@@ -8,10 +8,16 @@ export default function ItemRegistrationPage() {
   const [color, setColor] = useState("");
   const [description, setDescription] = useState("");
   const [qrId, setQrId] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
 
-  const fieldStyle = {
+  const [contactMethod, setContactMethod] = useState<
+    "phone" | "chat" | "both"
+  >("both");
+
+  const [phone, setPhone] = useState("");
+  const [allowLocation, setAllowLocation] = useState(true);
+  const [finderReward, setFinderReward] = useState(false);
+
+  const inputStyle = {
     width: "100%",
     boxSizing: "border-box" as const,
     padding: "15px 16px",
@@ -26,9 +32,9 @@ export default function ItemRegistrationPage() {
   const labelStyle = {
     display: "block",
     marginBottom: "8px",
-    fontSize: "14px",
     fontWeight: "800",
     color: "#111827",
+    fontSize: "14px",
   };
 
   return (
@@ -65,21 +71,21 @@ export default function ItemRegistrationPage() {
             border: "1px solid #e5e7eb",
             borderRadius: "30px",
             padding: "36px",
-            boxShadow: "0 18px 45px rgba(15, 23, 42, 0.07)",
+            boxShadow: "0 18px 45px rgba(15,23,42,0.07)",
           }}
         >
           <div style={{ textAlign: "center" }}>
             <div
               style={{
-                width: "64px",
-                height: "64px",
+                width: "68px",
+                height: "68px",
                 margin: "0 auto",
                 borderRadius: "20px",
                 background: "#eff6ff",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "32px",
+                fontSize: "34px",
               }}
             >
               🏷️
@@ -99,12 +105,13 @@ export default function ItemRegistrationPage() {
             <p
               style={{
                 margin: "12px auto 0",
-                maxWidth: "520px",
+                maxWidth: "560px",
                 color: "#6b7280",
                 lineHeight: "1.7",
               }}
             >
-              შეავსე ნივთის ინფორმაცია და დაუკავშირე მას შენი QR კოდი.
+              შეავსე ნივთის ინფორმაცია და აირჩიე, როგორ შეძლებს მპოვნელი
+              შენთან დაკავშირებას.
             </p>
           </div>
 
@@ -121,7 +128,7 @@ export default function ItemRegistrationPage() {
               <select
                 value={itemType}
                 onChange={(e) => setItemType(e.target.value)}
-                style={fieldStyle}
+                style={inputStyle}
               >
                 <option value="">აირჩიე ნივთი</option>
                 <option value="keys">🔑 გასაღები</option>
@@ -139,7 +146,7 @@ export default function ItemRegistrationPage() {
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="მაგ: ჩემი სამუშაო ჩანთა"
-                style={fieldStyle}
+                style={inputStyle}
               />
             </div>
 
@@ -151,7 +158,7 @@ export default function ItemRegistrationPage() {
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 placeholder="მაგ: შავი"
-                style={fieldStyle}
+                style={inputStyle}
               />
             </div>
 
@@ -161,10 +168,10 @@ export default function ItemRegistrationPage() {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="მაგ: შავი ტყავის საფულე, შიგნით რამდენიმე ბარათით"
+                placeholder="მოკლედ აღწერე ნივთი..."
                 rows={4}
                 style={{
-                  ...fieldStyle,
+                  ...inputStyle,
                   resize: "vertical",
                   fontFamily: "inherit",
                 }}
@@ -179,67 +186,227 @@ export default function ItemRegistrationPage() {
                 value={qrId}
                 onChange={(e) => setQrId(e.target.value)}
                 placeholder="მაგ: QR-00128"
-                style={fieldStyle}
+                style={inputStyle}
               />
             </div>
 
             <div
               style={{
                 borderTop: "1px solid #e5e7eb",
-                marginTop: "6px",
-                paddingTop: "24px",
+                paddingTop: "26px",
+                marginTop: "4px",
               }}
             >
               <h2
                 style={{
-                  margin: "0 0 8px",
-                  fontSize: "20px",
+                  margin: 0,
+                  fontSize: "22px",
                   color: "#111827",
                 }}
               >
-                საკონტაქტო ინფორმაცია
+                როგორ დაგიკავშირდეს მპოვნელი?
               </h2>
 
               <p
                 style={{
-                  margin: 0,
+                  margin: "8px 0 0",
                   color: "#6b7280",
                   fontSize: "14px",
                   lineHeight: "1.6",
                 }}
               >
-                ეს ინფორმაცია გამოყენებული იქნება მპოვნელთან დასაკავშირებლად.
+                შეგიძლია აირჩიო მობილური, Live Chat ან ორივე.
               </p>
             </div>
 
-            <div>
-              <label style={labelStyle}>ტელეფონის ნომერი</label>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: "12px",
+              }}
+            >
+              {[
+                {
+                  id: "phone",
+                  icon: "📞",
+                  title: "მობილური",
+                },
+                {
+                  id: "chat",
+                  icon: "💬",
+                  title: "Live Chat",
+                },
+                {
+                  id: "both",
+                  icon: "📱",
+                  title: "ორივე",
+                },
+              ].map((option) => {
+                const active = contactMethod === option.id;
 
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 000 000 0000"
-                style={fieldStyle}
-              />
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() =>
+                      setContactMethod(
+                        option.id as "phone" | "chat" | "both"
+                      )
+                    }
+                    style={{
+                      border: active
+                        ? "2px solid #2563eb"
+                        : "1px solid #e5e7eb",
+                      background: active ? "#eff6ff" : "#ffffff",
+                      borderRadius: "18px",
+                      padding: "20px 14px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "28px",
+                      }}
+                    >
+                      {option.icon}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: "8px",
+                        fontWeight: "800",
+                        color: "#111827",
+                      }}
+                    >
+                      {option.title}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
-            <div>
-              <label style={labelStyle}>ელფოსტა</label>
+            {(contactMethod === "phone" || contactMethod === "both") && (
+              <div>
+                <label style={labelStyle}>ტელეფონის ნომერი</label>
 
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                style={fieldStyle}
-              />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 000 000 0000"
+                  style={inputStyle}
+                />
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "grid",
+                gap: "12px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setAllowLocation(!allowLocation)}
+                style={{
+                  border: allowLocation
+                    ? "2px solid #2563eb"
+                    : "1px solid #e5e7eb",
+                  background: allowLocation ? "#eff6ff" : "#ffffff",
+                  borderRadius: "18px",
+                  padding: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontWeight: "800",
+                      color: "#111827",
+                    }}
+                  >
+                    📍 ლოკაციის გაზიარება
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color: "#6b7280",
+                      fontSize: "13px",
+                    }}
+                  >
+                    მპოვნელს შეეძლება ერთი ღილაკით გამოგიგზავნოს მდებარეობა.
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    color: allowLocation ? "#2563eb" : "#94a3b8",
+                    fontWeight: "900",
+                  }}
+                >
+                  {allowLocation ? "ON" : "OFF"}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFinderReward(!finderReward)}
+                style={{
+                  border: finderReward
+                    ? "2px solid #16a34a"
+                    : "1px solid #e5e7eb",
+                  background: finderReward ? "#f0fdf4" : "#ffffff",
+                  borderRadius: "18px",
+                  padding: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontWeight: "800",
+                      color: "#111827",
+                    }}
+                  >
+                    🎁 მპოვნელის დაჯილდოება
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color: "#6b7280",
+                      fontSize: "13px",
+                    }}
+                  >
+                    სურვილის შემთხვევაში შეგიძლია მიუთითო, რომ ჯილდოს სთავაზობ.
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    color: finderReward ? "#16a34a" : "#94a3b8",
+                    fontWeight: "900",
+                  }}
+                >
+                  {finderReward ? "ON" : "OFF"}
+                </div>
+              </button>
             </div>
 
             <button
               type="button"
               style={{
-                marginTop: "8px",
+                marginTop: "10px",
                 width: "100%",
                 border: "none",
                 borderRadius: "15px",
