@@ -5,54 +5,50 @@ export default function Items() {
     <section
       id="items"
       style={{
-        background: "#ffffff",
-        padding: "90px 24px",
+        background: "#f8fafc",
+        padding: "80px 24px 100px",
       }}
     >
       <div
         style={{
-          maxWidth: "1200px",
+          maxWidth: "950px",
           margin: "0 auto",
         }}
       >
         <div
           style={{
             textAlign: "center",
-            maxWidth: "760px",
-            margin: "0 auto",
+            marginBottom: "42px",
           }}
         >
           <h2
             style={{
-              fontSize: "clamp(34px, 5vw, 52px)",
               margin: 0,
-              color: "#111827",
+              fontSize: "clamp(30px, 5vw, 44px)",
               fontWeight: "900",
+              color: "#111827",
               letterSpacing: "-1px",
             }}
           >
-            ერთი QR — ბევრი შესაძლებლობა
+            რის რეგისტრაციას გსურს?
           </h2>
 
           <p
             style={{
-              marginTop: "18px",
-              fontSize: "18px",
-              lineHeight: "1.7",
-              color: "#6b7280",
+              margin: "12px 0 0",
+              color: "#64748b",
+              fontSize: "16px",
             }}
           >
-            QR კოდი შეგიძლია გამოიყენო როგორც ცხოველისთვის, ასევე ყოველდღიური
-            ნივთებისთვის.
+            აირჩიე ცხოველი ან ნივთი
           </p>
         </div>
 
         <div
           style={{
-            marginTop: "55px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "24px",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "18px",
           }}
         >
           {items.map((item) => (
@@ -61,119 +57,48 @@ export default function Items() {
               href={`/register?type=${item.id}`}
               style={{
                 textDecoration: "none",
-                color: "#111827",
                 background: "#ffffff",
                 border: "1px solid #e5e7eb",
-                borderRadius: "30px",
-                minHeight: "310px",
-                padding: "30px",
+                borderRadius: "24px",
+                minHeight: "170px",
+                padding: "24px",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
-                boxShadow: "0 16px 40px rgba(15, 23, 42, 0.07)",
-                transition: "0.25s ease",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 25px rgba(15,23,42,0.05)",
               }}
             >
               <div
                 style={{
-                  borderRadius: "24px",
-                  background: "#f8fafc",
-                  padding: "30px 20px",
-                  minHeight: "150px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "20px",
+                  fontSize: "48px",
+                  lineHeight: 1,
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "62px",
-                    lineHeight: 1,
-                  }}
-                >
-                  {item.icon}
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "54px",
-                      height: "54px",
-                      borderRadius: "14px",
-                      background: "#111827",
-                      color: "#ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "900",
-                      fontSize: "15px",
-                    }}
-                  >
-                    QR
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: "44px",
-                    }}
-                  >
-                    📱
-                  </div>
-                </div>
+                {item.icon}
               </div>
 
               <div
                 style={{
-                  marginTop: "26px",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "24px",
-                    fontWeight: "900",
-                  }}
-                >
-                  {item.nameKa}
-                </h3>
-
-                <p
-                  style={{
-                    marginTop: "9px",
-                    marginBottom: 0,
-                    fontSize: "15px",
-                    lineHeight: "1.6",
-                    color: "#6b7280",
-                  }}
-                >
-                  QR ტეგის სკანირება ტელეფონით
-                </p>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  color: "#2563eb",
+                  marginTop: "16px",
+                  fontSize: "18px",
                   fontWeight: "800",
-                  fontSize: "14px",
+                  color: "#111827",
                 }}
               >
-                <span>QR-ის რეგისტრაცია</span>
-                <span style={{ fontSize: "20px" }}>→</span>
+                {item.nameKa}
               </div>
             </a>
           ))}
         </div>
+
+        <style>{`
+          @media (max-width: 700px) {
+            #items > div > div:last-of-type {
+              grid-template-columns: repeat(2, 1fr) !important;
+            }
+          }
+        `}</style>
       </div>
     </section>
   );
