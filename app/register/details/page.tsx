@@ -1,9 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { items } from "@/data/items";
 
-export default function DetailsPage() {
+function DetailsContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 
@@ -45,16 +46,8 @@ export default function DetailsPage() {
             border: "1px solid #e5e7eb",
           }}
         >
-          <div
-            style={{
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "64px",
-              }}
-            >
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "64px" }}>
               {selectedItem?.icon || "🏷️"}
             </div>
 
@@ -117,7 +110,6 @@ export default function DetailsPage() {
                   border: "1px solid #d1d5db",
                   borderRadius: "14px",
                   fontSize: "16px",
-                  outline: "none",
                 }}
               />
             </div>
@@ -144,7 +136,6 @@ export default function DetailsPage() {
                   border: "1px solid #d1d5db",
                   borderRadius: "14px",
                   fontSize: "16px",
-                  outline: "none",
                 }}
               />
             </div>
@@ -171,7 +162,6 @@ export default function DetailsPage() {
                   border: "1px solid #d1d5db",
                   borderRadius: "14px",
                   fontSize: "16px",
-                  outline: "none",
                 }}
               />
             </div>
@@ -198,7 +188,6 @@ export default function DetailsPage() {
                   border: "1px solid #d1d5db",
                   borderRadius: "14px",
                   fontSize: "16px",
-                  outline: "none",
                 }}
               />
             </div>
@@ -223,5 +212,13 @@ export default function DetailsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function DetailsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "40px" }}>იტვირთება...</div>}>
+      <DetailsContent />
+    </Suspense>
   );
 }
