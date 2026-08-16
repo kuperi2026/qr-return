@@ -1,11 +1,4 @@
-const items = [
-  { icon: "🐶", name: "ძაღლი", description: "QR ტეგი საყელოსთვის" },
-  { icon: "🐱", name: "კატა", description: "QR ტეგი საყელოსთვის" },
-  { icon: "🔑", name: "გასაღები", description: "პატარა QR ტეგი გასაღებისთვის" },
-  { icon: "👛", name: "საფულე", description: "QR ბარათი საფულისთვის" },
-  { icon: "🧳", name: "ჩემოდანი", description: "QR ტეგი მოგზაურობისთვის" },
-  { icon: "🎒", name: "ჩანთა", description: "QR ტეგი ყოველდღიური ჩანთისთვის" },
-];
+import { items } from "@/data/items";
 
 export default function Items() {
   return (
@@ -62,8 +55,8 @@ export default function Items() {
         >
           {items.map((item) => (
             <a
-              key={item.name}
-              href={`/register?type=${encodeURIComponent(item.name)}`}
+              key={item.id}
+              href={`/register?type=${item.id}`}
               style={{
                 textDecoration: "none",
                 color: "#111827",
@@ -94,18 +87,7 @@ export default function Items() {
                   fontWeight: "800",
                 }}
               >
-                {item.name}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "13px",
-                  lineHeight: "1.5",
-                  color: "#6b7280",
-                }}
-              >
-                {item.description}
+                {item.nameKa}
               </div>
             </a>
           ))}
