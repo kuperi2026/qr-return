@@ -1,19 +1,37 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
-const products = [
-  { name: "ძაღლი", icon: "🐶", tag: "QR" },
-  { name: "კატა", icon: "🐱", tag: "QR" },
-  { name: "გასაღები", icon: "🔑", tag: "QR" },
-  { name: "საფულე", icon: "👛", tag: "QR" },
-  { name: "ჩემოდანი", icon: "🧳", tag: "QR" },
-  { name: "ჩანთა", icon: "🎒", tag: "QR" },
+const items = [
+  {
+    id: "dog",
+    name: "ძაღლი",
+    icon: "🐶",
+  },
+  {
+    id: "cat",
+    name: "კატა",
+    icon: "🐱",
+  },
+  {
+    id: "keys",
+    name: "გასაღები",
+    icon: "🔑",
+  },
+  {
+    id: "wallet",
+    name: "საფულე",
+    icon: "👛",
+  },
+  {
+    id: "suitcase",
+    name: "ჩემოდანი",
+    icon: "🧳",
+  },
+  {
+    id: "bag",
+    name: "ჩანთა",
+    icon: "🎒",
+  },
 ];
 
 export default function HomePage() {
-  const router = useRouter();
-
   return (
     <main
       style={{
@@ -23,26 +41,29 @@ export default function HomePage() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      {/* HEADER */}
+      {/* COMPANY */}
       <header
         style={{
-          width: "100%",
-          maxWidth: "1180px",
+          maxWidth: "1100px",
           margin: "0 auto",
-          padding: "28px 24px",
-          boxSizing: "border-box",
+          padding: "32px 24px",
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <div>
+        <a
+          href="/"
+          style={{
+            textDecoration: "none",
+          }}
+        >
           <div
             style={{
-              fontSize: "30px",
-              fontWeight: 900,
+              color: "#2563eb",
+              fontSize: "32px",
+              fontWeight: "900",
               letterSpacing: "-1.5px",
-              color: "#0f172a",
             }}
           >
             QR RETURN
@@ -51,46 +72,43 @@ export default function HomePage() {
           <div
             style={{
               marginTop: "3px",
-              color: "#2563eb",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "2.5px",
+              color: "#94a3b8",
+              fontSize: "10px",
+              fontWeight: "800",
+              letterSpacing: "3px",
             }}
           >
             LOST & FOUND
           </div>
-        </div>
+        </a>
 
-        <button
-          onClick={() => router.push("/login")}
+        <a
+          href="/login"
           style={{
-            border: "1px solid #e2e8f0",
-            background: "#ffffff",
-            color: "#0f172a",
-            padding: "11px 20px",
-            borderRadius: "12px",
-            fontWeight: 800,
-            cursor: "pointer",
+            color: "#2563eb",
+            textDecoration: "none",
+            fontWeight: "800",
+            fontSize: "15px",
           }}
         >
           შესვლა
-        </button>
+        </a>
       </header>
 
       {/* HERO */}
       <section
         style={{
-          maxWidth: "1000px",
+          maxWidth: "950px",
           margin: "0 auto",
-          padding: "90px 24px 65px",
+          padding: "90px 24px 55px",
           textAlign: "center",
         }}
       >
         <div
           style={{
             color: "#2563eb",
-            fontSize: "15px",
-            fontWeight: 900,
+            fontSize: "18px",
+            fontWeight: "900",
             letterSpacing: "4px",
           }}
         >
@@ -99,11 +117,11 @@ export default function HomePage() {
 
         <h1
           style={{
-            margin: "22px 0 0",
-            fontSize: "clamp(46px, 7vw, 78px)",
-            lineHeight: 1.05,
+            margin: "20px 0 0",
+            fontSize: "clamp(45px, 7vw, 76px)",
+            lineHeight: "1.06",
             letterSpacing: "-3px",
-            fontWeight: 900,
+            fontWeight: "900",
           }}
         >
           დაკარგვა არ ნიშნავს
@@ -113,87 +131,79 @@ export default function HomePage() {
 
         <p
           style={{
+            margin: "22px auto 0",
             maxWidth: "600px",
-            margin: "24px auto 0",
             color: "#64748b",
             fontSize: "18px",
-            lineHeight: 1.7,
+            lineHeight: "1.7",
           }}
         >
-          ერთი QR კოდი ეხმარება მპოვნელს სწრაფად დაგიკავშირდეს.
+          მიაბი QR ტეგი სასურველ ცხოველს ან ნივთს და დაიბრუნე მარტივად.
         </p>
-
-        <button
-          onClick={() => router.push("/register")}
-          style={{
-            marginTop: "34px",
-            border: "none",
-            background: "#2563eb",
-            color: "#ffffff",
-            padding: "16px 34px",
-            borderRadius: "14px",
-            fontSize: "16px",
-            fontWeight: 900,
-            cursor: "pointer",
-            boxShadow: "0 12px 30px rgba(37,99,235,0.22)",
-          }}
-        >
-          რეგისტრაცია →
-        </button>
       </section>
 
-      {/* PRODUCT VISUALS */}
+      {/* DIRECT REGISTRATION */}
       <section
         style={{
           maxWidth: "1000px",
           margin: "0 auto",
-          padding: "20px 24px 100px",
+          padding: "25px 24px 110px",
         }}
       >
+        <h2
+          style={{
+            textAlign: "center",
+            margin: "0 0 38px",
+            fontSize: "28px",
+            fontWeight: "900",
+          }}
+        >
+          რის რეგისტრაციას გსურს?
+        </h2>
+
         <div
-          className="product-grid"
+          className="item-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
             gap: "18px",
           }}
         >
-          {products.map((product) => (
-            <div
-              key={product.name}
+          {items.map((item) => (
+            <a
+              key={item.id}
+              href={`/register/details?type=${item.id}`}
               style={{
                 position: "relative",
-                minHeight: "190px",
+                minHeight: "185px",
                 background:
-                  "linear-gradient(145deg, #ffffff 0%, #f4f7fb 100%)",
-                border: "1px solid #e8edf5",
+                  "linear-gradient(145deg, #ffffff 0%, #f5f8ff 100%)",
+                border: "1px solid #e5eaf2",
                 borderRadius: "26px",
+                textDecoration: "none",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 14px 40px rgba(15,23,42,0.06)",
+                alignItems: "center",
+                boxShadow: "0 14px 40px rgba(37,99,235,0.07)",
+                color: "#0f172a",
               }}
             >
-              {/* QR TAG IMITATION */}
               <div
                 style={{
                   position: "absolute",
-                  top: "20px",
-                  right: "20px",
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "10px",
-                  background: "#0f172a",
+                  top: "18px",
+                  right: "18px",
+                  width: "35px",
+                  height: "35px",
+                  borderRadius: "9px",
+                  background: "#2563eb",
                   color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "10px",
-                  fontWeight: 900,
-                  letterSpacing: "0.5px",
-                  transform: "rotate(5deg)",
-                  boxShadow: "0 6px 14px rgba(15,23,42,0.16)",
+                  fontSize: "9px",
+                  fontWeight: "900",
                 }}
               >
                 QR
@@ -201,170 +211,111 @@ export default function HomePage() {
 
               <div
                 style={{
-                  fontSize: "67px",
+                  fontSize: "62px",
                   lineHeight: 1,
                 }}
               >
-                {product.icon}
+                {item.icon}
               </div>
 
               <div
                 style={{
-                  marginTop: "20px",
+                  marginTop: "18px",
                   fontSize: "18px",
-                  fontWeight: 850,
-                  color: "#0f172a",
+                  fontWeight: "900",
                 }}
               >
-                {product.name}
+                {item.name}
               </div>
-            </div>
+            </a>
           ))}
-        </div>
-      </section>
-
-      {/* MAIN MESSAGE */}
-      <section
-        style={{
-          background:
-            "linear-gradient(180deg, #f5f8ff 0%, #eef4ff 100%)",
-          padding: "100px 24px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "0 auto",
-          }}
-        >
-          <div
-            style={{
-              color: "#2563eb",
-              fontSize: "13px",
-              fontWeight: 900,
-              letterSpacing: "2.5px",
-            }}
-          >
-            QR RETURN
-          </div>
-
-          <h2
-            style={{
-              margin: "18px auto 0",
-              fontSize: "clamp(34px, 5vw, 54px)",
-              lineHeight: 1.18,
-              letterSpacing: "-2px",
-              fontWeight: 900,
-            }}
-          >
-            მიაბი QR ტეგი სასურველ ცხოველს ან ნივთს და დაიბრუნე მარტივად.
-          </h2>
         </div>
       </section>
 
       {/* HOW IT WORKS */}
       <section
         style={{
-          maxWidth: "1050px",
-          margin: "0 auto",
-          padding: "100px 24px 120px",
+          background: "#f7f9fc",
+          padding: "90px 24px 110px",
         }}
       >
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              color: "#2563eb",
-              fontSize: "13px",
-              fontWeight: 900,
-              letterSpacing: "2px",
-            }}
-          >
-            მარტივი პროცესი
-          </div>
-
+        <div
+          style={{
+            maxWidth: "1000px",
+            margin: "0 auto",
+          }}
+        >
           <h2
             style={{
-              margin: "14px 0 50px",
-              fontSize: "clamp(38px, 5vw, 54px)",
-              letterSpacing: "-2px",
+              margin: "0 0 45px",
+              textAlign: "center",
+              fontSize: "40px",
+              fontWeight: "900",
             }}
           >
             როგორ მუშაობს?
           </h2>
-        </div>
 
-        <div
-          className="steps-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "18px",
-          }}
-        >
-          {[
-            {
-              number: "01",
-              title: "დაარეგისტრირე",
-              text: "მიაბი QR კოდი შენს ცხოველს ან ნივთს.",
-            },
-            {
-              number: "02",
-              title: "მპოვნელი ასკანერებს",
-              text: "საკმარისია QR კოდის ტელეფონით დასკანერება.",
-            },
-            {
-              number: "03",
-              title: "დაიბრუნე",
-              text: "მპოვნელი დაგიკავშირდება და ნივთს მარტივად დაიბრუნებ.",
-            },
-          ].map((step) => (
-            <div
-              key={step.number}
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e8edf5",
-                borderRadius: "24px",
-                padding: "32px",
-              }}
-            >
+          <div
+            className="steps-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "18px",
+            }}
+          >
+            {[
+              ["01", "მიაბი", "QR ტეგი მიაბი ცხოველს ან ნივთს."],
+              ["02", "დაასკანერებენ", "მპოვნელი QR კოდს ტელეფონით დაასკანერებს."],
+              ["03", "დაიბრუნე", "მპოვნელი დაგიკავშირდება."],
+            ].map(([number, title, text]) => (
               <div
+                key={number}
                 style={{
-                  color: "#2563eb",
-                  fontWeight: 900,
-                  fontSize: "14px",
+                  background: "#ffffff",
+                  borderRadius: "22px",
+                  padding: "30px",
+                  border: "1px solid #e8edf5",
                 }}
               >
-                {step.number}
+                <div
+                  style={{
+                    color: "#2563eb",
+                    fontSize: "14px",
+                    fontWeight: "900",
+                  }}
+                >
+                  {number}
+                </div>
+
+                <h3
+                  style={{
+                    margin: "18px 0 8px",
+                    fontSize: "21px",
+                  }}
+                >
+                  {title}
+                </h3>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#64748b",
+                    lineHeight: "1.6",
+                    fontSize: "14px",
+                  }}
+                >
+                  {text}
+                </p>
               </div>
-
-              <h3
-                style={{
-                  margin: "18px 0 10px",
-                  fontSize: "21px",
-                }}
-              >
-                {step.title}
-              </h3>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: "#64748b",
-                  lineHeight: 1.65,
-                  fontSize: "15px",
-                }}
-              >
-                {step.text}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       <style>{`
         @media (max-width: 700px) {
-          .product-grid {
+          .item-grid {
             grid-template-columns: repeat(2, 1fr) !important;
           }
 
