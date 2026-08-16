@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+type Language = "ka" | "en";
+
 const items = [
   { id: "dog", ka: "ძაღლი", en: "Dog", icon: "🐶" },
   { id: "cat", ka: "კატა", en: "Cat", icon: "🐱" },
@@ -12,9 +14,9 @@ const items = [
 ];
 
 export default function HomePage() {
-  const [language, setLanguage] = useState<"ka" | "en">("ka");
+  const [language, setLanguage] = useState<Language>("ka");
 
-  const isKa = language === "ka";
+  const ka = language === "ka";
 
   return (
     <main
@@ -22,7 +24,8 @@ export default function HomePage() {
         minHeight: "100vh",
         background: "#ffffff",
         color: "#0f172a",
-        fontFamily: "Arial, sans-serif",
+        fontFamily:
+          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
       {/* HEADER */}
@@ -32,8 +35,8 @@ export default function HomePage() {
           margin: "0 auto",
           padding: "26px 24px",
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
+          alignItems: "center",
           gap: "20px",
         }}
       >
@@ -44,22 +47,22 @@ export default function HomePage() {
             textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            gap: "13px",
+            gap: "14px",
           }}
         >
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "14px",
+              width: "52px",
+              height: "52px",
+              borderRadius: "15px",
               background: "#2563eb",
               color: "#ffffff",
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
-              fontSize: "14px",
-              fontWeight: "900",
-              boxShadow: "0 8px 22px rgba(37,99,235,.22)",
+              alignItems: "center",
+              fontWeight: 900,
+              fontSize: "15px",
+              boxShadow: "0 10px 25px rgba(37,99,235,.25)",
             }}
           >
             QR
@@ -69,10 +72,10 @@ export default function HomePage() {
             <div
               style={{
                 color: "#2563eb",
-                fontSize: "30px",
+                fontSize: "32px",
+                fontWeight: 900,
                 lineHeight: 1,
-                fontWeight: "900",
-                letterSpacing: "-1.4px",
+                letterSpacing: "-1.6px",
               }}
             >
               QR RETURN
@@ -80,11 +83,11 @@ export default function HomePage() {
 
             <div
               style={{
-                marginTop: "5px",
-                color: "#94a3b8",
+                marginTop: "6px",
+                color: "#64748b",
                 fontSize: "9px",
-                fontWeight: "800",
-                letterSpacing: "3px",
+                fontWeight: 800,
+                letterSpacing: "3.5px",
               }}
             >
               LOST & FOUND
@@ -92,7 +95,7 @@ export default function HomePage() {
           </div>
         </a>
 
-        {/* RIGHT MENU */}
+        {/* HEADER CONTROLS */}
         <div
           style={{
             display: "flex",
@@ -103,23 +106,23 @@ export default function HomePage() {
           <div
             style={{
               display: "flex",
-              background: "#f1f5f9",
               padding: "4px",
-              borderRadius: "11px",
+              background: "#f1f5f9",
+              borderRadius: "12px",
             }}
           >
             <button
               type="button"
               onClick={() => setLanguage("ka")}
               style={{
-                border: "none",
-                background: isKa ? "#ffffff" : "transparent",
-                color: isKa ? "#2563eb" : "#64748b",
-                padding: "8px 10px",
-                borderRadius: "8px",
+                border: 0,
+                padding: "8px 11px",
+                borderRadius: "9px",
                 cursor: "pointer",
-                fontWeight: "800",
-                boxShadow: isKa
+                fontWeight: 800,
+                background: ka ? "#ffffff" : "transparent",
+                color: ka ? "#2563eb" : "#64748b",
+                boxShadow: ka
                   ? "0 2px 8px rgba(15,23,42,.08)"
                   : "none",
               }}
@@ -131,14 +134,14 @@ export default function HomePage() {
               type="button"
               onClick={() => setLanguage("en")}
               style={{
-                border: "none",
-                background: !isKa ? "#ffffff" : "transparent",
-                color: !isKa ? "#2563eb" : "#64748b",
-                padding: "8px 10px",
-                borderRadius: "8px",
+                border: 0,
+                padding: "8px 11px",
+                borderRadius: "9px",
                 cursor: "pointer",
-                fontWeight: "800",
-                boxShadow: !isKa
+                fontWeight: 800,
+                background: !ka ? "#ffffff" : "transparent",
+                color: !ka ? "#2563eb" : "#64748b",
+                boxShadow: !ka
                   ? "0 2px 8px rgba(15,23,42,.08)"
                   : "none",
               }}
@@ -153,13 +156,13 @@ export default function HomePage() {
               textDecoration: "none",
               background: "#0f172a",
               color: "#ffffff",
-              padding: "11px 18px",
-              borderRadius: "11px",
+              padding: "11px 19px",
+              borderRadius: "12px",
               fontSize: "14px",
-              fontWeight: "800",
+              fontWeight: 800,
             }}
           >
-            {isKa ? "შესვლა" : "Log in"}
+            {ka ? "შესვლა" : "Log in"}
           </a>
         </div>
       </header>
@@ -167,38 +170,45 @@ export default function HomePage() {
       {/* HERO */}
       <section
         style={{
-          maxWidth: "980px",
+          maxWidth: "1000px",
           margin: "0 auto",
-          padding: "90px 24px 65px",
+          padding: "95px 24px 75px",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            display: "inline-block",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
             color: "#2563eb",
-            background: "#eff6ff",
-            padding: "8px 14px",
-            borderRadius: "999px",
-            fontSize: "12px",
-            fontWeight: "900",
-            letterSpacing: "2px",
+            fontWeight: 900,
+            fontSize: "13px",
+            letterSpacing: "3px",
           }}
         >
+          <span
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: "#2563eb",
+            }}
+          />
           QR RETURN
         </div>
 
         <h1
           style={{
-            margin: "22px auto 0",
-            fontSize: "clamp(44px, 7vw, 76px)",
-            lineHeight: "1.07",
-            letterSpacing: "-3px",
-            fontWeight: "900",
-            maxWidth: "900px",
+            margin: "23px auto 0",
+            maxWidth: "920px",
+            fontSize: "clamp(46px, 7vw, 78px)",
+            lineHeight: 1.05,
+            fontWeight: 900,
+            letterSpacing: "-3.2px",
           }}
         >
-          {isKa ? (
+          {ka ? (
             <>
               დაკარგვა არ ნიშნავს
               <br />
@@ -206,7 +216,7 @@ export default function HomePage() {
             </>
           ) : (
             <>
-              Lost doesn't mean
+              Lost doesn&apos;t mean
               <br />
               gone forever.
             </>
@@ -215,30 +225,30 @@ export default function HomePage() {
 
         <p
           style={{
-            maxWidth: "620px",
-            margin: "24px auto 0",
+            margin: "25px auto 0",
+            maxWidth: "650px",
             color: "#64748b",
             fontSize: "18px",
-            lineHeight: "1.7",
+            lineHeight: 1.7,
           }}
         >
-          {isKa
-            ? "ერთი QR კოდი ეხმარება მპოვნელს სწრაფად დაგიკავშირდეს."
-            : "One QR code helps the finder quickly get in touch with you."}
+          {ka
+            ? "ერთი QR კოდი ეხმარება მპოვნელს სწრაფად დაგიკავშირდეს — პირადი ინფორმაციის ზედმეტად გამჟღავნების გარეშე."
+            : "One QR code helps a finder quickly reach you without unnecessarily exposing your personal information."}
         </p>
       </section>
 
-      {/* REGISTRATION CHOICES */}
+      {/* DIRECT REGISTRATION */}
       <section
         style={{
+          padding: "75px 24px 115px",
           background:
-            "linear-gradient(180deg, #f8faff 0%, #f3f7ff 100%)",
-          padding: "70px 24px 110px",
+            "linear-gradient(180deg, #f8faff 0%, #f2f6ff 100%)",
         }}
       >
         <div
           style={{
-            maxWidth: "1000px",
+            maxWidth: "1020px",
             margin: "0 auto",
           }}
         >
@@ -247,36 +257,36 @@ export default function HomePage() {
               maxWidth: "820px",
               margin: "0 auto",
               textAlign: "center",
-              fontSize: "clamp(29px, 4vw, 43px)",
-              lineHeight: "1.22",
-              letterSpacing: "-1.5px",
-              fontWeight: "900",
+              fontSize: "clamp(30px, 4vw, 45px)",
+              lineHeight: 1.2,
+              fontWeight: 900,
+              letterSpacing: "-1.6px",
             }}
           >
-            {isKa
+            {ka
               ? "მიაბი QR ტეგი სასურველ ცხოველს ან ნივთს და დაიბრუნე მარტივად."
               : "Attach a QR tag to your pet or item and get it back easily."}
           </h2>
 
           <p
             style={{
-              margin: "15px auto 42px",
               textAlign: "center",
               color: "#64748b",
+              margin: "15px auto 44px",
               fontSize: "15px",
             }}
           >
-            {isKa
-              ? "აირჩიე ქვემოთ და დაიწყე რეგისტრაცია"
-              : "Choose below to start registration"}
+            {ka
+              ? "აირჩიე ქვემოთ — რეგისტრაცია პირდაპირ დაიწყება."
+              : "Choose below to start registration immediately."}
           </p>
 
           <div
-            className="item-grid"
+            className="qr-item-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "18px",
+              gap: "20px",
             }}
           >
             {items.map((item) => (
@@ -284,37 +294,38 @@ export default function HomePage() {
                 key={item.id}
                 href={`/register/details?type=${item.id}&lang=${language}`}
                 style={{
+                  minHeight: "220px",
                   position: "relative",
-                  minHeight: "205px",
                   textDecoration: "none",
                   background: "#ffffff",
-                  border: "1px solid #e4eaf3",
-                  borderRadius: "27px",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "28px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#0f172a",
                   boxShadow: "0 15px 45px rgba(37,99,235,.07)",
+                  overflow: "hidden",
                 }}
               >
-                {/* QR TAG */}
+                {/* decorative QR tag */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "17px",
-                    right: "17px",
-                    width: "37px",
-                    height: "37px",
-                    borderRadius: "10px",
+                    top: "18px",
+                    right: "18px",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "11px",
                     background: "#2563eb",
                     color: "#ffffff",
                     display: "flex",
-                    alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "9px",
-                    fontWeight: "900",
-                    boxShadow: "0 6px 15px rgba(37,99,235,.2)",
+                    alignItems: "center",
+                    fontSize: "10px",
+                    fontWeight: 900,
+                    boxShadow: "0 7px 18px rgba(37,99,235,.2)",
                   }}
                 >
                   QR
@@ -322,8 +333,15 @@ export default function HomePage() {
 
                 <div
                   style={{
-                    fontSize: "68px",
-                    lineHeight: 1,
+                    width: "105px",
+                    height: "105px",
+                    borderRadius: "28px",
+                    background:
+                      "linear-gradient(145deg,#f8fafc,#eef4ff)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "64px",
                   }}
                 >
                   {item.icon}
@@ -333,10 +351,21 @@ export default function HomePage() {
                   style={{
                     marginTop: "20px",
                     fontSize: "19px",
-                    fontWeight: "900",
+                    fontWeight: 900,
                   }}
                 >
-                  {isKa ? item.ka : item.en}
+                  {ka ? item.ka : item.en}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#2563eb",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {ka ? "რეგისტრაცია →" : "Register →"}
                 </div>
               </a>
             ))}
@@ -344,35 +373,78 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer
+      {/* TRUST STRIP */}
+      <section
         style={{
-          padding: "35px 24px",
-          textAlign: "center",
+          padding: "32px 24px",
           background: "#ffffff",
         }}
       >
         <div
           style={{
+            maxWidth: "850px",
+            margin: "0 auto",
+            display: "flex",
+            justifyContent: "center",
+            gap: "35px",
+            flexWrap: "wrap",
+            color: "#64748b",
+            fontSize: "13px",
+            fontWeight: 700,
+          }}
+        >
+          <span>✓ QR Tag</span>
+          <span>✓ Live Chat</span>
+          <span>✓ Location Share</span>
+          <span>✓ Finder Reward</span>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer
+        style={{
+          borderTop: "1px solid #f1f5f9",
+          padding: "35px 24px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
             color: "#2563eb",
-            fontWeight: "900",
-            fontSize: "17px",
+            fontWeight: 900,
+            fontSize: "20px",
           }}
         >
           QR RETURN
         </div>
+
+        <div
+          style={{
+            marginTop: "5px",
+            color: "#94a3b8",
+            fontSize: "10px",
+            letterSpacing: "2px",
+          }}
+        >
+          LOST & FOUND
+        </div>
       </footer>
 
       <style>{`
-        @media (max-width: 700px) {
-          .item-grid {
+        @media (max-width: 720px) {
+          .qr-item-grid {
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }
 
-        @media (max-width: 520px) {
+        @media (max-width: 500px) {
           header {
-            padding-left: 16px !important;
-            padding-right: 16px !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+          }
+
+          .qr-item-grid > a {
+            min-height: 190px !important;
           }
         }
       `}</style>
