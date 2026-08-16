@@ -2,449 +2,528 @@
 
 import { useState } from "react";
 
-type Language = "ka" | "en";
+type Lang = "ka" | "en";
 
 const items = [
-  { id: "dog", ka: "ძაღლი", en: "Dog", icon: "🐶" },
-  { id: "cat", ka: "კატა", en: "Cat", icon: "🐱" },
-  { id: "keys", ka: "გასაღები", en: "Keys", icon: "🔑" },
-  { id: "wallet", ka: "საფულე", en: "Wallet", icon: "👛" },
-  { id: "suitcase", ka: "ჩემოდანი", en: "Suitcase", icon: "🧳" },
-  { id: "bag", ka: "ჩანთა", en: "Bag", icon: "🎒" },
+  { id: "dog", icon: "🐕", ka: "ძაღლი", en: "Dog" },
+  { id: "cat", icon: "🐈", ka: "კატა", en: "Cat" },
+  { id: "keys", icon: "🔑", ka: "გასაღები", en: "Keys" },
+  { id: "wallet", icon: "◫", ka: "საფულე", en: "Wallet" },
+  { id: "suitcase", icon: "▣", ka: "ჩემოდანი", en: "Luggage" },
+  { id: "bag", icon: "◒", ka: "ჩანთა", en: "Bag" },
 ];
 
 export default function HomePage() {
-  const [language, setLanguage] = useState<Language>("ka");
+  const [lang, setLang] = useState<Lang>("ka");
 
-  const ka = language === "ka";
+  const ka = lang === "ka";
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#ffffff",
-        color: "#0f172a",
-        fontFamily:
-          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
-      {/* HEADER */}
-      <header
-        style={{
-          maxWidth: "1180px",
-          margin: "0 auto",
-          padding: "26px 24px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "20px",
-        }}
-      >
-        {/* BRAND */}
-        <a
-          href="/"
-          style={{
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "15px",
-              background: "#2563eb",
-              color: "#ffffff",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontWeight: 900,
-              fontSize: "15px",
-              boxShadow: "0 10px 25px rgba(37,99,235,.25)",
-            }}
-          >
-            QR
-          </div>
+    <main className="site">
+      <header className="nav">
+        <a href="/" className="brand">
+          <span className="brandMark">Q</span>
 
-          <div>
-            <div
-              style={{
-                color: "#2563eb",
-                fontSize: "32px",
-                fontWeight: 900,
-                lineHeight: 1,
-                letterSpacing: "-1.6px",
-              }}
-            >
-              QR RETURN
-            </div>
-
-            <div
-              style={{
-                marginTop: "6px",
-                color: "#64748b",
-                fontSize: "9px",
-                fontWeight: 800,
-                letterSpacing: "3.5px",
-              }}
-            >
-              LOST & FOUND
-            </div>
-          </div>
+          <span className="brandText">
+            <strong>QR RETURN</strong>
+            <small>SMART LOST & FOUND</small>
+          </span>
         </a>
 
-        {/* HEADER CONTROLS */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              padding: "4px",
-              background: "#f1f5f9",
-              borderRadius: "12px",
-            }}
-          >
+        <div className="navRight">
+          <div className="language">
             <button
-              type="button"
-              onClick={() => setLanguage("ka")}
-              style={{
-                border: 0,
-                padding: "8px 11px",
-                borderRadius: "9px",
-                cursor: "pointer",
-                fontWeight: 800,
-                background: ka ? "#ffffff" : "transparent",
-                color: ka ? "#2563eb" : "#64748b",
-                boxShadow: ka
-                  ? "0 2px 8px rgba(15,23,42,.08)"
-                  : "none",
-              }}
+              className={ka ? "active" : ""}
+              onClick={() => setLang("ka")}
             >
-              ქარ
+              GEO
             </button>
 
             <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              style={{
-                border: 0,
-                padding: "8px 11px",
-                borderRadius: "9px",
-                cursor: "pointer",
-                fontWeight: 800,
-                background: !ka ? "#ffffff" : "transparent",
-                color: !ka ? "#2563eb" : "#64748b",
-                boxShadow: !ka
-                  ? "0 2px 8px rgba(15,23,42,.08)"
-                  : "none",
-              }}
+              className={!ka ? "active" : ""}
+              onClick={() => setLang("en")}
             >
-              EN
+              ENG
             </button>
           </div>
 
-          <a
-            href="/login"
-            style={{
-              textDecoration: "none",
-              background: "#0f172a",
-              color: "#ffffff",
-              padding: "11px 19px",
-              borderRadius: "12px",
-              fontSize: "14px",
-              fontWeight: 800,
-            }}
-          >
-            {ka ? "შესვლა" : "Log in"}
+          <a href="/login" className="login">
+            {ka ? "შესვლა" : "Sign in"}
           </a>
         </div>
       </header>
 
-      {/* HERO */}
-      <section
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "95px 24px 75px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            color: "#2563eb",
-            fontWeight: 900,
-            fontSize: "13px",
-            letterSpacing: "3px",
-          }}
-        >
-          <span
-            style={{
-              width: "7px",
-              height: "7px",
-              borderRadius: "50%",
-              background: "#2563eb",
-            }}
-          />
+      <section className="hero">
+        <div className="eyebrow">
+          <span />
           QR RETURN
         </div>
 
-        <h1
-          style={{
-            margin: "23px auto 0",
-            maxWidth: "920px",
-            fontSize: "clamp(46px, 7vw, 78px)",
-            lineHeight: 1.05,
-            fontWeight: 900,
-            letterSpacing: "-3.2px",
-          }}
-        >
+        <h1>
           {ka ? (
             <>
-              დაკარგვა არ ნიშნავს
+              რაც შენთვის მნიშვნელოვანია,
               <br />
-              დამშვიდობებას.
+              <em>დაბრუნების გზა აქვს.</em>
             </>
           ) : (
             <>
-              Lost doesn&apos;t mean
+              What matters to you
               <br />
-              gone forever.
+              <em>has a way back.</em>
             </>
           )}
         </h1>
 
-        <p
-          style={{
-            margin: "25px auto 0",
-            maxWidth: "650px",
-            color: "#64748b",
-            fontSize: "18px",
-            lineHeight: 1.7,
-          }}
-        >
+        <p>
           {ka
-            ? "ერთი QR კოდი ეხმარება მპოვნელს სწრაფად დაგიკავშირდეს — პირადი ინფორმაციის ზედმეტად გამჟღავნების გარეშე."
-            : "One QR code helps a finder quickly reach you without unnecessarily exposing your personal information."}
+            ? "QR ტეგი აკავშირებს მპოვნელს შენთან — სწრაფად, მარტივად და შენ მიერ არჩეული საკონტაქტო ინფორმაციის საშუალებით."
+            : "A QR tag connects the finder with you — quickly, simply, and through the contact information you choose."}
         </p>
+
+        <div className="miniProof">
+          <span>● No app required</span>
+          <span>● Private contact</span>
+          <span>● One scan</span>
+        </div>
       </section>
 
-      {/* DIRECT REGISTRATION */}
-      <section
-        style={{
-          padding: "75px 24px 115px",
-          background:
-            "linear-gradient(180deg, #f8faff 0%, #f2f6ff 100%)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1020px",
-            margin: "0 auto",
-          }}
-        >
-          <h2
-            style={{
-              maxWidth: "820px",
-              margin: "0 auto",
-              textAlign: "center",
-              fontSize: "clamp(30px, 4vw, 45px)",
-              lineHeight: 1.2,
-              fontWeight: 900,
-              letterSpacing: "-1.6px",
-            }}
-          >
+      <section className="registerArea">
+        <div className="registerHeading">
+          <span>QR PROTECTION</span>
+
+          <h2>
             {ka
               ? "მიაბი QR ტეგი სასურველ ცხოველს ან ნივთს და დაიბრუნე მარტივად."
-              : "Attach a QR tag to your pet or item and get it back easily."}
+              : "Attach a QR tag to your pet or item and make its way home simple."}
           </h2>
+        </div>
 
-          <p
-            style={{
-              textAlign: "center",
-              color: "#64748b",
-              margin: "15px auto 44px",
-              fontSize: "15px",
-            }}
-          >
-            {ka
-              ? "აირჩიე ქვემოთ — რეგისტრაცია პირდაპირ დაიწყება."
-              : "Choose below to start registration immediately."}
-          </p>
+        <div className="itemGrid">
+          {items.map((item, index) => (
+            <a
+              key={item.id}
+              href={`/register/details?type=${item.id}&lang=${lang}`}
+              className="item"
+            >
+              <div className="itemTop">
+                <span className="number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
 
-          <div
-            className="qr-item-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "20px",
-            }}
-          >
-            {items.map((item) => (
-              <a
-                key={item.id}
-                href={`/register/details?type=${item.id}&lang=${language}`}
-                style={{
-                  minHeight: "220px",
-                  position: "relative",
-                  textDecoration: "none",
-                  background: "#ffffff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "28px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#0f172a",
-                  boxShadow: "0 15px 45px rgba(37,99,235,.07)",
-                  overflow: "hidden",
-                }}
-              >
-                {/* decorative QR tag */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "18px",
-                    right: "18px",
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "11px",
-                    background: "#2563eb",
-                    color: "#ffffff",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontSize: "10px",
-                    fontWeight: 900,
-                    boxShadow: "0 7px 18px rgba(37,99,235,.2)",
-                  }}
-                >
-                  QR
-                </div>
+                <span className="arrow">↗</span>
+              </div>
 
-                <div
-                  style={{
-                    width: "105px",
-                    height: "105px",
-                    borderRadius: "28px",
-                    background:
-                      "linear-gradient(145deg,#f8fafc,#eef4ff)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "64px",
-                  }}
-                >
-                  {item.icon}
-                </div>
+              <div className="object">
+                <span className="objectIcon">{item.icon}</span>
 
-                <div
-                  style={{
-                    marginTop: "20px",
-                    fontSize: "19px",
-                    fontWeight: 900,
-                  }}
-                >
-                  {ka ? item.ka : item.en}
-                </div>
+                <span className="qrTag">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </div>
 
-                <div
-                  style={{
-                    marginTop: "7px",
-                    color: "#2563eb",
-                    fontSize: "12px",
-                    fontWeight: 800,
-                  }}
-                >
-                  {ka ? "რეგისტრაცია →" : "Register →"}
-                </div>
-              </a>
-            ))}
-          </div>
+              <strong>{ka ? item.ka : item.en}</strong>
+            </a>
+          ))}
         </div>
       </section>
 
-      {/* TRUST STRIP */}
-      <section
-        style={{
-          padding: "32px 24px",
-          background: "#ffffff",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "850px",
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "center",
-            gap: "35px",
-            flexWrap: "wrap",
-            color: "#64748b",
-            fontSize: "13px",
-            fontWeight: 700,
-          }}
-        >
-          <span>✓ QR Tag</span>
-          <span>✓ Live Chat</span>
-          <span>✓ Location Share</span>
-          <span>✓ Finder Reward</span>
+      <section className="featureBar">
+        <div>
+          <strong>01</strong>
+          <span>{ka ? "ერთი QR ტეგი" : "One QR tag"}</span>
+        </div>
+
+        <div>
+          <strong>02</strong>
+          <span>{ka ? "შენი არჩევანი" : "Your privacy"}</span>
+        </div>
+
+        <div>
+          <strong>03</strong>
+          <span>{ka ? "სწრაფი დაბრუნება" : "Faster return"}</span>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer
-        style={{
-          borderTop: "1px solid #f1f5f9",
-          padding: "35px 24px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            color: "#2563eb",
-            fontWeight: 900,
-            fontSize: "20px",
-          }}
-        >
-          QR RETURN
-        </div>
-
-        <div
-          style={{
-            marginTop: "5px",
-            color: "#94a3b8",
-            fontSize: "10px",
-            letterSpacing: "2px",
-          }}
-        >
-          LOST & FOUND
-        </div>
+      <footer>
+        <div className="footerBrand">QR RETURN</div>
+        <span>Lost & Found, redesigned.</span>
       </footer>
 
-      <style>{`
-        @media (max-width: 720px) {
-          .qr-item-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
+      <style jsx>{`
+        * {
+          box-sizing: border-box;
         }
 
-        @media (max-width: 500px) {
-          header {
-            padding-left: 15px !important;
-            padding-right: 15px !important;
+        .site {
+          min-height: 100vh;
+          background: #fbfcff;
+          color: #081426;
+          font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+        }
+
+        .nav {
+          width: calc(100% - 48px);
+          max-width: 1240px;
+          height: 92px;
+          margin: auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #e8edf5;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          text-decoration: none;
+        }
+
+        .brandMark {
+          width: 47px;
+          height: 47px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: #155eef;
+          color: white;
+          font-size: 23px;
+          font-weight: 900;
+          box-shadow: 0 10px 30px rgba(21, 94, 239, 0.2);
+        }
+
+        .brandText {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .brandText strong {
+          color: #155eef;
+          font-size: 24px;
+          letter-spacing: -1px;
+        }
+
+        .brandText small {
+          margin-top: 3px;
+          color: #8793a7;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 2.6px;
+        }
+
+        .navRight {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+        }
+
+        .language {
+          display: flex;
+          padding: 4px;
+          border-radius: 12px;
+          background: #eef2f8;
+        }
+
+        .language button {
+          border: 0;
+          padding: 8px 10px;
+          border-radius: 9px;
+          background: transparent;
+          color: #78859a;
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .language button.active {
+          background: white;
+          color: #155eef;
+          box-shadow: 0 2px 10px rgba(8, 20, 38, 0.08);
+        }
+
+        .login {
+          padding: 11px 18px;
+          border-radius: 11px;
+          background: #081426;
+          color: white;
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .hero {
+          max-width: 1100px;
+          margin: auto;
+          padding: 120px 24px 115px;
+        }
+
+        .eyebrow {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          color: #155eef;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 2.5px;
+        }
+
+        .eyebrow span {
+          width: 28px;
+          height: 2px;
+          background: #155eef;
+        }
+
+        h1 {
+          max-width: 1000px;
+          margin: 25px 0 0;
+          color: #081426;
+          font-size: clamp(50px, 7vw, 88px);
+          line-height: 0.99;
+          letter-spacing: -5px;
+          font-weight: 800;
+        }
+
+        h1 em {
+          color: #155eef;
+          font-style: normal;
+        }
+
+        .hero p {
+          max-width: 650px;
+          margin: 35px 0 0;
+          color: #64748b;
+          font-size: 18px;
+          line-height: 1.75;
+        }
+
+        .miniProof {
+          display: flex;
+          gap: 25px;
+          margin-top: 32px;
+          color: #8190a5;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .miniProof span::first-letter {
+          color: #155eef;
+        }
+
+        .registerArea {
+          padding: 100px 24px 120px;
+          background: #071426;
+        }
+
+        .registerHeading {
+          max-width: 1100px;
+          margin: auto;
+        }
+
+        .registerHeading > span {
+          color: #6ea1ff;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 2.5px;
+        }
+
+        .registerHeading h2 {
+          max-width: 900px;
+          margin: 18px 0 55px;
+          color: white;
+          font-size: clamp(32px, 4vw, 51px);
+          line-height: 1.16;
+          letter-spacing: -2.2px;
+        }
+
+        .itemGrid {
+          max-width: 1100px;
+          margin: auto;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+        }
+
+        .item {
+          min-height: 270px;
+          padding: 25px;
+          border: 1px solid #243247;
+          border-radius: 22px;
+          background: #0d1b2e;
+          color: white;
+          text-decoration: none;
+          transition:
+            transform 0.2s ease,
+            border-color 0.2s ease,
+            background 0.2s ease;
+        }
+
+        .item:hover {
+          transform: translateY(-4px);
+          border-color: #377dff;
+          background: #11233c;
+        }
+
+        .itemTop {
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .number {
+          color: #61718a;
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .arrow {
+          color: #6ea1ff;
+          font-size: 18px;
+        }
+
+        .object {
+          position: relative;
+          width: 125px;
+          height: 125px;
+          margin: 28px auto 22px;
+          display: grid;
+          place-items: center;
+          border-radius: 35px;
+          background: linear-gradient(145deg, #162941, #0a1728);
+        }
+
+        .objectIcon {
+          font-size: 63px;
+        }
+
+        .qrTag {
+          position: absolute;
+          right: -5px;
+          bottom: 7px;
+          width: 38px;
+          height: 38px;
+          padding: 7px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3px;
+          border-radius: 9px;
+          background: white;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .qrTag i {
+          display: block;
+          background: #071426;
+          border-radius: 1px;
+        }
+
+        .item strong {
+          display: block;
+          text-align: center;
+          font-size: 18px;
+        }
+
+        .featureBar {
+          max-width: 1100px;
+          margin: auto;
+          padding: 55px 24px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          border-bottom: 1px solid #e6ebf2;
+        }
+
+        .featureBar div {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          justify-content: center;
+        }
+
+        .featureBar strong {
+          color: #155eef;
+          font-size: 11px;
+        }
+
+        .featureBar span {
+          color: #42526a;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        footer {
+          max-width: 1100px;
+          margin: auto;
+          padding: 45px 24px 60px;
+          display: flex;
+          justify-content: space-between;
+          color: #94a3b8;
+          font-size: 11px;
+        }
+
+        .footerBrand {
+          color: #155eef;
+          font-size: 16px;
+          font-weight: 900;
+        }
+
+        @media (max-width: 720px) {
+          .nav {
+            width: calc(100% - 28px);
           }
 
-          .qr-item-grid > a {
-            min-height: 190px !important;
+          .brandText strong {
+            font-size: 20px;
+          }
+
+          .brandText small {
+            display: none;
+          }
+
+          .hero {
+            padding-top: 80px;
+          }
+
+          h1 {
+            letter-spacing: -3px;
+          }
+
+          .miniProof {
+            flex-wrap: wrap;
+          }
+
+          .itemGrid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .item {
+            min-height: 220px;
+            padding: 18px;
+          }
+
+          .object {
+            width: 95px;
+            height: 95px;
+          }
+
+          .objectIcon {
+            font-size: 50px;
+          }
+
+          .featureBar {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          footer {
+            flex-direction: column;
+            gap: 8px;
           }
         }
       `}</style>
