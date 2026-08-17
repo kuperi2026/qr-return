@@ -8,9 +8,12 @@ type ItemProfile = {
   tag_code: string;
   item_type: string;
   pet_type: string | null;
-  item_name: string | null;
-  colour: string | null;
 
+  // სავალდებულო
+  item_name: string | null;
+
+  // არასავალდებულო
+  colour: string | null;
   sex: string | null;
   date_of_birth: string | null;
   weight: number | null;
@@ -25,14 +28,50 @@ type ItemProfile = {
 
   photo_url: string | null;
 
+  // მფლობელი
   owner_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
+
+  // არასავალდებულო
   owner_photo_url: string | null;
 
+  additional_contact_name: string | null;
+  additional_contact_phone: string | null;
+  additional_contact_email: string | null;
+
   finder_message: string | null;
-  contact_preference: string | null;
+  lost_seen_location: string | null;
+
+  // დაკავშირების მეთოდები
+  phone_enabled: boolean | null;
+  whatsapp_enabled: boolean | null;
+  live_chat_enabled: boolean | null;
+
   location_sharing_enabled: boolean | null;
+
+  // არასავალდებულო ველების ხილვადობა
+  show_colour: boolean | null;
+  show_sex: boolean | null;
+  show_date_of_birth: boolean | null;
+  show_weight: boolean | null;
+  show_medical_info: boolean | null;
+
+  show_brand: boolean | null;
+  show_model: boolean | null;
+  show_size: boolean | null;
+  show_material: boolean | null;
+  show_distinctive_features: boolean | null;
+  show_description: boolean | null;
+
+  show_photo: boolean | null;
+  show_owner_photo: boolean | null;
+
+  show_additional_contact: boolean | null;
+
+  show_finder_message: boolean | null;
+  show_lost_seen_location: boolean | null;
+
   active: boolean | null;
 };
 
@@ -47,9 +86,14 @@ export default function ProfilePage() {
     ? rawTag
     : "";
 
-  const [profile, setProfile] = useState<ItemProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [profile, setProfile] =
+    useState<ItemProfile | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
     async function loadProfile() {
@@ -57,39 +101,67 @@ export default function ProfilePage() {
       setError("");
 
       if (!tagCode) {
-        setError("QR კოდი ვერ მოიძებნა.");
+        setError(
+          "QR კოდი ვერ მოიძებნა."
+        );
+
         setLoading(false);
         return;
       }
 
       try {
-        const decodedTag = decodeURIComponent(tagCode);
+        const decodedTag =
+          decodeURIComponent(
+            tagCode
+          );
 
-        const { data, error: fetchError } = await supabase
+        const {
+          data,
+          error: fetchError,
+        } = await supabase
           .from("item")
           .select("*")
-          .eq("tag_code", decodedTag)
+          .eq(
+            "tag_code",
+            decodedTag
+          )
           .maybeSingle();
 
         if (fetchError) {
-          console.error("Profile load error:", fetchError);
+          console.error(
+            "Profile load error:",
+            fetchError
+          );
+
           setError(
             `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
           );
+
           setLoading(false);
           return;
         }
 
         if (!data) {
-          setError("ამ QR კოდზე პროფილი არ მოიძებნა.");
+          setError(
+            "ამ QR კოდზე პროფილი არ მოიძებნა."
+          );
+
           setLoading(false);
           return;
         }
 
-        setProfile(data as ItemProfile);
+        setProfile(
+          data as ItemProfile
+        );
       } catch (err) {
-        console.error("Profile error:", err);
-        setError("პროფილის ჩატვირთვა ვერ მოხერხდა.");
+        console.error(
+          "Profile error:",
+          err
+        );
+
+        setError(
+          "პროფილის ჩატვირთვა ვერ მოხერხდა."
+        );
       } finally {
         setLoading(false);
       }
@@ -102,9 +174,17 @@ export default function ProfilePage() {
     return (
       <>
         <main className="centerPage">
-          <div className="logo centerLogo">QR</div>
-          <h1>QR RETURN</h1>
-          <p>პროფილი იტვირთება...</p>
+          <div className="logo centerLogo">
+            QR
+          </div>
+
+          <h1>
+            QR RETURN
+          </h1>
+
+          <p>
+            პროფილი იტვირთება...
+          </p>
         </main>
 
         <Styles />
@@ -112,19 +192,30 @@ export default function ProfilePage() {
     );
   }
 
-  if (error || !profile) {
+  if (
+    error ||
+    !profile
+  ) {
     return (
       <>
         <main className="centerPage">
-          <div className="logo centerLogo">QR</div>
-
-          <h1>QR RETURN</h1>
-
-          <div className="errorBox">
-            {error || "პროფილი ვერ მოიძებნა."}
+          <div className="logo centerLogo">
+            QR
           </div>
 
-          <a href="/" className="homeButton">
+          <h1>
+            QR RETURN
+          </h1>
+
+          <div className="errorBox">
+            {error ||
+              "პროფილი ვერ მოიძებნა."}
+          </div>
+
+          <a
+            href="/"
+            className="homeButton"
+          >
             მთავარ გვერდზე დაბრუნება
           </a>
         </main>
@@ -138,20 +229,66 @@ export default function ProfilePage() {
     profile.item_type === "dog" ||
     profile.item_type === "cat";
 
+  const cleanPhone =
+    profile.owner_phone
+      ?.replace(/[^\d+]/g, "") ||
+    "";
+
+  const whatsappPhone =
+    profile.owner_phone
+      ?.replace(/\D/g, "") ||
+    "";
+
+  const hasAdditionalContact =
+    profile.show_additional_contact ===
+      true &&
+    Boolean(
+      profile.additional_contact_name ||
+        profile.additional_contact_phone ||
+        profile.additional_contact_email
+    );
+
+  const hasFinderInformation =
+    (profile.show_finder_message ===
+      true &&
+      Boolean(
+        profile.finder_message
+      )) ||
+    (profile.show_lost_seen_location ===
+      true &&
+      Boolean(
+        profile.lost_seen_location
+      )) ||
+    profile.location_sharing_enabled ===
+      true;
+
   return (
     <>
       <main className="page">
         <header className="header">
-          <a href="/" className="brand">
-            <div className="logo">QR</div>
+          <a
+            href="/"
+            className="brand"
+          >
+            <div className="logo">
+              QR
+            </div>
 
             <div>
-              <strong>QR RETURN</strong>
-              <small>OWNER PROFILE</small>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <small>
+                OWNER PROFILE
+              </small>
             </div>
           </a>
 
-          <a href="/" className="homeLink">
+          <a
+            href="/"
+            className="homeLink"
+          >
             მთავარი
           </a>
         </header>
@@ -159,15 +296,24 @@ export default function ProfilePage() {
         <div className="container">
           <section className="profileCard">
             <div className="hero">
-              {profile.photo_url ? (
+              {profile.show_photo ===
+                true &&
+              profile.photo_url ? (
                 <img
-                  src={profile.photo_url}
-                  alt={profile.item_name || "Profile"}
+                  src={
+                    profile.photo_url
+                  }
+                  alt={
+                    profile.item_name ||
+                    "Profile"
+                  }
                   className="mainPhoto"
                 />
               ) : (
                 <div className="photoPlaceholder">
-                  {getIcon(profile.item_type)}
+                  {getIcon(
+                    profile.item_type
+                  )}
                 </div>
               )}
 
@@ -178,37 +324,48 @@ export default function ProfilePage() {
 
                 <h1>
                   {profile.item_name ||
-                    getCategory(profile.item_type)}
+                    getCategory(
+                      profile.item_type
+                    )}
                 </h1>
 
                 <div className="category">
-                  {getCategory(profile.item_type)}
+                  {getCategory(
+                    profile.item_type
+                  )}
                 </div>
 
                 <p className="tag">
                   QR კოდი:{" "}
-                  <strong>{profile.tag_code}</strong>
+                  <strong>
+                    {profile.tag_code}
+                  </strong>
                 </p>
 
                 <div
                   className={
-                    profile.active === false
+                    profile.active ===
+                    false
                       ? "status inactive"
                       : "status active"
                   }
                 >
                   <span />
 
-                  {profile.active === false
+                  {profile.active ===
+                  false
                     ? "არააქტიური"
                     : "აქტიური"}
                 </div>
               </div>
             </div>
 
+            {/* 01 */}
             <section className="section">
               <div className="sectionTitle">
-                <span>01</span>
+                <span>
+                  01
+                </span>
 
                 <h2>
                   {isPet
@@ -218,95 +375,159 @@ export default function ProfilePage() {
               </div>
 
               <div className="grid">
-                {profile.colour && (
-                  <Info
-                    label="ფერი"
-                    value={profile.colour}
-                  />
-                )}
+                {profile.show_colour ===
+                  true &&
+                  profile.colour && (
+                    <Info
+                      label="ფერი"
+                      value={
+                        profile.colour
+                      }
+                    />
+                  )}
 
-                {isPet && profile.sex && (
-                  <Info
-                    label="სქესი"
-                    value={translateSex(profile.sex)}
-                  />
-                )}
+                {isPet &&
+                  profile.show_sex ===
+                    true &&
+                  profile.sex && (
+                    <Info
+                      label="სქესი"
+                      value={translateSex(
+                        profile.sex
+                      )}
+                    />
+                  )}
 
-                {isPet && profile.date_of_birth && (
-                  <Info
-                    label="დაბადების თარიღი"
-                    value={profile.date_of_birth}
-                  />
-                )}
+                {isPet &&
+                  profile.show_date_of_birth ===
+                    true &&
+                  profile.date_of_birth && (
+                    <Info
+                      label="დაბადების თარიღი"
+                      value={
+                        profile.date_of_birth
+                      }
+                    />
+                  )}
 
-                {isPet && profile.weight !== null && (
-                  <Info
-                    label="წონა"
-                    value={`${profile.weight}`}
-                  />
-                )}
+                {isPet &&
+                  profile.show_weight ===
+                    true &&
+                  profile.weight !==
+                    null &&
+                  profile.weight !==
+                    undefined && (
+                    <Info
+                      label="წონა"
+                      value={`${profile.weight}`}
+                    />
+                  )}
 
-                {!isPet && profile.brand && (
-                  <Info
-                    label="ბრენდი"
-                    value={profile.brand}
-                  />
-                )}
+                {!isPet &&
+                  profile.show_brand ===
+                    true &&
+                  profile.brand && (
+                    <Info
+                      label="ბრენდი"
+                      value={
+                        profile.brand
+                      }
+                    />
+                  )}
 
-                {!isPet && profile.model && (
-                  <Info
-                    label="მოდელი"
-                    value={profile.model}
-                  />
-                )}
+                {!isPet &&
+                  profile.show_model ===
+                    true &&
+                  profile.model && (
+                    <Info
+                      label="მოდელი"
+                      value={
+                        profile.model
+                      }
+                    />
+                  )}
 
-                {!isPet && profile.size && (
-                  <Info
-                    label="ზომა"
-                    value={profile.size}
-                  />
-                )}
+                {!isPet &&
+                  profile.show_size ===
+                    true &&
+                  profile.size && (
+                    <Info
+                      label="ზომა"
+                      value={
+                        profile.size
+                      }
+                    />
+                  )}
 
-                {!isPet && profile.material && (
-                  <Info
-                    label="მასალა"
-                    value={profile.material}
-                  />
-                )}
+                {!isPet &&
+                  profile.show_material ===
+                    true &&
+                  profile.material && (
+                    <Info
+                      label="მასალა"
+                      value={
+                        profile.material
+                      }
+                    />
+                  )}
               </div>
 
-              {profile.medical_info && (
-                <LongInfo
-                  label="სამედიცინო ინფორმაცია"
-                  value={profile.medical_info}
-                />
-              )}
+              {isPet &&
+                profile.show_medical_info ===
+                  true &&
+                profile.medical_info && (
+                  <LongInfo
+                    label="სამედიცინო ინფორმაცია"
+                    value={
+                      profile.medical_info
+                    }
+                  />
+                )}
 
-              {profile.distinctive_features && (
-                <LongInfo
-                  label="განმასხვავებელი ნიშნები"
-                  value={profile.distinctive_features}
-                />
-              )}
+              {!isPet &&
+                profile.show_distinctive_features ===
+                  true &&
+                profile.distinctive_features && (
+                  <LongInfo
+                    label="განმასხვავებელი ნიშნები"
+                    value={
+                      profile.distinctive_features
+                    }
+                  />
+                )}
 
-              {profile.description && (
-                <LongInfo
-                  label="დამატებითი აღწერა"
-                  value={profile.description}
-                />
-              )}
+              {profile.show_description ===
+                true &&
+                profile.description && (
+                  <LongInfo
+                    label="დამატებითი აღწერა"
+                    value={
+                      profile.description
+                    }
+                  />
+                )}
             </section>
 
+            {/* 02 */}
             <section className="section">
               <div className="sectionTitle">
-                <span>02</span>
-                <h2>მფლობელის ინფორმაცია</h2>
+                <span>
+                  02
+                </span>
+
+                <h2>
+                  მფლობელის ინფორმაცია
+                </h2>
               </div>
 
               <div className="ownerCard">
-                {profile.owner_photo_url ? (
+                {profile.show_owner_photo ===
+                  true &&
+                profile.owner_photo_url ? (
                   <img
-                    src={profile.owner_photo_url}
+                    src={
+                      profile.owner_photo_url
+                    }
                     alt="Owner"
                     className="ownerPhoto"
                   />
@@ -317,69 +538,196 @@ export default function ProfilePage() {
                 )}
 
                 <div className="ownerInfo">
-                  <small>მფლობელი</small>
+                  <small>
+                    მფლობელი
+                  </small>
 
                   <strong>
                     {profile.owner_name ||
-                      "სახელი მითითებული არ არის"}
+                      "მფლობელი"}
                   </strong>
 
+                  {/* სავალდებულო — ყოველთვის ჩანს */}
                   {profile.owner_phone && (
-                    <a href={`tel:${profile.owner_phone}`}>
-                      📞 {profile.owner_phone}
+                    <a
+                      href={`tel:${cleanPhone}`}
+                    >
+                      📞{" "}
+                      {
+                        profile.owner_phone
+                      }
                     </a>
                   )}
 
+                  {/* სავალდებულო — ყოველთვის ჩანს */}
                   {profile.owner_email && (
                     <a
                       href={`mailto:${profile.owner_email}`}
                     >
-                      ✉️ {profile.owner_email}
+                      ✉️{" "}
+                      {
+                        profile.owner_email
+                      }
                     </a>
                   )}
                 </div>
               </div>
 
-              {profile.contact_preference && (
-                <div className="singleInfo">
-                  <Info
-                    label="დაკავშირების მეთოდი"
-                    value={translateContact(
-                      profile.contact_preference
+              <div className="contactSection">
+                <div className="contactTitle">
+                  დაუკავშირდი მფლობელს
+                </div>
+
+                <div className="contactButtons">
+                  {profile.phone_enabled ===
+                    true &&
+                    profile.owner_phone && (
+                      <a
+                        href={`tel:${cleanPhone}`}
+                        className="contactButton phoneButton"
+                      >
+                        <span>
+                          📞
+                        </span>
+
+                        <strong>
+                          დარეკვა
+                        </strong>
+                      </a>
                     )}
-                  />
+
+                  {profile.whatsapp_enabled ===
+                    true &&
+                    whatsappPhone && (
+                      <a
+                        href={`https://wa.me/${whatsappPhone}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="contactButton whatsappButton"
+                      >
+                        <span>
+                          🟢
+                        </span>
+
+                        <strong>
+                          WhatsApp
+                        </strong>
+                      </a>
+                    )}
+
+                  {profile.live_chat_enabled ===
+                    true && (
+                    <div className="contactButton chatButton">
+                      <span>
+                        💬
+                      </span>
+
+                      <strong>
+                        Live Chat
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {hasAdditionalContact && (
+                <div className="additionalContact">
+                  <div className="additionalTitle">
+                    დამატებითი საკონტაქტო პირი
+                  </div>
+
+                  {profile.additional_contact_name && (
+                    <Info
+                      label="სახელი"
+                      value={
+                        profile.additional_contact_name
+                      }
+                    />
+                  )}
+
+                  {profile.additional_contact_phone && (
+                    <a
+                      href={`tel:${profile.additional_contact_phone}`}
+                      className="additionalLink"
+                    >
+                      📞{" "}
+                      {
+                        profile.additional_contact_phone
+                      }
+                    </a>
+                  )}
+
+                  {profile.additional_contact_email && (
+                    <a
+                      href={`mailto:${profile.additional_contact_email}`}
+                      className="additionalLink"
+                    >
+                      ✉️{" "}
+                      {
+                        profile.additional_contact_email
+                      }
+                    </a>
+                  )}
                 </div>
               )}
             </section>
 
-            <section className="section">
-              <div className="sectionTitle">
-                <span>03</span>
-                <h2>მპოვნელისთვის</h2>
-              </div>
+            {/* 03 */}
+            {hasFinderInformation && (
+              <section className="section">
+                <div className="sectionTitle">
+                  <span>
+                    03
+                  </span>
 
-              {profile.finder_message ? (
-                <LongInfo
-                  label="შეტყობინება მპოვნელისთვის"
-                  value={profile.finder_message}
-                />
-              ) : (
-                <div className="empty">
-                  შეტყობინება მითითებული არ არის.
+                  <h2>
+                    მპოვნელისთვის
+                  </h2>
                 </div>
-              )}
 
-              <div className="singleInfo">
-                <Info
-                  label="ლოკაციის გაზიარება"
-                  value={
-                    profile.location_sharing_enabled
-                      ? "ჩართულია"
-                      : "გამორთულია"
-                  }
-                />
-              </div>
-            </section>
+                {profile.show_finder_message ===
+                  true &&
+                  profile.finder_message && (
+                    <LongInfo
+                      label="შეტყობინება მპოვნელისთვის"
+                      value={
+                        profile.finder_message
+                      }
+                    />
+                  )}
+
+                {profile.show_lost_seen_location ===
+                  true &&
+                  profile.lost_seen_location && (
+                    <LongInfo
+                      label="ბოლო ნანახი ადგილი"
+                      value={
+                        profile.lost_seen_location
+                      }
+                    />
+                  )}
+
+                {profile.location_sharing_enabled ===
+                  true && (
+                  <div className="locationBox">
+                    <div>
+                      <strong>
+                        📍 ლოკაციის გაზიარება
+                      </strong>
+
+                      <p>
+                        მფლობელს ჩართული აქვს
+                        ლოკაციის მიღების ფუნქცია.
+                      </p>
+                    </div>
+
+                    <span className="enabledBadge">
+                      ჩართულია
+                    </span>
+                  </div>
+                )}
+              </section>
+            )}
 
             <div className="buttons">
               <a
@@ -416,8 +764,13 @@ function Info({
 }) {
   return (
     <div className="infoBox">
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
     </div>
   );
 }
@@ -431,66 +784,91 @@ function LongInfo({
 }) {
   return (
     <div className="longInfo">
-      <span>{label}</span>
-      <p>{value}</p>
+      <span>
+        {label}
+      </span>
+
+      <p>
+        {value}
+      </p>
     </div>
   );
 }
 
-function getCategory(type: string) {
+function getCategory(
+  type: string
+) {
   switch (type) {
     case "dog":
       return "ძაღლი";
+
     case "cat":
       return "კატა";
+
     case "key":
+    case "keys":
       return "გასაღები";
+
     case "wallet":
       return "საფულე";
+
+    case "suitcase":
+      return "ჩემოდანი";
+
+    case "bag":
+      return "ჩანთა";
+
     case "luggage":
       return "ჩანთა / ჩემოდანი";
+
     default:
       return type;
   }
 }
 
-function getIcon(type: string) {
+function getIcon(
+  type: string
+) {
   switch (type) {
     case "dog":
       return "🐕";
+
     case "cat":
       return "🐈";
+
     case "key":
+    case "keys":
       return "🔑";
+
     case "wallet":
       return "👛";
+
+    case "suitcase":
+      return "🧳";
+
+    case "bag":
+      return "🎒";
+
     case "luggage":
       return "🧳";
+
     default:
       return "📦";
   }
 }
 
-function translateSex(sex: string) {
-  if (sex === "male") return "მამრობითი";
-  if (sex === "female") return "მდედრობითი";
+function translateSex(
+  sex: string
+) {
+  if (sex === "male") {
+    return "მამრობითი";
+  }
+
+  if (sex === "female") {
+    return "მდედრობითი";
+  }
+
   return sex;
-}
-
-function translateContact(value: string) {
-  if (value === "both") {
-    return "Live Chat და ტელეფონი";
-  }
-
-  if (value === "chat") {
-    return "Live Chat";
-  }
-
-  if (value === "phone") {
-    return "ტელეფონი";
-  }
-
-  return value;
 }
 
 function Styles() {
@@ -513,7 +891,10 @@ function Styles() {
       .page {
         min-height: 100vh;
         color: #101828;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
       }
 
       .header {
@@ -692,7 +1073,11 @@ function Styles() {
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
         gap: 12px;
       }
 
@@ -782,22 +1167,128 @@ function Styles() {
         text-decoration: none;
       }
 
-      .singleInfo {
-        margin-top: 12px;
+      .contactSection {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 14px;
+        background: #f8fafc;
       }
 
-      .empty {
-        padding: 14px;
+      .contactTitle {
+        margin-bottom: 11px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .contactButtons {
+        display: grid;
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0, 1fr)
+          );
+        gap: 9px;
+      }
+
+      .contactButton {
+        min-height: 54px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
         border-radius: 12px;
+        text-decoration: none;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .contactButton strong {
+        font-size: 11px;
+      }
+
+      .phoneButton {
+        background: #1465e8;
+        color: white;
+      }
+
+      .whatsappButton {
+        background: #e9f9ef;
+        color: #15753b;
+        border: 1px solid #c9eed7;
+      }
+
+      .chatButton {
+        background: #eef4ff;
+        color: #1465e8;
+        border: 1px solid #d7e5ff;
+      }
+
+      .additionalContact {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 14px;
         background: #f8fafc;
-        color: #98a2b3;
+      }
+
+      .additionalTitle {
+        margin-bottom: 10px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .additionalContact .infoBox {
+        margin-bottom: 8px;
+        background: white;
+      }
+
+      .additionalLink {
+        display: block;
+        margin-top: 7px;
+        color: #475467;
+        font-size: 11px;
+        text-decoration: none;
+      }
+
+      .locationBox {
+        margin-top: 12px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        border-radius: 12px;
+        background: #f3f7fd;
+      }
+
+      .locationBox strong {
         font-size: 12px;
+      }
+
+      .locationBox p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .enabledBadge {
+        flex: 0 0 auto;
+        padding: 6px 9px;
+        border-radius: 30px;
+        background: #e9f8ef;
+        color: #16803b;
+        font-size: 9px;
+        font-weight: 900;
       }
 
       .buttons {
         margin-top: 30px;
         display: grid;
-        grid-template-columns: 1.4fr 1fr;
+        grid-template-columns:
+          1.4fr 1fr;
         gap: 10px;
       }
 
@@ -832,7 +1323,10 @@ function Styles() {
         margin: auto;
         padding-top: 130px;
         text-align: center;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
       }
 
       .centerLogo {
@@ -858,7 +1352,9 @@ function Styles() {
         color: white;
       }
 
-      @media (max-width: 600px) {
+      @media (
+        max-width: 600px
+      ) {
         .header {
           min-height: 70px;
         }
@@ -894,11 +1390,18 @@ function Styles() {
         }
 
         .grid {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr;
+        }
+
+        .contactButtons {
+          grid-template-columns:
+            1fr;
         }
 
         .buttons {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr;
         }
       }
     `}</style>
