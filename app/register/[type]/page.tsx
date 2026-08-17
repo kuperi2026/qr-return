@@ -379,6 +379,9 @@ export default function RegistrationPage() {
         location_sharing_enabled:
           locationSharingEnabled,
 
+        owner_message_enabled:
+          Boolean(form.finder_message.trim()),
+
         lost_seen_location:
           form.lost_seen_location.trim() || null,
 
