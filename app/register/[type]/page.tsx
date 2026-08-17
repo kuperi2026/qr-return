@@ -41,8 +41,6 @@ type FormState = {
   additional_contact_phone: string;
   additional_contact_email: string;
 
-  contact_preference: string;
-
   finder_message: string;
   reward: string;
   lost_seen_location: string;
@@ -133,8 +131,6 @@ const initialForm: FormState = {
   additional_contact_phone: "",
   additional_contact_email: "",
 
-  contact_preference: "both",
-
   finder_message: "",
   reward: "",
   lost_seen_location: "",
@@ -189,7 +185,9 @@ async function uploadImage(
           .slice(2)}`;
 
   const filePath =
-    `${folder}/${cleanTag(tagCode)}-${uniquePart}.${extension}`;
+    `${folder}/${cleanTag(
+      tagCode
+    )}-${uniquePart}.${extension}`;
 
   const { error: uploadError } =
     await supabase.storage
@@ -258,6 +256,21 @@ export default function RegistrationPage() {
     locationSharingEnabled,
     setLocationSharingEnabled,
   ] = useState(false);
+
+  const [
+    phoneEnabled,
+    setPhoneEnabled,
+  ] = useState(true);
+
+  const [
+    whatsappEnabled,
+    setWhatsappEnabled,
+  ] = useState(false);
+
+  const [
+    liveChatEnabled,
+    setLiveChatEnabled,
+  ] = useState(true);
 
   const [itemPhoto, setItemPhoto] =
     useState<File | null>(null);
@@ -333,6 +346,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ QR კოდი."
             : "Please enter the QR code."
         );
+
         return;
       }
 
@@ -346,6 +360,7 @@ export default function RegistrationPage() {
             ? "Please enter the pet name."
             : "Please enter the item name."
         );
+
         return;
       }
 
@@ -365,6 +380,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ მფლობელის სახელი."
             : "Please enter the owner's first name."
         );
+
         return;
       }
 
@@ -374,6 +390,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ მფლობელის გვარი."
             : "Please enter the owner's last name."
         );
+
         return;
       }
 
@@ -383,6 +400,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ მობილურის ნომერი."
             : "Please enter the phone number."
         );
+
         return;
       }
 
@@ -392,6 +410,21 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ ელფოსტა."
             : "Please enter an email address."
         );
+
+        return;
+      }
+
+      if (
+        !phoneEnabled &&
+        !whatsappEnabled &&
+        !liveChatEnabled
+      ) {
+        setError(
+          ka
+            ? "აირჩიეთ დაკავშირების მინიმუმ ერთი მეთოდი."
+            : "Choose at least one contact method."
+        );
+
         return;
       }
 
@@ -438,7 +471,9 @@ export default function RegistrationPage() {
       }
 
       let photoUrl: string | null = null;
-      let ownerPhotoUrl: string | null = null;
+
+      let ownerPhotoUrl: string | null =
+        null;
 
       if (itemPhoto) {
         try {
@@ -572,7 +607,8 @@ export default function RegistrationPage() {
 
         medical_info:
           category.isPet
-            ? form.medical_info.trim() || null
+            ? form.medical_info.trim() ||
+              null
             : null,
 
         brand:
@@ -597,7 +633,8 @@ export default function RegistrationPage() {
 
         distinctive_features:
           !category.isPet
-            ? form.distinctive_features.trim() || null
+            ? form.distinctive_features.trim() ||
+              null
             : null,
 
         description:
@@ -618,11 +655,37 @@ export default function RegistrationPage() {
         owner_email:
           form.owner_email.trim(),
 
+        additional_contact_name:
+          form.additional_contact_name.trim() ||
+          null,
+
+        additional_contact_phone:
+          form.additional_contact_phone.trim() ||
+          null,
+
+        additional_contact_email:
+          form.additional_contact_email.trim() ||
+          null,
+
         finder_message:
           finderMessage || null,
 
+        /*
+         * Legacy field.
+         * ახალი სისტემა რეალურად ქვემოთ მოცემულ
+         * სამ boolean ველს იყენებს.
+         */
         contact_preference:
-          form.contact_preference,
+          "both",
+
+        phone_enabled:
+          phoneEnabled,
+
+        whatsapp_enabled:
+          whatsappEnabled,
+
+        live_chat_enabled:
+          liveChatEnabled,
 
         location_sharing_enabled:
           locationSharingEnabled,
@@ -631,7 +694,8 @@ export default function RegistrationPage() {
           finderMessage.length > 0,
 
         lost_seen_location:
-          form.lost_seen_location.trim() || null,
+          form.lost_seen_location.trim() ||
+          null,
 
         active: true,
       };
@@ -1155,8 +1219,8 @@ export default function RegistrationPage() {
                 }
                 text={
                   ka
-                    ? "მიუთითეთ ინფორმაცია, რომლის საშუალებითაც მპოვნელი შეძლებს თქვენთან დაკავშირებას."
-                    : "Enter the information the finder can use to contact you."
+                    ? "მიუთითეთ ინფორმაცია და აირჩიეთ როგორ გსურთ მპოვნელმა დაგიკავშირდეთ."
+                    : "Enter your information and choose how the finder can contact you."
                 }
               />
 
@@ -1245,40 +1309,63 @@ export default function RegistrationPage() {
                 ka={ka}
               />
 
-              <SelectField
-                label={
-                  ka
-                    ? "როგორ გსურთ მპოვნელმა დაგიკავშირდეთ?"
-                    : "How should the finder contact you?"
-                }
-                value={
-                  form.contact_preference
-                }
-                onChange={(value) =>
-                  updateField(
-                    "contact_preference",
-                    value
-                  )
-                }
-                options={[
-                  {
-                    value: "both",
-                    label: ka
-                      ? "Live Chat და ტელეფონი"
-                      : "Live Chat & phone",
-                  },
-                  {
-                    value: "chat",
-                    label: "Live Chat",
-                  },
-                  {
-                    value: "phone",
-                    label: ka
+              <div className="contactMethods">
+                <div className="contactMethodsTitle">
+                  <strong>
+                    {ka
+                      ? "როგორ გსურთ მპოვნელმა დაგიკავშირდეთ?"
+                      : "How should the finder contact you?"}
+                  </strong>
+
+                  <p>
+                    {ka
+                      ? "მონიშნეთ ერთი, ორი ან სამივე მეთოდი."
+                      : "Select one, two, or all three methods."}
+                  </p>
+                </div>
+
+                <ContactChoice
+                  icon="📞"
+                  title={
+                    ka
                       ? "ტელეფონი"
-                      : "Phone",
-                  },
-                ]}
-              />
+                      : "Phone"
+                  }
+                  checked={phoneEnabled}
+                  onClick={() =>
+                    setPhoneEnabled(
+                      !phoneEnabled
+                    )
+                  }
+                />
+
+                <ContactChoice
+                  icon="🟢"
+                  title="WhatsApp"
+                  text={
+                    ka
+                      ? "გამოიყენებს ზემოთ მითითებულ მობილურის ნომერს."
+                      : "Uses the phone number entered above."
+                  }
+                  checked={whatsappEnabled}
+                  onClick={() =>
+                    setWhatsappEnabled(
+                      !whatsappEnabled
+                    )
+                  }
+                />
+
+                <ContactChoice
+                  icon="💬"
+                  title="Live Chat"
+                  checked={liveChatEnabled}
+                  onClick={() =>
+                    setLiveChatEnabled(
+                      !liveChatEnabled
+                    )
+                  }
+                />
+              </div>
 
               <button
                 type="button"
@@ -1862,6 +1949,59 @@ function PhotoField({
   );
 }
 
+function ContactChoice({
+  icon,
+  title,
+  text,
+  checked,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  text?: string;
+  checked: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        checked
+          ? "contactChoice selected"
+          : "contactChoice"
+      }
+      onClick={onClick}
+      aria-pressed={checked}
+    >
+      <div className="contactChoiceIcon">
+        {icon}
+      </div>
+
+      <div className="contactChoiceText">
+        <strong>
+          {title}
+        </strong>
+
+        {text && (
+          <small>
+            {text}
+          </small>
+        )}
+      </div>
+
+      <div
+        className={
+          checked
+            ? "checkbox checked"
+            : "checkbox"
+        }
+      >
+        {checked ? "✓" : ""}
+      </div>
+    </button>
+  );
+}
+
 function ErrorBox({
   text,
 }: {
@@ -2213,6 +2353,99 @@ function Styles() {
         margin-top: 4px;
         color: #8a94a3;
         font-size: 10px;
+      }
+
+      .contactMethods {
+        margin-bottom: 18px;
+        padding: 18px;
+        border: 1px solid #e0e5eb;
+        border-radius: 15px;
+        background: #f8fafc;
+      }
+
+      .contactMethodsTitle {
+        margin-bottom: 13px;
+      }
+
+      .contactMethodsTitle strong {
+        display: block;
+        color: #344054;
+        font-size: 14px;
+      }
+
+      .contactMethodsTitle p {
+        margin: 5px 0 0;
+        color: #7b8492;
+        font-size: 11px;
+      }
+
+      .contactChoice {
+        width: 100%;
+        min-height: 65px;
+        margin-top: 9px;
+        padding: 11px 13px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #dce2e9;
+        border-radius: 13px;
+        background: white;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .contactChoice.selected {
+        border-color: #1465e8;
+        background: #f3f7fd;
+      }
+
+      .contactChoiceIcon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        background: #eef4ff;
+        font-size: 18px;
+      }
+
+      .contactChoiceText {
+        flex: 1;
+      }
+
+      .contactChoiceText strong {
+        display: block;
+        color: #344054;
+        font-size: 13px;
+      }
+
+      .contactChoiceText small {
+        display: block;
+        margin-top: 4px;
+        color: #7b8492;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+
+      .checkbox {
+        width: 23px;
+        height: 23px;
+        flex: 0 0 23px;
+        display: grid;
+        place-items: center;
+        border:
+          1px solid #cdd4dd;
+        border-radius: 7px;
+        background: white;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .checkbox.checked {
+        border-color: #1465e8;
+        background: #1465e8;
       }
 
       .optional {
