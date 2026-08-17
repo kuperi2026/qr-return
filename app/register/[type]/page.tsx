@@ -15,57 +15,6 @@ type CategoryKey =
   | "suitcase"
   | "bag";
 
-const categories = {
-  dog: {
-    icon: "🐕",
-    ka: "ძაღლი",
-    en: "Dog",
-    itemType: "pet",
-    petType: "dog",
-    isPet: true,
-  },
-  cat: {
-    icon: "🐈",
-    ka: "კატა",
-    en: "Cat",
-    itemType: "pet",
-    petType: "cat",
-    isPet: true,
-  },
-  keys: {
-    icon: "🔑",
-    ka: "გასაღები",
-    en: "Keys",
-    itemType: "keys",
-    petType: null,
-    isPet: false,
-  },
-  wallet: {
-    icon: "👛",
-    ka: "საფულე",
-    en: "Wallet",
-    itemType: "wallet",
-    petType: null,
-    isPet: false,
-  },
-  suitcase: {
-    icon: "🧳",
-    ka: "ჩემოდანი",
-    en: "Suitcase",
-    itemType: "suitcase",
-    petType: null,
-    isPet: false,
-  },
-  bag: {
-    icon: "🎒",
-    ka: "ჩანთა",
-    en: "Bag",
-    itemType: "bag",
-    petType: null,
-    isPet: false,
-  },
-} as const;
-
 type FormState = {
   tag_code: string;
   item_name: string;
@@ -81,7 +30,6 @@ type FormState = {
   size: string;
   material: string;
   distinctive_features: string;
-
   description: string;
 
   owner_first_name: string;
@@ -100,6 +48,62 @@ type FormState = {
   lost_seen_location: string;
 };
 
+const categories = {
+  dog: {
+    icon: "🐕",
+    ka: "ძაღლი",
+    en: "Dog",
+    itemType: "dog",
+    petType: "dog",
+    isPet: true,
+  },
+
+  cat: {
+    icon: "🐈",
+    ka: "კატა",
+    en: "Cat",
+    itemType: "cat",
+    petType: "cat",
+    isPet: true,
+  },
+
+  keys: {
+    icon: "🔑",
+    ka: "გასაღები",
+    en: "Keys",
+    itemType: "keys",
+    petType: null,
+    isPet: false,
+  },
+
+  wallet: {
+    icon: "👛",
+    ka: "საფულე",
+    en: "Wallet",
+    itemType: "wallet",
+    petType: null,
+    isPet: false,
+  },
+
+  suitcase: {
+    icon: "🧳",
+    ka: "ჩემოდანი",
+    en: "Suitcase",
+    itemType: "suitcase",
+    petType: null,
+    isPet: false,
+  },
+
+  bag: {
+    icon: "🎒",
+    ka: "ჩანთა",
+    en: "Bag",
+    itemType: "bag",
+    petType: null,
+    isPet: false,
+  },
+} as const;
+
 const initialForm: FormState = {
   tag_code: "",
   item_name: "",
@@ -115,7 +119,6 @@ const initialForm: FormState = {
   size: "",
   material: "",
   distinctive_features: "",
-
   description: "",
 
   owner_first_name: "",
@@ -186,12 +189,12 @@ export default function RegistrationPage() {
   const ka = language === "ka";
 
   function updateField(
-    name: keyof FormState,
+    field: keyof FormState,
     value: string
   ) {
     setForm((current) => ({
       ...current,
-      [name]: value,
+      [field]: value,
     }));
   }
 
@@ -278,9 +281,11 @@ export default function RegistrationPage() {
   function previousStep() {
     setError("");
 
-    setStep((current) =>
-      current === 3 ? 2 : 1
-    );
+    if (step === 3) {
+      setStep(2);
+    } else {
+      setStep(1);
+    }
 
     goTop();
   }
@@ -299,6 +304,9 @@ export default function RegistrationPage() {
     setError("");
 
     try {
+      const finderMessage =
+        form.finder_message.trim();
+
       const payload = {
         tag_code:
           form.tag_code.trim(),
@@ -371,7 +379,7 @@ export default function RegistrationPage() {
           form.owner_email.trim(),
 
         finder_message:
-          form.finder_message.trim() || null,
+          finderMessage || null,
 
         contact_preference:
           form.contact_preference,
@@ -380,7 +388,7 @@ export default function RegistrationPage() {
           locationSharingEnabled,
 
         owner_message_enabled:
-          Boolean(form.finder_message.trim()),
+          finderMessage.length > 0,
 
         lost_seen_location:
           form.lost_seen_location.trim() || null,
@@ -411,10 +419,7 @@ export default function RegistrationPage() {
       setSuccess(true);
       goTop();
     } catch (err) {
-      console.error(
-        "Registration error:",
-        err
-      );
+      console.error(err);
 
       setError(
         ka
@@ -440,7 +445,7 @@ export default function RegistrationPage() {
             ✓
           </div>
 
-          <div className="smallLabel">
+          <div className="eyebrow">
             QR RETURN
           </div>
 
@@ -452,27 +457,28 @@ export default function RegistrationPage() {
 
           <p>
             {ka
-              ? "ინფორმაცია წარმატებით შეინახა. პროფილის მონაცემების რედაქტირებას მომავალშიც შეძლებთ."
-              : "Your information has been saved. You will be able to edit the profile later."}
+              ? "ინფორმაცია წარმატებით შეინახა."
+              : "Your information has been saved successfully."}
           </p>
 
-          <div className="successNotice">
+          <div className="successInfo">
             <strong>
+              {category.icon}{" "}
               {ka
-                ? "კატეგორია უცვლელია"
-                : "Category is fixed"}
+                ? category.ka
+                : category.en}
             </strong>
 
             <span>
               {ka
-                ? `ეს QR კოდი რეგისტრირებულია კატეგორიაში „${category.ka}“. პროფილის მონაცემების შეცვლა შესაძლებელი იქნება, კატეგორიის — არა.`
-                : `This QR code is registered as "${category.en}". Profile information can be changed later, but the category cannot be changed.`}
+                ? "კატეგორიის შეცვლა აღარ იქნება შესაძლებელი. პროფილის სხვა მონაცემების რედაქტირება მომავალშიც შეგეძლებათ."
+                : "The category is now fixed. Other profile information can still be edited later."}
             </span>
           </div>
 
           <a
             href="/"
-            className="primaryLink"
+            className="homeButton"
           >
             {ka
               ? "მთავარ გვერდზე დაბრუნება"
@@ -493,14 +499,14 @@ export default function RegistrationPage() {
         setLanguage={setLanguage}
       />
 
-      <section className="registration">
+      <section className="content">
         <div className="intro">
-          <div className="categoryBox">
+          <div className="categoryIcon">
             {category.icon}
           </div>
 
           <div>
-            <div className="smallLabel">
+            <div className="eyebrow">
               QR RETURN
             </div>
 
@@ -513,13 +519,13 @@ export default function RegistrationPage() {
             <p>
               {ka
                 ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
-                : "Add information that will make it easier for a finder to contact you if your pet or item is lost."}
+                : "Add information that will help a finder contact you if your pet or item is lost."}
             </p>
           </div>
         </div>
 
         <div className="progress">
-          <ProgressItem
+          <Progress
             number="1"
             label={
               ka ? "პროფილი" : "Profile"
@@ -531,12 +537,12 @@ export default function RegistrationPage() {
           <div
             className={
               step >= 2
-                ? "progressLine active"
-                : "progressLine"
+                ? "line active"
+                : "line"
             }
           />
 
-          <ProgressItem
+          <Progress
             number="2"
             label={
               ka ? "მფლობელი" : "Owner"
@@ -548,12 +554,12 @@ export default function RegistrationPage() {
           <div
             className={
               step >= 3
-                ? "progressLine active"
-                : "progressLine"
+                ? "line active"
+                : "line"
             }
           />
 
-          <ProgressItem
+          <Progress
             number="3"
             label={
               ka ? "დასრულება" : "Finish"
@@ -564,12 +570,12 @@ export default function RegistrationPage() {
         </div>
 
         <form
-          className="formCard"
+          className="card"
           onSubmit={handleSubmit}
         >
           {step === 1 && (
             <>
-              <StepHeader
+              <StepTitle
                 number="01"
                 title={
                   ka
@@ -580,10 +586,10 @@ export default function RegistrationPage() {
                     ? "Pet information"
                     : "Item information"
                 }
-                description={
+                text={
                   ka
-                    ? "შეავსეთ ძირითადი ინფორმაცია. დამატებითი მონაცემების შევსება ნებაყოფლობითია."
-                    : "Add the basic information. Additional details are optional."
+                    ? "ძირითადი ინფორმაცია შეავსეთ. დამატებითი ველები ნებაყოფლობითია."
+                    : "Complete the basic information. Additional fields are optional."
                 }
               />
 
@@ -621,24 +627,13 @@ export default function RegistrationPage() {
                     value
                   )
                 }
-                placeholder={
-                  category.isPet
-                    ? ka
-                      ? "მაგ. ბობი"
-                      : "Example: Bobby"
-                    : ka
-                    ? "მაგ. შავი საფულე"
-                    : "Example: Black wallet"
-                }
                 required
               />
 
-              <div className="twoColumns">
+              <div className="grid2">
                 <Field
                   label={
-                    ka
-                      ? "ფერი"
-                      : "Colour"
+                    ka ? "ფერი" : "Colour"
                   }
                   value={form.colour}
                   onChange={(value) =>
@@ -647,19 +642,12 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  placeholder={
-                    ka
-                      ? "მაგ. ყავისფერი"
-                      : "Example: Brown"
-                  }
                 />
 
                 {category.isPet ? (
                   <SelectField
                     label={
-                      ka
-                        ? "სქესი"
-                        : "Sex"
+                      ka ? "სქესი" : "Sex"
                     }
                     value={form.sex}
                     onChange={(value) =>
@@ -692,9 +680,7 @@ export default function RegistrationPage() {
                 ) : (
                   <Field
                     label={
-                      ka
-                        ? "ბრენდი"
-                        : "Brand"
+                      ka ? "ბრენდი" : "Brand"
                     }
                     value={form.brand}
                     onChange={(value) =>
@@ -702,11 +688,6 @@ export default function RegistrationPage() {
                         "brand",
                         value
                       )
-                    }
-                    placeholder={
-                      ka
-                        ? "მაგ. Samsonite"
-                        : "Example: Samsonite"
                     }
                   />
                 )}
@@ -729,18 +710,18 @@ export default function RegistrationPage() {
 
               <button
                 type="button"
-                className="optionalButton"
+                className="optional"
                 onClick={() =>
                   setShowExtraProfile(
                     !showExtraProfile
                   )
                 }
               >
-                <span>
+                <b>
                   {showExtraProfile
                     ? "−"
                     : "+"}
-                </span>
+                </b>
 
                 {ka
                   ? "დამატებითი ინფორმაცია"
@@ -751,7 +732,7 @@ export default function RegistrationPage() {
                 <div className="optionalPanel">
                   {category.isPet ? (
                     <>
-                      <div className="twoColumns">
+                      <div className="grid2">
                         <Field
                           label={
                             ka
@@ -784,7 +765,6 @@ export default function RegistrationPage() {
                               value
                             )
                           }
-                          placeholder="12.5"
                         />
                       </div>
 
@@ -807,7 +787,7 @@ export default function RegistrationPage() {
                     </>
                   ) : (
                     <>
-                      <div className="twoColumns">
+                      <div className="grid2">
                         <Field
                           label={
                             ka
@@ -891,43 +871,39 @@ export default function RegistrationPage() {
               )}
 
               {error && (
-                <ErrorMessage
-                  text={error}
-                />
+                <ErrorBox text={error} />
               )}
 
-              <div className="singleAction">
-                <button
-                  type="button"
-                  className="nextButton"
-                  onClick={nextStep}
-                >
-                  {ka
-                    ? "შემდეგი"
-                    : "Next"}{" "}
-                  →
-                </button>
-              </div>
+              <button
+                type="button"
+                className="mainButton full"
+                onClick={nextStep}
+              >
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
+              </button>
             </>
           )}
 
           {step === 2 && (
             <>
-              <StepHeader
+              <StepTitle
                 number="02"
                 title={
                   ka
                     ? "მფლობელის ინფორმაცია"
                     : "Owner information"
                 }
-                description={
+                text={
                   ka
-                    ? "მიუთითეთ საკონტაქტო ინფორმაცია, რომლის საშუალებითაც მპოვნელი შეძლებს თქვენთან დაკავშირებას."
-                    : "Add the contact information the finder can use to reach you."
+                    ? "მიუთითეთ საკონტაქტო ინფორმაცია."
+                    : "Enter your contact information."
                 }
               />
 
-              <div className="twoColumns">
+              <div className="grid2">
                 <Field
                   label={
                     ka
@@ -968,24 +944,6 @@ export default function RegistrationPage() {
               <Field
                 label={
                   ka
-                    ? "ელფოსტა"
-                    : "Email"
-                }
-                type="email"
-                value={form.owner_email}
-                onChange={(value) =>
-                  updateField(
-                    "owner_email",
-                    value
-                  )
-                }
-                placeholder="name@example.com"
-                required
-              />
-
-              <Field
-                label={
-                  ka
                     ? "მობილურის ნომერი"
                     : "Phone number"
                 }
@@ -998,6 +956,24 @@ export default function RegistrationPage() {
                   )
                 }
                 placeholder="+1 000 000 0000"
+                required
+              />
+
+              <Field
+                label={
+                  ka
+                    ? "ელფოსტა"
+                    : "Email"
+                }
+                type="email"
+                value={form.owner_email}
+                onChange={(value) =>
+                  updateField(
+                    "owner_email",
+                    value
+                  )
+                }
+                placeholder="name@example.com"
                 required
               />
 
@@ -1049,18 +1025,18 @@ export default function RegistrationPage() {
 
               <button
                 type="button"
-                className="optionalButton"
+                className="optional"
                 onClick={() =>
                   setShowExtraContact(
                     !showExtraContact
                   )
                 }
               >
-                <span>
+                <b>
                   {showExtraContact
                     ? "−"
                     : "+"}
-                </span>
+                </b>
 
                 {ka
                   ? "დამატებითი საკონტაქტო პირი"
@@ -1092,7 +1068,6 @@ export default function RegistrationPage() {
                         ? "ტელეფონი"
                         : "Phone"
                     }
-                    type="tel"
                     value={
                       form.additional_contact_phone
                     }
@@ -1125,12 +1100,10 @@ export default function RegistrationPage() {
               )}
 
               {error && (
-                <ErrorMessage
-                  text={error}
-                />
+                <ErrorBox text={error} />
               )}
 
-              <div className="actions">
+              <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
@@ -1144,7 +1117,7 @@ export default function RegistrationPage() {
 
                 <button
                   type="button"
-                  className="nextButton"
+                  className="mainButton"
                   onClick={nextStep}
                 >
                   {ka
@@ -1158,17 +1131,17 @@ export default function RegistrationPage() {
 
           {step === 3 && (
             <>
-              <StepHeader
+              <StepTitle
                 number="03"
                 title={
                   ka
                     ? "ინფორმაცია მპოვნელისთვის"
                     : "Information for the finder"
                 }
-                description={
+                text={
                   ka
-                    ? "დაასრულეთ პროფილის შექმნა და სურვილის შემთხვევაში ჩართეთ ლოკაციის გაზიარება."
-                    : "Finish creating the profile and optionally enable location sharing."
+                    ? "დაასრულეთ პროფილის შექმნა."
+                    : "Finish creating your profile."
                 }
               />
 
@@ -1189,7 +1162,7 @@ export default function RegistrationPage() {
                 }
               />
 
-              <div className="twoColumns">
+              <div className="grid2">
                 <Field
                   label={
                     ka
@@ -1224,7 +1197,7 @@ export default function RegistrationPage() {
                 />
               </div>
 
-              <div className="settingCard">
+              <div className="locationCard">
                 <div>
                   <strong>
                     {ka
@@ -1234,8 +1207,8 @@ export default function RegistrationPage() {
 
                   <p>
                     {ka
-                      ? "თუ ფუნქციას ჩართავთ, QR კოდის დამსკანერებელს სურვილის შემთხვევაში შეეძლება გამოგიგზავნოთ თავისი მიმდინარე მდებარეობა. ლოკაცია ავტომატურად არ იგზავნება."
-                      : "When enabled, the person scanning the QR code may choose to send you their current location. Location is never shared automatically."}
+                      ? "თუ ჩართავთ, QR კოდის დამსკანერებელს სურვილის შემთხვევაში შეეძლება თავისი მიმდინარე ლოკაციის გამოგზავნა. ავტომატურად არაფერი იგზავნება."
+                      : "If enabled, the finder may choose to send their current location. Nothing is shared automatically."}
                   </p>
                 </div>
 
@@ -1251,22 +1224,25 @@ export default function RegistrationPage() {
                       !locationSharingEnabled
                     )
                   }
+                  aria-pressed={
+                    locationSharingEnabled
+                  }
                 >
                   <span />
                 </button>
               </div>
 
               <div className="summary">
-                <div className="summaryIcon">
+                <div>
                   {category.icon}
                 </div>
 
-                <div>
-                  <span>
+                <section>
+                  <small>
                     {ka
-                      ? "იქმნება პროფილი:"
-                      : "Creating profile:"}
-                  </span>
+                      ? "იქმნება პროფილი"
+                      : "Creating profile"}
+                  </small>
 
                   <strong>
                     {form.item_name ||
@@ -1275,21 +1251,19 @@ export default function RegistrationPage() {
                         : category.en)}
                   </strong>
 
-                  <small>
+                  <p>
                     {ka
-                      ? "კატეგორია პროფილის შექმნის შემდეგ აღარ შეიცვლება. სხვა მონაცემების რედაქტირება მომავალშიც შესაძლებელი იქნება."
-                      : "The category cannot be changed after profile creation. Other profile information can be edited later."}
-                  </small>
-                </div>
+                      ? "კატეგორია უცვლელი დარჩება. სხვა მონაცემების რედაქტირება მომავალშიც შესაძლებელი იქნება."
+                      : "The category will remain fixed. Other profile details may be edited later."}
+                  </p>
+                </section>
               </div>
 
               {error && (
-                <ErrorMessage
-                  text={error}
-                />
+                <ErrorBox text={error} />
               )}
 
-              <div className="actions">
+              <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
@@ -1303,7 +1277,7 @@ export default function RegistrationPage() {
 
                 <button
                   type="submit"
-                  className="saveButton"
+                  className="mainButton"
                   disabled={saving}
                 >
                   {saving
@@ -1333,24 +1307,27 @@ function Header({
   ka: boolean;
   language: Language;
   setLanguage: (
-    language: Language
+    value: Language
   ) => void;
 }) {
   return (
     <header className="header">
-      <a href="/" className="brand">
-        <div className="brandMark">
+      <a
+        href="/"
+        className="brand"
+      >
+        <div className="logo">
           QR
         </div>
 
         <div>
-          <div className="brandName">
+          <strong>
             QR RETURN
-          </div>
+          </strong>
 
-          <div className="brandSub">
+          <small>
             SMART LOST & FOUND
-          </div>
+          </small>
         </div>
       </a>
 
@@ -1362,7 +1339,7 @@ function Header({
           ← {ka ? "უკან" : "Back"}
         </a>
 
-        <div className="language">
+        <div className="languages">
           <button
             type="button"
             className={
@@ -1396,7 +1373,7 @@ function Header({
   );
 }
 
-function ProgressItem({
+function Progress({
   number,
   label,
   active,
@@ -1409,37 +1386,46 @@ function ProgressItem({
 }) {
   return (
     <div className="progressItem">
-      <div
+      <span
         className={[
-          "progressCircle",
+          "circle",
           active ? "active" : "",
           current ? "current" : "",
         ].join(" ")}
       >
         {number}
-      </div>
+      </span>
 
-      <span>{label}</span>
+      <small>
+        {label}
+      </small>
     </div>
   );
 }
 
-function StepHeader({
+function StepTitle({
   number,
   title,
-  description,
+  text,
 }: {
   number: string;
   title: string;
-  description: string;
+  text: string;
 }) {
   return (
-    <div className="stepHeader">
-      <span>{number}</span>
+    <div className="stepTitle">
+      <b>
+        {number}
+      </b>
 
       <div>
-        <h2>{title}</h2>
-        <p>{description}</p>
+        <h2>
+          {title}
+        </h2>
+
+        <p>
+          {text}
+        </p>
       </div>
     </div>
   );
@@ -1455,7 +1441,9 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   placeholder?: string;
   type?: string;
   required?: boolean;
@@ -1473,7 +1461,9 @@ function Field({
         placeholder={placeholder}
         required={required}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
     </label>
@@ -1488,7 +1478,9 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   options: {
     value: string;
     label: string;
@@ -1496,22 +1488,33 @@ function SelectField({
 }) {
   return (
     <label className="field">
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
 
       <select
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       >
-        {options.map((option) => (
-          <option
-            key={option.value || "empty"}
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
+        {options.map(
+          (option) => (
+            <option
+              key={
+                option.value ||
+                "empty"
+              }
+              value={
+                option.value
+              }
+            >
+              {option.label}
+            </option>
+          )
+        )}
       </select>
     </label>
   );
@@ -1521,22 +1524,25 @@ function TextArea({
   label,
   value,
   onChange,
-  placeholder = "",
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
+  onChange: (
+    value: string
+  ) => void;
 }) {
   return (
     <label className="field">
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
 
       <textarea
         value={value}
-        placeholder={placeholder}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
     </label>
@@ -1557,7 +1563,7 @@ function PhotoField({
   ka: boolean;
 }) {
   return (
-    <label className="photoField">
+    <label className="photo">
       <input
         type="file"
         accept="image/*"
@@ -1569,32 +1575,34 @@ function PhotoField({
         }
       />
 
-      <div className="photoPlus">
+      <b>
         +
-      </div>
+      </b>
 
-      <div className="photoText">
-        <strong>{label}</strong>
+      <div>
+        <strong>
+          {label}
+        </strong>
 
-        <span>
+        <small>
           {file
             ? file.name
             : ka
             ? "დააჭირეთ ფოტოს ასარჩევად"
             : "Click to choose a photo"}
-        </span>
+        </small>
       </div>
     </label>
   );
 }
 
-function ErrorMessage({
+function ErrorBox({
   text,
 }: {
   text: string;
 }) {
   return (
-    <div className="errorMessage">
+    <div className="error">
       {text}
     </div>
   );
@@ -1605,10 +1613,6 @@ function Styles() {
     <style jsx global>{`
       * {
         box-sizing: border-box;
-      }
-
-      html {
-        scroll-behavior: smooth;
       }
 
       body {
@@ -1628,81 +1632,78 @@ function Styles() {
         color: #101828;
         font-family:
           Inter,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
           Arial,
           sans-serif;
       }
 
       .header {
-        width: calc(100% - 40px);
-        max-width: 1080px;
-        min-height: 82px;
+        width: calc(100% - 32px);
+        max-width: 1050px;
+        min-height: 78px;
         margin: auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 20px;
-        border-bottom: 1px solid #e9edf2;
+        border-bottom:
+          1px solid #e8ecf1;
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 10px;
         text-decoration: none;
       }
 
-      .brandMark {
-        width: 44px;
-        height: 44px;
-        display: grid;
-        place-items: center;
+      .logo {
+        width: 43px;
+        height: 43px;
         border-radius: 13px;
         background: #1465e8;
         color: white;
-        font-size: 13px;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
         font-weight: 900;
       }
 
-      .brandName {
+      .brand strong {
+        display: block;
         color: #1465e8;
-        font-size: 21px;
-        font-weight: 900;
+        font-size: 20px;
       }
 
-      .brandSub {
-        margin-top: 3px;
+      .brand small {
+        display: block;
+        margin-top: 2px;
         color: #98a2b3;
         font-size: 7px;
-        font-weight: 800;
         letter-spacing: 2px;
       }
 
       .headerRight {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
       }
 
       .headerBack {
         color: #475467;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
       }
 
-      .language {
-        display: flex;
+      .languages {
         padding: 4px;
-        border-radius: 10px;
+        display: flex;
         background: #edf0f4;
+        border-radius: 10px;
       }
 
-      .language button {
-        border: 0;
+      .languages button {
         padding: 7px 9px;
+        border: 0;
         border-radius: 7px;
         background: transparent;
         color: #7d8795;
@@ -1711,36 +1712,35 @@ function Styles() {
         cursor: pointer;
       }
 
-      .language button.selected {
+      .languages .selected {
         background: white;
         color: #1465e8;
       }
 
-      .registration {
-        width: calc(100% - 32px);
+      .content {
+        width: calc(100% - 24px);
         max-width: 760px;
         margin: auto;
-        padding: 48px 0 80px;
+        padding: 45px 0 80px;
       }
 
       .intro {
         display: flex;
-        align-items: flex-start;
-        gap: 17px;
+        gap: 16px;
       }
 
-      .categoryBox {
+      .categoryIcon {
         width: 58px;
         height: 58px;
         flex: 0 0 58px;
-        display: grid;
-        place-items: center;
         border-radius: 18px;
         background: #eaf2ff;
-        font-size: 32px;
+        display: grid;
+        place-items: center;
+        font-size: 31px;
       }
 
-      .smallLabel {
+      .eyebrow {
         color: #1465e8;
         font-size: 10px;
         font-weight: 900;
@@ -1748,50 +1748,37 @@ function Styles() {
       }
 
       .intro h1 {
-        margin: 8px 0;
-        font-size: clamp(
-          30px,
-          5vw,
-          44px
-        );
+        margin: 7px 0;
+        font-size: 40px;
         line-height: 1.05;
-        letter-spacing: -1.8px;
       }
 
       .intro p {
-        max-width: 620px;
         margin: 0;
         color: #667085;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.6;
       }
 
       .progress {
-        margin: 38px 0 25px;
+        margin: 34px 0 24px;
         display: flex;
         align-items: center;
       }
 
       .progressItem {
-        min-width: 78px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 7px;
+        min-width: 72px;
+        text-align: center;
       }
 
-      .progressItem span {
-        color: #7b8492;
-        font-size: 10px;
-        font-weight: 800;
-      }
-
-      .progressCircle {
+      .circle {
         width: 34px;
         height: 34px;
+        margin: auto;
         display: grid;
         place-items: center;
-        border: 1px solid #d4dae2;
+        border:
+          1px solid #d4dae2;
         border-radius: 50%;
         background: white;
         color: #98a2b3;
@@ -1799,62 +1786,67 @@ function Styles() {
         font-weight: 900;
       }
 
-      .progressCircle.active {
+      .circle.active {
         border-color: #1465e8;
-        background: #eaf2ff;
         color: #1465e8;
       }
 
-      .progressCircle.current {
+      .circle.current {
         background: #1465e8;
         color: white;
       }
 
-      .progressLine {
-        height: 1px;
+      .progressItem small {
+        display: block;
+        margin-top: 6px;
+        color: #7b8492;
+        font-size: 9px;
+        font-weight: 800;
+      }
+
+      .line {
         flex: 1;
-        margin-bottom: 23px;
+        height: 1px;
+        margin-bottom: 20px;
         background: #dce1e8;
       }
 
-      .progressLine.active {
+      .line.active {
         background: #1465e8;
       }
 
-      .formCard {
-        padding: 30px;
-        border: 1px solid #e2e7ed;
-        border-radius: 24px;
+      .card {
+        padding: 28px;
+        border:
+          1px solid #e2e7ed;
+        border-radius: 23px;
         background: white;
       }
 
-      .stepHeader {
-        margin-bottom: 28px;
+      .stepTitle {
+        margin-bottom: 26px;
         display: flex;
-        gap: 14px;
-        align-items: flex-start;
+        gap: 13px;
       }
 
-      .stepHeader > span {
+      .stepTitle > b {
         margin-top: 5px;
         color: #1465e8;
         font-size: 10px;
-        font-weight: 900;
       }
 
-      .stepHeader h2 {
+      .stepTitle h2 {
         margin: 0;
-        font-size: 23px;
+        font-size: 22px;
       }
 
-      .stepHeader p {
-        margin: 7px 0 0;
+      .stepTitle p {
+        margin: 6px 0 0;
         color: #7b8492;
         font-size: 12px;
-        line-height: 1.55;
       }
 
-      .twoColumns {
+      .grid2 {
         display: grid;
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
@@ -1863,7 +1855,7 @@ function Styles() {
 
       .field {
         display: block;
-        margin-bottom: 17px;
+        margin-bottom: 16px;
       }
 
       .field > span {
@@ -1878,26 +1870,23 @@ function Styles() {
       .field select,
       .field textarea {
         width: 100%;
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
         border-radius: 12px;
         background: white;
-        color: #101828;
         outline: none;
       }
 
       .field input,
       .field select {
         height: 54px;
-        padding: 0 15px;
-        font-size: 15px;
+        padding: 0 14px;
       }
 
       .field textarea {
-        min-height: 105px;
-        padding: 14px 15px;
+        min-height: 100px;
+        padding: 14px;
         resize: vertical;
-        line-height: 1.5;
-        font-size: 14px;
       }
 
       .field input:focus,
@@ -1906,66 +1895,63 @@ function Styles() {
         border-color: #1465e8;
         box-shadow:
           0 0 0 3px
-          rgba(20, 101, 232, 0.08);
+          rgba(20,101,232,.08);
       }
 
-      .photoField {
-        min-height: 76px;
-        margin-bottom: 17px;
-        padding: 14px;
+      .photo {
+        min-height: 72px;
+        margin-bottom: 16px;
+        padding: 13px;
         display: flex;
         align-items: center;
-        gap: 13px;
-        border: 1px dashed #c7ced8;
+        gap: 12px;
+        border:
+          1px dashed #c7ced8;
         border-radius: 13px;
         background: #fafbfc;
         cursor: pointer;
       }
 
-      .photoField input {
+      .photo input {
         display: none;
       }
 
-      .photoPlus {
-        width: 42px;
-        height: 42px;
-        flex: 0 0 42px;
+      .photo > b {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
         display: grid;
         place-items: center;
         border-radius: 11px;
         background: #eaf2ff;
         color: #1465e8;
-        font-size: 22px;
+        font-size: 20px;
       }
 
-      .photoText {
-        min-width: 0;
-      }
-
-      .photoField strong,
-      .photoField span {
+      .photo strong,
+      .photo small {
         display: block;
       }
 
-      .photoField strong {
-        color: #344054;
+      .photo strong {
         font-size: 12px;
       }
 
-      .photoField span {
+      .photo small {
         margin-top: 4px;
         color: #8a94a3;
-        font-size: 11px;
+        font-size: 10px;
       }
 
-      .optionalButton {
+      .optional {
         width: 100%;
-        min-height: 52px;
-        padding: 0 15px;
+        min-height: 50px;
+        padding: 0 14px;
         display: flex;
         align-items: center;
-        gap: 9px;
-        border: 1px solid #e0e5eb;
+        gap: 8px;
+        border:
+          1px solid #e0e5eb;
         border-radius: 12px;
         background: #f8fafc;
         color: #344054;
@@ -1974,41 +1960,41 @@ function Styles() {
         cursor: pointer;
       }
 
-      .optionalButton span {
+      .optional b {
         color: #1465e8;
-        font-size: 19px;
+        font-size: 18px;
       }
 
       .optionalPanel {
-        margin-top: 14px;
-        padding: 19px;
+        margin-top: 13px;
+        padding: 18px;
         border-radius: 14px;
         background: #f8fafc;
       }
 
-      .settingCard {
-        margin-top: 4px;
-        padding: 18px;
+      .locationCard {
+        padding: 17px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 25px;
-        border: 1px solid #e0e5eb;
+        justify-content:
+          space-between;
+        gap: 18px;
+        border:
+          1px solid #e0e5eb;
         border-radius: 14px;
         background: #f9fafb;
       }
 
-      .settingCard strong {
-        color: #344054;
+      .locationCard strong {
         font-size: 13px;
       }
 
-      .settingCard p {
+      .locationCard p {
         max-width: 520px;
-        margin: 6px 0 0;
+        margin: 5px 0 0;
         color: #7b8492;
-        font-size: 11px;
-        line-height: 1.55;
+        font-size: 10px;
+        line-height: 1.5;
       }
 
       .switch {
@@ -2028,7 +2014,7 @@ function Styles() {
         height: 23px;
         border-radius: 50%;
         background: white;
-        transition: 0.2s;
+        transition: .2s;
       }
 
       .switch.active {
@@ -2041,279 +2027,219 @@ function Styles() {
       }
 
       .summary {
-        margin-top: 18px;
-        padding: 17px;
+        margin-top: 16px;
+        padding: 16px;
         display: flex;
+        gap: 12px;
         align-items: center;
-        gap: 13px;
-        border: 1px solid #dbe7f8;
+        border:
+          1px solid #dbe7f8;
         border-radius: 14px;
         background: #f3f7fd;
       }
 
-      .summaryIcon {
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
+      .summary > div {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
+        border-radius: 12px;
         background: white;
-        font-size: 26px;
+        font-size: 24px;
       }
 
-      .summary span,
+      .summary small,
       .summary strong,
-      .summary small {
+      .summary p {
         display: block;
       }
 
-      .summary span {
+      .summary small {
         color: #7b8492;
-        font-size: 10px;
+        font-size: 9px;
       }
 
       .summary strong {
         margin-top: 2px;
-        color: #1d2939;
-        font-size: 14px;
+        font-size: 13px;
       }
 
-      .summary small {
-        margin-top: 4px;
+      .summary p {
+        margin: 4px 0 0;
         color: #667085;
-        font-size: 10px;
+        font-size: 9px;
         line-height: 1.4;
       }
 
-      .actions,
-      .singleAction {
-        margin-top: 28px;
+      .buttons {
+        margin-top: 25px;
         display: flex;
-        align-items: center;
-        gap: 12px;
+        gap: 10px;
       }
 
-      .singleAction {
-        justify-content: flex-end;
-      }
-
-      .backButton,
-      .nextButton,
-      .saveButton {
-        min-height: 54px;
-        padding: 0 22px;
+      .mainButton,
+      .backButton {
+        min-height: 52px;
+        padding: 0 20px;
         border-radius: 12px;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .backButton {
-        border: 1px solid #d5dae1;
-        background: white;
-        color: #475467;
-      }
-
-      .nextButton,
-      .saveButton {
+      .mainButton {
         margin-left: auto;
         border: 0;
         background: #1465e8;
         color: white;
       }
 
-      .saveButton {
-        min-width: 190px;
+      .mainButton.full {
+        width: 100%;
+        margin-top: 25px;
       }
 
-      .saveButton:disabled {
-        opacity: 0.6;
+      .backButton {
+        border:
+          1px solid #d5dae1;
+        background: white;
+        color: #475467;
+      }
+
+      .mainButton:disabled {
+        opacity: .6;
         cursor: wait;
       }
 
-      .errorMessage {
-        margin-top: 18px;
-        padding: 13px 15px;
+      .error {
+        margin-top: 17px;
+        padding: 13px;
         border-radius: 11px;
         background: #fff1f1;
         color: #b42318;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
+        line-height: 1.5;
       }
 
       .successPage {
-        width: calc(100% - 32px);
-        max-width: 620px;
+        width: calc(100% - 24px);
+        max-width: 580px;
         margin: auto;
-        padding: 120px 0;
+        padding: 110px 0;
         text-align: center;
       }
 
       .successIcon {
-        width: 70px;
-        height: 70px;
-        margin: 0 auto 24px;
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 22px;
         display: grid;
         place-items: center;
         border-radius: 50%;
         background: #e9f8ef;
         color: #16803b;
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 900;
       }
 
       .successPage h1 {
-        margin: 12px 0;
-        font-size: 38px;
+        margin: 10px 0;
+        font-size: 35px;
       }
 
       .successPage > p {
         color: #667085;
-        line-height: 1.65;
       }
 
-      .successNotice {
-        margin-top: 24px;
-        padding: 17px;
-        border: 1px solid #dbe7f8;
+      .successInfo {
+        margin-top: 22px;
+        padding: 16px;
+        border:
+          1px solid #dbe7f8;
         border-radius: 14px;
         background: #f3f7fd;
         text-align: left;
       }
 
-      .successNotice strong,
-      .successNotice span {
+      .successInfo strong,
+      .successInfo span {
         display: block;
       }
 
-      .successNotice strong {
-        color: #1465e8;
-        font-size: 12px;
-      }
-
-      .successNotice span {
+      .successInfo span {
         margin-top: 5px;
         color: #667085;
-        font-size: 11px;
-        line-height: 1.55;
+        font-size: 10px;
+        line-height: 1.5;
       }
 
-      .primaryLink {
-        min-height: 54px;
-        margin-top: 28px;
-        padding: 0 22px;
+      .homeButton {
+        min-height: 52px;
+        margin-top: 25px;
+        padding: 0 20px;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
         border-radius: 12px;
         background: #1465e8;
         color: white;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 900;
       }
 
-      @media (max-width: 600px) {
+      @media (
+        max-width: 600px
+      ) {
         .header {
-          width: calc(100% - 24px);
-          min-height: 72px;
+          min-height: 70px;
         }
 
-        .brandName {
-          font-size: 18px;
-        }
-
-        .brandSub {
-          display: none;
-        }
-
-        .brandMark {
-          width: 40px;
-          height: 40px;
-        }
-
+        .brand small,
         .headerBack {
           display: none;
         }
 
-        .registration {
-          width: calc(100% - 20px);
-          padding-top: 30px;
-        }
-
-        .intro {
-          gap: 12px;
-        }
-
-        .categoryBox {
-          width: 52px;
-          height: 52px;
-          flex-basis: 52px;
-          font-size: 29px;
+        .content {
+          padding-top: 28px;
         }
 
         .intro h1 {
-          font-size: 30px;
+          font-size: 29px;
         }
 
-        .intro p {
-          font-size: 12px;
-        }
-
-        .progressItem {
-          min-width: 64px;
-        }
-
-        .formCard {
-          padding: 21px 15px;
-          border-radius: 19px;
-        }
-
-        .twoColumns {
-          grid-template-columns: 1fr;
+        .grid2 {
+          grid-template-columns:
+            1fr;
           gap: 0;
         }
 
-        .field input,
-        .field select {
-          height: 56px;
-          font-size: 16px;
+        .card {
+          padding: 20px 14px;
+          border-radius: 18px;
         }
 
+        .field input,
+        .field select,
         .field textarea {
           font-size: 16px;
         }
 
-        .actions {
+        .buttons {
           display: grid;
           grid-template-columns:
-            1fr 1.35fr;
+            1fr 1.3fr;
         }
 
-        .backButton,
-        .nextButton,
-        .saveButton {
+        .mainButton,
+        .backButton {
           width: 100%;
-          min-width: 0;
           margin: 0;
         }
 
-        .singleAction {
-          display: block;
-        }
-
-        .singleAction
-          .nextButton {
-          width: 100%;
-        }
-
-        .successPage {
-          padding-top: 80px;
-        }
-
         .successPage h1 {
-          font-size: 31px;
+          font-size: 29px;
         }
       }
     `}</style>
