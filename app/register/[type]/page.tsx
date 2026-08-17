@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type CategoryKey =
   | "dog"
@@ -80,11 +80,6 @@ export default function RegistrationDetailsPage() {
 
   const ka = lang === "ka";
 
-  const title = useMemo(
-    () => (ka ? category.ka : category.en),
-    [ka, category]
-  );
-
   return (
     <main className="page">
       {/* HEADER */}
@@ -125,58 +120,37 @@ export default function RegistrationDetailsPage() {
         </div>
       </header>
 
-      {/* TITLE */}
+      {/* INTRO */}
       <section className="intro">
         <div className="categoryIcon">
           {category.icon}
         </div>
 
-        <div>
+        <div className="introText">
           <div className="eyebrow">
-            QR RETURN REGISTRATION
+            QR RETURN
           </div>
 
           <h1>
             {ka
-              ? `${title} — რეგისტრაცია`
-              : `${title} Registration`}
+              ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
+              : "Add the information that will make it easier for a finder to contact you if your pet or item is lost."}
           </h1>
-
-          <p>
-            {ka
-              ? "შეავსეთ ინფორმაცია, რომელიც საჭირო იქნება QR პროფილისთვის."
-              : "Complete the information that will be used for the QR profile."}
-          </p>
         </div>
       </section>
 
       <form
         className="form"
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
+        onSubmit={(e) => e.preventDefault()}
       >
         {/* QR */}
         <section className="panel">
-          <div className="sectionTitle">
-            <span>01</span>
+          <SectionTitle
+            number="01"
+            title={ka ? "QR ინფორმაცია" : "QR information"}
+          />
 
-            <div>
-              <h2>
-                {ka
-                  ? "QR ინფორმაცია"
-                  : "QR information"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "QR ტეგთან დაკავშირებული მონაცემი."
-                  : "Information connected to the QR tag."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid">
+          <div className="fieldsGrid">
             <Field
               label={ka ? "QR კოდი" : "QR code"}
               name="tag_code"
@@ -186,28 +160,18 @@ export default function RegistrationDetailsPage() {
           </div>
         </section>
 
-        {/* BASIC ITEM INFO */}
+        {/* BASIC */}
         <section className="panel">
-          <div className="sectionTitle">
-            <span>02</span>
+          <SectionTitle
+            number="02"
+            title={
+              ka
+                ? "ძირითადი ინფორმაცია"
+                : "Basic information"
+            }
+          />
 
-            <div>
-              <h2>
-                {ka
-                  ? "ძირითადი ინფორმაცია"
-                  : "Basic information"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "ინფორმაცია ცხოველის ან ნივთის შესახებ."
-                  : "Information about the pet or item."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid">
-            {/* PHOTO_URL */}
+          <div className="fieldsGrid">
             <div className="field full">
               <label>
                 {ka ? "ფოტო" : "Photo"}
@@ -224,7 +188,7 @@ export default function RegistrationDetailsPage() {
                   }
                 />
 
-                <div className="uploadIcon">＋</div>
+                <span className="uploadIcon">＋</span>
 
                 <strong>
                   {photoName ||
@@ -233,13 +197,10 @@ export default function RegistrationDetailsPage() {
                       : "Choose photo")}
                 </strong>
 
-                <small>
-                  photo_url
-                </small>
+                <small>JPG / PNG</small>
               </label>
             </div>
 
-            {/* PET ONLY */}
             {category.pet && (
               <>
                 <Field
@@ -259,21 +220,15 @@ export default function RegistrationDetailsPage() {
 
                   <select name="sex">
                     <option value="">
-                      {ka
-                        ? "აირჩიეთ"
-                        : "Select"}
+                      {ka ? "აირჩიეთ" : "Select"}
                     </option>
 
                     <option value="male">
-                      {ka
-                        ? "მამრობითი"
-                        : "Male"}
+                      {ka ? "მამრობითი" : "Male"}
                     </option>
 
                     <option value="female">
-                      {ka
-                        ? "მდედრობითი"
-                        : "Female"}
+                      {ka ? "მდედრობითი" : "Female"}
                     </option>
                   </select>
                 </div>
@@ -292,11 +247,7 @@ export default function RegistrationDetailsPage() {
                   label={ka ? "წონა" : "Weight"}
                   name="weight"
                   type="number"
-                  placeholder={
-                    ka
-                      ? "მაგ: 12.5"
-                      : "Example: 12.5"
-                  }
+                  placeholder="12.5"
                 />
               </>
             )}
@@ -318,7 +269,7 @@ export default function RegistrationDetailsPage() {
 
               <textarea
                 name="description"
-                rows={5}
+                rows={4}
                 placeholder={
                   ka
                     ? "აღწერეთ ნივთი ან ცხოველი..."
@@ -337,7 +288,7 @@ export default function RegistrationDetailsPage() {
 
                 <textarea
                   name="medical_info"
-                  rows={5}
+                  rows={4}
                   placeholder={
                     ka
                       ? "მნიშვნელოვანი სამედიცინო ინფორმაცია..."
@@ -351,25 +302,16 @@ export default function RegistrationDetailsPage() {
 
         {/* OWNER */}
         <section className="panel">
-          <div className="sectionTitle">
-            <span>03</span>
+          <SectionTitle
+            number="03"
+            title={
+              ka
+                ? "მფლობელის ინფორმაცია"
+                : "Owner information"
+            }
+          />
 
-            <div>
-              <h2>
-                {ka
-                  ? "მფლობელის ინფორმაცია"
-                  : "Owner information"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "მფლობელის მონაცემები QR პროფილისთვის."
-                  : "Owner details for the QR profile."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid">
+          <div className="fieldsGrid">
             <Field
               label={
                 ka
@@ -399,27 +341,18 @@ export default function RegistrationDetailsPage() {
           </div>
         </section>
 
-        {/* FINDER INFO */}
+        {/* FINDER */}
         <section className="panel">
-          <div className="sectionTitle">
-            <span>04</span>
+          <SectionTitle
+            number="04"
+            title={
+              ka
+                ? "ინფორმაცია მპოვნელისთვის"
+                : "Finder information"
+            }
+          />
 
-            <div>
-              <h2>
-                {ka
-                  ? "ინფორმაცია მპოვნელისთვის"
-                  : "Finder information"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "ეს ინფორმაცია გამოიყენება დაკარგვის შემთხვევაში."
-                  : "This information is used if the pet or item is lost."}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid">
+          <div className="fieldsGrid">
             <Field
               label={
                 ka
@@ -462,7 +395,7 @@ export default function RegistrationDetailsPage() {
                 placeholder={
                   ka
                     ? "ტექსტი, რომელიც გამოჩნდება Lost Mode-ის დროს..."
-                    : "Message shown when Lost Mode is active..."
+                    : "Message displayed while Lost Mode is active..."
                 }
               />
             </div>
@@ -480,9 +413,7 @@ export default function RegistrationDetailsPage() {
                 }
               >
                 <div>
-                  <strong>
-                    ⚠️ Lost Mode
-                  </strong>
+                  <strong>⚠️ Lost Mode</strong>
 
                   <p>
                     {ka
@@ -499,15 +430,13 @@ export default function RegistrationDetailsPage() {
               <input
                 type="hidden"
                 name="lost_mode"
-                value={
-                  lostMode ? "true" : "false"
-                }
+                value={lostMode ? "true" : "false"}
               />
             </div>
           </div>
         </section>
 
-        {/* FINAL */}
+        {/* SUBMIT */}
         <section className="submitPanel">
           <div>
             <div className="submitLabel">
@@ -519,12 +448,6 @@ export default function RegistrationDetailsPage() {
                 ? "ინფორმაცია მზადაა."
                 : "Your information is ready."}
             </h2>
-
-            <p>
-              {ka
-                ? "ამ ეტაპზე ფორმა მხოლოდ დიზაინია. შემდეგ ცალკე მივაბამთ Supabase-ის შენახვას."
-                : "This is currently the form interface. Supabase saving will be connected separately."}
-            </p>
           </div>
 
           <button type="submit">
@@ -543,19 +466,23 @@ export default function RegistrationDetailsPage() {
 
         .page {
           min-height: 100vh;
-          background: #f4f7fb;
+          background: #f5f7fb;
           color: #0b1729;
           font-family:
             Inter,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
+            Arial,
             sans-serif;
         }
 
+        /* HEADER */
+
         .header {
+          width: 100%;
           max-width: 1120px;
-          min-height: 88px;
+          min-height: 84px;
           margin: auto;
           padding: 0 24px;
           display: flex;
@@ -574,13 +501,14 @@ export default function RegistrationDetailsPage() {
         .brandMark {
           width: 46px;
           height: 46px;
+          flex-shrink: 0;
           border-radius: 14px;
-          background: #1465e8;
-          color: white;
           display: grid;
           place-items: center;
-          font-weight: 950;
+          background: #1465e8;
+          color: #fff;
           font-size: 14px;
+          font-weight: 950;
         }
 
         .brandName {
@@ -592,7 +520,7 @@ export default function RegistrationDetailsPage() {
 
         .brandSub {
           margin-top: 4px;
-          color: #8a95a6;
+          color: #8b96a7;
           font-size: 8px;
           font-weight: 800;
           letter-spacing: 2px;
@@ -616,102 +544,99 @@ export default function RegistrationDetailsPage() {
         }
 
         .language {
-          background: #e9eef5;
           padding: 4px;
           border-radius: 10px;
+          background: #e9eef5;
         }
 
         .language button {
           border: 0;
           background: transparent;
-          color: #7e8a9c;
           padding: 7px 9px;
           border-radius: 7px;
+          color: #7f8a9c;
           font-size: 9px;
           font-weight: 900;
           cursor: pointer;
         }
 
         .language button.selected {
-          background: white;
+          background: #fff;
           color: #1465e8;
-          box-shadow:
-            0 2px 8px rgba(25, 50, 90, 0.08);
         }
 
+        /* INTRO */
+
         .intro {
+          width: 100%;
           max-width: 1000px;
           margin: auto;
-          padding: 55px 24px 35px;
+          padding: 50px 24px 30px;
           display: flex;
           align-items: center;
-          gap: 25px;
+          gap: 24px;
         }
 
         .categoryIcon {
-          width: 90px;
-          height: 90px;
-          flex-shrink: 0;
-          border-radius: 28px;
-          background:
-            linear-gradient(
-              145deg,
-              #e7f1ff,
-              #ffffff
-            );
-          border: 1px solid #dde8f6;
+          width: 82px;
+          height: 82px;
+          flex: 0 0 82px;
+          border-radius: 24px;
           display: grid;
           place-items: center;
-          font-size: 50px;
-          box-shadow:
-            0 15px 40px rgba(25, 75, 145, 0.08);
+          background: #eaf2ff;
+          border: 1px solid #dae7f8;
+          font-size: 46px;
+        }
+
+        .introText {
+          min-width: 0;
         }
 
         .eyebrow {
           color: #1465e8;
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: 2.6px;
+          letter-spacing: 2.4px;
         }
 
         .intro h1 {
-          margin: 8px 0 6px;
-          font-size:
-            clamp(34px, 5vw, 50px);
-          letter-spacing: -2px;
+          max-width: 820px;
+          margin: 10px 0 0;
+          font-size: clamp(28px, 4vw, 43px);
+          line-height: 1.18;
+          letter-spacing: -1.8px;
         }
 
-        .intro p {
-          margin: 0;
-          color: #718096;
-          line-height: 1.6;
-        }
+        /* FORM */
 
         .form {
+          width: 100%;
           max-width: 1000px;
           margin: auto;
-          padding: 0 24px 100px;
+          padding: 0 24px 90px;
         }
 
         .panel {
+          width: 100%;
           margin-top: 18px;
-          padding: 34px;
-          border-radius: 27px;
-          background: white;
+          padding: 32px;
           border: 1px solid #e2e8f0;
-          box-shadow:
-            0 16px 45px rgba(20, 50, 90, 0.045);
+          border-radius: 24px;
+          background: #fff;
+          box-shadow: 0 14px 40px rgba(20, 50, 90, 0.04);
         }
 
         .sectionTitle {
           display: flex;
-          align-items: flex-start;
-          gap: 18px;
-          padding-bottom: 25px;
+          gap: 16px;
+          align-items: center;
+          padding-bottom: 22px;
           border-bottom: 1px solid #edf1f5;
         }
 
         .sectionTitle > span {
+          flex-shrink: 0;
           color: #1465e8;
           font-size: 11px;
           font-weight: 950;
@@ -719,24 +644,27 @@ export default function RegistrationDetailsPage() {
 
         .sectionTitle h2 {
           margin: 0;
-          font-size: 21px;
+          font-size: 20px;
         }
 
-        .sectionTitle p {
-          margin: 6px 0 0;
-          color: #8290a3;
-          font-size: 13px;
-        }
-
-        .grid {
-          margin-top: 27px;
+        /*
+          DESKTOP:
+          always two equal columns.
+          No random narrow fields.
+        */
+        .fieldsGrid {
+          width: 100%;
+          margin-top: 26px;
           display: grid;
           grid-template-columns:
-            repeat(2, 1fr);
-          gap: 21px;
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+          gap: 20px;
         }
 
         .field {
+          width: 100%;
+          min-width: 0;
           display: flex;
           flex-direction: column;
         }
@@ -746,6 +674,7 @@ export default function RegistrationDetailsPage() {
         }
 
         .field label {
+          min-height: 20px;
           margin-bottom: 8px;
           color: #26364d;
           font-size: 13px;
@@ -753,40 +682,56 @@ export default function RegistrationDetailsPage() {
         }
 
         input,
-        textarea,
-        select {
+        select,
+        textarea {
+          display: block;
           width: 100%;
-          border: 1px solid #d9e1eb;
-          background: #ffffff;
+          max-width: 100%;
+          min-width: 0;
+          border: 1px solid #d8e0ea;
           border-radius: 12px;
-          padding: 14px 15px;
+          background: #fff;
           color: #111827;
           font: inherit;
+          font-size: 16px;
           outline: none;
         }
 
+        input,
+        select {
+          height: 52px;
+          padding: 0 15px;
+        }
+
         textarea {
+          min-height: 112px;
+          padding: 14px 15px;
+          line-height: 1.55;
           resize: vertical;
         }
 
         input:focus,
-        textarea:focus,
-        select:focus {
+        select:focus,
+        textarea:focus {
           border-color: #1465e8;
           box-shadow:
             0 0 0 3px rgba(20, 101, 232, 0.08);
         }
 
+        /* PHOTO */
+
         .uploadBox {
-          min-height: 135px;
+          width: 100%;
+          min-height: 115px;
           margin: 0;
-          border: 1px dashed #b9c7d8;
-          border-radius: 16px;
+          padding: 20px;
+          border: 1px dashed #bcc9d9;
+          border-radius: 14px;
           background: #f8fafc;
           display: flex;
           flex-direction: column;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
           cursor: pointer;
         }
 
@@ -796,13 +741,17 @@ export default function RegistrationDetailsPage() {
 
         .uploadIcon {
           color: #1465e8;
-          font-size: 28px;
+          font-size: 25px;
           line-height: 1;
         }
 
         .uploadBox strong {
+          max-width: 100%;
           margin-top: 7px;
           color: #25364d;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .uploadBox small {
@@ -810,15 +759,19 @@ export default function RegistrationDetailsPage() {
           color: #8c98aa;
         }
 
+        /* LOST MODE */
+
         .lostMode {
           width: 100%;
+          min-height: 78px;
           border: 1px solid #dbe2eb;
-          background: white;
-          padding: 19px;
-          border-radius: 15px;
+          border-radius: 14px;
+          background: #fff;
+          padding: 17px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 20px;
           text-align: left;
           cursor: pointer;
         }
@@ -834,6 +787,7 @@ export default function RegistrationDetailsPage() {
         }
 
         .lostMode > span {
+          flex-shrink: 0;
           color: #9ba5b4;
           font-size: 11px;
           font-weight: 950;
@@ -848,94 +802,164 @@ export default function RegistrationDetailsPage() {
           color: #e5484d;
         }
 
+        /* SUBMIT */
+
         .submitPanel {
+          width: 100%;
           margin-top: 20px;
-          padding: 36px;
-          border-radius: 28px;
+          padding: 32px;
+          border-radius: 24px;
           background:
             linear-gradient(
               135deg,
               #07182e,
               #11427d
             );
-          color: white;
+          color: #fff;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 30px;
+          gap: 25px;
         }
 
         .submitLabel {
           color: #69a6ff;
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: 2.5px;
+          letter-spacing: 2.4px;
         }
 
         .submitPanel h2 {
-          margin: 10px 0 6px;
-          font-size: 25px;
-        }
-
-        .submitPanel p {
-          max-width: 600px;
-          margin: 0;
-          color: #a5b7cf;
-          font-size: 13px;
-          line-height: 1.6;
+          margin: 9px 0 0;
+          font-size: 23px;
         }
 
         .submitPanel button {
           flex-shrink: 0;
+          min-height: 50px;
           border: 0;
-          background: white;
-          color: #1465e8;
-          padding: 15px 20px;
           border-radius: 12px;
+          background: #fff;
+          color: #1465e8;
+          padding: 0 20px;
+          font-size: 14px;
           font-weight: 900;
           cursor: pointer;
         }
 
-        @media (max-width: 700px) {
-          .grid {
+        /*
+          TABLET / PHONE
+          Everything becomes ONE clean column.
+        */
+        @media (max-width: 720px) {
+          .header {
+            padding-left: 16px;
+            padding-right: 16px;
+          }
+
+          .brandSub {
+            display: none;
+          }
+
+          .intro {
+            padding:
+              34px 18px
+              20px;
+            align-items: flex-start;
+          }
+
+          .categoryIcon {
+            width: 64px;
+            height: 64px;
+            flex-basis: 64px;
+            border-radius: 19px;
+            font-size: 36px;
+          }
+
+          .intro h1 {
+            font-size: 27px;
+            letter-spacing: -1px;
+          }
+
+          .form {
+            padding:
+              0 14px
+              70px;
+          }
+
+          .panel {
+            padding: 23px 18px;
+            border-radius: 20px;
+          }
+
+          .fieldsGrid {
             grid-template-columns: 1fr;
+            gap: 17px;
           }
 
           .field.full {
             grid-column: auto;
           }
 
-          .intro {
-            align-items: flex-start;
+          input,
+          select {
+            /*
+              16px prevents Safari/iPhone
+              auto zoom on focus.
+            */
+            height: 52px;
+            font-size: 16px;
+          }
+
+          textarea {
+            font-size: 16px;
           }
 
           .submitPanel {
+            padding: 25px 20px;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
+          }
+
+          .submitPanel button {
+            width: 100%;
           }
         }
 
-        @media (max-width: 500px) {
-          .brandSub {
-            display: none;
+        @media (max-width: 420px) {
+          .backLink {
+            font-size: 11px;
           }
 
           .intro {
-            padding-top: 35px;
+            gap: 14px;
           }
 
-          .categoryIcon {
-            width: 70px;
-            height: 70px;
-            font-size: 40px;
+          .intro h1 {
+            font-size: 23px;
           }
 
-          .panel {
-            padding: 24px 20px;
+          .sectionTitle h2 {
+            font-size: 18px;
           }
         }
       `}</style>
     </main>
+  );
+}
+
+function SectionTitle({
+  number,
+  title,
+}: {
+  number: string;
+  title: string;
+}) {
+  return (
+    <div className="sectionTitle">
+      <span>{number}</span>
+      <h2>{title}</h2>
+    </div>
   );
 }
 
