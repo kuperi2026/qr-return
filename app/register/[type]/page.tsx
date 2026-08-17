@@ -11,7 +11,7 @@ type CategoryKey =
   | "suitcase"
   | "bag";
 
-type Lang = "ka" | "en";
+type Language = "ka" | "en";
 
 const categories = {
   dog: {
@@ -22,6 +22,7 @@ const categories = {
     itemType: "pet",
     petType: "dog",
   },
+
   cat: {
     icon: "🐈",
     ka: "კატა",
@@ -30,6 +31,7 @@ const categories = {
     itemType: "pet",
     petType: "cat",
   },
+
   keys: {
     icon: "🔑",
     ka: "გასაღები",
@@ -38,6 +40,7 @@ const categories = {
     itemType: "keys",
     petType: "",
   },
+
   wallet: {
     icon: "👛",
     ka: "საფულე",
@@ -46,6 +49,7 @@ const categories = {
     itemType: "wallet",
     petType: "",
   },
+
   suitcase: {
     icon: "🧳",
     ka: "ჩემოდანი",
@@ -54,6 +58,7 @@ const categories = {
     itemType: "suitcase",
     petType: "",
   },
+
   bag: {
     icon: "🎒",
     ka: "ჩანთა",
@@ -62,19 +67,9 @@ const categories = {
     itemType: "bag",
     petType: "",
   },
-} satisfies Record<
-  CategoryKey,
-  {
-    icon: string;
-    ka: string;
-    en: string;
-    pet: boolean;
-    itemType: string;
-    petType: string;
-  }
->;
+} as const;
 
-export default function RegistrationDetailsPage() {
+export default function RegistrationPage() {
   const params = useParams();
 
   const rawType = Array.isArray(params.type)
@@ -88,90 +83,171 @@ export default function RegistrationDetailsPage() {
 
   const category = categories[type];
 
-  const [lang, setLang] = useState<Lang>("ka");
-  const [locationSharing, setLocationSharing] = useState(true);
-  const [ownerMessageEnabled, setOwnerMessageEnabled] = useState(true);
-  const [photoName, setPhotoName] = useState("");
-  const [ownerPhotoName, setOwnerPhotoName] = useState("");
+  const [language, setLanguage] =
+    useState<Language>("ka");
 
-  const ka = lang === "ka";
+  const [photoName, setPhotoName] =
+    useState("");
+
+  const [ownerPhotoName, setOwnerPhotoName] =
+    useState("");
+
+  const [
+    locationSharingEnabled,
+    setLocationSharingEnabled,
+  ] = useState(true);
+
+  const [
+    ownerMessageEnabled,
+    setOwnerMessageEnabled,
+  ] = useState(true);
+
+  const ka = language === "ka";
 
   return (
     <main className="page">
+
+      {/* HEADER */}
+
       <header className="header">
         <a href="/" className="brand">
-          <div className="brandMark">QR</div>
+
+          <div className="brandMark">
+            QR
+          </div>
 
           <div>
-            <div className="brandName">QR RETURN</div>
-            <div className="brandSub">SMART LOST & FOUND</div>
+            <div className="brandName">
+              QR RETURN
+            </div>
+
+            <div className="brandSub">
+              SMART LOST & FOUND
+            </div>
           </div>
+
         </a>
 
-        <div className="headerActions">
-          <a href="/register" className="backLink">
+        <div className="headerRight">
+
+          <a
+            href="/register"
+            className="back"
+          >
             ← {ka ? "უკან" : "Back"}
           </a>
 
           <div className="language">
+
             <button
               type="button"
-              className={ka ? "selected" : ""}
-              onClick={() => setLang("ka")}
+              className={
+                ka ? "selected" : ""
+              }
+              onClick={() =>
+                setLanguage("ka")
+              }
             >
               GEO
             </button>
 
             <button
               type="button"
-              className={!ka ? "selected" : ""}
-              onClick={() => setLang("en")}
+              className={
+                !ka ? "selected" : ""
+              }
+              onClick={() =>
+                setLanguage("en")
+              }
             >
               ENG
             </button>
+
           </div>
+
         </div>
       </header>
 
-      <section className="intro">
-        <div className="categoryIcon">{category.icon}</div>
 
-        <div>
-          <div className="eyebrow">QR RETURN</div>
+      {/* INTRO */}
+
+      <section className="intro">
+
+        <div className="categoryIcon">
+          {category.icon}
+        </div>
+
+        <div className="introContent">
+
+          <div className="eyebrow">
+            QR RETURN
+          </div>
 
           <h1>
             {ka
               ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
-              : "Add the information that will make it easier for a finder to contact you if your pet or item is lost."}
+              : "Complete the information that will make it easier for a finder to contact you if your pet or item is lost."}
           </h1>
+
         </div>
+
       </section>
+
 
       <form
         className="form"
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
+        onSubmit={(e) =>
+          e.preventDefault()
+        }
       >
-        <input type="hidden" name="item_type" value={category.itemType} />
-        <input type="hidden" name="pet_type" value={category.petType} />
+
+        {/* DATABASE VALUES */}
+
+        <input
+          type="hidden"
+          name="item_type"
+          value={category.itemType}
+        />
+
+        <input
+          type="hidden"
+          name="pet_type"
+          value={category.petType}
+        />
+
+
+        {/* SECTION 1 */}
 
         <section className="panel">
+
           <SectionTitle
             number="01"
-            title={ka ? "QR და ძირითადი ინფორმაცია" : "QR & basic information"}
+            title={
+              ka
+                ? "ძირითადი ინფორმაცია"
+                : "Basic information"
+            }
           />
 
-          <div className="fieldsGrid">
+          <div className="fields">
+
             <Field
-              label={ka ? "QR კოდი" : "QR code"}
+              label={
+                ka
+                  ? "QR კოდი"
+                  : "QR code"
+              }
               name="tag_code"
               placeholder="LF-XXXXXX"
               required
             />
 
             <Field
-              label={ka ? "სახელი" : "Name"}
+              label={
+                ka
+                  ? "სახელი"
+                  : "Name"
+              }
               name="item_name"
               placeholder={
                 category.pet
@@ -185,98 +261,175 @@ export default function RegistrationDetailsPage() {
               required
             />
 
-            <div className="field">
-              <label>{ka ? "ფოტო" : "Photo"}</label>
 
-              <label className="uploadBox compact">
+            <div className="field">
+
+              <label>
+                {ka
+                  ? "ფოტო"
+                  : "Photo"}
+              </label>
+
+              <label className="fileInput">
+
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) =>
-                    setPhotoName(e.target.files?.[0]?.name || "")
+                    setPhotoName(
+                      e.target.files?.[0]
+                        ?.name || ""
+                    )
                   }
                 />
 
-                <span>＋</span>
-                <strong>
-                  {photoName || (ka ? "აირჩიეთ ფოტო" : "Choose photo")}
-                </strong>
+                <span className="plus">
+                  +
+                </span>
+
+                <span className="fileName">
+                  {photoName ||
+                    (ka
+                      ? "ფოტოს არჩევა"
+                      : "Choose photo")}
+                </span>
+
               </label>
+
             </div>
 
+
             <Field
-              label={ka ? "ფერი" : "Colour"}
+              label={
+                ka
+                  ? "ფერი"
+                  : "Colour"
+              }
               name="colour"
-              placeholder={ka ? "მაგ: შავი" : "Example: Black"}
+              placeholder={
+                ka
+                  ? "მაგ: შავი"
+                  : "Example: Black"
+              }
             />
+
+
+            {/* PET FIELDS */}
 
             {category.pet && (
               <>
+
                 <div className="field">
-                  <label>{ka ? "სქესი" : "Sex"}</label>
+
+                  <label>
+                    {ka
+                      ? "სქესი"
+                      : "Sex"}
+                  </label>
 
                   <select name="sex">
+
                     <option value="">
-                      {ka ? "აირჩიეთ" : "Select"}
+                      {ka
+                        ? "აირჩიეთ"
+                        : "Select"}
                     </option>
+
                     <option value="male">
-                      {ka ? "მამრობითი" : "Male"}
+                      {ka
+                        ? "მამრობითი"
+                        : "Male"}
                     </option>
+
                     <option value="female">
-                      {ka ? "მდედრობითი" : "Female"}
+                      {ka
+                        ? "მდედრობითი"
+                        : "Female"}
                     </option>
+
                   </select>
+
                 </div>
 
+
                 <Field
-                  label={ka ? "დაბადების თარიღი" : "Date of birth"}
+                  label={
+                    ka
+                      ? "დაბადების თარიღი"
+                      : "Date of birth"
+                  }
                   name="date_of_birth"
                   type="date"
                 />
 
+
                 <Field
-                  label={ka ? "წონა" : "Weight"}
+                  label={
+                    ka
+                      ? "წონა"
+                      : "Weight"
+                  }
                   name="weight"
                   type="number"
                   placeholder="12.5"
                 />
 
-                <Field
-                  label={ka ? "ჯიში" : "Breed"}
-                  name="breed"
-                  placeholder={
-                    ka ? "მაგ: Golden Retriever" : "Example: Golden Retriever"
-                  }
-                />
               </>
             )}
 
+
+            {/* ITEM FIELDS */}
+
             {!category.pet && (
               <>
+
                 <Field
-                  label={ka ? "ბრენდი" : "Brand"}
+                  label={
+                    ka
+                      ? "ბრენდი"
+                      : "Brand"
+                  }
                   name="brand"
-                  placeholder={ka ? "მაგ: Samsonite" : "Example: Samsonite"}
+                  placeholder={
+                    ka
+                      ? "მაგ: Samsonite"
+                      : "Example: Samsonite"
+                  }
                 />
 
                 <Field
-                  label={ka ? "მოდელი" : "Model"}
+                  label={
+                    ka
+                      ? "მოდელი"
+                      : "Model"
+                  }
                   name="model"
                 />
 
                 <Field
-                  label={ka ? "ზომა" : "Size"}
+                  label={
+                    ka
+                      ? "ზომა"
+                      : "Size"
+                  }
                   name="size"
                 />
 
                 <Field
-                  label={ka ? "მასალა" : "Material"}
+                  label={
+                    ka
+                      ? "მასალა"
+                      : "Material"
+                  }
                   name="material"
                 />
 
                 <div className="field full">
+
                   <label>
-                    {ka ? "განმასხვავებელი ნიშნები" : "Distinctive features"}
+                    {ka
+                      ? "განმასხვავებელი ნიშნები"
+                      : "Distinctive features"}
                   </label>
 
                   <textarea
@@ -284,41 +437,65 @@ export default function RegistrationDetailsPage() {
                     rows={4}
                     placeholder={
                       ka
-                        ? "აღწერეთ ნიშნები, რომლითაც ნივთის ამოცნობა მარტივია..."
-                        : "Describe details that make the item easy to identify..."
+                        ? "აღწერეთ განსაკუთრებული ნიშნები..."
+                        : "Describe distinctive features..."
                     }
                   />
+
                 </div>
+
               </>
             )}
 
+
             <div className="field full">
-              <label>{ka ? "აღწერა" : "Description"}</label>
+
+              <label>
+                {ka
+                  ? "აღწერა"
+                  : "Description"}
+              </label>
 
               <textarea
                 name="description"
                 rows={4}
                 placeholder={
                   ka
-                    ? "დამატებითი აღწერა..."
-                    : "Additional description..."
+                    ? "დამატებითი ინფორმაცია..."
+                    : "Additional information..."
                 }
               />
+
             </div>
+
           </div>
+
         </section>
 
+
+        {/* PET INFORMATION */}
+
         {category.pet && (
+
           <section className="panel">
+
             <SectionTitle
               number="02"
-              title={ka ? "ცხოველის დამატებითი ინფორმაცია" : "Pet information"}
+              title={
+                ka
+                  ? "ცხოველის დამატებითი ინფორმაცია"
+                  : "Additional pet information"
+              }
             />
 
-            <div className="fieldsGrid">
+            <div className="fields">
+
               <div className="field full">
+
                 <label>
-                  {ka ? "სამედიცინო ინფორმაცია" : "Medical information"}
+                  {ka
+                    ? "სამედიცინო ინფორმაცია"
+                    : "Medical information"}
                 </label>
 
                 <textarea
@@ -326,145 +503,172 @@ export default function RegistrationDetailsPage() {
                   rows={4}
                   placeholder={
                     ka
-                      ? "დაავადება, ალერგია, წამალი ან სხვა მნიშვნელოვანი ინფორმაცია..."
-                      : "Condition, allergy, medication or other important information..."
+                      ? "მიუთითეთ მნიშვნელოვანი სამედიცინო ინფორმაცია..."
+                      : "Enter important medical information..."
                   }
                 />
+
               </div>
 
+
               <div className="field full">
-                <label>{ka ? "ქცევის შენიშვნა" : "Behaviour note"}</label>
+
+                <label>
+                  {ka
+                    ? "ქცევის შესახებ ინფორმაცია"
+                    : "Behaviour note"}
+                </label>
 
                 <textarea
                   name="behaviour_note"
                   rows={4}
                   placeholder={
                     ka
-                      ? "მაგ: მეგობრულია, უცხოებთან ფრთხილია, ხმაურზე რეაგირებს..."
-                      : "Example: Friendly, cautious with strangers, reacts to loud noise..."
+                      ? "მაგ: მეგობრულია, უცხოებთან ფრთხილია..."
+                      : "Example: Friendly, cautious with strangers..."
                   }
                 />
+
               </div>
+
             </div>
+
           </section>
+
         )}
 
+
+        {/* OWNER */}
+
         <section className="panel">
+
           <SectionTitle
-            number={category.pet ? "03" : "02"}
-            title={ka ? "მფლობელის ინფორმაცია" : "Owner information"}
+            number={
+              category.pet
+                ? "03"
+                : "02"
+            }
+            title={
+              ka
+                ? "მფლობელის ინფორმაცია"
+                : "Owner information"
+            }
           />
 
-          <div className="fieldsGrid">
-            <Field
-              label={ka ? "სახელი" : "First name"}
-              name="owner_first_name"
-              placeholder={ka ? "სახელი" : "First name"}
-              required
-            />
-
-            <Field
-              label={ka ? "გვარი" : "Last name"}
-              name="owner_last_name"
-              placeholder={ka ? "გვარი" : "Last name"}
-              required
-            />
+          <div className="fields">
 
             <div className="field">
-              <label>{ka ? "მფლობელის ფოტო" : "Owner photo"}</label>
 
-              <label className="uploadBox compact">
+              <label>
+                {ka
+                  ? "მფლობელის ფოტო"
+                  : "Owner photo"}
+              </label>
+
+              <label className="fileInput">
+
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) =>
-                    setOwnerPhotoName(e.target.files?.[0]?.name || "")
+                    setOwnerPhotoName(
+                      e.target.files?.[0]
+                        ?.name || ""
+                    )
                   }
                 />
 
-                <span>＋</span>
-                <strong>
-                  {ownerPhotoName || (ka ? "აირჩიეთ ფოტო" : "Choose photo")}
-                </strong>
+                <span className="plus">
+                  +
+                </span>
+
+                <span className="fileName">
+                  {ownerPhotoName ||
+                    (ka
+                      ? "ფოტოს არჩევა"
+                      : "Choose photo")}
+                </span>
+
               </label>
+
             </div>
 
+
             <Field
-              label={ka ? "ელფოსტა" : "Owner email"}
+              label={
+                ka
+                  ? "მფლობელის ელფოსტა"
+                  : "Owner email"
+              }
               name="owner_email"
               type="email"
               placeholder="name@example.com"
               required
             />
 
-            <Field
-              label={ka ? "ტელეფონის ნომერი" : "Phone number"}
-              name="owner_phone"
-              type="tel"
-              placeholder="+1 000 000 0000"
-            />
 
             <div className="field">
-              <label>{ka ? "კონტაქტის მეთოდი" : "Contact preference"}</label>
 
-              <select name="contact_preference">
+              <label>
+                {ka
+                  ? "დაკავშირების მეთოდი"
+                  : "Contact preference"}
+              </label>
+
+              <select
+                name="contact_preference"
+              >
+
                 <option value="both">
-                  {ka ? "Live Chat და ტელეფონი" : "Live Chat & Phone"}
+                  {ka
+                    ? "Live Chat და ტელეფონი"
+                    : "Live Chat & Phone"}
                 </option>
-                <option value="chat">Live Chat</option>
+
+                <option value="chat">
+                  Live Chat
+                </option>
+
                 <option value="phone">
-                  {ka ? "ტელეფონი" : "Phone"}
+                  {ka
+                    ? "ტელეფონი"
+                    : "Phone"}
                 </option>
+
               </select>
+
             </div>
+
           </div>
+
         </section>
 
+
+        {/* FINDER */}
+
         <section className="panel">
+
           <SectionTitle
-            number={category.pet ? "04" : "03"}
+            number={
+              category.pet
+                ? "04"
+                : "03"
+            }
             title={
               ka
-                ? "დამატებითი საკონტაქტო პირი"
-                : "Additional contact person"
+                ? "ინფორმაცია მპოვნელისთვის"
+                : "Finder information"
             }
           />
 
-          <div className="fieldsGrid">
-            <Field
-              label={ka ? "სახელი" : "First name"}
-              name="additional_contact_first_name"
-            />
+          <div className="fields">
 
-            <Field
-              label={ka ? "გვარი" : "Last name"}
-              name="additional_contact_last_name"
-            />
-
-            <Field
-              label={ka ? "ტელეფონი" : "Phone"}
-              name="additional_contact_phone"
-              type="tel"
-            />
-
-            <Field
-              label={ka ? "ელფოსტა" : "Email"}
-              name="additional_contact_email"
-              type="email"
-            />
-          </div>
-        </section>
-
-        <section className="panel">
-          <SectionTitle
-            number={category.pet ? "05" : "04"}
-            title={ka ? "ინფორმაცია მპოვნელისთვის" : "Finder information"}
-          />
-
-          <div className="fieldsGrid">
             <div className="field full">
+
               <label>
-                {ka ? "შეტყობინება მპოვნელისთვის" : "Finder message"}
+                {ka
+                  ? "შეტყობინება მპოვნელისთვის"
+                  : "Finder message"}
               </label>
 
               <textarea
@@ -472,91 +676,145 @@ export default function RegistrationDetailsPage() {
                 rows={4}
                 placeholder={
                   ka
-                    ? "მაგ: გთხოვთ დამიკავშირდეთ. მადლობა დახმარებისთვის..."
-                    : "Example: Please contact me. Thank you for helping..."
+                    ? "ტექსტი, რომელსაც მპოვნელი დაინახავს..."
+                    : "Message visible to the finder..."
                 }
               />
+
             </div>
 
+
             <div className="field full">
-              <label>{ka ? "დაკარგვის შეტყობინება" : "Lost message"}</label>
+
+              <label>
+                {ka
+                  ? "დაკარგვის შეტყობინება"
+                  : "Lost message"}
+              </label>
 
               <textarea
                 name="lost_message"
                 rows={4}
                 placeholder={
                   ka
-                    ? "ტექსტი, რომელიც გამოჩნდება დაკარგვის შემთხვევაში..."
-                    : "Message displayed when the item is marked as lost..."
+                    ? "დაკარგვის შემთხვევაში გამოსაჩენი ინფორმაცია..."
+                    : "Message displayed if the item is lost..."
                 }
               />
+
             </div>
 
-            <Field
-              label={ka ? "მპოვნელის ჯილდო" : "Finder reward"}
-              name="reward"
-              type="number"
-              placeholder="0"
-            />
 
             <Field
-              label={ka ? "ბოლო ნანახი ადგილი" : "Last seen location"}
+              label={
+                ka
+                  ? "ბოლო ნანახი ადგილი"
+                  : "Last seen location"
+              }
               name="lost_seen_location"
               placeholder={
-                ka ? "მაგ: Central Park, NYC" : "Example: Central Park, NYC"
+                ka
+                  ? "მაგ: Central Park"
+                  : "Example: Central Park"
               }
             />
 
-            <Toggle
-              title={ka ? "ლოკაციის გაზიარება" : "Location sharing"}
-              description={
-                ka
-                  ? "მპოვნელს შეეძლება მიმდინარე მდებარეობის გაზიარება."
-                  : "Allow the finder to share the current location."
-              }
-              enabled={locationSharing}
-              onClick={() => setLocationSharing(!locationSharing)}
-            />
 
             <Toggle
-              title={ka ? "მფლობელის შეტყობინება" : "Owner message"}
+              title={
+                ka
+                  ? "ლოკაციის გაზიარება"
+                  : "Location sharing"
+              }
               description={
                 ka
-                  ? "მპოვნელისთვის გამოჩნდეს მფლობელის შეტყობინება."
-                  : "Show the owner's message to the finder."
+                  ? "მპოვნელს შეეძლება თავისი მდებარეობა გაგიზიაროთ."
+                  : "Allow the finder to share their location."
               }
-              enabled={ownerMessageEnabled}
-              onClick={() => setOwnerMessageEnabled(!ownerMessageEnabled)}
+              enabled={
+                locationSharingEnabled
+              }
+              onClick={() =>
+                setLocationSharingEnabled(
+                  !locationSharingEnabled
+                )
+              }
             />
+
+
+            <Toggle
+              title={
+                ka
+                  ? "მფლობელის შეტყობინება"
+                  : "Owner message"
+              }
+              description={
+                ka
+                  ? "QR გვერდზე გამოჩნდეს მფლობელის შეტყობინება."
+                  : "Show the owner's message on the QR page."
+              }
+              enabled={
+                ownerMessageEnabled
+              }
+              onClick={() =>
+                setOwnerMessageEnabled(
+                  !ownerMessageEnabled
+                )
+              }
+            />
+
 
             <input
               type="hidden"
               name="location_sharing_enabled"
-              value={String(locationSharing)}
+              value={String(
+                locationSharingEnabled
+              )}
             />
 
             <input
               type="hidden"
               name="owner_message_enabled"
-              value={String(ownerMessageEnabled)}
+              value={String(
+                ownerMessageEnabled
+              )}
             />
+
           </div>
+
         </section>
 
-        <section className="submitPanel">
-          <div>
-            <div className="submitLabel">QR RETURN</div>
 
-            <h2>{ka ? "ინფორმაცია მზადაა." : "Information ready."}</h2>
+        {/* SUBMIT */}
+
+        <section className="submitPanel">
+
+          <div>
+            <div className="submitLabel">
+              QR RETURN
+            </div>
+
+            <h2>
+              {ka
+                ? "ინფორმაცია მზადაა შესანახად."
+                : "Information ready to save."}
+            </h2>
           </div>
 
           <button type="submit">
-            {ka ? "შენახვა" : "Save"} →
+            {ka
+              ? "შენახვა"
+              : "Save"}{" "}
+            →
           </button>
+
         </section>
+
       </form>
 
+
       <style jsx>{`
+
         * {
           box-sizing: border-box;
         }
@@ -575,20 +833,19 @@ export default function RegistrationDetailsPage() {
         }
 
         .header {
-          max-width: 1120px;
+          max-width: 1100px;
           min-height: 84px;
           margin: auto;
-          padding: 0 24px;
+          padding: 0 22px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          gap: 20px;
+          align-items: center;
         }
 
         .brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 11px;
           text-decoration: none;
         }
 
@@ -596,11 +853,10 @@ export default function RegistrationDetailsPage() {
           width: 46px;
           height: 46px;
           border-radius: 14px;
-          display: grid;
-          place-items: center;
           background: #1465e8;
           color: white;
-          font-size: 14px;
+          display: grid;
+          place-items: center;
           font-weight: 950;
         }
 
@@ -612,32 +868,29 @@ export default function RegistrationDetailsPage() {
 
         .brandSub {
           margin-top: 4px;
-          color: #8b96a7;
+          color: #8792a3;
           font-size: 8px;
           font-weight: 800;
           letter-spacing: 2px;
         }
 
-        .headerActions,
-        .language {
+        .headerRight {
           display: flex;
           align-items: center;
-        }
-
-        .headerActions {
           gap: 12px;
         }
 
-        .backLink {
-          color: #526176;
+        .back {
           text-decoration: none;
+          color: #536276;
           font-size: 13px;
           font-weight: 800;
         }
 
         .language {
-          padding: 4px;
+          display: flex;
           background: #e9eef5;
+          padding: 4px;
           border-radius: 10px;
         }
 
@@ -646,73 +899,78 @@ export default function RegistrationDetailsPage() {
           background: transparent;
           padding: 7px 9px;
           border-radius: 7px;
-          color: #7f8a9c;
+          color: #7e8999;
           font-size: 9px;
           font-weight: 900;
           cursor: pointer;
         }
 
-        .language button.selected {
+        .language .selected {
           background: white;
           color: #1465e8;
         }
 
         .intro {
-          max-width: 1000px;
+          max-width: 950px;
           margin: auto;
-          padding: 48px 24px 28px;
+          padding: 48px 22px 28px;
           display: flex;
-          align-items: center;
           gap: 22px;
+          align-items: center;
         }
 
         .categoryIcon {
-          width: 78px;
-          height: 78px;
-          flex: 0 0 78px;
-          border-radius: 23px;
+          width: 76px;
+          height: 76px;
+          flex: 0 0 76px;
+          border-radius: 22px;
           background: #eaf2ff;
-          border: 1px solid #dae7f8;
+          border: 1px solid #dbe7f6;
           display: grid;
           place-items: center;
-          font-size: 44px;
+          font-size: 43px;
         }
 
         .eyebrow {
           color: #1465e8;
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: 2.4px;
+          letter-spacing: 2.3px;
         }
 
         .intro h1 {
-          max-width: 800px;
-          margin: 10px 0 0;
-          font-size: clamp(28px, 4vw, 42px);
-          line-height: 1.17;
-          letter-spacing: -1.7px;
+          max-width: 780px;
+          margin: 9px 0 0;
+          font-size: clamp(
+            28px,
+            4vw,
+            40px
+          );
+          line-height: 1.18;
+          letter-spacing: -1.5px;
         }
 
         .form {
-          max-width: 1000px;
+          max-width: 950px;
           margin: auto;
-          padding: 0 24px 90px;
+          padding: 0 22px 85px;
         }
 
         .panel {
-          margin-top: 18px;
-          padding: 30px;
-          border: 1px solid #e2e8f0;
-          border-radius: 23px;
+          margin-top: 17px;
+          padding: 29px;
           background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 22px;
         }
 
         .sectionTitle {
           display: flex;
-          gap: 15px;
           align-items: center;
-          padding-bottom: 21px;
-          border-bottom: 1px solid #edf1f5;
+          gap: 14px;
+          padding-bottom: 20px;
+          border-bottom:
+            1px solid #edf1f5;
         }
 
         .sectionTitle > span {
@@ -723,19 +981,29 @@ export default function RegistrationDetailsPage() {
 
         .sectionTitle h2 {
           margin: 0;
-          font-size: 20px;
+          font-size: 19px;
         }
 
-        .fieldsGrid {
-          margin-top: 24px;
+        /*
+          IMPORTANT:
+          All normal fields have
+          exactly the same width.
+        */
+
+        .fields {
+          margin-top: 23px;
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
           gap: 18px;
         }
 
         .field {
-          width: 100%;
           min-width: 0;
+          width: 100%;
           display: flex;
           flex-direction: column;
         }
@@ -746,10 +1014,15 @@ export default function RegistrationDetailsPage() {
 
         .field label {
           margin-bottom: 8px;
-          color: #26364d;
+          color: #28374e;
           font-size: 13px;
           font-weight: 850;
         }
+
+        /*
+          input and select are IDENTICAL.
+          Same width + same height.
+        */
 
         input,
         select,
@@ -757,11 +1030,11 @@ export default function RegistrationDetailsPage() {
           width: 100%;
           min-width: 0;
           max-width: 100%;
-          border: 1px solid #d8e0ea;
-          border-radius: 12px;
+          border: 1px solid #d7e0ea;
+          border-radius: 11px;
           background: white;
           color: #111827;
-          font: inherit;
+          font-family: inherit;
           font-size: 16px;
           outline: none;
         }
@@ -769,12 +1042,12 @@ export default function RegistrationDetailsPage() {
         input,
         select {
           height: 52px;
-          padding: 0 15px;
+          padding: 0 14px;
         }
 
         textarea {
-          min-height: 108px;
-          padding: 14px 15px;
+          min-height: 105px;
+          padding: 13px 14px;
           line-height: 1.55;
           resize: vertical;
         }
@@ -783,49 +1056,63 @@ export default function RegistrationDetailsPage() {
         select:focus,
         textarea:focus {
           border-color: #1465e8;
-          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
+          box-shadow:
+            0 0 0 3px
+            rgba(
+              20,
+              101,
+              232,
+              0.08
+            );
         }
 
-        .uploadBox.compact {
+        /*
+          Photo looks exactly like
+          a normal input.
+        */
+
+        .fileInput {
+          width: 100%;
           height: 52px;
           margin: 0;
-          padding: 0 15px;
-          border: 1px dashed #b9c7d8;
-          border-radius: 12px;
-          background: #f8fafc;
+          padding: 0 14px;
+          border:
+            1px dashed #b8c6d7;
+          border-radius: 11px;
+          background: #f9fafc;
           display: flex;
-          flex-direction: row;
-          gap: 8px;
           align-items: center;
+          gap: 8px;
           cursor: pointer;
         }
 
-        .uploadBox input {
+        .fileInput input {
           display: none;
         }
 
-        .uploadBox span {
+        .plus {
+          flex: 0 0 auto;
           color: #1465e8;
           font-size: 20px;
         }
 
-        .uploadBox strong {
+        .fileName {
           min-width: 0;
           overflow: hidden;
-          text-overflow: ellipsis;
           white-space: nowrap;
-          color: #334155;
+          text-overflow: ellipsis;
+          color: #526176;
           font-size: 13px;
         }
 
         .toggle {
           grid-column: 1 / -1;
           width: 100%;
-          min-height: 76px;
-          padding: 16px;
-          border: 1px solid #dbe2eb;
-          border-radius: 14px;
+          min-height: 72px;
+          border: 1px solid #dae2eb;
+          border-radius: 13px;
           background: white;
+          padding: 15px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -839,20 +1126,21 @@ export default function RegistrationDetailsPage() {
         }
 
         .toggle p {
-          margin: 5px 0 0;
+          margin: 4px 0 0;
           color: #8490a2;
           font-size: 12px;
         }
 
         .toggle > span {
-          color: #9ba5b4;
+          flex: 0 0 auto;
+          color: #99a4b4;
           font-size: 11px;
           font-weight: 950;
         }
 
         .toggle.active {
           border-color: #1465e8;
-          background: #f1f6ff;
+          background: #f2f7ff;
         }
 
         .toggle.active > span {
@@ -860,14 +1148,20 @@ export default function RegistrationDetailsPage() {
         }
 
         .submitPanel {
-          margin-top: 20px;
-          padding: 30px;
-          border-radius: 23px;
-          background: linear-gradient(135deg, #07182e, #11427d);
+          margin-top: 19px;
+          padding: 28px;
+          border-radius: 22px;
+          background:
+            linear-gradient(
+              135deg,
+              #07182e,
+              #11427d
+            );
           color: white;
           display: flex;
+          justify-content:
+            space-between;
           align-items: center;
-          justify-content: space-between;
           gap: 25px;
         }
 
@@ -875,30 +1169,37 @@ export default function RegistrationDetailsPage() {
           color: #69a6ff;
           font-size: 10px;
           font-weight: 950;
-          letter-spacing: 2.4px;
+          letter-spacing: 2.3px;
         }
 
         .submitPanel h2 {
-          margin: 9px 0 0;
-          font-size: 23px;
+          margin: 8px 0 0;
+          font-size: 22px;
         }
 
         .submitPanel button {
-          flex-shrink: 0;
-          height: 50px;
+          flex: 0 0 auto;
+          height: 48px;
           border: 0;
-          border-radius: 12px;
+          border-radius: 11px;
           background: white;
           color: #1465e8;
-          padding: 0 22px;
+          padding: 0 21px;
           font-weight: 900;
           cursor: pointer;
         }
 
-        @media (max-width: 720px) {
+        /*
+          PHONE
+        */
+
+        @media (
+          max-width: 700px
+        ) {
+
           .header {
-            padding-left: 15px;
-            padding-right: 15px;
+            padding-left: 14px;
+            padding-right: 14px;
           }
 
           .brandSub {
@@ -906,33 +1207,47 @@ export default function RegistrationDetailsPage() {
           }
 
           .intro {
-            padding: 34px 16px 20px;
+            padding:
+              32px
+              15px
+              19px;
             align-items: flex-start;
           }
 
           .categoryIcon {
-            width: 62px;
-            height: 62px;
-            flex-basis: 62px;
-            font-size: 35px;
+            width: 60px;
+            height: 60px;
+            flex-basis: 60px;
+            font-size: 34px;
           }
 
           .intro h1 {
-            font-size: 25px;
-            letter-spacing: -1px;
+            font-size: 24px;
+            letter-spacing: -0.8px;
           }
 
           .form {
-            padding: 0 12px 65px;
+            padding:
+              0
+              11px
+              60px;
           }
 
           .panel {
-            padding: 22px 17px;
+            padding:
+              21px
+              16px;
           }
 
-          .fieldsGrid {
-            grid-template-columns: 1fr;
-            gap: 16px;
+          /*
+            On phone EVERY field
+            gets the full width.
+          */
+
+          .fields {
+            grid-template-columns:
+              1fr;
+            gap: 15px;
           }
 
           .field.full,
@@ -942,12 +1257,16 @@ export default function RegistrationDetailsPage() {
 
           input,
           select,
-          .uploadBox.compact {
+          .fileInput {
             height: 52px;
           }
 
+          textarea {
+            min-height: 100px;
+          }
+
           .submitPanel {
-            padding: 24px 19px;
+            padding: 22px 18px;
             flex-direction: column;
             align-items: stretch;
           }
@@ -956,10 +1275,13 @@ export default function RegistrationDetailsPage() {
             width: 100%;
           }
         }
+
       `}</style>
+
     </main>
   );
 }
+
 
 function SectionTitle({
   number,
@@ -976,6 +1298,7 @@ function SectionTitle({
   );
 }
 
+
 function Field({
   label,
   name,
@@ -991,6 +1314,7 @@ function Field({
 }) {
   return (
     <div className="field">
+
       <label>
         {label}
         {required ? " *" : ""}
@@ -1002,9 +1326,11 @@ function Field({
         placeholder={placeholder}
         required={required}
       />
+
     </div>
   );
 }
+
 
 function Toggle({
   title,
@@ -1020,15 +1346,30 @@ function Toggle({
   return (
     <button
       type="button"
-      className={enabled ? "toggle active" : "toggle"}
+      className={
+        enabled
+          ? "toggle active"
+          : "toggle"
+      }
       onClick={onClick}
     >
+
       <div>
-        <strong>{title}</strong>
-        <p>{description}</p>
+        <strong>
+          {title}
+        </strong>
+
+        <p>
+          {description}
+        </p>
       </div>
 
-      <span>{enabled ? "ON" : "OFF"}</span>
+      <span>
+        {enabled
+          ? "ON"
+          : "OFF"}
+      </span>
+
     </button>
   );
 }
