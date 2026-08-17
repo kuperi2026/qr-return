@@ -5,10 +5,13 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import {
   useParams,
   useRouter,
+  usePathname,
 } from "next/navigation";
+
 import { supabase } from "@/lib/supabase";
 
 type Profile = {
@@ -48,29 +51,29 @@ type Profile = {
 
   location_sharing_enabled: boolean | null;
 
-  show_colour: boolean;
-  show_sex: boolean;
-  show_date_of_birth: boolean;
-  show_weight: boolean;
-  show_medical_info: boolean;
+  show_colour: boolean | null;
+  show_sex: boolean | null;
+  show_date_of_birth: boolean | null;
+  show_weight: boolean | null;
+  show_medical_info: boolean | null;
 
-  show_brand: boolean;
-  show_model: boolean;
-  show_size: boolean;
-  show_material: boolean;
-  show_distinctive_features: boolean;
-  show_description: boolean;
+  show_brand: boolean | null;
+  show_model: boolean | null;
+  show_size: boolean | null;
+  show_material: boolean | null;
+  show_distinctive_features: boolean | null;
+  show_description: boolean | null;
 
-  show_photo: boolean;
-  show_owner_photo: boolean;
+  show_photo: boolean | null;
+  show_owner_photo: boolean | null;
 
-  show_owner_phone: boolean;
-  show_owner_email: boolean;
+  show_owner_phone: boolean | null;
+  show_owner_email: boolean | null;
 
-  show_additional_contact: boolean;
+  show_additional_contact: boolean | null;
 
-  show_finder_message: boolean;
-  show_lost_seen_location: boolean;
+  show_finder_message: boolean | null;
+  show_lost_seen_location: boolean | null;
 
   lost_seen_location: string | null;
 };
@@ -295,6 +298,12 @@ async function uploadImage(
         filePath
       );
 
+  if (!data.publicUrl) {
+    throw new Error(
+      "PUBLIC_URL_ERROR"
+    );
+  }
+
   return data.publicUrl;
 }
 
@@ -305,16 +314,59 @@ export default function EditProfilePage() {
   const router =
     useRouter();
 
+  const pathname =
+    usePathname();
+
   const rawTag =
     params?.tag_code;
 
-  const tagCode =
+  let tagCode =
     Array.isArray(rawTag)
       ? rawTag[0]
       : typeof rawTag ===
         "string"
       ? rawTag
       : "";
+
+  /*
+   * Fallback:
+   * თუ Next.js useParams()-დან
+   * tag_code ვერ მივიღეთ,
+   * URL-დან პირდაპირ ამოვიღებთ.
+   *
+   * მაგალითად:
+   * /profile/324242/edit
+   *
+   * tagCode = 324242
+   */
+  if (
+    !tagCode &&
+    pathname
+  ) {
+    const parts =
+      pathname
+        .split("/")
+        .filter(Boolean);
+
+    const profileIndex =
+      parts.indexOf(
+        "profile"
+      );
+
+    if (
+      profileIndex !== -1 &&
+      parts[
+        profileIndex + 1
+      ]
+    ) {
+      tagCode =
+        decodeURIComponent(
+          parts[
+            profileIndex + 1
+          ]
+        );
+    }
+  }
 
   const [
     profile,
@@ -407,7 +459,12 @@ export default function EditProfilePage() {
       const decodedTag =
         decodeURIComponent(
           tagCode
-        );
+        ).trim();
+
+      console.log(
+        "Edit profile tag:",
+        decodedTag
+      );
 
       const {
         data,
@@ -423,6 +480,11 @@ export default function EditProfilePage() {
         .maybeSingle();
 
       if (fetchError) {
+        console.error(
+          "Profile fetch error:",
+          fetchError
+        );
+
         setError(
           `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
         );
@@ -433,7 +495,7 @@ export default function EditProfilePage() {
 
       if (!data) {
         setError(
-          "ამ QR კოდზე პროფილი არ მოიძებნა."
+          `ამ QR კოდზე პროფილი არ მოიძებნა: ${decodedTag}`
         );
 
         setLoading(false);
@@ -630,7 +692,9 @@ export default function EditProfilePage() {
     }
 
     loadProfile();
-  }, [tagCode]);
+  }, [
+    tagCode,
+  ]);
 
   function updateField(
     field: keyof FormState,
@@ -642,6 +706,10 @@ export default function EditProfilePage() {
         [field]: value,
       })
     );
+
+    if (error) {
+      setError("");
+    }
   }
 
   function toggleVisibility(
@@ -734,6 +802,18 @@ export default function EditProfilePage() {
     }
 
     if (
+      !phoneEnabled &&
+      !whatsappEnabled &&
+      !liveChatEnabled
+    ) {
+      setError(
+        "აირჩიე დაკავშირების მინიმუმ ერთი მეთოდი."
+      );
+
+      return;
+    }
+
+    if (
       !validateImage(
         itemPhoto
       ) ||
@@ -744,13 +824,21 @@ export default function EditProfilePage() {
       return;
     }
 
+    const weightNumber =
+      form.weight.trim()
+        ? Number(
+            form.weight
+          )
+        : null;
+
     if (
-      !phoneEnabled &&
-      !whatsappEnabled &&
-      !liveChatEnabled
+      weightNumber !== null &&
+      Number.isNaN(
+        weightNumber
+      )
     ) {
       setError(
-        "აირჩიე დაკავშირების მინიმუმ ერთი მეთოდი."
+        "წონა სწორად მიუთითე."
       );
 
       return;
@@ -787,7 +875,9 @@ export default function EditProfilePage() {
         profile.item_type ===
           "dog" ||
         profile.item_type ===
-          "cat";
+          "cat" ||
+        profile.item_type ===
+          "pet";
 
       const payload = {
         item_name:
@@ -810,11 +900,8 @@ export default function EditProfilePage() {
             : null,
 
         weight:
-          isPet &&
-          form.weight.trim()
-            ? Number(
-                form.weight
-              )
+          isPet
+            ? weightNumber
             : null,
 
         medical_info:
@@ -920,11 +1007,15 @@ export default function EditProfilePage() {
         );
 
       if (updateError) {
+        console.error(
+          "Profile update error:",
+          updateError
+        );
+
         setError(
           `ცვლილებების შენახვა ვერ მოხერხდა: ${updateError.message}`
         );
 
-        setSaving(false);
         return;
       }
 
@@ -940,7 +1031,10 @@ export default function EditProfilePage() {
         );
       }, 800);
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Edit profile error:",
+        err
+      );
 
       setError(
         "ცვლილებების შენახვისას დაფიქსირდა შეცდომა."
@@ -997,7 +1091,9 @@ export default function EditProfilePage() {
     profile.item_type ===
       "dog" ||
     profile.item_type ===
-      "cat";
+      "cat" ||
+    profile.item_type ===
+      "pet";
 
   return (
     <>
@@ -1044,8 +1140,10 @@ export default function EditProfilePage() {
               </h1>
 
               <p>
-                შეგიძლია დაამატო ის ინფორმაციაც,
-                რომელიც რეგისტრაციის დროს არ შეგივსია.
+                აქ ჩანს სრული პროფილი. შეგიძლია
+                შეცვალო არსებული ინფორმაცია ან
+                დაამატო ის, რაც რეგისტრაციის დროს
+                არ შეგივსია.
               </p>
             </div>
           </div>
@@ -1802,58 +1900,6 @@ function Field({
   );
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  options: {
-    value: string;
-    label: string;
-  }[];
-}) {
-  return (
-    <label className="field">
-      <span>
-        {label}
-      </span>
-
-      <select
-        value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
-        }
-      >
-        {options.map(
-          (option) => (
-            <option
-              key={
-                option.value ||
-                "empty"
-              }
-              value={
-                option.value
-              }
-            >
-              {option.label}
-            </option>
-          )
-        )}
-      </select>
-    </label>
-  );
-}
-
 function OptionalField({
   label,
   value,
@@ -2142,6 +2188,15 @@ function PhotoEditor({
       <small>
         ფოტო სავალდებულო არ არის • მაქს. 5 MB
       </small>
+
+      <small>
+        მპოვნელისთვის ჩვენება:{" "}
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
+      </small>
     </div>
   );
 }
@@ -2221,6 +2276,9 @@ function VisibilityToggle({
       onClick={
         onClick
       }
+      aria-pressed={
+        active
+      }
     >
       <span />
     </button>
@@ -2249,7 +2307,10 @@ function Styles() {
         min-height: 100vh;
         background: #f8fafc;
         color: #101828;
-        font-family: Inter, Arial, sans-serif;
+        font-family:
+          Inter,
+          Arial,
+          sans-serif;
       }
 
       .header {
@@ -2259,8 +2320,10 @@ function Styles() {
         margin: auto;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e8ecf1;
+        justify-content:
+          space-between;
+        border-bottom:
+          1px solid #e8ecf1;
       }
 
       .brand {
@@ -2325,6 +2388,7 @@ function Styles() {
         margin: 0;
         color: #667085;
         font-size: 13px;
+        line-height: 1.6;
       }
 
       .locked {
@@ -2345,7 +2409,8 @@ function Styles() {
 
       .card {
         padding: 28px;
-        border: 1px solid #e2e7ed;
+        border:
+          1px solid #e2e7ed;
         border-radius: 23px;
         background: white;
       }
@@ -2370,6 +2435,7 @@ function Styles() {
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 11px;
+        line-height: 1.5;
       }
 
       .divider {
@@ -2397,19 +2463,19 @@ function Styles() {
       }
 
       .field input,
-      .field select,
       .visibilityField input,
       .visibilityField select,
       .visibilityField textarea {
         width: 100%;
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
         border-radius: 12px;
         background: white;
+        color: #101828;
         outline: none;
       }
 
       .field input,
-      .field select,
       .visibilityField input,
       .visibilityField select {
         height: 54px;
@@ -2422,11 +2488,27 @@ function Styles() {
         resize: vertical;
       }
 
+      .field input:focus,
+      .visibilityField input:focus,
+      .visibilityField select:focus,
+      .visibilityField textarea:focus {
+        border-color: #1465e8;
+        box-shadow:
+          0 0 0 3px
+          rgba(
+            20,
+            101,
+            232,
+            0.08
+          );
+      }
+
       .visibilityHeader {
         margin-bottom: 8px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 15px;
       }
 
@@ -2446,7 +2528,8 @@ function Styles() {
         padding: 18px;
         border-radius: 15px;
         background: #f8fafc;
-        border: 1px solid #e0e5eb;
+        border:
+          1px solid #e0e5eb;
       }
 
       .contactMethodsHeader {
@@ -2473,7 +2556,8 @@ function Styles() {
         display: flex;
         align-items: center;
         gap: 12px;
-        border: 1px solid #dce2e9;
+        border:
+          1px solid #dce2e9;
         border-radius: 13px;
         background: white;
         text-align: left;
@@ -2520,7 +2604,8 @@ function Styles() {
         flex: 0 0 23px;
         display: grid;
         place-items: center;
-        border: 1px solid #cdd4dd;
+        border:
+          1px solid #cdd4dd;
         border-radius: 7px;
         background: white;
         color: white;
@@ -2543,7 +2628,8 @@ function Styles() {
       .optionalHeader {
         margin-bottom: 17px;
         display: flex;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 15px;
       }
 
@@ -2560,7 +2646,8 @@ function Styles() {
       .photoEditor {
         margin-bottom: 18px;
         padding: 16px;
-        border: 1px dashed #c7ced8;
+        border:
+          1px dashed #c7ced8;
         border-radius: 14px;
         background: #fafbfc;
       }
@@ -2597,6 +2684,10 @@ function Styles() {
         font-size: 10px;
       }
 
+      .photoEditor small b {
+        color: #1465e8;
+      }
+
       .switch {
         width: 50px;
         height: 29px;
@@ -2622,14 +2713,16 @@ function Styles() {
       }
 
       .switch.active span {
-        transform: translateX(21px);
+        transform:
+          translateX(21px);
       }
 
       .locationBox {
         padding: 17px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 20px;
         border-radius: 14px;
         background: #f8fafc;
@@ -2653,6 +2746,7 @@ function Styles() {
         border-radius: 12px;
         font-size: 11px;
         font-weight: 800;
+        line-height: 1.5;
       }
 
       .error {
@@ -2668,7 +2762,8 @@ function Styles() {
       .actions {
         margin-top: 28px;
         display: grid;
-        grid-template-columns: 1fr 1.5fr;
+        grid-template-columns:
+          1fr 1.5fr;
         gap: 10px;
       }
 
@@ -2685,7 +2780,9 @@ function Styles() {
       }
 
       .cancelButton {
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
+        background: white;
         color: #475467;
       }
 
@@ -2698,15 +2795,31 @@ function Styles() {
 
       .saveButton:disabled {
         opacity: 0.6;
+        cursor: wait;
       }
 
       .center {
+        width: calc(100% - 24px);
+        max-width: 600px;
+        margin: auto;
         padding-top: 130px;
         text-align: center;
-        font-family: Arial, sans-serif;
+        font-family:
+          Arial,
+          sans-serif;
       }
 
-      @media (max-width: 600px) {
+      .center h1 {
+        color: #1465e8;
+      }
+
+      .center p {
+        color: #667085;
+      }
+
+      @media (
+        max-width: 600px
+      ) {
         .back {
           display: none;
         }
@@ -2724,11 +2837,11 @@ function Styles() {
         }
 
         .actions {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr;
         }
 
         .field input,
-        .field select,
         .visibilityField input,
         .visibilityField select,
         .visibilityField textarea {
