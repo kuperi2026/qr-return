@@ -157,7 +157,7 @@ const emptyForm: FormState = {
   finder_message: "",
   lost_seen_location: "",
 
-  contact_preference: "both",
+  contact_preference: "phone_chat",
 };
 
 const defaultVisibility: VisibilityState = {
@@ -348,6 +348,14 @@ export default function EditProfilePage() {
 
       setProfile(current);
 
+      let contactPreference =
+        current.contact_preference || "phone_chat";
+
+      // ძველი მნიშვნელობების თავსებადობა
+      if (contactPreference === "both") {
+        contactPreference = "phone_chat";
+      }
+
       setForm({
         item_name:
           current.item_name || "",
@@ -413,7 +421,7 @@ export default function EditProfilePage() {
           current.lost_seen_location || "",
 
         contact_preference:
-          current.contact_preference || "both",
+          contactPreference,
       });
 
       setVisibility({
@@ -734,9 +742,7 @@ export default function EditProfilePage() {
     return (
       <>
         <main className="center">
-          <h1>
-            QR RETURN
-          </h1>
+          <h1>QR RETURN</h1>
 
           <p>
             პროფილი იტვირთება...
@@ -755,9 +761,7 @@ export default function EditProfilePage() {
     return (
       <>
         <main className="center">
-          <h1>
-            QR RETURN
-          </h1>
+          <h1>QR RETURN</h1>
 
           <div className="error">
             {error}
@@ -1203,7 +1207,7 @@ export default function EditProfilePage() {
             />
 
             <SelectField
-              label="დაკავშირების მეთოდი"
+              label="როგორ გსურს მპოვნელმა დაგიკავშირდეს?"
               value={
                 form.contact_preference
               }
@@ -1215,20 +1219,50 @@ export default function EditProfilePage() {
               }
               options={[
                 {
-                  value: "both",
-                  label:
-                    "Live Chat და ტელეფონი",
+                  value: "phone",
+                  label: "📞 ტელეფონი",
+                },
+                {
+                  value: "whatsapp",
+                  label: "🟢 WhatsApp",
                 },
                 {
                   value: "chat",
-                  label: "Live Chat",
+                  label: "💬 Live Chat",
                 },
                 {
-                  value: "phone",
-                  label: "ტელეფონი",
+                  value: "phone_whatsapp",
+                  label:
+                    "📞 ტელეფონი + 🟢 WhatsApp",
+                },
+                {
+                  value: "phone_chat",
+                  label:
+                    "📞 ტელეფონი + 💬 Live Chat",
+                },
+                {
+                  value: "whatsapp_chat",
+                  label:
+                    "🟢 WhatsApp + 💬 Live Chat",
+                },
+                {
+                  value: "all",
+                  label:
+                    "📞 ტელეფონი + 🟢 WhatsApp + 💬 Live Chat",
                 },
               ]}
             />
+
+            <div className="contactNote">
+              <strong>
+                WhatsApp
+              </strong>
+
+              <p>
+                WhatsApp გამოიყენებს იმავე მობილურის
+                ნომერს, რომელიც ზემოთ გაქვს მითითებული.
+              </p>
+            </div>
 
             <div className="optionalGroup">
               <div className="optionalHeader">
@@ -1353,7 +1387,8 @@ export default function EditProfilePage() {
                 </strong>
 
                 <p>
-                  მპოვნელმა სურვილის შემთხვევაში შეძლოს თავისი მიმდინარე ლოკაციის გამოგზავნა.
+                  მპოვნელმა სურვილის შემთხვევაში შეძლოს
+                  თავისი მიმდინარე ლოკაციის გამოგზავნა.
                 </p>
               </div>
 
@@ -1948,6 +1983,25 @@ function Styles() {
 
       .visibilityField small b {
         color: #1465e8;
+      }
+
+      .contactNote {
+        margin: -5px 0 20px;
+        padding: 13px 15px;
+        border-radius: 12px;
+        background: #f3f7fd;
+      }
+
+      .contactNote strong {
+        color: #1465e8;
+        font-size: 12px;
+      }
+
+      .contactNote p {
+        margin: 4px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.5;
       }
 
       .optionalGroup {
