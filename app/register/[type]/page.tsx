@@ -24,7 +24,6 @@ const categories = {
     petType: "dog",
     isPet: true,
   },
-
   cat: {
     icon: "🐈",
     ka: "კატა",
@@ -33,7 +32,6 @@ const categories = {
     petType: "cat",
     isPet: true,
   },
-
   keys: {
     icon: "🔑",
     ka: "გასაღები",
@@ -42,7 +40,6 @@ const categories = {
     petType: null,
     isPet: false,
   },
-
   wallet: {
     icon: "👛",
     ka: "საფულე",
@@ -51,7 +48,6 @@ const categories = {
     petType: null,
     isPet: false,
   },
-
   suitcase: {
     icon: "🧳",
     ka: "ჩემოდანი",
@@ -60,7 +56,6 @@ const categories = {
     petType: null,
     isPet: false,
   },
-
   bag: {
     icon: "🎒",
     ka: "ჩანთა",
@@ -200,7 +195,7 @@ export default function RegistrationPage() {
     }));
   }
 
-  function scrollTop() {
+  function goTop() {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -217,7 +212,6 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ QR კოდი."
             : "Please enter the QR code."
         );
-
         return;
       }
 
@@ -231,12 +225,11 @@ export default function RegistrationPage() {
             ? "Please enter the pet name."
             : "Please enter the item name."
         );
-
         return;
       }
 
       setStep(2);
-      scrollTop();
+      goTop();
       return;
     }
 
@@ -247,7 +240,6 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ მფლობელის სახელი."
             : "Please enter the owner's first name."
         );
-
         return;
       }
 
@@ -257,7 +249,15 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ მფლობელის გვარი."
             : "Please enter the owner's last name."
         );
+        return;
+      }
 
+      if (!form.owner_phone.trim()) {
+        setError(
+          ka
+            ? "გთხოვთ, მიუთითოთ მობილურის ნომერი."
+            : "Please enter the phone number."
+        );
         return;
       }
 
@@ -267,12 +267,11 @@ export default function RegistrationPage() {
             ? "გთხოვთ, მიუთითოთ ელფოსტა."
             : "Please enter an email address."
         );
-
         return;
       }
 
       setStep(3);
-      scrollTop();
+      goTop();
     }
   }
 
@@ -283,7 +282,7 @@ export default function RegistrationPage() {
       current === 3 ? 2 : 1
     );
 
-    scrollTop();
+    goTop();
   }
 
   async function handleSubmit(
@@ -300,13 +299,12 @@ export default function RegistrationPage() {
     setError("");
 
     try {
-      /*
-        ფოტოები ჯერ მხოლოდ ირჩევა.
-        Supabase Storage-ს შემდეგ ეტაპზე მივაბამთ.
-
-        აქ Supabase-ში მხოლოდ იმ ველებს ვაგზავნით,
-        რომლებიც უკვე გვაქვს item ცხრილში.
-      */
+      const ownerName = [
+        form.owner_first_name.trim(),
+        form.owner_last_name.trim(),
+      ]
+        .filter(Boolean)
+        .join(" ");
 
       const payload = {
         tag_code:
@@ -373,6 +371,12 @@ export default function RegistrationPage() {
         description:
           form.description.trim() || null,
 
+        owner_name:
+          ownerName,
+
+        owner_phone:
+          form.owner_phone.trim(),
+
         owner_email:
           form.owner_email.trim(),
 
@@ -412,7 +416,7 @@ export default function RegistrationPage() {
       }
 
       setSuccess(true);
-      scrollTop();
+      goTop();
     } catch (err) {
       console.error(
         "Registration error:",
@@ -455,8 +459,8 @@ export default function RegistrationPage() {
 
           <p>
             {ka
-              ? "თქვენი ინფორმაცია შენახულია. პროფილის მონაცემების შეცვლას მომავალშიც შეძლებთ."
-              : "Your information has been saved. You will be able to update the profile later."}
+              ? "ინფორმაცია წარმატებით შეინახა. პროფილის მონაცემების რედაქტირებას მომავალშიც შეძლებთ."
+              : "Your information has been saved. You will be able to edit the profile later."}
           </p>
 
           <div className="successNotice">
@@ -469,7 +473,7 @@ export default function RegistrationPage() {
             <span>
               {ka
                 ? `ეს QR კოდი რეგისტრირებულია კატეგორიაში „${category.ka}“. პროფილის მონაცემების შეცვლა შესაძლებელი იქნება, კატეგორიის — არა.`
-                : `This QR code is registered as "${category.en}". Profile information can be updated later, but the category cannot be changed.`}
+                : `This QR code is registered as "${category.en}". Profile information can be changed later, but the category cannot be changed.`}
             </span>
           </div>
 
@@ -497,8 +501,6 @@ export default function RegistrationPage() {
       />
 
       <section className="registration">
-        {/* INTRO */}
-
         <div className="intro">
           <div className="categoryBox">
             {category.icon}
@@ -523,8 +525,6 @@ export default function RegistrationPage() {
           </div>
         </div>
 
-        {/* PROGRESS */}
-
         <div className="progress">
           <ProgressItem
             number="1"
@@ -546,7 +546,9 @@ export default function RegistrationPage() {
           <ProgressItem
             number="2"
             label={
-              ka ? "მფლობელი" : "Owner"
+              ka
+                ? "მფლობელი"
+                : "Owner"
             }
             active={step >= 2}
             current={step === 2}
@@ -563,7 +565,9 @@ export default function RegistrationPage() {
           <ProgressItem
             number="3"
             label={
-              ka ? "დასრულება" : "Finish"
+              ka
+                ? "დასრულება"
+                : "Finish"
             }
             active={step >= 3}
             current={step === 3}
@@ -574,8 +578,6 @@ export default function RegistrationPage() {
           className="formCard"
           onSubmit={handleSubmit}
         >
-          {/* STEP 1 */}
-
           {step === 1 && (
             <>
               <StepHeader
@@ -645,7 +647,9 @@ export default function RegistrationPage() {
               <div className="twoColumns">
                 <Field
                   label={
-                    ka ? "ფერი" : "Colour"
+                    ka
+                      ? "ფერი"
+                      : "Colour"
                   }
                   value={form.colour}
                   onChange={(value) =>
@@ -664,7 +668,9 @@ export default function RegistrationPage() {
                 {category.isPet ? (
                   <SelectField
                     label={
-                      ka ? "სქესი" : "Sex"
+                      ka
+                        ? "სქესი"
+                        : "Sex"
                     }
                     value={form.sex}
                     onChange={(value) =>
@@ -782,7 +788,9 @@ export default function RegistrationPage() {
                               : "Weight"
                           }
                           type="number"
-                          value={form.weight}
+                          value={
+                            form.weight
+                          }
                           onChange={(value) =>
                             updateField(
                               "weight",
@@ -824,7 +832,9 @@ export default function RegistrationPage() {
                               ? "მოდელი"
                               : "Model"
                           }
-                          value={form.model}
+                          value={
+                            form.model
+                          }
                           onChange={(value) =>
                             updateField(
                               "model",
@@ -839,7 +849,9 @@ export default function RegistrationPage() {
                               ? "ზომა"
                               : "Size"
                           }
-                          value={form.size}
+                          value={
+                            form.size
+                          }
                           onChange={(value) =>
                             updateField(
                               "size",
@@ -855,7 +867,9 @@ export default function RegistrationPage() {
                             ? "მასალა"
                             : "Material"
                         }
-                        value={form.material}
+                        value={
+                          form.material
+                        }
                         onChange={(value) =>
                           updateField(
                             "material",
@@ -894,17 +908,14 @@ export default function RegistrationPage() {
                         ? "დამატებითი აღწერა"
                         : "Additional description"
                     }
-                    value={form.description}
+                    value={
+                      form.description
+                    }
                     onChange={(value) =>
                       updateField(
                         "description",
                         value
                       )
-                    }
-                    placeholder={
-                      ka
-                        ? "დამატებითი ინფორმაცია, რომელიც შესაძლოა მპოვნელს გამოადგეს."
-                        : "Any additional information that may help the finder."
                     }
                   />
                 </div>
@@ -931,8 +942,6 @@ export default function RegistrationPage() {
             </>
           )}
 
-          {/* STEP 2 */}
-
           {step === 2 && (
             <>
               <StepHeader
@@ -945,7 +954,7 @@ export default function RegistrationPage() {
                 description={
                   ka
                     ? "მიუთითეთ საკონტაქტო ინფორმაცია, რომლის საშუალებითაც მპოვნელი შეძლებს თქვენთან დაკავშირებას."
-                    : "Add the contact information a finder can use to reach you."
+                    : "Add the contact information the finder can use to reach you."
                 }
               />
 
@@ -965,11 +974,6 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  placeholder={
-                    ka
-                      ? "სახელი"
-                      : "First name"
-                  }
                   required
                 />
 
@@ -988,11 +992,6 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  placeholder={
-                    ka
-                      ? "გვარი"
-                      : "Last name"
-                  }
                   required
                 />
               </div>
@@ -1004,7 +1003,9 @@ export default function RegistrationPage() {
                     : "Email"
                 }
                 type="email"
-                value={form.owner_email}
+                value={
+                  form.owner_email
+                }
                 onChange={(value) =>
                   updateField(
                     "owner_email",
@@ -1022,7 +1023,9 @@ export default function RegistrationPage() {
                     : "Phone number"
                 }
                 type="tel"
-                value={form.owner_phone}
+                value={
+                  form.owner_phone
+                }
                 onChange={(value) =>
                   updateField(
                     "owner_phone",
@@ -1030,6 +1033,7 @@ export default function RegistrationPage() {
                   )
                 }
                 placeholder="+1 000 000 0000"
+                required
               />
 
               <PhotoField
@@ -1117,45 +1121,41 @@ export default function RegistrationPage() {
                     }
                   />
 
-                  <div className="twoColumns">
-                    <Field
-                      label={
-                        ka
-                          ? "ტელეფონი"
-                          : "Phone"
-                      }
-                      type="tel"
-                      value={
-                        form.additional_contact_phone
-                      }
-                      onChange={(value) =>
-                        updateField(
-                          "additional_contact_phone",
-                          value
-                        )
-                      }
-                      placeholder="+1 000 000 0000"
-                    />
+                  <Field
+                    label={
+                      ka
+                        ? "ტელეფონი"
+                        : "Phone"
+                    }
+                    type="tel"
+                    value={
+                      form.additional_contact_phone
+                    }
+                    onChange={(value) =>
+                      updateField(
+                        "additional_contact_phone",
+                        value
+                      )
+                    }
+                  />
 
-                    <Field
-                      label={
-                        ka
-                          ? "ელფოსტა"
-                          : "Email"
-                      }
-                      type="email"
-                      value={
-                        form.additional_contact_email
-                      }
-                      onChange={(value) =>
-                        updateField(
-                          "additional_contact_email",
-                          value
-                        )
-                      }
-                      placeholder="name@example.com"
-                    />
-                  </div>
+                  <Field
+                    label={
+                      ka
+                        ? "ელფოსტა"
+                        : "Email"
+                    }
+                    type="email"
+                    value={
+                      form.additional_contact_email
+                    }
+                    onChange={(value) =>
+                      updateField(
+                        "additional_contact_email",
+                        value
+                      )
+                    }
+                  />
                 </div>
               )}
 
@@ -1191,8 +1191,6 @@ export default function RegistrationPage() {
             </>
           )}
 
-          {/* STEP 3 */}
-
           {step === 3 && (
             <>
               <StepHeader
@@ -1204,8 +1202,8 @@ export default function RegistrationPage() {
                 }
                 description={
                   ka
-                    ? "დაასრულეთ პროფილის შექმნა. სურვილის შემთხვევაში შეგიძლიათ ჩართოთ ლოკაციის გაზიარების ფუნქციაც."
-                    : "Finish creating the profile. You can also enable location sharing if you wish."
+                    ? "დაასრულეთ პროფილის შექმნა და სურვილის შემთხვევაში ჩართეთ ლოკაციის გაზიარება."
+                    : "Finish creating the profile and optionally enable location sharing."
                 }
               />
 
@@ -1224,11 +1222,6 @@ export default function RegistrationPage() {
                     value
                   )
                 }
-                placeholder={
-                  ka
-                    ? "მაგ. გთხოვთ დამიკავშირდეთ. მადლობა დახმარებისთვის."
-                    : "Example: Please contact me. Thank you for helping."
-                }
               />
 
               <div className="twoColumns">
@@ -1239,17 +1232,14 @@ export default function RegistrationPage() {
                       : "Finder reward — optional"
                   }
                   type="number"
-                  value={form.reward}
+                  value={
+                    form.reward
+                  }
                   onChange={(value) =>
                     updateField(
                       "reward",
                       value
                     )
-                  }
-                  placeholder={
-                    ka
-                      ? "მაგ. 100"
-                      : "Example: 100"
                   }
                 />
 
@@ -1268,11 +1258,6 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  placeholder={
-                    ka
-                      ? "მაგ. Central Park, New York"
-                      : "Example: Central Park, New York"
-                  }
                 />
               </div>
 
@@ -1287,7 +1272,7 @@ export default function RegistrationPage() {
                   <p>
                     {ka
                       ? "თუ ფუნქციას ჩართავთ, QR კოდის დამსკანერებელს სურვილის შემთხვევაში შეეძლება გამოგიგზავნოთ თავისი მიმდინარე მდებარეობა. ლოკაცია ავტომატურად არ იგზავნება."
-                      : "When enabled, the person who scans the QR code may choose to send you their current location. Location is never shared automatically."}
+                      : "When enabled, the person scanning the QR code may choose to send you their current location. Location is never shared automatically."}
                   </p>
                 </div>
 
@@ -1297,14 +1282,6 @@ export default function RegistrationPage() {
                     locationSharingEnabled
                       ? "switch active"
                       : "switch"
-                  }
-                  aria-label={
-                    ka
-                      ? "ლოკაციის გაზიარება"
-                      : "Location sharing"
-                  }
-                  aria-pressed={
-                    locationSharingEnabled
                   }
                   onClick={() =>
                     setLocationSharingEnabled(
@@ -1337,8 +1314,8 @@ export default function RegistrationPage() {
 
                   <small>
                     {ka
-                      ? "პროფილის შექმნის შემდეგ კატეგორია აღარ შეიცვლება. პროფილში შენახული მონაცემების რედაქტირება კი მომავალშიც შეგეძლებათ."
-                      : "The category cannot be changed after profile creation. You will still be able to edit the saved profile information later."}
+                      ? "კატეგორია პროფილის შექმნის შემდეგ აღარ შეიცვლება. სხვა მონაცემების რედაქტირება მომავალშიც შესაძლებელი იქნება."
+                      : "The category cannot be changed after profile creation. Other profile information can be edited later."}
                   </small>
                 </div>
               </div>
@@ -1384,10 +1361,6 @@ export default function RegistrationPage() {
     </main>
   );
 }
-
-/* ---------------------------------- */
-/* HEADER                             */
-/* ---------------------------------- */
 
 function Header({
   ka,
@@ -1463,10 +1436,6 @@ function Header({
   );
 }
 
-/* ---------------------------------- */
-/* PROGRESS                           */
-/* ---------------------------------- */
-
 function ProgressItem({
   number,
   label,
@@ -1490,16 +1459,10 @@ function ProgressItem({
         {number}
       </div>
 
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
     </div>
   );
 }
-
-/* ---------------------------------- */
-/* STEP HEADER                        */
-/* ---------------------------------- */
 
 function StepHeader({
   number,
@@ -1512,26 +1475,15 @@ function StepHeader({
 }) {
   return (
     <div className="stepHeader">
-      <span>
-        {number}
-      </span>
+      <span>{number}</span>
 
       <div>
-        <h2>
-          {title}
-        </h2>
-
-        <p>
-          {description}
-        </p>
+        <h2>{title}</h2>
+        <p>{description}</p>
       </div>
     </div>
   );
 }
-
-/* ---------------------------------- */
-/* FIELD                              */
-/* ---------------------------------- */
 
 function Field({
   label,
@@ -1543,7 +1495,9 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   placeholder?: string;
   type?: string;
   required?: boolean;
@@ -1570,10 +1524,6 @@ function Field({
   );
 }
 
-/* ---------------------------------- */
-/* SELECT                             */
-/* ---------------------------------- */
-
 function SelectField({
   label,
   value,
@@ -1582,7 +1532,9 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   options: {
     value: string;
     label: string;
@@ -1590,9 +1542,7 @@ function SelectField({
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
 
       <select
         value={value}
@@ -1622,10 +1572,6 @@ function SelectField({
   );
 }
 
-/* ---------------------------------- */
-/* TEXTAREA                           */
-/* ---------------------------------- */
-
 function TextArea({
   label,
   value,
@@ -1634,14 +1580,14 @@ function TextArea({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   placeholder?: string;
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
 
       <textarea
         value={value}
@@ -1655,10 +1601,6 @@ function TextArea({
     </label>
   );
 }
-
-/* ---------------------------------- */
-/* PHOTO                              */
-/* ---------------------------------- */
 
 function PhotoField({
   label,
@@ -1691,9 +1633,7 @@ function PhotoField({
       </div>
 
       <div className="photoText">
-        <strong>
-          {label}
-        </strong>
+        <strong>{label}</strong>
 
         <span>
           {file
@@ -1707,10 +1647,6 @@ function PhotoField({
   );
 }
 
-/* ---------------------------------- */
-/* ERROR                              */
-/* ---------------------------------- */
-
 function ErrorMessage({
   text,
 }: {
@@ -1722,10 +1658,6 @@ function ErrorMessage({
     </div>
   );
 }
-
-/* ---------------------------------- */
-/* STYLES                             */
-/* ---------------------------------- */
 
 function Styles() {
   return (
@@ -1762,8 +1694,6 @@ function Styles() {
           sans-serif;
       }
 
-      /* HEADER */
-
       .header {
         width: calc(100% - 40px);
         max-width: 1080px;
@@ -1773,8 +1703,7 @@ function Styles() {
         align-items: center;
         justify-content: space-between;
         gap: 20px;
-        border-bottom:
-          1px solid #e9edf2;
+        border-bottom: 1px solid #e9edf2;
       }
 
       .brand {
@@ -1849,8 +1778,6 @@ function Styles() {
           rgba(0, 0, 0, 0.06);
       }
 
-      /* MAIN */
-
       .registration {
         width: calc(100% - 32px);
         max-width: 760px;
@@ -1901,8 +1828,6 @@ function Styles() {
         line-height: 1.6;
       }
 
-      /* PROGRESS */
-
       .progress {
         margin: 38px 0 25px;
         display: flex;
@@ -1928,8 +1853,7 @@ function Styles() {
         height: 34px;
         display: grid;
         place-items: center;
-        border:
-          1px solid #d4dae2;
+        border: 1px solid #d4dae2;
         border-radius: 50%;
         background: white;
         color: #98a2b3;
@@ -1959,12 +1883,9 @@ function Styles() {
         background: #1465e8;
       }
 
-      /* FORM */
-
       .formCard {
         padding: 30px;
-        border:
-          1px solid #e2e7ed;
+        border: 1px solid #e2e7ed;
         border-radius: 24px;
         background: white;
         box-shadow:
@@ -2002,10 +1923,7 @@ function Styles() {
       .twoColumns {
         display: grid;
         grid-template-columns:
-          repeat(
-            2,
-            minmax(0, 1fr)
-          );
+          repeat(2, minmax(0, 1fr));
         gap: 14px;
       }
 
@@ -2026,15 +1944,11 @@ function Styles() {
       .field select,
       .field textarea {
         width: 100%;
-        border:
-          1px solid #d5dae1;
+        border: 1px solid #d5dae1;
         border-radius: 12px;
         background: white;
         color: #101828;
         outline: none;
-        transition:
-          border-color 0.15s ease,
-          box-shadow 0.15s ease;
       }
 
       .field input,
@@ -2058,15 +1972,8 @@ function Styles() {
         border-color: #1465e8;
         box-shadow:
           0 0 0 3px
-          rgba(
-            20,
-            101,
-            232,
-            0.08
-          );
+          rgba(20, 101, 232, 0.08);
       }
-
-      /* PHOTO */
 
       .photoField {
         min-height: 76px;
@@ -2075,8 +1982,7 @@ function Styles() {
         display: flex;
         align-items: center;
         gap: 13px;
-        border:
-          1px dashed #c7ced8;
+        border: 1px dashed #c7ced8;
         border-radius: 13px;
         background: #fafbfc;
         cursor: pointer;
@@ -2113,16 +2019,10 @@ function Styles() {
       }
 
       .photoField span {
-        max-width: 500px;
         margin-top: 4px;
-        overflow: hidden;
         color: #8a94a3;
         font-size: 11px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
       }
-
-      /* OPTIONAL */
 
       .optionalButton {
         width: 100%;
@@ -2131,8 +2031,7 @@ function Styles() {
         display: flex;
         align-items: center;
         gap: 9px;
-        border:
-          1px solid #e0e5eb;
+        border: 1px solid #e0e5eb;
         border-radius: 12px;
         background: #f8fafc;
         color: #344054;
@@ -2153,18 +2052,14 @@ function Styles() {
         background: #f8fafc;
       }
 
-      /* LOCATION */
-
       .settingCard {
         margin-top: 4px;
         padding: 18px;
         display: flex;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         align-items: center;
         gap: 25px;
-        border:
-          1px solid #e0e5eb;
+        border: 1px solid #e0e5eb;
         border-radius: 14px;
         background: #f9fafb;
       }
@@ -2191,7 +2086,6 @@ function Styles() {
         border-radius: 30px;
         background: #cdd3db;
         cursor: pointer;
-        transition: 0.2s;
       }
 
       .switch span {
@@ -2200,9 +2094,6 @@ function Styles() {
         height: 23px;
         border-radius: 50%;
         background: white;
-        box-shadow:
-          0 2px 5px
-          rgba(0, 0, 0, 0.15);
         transition: 0.2s;
       }
 
@@ -2215,16 +2106,13 @@ function Styles() {
           translateX(21px);
       }
 
-      /* SUMMARY */
-
       .summary {
         margin-top: 18px;
         padding: 17px;
         display: flex;
         align-items: center;
         gap: 13px;
-        border:
-          1px solid #dbe7f8;
+        border: 1px solid #dbe7f8;
         border-radius: 14px;
         background: #f3f7fd;
       }
@@ -2264,8 +2152,6 @@ function Styles() {
         line-height: 1.4;
       }
 
-      /* ACTIONS */
-
       .actions,
       .singleAction {
         margin-top: 28px;
@@ -2290,8 +2176,7 @@ function Styles() {
       }
 
       .backButton {
-        border:
-          1px solid #d5dae1;
+        border: 1px solid #d5dae1;
         background: white;
         color: #475467;
       }
@@ -2313,18 +2198,6 @@ function Styles() {
         cursor: wait;
       }
 
-      .backButton:hover,
-      .optionalButton:hover {
-        background: #f5f7fa;
-      }
-
-      .nextButton:hover,
-      .saveButton:hover {
-        background: #0f57cf;
-      }
-
-      /* ERROR */
-
       .errorMessage {
         margin-top: 18px;
         padding: 13px 15px;
@@ -2335,8 +2208,6 @@ function Styles() {
         font-weight: 700;
         line-height: 1.5;
       }
-
-      /* SUCCESS */
 
       .successPage {
         width: calc(100% - 32px);
@@ -2366,18 +2237,14 @@ function Styles() {
       }
 
       .successPage > p {
-        max-width: 500px;
-        margin: 0 auto;
         color: #667085;
-        font-size: 14px;
         line-height: 1.65;
       }
 
       .successNotice {
         margin-top: 24px;
         padding: 17px;
-        border:
-          1px solid #dbe7f8;
+        border: 1px solid #dbe7f8;
         border-radius: 14px;
         background: #f3f7fd;
         text-align: left;
@@ -2415,8 +2282,6 @@ function Styles() {
         font-weight: 900;
       }
 
-      /* MOBILE */
-
       @media (
         max-width: 600px
       ) {
@@ -2434,7 +2299,7 @@ function Styles() {
           display: none;
         }
 
-        .brandMark {
+        .headerMark {
           width: 40px;
           height: 40px;
         }
@@ -2468,16 +2333,8 @@ function Styles() {
           font-size: 12px;
         }
 
-        .progress {
-          margin-top: 30px;
-        }
-
         .progressItem {
           min-width: 64px;
-        }
-
-        .progressItem span {
-          font-size: 9px;
         }
 
         .formCard {
@@ -2501,15 +2358,6 @@ function Styles() {
           font-size: 16px;
         }
 
-        .photoField span {
-          max-width: 240px;
-        }
-
-        .settingCard {
-          align-items: flex-start;
-          gap: 15px;
-        }
-
         .actions {
           display: grid;
           grid-template-columns:
@@ -2522,7 +2370,6 @@ function Styles() {
           width: 100%;
           min-width: 0;
           margin: 0;
-          padding: 0 10px;
         }
 
         .singleAction {
