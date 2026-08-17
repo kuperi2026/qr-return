@@ -9,10 +9,8 @@ type ItemProfile = {
   item_type: string;
   pet_type: string | null;
 
-  // სავალდებულო
   item_name: string | null;
 
-  // არასავალდებულო
   colour: string | null;
   sex: string | null;
   date_of_birth: string | null;
@@ -28,12 +26,9 @@ type ItemProfile = {
 
   photo_url: string | null;
 
-  // მფლობელი
   owner_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
-
-  // არასავალდებულო
   owner_photo_url: string | null;
 
   additional_contact_name: string | null;
@@ -43,14 +38,12 @@ type ItemProfile = {
   finder_message: string | null;
   lost_seen_location: string | null;
 
-  // დაკავშირების მეთოდები
   phone_enabled: boolean | null;
   whatsapp_enabled: boolean | null;
   live_chat_enabled: boolean | null;
 
   location_sharing_enabled: boolean | null;
 
-  // არასავალდებულო ველების ხილვადობა
   show_colour: boolean | null;
   show_sex: boolean | null;
   show_date_of_birth: boolean | null;
@@ -66,6 +59,9 @@ type ItemProfile = {
 
   show_photo: boolean | null;
   show_owner_photo: boolean | null;
+
+  show_owner_phone: boolean | null;
+  show_owner_email: boolean | null;
 
   show_additional_contact: boolean | null;
 
@@ -137,7 +133,6 @@ export default function ProfilePage() {
             `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
           );
 
-          setLoading(false);
           return;
         }
 
@@ -146,7 +141,6 @@ export default function ProfilePage() {
             "ამ QR კოდზე პროფილი არ მოიძებნა."
           );
 
-          setLoading(false);
           return;
         }
 
@@ -226,18 +220,38 @@ export default function ProfilePage() {
   }
 
   const isPet =
-    profile.item_type === "dog" ||
-    profile.item_type === "cat";
+    profile.item_type ===
+      "dog" ||
+    profile.item_type ===
+      "cat";
 
   const cleanPhone =
     profile.owner_phone
-      ?.replace(/[^\d+]/g, "") ||
-    "";
+      ?.replace(
+        /[^\d+]/g,
+        ""
+      ) || "";
 
   const whatsappPhone =
     profile.owner_phone
-      ?.replace(/\D/g, "") ||
-    "";
+      ?.replace(
+        /\D/g,
+        ""
+      ) || "";
+
+  const showPhone =
+    profile.show_owner_phone ===
+      true &&
+    Boolean(
+      profile.owner_phone
+    );
+
+  const showEmail =
+    profile.show_owner_email ===
+      true &&
+    Boolean(
+      profile.owner_email
+    );
 
   const hasAdditionalContact =
     profile.show_additional_contact ===
@@ -248,7 +262,7 @@ export default function ProfilePage() {
         profile.additional_contact_email
     );
 
-  const hasFinderInformation =
+  const hasFinderInfo =
     (profile.show_finder_message ===
       true &&
       Boolean(
@@ -295,7 +309,10 @@ export default function ProfilePage() {
 
         <div className="container">
           <section className="profileCard">
+
+            {/* HERO */}
             <div className="hero">
+
               {profile.show_photo ===
                 true &&
               profile.photo_url ? (
@@ -375,6 +392,8 @@ export default function ProfilePage() {
               </div>
 
               <div className="grid">
+
+                {/* ფერი */}
                 {profile.show_colour ===
                   true &&
                   profile.colour && (
@@ -386,6 +405,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* სქესი */}
                 {isPet &&
                   profile.show_sex ===
                     true &&
@@ -398,6 +418,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* დაბადების თარიღი */}
                 {isPet &&
                   profile.show_date_of_birth ===
                     true &&
@@ -410,6 +431,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* წონა */}
                 {isPet &&
                   profile.show_weight ===
                     true &&
@@ -423,6 +445,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* ბრენდი */}
                 {!isPet &&
                   profile.show_brand ===
                     true &&
@@ -435,6 +458,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* მოდელი */}
                 {!isPet &&
                   profile.show_model ===
                     true &&
@@ -447,6 +471,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* ზომა */}
                 {!isPet &&
                   profile.show_size ===
                     true &&
@@ -459,6 +484,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* მასალა */}
                 {!isPet &&
                   profile.show_material ===
                     true &&
@@ -472,6 +498,7 @@ export default function ProfilePage() {
                   )}
               </div>
 
+              {/* სამედიცინო ინფორმაცია */}
               {isPet &&
                 profile.show_medical_info ===
                   true &&
@@ -484,6 +511,7 @@ export default function ProfilePage() {
                   />
                 )}
 
+              {/* განმასხვავებელი ნიშნები */}
               {!isPet &&
                 profile.show_distinctive_features ===
                   true &&
@@ -496,6 +524,7 @@ export default function ProfilePage() {
                   />
                 )}
 
+              {/* აღწერა */}
               {profile.show_description ===
                 true &&
                 profile.description && (
@@ -521,6 +550,8 @@ export default function ProfilePage() {
               </div>
 
               <div className="ownerCard">
+
+                {/* მფლობელის ფოტო */}
                 {profile.show_owner_photo ===
                   true &&
                 profile.owner_photo_url ? (
@@ -538,17 +569,22 @@ export default function ProfilePage() {
                 )}
 
                 <div className="ownerInfo">
+
                   <small>
                     მფლობელი
                   </small>
 
+                  {/* სახელი */}
                   <strong>
                     {profile.owner_name ||
                       "მფლობელი"}
                   </strong>
 
-                  {/* სავალდებულო — ყოველთვის ჩანს */}
-                  {profile.owner_phone && (
+                  {/* PHONE
+                      შევსება სავალდებულოა,
+                      ჩვენება არჩევითია
+                  */}
+                  {showPhone && (
                     <a
                       href={`tel:${cleanPhone}`}
                     >
@@ -559,8 +595,11 @@ export default function ProfilePage() {
                     </a>
                   )}
 
-                  {/* სავალდებულო — ყოველთვის ჩანს */}
-                  {profile.owner_email && (
+                  {/* EMAIL
+                      შევსება სავალდებულოა,
+                      ჩვენება არჩევითია
+                  */}
+                  {showEmail && (
                     <a
                       href={`mailto:${profile.owner_email}`}
                     >
@@ -570,15 +609,20 @@ export default function ProfilePage() {
                       }
                     </a>
                   )}
+
                 </div>
               </div>
 
+              {/* დაკავშირების მეთოდები */}
               <div className="contactSection">
+
                 <div className="contactTitle">
                   დაუკავშირდი მფლობელს
                 </div>
 
                 <div className="contactButtons">
+
+                  {/* PHONE BUTTON */}
                   {profile.phone_enabled ===
                     true &&
                     profile.owner_phone && (
@@ -596,6 +640,7 @@ export default function ProfilePage() {
                       </a>
                     )}
 
+                  {/* WHATSAPP */}
                   {profile.whatsapp_enabled ===
                     true &&
                     whatsappPhone && (
@@ -615,9 +660,13 @@ export default function ProfilePage() {
                       </a>
                     )}
 
+                  {/* LIVE CHAT */}
                   {profile.live_chat_enabled ===
                     true && (
-                    <div className="contactButton chatButton">
+                    <button
+                      type="button"
+                      className="contactButton chatButton"
+                    >
                       <span>
                         💬
                       </span>
@@ -625,13 +674,16 @@ export default function ProfilePage() {
                       <strong>
                         Live Chat
                       </strong>
-                    </div>
+                    </button>
                   )}
+
                 </div>
               </div>
 
+              {/* დამატებითი პირი */}
               {hasAdditionalContact && (
                 <div className="additionalContact">
+
                   <div className="additionalTitle">
                     დამატებითი საკონტაქტო პირი
                   </div>
@@ -668,13 +720,15 @@ export default function ProfilePage() {
                       }
                     </a>
                   )}
+
                 </div>
               )}
             </section>
 
             {/* 03 */}
-            {hasFinderInformation && (
+            {hasFinderInfo && (
               <section className="section">
+
                 <div className="sectionTitle">
                   <span>
                     03
@@ -685,6 +739,7 @@ export default function ProfilePage() {
                   </h2>
                 </div>
 
+                {/* შეტყობინება */}
                 {profile.show_finder_message ===
                   true &&
                   profile.finder_message && (
@@ -696,6 +751,7 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* ბოლო ნანახი ადგილი */}
                 {profile.show_lost_seen_location ===
                   true &&
                   profile.lost_seen_location && (
@@ -707,29 +763,34 @@ export default function ProfilePage() {
                     />
                   )}
 
+                {/* LOCATION SHARING */}
                 {profile.location_sharing_enabled ===
                   true && (
-                  <div className="locationBox">
-                    <div>
-                      <strong>
-                        📍 ლოკაციის გაზიარება
-                      </strong>
+                    <div className="locationBox">
 
-                      <p>
-                        მფლობელს ჩართული აქვს
-                        ლოკაციის მიღების ფუნქცია.
-                      </p>
+                      <div>
+                        <strong>
+                          📍 ლოკაციის გაზიარება
+                        </strong>
+
+                        <p>
+                          მფლობელს ჩართული აქვს
+                          ლოკაციის მიღების ფუნქცია.
+                        </p>
+                      </div>
+
+                      <span className="enabledBadge">
+                        ჩართულია
+                      </span>
+
                     </div>
-
-                    <span className="enabledBadge">
-                      ჩართულია
-                    </span>
-                  </div>
-                )}
+                  )}
               </section>
             )}
 
+            {/* BUTTONS */}
             <div className="buttons">
+
               <a
                 href={`/profile/${encodeURIComponent(
                   profile.tag_code
@@ -745,7 +806,9 @@ export default function ProfilePage() {
               >
                 მთავარ გვერდზე დაბრუნება
               </a>
+
             </div>
+
           </section>
         </div>
       </main>
@@ -764,6 +827,7 @@ function Info({
 }) {
   return (
     <div className="infoBox">
+
       <span>
         {label}
       </span>
@@ -771,6 +835,7 @@ function Info({
       <strong>
         {value}
       </strong>
+
     </div>
   );
 }
@@ -784,6 +849,7 @@ function LongInfo({
 }) {
   return (
     <div className="longInfo">
+
       <span>
         {label}
       </span>
@@ -791,6 +857,7 @@ function LongInfo({
       <p>
         {value}
       </p>
+
     </div>
   );
 }
@@ -874,6 +941,7 @@ function translateSex(
 function Styles() {
   return (
     <style jsx global>{`
+
       * {
         box-sizing: border-box;
       }
@@ -886,6 +954,13 @@ function Styles() {
 
       body {
         background: #f7f9fc;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
       }
 
       .page {
@@ -902,69 +977,92 @@ function Styles() {
         max-width: 1050px;
         min-height: 78px;
         margin: auto;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid #e7ebf0;
+
+        border-bottom:
+          1px solid #e7ebf0;
       }
 
       .brand {
         display: flex;
         align-items: center;
         gap: 10px;
+
         text-decoration: none;
       }
 
       .logo {
         width: 44px;
         height: 44px;
+
         display: grid;
         place-items: center;
+
         border-radius: 13px;
+
         background: #1465e8;
         color: white;
+
         font-size: 12px;
         font-weight: 900;
       }
 
       .brand strong {
         display: block;
+
         color: #1465e8;
+
         font-size: 20px;
       }
 
       .brand small {
         display: block;
+
         margin-top: 2px;
+
         color: #98a2b3;
+
         font-size: 7px;
         letter-spacing: 2px;
       }
 
       .homeLink {
         color: #475467;
+
         font-size: 12px;
         font-weight: 800;
+
         text-decoration: none;
       }
 
       .container {
         width: calc(100% - 24px);
         max-width: 760px;
+
         margin: auto;
-        padding: 45px 0 80px;
+
+        padding:
+          45px 0 80px;
       }
 
       .profileCard {
         padding: 28px;
-        border: 1px solid #e1e6ec;
+
+        border:
+          1px solid #e1e6ec;
+
         border-radius: 24px;
+
         background: white;
       }
 
       .hero {
         display: flex;
         align-items: center;
+
         gap: 22px;
       }
 
@@ -972,7 +1070,10 @@ function Styles() {
       .photoPlaceholder {
         width: 160px;
         height: 160px;
-        flex: 0 0 160px;
+
+        flex:
+          0 0 160px;
+
         border-radius: 22px;
       }
 
@@ -983,44 +1084,63 @@ function Styles() {
       .photoPlaceholder {
         display: grid;
         place-items: center;
+
         background: #eef4ff;
+
         font-size: 55px;
       }
 
       .profileLabel {
         color: #1465e8;
+
         font-size: 10px;
         font-weight: 900;
+
         letter-spacing: 2px;
       }
 
       .heroText h1 {
-        margin: 8px 0;
+        margin:
+          8px 0;
+
         font-size: 36px;
       }
 
       .category {
         width: fit-content;
-        padding: 6px 10px;
+
+        padding:
+          6px 10px;
+
         border-radius: 30px;
+
         background: #eef4ff;
+
         color: #1465e8;
+
         font-size: 10px;
         font-weight: 900;
       }
 
       .tag {
-        margin: 10px 0 0;
+        margin:
+          10px 0 0;
+
         color: #667085;
+
         font-size: 12px;
       }
 
       .status {
         width: fit-content;
+
         margin-top: 10px;
+
         display: flex;
         align-items: center;
+
         gap: 6px;
+
         font-size: 10px;
         font-weight: 800;
       }
@@ -1028,6 +1148,7 @@ function Styles() {
       .status span {
         width: 7px;
         height: 7px;
+
         border-radius: 50%;
       }
 
@@ -1049,79 +1170,105 @@ function Styles() {
 
       .section {
         margin-top: 30px;
+
         padding-top: 26px;
-        border-top: 1px solid #edf0f3;
+
+        border-top:
+          1px solid #edf0f3;
       }
 
       .sectionTitle {
         margin-bottom: 17px;
+
         display: flex;
         align-items: center;
+
         gap: 9px;
       }
 
       .sectionTitle span {
         color: #1465e8;
+
         font-size: 9px;
         font-weight: 900;
       }
 
       .sectionTitle h2 {
         margin: 0;
+
         font-size: 18px;
       }
 
       .grid {
         display: grid;
+
         grid-template-columns:
           repeat(
             2,
             minmax(0, 1fr)
           );
+
         gap: 12px;
       }
 
       .infoBox {
         padding: 14px;
+
         border-radius: 12px;
+
         background: #f8fafc;
       }
 
       .infoBox span,
       .longInfo span {
         display: block;
+
         color: #7b8492;
+
         font-size: 10px;
         font-weight: 700;
       }
 
       .infoBox strong {
         display: block;
+
         margin-top: 5px;
+
         font-size: 13px;
       }
 
       .longInfo {
         margin-top: 12px;
+
         padding: 14px;
+
         border-radius: 12px;
+
         background: #f8fafc;
       }
 
       .longInfo p {
-        margin: 6px 0 0;
+        margin:
+          6px 0 0;
+
         color: #344054;
+
         font-size: 12px;
         line-height: 1.6;
       }
 
       .ownerCard {
         margin-bottom: 12px;
+
         padding: 16px;
+
         display: flex;
         align-items: center;
+
         gap: 14px;
+
         border-radius: 14px;
+
         background: #f8fafc;
       }
 
@@ -1129,7 +1276,10 @@ function Styles() {
       .ownerPlaceholder {
         width: 70px;
         height: 70px;
-        flex: 0 0 70px;
+
+        flex:
+          0 0 70px;
+
         border-radius: 50%;
       }
 
@@ -1140,7 +1290,9 @@ function Styles() {
       .ownerPlaceholder {
         display: grid;
         place-items: center;
+
         background: #eef4ff;
+
         font-size: 27px;
       }
 
@@ -1152,55 +1304,77 @@ function Styles() {
 
       .ownerInfo small {
         color: #98a2b3;
+
         font-size: 9px;
       }
 
       .ownerInfo strong {
-        margin: 3px 0 7px;
+        margin:
+          3px 0 7px;
+
         font-size: 15px;
       }
 
       .ownerInfo a {
         margin-top: 5px;
+
         color: #475467;
+
         font-size: 11px;
+
         text-decoration: none;
       }
 
       .contactSection {
         margin-top: 14px;
+
         padding: 16px;
+
         border-radius: 14px;
+
         background: #f8fafc;
       }
 
       .contactTitle {
         margin-bottom: 11px;
+
         color: #344054;
+
         font-size: 13px;
         font-weight: 900;
       }
 
       .contactButtons {
         display: grid;
+
         grid-template-columns:
           repeat(
             3,
             minmax(0, 1fr)
           );
+
         gap: 9px;
       }
 
       .contactButton {
         min-height: 54px;
+
         padding: 10px;
+
         display: flex;
         align-items: center;
         justify-content: center;
+
         gap: 7px;
+
         border-radius: 12px;
+
+        border: 0;
+
         text-decoration: none;
+
         font-size: 11px;
+
         cursor: pointer;
       }
 
@@ -1210,56 +1384,78 @@ function Styles() {
 
       .phoneButton {
         background: #1465e8;
+
         color: white;
       }
 
       .whatsappButton {
         background: #e9f9ef;
+
         color: #15753b;
-        border: 1px solid #c9eed7;
+
+        border:
+          1px solid #c9eed7;
       }
 
       .chatButton {
         background: #eef4ff;
+
         color: #1465e8;
-        border: 1px solid #d7e5ff;
+
+        border:
+          1px solid #d7e5ff;
       }
 
       .additionalContact {
         margin-top: 14px;
+
         padding: 16px;
+
         border-radius: 14px;
+
         background: #f8fafc;
       }
 
       .additionalTitle {
         margin-bottom: 10px;
+
         color: #344054;
+
         font-size: 13px;
         font-weight: 900;
       }
 
       .additionalContact .infoBox {
         margin-bottom: 8px;
+
         background: white;
       }
 
       .additionalLink {
         display: block;
+
         margin-top: 7px;
+
         color: #475467;
+
         font-size: 11px;
+
         text-decoration: none;
       }
 
       .locationBox {
         margin-top: 12px;
+
         padding: 15px;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         gap: 15px;
+
         border-radius: 12px;
+
         background: #f3f7fd;
       }
 
@@ -1268,27 +1464,39 @@ function Styles() {
       }
 
       .locationBox p {
-        margin: 5px 0 0;
+        margin:
+          5px 0 0;
+
         color: #667085;
+
         font-size: 10px;
         line-height: 1.5;
       }
 
       .enabledBadge {
         flex: 0 0 auto;
-        padding: 6px 9px;
+
+        padding:
+          6px 9px;
+
         border-radius: 30px;
+
         background: #e9f8ef;
+
         color: #16803b;
+
         font-size: 9px;
         font-weight: 900;
       }
 
       .buttons {
         margin-top: 30px;
+
         display: grid;
+
         grid-template-columns:
           1.4fr 1fr;
+
         gap: 10px;
       }
 
@@ -1296,33 +1504,49 @@ function Styles() {
       .secondaryButton,
       .homeButton {
         min-height: 54px;
-        padding: 0 20px;
+
+        padding:
+          0 20px;
+
         display: flex;
         align-items: center;
         justify-content: center;
+
         border-radius: 12px;
+
         font-size: 12px;
         font-weight: 900;
+
         text-decoration: none;
       }
 
       .editButton {
         background: #1465e8;
+
         color: white;
       }
 
       .secondaryButton {
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
+
         background: white;
+
         color: #475467;
       }
 
       .centerPage {
-        width: calc(100% - 24px);
+        width:
+          calc(100% - 24px);
+
         max-width: 500px;
+
         margin: auto;
+
         padding-top: 130px;
+
         text-align: center;
+
         font-family:
           Arial,
           Helvetica,
@@ -1338,23 +1562,32 @@ function Styles() {
       }
 
       .errorBox {
-        margin: 20px 0;
+        margin:
+          20px 0;
+
         padding: 15px;
+
         border-radius: 12px;
+
         background: #fff1f1;
+
         color: #b42318;
+
         font-size: 12px;
       }
 
       .homeButton {
         margin-top: 20px;
+
         background: #1465e8;
+
         color: white;
       }
 
       @media (
         max-width: 600px
       ) {
+
         .header {
           min-height: 70px;
         }
@@ -1368,12 +1601,15 @@ function Styles() {
         }
 
         .profileCard {
-          padding: 18px 14px;
+          padding:
+            18px 14px;
+
           border-radius: 18px;
         }
 
         .hero {
           align-items: flex-start;
+
           gap: 14px;
         }
 
@@ -1381,7 +1617,9 @@ function Styles() {
         .photoPlaceholder {
           width: 105px;
           height: 105px;
+
           flex-basis: 105px;
+
           border-radius: 16px;
         }
 
