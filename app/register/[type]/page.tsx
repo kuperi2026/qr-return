@@ -62,9 +62,7 @@ type VisibilityState = {
   show_photo: boolean;
   show_owner_photo: boolean;
 
-  show_owner_phone: boolean;
   show_owner_email: boolean;
-
   show_additional_contact: boolean;
 
   show_finder_message: boolean;
@@ -177,9 +175,7 @@ const initialVisibility: VisibilityState = {
   show_photo: true,
   show_owner_photo: false,
 
-  show_owner_phone: true,
   show_owner_email: false,
-
   show_additional_contact: false,
 
   show_finder_message: true,
@@ -381,6 +377,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ მიუთითოთ QR კოდი."
             : "Please enter the QR code."
         );
+
         return;
       }
 
@@ -394,6 +391,7 @@ export default function RegistrationPage() {
             ? "Please enter the pet name."
             : "Please enter the item name."
         );
+
         return;
       }
 
@@ -413,6 +411,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ მიუთითოთ მფლობელის სახელი."
             : "Please enter the owner's first name."
         );
+
         return;
       }
 
@@ -422,6 +421,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ მიუთითოთ მფლობელის გვარი."
             : "Please enter the owner's last name."
         );
+
         return;
       }
 
@@ -431,6 +431,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ მიუთითოთ მობილურის ნომერი."
             : "Please enter the phone number."
         );
+
         return;
       }
 
@@ -440,6 +441,7 @@ export default function RegistrationPage() {
             ? "გთხოვთ მიუთითოთ ელფოსტა."
             : "Please enter the email."
         );
+
         return;
       }
 
@@ -453,6 +455,7 @@ export default function RegistrationPage() {
             ? "აირჩიეთ დაკავშირების მინიმუმ ერთი მეთოდი."
             : "Choose at least one contact method."
         );
+
         return;
       }
 
@@ -500,15 +503,14 @@ export default function RegistrationPage() {
 
       const tagCode = form.tag_code.trim();
 
-      /*
-       * Check if this QR/tag is already registered.
-       */
-      const { data: existing, error: checkError } =
-        await supabase
-          .from("item")
-          .select("tag_code")
-          .eq("tag_code", tagCode)
-          .maybeSingle();
+      const {
+        data: existing,
+        error: checkError,
+      } = await supabase
+        .from("item")
+        .select("tag_code")
+        .eq("tag_code", tagCode)
+        .maybeSingle();
 
       if (checkError) {
         setError(
@@ -516,6 +518,7 @@ export default function RegistrationPage() {
             ? `QR კოდის შემოწმება ვერ მოხერხდა: ${checkError.message}`
             : `QR code check failed: ${checkError.message}`
         );
+
         return;
       }
 
@@ -525,6 +528,7 @@ export default function RegistrationPage() {
             ? "ეს QR კოდი უკვე რეგისტრირებულია."
             : "This QR code is already registered."
         );
+
         return;
       }
 
@@ -571,6 +575,7 @@ export default function RegistrationPage() {
             ? "წონა სწორად მიუთითეთ."
             : "Please enter a valid weight."
         );
+
         return;
       }
 
@@ -580,8 +585,15 @@ export default function RegistrationPage() {
         item_type: category.itemType,
         pet_type: category.petType,
 
+        /*
+         * ALWAYS VISIBLE:
+         * item type + item/pet name
+         */
         item_name: form.item_name.trim(),
 
+        /*
+         * OPTIONAL + VISIBILITY CONTROL
+         */
         colour:
           form.colour.trim() || null,
 
@@ -627,8 +639,18 @@ export default function RegistrationPage() {
         photo_url: photoUrl,
         owner_photo_url: ownerPhotoUrl,
 
+        /*
+         * OWNER NAME + PHONE:
+         * REQUIRED AND ALWAYS VISIBLE
+         */
         owner_name: ownerName,
         owner_phone: form.owner_phone.trim(),
+
+        /*
+         * EMAIL:
+         * REQUIRED TO COMPLETE REGISTRATION,
+         * BUT VISIBILITY IS USER'S CHOICE
+         */
         owner_email: form.owner_email.trim(),
 
         additional_contact_name:
@@ -653,6 +675,10 @@ export default function RegistrationPage() {
           form.lost_seen_location.trim() ||
           null,
 
+        /*
+         * CONTACT METHODS:
+         * ONE OR MORE
+         */
         phone_enabled: phoneEnabled,
         whatsapp_enabled: whatsappEnabled,
         live_chat_enabled: liveChatEnabled,
@@ -660,6 +686,15 @@ export default function RegistrationPage() {
         location_sharing_enabled:
           locationSharingEnabled,
 
+        /*
+         * IMPORTANT:
+         * PHONE IS ALWAYS VISIBLE.
+         */
+        show_owner_phone: true,
+
+        /*
+         * Optional visibility values
+         */
         ...visibility,
 
         active: true,
@@ -771,8 +806,29 @@ export default function RegistrationPage() {
 
             <p>
               {ka
-                ? `კატეგორია: ${category.ka}. შეავსეთ ინფორმაცია და თავად გადაწყვიტეთ რას ნახავს მპოვნელი.`
-                : `Category: ${category.en}. Complete the profile and choose what the finder can see.`}
+                ? `კატეგორია: ${category.ka}`
+                : `Category: ${category.en}`}
+            </p>
+          </div>
+        </div>
+
+        {/* IMPORTANT USER EXPLANATION */}
+        <div className="privacyNotice">
+          <div className="privacyIcon">
+            ℹ️
+          </div>
+
+          <div>
+            <strong>
+              {ka
+                ? "რა გამოჩნდება QR კოდის დასკანერებისას?"
+                : "What will be visible after scanning the QR code?"}
+            </strong>
+
+            <p>
+              {ka
+                ? "დაკარგულის ტიპი, ნივთის ან ცხოველის სახელი, მფლობელის სახელი და გვარი და მობილურის ნომერი ყოველთვის ხილული იქნება, რათა მპოვნელმა შეძლოს დაკარგულის იდენტიფიცირება და თქვენთან დაკავშირება. სხვა ინფორმაციის ხილვადობას თავად აკონტროლებთ."
+                : "The lost item or pet type, its name, the owner's full name and phone number are always visible so the finder can identify it and contact you. You control the visibility of other information."}
             </p>
           </div>
         </div>
@@ -841,8 +897,8 @@ export default function RegistrationPage() {
                 }
                 text={
                   ka
-                    ? "QR კოდი და ძირითადი ინფორმაცია."
-                    : "QR code and basic information."
+                    ? "ძირითადი ინფორმაცია მპოვნელისთვის."
+                    : "Basic information for the finder."
                 }
               />
 
@@ -863,12 +919,12 @@ export default function RegistrationPage() {
                 required
               />
 
-              <Field
+              <AlwaysVisibleField
                 label={
                   category.isPet
                     ? ka
-                      ? "სახელი"
-                      : "Name"
+                      ? "ცხოველის სახელი"
+                      : "Pet name"
                     : ka
                     ? "ნივთის დასახელება"
                     : "Item name"
@@ -880,12 +936,14 @@ export default function RegistrationPage() {
                     value
                   )
                 }
-                required
+                ka={ka}
               />
 
               <OptionalField
                 label={
-                  ka ? "ფერი" : "Colour"
+                  ka
+                    ? "ფერი"
+                    : "Colour"
                 }
                 value={form.colour}
                 onChange={(value) =>
@@ -931,7 +989,9 @@ export default function RegistrationPage() {
               {category.isPet ? (
                 <OptionalSelect
                   label={
-                    ka ? "სქესი" : "Sex"
+                    ka
+                      ? "სქესი"
+                      : "Sex"
                   }
                   value={form.sex}
                   onChange={(value) =>
@@ -973,7 +1033,9 @@ export default function RegistrationPage() {
               ) : (
                 <OptionalField
                   label={
-                    ka ? "ბრენდი" : "Brand"
+                    ka
+                      ? "ბრენდი"
+                      : "Brand"
                   }
                   value={form.brand}
                   onChange={(value) =>
@@ -1044,10 +1106,14 @@ export default function RegistrationPage() {
 
                       <OptionalField
                         label={
-                          ka ? "წონა" : "Weight"
+                          ka
+                            ? "წონა"
+                            : "Weight"
                         }
                         type="number"
-                        value={form.weight}
+                        value={
+                          form.weight
+                        }
                         onChange={(value) =>
                           updateField(
                             "weight",
@@ -1095,7 +1161,9 @@ export default function RegistrationPage() {
                     <>
                       <OptionalField
                         label={
-                          ka ? "მოდელი" : "Model"
+                          ka
+                            ? "მოდელი"
+                            : "Model"
                         }
                         value={form.model}
                         onChange={(value) =>
@@ -1117,7 +1185,9 @@ export default function RegistrationPage() {
 
                       <OptionalField
                         label={
-                          ka ? "ზომა" : "Size"
+                          ka
+                            ? "ზომა"
+                            : "Size"
                         }
                         value={form.size}
                         onChange={(value) =>
@@ -1195,7 +1265,9 @@ export default function RegistrationPage() {
                         ? "დამატებითი აღწერა"
                         : "Additional description"
                     }
-                    value={form.description}
+                    value={
+                      form.description
+                    }
                     onChange={(value) =>
                       updateField(
                         "description",
@@ -1224,7 +1296,10 @@ export default function RegistrationPage() {
                 className="mainButton full"
                 onClick={nextStep}
               >
-                {ka ? "შემდეგი" : "Next"} →
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
               </button>
             </>
           )}
@@ -1240,15 +1315,31 @@ export default function RegistrationPage() {
                 }
                 text={
                   ka
-                    ? "შეავსეთ საკონტაქტო ინფორმაცია და აირჩიეთ დაკავშირების მეთოდი."
-                    : "Enter contact information and choose contact methods."
+                    ? "თქვენი სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილული იქნება."
+                    : "Your full name and phone number will always be visible to the finder."
                 }
               />
 
+              <div className="importantNotice">
+                <strong>
+                  {ka
+                    ? "სავალდებულო და ყოველთვის ხილული"
+                    : "Required and always visible"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "სახელი, გვარი და მობილურის ნომერი საჭიროა, რათა მპოვნელმა შეძლოს თქვენთან დაკავშირება."
+                    : "Your name and phone number are required so the finder can contact you."}
+                </p>
+              </div>
+
               <div className="grid2">
-                <Field
+                <AlwaysVisibleField
                   label={
-                    ka ? "სახელი" : "First name"
+                    ka
+                      ? "სახელი"
+                      : "First name"
                   }
                   value={
                     form.owner_first_name
@@ -1259,12 +1350,14 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  required
+                  ka={ka}
                 />
 
-                <Field
+                <AlwaysVisibleField
                   label={
-                    ka ? "გვარი" : "Last name"
+                    ka
+                      ? "გვარი"
+                      : "Last name"
                   }
                   value={
                     form.owner_last_name
@@ -1275,43 +1368,39 @@ export default function RegistrationPage() {
                       value
                     )
                   }
-                  required
+                  ka={ka}
                 />
               </div>
 
-              <OptionalField
+              <AlwaysVisibleField
                 label={
                   ka
-                    ? "მობილურის ნომერი *"
-                    : "Phone number *"
+                    ? "მობილურის ნომერი"
+                    : "Phone number"
                 }
                 type="tel"
-                value={form.owner_phone}
+                value={
+                  form.owner_phone
+                }
                 onChange={(value) =>
                   updateField(
                     "owner_phone",
                     value
                   )
                 }
-                visible={
-                  visibility.show_owner_phone
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_owner_phone"
-                  )
-                }
                 ka={ka}
               />
 
-              <OptionalField
+              <RequiredOptionalVisibilityField
                 label={
                   ka
-                    ? "ელფოსტა *"
-                    : "Email *"
+                    ? "ელფოსტა"
+                    : "Email"
                 }
                 type="email"
-                value={form.owner_email}
+                value={
+                  form.owner_email
+                }
                 onChange={(value) =>
                   updateField(
                     "owner_email",
@@ -1357,16 +1446,20 @@ export default function RegistrationPage() {
 
                 <p>
                   {ka
-                    ? "მონიშნეთ ერთი, ორი ან სამივე."
-                    : "Select one, two, or all three."}
+                    ? "აირჩიეთ მინიმუმ ერთი. შეგიძლიათ მონიშნოთ ერთი, ორი ან სამივე."
+                    : "Choose at least one. You can select one, two, or all three."}
                 </p>
 
                 <ContactMethod
                   icon="📞"
                   title={
-                    ka ? "მობილური" : "Phone"
+                    ka
+                      ? "მობილური"
+                      : "Phone"
                   }
-                  active={phoneEnabled}
+                  active={
+                    phoneEnabled
+                  }
                   onClick={() =>
                     setPhoneEnabled(
                       !phoneEnabled
@@ -1377,7 +1470,9 @@ export default function RegistrationPage() {
                 <ContactMethod
                   icon="🟢"
                   title="WhatsApp"
-                  active={whatsappEnabled}
+                  active={
+                    whatsappEnabled
+                  }
                   onClick={() =>
                     setWhatsappEnabled(
                       !whatsappEnabled
@@ -1388,7 +1483,9 @@ export default function RegistrationPage() {
                 <ContactMethod
                   icon="💬"
                   title="Live Chat"
-                  active={liveChatEnabled}
+                  active={
+                    liveChatEnabled
+                  }
                   onClick={() =>
                     setLiveChatEnabled(
                       !liveChatEnabled
@@ -1417,11 +1514,19 @@ export default function RegistrationPage() {
               {showExtraContact && (
                 <div className="optionalPanel">
                   <div className="visibilityHeader">
-                    <strong>
-                      {ka
-                        ? "მპოვნელისთვის ჩვენება"
-                        : "Show to finder"}
-                    </strong>
+                    <div>
+                      <strong>
+                        {ka
+                          ? "დამატებითი პირის ჩვენება"
+                          : "Show additional contact"}
+                      </strong>
+
+                      <small className="optionalLabel">
+                        {ka
+                          ? "ნებაყოფლობითი"
+                          : "Optional"}
+                      </small>
+                    </div>
 
                     <VisibilityToggle
                       active={
@@ -1454,7 +1559,9 @@ export default function RegistrationPage() {
 
                   <Field
                     label={
-                      ka ? "ტელეფონი" : "Phone"
+                      ka
+                        ? "ტელეფონი"
+                        : "Phone"
                     }
                     type="tel"
                     value={
@@ -1470,7 +1577,9 @@ export default function RegistrationPage() {
 
                   <Field
                     label={
-                      ka ? "ელფოსტა" : "Email"
+                      ka
+                        ? "ელფოსტა"
+                        : "Email"
                     }
                     type="email"
                     value={
@@ -1496,7 +1605,10 @@ export default function RegistrationPage() {
                   className="backButton"
                   onClick={previousStep}
                 >
-                  ← {ka ? "უკან" : "Back"}
+                  ←{" "}
+                  {ka
+                    ? "უკან"
+                    : "Back"}
                 </button>
 
                 <button
@@ -1504,7 +1616,10 @@ export default function RegistrationPage() {
                   className="mainButton"
                   onClick={nextStep}
                 >
-                  {ka ? "შემდეგი" : "Next"} →
+                  {ka
+                    ? "შემდეგი"
+                    : "Next"}{" "}
+                  →
                 </button>
               </div>
             </>
@@ -1532,7 +1647,9 @@ export default function RegistrationPage() {
                     ? "შეტყობინება მპოვნელისთვის"
                     : "Message for the finder"
                 }
-                value={form.finder_message}
+                value={
+                  form.finder_message
+                }
                 onChange={(value) =>
                   updateField(
                     "finder_message",
@@ -1613,7 +1730,10 @@ export default function RegistrationPage() {
                   className="backButton"
                   onClick={previousStep}
                 >
-                  ← {ka ? "უკან" : "Back"}
+                  ←{" "}
+                  {ka
+                    ? "უკან"
+                    : "Back"}
                 </button>
 
                 <button
@@ -1651,14 +1771,22 @@ function Header({
 }) {
   return (
     <header className="header">
-      <a href="/" className="brand">
+      <a
+        href="/"
+        className="brand"
+      >
         <div className="logo">
           QR
         </div>
 
         <div>
-          <strong>QR RETURN</strong>
-          <small>SMART LOST & FOUND</small>
+          <strong>
+            QR RETURN
+          </strong>
+
+          <small>
+            SMART LOST & FOUND
+          </small>
         </div>
       </a>
 
@@ -1727,7 +1855,9 @@ function Progress({
         {number}
       </span>
 
-      <small>{label}</small>
+      <small>
+        {label}
+      </small>
     </div>
   );
 }
@@ -1743,11 +1873,18 @@ function StepTitle({
 }) {
   return (
     <div className="stepTitle">
-      <b>{number}</b>
+      <b>
+        {number}
+      </b>
 
       <div>
-        <h2>{title}</h2>
-        <p>{text}</p>
+        <h2>
+          {title}
+        </h2>
+
+        <p>
+          {text}
+        </p>
       </div>
     </div>
   );
@@ -1759,32 +1896,137 @@ function Field({
   onChange,
   type = "text",
   placeholder = "",
-  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   placeholder?: string;
-  required?: boolean;
 }) {
   return (
     <label className="field">
       <span>
         {label}
-        {required ? " *" : ""}
       </span>
 
       <input
         type={type}
         value={value}
         placeholder={placeholder}
-        required={required}
         onChange={(event) =>
           onChange(event.target.value)
         }
       />
     </label>
+  );
+}
+
+function AlwaysVisibleField({
+  label,
+  value,
+  onChange,
+  ka,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  ka: boolean;
+  type?: string;
+}) {
+  return (
+    <div className="requiredVisibleField">
+      <label>
+        <span>
+          {label} *
+        </span>
+
+        <input
+          type={type}
+          value={value}
+          required
+          onChange={(event) =>
+            onChange(
+              event.target.value
+            )
+          }
+        />
+      </label>
+
+      <div className="alwaysVisibleBadge">
+        ✓{" "}
+        {ka
+          ? "სავალდებულო • მპოვნელისთვის ხილული"
+          : "Required • Visible to finder"}
+      </div>
+    </div>
+  );
+}
+
+function RequiredOptionalVisibilityField({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+  ka,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  ka: boolean;
+  type?: string;
+}) {
+  return (
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <div>
+          <strong>
+            {label} *
+          </strong>
+
+          <small className="requiredFillLabel">
+            {ka
+              ? "შევსება სავალდებულოა • ჩვენება თქვენი არჩევანია"
+              : "Required to complete • Visibility is your choice"}
+          </small>
+        </div>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
+
+      <input
+        type={type}
+        required
+        value={value}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+      />
+
+      <small>
+        {ka
+          ? "მპოვნელისთვის:"
+          : "For finder:"}{" "}
+        <b>
+          {visible
+            ? ka
+              ? "ხილული"
+              : "Visible"
+            : ka
+            ? "დამალული"
+            : "Hidden"}
+        </b>
+      </small>
+    </div>
   );
 }
 
@@ -1808,7 +2050,17 @@ function OptionalField({
   return (
     <div className="visibilityField">
       <div className="visibilityHeader">
-        <strong>{label}</strong>
+        <div>
+          <strong>
+            {label}
+          </strong>
+
+          <small className="optionalLabel">
+            {ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
+          </small>
+        </div>
 
         <VisibilityToggle
           active={visible}
@@ -1828,7 +2080,11 @@ function OptionalField({
         {ka
           ? "მპოვნელისთვის ჩვენება:"
           : "Show to finder:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </small>
     </div>
   );
@@ -1857,7 +2113,17 @@ function OptionalSelect({
   return (
     <div className="visibilityField">
       <div className="visibilityHeader">
-        <strong>{label}</strong>
+        <div>
+          <strong>
+            {label}
+          </strong>
+
+          <small className="optionalLabel">
+            {ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
+          </small>
+        </div>
 
         <VisibilityToggle
           active={visible}
@@ -1873,7 +2139,9 @@ function OptionalSelect({
       >
         {options.map((option) => (
           <option
-            key={option.value || "empty"}
+            key={
+              option.value || "empty"
+            }
             value={option.value}
           >
             {option.label}
@@ -1885,7 +2153,11 @@ function OptionalSelect({
         {ka
           ? "მპოვნელისთვის ჩვენება:"
           : "Show to finder:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </small>
     </div>
   );
@@ -1909,7 +2181,17 @@ function OptionalTextArea({
   return (
     <div className="visibilityField">
       <div className="visibilityHeader">
-        <strong>{label}</strong>
+        <div>
+          <strong>
+            {label}
+          </strong>
+
+          <small className="optionalLabel">
+            {ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
+          </small>
+        </div>
 
         <VisibilityToggle
           active={visible}
@@ -1928,7 +2210,11 @@ function OptionalTextArea({
         {ka
           ? "მპოვნელისთვის ჩვენება:"
           : "Show to finder:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </small>
     </div>
   );
@@ -1952,7 +2238,17 @@ function PhotoField({
   return (
     <div className="photoBox">
       <div className="visibilityHeader">
-        <strong>{label}</strong>
+        <div>
+          <strong>
+            {label}
+          </strong>
+
+          <small className="optionalLabel">
+            {ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
+          </small>
+        </div>
 
         <VisibilityToggle
           active={visible}
@@ -1972,15 +2268,17 @@ function PhotoField({
           }
         />
 
-        <b>{file ? "✓" : "+"}</b>
+        <b>
+          {file ? "✓" : "+"}
+        </b>
 
         <div>
           <strong>
             {file
               ? file.name
               : ka
-              ? "ფოტოს დამატება — ნებაყოფლობითი"
-              : "Add photo — optional"}
+              ? "ფოტოს დამატება"
+              : "Add photo"}
           </strong>
 
           <small>
@@ -1995,7 +2293,11 @@ function PhotoField({
         {ka
           ? "მპოვნელისთვის ჩვენება:"
           : "Show to finder:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </small>
     </div>
   );
@@ -2026,7 +2328,9 @@ function ContactMethod({
         {icon}
       </span>
 
-      <strong>{title}</strong>
+      <strong>
+        {title}
+      </strong>
 
       <span
         className={
@@ -2057,6 +2361,7 @@ function VisibilityToggle({
           : "switch"
       }
       onClick={onClick}
+      aria-pressed={active}
     >
       <span />
     </button>
@@ -2097,7 +2402,10 @@ function Styles() {
         min-height: 100vh;
         background: #f8fafc;
         color: #101828;
-        font-family: Inter, Arial, sans-serif;
+        font-family:
+          Inter,
+          Arial,
+          sans-serif;
       }
 
       .header {
@@ -2218,7 +2526,57 @@ function Styles() {
         margin: 0;
         color: #667085;
         font-size: 13px;
-        line-height: 1.6;
+      }
+
+      .privacyNotice {
+        margin-top: 24px;
+        padding: 17px;
+        display: flex;
+        gap: 12px;
+        border: 1px solid #d9e6fb;
+        border-radius: 15px;
+        background: #f2f7ff;
+      }
+
+      .privacyIcon {
+        width: 35px;
+        height: 35px;
+        flex: 0 0 35px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: white;
+      }
+
+      .privacyNotice strong {
+        color: #344054;
+        font-size: 12px;
+      }
+
+      .privacyNotice p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.55;
+      }
+
+      .importantNotice {
+        margin-bottom: 18px;
+        padding: 15px;
+        border-radius: 13px;
+        background: #f2f7ff;
+      }
+
+      .importantNotice strong {
+        color: #1465e8;
+        font-size: 11px;
+      }
+
+      .importantNotice p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.5;
       }
 
       .progress {
@@ -2302,6 +2660,7 @@ function Styles() {
         margin: 6px 0 0;
         color: #7b8492;
         font-size: 12px;
+        line-height: 1.5;
       }
 
       .grid2 {
@@ -2312,12 +2671,14 @@ function Styles() {
       }
 
       .field,
-      .visibilityField {
+      .visibilityField,
+      .requiredVisibleField {
         display: block;
         margin-bottom: 16px;
       }
 
       .field > span,
+      .requiredVisibleField label > span,
       .visibilityHeader strong {
         display: block;
         color: #344054;
@@ -2325,11 +2686,13 @@ function Styles() {
         font-weight: 800;
       }
 
-      .field > span {
+      .field > span,
+      .requiredVisibleField label > span {
         margin-bottom: 7px;
       }
 
       .field input,
+      .requiredVisibleField input,
       .visibilityField input,
       .visibilityField select,
       .visibilityField textarea {
@@ -2341,6 +2704,7 @@ function Styles() {
       }
 
       .field input,
+      .requiredVisibleField input,
       .visibilityField input,
       .visibilityField select {
         height: 54px;
@@ -2353,6 +2717,13 @@ function Styles() {
         resize: vertical;
       }
 
+      .alwaysVisibleBadge {
+        margin-top: 6px;
+        color: #16803b;
+        font-size: 9px;
+        font-weight: 800;
+      }
+
       .visibilityHeader {
         margin-bottom: 8px;
         display: flex;
@@ -2361,7 +2732,7 @@ function Styles() {
         gap: 12px;
       }
 
-      .visibilityField small,
+      .visibilityField > small,
       .visibilityStatus {
         display: block;
         margin-top: 6px;
@@ -2369,9 +2740,22 @@ function Styles() {
         font-size: 10px;
       }
 
-      .visibilityField small b,
+      .visibilityField > small b,
       .visibilityStatus b {
         color: #1465e8;
+      }
+
+      .optionalLabel,
+      .requiredFillLabel {
+        display: block;
+        margin-top: 3px;
+        color: #98a2b3;
+        font-size: 9px;
+        font-weight: 500;
+      }
+
+      .requiredFillLabel {
+        color: #667085;
       }
 
       .photoBox {
@@ -2659,6 +3043,7 @@ function Styles() {
         }
 
         .field input,
+        .requiredVisibleField input,
         .visibilityField input,
         .visibilityField select,
         .visibilityField textarea {
