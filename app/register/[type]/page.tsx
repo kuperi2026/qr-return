@@ -1,57 +1,43 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type Language = "ka" | "en";
-type Step = 1 | 2 | 3;
+type Lang = "ka" | "en";
 
-type CategoryKey =
-  | "dog"
-  | "cat"
-  | "keys"
-  | "wallet"
-  | "suitcase"
-  | "bag";
-
-type FormState = {
-  tag_code: string;
-  item_name: string;
+type FormData = {
+  tagCode: string;
+  itemName: string;
+  ownerName: string;
+  ownerPhone: string;
+  ownerEmail: string;
   colour: string;
-
   sex: string;
-  date_of_birth: string;
+  dateOfBirth: string;
   weight: string;
-  medical_info: string;
-
+  medicalInfo: string;
+  finderMessage: string;
+  contactPreference: string;
+  description: string;
   brand: string;
   model: string;
   size: string;
   material: string;
-  distinctive_features: string;
-  description: string;
-
-  owner_first_name: string;
-  owner_last_name: string;
-  owner_phone: string;
-  owner_email: string;
-
-  additional_contact_name: string;
-  additional_contact_phone: string;
-  additional_contact_email: string;
-
-  contact_preference: string;
-
-  finder_message: string;
-  reward: string;
-  lost_seen_location: string;
+  distinctiveFeatures: string;
 };
 
-const BUCKET = "qr-return-images";
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-
-const categories = {
+const TYPE_CONFIG: Record<
+  string,
+  {
+    icon: string;
+    ka: string;
+    en: string;
+    itemType: string;
+    petType: string | null;
+    isPet: boolean;
+  }
+> = {
   dog: {
     icon: "🐕",
     ka: "ძაღლი",
@@ -92,7 +78,7 @@ const categories = {
     icon: "🧳",
     ka: "ჩემოდანი",
     en: "Suitcase",
-    itemType: "luggage",
+    itemType: "suitcase",
     petType: null,
     isPet: false,
   },
@@ -101,169 +87,233 @@ const categories = {
     icon: "🎒",
     ka: "ჩანთა",
     en: "Bag",
-    itemType: "luggage",
+    itemType: "bag",
     petType: null,
     isPet: false,
   },
-} as const;
+};
 
-const initialForm: FormState = {
-  tag_code: "",
-  item_name: "",
+const TEXT = {
+  ka: {
+    brandSub: "SCAN • CONNECT • RETURN",
+    back: "მთავარზე დაბრუნება",
+    eyebrow: "პროფილის შექმნა",
+    title: "დაარეგისტრირე",
+    subtitle:
+      "შეავსე ინფორმაცია, რომელიც დაგვეხმარება ნივთის ან ცხოველის უსაფრთხოდ დაბრუნებაში.",
+    step1: "ძირითადი",
+    step2: "დეტალები",
+    step3: "კონტაქტი",
+    step4: "მზადაა",
+    section1: "ძირითადი ინფორმაცია",
+    section1Sub: "QR კოდი და მთავარი მონაცემები",
+    section2: "დამატებითი დეტალები",
+    section2Sub: "ეს ინფორმაცია მპოვნელს ამოცნობაში დაეხმარება",
+    section3: "მფლობელი და კონტაქტი",
+    section3Sub: "როგორ დაგიკავშირდეს მპოვნელი",
+    tag: "QR Tag Code",
+    tagHint: "ჩაწერე QR ტეგზე დაბეჭდილი უნიკალური კოდი.",
+    itemNamePet: "ცხოველის სახელი",
+    itemNameItem: "ნივთის სახელი",
+    ownerName: "მფლობელის სახელი",
+    ownerPhone: "ტელეფონის ნომერი",
+    ownerEmail: "ელფოსტა",
+    colour: "ფერი",
+    sex: "სქესი",
+    male: "მამრობითი",
+    female: "მდედრობითი",
+    select: "აირჩიე",
+    dob: "დაბადების თარიღი",
+    weight: "წონა",
+    medical: "სამედიცინო ინფორმაცია",
+    medicalPlaceholder:
+      "მაგ. ალერგია, მედიკამენტი, განსაკუთრებული საჭიროება...",
+    finderMessage: "შეტყობინება მპოვნელისთვის",
+    finderPlaceholder:
+      "მაგ. გთხოვთ დამიკავშირდეთ. ცხოველი მეგობრულია...",
+    contactPreference: "სასურველი დაკავშირების მეთოდი",
+    phone: "ტელეფონი",
+    email: "ელფოსტა",
+    both: "ტელეფონი და ელფოსტა",
+    description: "აღწერა",
+    descriptionPlaceholder:
+      "მოკლე აღწერა, რომელიც ნივთის ამოცნობაში დაეხმარება...",
+    brand: "ბრენდი",
+    model: "მოდელი",
+    size: "ზომა",
+    material: "მასალა",
+    distinctive: "განმასხვავებელი ნიშნები",
+    distinctivePlaceholder:
+      "ნაკაწრი, სტიკერი, ინიციალები ან სხვა ნიშანი...",
+    photo: "ფოტო",
+    photoSub: "დაამატე ფოტო უკეთესი ამოცნობისთვის",
+    choosePhoto: "ფოტოს არჩევა",
+    changePhoto: "ფოტოს შეცვლა",
+    remove: "წაშლა",
+    location: "ლოკაციის გაზიარება",
+    locationSub:
+      "თუ ჩართულია, მპოვნელს შეუძლია თავისი მდებარეობა გაგიზიაროს.",
+    ownerMessage: "მფლობელის შეტყობინება",
+    ownerMessageSub:
+      "მპოვნელისთვის გამოჩნდება შენ მიერ დაწერილი შეტყობინება.",
+    active: "ტეგის გააქტიურება",
+    activeSub: "აქტიური ტეგი მზად იქნება სკანირებისთვის.",
+    save: "პროფილის შენახვა",
+    saving: "ინახება...",
+    required: "სავალდებულო",
+    successTitle: "პროფილი წარმატებით შეიქმნა",
+    successText:
+      "QR ტეგი დაკავშირებულია შენს პროფილთან და მზადაა გამოყენებისთვის.",
+    registerAnother: "სხვა ნივთის რეგისტრაცია",
+    home: "მთავარ გვერდზე დაბრუნება",
+    errorRequired:
+      "შეავსე ყველა სავალდებულო ველი.",
+    errorTag:
+      "QR Tag Code სავალდებულოა.",
+    errorSave:
+      "შენახვა ვერ მოხერხდა.",
+    photoReady: "ფოტო არჩეულია",
+    petDetails: "ცხოველის დეტალები",
+    itemDetails: "ნივთის დეტალები",
+  },
+
+  en: {
+    brandSub: "SCAN • CONNECT • RETURN",
+    back: "Back to home",
+    eyebrow: "CREATE PROFILE",
+    title: "Register your",
+    subtitle:
+      "Add the information that can help return your pet or item safely.",
+    step1: "Basic",
+    step2: "Details",
+    step3: "Contact",
+    step4: "Ready",
+    section1: "Basic information",
+    section1Sub: "QR code and primary details",
+    section2: "Additional details",
+    section2Sub:
+      "This information can help the finder identify it",
+    section3: "Owner & contact",
+    section3Sub: "Choose how a finder can reach you",
+    tag: "QR Tag Code",
+    tagHint: "Enter the unique code printed on the QR tag.",
+    itemNamePet: "Pet name",
+    itemNameItem: "Item name",
+    ownerName: "Owner name",
+    ownerPhone: "Phone number",
+    ownerEmail: "Email",
+    colour: "Color",
+    sex: "Sex",
+    male: "Male",
+    female: "Female",
+    select: "Select",
+    dob: "Date of birth",
+    weight: "Weight",
+    medical: "Medical information",
+    medicalPlaceholder:
+      "Allergies, medication, special needs...",
+    finderMessage: "Message for finder",
+    finderPlaceholder:
+      "Please contact me. My pet is friendly...",
+    contactPreference: "Preferred contact method",
+    phone: "Phone",
+    email: "Email",
+    both: "Phone and email",
+    description: "Description",
+    descriptionPlaceholder:
+      "Add a short description that can help identify the item...",
+    brand: "Brand",
+    model: "Model",
+    size: "Size",
+    material: "Material",
+    distinctive: "Distinctive features",
+    distinctivePlaceholder:
+      "Scratch, sticker, initials or another unique feature...",
+    photo: "Photo",
+    photoSub: "Add a photo for easier identification",
+    choosePhoto: "Choose photo",
+    changePhoto: "Change photo",
+    remove: "Remove",
+    location: "Location sharing",
+    locationSub:
+      "When enabled, a finder can share their current location with you.",
+    ownerMessage: "Owner message",
+    ownerMessageSub:
+      "Your finder message will be visible to the person who scans the tag.",
+    active: "Activate tag",
+    activeSub: "An active tag will be ready for scanning.",
+    save: "Save profile",
+    saving: "Saving...",
+    required: "Required",
+    successTitle: "Profile created successfully",
+    successText:
+      "Your QR tag is now connected to this profile and ready to use.",
+    registerAnother: "Register another item",
+    home: "Return to home",
+    errorRequired:
+      "Please complete all required fields.",
+    errorTag: "QR Tag Code is required.",
+    errorSave: "Could not save the profile.",
+    photoReady: "Photo selected",
+    petDetails: "Pet details",
+    itemDetails: "Item details",
+  },
+};
+
+const INITIAL_FORM: FormData = {
+  tagCode: "",
+  itemName: "",
+  ownerName: "",
+  ownerPhone: "",
+  ownerEmail: "",
   colour: "",
-
   sex: "",
-  date_of_birth: "",
+  dateOfBirth: "",
   weight: "",
-  medical_info: "",
-
+  medicalInfo: "",
+  finderMessage: "",
+  contactPreference: "both",
+  description: "",
   brand: "",
   model: "",
   size: "",
   material: "",
-  distinctive_features: "",
-  description: "",
-
-  owner_first_name: "",
-  owner_last_name: "",
-  owner_phone: "",
-  owner_email: "",
-
-  additional_contact_name: "",
-  additional_contact_phone: "",
-  additional_contact_email: "",
-
-  contact_preference: "both",
-
-  finder_message: "",
-  reward: "",
-  lost_seen_location: "",
+  distinctiveFeatures: "",
 };
 
-function safeExtension(file: File) {
-  const extension =
-    file.name.split(".").pop()?.toLowerCase() || "jpg";
-
-  const allowed = [
-    "jpg",
-    "jpeg",
-    "png",
-    "webp",
-    "gif",
-    "heic",
-    "heif",
-  ];
-
-  return allowed.includes(extension)
-    ? extension
-    : "jpg";
-}
-
-function cleanTag(tag: string) {
-  return tag
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
-async function uploadImage(
-  file: File,
-  folder: "items" | "owners",
-  tagCode: string
-) {
-  if (!file.type.startsWith("image/")) {
-    throw new Error("INVALID_IMAGE_TYPE");
-  }
-
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw new Error("IMAGE_TOO_LARGE");
-  }
-
-  const extension = safeExtension(file);
-
-  const uniquePart =
-    typeof crypto !== "undefined" &&
-    "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2)}`;
-
-  const filePath =
-    `${folder}/${cleanTag(tagCode)}-${uniquePart}.${extension}`;
-
-  const { error: uploadError } =
-    await supabase.storage
-      .from(BUCKET)
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
-      });
-
-  if (uploadError) {
-    console.error(
-      "Storage upload error:",
-      uploadError
-    );
-
-    throw uploadError;
-  }
-
-  const { data } =
-    supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(filePath);
-
-  if (!data.publicUrl) {
-    throw new Error("PUBLIC_URL_ERROR");
-  }
-
-  return data.publicUrl;
-}
-
-export default function RegistrationPage() {
+export default function RegisterTypePage() {
   const params = useParams();
 
-  const rawType = Array.isArray(params.type)
+  const rawType = Array.isArray(params?.type)
     ? params.type[0]
-    : params.type;
+    : params?.type;
 
-  const type: CategoryKey =
-    rawType && rawType in categories
-      ? (rawType as CategoryKey)
+  const type =
+    typeof rawType === "string"
+      ? rawType.toLowerCase()
       : "dog";
 
-  const category = categories[type];
+  const config =
+    TYPE_CONFIG[type] ?? TYPE_CONFIG.dog;
 
-  const [language, setLanguage] =
-    useState<Language>("ka");
-
-  const [step, setStep] =
-    useState<Step>(1);
-
+  const [lang, setLang] = useState<Lang>("ka");
   const [form, setForm] =
-    useState<FormState>(initialForm);
+    useState<FormData>(INITIAL_FORM);
 
-  const [
-    showExtraProfile,
-    setShowExtraProfile,
-  ] = useState(false);
+  const [locationSharing, setLocationSharing] =
+    useState(true);
 
-  const [
-    showExtraContact,
-    setShowExtraContact,
-  ] = useState(false);
+  const [ownerMessageEnabled, setOwnerMessageEnabled] =
+    useState(true);
 
-  const [
-    locationSharingEnabled,
-    setLocationSharingEnabled,
-  ] = useState(false);
+  const [active, setActive] =
+    useState(true);
 
-  const [itemPhoto, setItemPhoto] =
+  const [photoFile, setPhotoFile] =
     useState<File | null>(null);
 
-  const [ownerPhoto, setOwnerPhoto] =
-    useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] =
+    useState("");
 
   const [saving, setSaving] =
     useState(false);
@@ -271,149 +321,122 @@ export default function RegistrationPage() {
   const [error, setError] =
     useState("");
 
-  const [success, setSuccess] =
+  const [saved, setSaved] =
     useState(false);
 
-  const ka = language === "ka";
+  const fileInputRef =
+    useRef<HTMLInputElement | null>(null);
+
+  const t = TEXT[lang];
+
+  const typeLabel =
+    lang === "ka"
+      ? config.ka
+      : config.en;
+
+  const completion = useMemo(() => {
+    let score = 0;
+
+    if (form.tagCode.trim()) score += 1;
+    if (form.itemName.trim()) score += 1;
+    if (form.ownerPhone.trim()) score += 1;
+    if (form.ownerEmail.trim()) score += 1;
+
+    return score;
+  }, [form]);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
   function updateField(
-    field: keyof FormState,
+    field: keyof FormData,
     value: string
   ) {
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
+
+    if (error) {
+      setError("");
+    }
   }
 
-  function goTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  function validateImage(
+  function handlePhoto(
     file: File | null
   ) {
-    if (!file) {
-      return true;
+    if (!file) return;
+
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
     }
 
-    if (!file.type.startsWith("image/")) {
-      setError(
-        ka
-          ? "გთხოვთ, აირჩიოთ მხოლოდ სურათის ფაილი."
-          : "Please select an image file only."
-      );
-
-      return false;
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      setError(
-        ka
-          ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
-          : "The image must not exceed 5 MB."
-      );
-
-      return false;
-    }
-
-    return true;
+    setPhotoFile(file);
+    setPhotoPreview(
+      URL.createObjectURL(file)
+    );
   }
 
-  function nextStep() {
-    setError("");
-
-    if (step === 1) {
-      if (!form.tag_code.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ QR კოდი."
-            : "Please enter the QR code."
-        );
-        return;
-      }
-
-      if (!form.item_name.trim()) {
-        setError(
-          ka
-            ? category.isPet
-              ? "გთხოვთ, მიუთითოთ ცხოველის სახელი."
-              : "გთხოვთ, მიუთითოთ ნივთის დასახელება."
-            : category.isPet
-            ? "Please enter the pet name."
-            : "Please enter the item name."
-        );
-        return;
-      }
-
-      if (!validateImage(itemPhoto)) {
-        return;
-      }
-
-      setStep(2);
-      goTop();
-      return;
+  function removePhoto() {
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
     }
 
-    if (step === 2) {
-      if (!form.owner_first_name.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მფლობელის სახელი."
-            : "Please enter the owner's first name."
-        );
-        return;
-      }
+    setPhotoFile(null);
+    setPhotoPreview("");
 
-      if (!form.owner_last_name.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მფლობელის გვარი."
-            : "Please enter the owner's last name."
-        );
-        return;
-      }
-
-      if (!form.owner_phone.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მობილურის ნომერი."
-            : "Please enter the phone number."
-        );
-        return;
-      }
-
-      if (!form.owner_email.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ ელფოსტა."
-            : "Please enter an email address."
-        );
-        return;
-      }
-
-      if (!validateImage(ownerPhoto)) {
-        return;
-      }
-
-      setStep(3);
-      goTop();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }
 
-  function previousStep() {
-    setError("");
-
-    if (step === 3) {
-      setStep(2);
-    } else {
-      setStep(1);
+  async function uploadPhoto(
+    tagCode: string
+  ) {
+    if (!photoFile) {
+      return null;
     }
 
-    goTop();
+    const safeTag = tagCode
+      .replace(/[^a-zA-Z0-9-_]/g, "-")
+      .toLowerCase();
+
+    const extension =
+      photoFile.name
+        .split(".")
+        .pop()
+        ?.toLowerCase() || "jpg";
+
+    const filePath =
+      `items/${safeTag}-${Date.now()}.${extension}`;
+
+    const { error: uploadError } =
+      await supabase.storage
+        .from("item-photos")
+        .upload(
+          filePath,
+          photoFile,
+          {
+            cacheControl: "3600",
+            upsert: false,
+          }
+        );
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } =
+      supabase.storage
+        .from("item-photos")
+        .getPublicUrl(filePath);
+
+    return data.publicUrl;
   }
 
   async function handleSubmit(
@@ -421,1471 +444,1342 @@ export default function RegistrationPage() {
   ) {
     event.preventDefault();
 
-    if (step !== 3) {
-      nextStep();
+    setError("");
+
+    const cleanTag =
+      form.tagCode.trim();
+
+    const cleanItemName =
+      form.itemName.trim();
+
+    const cleanPhone =
+      form.ownerPhone.trim();
+
+    const cleanEmail =
+      form.ownerEmail.trim();
+
+    if (!cleanTag) {
+      setError(t.errorTag);
+      return;
+    }
+
+    if (
+      !cleanItemName ||
+      !cleanPhone ||
+      !cleanEmail
+    ) {
+      setError(
+        t.errorRequired
+      );
       return;
     }
 
     setSaving(true);
-    setError("");
 
     try {
+      let photoUrl: string | null =
+        null;
+
+      if (photoFile) {
+        photoUrl =
+          await uploadPhoto(
+            cleanTag
+          );
+      }
+
+      const weightValue =
+        config.isPet &&
+        form.weight.trim() !== ""
+          ? Number(
+              form.weight
+            )
+          : null;
+
       if (
-        !validateImage(itemPhoto) ||
-        !validateImage(ownerPhoto)
+        weightValue !== null &&
+        Number.isNaN(
+          weightValue
+        )
       ) {
-        return;
+        throw new Error(
+          lang === "ka"
+            ? "წონა სწორად ჩაწერე."
+            : "Enter a valid weight."
+        );
       }
-
-      let photoUrl: string | null = null;
-      let ownerPhotoUrl: string | null = null;
-
-      /*
-       * ITEM / PET PHOTO
-       */
-      if (itemPhoto) {
-        try {
-          photoUrl =
-            await uploadImage(
-              itemPhoto,
-              "items",
-              form.tag_code
-            );
-        } catch (uploadError) {
-          console.error(uploadError);
-
-          const message =
-            uploadError instanceof Error
-              ? uploadError.message
-              : "";
-
-          if (
-            message === "IMAGE_TOO_LARGE"
-          ) {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფოტო 5 MB-ზე დიდია."
-                : "The pet/item image is larger than 5 MB."
-            );
-          } else if (
-            message === "INVALID_IMAGE_TYPE"
-          ) {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფაილი სურათი უნდა იყოს."
-                : "The pet/item file must be an image."
-            );
-          } else {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფოტოს ატვირთვა ვერ მოხერხდა."
-                : "The pet/item image could not be uploaded."
-            );
-          }
-
-          return;
-        }
-      }
-
-      /*
-       * OWNER PHOTO
-       */
-      if (ownerPhoto) {
-        try {
-          ownerPhotoUrl =
-            await uploadImage(
-              ownerPhoto,
-              "owners",
-              form.tag_code
-            );
-        } catch (uploadError) {
-          console.error(uploadError);
-
-          const message =
-            uploadError instanceof Error
-              ? uploadError.message
-              : "";
-
-          if (
-            message === "IMAGE_TOO_LARGE"
-          ) {
-            setError(
-              ka
-                ? "მფლობელის ფოტო 5 MB-ზე დიდია."
-                : "The owner image is larger than 5 MB."
-            );
-          } else if (
-            message === "INVALID_IMAGE_TYPE"
-          ) {
-            setError(
-              ka
-                ? "მფლობელის ფაილი სურათი უნდა იყოს."
-                : "The owner file must be an image."
-            );
-          } else {
-            setError(
-              ka
-                ? "მფლობელის ფოტოს ატვირთვა ვერ მოხერხდა."
-                : "The owner image could not be uploaded."
-            );
-          }
-
-          return;
-        }
-      }
-
-      const ownerName = [
-        form.owner_first_name.trim(),
-        form.owner_last_name.trim(),
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      const finderMessage =
-        form.finder_message.trim();
 
       const payload = {
-        tag_code:
-          form.tag_code.trim(),
+        tag_code: cleanTag,
 
-        /*
-         * IMPORTANT:
-         * Supabase CHECK constraint:
-         *
-         * dog
-         * cat
-         * key
-         * wallet
-         * luggage
-         */
         item_type:
-          category.itemType,
+          config.itemType,
 
         pet_type:
-          category.petType,
+          config.petType,
 
         item_name:
-          form.item_name.trim(),
+          cleanItemName,
+
+        owner_phone:
+          cleanPhone,
+
+        owner_email:
+          cleanEmail,
 
         colour:
-          form.colour.trim() || null,
+          form.colour.trim() ||
+          null,
 
         sex:
-          category.isPet
+          config.isPet
             ? form.sex || null
             : null,
 
         date_of_birth:
-          category.isPet
-            ? form.date_of_birth || null
+          config.isPet
+            ? form.dateOfBirth ||
+              null
             : null,
 
         weight:
-          category.isPet &&
-          form.weight.trim()
-            ? Number(form.weight)
-            : null,
+          weightValue,
 
         medical_info:
-          category.isPet
-            ? form.medical_info.trim() || null
+          config.isPet
+            ? form.medicalInfo.trim() ||
+              null
             : null,
 
+        finder_message:
+          form.finderMessage.trim() ||
+          null,
+
+        contact_preference:
+          form.contactPreference ||
+          "both",
+
+        location_sharing_enabled:
+          locationSharing,
+
+        owner_message_enabled:
+          ownerMessageEnabled,
+
+        description:
+          form.description.trim() ||
+          null,
+
         brand:
-          !category.isPet
-            ? form.brand.trim() || null
+          !config.isPet
+            ? form.brand.trim() ||
+              null
             : null,
 
         model:
-          !category.isPet
-            ? form.model.trim() || null
+          !config.isPet
+            ? form.model.trim() ||
+              null
             : null,
 
         size:
-          !category.isPet
-            ? form.size.trim() || null
+          !config.isPet
+            ? form.size.trim() ||
+              null
             : null,
 
         material:
-          !category.isPet
-            ? form.material.trim() || null
+          !config.isPet
+            ? form.material.trim() ||
+              null
             : null,
 
         distinctive_features:
-          !category.isPet
-            ? form.distinctive_features.trim() || null
+          !config.isPet
+            ? form.distinctiveFeatures.trim() ||
+              null
             : null,
 
-        description:
-          form.description.trim() || null,
+        active,
+
+        lost_at: null,
+
+        lost_message: null,
+
+        scan_count: 0,
+
+        last_scanned_at: null,
+
+        last_scan_latitude: null,
+
+        last_scan_longitude: null,
+
+        last_scan_accuracy: null,
 
         photo_url:
           photoUrl,
 
-        owner_photo_url:
-          ownerPhotoUrl,
-
         owner_name:
-          ownerName,
-
-        owner_phone:
-          form.owner_phone.trim(),
-
-        owner_email:
-          form.owner_email.trim(),
-
-        finder_message:
-          finderMessage || null,
-
-        contact_preference:
-          form.contact_preference,
-
-        location_sharing_enabled:
-          locationSharingEnabled,
-
-        owner_message_enabled:
-          finderMessage.length > 0,
-
-        lost_seen_location:
-          form.lost_seen_location.trim() || null,
-
-        active: true,
+          form.ownerName.trim() ||
+          null,
       };
 
-      const { error: saveError } =
-        await supabase
-          .from("item")
-          .insert(payload);
+      const {
+        error: insertError,
+      } = await supabase
+        .from("item")
+        .insert([
+          payload,
+        ]);
 
-      if (saveError) {
-        console.error(
-          "Supabase save error:",
-          saveError
-        );
-
-        setError(
-          ka
-            ? `შენახვა ვერ მოხერხდა: ${saveError.message}`
-            : `Save failed: ${saveError.message}`
-        );
-
-        return;
+      if (insertError) {
+        throw insertError;
       }
 
-      setSuccess(true);
-      goTop();
-    } catch (err) {
+      setSaved(true);
+    } catch (err: any) {
       console.error(
-        "Registration error:",
+        "SAVE ERROR:",
         err
       );
 
+      let message =
+        err?.message ||
+        t.errorSave;
+
+      if (
+        message
+          .toLowerCase()
+          .includes(
+            "duplicate"
+          )
+      ) {
+        message =
+          lang === "ka"
+            ? "ეს QR Tag Code უკვე გამოყენებულია. გამოიყენე სხვა კოდი."
+            : "This QR Tag Code is already in use.";
+      }
+
       setError(
-        ka
-          ? "ინფორმაციის შენახვისას დაფიქსირდა შეცდომა."
-          : "An error occurred while saving the information."
+        message
       );
     } finally {
       setSaving(false);
     }
   }
 
-  if (success) {
+  if (saved) {
     return (
-      <main className="page">
-        <Header
-          ka={ka}
-          language={language}
-          setLanguage={setLanguage}
-        />
+      <>
+        <main className="successPage">
+          <div className="successCard">
+            <div className="successIcon">
+              ✓
+            </div>
 
-        <section className="successPage">
-          <div className="successIcon">
-            ✓
-          </div>
-
-          <div className="eyebrow">
-            QR RETURN
-          </div>
-
-          <h1>
-            {ka
-              ? "პროფილი წარმატებით შეიქმნა"
-              : "Profile created successfully"}
-          </h1>
-
-          <p>
-            {ka
-              ? "ინფორმაცია და არჩეული ფოტოები წარმატებით შეინახა."
-              : "Your information and selected images have been saved successfully."}
-          </p>
-
-          <div className="successInfo">
-            <strong>
-              {category.icon}{" "}
-              {ka
-                ? category.ka
-                : category.en}
-            </strong>
-
-            <span>
-              {ka
-                ? "კატეგორია უცვლელი დარჩება. პროფილის სხვა მონაცემების რედაქტირებას მომავალშიც შეძლებთ."
-                : "The category will remain fixed. Other profile information can still be edited later."}
-            </span>
-          </div>
-
-          <a
-            href="/"
-            className="homeButton"
-          >
-            {ka
-              ? "მთავარ გვერდზე დაბრუნება"
-              : "Return to home"}
-          </a>
-        </section>
-
-        <Styles />
-      </main>
-    );
-  }
-
-  return (
-    <main className="page">
-      <Header
-        ka={ka}
-        language={language}
-        setLanguage={setLanguage}
-      />
-
-      <section className="content">
-        <div className="intro">
-          <div className="categoryIcon">
-            {category.icon}
-          </div>
-
-          <div>
-            <div className="eyebrow">
+            <div className="successMini">
               QR RETURN
             </div>
 
             <h1>
-              {ka
-                ? "პროფილის შექმნა"
-                : "Create profile"}
+              {
+                t.successTitle
+              }
             </h1>
 
             <p>
-              {ka
-                ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
-                : "Add information that will help a finder contact you if your pet or item is lost."}
+              {
+                t.successText
+              }
             </p>
+
+            <div className="savedTag">
+              <span>
+                QR TAG
+              </span>
+
+              <strong>
+                {
+                  form.tagCode
+                }
+              </strong>
+            </div>
+
+            <div className="successActions">
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={() => {
+                  setSaved(
+                    false
+                  );
+
+                  setForm(
+                    INITIAL_FORM
+                  );
+
+                  setPhotoFile(
+                    null
+                  );
+
+                  setPhotoPreview(
+                    ""
+                  );
+                }}
+              >
+                {
+                  t.registerAnother
+                }
+              </button>
+
+              <a
+                href="/"
+                className="secondaryButton"
+              >
+                {t.home}
+              </a>
+            </div>
           </div>
-        </div>
+        </main>
 
-        <div className="progress">
-          <Progress
-            number="1"
-            label={
-              ka
-                ? "პროფილი"
-                : "Profile"
-            }
-            active={step >= 1}
-            current={step === 1}
-          />
+        <Styles />
+      </>
+    );
+  }
 
-          <div
-            className={
-              step >= 2
-                ? "line active"
-                : "line"
-            }
-          />
+  return (
+    <>
+      <main className="page">
+        <header className="header">
+          <a
+            href="/"
+            className="brand"
+          >
+            <div className="brandMark">
+              QR
+            </div>
 
-          <Progress
-            number="2"
-            label={
-              ka
-                ? "მფლობელი"
-                : "Owner"
-            }
-            active={step >= 2}
-            current={step === 2}
-          />
+            <div className="brandText">
+              <strong>
+                QR RETURN
+              </strong>
 
-          <div
-            className={
-              step >= 3
-                ? "line active"
-                : "line"
-            }
-          />
+              <small>
+                {
+                  t.brandSub
+                }
+              </small>
+            </div>
+          </a>
 
-          <Progress
-            number="3"
-            label={
-              ka
-                ? "დასრულება"
-                : "Finish"
-            }
-            active={step >= 3}
-            current={step === 3}
-          />
-        </div>
+          <div className="headerRight">
+            <div className="languageSwitch">
+              <button
+                type="button"
+                className={
+                  lang ===
+                  "ka"
+                    ? "langActive"
+                    : ""
+                }
+                onClick={() =>
+                  setLang(
+                    "ka"
+                  )
+                }
+              >
+                ქარ
+              </button>
+
+              <button
+                type="button"
+                className={
+                  lang ===
+                  "en"
+                    ? "langActive"
+                    : ""
+                }
+                onClick={() =>
+                  setLang(
+                    "en"
+                  )
+                }
+              >
+                ENG
+              </button>
+            </div>
+
+            <a
+              href="/"
+              className="backLink"
+            >
+              ← {t.back}
+            </a>
+          </div>
+        </header>
+
+        <section className="hero">
+          <div className="heroInner">
+            <div className="heroCopy">
+              <div className="eyebrow">
+                {
+                  t.eyebrow
+                }
+              </div>
+
+              <h1>
+                {t.title}{" "}
+                <span>
+                  {typeLabel}
+                </span>
+              </h1>
+
+              <p>
+                {
+                  t.subtitle
+                }
+              </p>
+            </div>
+
+            <div className="typeBadge">
+              <div className="typeIcon">
+                {
+                  config.icon
+                }
+              </div>
+
+              <div>
+                <small>
+                  CATEGORY
+                </small>
+
+                <strong>
+                  {
+                    typeLabel
+                  }
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="progressWrap">
+          <div className="progressTop">
+            <span>
+              PROFILE
+              COMPLETION
+            </span>
+
+            <strong>
+              {
+                completion
+              }
+              /4
+            </strong>
+          </div>
+
+          <div className="progressBar">
+            <div
+              className="progressFill"
+              style={{
+                width: `${
+                  (
+                    completion /
+                    4
+                  ) * 100
+                }%`,
+              }}
+            />
+          </div>
+
+          <div className="steps">
+            <div>
+              01{" "}
+              <span>
+                {
+                  t.step1
+                }
+              </span>
+            </div>
+
+            <div>
+              02{" "}
+              <span>
+                {
+                  t.step2
+                }
+              </span>
+            </div>
+
+            <div>
+              03{" "}
+              <span>
+                {
+                  t.step3
+                }
+              </span>
+            </div>
+
+            <div>
+              04{" "}
+              <span>
+                {
+                  t.step4
+                }
+              </span>
+            </div>
+          </div>
+        </section>
 
         <form
-          className="card"
-          onSubmit={handleSubmit}
+          className="form"
+          onSubmit={
+            handleSubmit
+          }
         >
-          {step === 1 && (
-            <>
-              <StepTitle
-                number="01"
-                title={
-                  ka
-                    ? category.isPet
-                      ? "ცხოველის ინფორმაცია"
-                      : "ნივთის ინფორმაცია"
-                    : category.isPet
-                    ? "Pet information"
-                    : "Item information"
-                }
-                text={
-                  ka
-                    ? "შეავსეთ ძირითადი ინფორმაცია. დამატებითი ველები ნებაყოფლობითია."
-                    : "Complete the basic information. Additional fields are optional."
-                }
-              />
-
-              <Field
-                label={
-                  ka
-                    ? "QR კოდი"
-                    : "QR code"
-                }
-                value={form.tag_code}
-                onChange={(value) =>
-                  updateField(
-                    "tag_code",
-                    value
-                  )
-                }
-                placeholder="LF-XXXXXX"
-                required
-              />
-
-              <Field
-                label={
-                  category.isPet
-                    ? ka
-                      ? "სახელი"
-                      : "Pet name"
-                    : ka
-                    ? "ნივთის დასახელება"
-                    : "Item name"
-                }
-                value={form.item_name}
-                onChange={(value) =>
-                  updateField(
-                    "item_name",
-                    value
-                  )
-                }
-                required
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "ფერი"
-                      : "Colour"
-                  }
-                  value={form.colour}
-                  onChange={(value) =>
-                    updateField(
-                      "colour",
-                      value
-                    )
-                  }
-                />
-
-                {category.isPet ? (
-                  <SelectField
-                    label={
-                      ka
-                        ? "სქესი"
-                        : "Sex"
-                    }
-                    value={form.sex}
-                    onChange={(value) =>
-                      updateField(
-                        "sex",
-                        value
-                      )
-                    }
-                    options={[
-                      {
-                        value: "",
-                        label: ka
-                          ? "აირჩიეთ"
-                          : "Select",
-                      },
-                      {
-                        value: "male",
-                        label: ka
-                          ? "მამრობითი"
-                          : "Male",
-                      },
-                      {
-                        value: "female",
-                        label: ka
-                          ? "მდედრობითი"
-                          : "Female",
-                      },
-                    ]}
-                  />
-                ) : (
-                  <Field
-                    label={
-                      ka
-                        ? "ბრენდი"
-                        : "Brand"
-                    }
-                    value={form.brand}
-                    onChange={(value) =>
-                      updateField(
-                        "brand",
-                        value
-                      )
-                    }
-                  />
-                )}
+          <section className="formSection">
+            <div className="sectionHeader">
+              <div className="sectionNumber">
+                01
               </div>
 
-              <PhotoField
-                label={
-                  category.isPet
-                    ? ka
-                      ? "ცხოველის ფოტო — ნებაყოფლობითი"
-                      : "Pet photo — optional"
-                    : ka
-                    ? "ნივთის ფოტო — ნებაყოფლობითი"
-                    : "Item photo — optional"
-                }
-                file={itemPhoto}
-                setFile={setItemPhoto}
-                ka={ka}
-              />
+              <div>
+                <h2>
+                  {
+                    t.section1
+                  }
+                </h2>
 
-              <button
-                type="button"
-                className="optional"
-                onClick={() =>
-                  setShowExtraProfile(
-                    !showExtraProfile
-                  )
-                }
-              >
-                <b>
-                  {showExtraProfile
-                    ? "−"
-                    : "+"}
-                </b>
+                <p>
+                  {
+                    t.section1Sub
+                  }
+                </p>
+              </div>
+            </div>
 
-                {ka
-                  ? "დამატებითი ინფორმაცია"
-                  : "Additional information"}
-              </button>
+            <div className="sectionBody">
+              <div className="field full">
+                <label>
+                  {t.tag}{" "}
+                  <b>*</b>
+                </label>
 
-              {showExtraProfile && (
-                <div className="optionalPanel">
-                  {category.isPet ? (
-                    <>
-                      <div className="grid2">
-                        <Field
-                          label={
-                            ka
-                              ? "დაბადების თარიღი"
-                              : "Date of birth"
-                          }
-                          type="date"
-                          value={
-                            form.date_of_birth
-                          }
-                          onChange={(value) =>
-                            updateField(
-                              "date_of_birth",
-                              value
-                            )
-                          }
-                        />
+                <div className="tagInputWrap">
+                  <div className="qrMini">
+                    ▦
+                  </div>
 
-                        <Field
-                          label={
-                            ka
-                              ? "წონა"
-                              : "Weight"
-                          }
-                          type="number"
-                          value={form.weight}
-                          onChange={(value) =>
-                            updateField(
-                              "weight",
-                              value
-                            )
-                          }
-                        />
-                      </div>
+                  <input
+                    value={
+                      form.tagCode
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      updateField(
+                        "tagCode",
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="QR-000000"
+                    autoCapitalize="characters"
+                  />
+                </div>
 
-                      <TextArea
-                        label={
-                          ka
-                            ? "სამედიცინო ინფორმაცია"
-                            : "Medical information"
+                <small className="hint">
+                  {
+                    t.tagHint
+                  }
+                </small>
+              </div>
+
+              <div className="twoColumns">
+                <div className="field">
+                  <label>
+                    {config.isPet
+                      ? t.itemNamePet
+                      : t.itemNameItem}{" "}
+                    <b>
+                      *
+                    </b>
+                  </label>
+
+                  <input
+                    value={
+                      form.itemName
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      updateField(
+                        "itemName",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label>
+                    {
+                      t.colour
+                    }
+                  </label>
+
+                  <input
+                    value={
+                      form.colour
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      updateField(
+                        "colour",
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="photoBlock">
+                <div className="photoCopy">
+                  <div className="photoTitle">
+                    {
+                      t.photo
+                    }
+                  </div>
+
+                  <p>
+                    {
+                      t.photoSub
+                    }
+                  </p>
+
+                  <input
+                    ref={
+                      fileInputRef
+                    }
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(
+                      e
+                    ) =>
+                      handlePhoto(
+                        e.target
+                          .files?.[0] ??
+                          null
+                      )
+                    }
+                  />
+
+                  <div className="photoButtons">
+                    <button
+                      type="button"
+                      className="uploadButton"
+                      onClick={() =>
+                        fileInputRef.current?.click()
+                      }
+                    >
+                      {photoFile
+                        ? t.changePhoto
+                        : t.choosePhoto}
+                    </button>
+
+                    {photoFile && (
+                      <button
+                        type="button"
+                        className="removeButton"
+                        onClick={
+                          removePhoto
                         }
+                      >
+                        {
+                          t.remove
+                        }
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="photoPreview">
+                  {photoPreview ? (
+                    <img
+                      src={
+                        photoPreview
+                      }
+                      alt="Preview"
+                    />
+                  ) : (
+                    <div className="photoPlaceholder">
+                      <span>
+                        {
+                          config.icon
+                        }
+                      </span>
+
+                      <small>
+                        PHOTO
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="formSection">
+            <div className="sectionHeader">
+              <div className="sectionNumber">
+                02
+              </div>
+
+              <div>
+                <h2>
+                  {config.isPet
+                    ? t.petDetails
+                    : t.itemDetails}
+                </h2>
+
+                <p>
+                  {
+                    t.section2Sub
+                  }
+                </p>
+              </div>
+            </div>
+
+            <div className="sectionBody">
+              {config.isPet ? (
+                <>
+                  <div className="twoColumns">
+                    <div className="field">
+                      <label>
+                        {
+                          t.sex
+                        }
+                      </label>
+
+                      <select
                         value={
-                          form.medical_info
+                          form.sex
                         }
-                        onChange={(value) =>
+                        onChange={(
+                          e
+                        ) =>
                           updateField(
-                            "medical_info",
-                            value
+                            "sex",
+                            e.target
+                              .value
+                          )
+                        }
+                      >
+                        <option value="">
+                          {
+                            t.select
+                          }
+                        </option>
+
+                        <option value="male">
+                          {
+                            t.male
+                          }
+                        </option>
+
+                        <option value="female">
+                          {
+                            t.female
+                          }
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className="field">
+                      <label>
+                        {
+                          t.dob
+                        }
+                      </label>
+
+                      <input
+                        type="date"
+                        value={
+                          form.dateOfBirth
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          updateField(
+                            "dateOfBirth",
+                            e.target
+                              .value
                           )
                         }
                       />
-                    </>
-                  ) : (
-                    <>
-                      <div className="grid2">
-                        <Field
-                          label={
-                            ka
-                              ? "მოდელი"
-                              : "Model"
-                          }
-                          value={form.model}
-                          onChange={(value) =>
-                            updateField(
-                              "model",
-                              value
-                            )
-                          }
-                        />
+                    </div>
+                  </div>
 
-                        <Field
-                          label={
-                            ka
-                              ? "ზომა"
-                              : "Size"
-                          }
-                          value={form.size}
-                          onChange={(value) =>
-                            updateField(
-                              "size",
-                              value
-                            )
-                          }
-                        />
-                      </div>
+                  <div className="field">
+                    <label>
+                      {
+                        t.weight
+                      }
+                    </label>
 
-                      <Field
-                        label={
-                          ka
-                            ? "მასალა"
-                            : "Material"
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={
+                        form.weight
+                      }
+                      onChange={(
+                        e
+                      ) =>
+                        updateField(
+                          "weight",
+                          e.target
+                            .value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>
+                      {
+                        t.medical
+                      }
+                    </label>
+
+                    <textarea
+                      value={
+                        form.medicalInfo
+                      }
+                      onChange={(
+                        e
+                      ) =>
+                        updateField(
+                          "medicalInfo",
+                          e.target
+                            .value
+                        )
+                      }
+                      placeholder={
+                        t.medicalPlaceholder
+                      }
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="twoColumns">
+                    <div className="field">
+                      <label>
+                        {
+                          t.brand
                         }
-                        value={form.material}
-                        onChange={(value) =>
+                      </label>
+
+                      <input
+                        value={
+                          form.brand
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          updateField(
+                            "brand",
+                            e.target
+                              .value
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label>
+                        {
+                          t.model
+                        }
+                      </label>
+
+                      <input
+                        value={
+                          form.model
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          updateField(
+                            "model",
+                            e.target
+                              .value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="twoColumns">
+                    <div className="field">
+                      <label>
+                        {
+                          t.size
+                        }
+                      </label>
+
+                      <input
+                        value={
+                          form.size
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          updateField(
+                            "size",
+                            e.target
+                              .value
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label>
+                        {
+                          t.material
+                        }
+                      </label>
+
+                      <input
+                        value={
+                          form.material
+                        }
+                        onChange={(
+                          e
+                        ) =>
                           updateField(
                             "material",
-                            value
+                            e.target
+                              .value
                           )
                         }
                       />
+                    </div>
+                  </div>
 
-                      <TextArea
-                        label={
-                          ka
-                            ? "განმასხვავებელი ნიშნები"
-                            : "Distinctive features"
-                        }
-                        value={
-                          form.distinctive_features
-                        }
-                        onChange={(value) =>
-                          updateField(
-                            "distinctive_features",
-                            value
-                          )
-                        }
-                      />
-                    </>
-                  )}
+                  <div className="field">
+                    <label>
+                      {
+                        t.distinctive
+                      }
+                    </label>
 
-                  <TextArea
-                    label={
-                      ka
-                        ? "დამატებითი აღწერა"
-                        : "Additional description"
-                    }
-                    value={form.description}
-                    onChange={(value) =>
-                      updateField(
-                        "description",
-                        value
-                      )
-                    }
-                  />
-                </div>
+                    <textarea
+                      value={
+                        form.distinctiveFeatures
+                      }
+                      onChange={(
+                        e
+                      ) =>
+                        updateField(
+                          "distinctiveFeatures",
+                          e.target
+                            .value
+                        )
+                      }
+                      placeholder={
+                        t.distinctivePlaceholder
+                      }
+                    />
+                  </div>
+                </>
               )}
 
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <button
-                type="button"
-                className="mainButton full"
-                onClick={nextStep}
-              >
-                {ka
-                  ? "შემდეგი"
-                  : "Next"}{" "}
-                →
-              </button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <StepTitle
-                number="02"
-                title={
-                  ka
-                    ? "მფლობელის ინფორმაცია"
-                    : "Owner information"
-                }
-                text={
-                  ka
-                    ? "მიუთითეთ ინფორმაცია, რომლის საშუალებითაც მპოვნელი შეძლებს თქვენთან დაკავშირებას."
-                    : "Enter the information the finder can use to contact you."
-                }
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "სახელი"
-                      : "First name"
+              <div className="field">
+                <label>
+                  {
+                    t.description
                   }
+                </label>
+
+                <textarea
                   value={
-                    form.owner_first_name
+                    form.description
                   }
-                  onChange={(value) =>
+                  onChange={(
+                    e
+                  ) =>
                     updateField(
-                      "owner_first_name",
-                      value
+                      "description",
+                      e.target
+                        .value
                     )
                   }
-                  required
+                  placeholder={
+                    t.descriptionPlaceholder
+                  }
                 />
+              </div>
+            </div>
+          </section>
 
-                <Field
-                  label={
-                    ka
-                      ? "გვარი"
-                      : "Last name"
+          <section className="formSection">
+            <div className="sectionHeader">
+              <div className="sectionNumber">
+                03
+              </div>
+
+              <div>
+                <h2>
+                  {
+                    t.section3
                   }
+                </h2>
+
+                <p>
+                  {
+                    t.section3Sub
+                  }
+                </p>
+              </div>
+            </div>
+
+            <div className="sectionBody">
+              <div className="field">
+                <label>
+                  {
+                    t.ownerName
+                  }
+                </label>
+
+                <input
                   value={
-                    form.owner_last_name
+                    form.ownerName
                   }
-                  onChange={(value) =>
+                  onChange={(
+                    e
+                  ) =>
                     updateField(
-                      "owner_last_name",
-                      value
+                      "ownerName",
+                      e.target
+                        .value
                     )
                   }
-                  required
                 />
               </div>
 
-              <Field
-                label={
-                  ka
-                    ? "მობილურის ნომერი"
-                    : "Phone number"
-                }
-                type="tel"
-                value={form.owner_phone}
-                onChange={(value) =>
-                  updateField(
-                    "owner_phone",
-                    value
-                  )
-                }
-                placeholder="+1 000 000 0000"
-                required
-              />
+              <div className="twoColumns">
+                <div className="field">
+                  <label>
+                    {
+                      t.ownerPhone
+                    }{" "}
+                    <b>
+                      *
+                    </b>
+                  </label>
 
-              <Field
-                label={
-                  ka
-                    ? "ელფოსტა"
-                    : "Email"
-                }
-                type="email"
-                value={form.owner_email}
-                onChange={(value) =>
-                  updateField(
-                    "owner_email",
-                    value
-                  )
-                }
-                placeholder="name@example.com"
-                required
-              />
-
-              <PhotoField
-                label={
-                  ka
-                    ? "მფლობელის ფოტო — ნებაყოფლობითი"
-                    : "Owner photo — optional"
-                }
-                file={ownerPhoto}
-                setFile={setOwnerPhoto}
-                ka={ka}
-              />
-
-              <SelectField
-                label={
-                  ka
-                    ? "როგორ გსურთ მპოვნელმა დაგიკავშირდეთ?"
-                    : "How should the finder contact you?"
-                }
-                value={
-                  form.contact_preference
-                }
-                onChange={(value) =>
-                  updateField(
-                    "contact_preference",
-                    value
-                  )
-                }
-                options={[
-                  {
-                    value: "both",
-                    label: ka
-                      ? "Live Chat და ტელეფონი"
-                      : "Live Chat & phone",
-                  },
-                  {
-                    value: "chat",
-                    label: "Live Chat",
-                  },
-                  {
-                    value: "phone",
-                    label: ka
-                      ? "ტელეფონი"
-                      : "Phone",
-                  },
-                ]}
-              />
-
-              <button
-                type="button"
-                className="optional"
-                onClick={() =>
-                  setShowExtraContact(
-                    !showExtraContact
-                  )
-                }
-              >
-                <b>
-                  {showExtraContact
-                    ? "−"
-                    : "+"}
-                </b>
-
-                {ka
-                  ? "დამატებითი საკონტაქტო პირი"
-                  : "Additional contact person"}
-              </button>
-
-              {showExtraContact && (
-                <div className="optionalPanel">
-                  <Field
-                    label={
-                      ka
-                        ? "სახელი და გვარი"
-                        : "Full name"
-                    }
-                    value={
-                      form.additional_contact_name
-                    }
-                    onChange={(value) =>
-                      updateField(
-                        "additional_contact_name",
-                        value
-                      )
-                    }
-                  />
-
-                  <Field
-                    label={
-                      ka
-                        ? "ტელეფონი"
-                        : "Phone"
-                    }
+                  <input
                     type="tel"
                     value={
-                      form.additional_contact_phone
+                      form.ownerPhone
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      e
+                    ) =>
                       updateField(
-                        "additional_contact_phone",
-                        value
+                        "ownerPhone",
+                        e.target
+                          .value
                       )
                     }
                   />
+                </div>
 
-                  <Field
-                    label={
-                      ka
-                        ? "ელფოსტა"
-                        : "Email"
-                    }
+                <div className="field">
+                  <label>
+                    {
+                      t.ownerEmail
+                    }{" "}
+                    <b>
+                      *
+                    </b>
+                  </label>
+
+                  <input
                     type="email"
                     value={
-                      form.additional_contact_email
+                      form.ownerEmail
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      e
+                    ) =>
                       updateField(
-                        "additional_contact_email",
-                        value
+                        "ownerEmail",
+                        e.target
+                          .value
                       )
                     }
                   />
                 </div>
-              )}
-
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={previousStep}
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="button"
-                  className="mainButton"
-                  onClick={nextStep}
-                >
-                  {ka
-                    ? "შემდეგი"
-                    : "Next"}{" "}
-                  →
-                </button>
               </div>
-            </>
-          )}
 
-          {step === 3 && (
-            <>
-              <StepTitle
-                number="03"
-                title={
-                  ka
-                    ? "ინფორმაცია მპოვნელისთვის"
-                    : "Information for the finder"
-                }
-                text={
-                  ka
-                    ? "დაასრულეთ პროფილის შექმნა."
-                    : "Finish creating your profile."
-                }
-              />
-
-              <TextArea
-                label={
-                  ka
-                    ? "შეტყობინება მპოვნელისთვის"
-                    : "Message for the finder"
-                }
-                value={
-                  form.finder_message
-                }
-                onChange={(value) =>
-                  updateField(
-                    "finder_message",
-                    value
-                  )
-                }
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "მპოვნელის ჯილდო — ნებაყოფლობითი"
-                      : "Finder reward — optional"
+              <div className="field">
+                <label>
+                  {
+                    t.contactPreference
                   }
-                  type="number"
-                  value={form.reward}
-                  onChange={(value) =>
-                    updateField(
-                      "reward",
-                      value
-                    )
-                  }
-                />
+                </label>
 
-                <Field
-                  label={
-                    ka
-                      ? "ბოლო ნანახი ადგილი — ნებაყოფლობითი"
-                      : "Last seen location — optional"
-                  }
+                <select
                   value={
-                    form.lost_seen_location
+                    form.contactPreference
                   }
-                  onChange={(value) =>
+                  onChange={(
+                    e
+                  ) =>
                     updateField(
-                      "lost_seen_location",
-                      value
+                      "contactPreference",
+                      e.target
+                        .value
                     )
+                  }
+                >
+                  <option value="both">
+                    {
+                      t.both
+                    }
+                  </option>
+
+                  <option value="phone">
+                    {
+                      t.phone
+                    }
+                  </option>
+
+                  <option value="email">
+                    {
+                      t.email
+                    }
+                  </option>
+                </select>
+              </div>
+
+              <div className="field">
+                <label>
+                  {
+                    t.finderMessage
+                  }
+                </label>
+
+                <textarea
+                  value={
+                    form.finderMessage
+                  }
+                  onChange={(
+                    e
+                  ) =>
+                    updateField(
+                      "finderMessage",
+                      e.target
+                        .value
+                    )
+                  }
+                  placeholder={
+                    t.finderPlaceholder
                   }
                 />
               </div>
 
-              <div className="locationCard">
-                <div>
-                  <strong>
-                    {ka
-                      ? "ლოკაციის გაზიარება"
-                      : "Location sharing"}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "თუ ჩართავთ, QR კოდის დამსკანერებელს სურვილის შემთხვევაში შეეძლება თავისი მიმდინარე ლოკაციის გამოგზავნა. ავტომატურად არაფერი იგზავნება."
-                      : "If enabled, the finder may choose to send their current location. Nothing is shared automatically."}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  className={
-                    locationSharingEnabled
-                      ? "switch active"
-                      : "switch"
+              <div className="settings">
+                <ToggleRow
+                  title={
+                    t.location
                   }
-                  onClick={() =>
-                    setLocationSharingEnabled(
-                      !locationSharingEnabled
+                  subtitle={
+                    t.locationSub
+                  }
+                  checked={
+                    locationSharing
+                  }
+                  onChange={() =>
+                    setLocationSharing(
+                      (
+                        value
+                      ) =>
+                        !value
                     )
                   }
-                  aria-pressed={
-                    locationSharingEnabled
-                  }
-                >
-                  <span />
-                </button>
-              </div>
-
-              <div className="summary">
-                <div>
-                  {category.icon}
-                </div>
-
-                <section>
-                  <small>
-                    {ka
-                      ? "იქმნება პროფილი"
-                      : "Creating profile"}
-                  </small>
-
-                  <strong>
-                    {form.item_name ||
-                      (ka
-                        ? category.ka
-                        : category.en)}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "კატეგორია უცვლელი დარჩება. სხვა მონაცემების რედაქტირება მომავალშიც შესაძლებელი იქნება."
-                      : "The category will remain fixed. Other profile details may be edited later."}
-                  </p>
-                </section>
-              </div>
-
-              {error && (
-                <ErrorBox
-                  text={error}
                 />
-              )}
 
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={previousStep}
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
+                <ToggleRow
+                  title={
+                    t.ownerMessage
+                  }
+                  subtitle={
+                    t.ownerMessageSub
+                  }
+                  checked={
+                    ownerMessageEnabled
+                  }
+                  onChange={() =>
+                    setOwnerMessageEnabled(
+                      (
+                        value
+                      ) =>
+                        !value
+                    )
+                  }
+                />
 
-                <button
-                  type="submit"
-                  className="mainButton"
-                  disabled={saving}
-                >
-                  {saving
-                    ? ka
-                      ? "იტვირთება და ინახება..."
-                      : "Uploading and saving..."
-                    : ka
-                    ? "პროფილის შენახვა"
-                    : "Save profile"}
-                </button>
+                <ToggleRow
+                  title={
+                    t.active
+                  }
+                  subtitle={
+                    t.activeSub
+                  }
+                  checked={
+                    active
+                  }
+                  onChange={() =>
+                    setActive(
+                      (
+                        value
+                      ) =>
+                        !value
+                    )
+                  }
+                />
               </div>
-            </>
+            </div>
+          </section>
+
+          {error && (
+            <div className="errorBox">
+              <strong>
+                !
+              </strong>
+
+              <span>
+                {
+                  error
+                }
+              </span>
+            </div>
           )}
-        </form>
-      </section>
 
-      <Styles />
-    </main>
-  );
-}
+          <div className="submitArea">
+            <div className="submitNote">
+              <span>
+                🔒
+              </span>
 
-function Header({
-  ka,
-  language,
-  setLanguage,
-}: {
-  ka: boolean;
-  language: Language;
-  setLanguage: (
-    value: Language
-  ) => void;
-}) {
-  return (
-    <header className="header">
-      <a
-        href="/"
-        className="brand"
-      >
-        <div className="logo">
-          QR
-        </div>
+              <p>
+                {lang ===
+                "ka"
+                  ? "შენი ინფორმაცია ინახება უსაფრთხოდ."
+                  : "Your information is stored securely."}
+              </p>
+            </div>
 
-        <div>
-          <strong>
-            QR RETURN
-          </strong>
-
-          <small>
-            SMART LOST & FOUND
-          </small>
-        </div>
-      </a>
-
-      <div className="headerRight">
-        <a
-          href="/register"
-          className="headerBack"
-        >
-          ← {ka ? "უკან" : "Back"}
-        </a>
-
-        <div className="languages">
-          <button
-            type="button"
-            className={
-              language === "ka"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("ka")
-            }
-          >
-            GEO
-          </button>
-
-          <button
-            type="button"
-            className={
-              language === "en"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("en")
-            }
-          >
-            ENG
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function Progress({
-  number,
-  label,
-  active,
-  current,
-}: {
-  number: string;
-  label: string;
-  active: boolean;
-  current: boolean;
-}) {
-  return (
-    <div className="progressItem">
-      <span
-        className={[
-          "circle",
-          active ? "active" : "",
-          current ? "current" : "",
-        ].join(" ")}
-      >
-        {number}
-      </span>
-
-      <small>
-        {label}
-      </small>
-    </div>
-  );
-}
-
-function StepTitle({
-  number,
-  title,
-  text,
-}: {
-  number: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="stepTitle">
-      <b>
-        {number}
-      </b>
-
-      <div>
-        <h2>
-          {title}
-        </h2>
-
-        <p>
-          {text}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder = "",
-  type = "text",
-  required = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  placeholder?: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="field">
-      <span>
-        {label}
-        {required ? " *" : ""}
-      </span>
-
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        required={required}
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
-      />
-    </label>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  options: {
-    value: string;
-    label: string;
-  }[];
-}) {
-  return (
-    <label className="field">
-      <span>
-        {label}
-      </span>
-
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
-      >
-        {options.map(
-          (option) => (
-            <option
-              key={
-                option.value ||
-                "empty"
-              }
-              value={
-                option.value
+            <button
+              type="submit"
+              className="submitButton"
+              disabled={
+                saving
               }
             >
-              {option.label}
-            </option>
-          )
-        )}
-      </select>
-    </label>
+              <span>
+                {saving
+                  ? t.saving
+                  : t.save}
+              </span>
+
+              {!saving && (
+                <b>
+                  →
+                </b>
+              )}
+            </button>
+          </div>
+        </form>
+
+        <footer className="footer">
+          <div>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <span>
+              •
+            </span>
+
+            <small>
+              LOST &
+              FOUND
+              PLATFORM
+            </small>
+          </div>
+
+          <p>
+            © 2026 QR
+            Return
+          </p>
+        </footer>
+      </main>
+
+      <Styles />
+    </>
   );
 }
 
-function TextArea({
-  label,
-  value,
+function ToggleRow({
+  title,
+  subtitle,
+  checked,
   onChange,
 }: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
+  title: string;
+  subtitle: string;
+  checked: boolean;
+  onChange: () => void;
 }) {
   return (
-    <label className="field">
-      <span>
-        {label}
-      </span>
-
-      <textarea
-        value={value}
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
-      />
-    </label>
-  );
-}
-
-function PhotoField({
-  label,
-  file,
-  setFile,
-  ka,
-}: {
-  label: string;
-  file: File | null;
-  setFile: (
-    file: File | null
-  ) => void;
-  ka: boolean;
-}) {
-  return (
-    <label className="photo">
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(event) =>
-          setFile(
-            event.target.files?.[0] ||
-              null
-          )
-        }
-      />
-
-      <b>
-        {file ? "✓" : "+"}
-      </b>
-
+    <div className="toggleRow">
       <div>
         <strong>
-          {label}
+          {title}
         </strong>
 
-        <small>
-          {file
-            ? `${file.name} • ${(
-                file.size /
-                1024 /
-                1024
-              ).toFixed(2)} MB`
-            : ka
-            ? "დააჭირეთ ფოტოს ასარჩევად • მაქს. 5 MB"
-            : "Click to choose a photo • max 5 MB"}
-        </small>
+        <p>
+          {
+            subtitle
+          }
+        </p>
       </div>
-    </label>
-  );
-}
 
-function ErrorBox({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <div className="error">
-      {text}
+      <button
+        type="button"
+        className={
+          checked
+            ? "toggle active"
+            : "toggle"
+        }
+        onClick={
+          onChange
+        }
+        aria-pressed={
+          checked
+        }
+      >
+        <span />
+      </button>
     </div>
   );
 }
@@ -1897,8 +1791,15 @@ function Styles() {
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
+      html,
       body {
         margin: 0;
+        padding: 0;
+        background: #f7f8fa;
       }
 
       button,
@@ -1908,603 +1809,841 @@ function Styles() {
         font: inherit;
       }
 
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
       .page {
         min-height: 100vh;
-        background: #f8fafc;
-        color: #101828;
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
+        color: #111827;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
       .header {
-        width: calc(100% - 32px);
-        max-width: 1050px;
-        min-height: 78px;
-        margin: auto;
+        width: calc(100% - 40px);
+        max-width: 1180px;
+        min-height: 82px;
+        margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom:
-          1px solid #e8ecf1;
+        border-bottom: 1px solid #e6e8ec;
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 11px;
+        color: inherit;
         text-decoration: none;
       }
 
-      .logo {
-        width: 43px;
-        height: 43px;
-        border-radius: 13px;
-        background: #1465e8;
-        color: white;
+      .brandMark {
+        width: 45px;
+        height: 45px;
         display: grid;
         place-items: center;
-        font-size: 12px;
+        border-radius: 14px;
+        background: #0e63e9;
+        color: white;
+        font-size: 13px;
         font-weight: 900;
+        letter-spacing: -0.5px;
+        box-shadow: 0 7px 18px rgba(14, 99, 233, 0.2);
       }
 
-      .brand strong {
+      .brandText strong {
         display: block;
-        color: #1465e8;
-        font-size: 20px;
+        color: #0e63e9;
+        font-size: 21px;
+        font-weight: 900;
+        letter-spacing: -0.7px;
       }
 
-      .brand small {
+      .brandText small {
         display: block;
         margin-top: 2px;
-        color: #98a2b3;
+        color: #9aa1ac;
         font-size: 7px;
-        letter-spacing: 2px;
+        font-weight: 700;
+        letter-spacing: 2.2px;
       }
 
       .headerRight {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 20px;
       }
 
-      .headerBack {
-        color: #475467;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      .languages {
-        padding: 4px;
+      .languageSwitch {
+        padding: 3px;
         display: flex;
-        background: #edf0f4;
+        border: 1px solid #dde1e6;
         border-radius: 10px;
+        background: #fff;
       }
 
-      .languages button {
-        padding: 7px 9px;
+      .languageSwitch button {
+        min-width: 43px;
+        height: 30px;
+        padding: 0 9px;
         border: 0;
         border-radius: 7px;
         background: transparent;
-        color: #7d8795;
+        color: #858d98;
         font-size: 9px;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .languages .selected {
-        background: white;
-        color: #1465e8;
-      }
-
-      .content {
-        width: calc(100% - 24px);
-        max-width: 760px;
-        margin: auto;
-        padding: 45px 0 80px;
-      }
-
-      .intro {
-        display: flex;
-        gap: 16px;
-      }
-
-      .categoryIcon {
-        width: 58px;
-        height: 58px;
-        flex: 0 0 58px;
-        border-radius: 18px;
-        background: #eaf2ff;
-        display: grid;
-        place-items: center;
-        font-size: 31px;
-      }
-
-      .eyebrow {
-        color: #1465e8;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 2px;
-      }
-
-      .intro h1 {
-        margin: 7px 0;
-        font-size: 40px;
-        line-height: 1.05;
-      }
-
-      .intro p {
-        margin: 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      .progress {
-        margin: 34px 0 24px;
-        display: flex;
-        align-items: center;
-      }
-
-      .progressItem {
-        min-width: 72px;
-        text-align: center;
-      }
-
-      .circle {
-        width: 34px;
-        height: 34px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border:
-          1px solid #d4dae2;
-        border-radius: 50%;
-        background: white;
-        color: #98a2b3;
-        font-size: 10px;
-        font-weight: 900;
-      }
-
-      .circle.active {
-        border-color: #1465e8;
-        color: #1465e8;
-      }
-
-      .circle.current {
-        background: #1465e8;
+      .languageSwitch .langActive {
+        background: #111827;
         color: white;
       }
 
-      .progressItem small {
-        display: block;
-        margin-top: 6px;
-        color: #7b8492;
-        font-size: 9px;
+      .backLink {
+        color: #5e6672;
+        font-size: 11px;
         font-weight: 800;
+        text-decoration: none;
       }
 
-      .line {
-        flex: 1;
-        height: 1px;
-        margin-bottom: 20px;
-        background: #dce1e8;
+      .hero {
+        padding: 54px 20px 34px;
       }
 
-      .line.active {
-        background: #1465e8;
-      }
-
-      .card {
-        padding: 28px;
-        border:
-          1px solid #e2e7ed;
-        border-radius: 23px;
-        background: white;
-      }
-
-      .stepTitle {
-        margin-bottom: 26px;
+      .heroInner {
+        width: 100%;
+        max-width: 920px;
+        margin: 0 auto;
         display: flex;
-        gap: 13px;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 30px;
       }
 
-      .stepTitle > b {
-        margin-top: 5px;
-        color: #1465e8;
-        font-size: 10px;
+      .heroCopy {
+        max-width: 620px;
       }
 
-      .stepTitle h2 {
+      .eyebrow {
+        margin-bottom: 12px;
+        color: #0e63e9;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 2.8px;
+      }
+
+      .hero h1 {
         margin: 0;
-        font-size: 22px;
+        color: #111827;
+        font-size: clamp(38px, 6vw, 66px);
+        font-weight: 900;
+        line-height: 0.98;
+        letter-spacing: -3px;
       }
 
-      .stepTitle p {
-        margin: 6px 0 0;
-        color: #7b8492;
+      .hero h1 span {
+        color: #0e63e9;
+      }
+
+      .hero p {
+        max-width: 560px;
+        margin: 18px 0 0;
+        color: #747d89;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .typeBadge {
+        min-width: 170px;
+        padding: 13px 15px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        border: 1px solid #e1e5ea;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 25px rgba(17, 24, 39, 0.04);
+      }
+
+      .typeIcon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: #eef4ff;
+        font-size: 24px;
+      }
+
+      .typeBadge small {
+        display: block;
+        color: #a0a7b1;
+        font-size: 7px;
+        font-weight: 900;
+        letter-spacing: 1.8px;
+      }
+
+      .typeBadge strong {
+        display: block;
+        margin-top: 4px;
+        color: #1d2633;
         font-size: 12px;
       }
 
-      .grid2 {
+      .progressWrap {
+        width: calc(100% - 40px);
+        max-width: 920px;
+        margin: 0 auto 24px;
+      }
+
+      .progressTop {
+        margin-bottom: 7px;
+        display: flex;
+        justify-content: space-between;
+        color: #9199a4;
+        font-size: 7px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+      }
+
+      .progressTop strong {
+        color: #0e63e9;
+        font-size: 8px;
+      }
+
+      .progressBar {
+        height: 3px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e5e8ed;
+      }
+
+      .progressFill {
+        height: 100%;
+        border-radius: inherit;
+        background: #0e63e9;
+        transition: width 0.25s ease;
+      }
+
+      .steps {
+        margin-top: 9px;
         display: grid;
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(4, 1fr);
+        color: #b0b6bf;
+        font-size: 7px;
+        font-weight: 900;
+        letter-spacing: 0.8px;
+      }
+
+      .steps div:nth-child(2),
+      .steps div:nth-child(3) {
+        text-align: center;
+      }
+
+      .steps div:last-child {
+        text-align: right;
+      }
+
+      .steps span {
+        color: #747d89;
+      }
+
+      .form {
+        width: calc(100% - 40px);
+        max-width: 920px;
+        margin: 0 auto;
+      }
+
+      .formSection {
+        margin-bottom: 18px;
+        overflow: hidden;
+        border: 1px solid #e0e4e9;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 12px 35px rgba(17, 24, 39, 0.035);
+      }
+
+      .sectionHeader {
+        padding: 20px 23px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        border-bottom: 1px solid #edf0f3;
+        background: #fbfcfd;
+      }
+
+      .sectionNumber {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #0e63e9;
+        color: white;
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .sectionHeader h2 {
+        margin: 0;
+        color: #1b2430;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .sectionHeader p {
+        margin: 3px 0 0;
+        color: #9aa1ab;
+        font-size: 9px;
+      }
+
+      .sectionBody {
+        padding: 24px;
+      }
+
+      .twoColumns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
       }
 
       .field {
-        display: block;
-        margin-bottom: 16px;
+        margin-bottom: 17px;
       }
 
-      .field > span {
+      .field:last-child {
+        margin-bottom: 0;
+      }
+
+      .field label {
         display: block;
         margin-bottom: 7px;
-        color: #344054;
-        font-size: 12px;
-        font-weight: 800;
+        color: #404957;
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .field label b {
+        color: #0e63e9;
       }
 
       .field input,
       .field select,
       .field textarea {
         width: 100%;
-        border:
-          1px solid #d5dae1;
-        border-radius: 12px;
-        background: white;
+        border: 1px solid #dce1e6;
+        border-radius: 11px;
+        background: #fff;
+        color: #111827;
         outline: none;
+        transition: 0.18s ease;
       }
 
       .field input,
       .field select {
-        height: 54px;
-        padding: 0 14px;
+        height: 49px;
+        padding: 0 13px;
+        font-size: 11px;
       }
 
       .field textarea {
         min-height: 100px;
-        padding: 14px;
+        padding: 13px;
+        font-size: 11px;
+        line-height: 1.55;
         resize: vertical;
       }
 
       .field input:focus,
       .field select:focus,
       .field textarea:focus {
-        border-color: #1465e8;
-        box-shadow:
-          0 0 0 3px
-          rgba(
-            20,
-            101,
-            232,
-            0.08
-          );
+        border-color: #0e63e9;
+        box-shadow: 0 0 0 3px rgba(14, 99, 233, 0.07);
       }
 
-      .photo {
-        min-height: 72px;
-        margin-bottom: 16px;
-        padding: 13px;
+      .field input::placeholder,
+      .field textarea::placeholder {
+        color: #b3bac3;
+      }
+
+      .hint {
+        display: block;
+        margin-top: 6px;
+        color: #9ba3ad;
+        font-size: 8px;
+      }
+
+      .tagInputWrap {
         display: flex;
         align-items: center;
-        gap: 12px;
-        border:
-          1px dashed #c7ced8;
-        border-radius: 13px;
-        background: #fafbfc;
-        cursor: pointer;
+        border: 1px solid #dce1e6;
+        border-radius: 11px;
+        background: #fff;
+        transition: 0.18s ease;
       }
 
-      .photo input {
-        display: none;
+      .tagInputWrap:focus-within {
+        border-color: #0e63e9;
+        box-shadow: 0 0 0 3px rgba(14, 99, 233, 0.07);
       }
 
-      .photo > b {
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
+      .tagInputWrap input {
+        border: 0;
+        box-shadow: none !important;
+      }
+
+      .qrMini {
+        width: 48px;
+        height: 48px;
         display: grid;
         place-items: center;
-        border-radius: 11px;
-        background: #eaf2ff;
-        color: #1465e8;
+        border-right: 1px solid #edf0f3;
+        color: #0e63e9;
         font-size: 20px;
+        font-weight: 900;
       }
 
-      .photo strong,
-      .photo small {
-        display: block;
-      }
-
-      .photo strong {
-        font-size: 12px;
-      }
-
-      .photo small {
+      .photoBlock {
         margin-top: 4px;
-        color: #8a94a3;
-        font-size: 10px;
-      }
-
-      .optional {
-        width: 100%;
-        min-height: 50px;
-        padding: 0 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border:
-          1px solid #e0e5eb;
-        border-radius: 12px;
-        background: #f8fafc;
-        color: #344054;
-        font-size: 12px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      .optional b {
-        color: #1465e8;
-        font-size: 18px;
-      }
-
-      .optionalPanel {
-        margin-top: 13px;
-        padding: 18px;
-        border-radius: 14px;
-        background: #f8fafc;
-      }
-
-      .locationCard {
         padding: 17px;
         display: flex;
         align-items: center;
-        justify-content:
-          space-between;
-        gap: 18px;
-        border:
-          1px solid #e0e5eb;
+        justify-content: space-between;
+        gap: 20px;
+        border: 1px dashed #ccd3db;
         border-radius: 14px;
-        background: #f9fafb;
+        background: #fafbfc;
       }
 
-      .locationCard strong {
-        font-size: 13px;
+      .photoTitle {
+        color: #26303d;
+        font-size: 11px;
+        font-weight: 900;
       }
 
-      .locationCard p {
-        max-width: 520px;
-        margin: 5px 0 0;
-        color: #7b8492;
-        font-size: 10px;
-        line-height: 1.5;
+      .photoCopy p {
+        margin: 5px 0 13px;
+        color: #959da8;
+        font-size: 9px;
       }
 
-      .switch {
-        width: 50px;
-        height: 29px;
-        flex: 0 0 50px;
-        padding: 3px;
-        border: 0;
-        border-radius: 30px;
-        background: #cdd3db;
-        cursor: pointer;
-      }
-
-      .switch span {
-        display: block;
-        width: 23px;
-        height: 23px;
-        border-radius: 50%;
-        background: white;
-        transition: 0.2s;
-      }
-
-      .switch.active {
-        background: #1465e8;
-      }
-
-      .switch.active span {
-        transform:
-          translateX(21px);
-      }
-
-      .summary {
-        margin-top: 16px;
-        padding: 16px;
+      .photoButtons {
         display: flex;
-        gap: 12px;
         align-items: center;
-        border:
-          1px solid #dbe7f8;
-        border-radius: 14px;
-        background: #f3f7fd;
+        gap: 8px;
       }
 
-      .summary > div {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: white;
-        font-size: 24px;
-      }
-
-      .summary small,
-      .summary strong,
-      .summary p {
-        display: block;
-      }
-
-      .summary small {
-        color: #7b8492;
+      .uploadButton,
+      .removeButton {
+        height: 35px;
+        padding: 0 13px;
+        border-radius: 9px;
         font-size: 9px;
-      }
-
-      .summary strong {
-        margin-top: 2px;
-        font-size: 13px;
-      }
-
-      .summary p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 9px;
-        line-height: 1.4;
-      }
-
-      .buttons {
-        margin-top: 25px;
-        display: flex;
-        gap: 10px;
-      }
-
-      .mainButton,
-      .backButton {
-        min-height: 52px;
-        padding: 0 20px;
-        border-radius: 12px;
-        font-size: 12px;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .mainButton {
-        margin-left: auto;
+      .uploadButton {
         border: 0;
-        background: #1465e8;
+        background: #111827;
         color: white;
       }
 
-      .mainButton.full {
-        width: 100%;
-        margin-top: 25px;
-      }
-
-      .backButton {
-        border:
-          1px solid #d5dae1;
+      .removeButton {
+        border: 1px solid #dfe3e8;
         background: white;
-        color: #475467;
+        color: #7b8490;
       }
 
-      .mainButton:disabled {
-        opacity: 0.6;
-        cursor: wait;
+      .photoPreview {
+        width: 88px;
+        height: 88px;
+        flex: 0 0 88px;
+        overflow: hidden;
+        border-radius: 15px;
+        background: #eef3fa;
       }
 
-      .error {
-        margin-top: 17px;
-        padding: 13px;
-        border-radius: 11px;
-        background: #fff1f1;
+      .photoPreview img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .photoPlaceholder {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 4px;
+      }
+
+      .photoPlaceholder span {
+        font-size: 30px;
+      }
+
+      .photoPlaceholder small {
+        color: #a1a9b3;
+        font-size: 6px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+      }
+
+      .settings {
+        margin-top: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e6eb;
+        border-radius: 14px;
+      }
+
+      .toggleRow {
+        min-height: 70px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        border-bottom: 1px solid #edf0f3;
+      }
+
+      .toggleRow:last-child {
+        border-bottom: 0;
+      }
+
+      .toggleRow strong {
+        display: block;
+        color: #303a47;
+        font-size: 10px;
+      }
+
+      .toggleRow p {
+        max-width: 560px;
+        margin: 4px 0 0;
+        color: #9aa2ac;
+        font-size: 8px;
+        line-height: 1.45;
+      }
+
+      .toggle {
+        width: 44px;
+        height: 25px;
+        flex: 0 0 44px;
+        padding: 3px;
+        border: 0;
+        border-radius: 20px;
+        background: #cbd1d8;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .toggle span {
+        display: block;
+        width: 19px;
+        height: 19px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+        transition: 0.2s ease;
+      }
+
+      .toggle.active {
+        background: #0e63e9;
+      }
+
+      .toggle.active span {
+        transform: translateX(19px);
+      }
+
+      .errorBox {
+        margin: 0 0 18px;
+        padding: 13px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #ffd4d4;
+        border-radius: 12px;
+        background: #fff5f5;
         color: #b42318;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
-        line-height: 1.5;
       }
 
-      .successPage {
-        width: calc(100% - 24px);
-        max-width: 580px;
-        margin: auto;
-        padding: 110px 0;
-        text-align: center;
-      }
-
-      .successIcon {
-        width: 68px;
-        height: 68px;
-        margin: 0 auto 22px;
+      .errorBox strong {
+        width: 22px;
+        height: 22px;
         display: grid;
         place-items: center;
         border-radius: 50%;
-        background: #e9f8ef;
-        color: #16803b;
+        background: #b42318;
+        color: white;
+        font-size: 11px;
+      }
+
+      .submitArea {
+        margin: 25px 0 65px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border: 1px solid #e0e4e9;
+        border-radius: 17px;
+        background: #fff;
+      }
+
+      .submitNote {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .submitNote span {
+        font-size: 16px;
+      }
+
+      .submitNote p {
+        margin: 0;
+        color: #9199a4;
+        font-size: 9px;
+      }
+
+      .submitButton {
+        min-width: 210px;
+        height: 50px;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        border: 0;
+        border-radius: 12px;
+        background: #0e63e9;
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 9px 24px rgba(14, 99, 233, 0.18);
+      }
+
+      .submitButton b {
+        font-size: 18px;
+      }
+
+      .submitButton:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
+      .footer {
+        width: calc(100% - 40px);
+        max-width: 1180px;
+        min-height: 75px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #e2e5e9;
+        color: #9aa2ac;
+      }
+
+      .footer div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .footer strong {
+        color: #0e63e9;
+        font-size: 10px;
+      }
+
+      .footer span,
+      .footer small,
+      .footer p {
+        font-size: 7px;
+        letter-spacing: 1px;
+      }
+
+      .successPage {
+        min-height: 100vh;
+        padding: 30px 20px;
+        display: grid;
+        place-items: center;
+        background: #f7f8fa;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .successCard {
+        width: 100%;
+        max-width: 500px;
+        padding: 46px 35px;
+        border: 1px solid #e0e4e9;
+        border-radius: 24px;
+        background: white;
+        text-align: center;
+        box-shadow: 0 18px 55px rgba(17, 24, 39, 0.06);
+      }
+
+      .successIcon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #0e63e9;
+        color: white;
         font-size: 28px;
         font-weight: 900;
       }
 
-      .successPage h1 {
-        margin: 10px 0;
-        font-size: 35px;
-      }
-
-      .successPage > p {
-        color: #667085;
-      }
-
-      .successInfo {
-        margin-top: 22px;
-        padding: 16px;
-        border:
-          1px solid #dbe7f8;
-        border-radius: 14px;
-        background: #f3f7fd;
-        text-align: left;
-      }
-
-      .successInfo strong,
-      .successInfo span {
-        display: block;
-      }
-
-      .successInfo span {
-        margin-top: 5px;
-        color: #667085;
-        font-size: 10px;
-        line-height: 1.5;
-      }
-
-      .homeButton {
-        min-height: 52px;
-        margin-top: 25px;
-        padding: 0 20px;
-        display: inline-flex;
-        align-items: center;
-        border-radius: 12px;
-        background: #1465e8;
-        color: white;
-        text-decoration: none;
-        font-size: 12px;
+      .successMini {
+        color: #0e63e9;
+        font-size: 8px;
         font-weight: 900;
+        letter-spacing: 2.4px;
       }
 
-      @media (
-        max-width: 600px
-      ) {
+      .successCard h1 {
+        margin: 10px 0;
+        color: #17202c;
+        font-size: 27px;
+        line-height: 1.1;
+      }
+
+      .successCard > p {
+        max-width: 380px;
+        margin: 0 auto;
+        color: #858e9a;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .savedTag {
+        margin: 25px 0;
+        padding: 15px;
+        border-radius: 13px;
+        background: #f5f8fd;
+      }
+
+      .savedTag span {
+        display: block;
+        color: #9ba3ad;
+        font-size: 7px;
+        font-weight: 900;
+        letter-spacing: 1.8px;
+      }
+
+      .savedTag strong {
+        display: block;
+        margin-top: 5px;
+        color: #0e63e9;
+        font-size: 19px;
+        letter-spacing: 1px;
+      }
+
+      .successActions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .primaryButton,
+      .secondaryButton {
+        min-height: 46px;
+        padding: 0 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        font-size: 9px;
+        font-weight: 900;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .primaryButton {
+        border: 0;
+        background: #0e63e9;
+        color: white;
+      }
+
+      .secondaryButton {
+        border: 1px solid #dce1e6;
+        background: white;
+        color: #56606d;
+      }
+
+      @media (max-width: 700px) {
         .header {
-          min-height: 70px;
+          width: calc(100% - 28px);
+          min-height: 72px;
         }
 
-        .brand small,
-        .headerBack {
+        .brandText strong {
+          font-size: 17px;
+        }
+
+        .brandText small {
+          font-size: 5px;
+          letter-spacing: 1.5px;
+        }
+
+        .backLink {
           display: none;
         }
 
-        .content {
-          padding-top: 28px;
+        .headerRight {
+          gap: 8px;
         }
 
-        .intro h1 {
-          font-size: 29px;
+        .hero {
+          padding: 38px 14px 26px;
         }
 
-        .grid2 {
-          grid-template-columns:
-            1fr;
+        .heroInner {
+          display: block;
+        }
+
+        .hero h1 {
+          font-size: 42px;
+          letter-spacing: -2px;
+        }
+
+        .hero p {
+          font-size: 11px;
+        }
+
+        .typeBadge {
+          width: fit-content;
+          margin-top: 20px;
+        }
+
+        .progressWrap,
+        .form {
+          width: calc(100% - 28px);
+        }
+
+        .steps span {
+          display: none;
+        }
+
+        .sectionHeader {
+          padding: 17px;
+        }
+
+        .sectionBody {
+          padding: 17px;
+        }
+
+        .twoColumns {
+          grid-template-columns: 1fr;
           gap: 0;
-        }
-
-        .card {
-          padding: 20px 14px;
-          border-radius: 18px;
         }
 
         .field input,
@@ -2513,20 +2652,40 @@ function Styles() {
           font-size: 16px;
         }
 
-        .buttons {
-          display: grid;
-          grid-template-columns:
-            1fr 1.3fr;
+        .photoBlock {
+          align-items: flex-start;
         }
 
-        .mainButton,
-        .backButton {
+        .photoPreview {
+          width: 74px;
+          height: 74px;
+          flex-basis: 74px;
+        }
+
+        .toggleRow {
+          padding: 13px;
+        }
+
+        .submitArea {
+          padding: 14px;
+          display: block;
+        }
+
+        .submitNote {
+          margin-bottom: 13px;
+        }
+
+        .submitButton {
           width: 100%;
-          margin: 0;
+          min-width: 0;
         }
 
-        .successPage h1 {
-          font-size: 29px;
+        .footer {
+          width: calc(100% - 28px);
+        }
+
+        .successActions {
+          grid-template-columns: 1fr;
         }
       }
     `}</style>
