@@ -1,992 +1,1163 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
-type Lang = "ka" | "en";
+type Language = "ka" | "en";
 
 const categories = [
-  { id: "dog", ka: "ძაღლი", en: "Dog", symbol: "01" },
-  { id: "cat", ka: "კატა", en: "Cat", symbol: "02" },
-  { id: "keys", ka: "გასაღები", en: "Keys", symbol: "03" },
-  { id: "wallet", ka: "საფულე", en: "Wallet", symbol: "04" },
-  { id: "suitcase", ka: "ჩემოდანი", en: "Luggage", symbol: "05" },
-  { id: "bag", ka: "ჩანთა", en: "Bag", symbol: "06" },
+  { id: "dog", icon: "🐕", ka: "ძაღლი", en: "Dog", number: "01" },
+  { id: "cat", icon: "🐈", ka: "კატა", en: "Cat", number: "02" },
+  { id: "keys", icon: "🔑", ka: "გასაღები", en: "Keys", number: "03" },
+  { id: "wallet", icon: "👛", ka: "საფულე", en: "Wallet", number: "04" },
+  {
+    id: "suitcase",
+    icon: "🧳",
+    ka: "ჩემოდანი",
+    en: "Suitcase",
+    number: "05",
+  },
+  { id: "bag", icon: "🎒", ka: "ჩანთა", en: "Bag", number: "06" },
+];
+
+const features = [
+  { number: "01", ka: "Live Chat", en: "Live Chat" },
+  {
+    number: "02",
+    ka: "ლოკაციის გაზიარება",
+    en: "Location Sharing",
+  },
+  {
+    number: "03",
+    ka: "მპოვნელის ჯილდო",
+    en: "Finder Reward",
+  },
+  {
+    number: "04",
+    ka: "პირადი მონაცემების კონტროლი",
+    en: "Privacy Control",
+  },
 ];
 
 export default function HomePage() {
-  const router = useRouter();
-  const [lang, setLang] = useState<Lang>("ka");
+  const [language, setLanguage] = useState<Language>("ka");
 
-  const ka = lang === "ka";
-
-  function register(type: string) {
-    router.push(`/register/details?type=${type}&lang=${lang}`);
-  }
+  const ka = language === "ka";
 
   return (
     <main className="page">
-      {/* NAV */}
-      <header className="nav">
-        <button className="brand" onClick={() => router.push("/")}>
-          <span className="brandIcon">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
 
-          <span className="brandWords">
-            <strong>QR RETURN</strong>
-            <small>SMART LOST & FOUND</small>
-          </span>
-        </button>
+      {/* HEADER */}
+      <header className="header">
+        <a href="/" className="brand">
+          <div className="brandMark">QR</div>
 
-        <nav className="navActions">
-          <a href="#contact">
-            {ka ? "კონტაქტი" : "Contact"}
-          </a>
+          <div>
+            <div className="brandName">QR RETURN</div>
+            <div className="brandSub">SMART LOST & FOUND</div>
+          </div>
+        </a>
 
-          <button
-            className="language"
-            onClick={() => setLang(ka ? "en" : "ka")}
-          >
-            {ka ? "EN" : "ქარ"}
-          </button>
+        <div className="headerRight">
 
-          <button
-            className="signin"
-            onClick={() => router.push("/login")}
-          >
-            {ka ? "შესვლა" : "Sign in"}
-          </button>
-        </nav>
+          {/* NAVIGATION */}
+          <nav className="nav">
+
+            <a href="/register" className="registerButton">
+              {ka ? "რეგისტრაცია" : "Register"}
+            </a>
+
+            <a href="/login" className="loginButton">
+              {ka ? "შესვლა" : "Sign in"}
+            </a>
+
+          </nav>
+
+          {/* LANGUAGE */}
+          <div className="language">
+
+            <button
+              type="button"
+              className={ka ? "selected" : ""}
+              onClick={() => setLanguage("ka")}
+            >
+              ქართული
+            </button>
+
+            <button
+              type="button"
+              className={!ka ? "selected" : ""}
+              onClick={() => setLanguage("en")}
+            >
+              English
+            </button>
+
+          </div>
+        </div>
       </header>
 
       {/* HERO */}
       <section className="hero">
-        <div className="heroCopy">
-          <div className="label">
-            <span />
+
+        <div className="heroGlow" />
+
+        <div className="heroContent">
+
+          <div className="heroBrand">
             QR RETURN
           </div>
 
           <h1>
             {ka ? (
               <>
-                დაბრუნების
+                QR, რომელიც დაკარგულს
                 <br />
-                <em>ჭკვიანი გზა.</em>
+                <span>შენთან აბრუნებს.</span>
               </>
             ) : (
               <>
-                A smarter way
+                The QR that brings
                 <br />
-                <em>back to you.</em>
+                <span>what&apos;s lost back to you.</span>
               </>
             )}
           </h1>
 
-          <p>
-            {ka
-              ? "QR ტეგი შენი ცხოველისა და მნიშვნელოვანი ნივთებისთვის. ერთი სკანირება საკმარისია, რომ მპოვნელმა შენთან დაკავშირება შეძლოს."
-              : "A QR tag for pets and the things that matter. One scan gives the finder a simple way to reach you."}
-          </p>
-
-          <div className="heroMeta">
-            <span>
-              <b>01</b>
-              {ka ? " აპი არ სჭირდება" : " No app needed"}
-            </span>
-
-            <span>
-              <b>02</b>
-              {ka ? " პირადი კონტაქტი" : " Private contact"}
-            </span>
-
-            <span>
-              <b>03</b>
-              {ka ? " ერთი სკანირება" : " One scan"}
-            </span>
-          </div>
         </div>
 
-        {/* ABSTRACT PRODUCT VISUAL */}
-        <div className="visual">
-          <div className="orb orbOne" />
-          <div className="orb orbTwo" />
+        {/* QR VISUAL */}
+        <div className="heroVisual">
 
           <div className="phone">
-            <div className="phoneTop">
-              <span className="miniLogo">
-                <i />
-                <i />
-                <i />
-                <i />
-              </span>
 
-              <b>QR RETURN</b>
-            </div>
+            <div className="phoneScreen">
 
-            <div className="scanSuccess">
-              <div className="check">✓</div>
-
-              <small>QR TAG</small>
-
-              <strong>
-                {ka ? "ტეგი ნაპოვნია" : "Tag found"}
-              </strong>
-
-              <p>
-                {ka
-                  ? "მფლობელთან დაკავშირება შესაძლებელია."
-                  : "You can now contact the owner."}
-              </p>
-            </div>
-
-            <div className="finderActions">
-              <div>
-                <span>⌁</span>
-                {ka ? "კონტაქტი" : "Contact"}
+              <div className="miniLogo">
+                QR
               </div>
 
-              <div>
-                <span>⌖</span>
-                {ka ? "ლოკაცია" : "Location"}
+              <div className="scanBox">
+
+                <div className="corner c1" />
+                <div className="corner c2" />
+                <div className="corner c3" />
+                <div className="corner c4" />
+
+                <div className="qrPattern">
+                  {Array.from({ length: 36 }).map((_, i) => (
+                    <i
+                      key={i}
+                      className={
+                        [
+                          1, 2, 4, 6, 7, 9, 12, 14, 15,
+                          17, 19, 20, 22, 25, 27, 28,
+                          31, 33, 34,
+                        ].includes(i)
+                          ? "dark"
+                          : ""
+                      }
+                    />
+                  ))}
+                </div>
+
               </div>
             </div>
           </div>
 
           <div className="floatingTag">
-            <div className="qrPattern">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <span key={i} />
-              ))}
+
+            <div className="tinyQR">
+              <b />
+              <b />
+              <b />
+              <b />
             </div>
 
-            <small>QR RETURN</small>
           </div>
         </div>
       </section>
 
-      {/* REGISTRATION SELECTOR */}
-      <section className="selectorSection">
-        <div className="selectorIntro">
-          <span>QR PROTECTION</span>
+      {/* INFORMATION */}
+      <section className="information">
+
+        <div className="infoInner">
+
+          <div className="infoLabel">
+            QR RETURN
+          </div>
 
           <h2>
             {ka
-              ? "მიაბი QR ტეგი სასურველ ცხოველს ან ნივთს და დაიბრუნე მარტივად."
-              : "Attach a QR tag to your pet or item and make its return simple."}
+              ? "როგორ მუშაობს QR RETURN"
+              : "How QR RETURN works"}
           </h2>
 
-          <p>
-            {ka
-              ? "აირჩიე კატეგორია და პირდაპირ დაიწყე რეგისტრაცია."
-              : "Select a category to begin registration."}
-          </p>
-        </div>
+          <div className="infoText">
 
-        <div className="categorySelector">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => register(category.id)}
-            >
-              <span className="categoryNumber">
-                {category.symbol}
-              </span>
+            {ka ? (
+              <>
+                <p className="lead">
+                  <strong>
+                    მიამაგრეთ QR კოდი თქვენს ცხოველს ან ნივთს და
+                    გაუმარტივეთ მპოვნელს თქვენთან დაკავშირება.
+                  </strong>
+                </p>
 
-              <strong>
-                {ka ? category.ka : category.en}
-              </strong>
+                <p>
+                  მპოვნელი ასკანერებს QR კოდს და{" "}
+                  <strong>
+                    ყოველგვარი აპლიკაციის ჩამოტვირთვის გარეშე
+                  </strong>{" "}
+                  გიკავშირდებათ —{" "}
+                  <strong>
+                    Live Chat-ის საშუალებით ან რეგისტრაციისას
+                    თქვენ მიერ მითითებულ ნომერზე.
+                  </strong>
+                </p>
 
-              <span className="categoryArrow">↗</span>
-            </button>
-          ))}
+                <p>
+                  მას ასევე შეუძლია{" "}
+                  <strong>
+                    გაგიზიაროთ ნივთის ან ცხოველის მდებარეობა
+                  </strong>{" "}
+                  პირდაპირ QR RETURN-ის საშუალებით.
+                </p>
+
+                <p>
+                  <strong>
+                    დაკავშირების მეთოდს თავად ირჩევთ.
+                    უსაფრთხოება და გამჭვირვალობა ჩვენი პრიორიტეტია.
+                  </strong>
+                </p>
+
+                <p className="lastLine">
+                  <strong>
+                    შეიძინეთ QR კოდი და დაკარგულთან
+                    დამშვიდობება აღარ მოგიწევთ.
+                  </strong>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="lead">
+                  <strong>
+                    Attach a QR code to your pet or personal item
+                    and make it easier for a finder to contact you.
+                  </strong>
+                </p>
+
+                <p>
+                  The finder scans the QR code and can contact you{" "}
+                  <strong>
+                    without downloading an application
+                  </strong>{" "}
+                  — through{" "}
+                  <strong>
+                    Live Chat or the phone number you provide
+                    during registration.
+                  </strong>
+                </p>
+
+                <p>
+                  The finder can also{" "}
+                  <strong>
+                    share the location of your pet or item
+                  </strong>{" "}
+                  directly through QR RETURN.
+                </p>
+
+                <p>
+                  <strong>
+                    You choose how you want to be contacted.
+                    Safety and transparency are our priority.
+                  </strong>
+                </p>
+
+                <p className="lastLine">
+                  <strong>
+                    Get your QR code and give what matters
+                    to you a way back home.
+                  </strong>
+                </p>
+              </>
+            )}
+
+          </div>
+
+          {/* FEATURES */}
+          <div className="featureGrid">
+
+            {features.map((feature) => (
+              <div
+                className="feature"
+                key={feature.number}
+              >
+                <div className="featureNumber">
+                  {feature.number}
+                </div>
+
+                <div className="featureName">
+                  {ka ? feature.ka : feature.en}
+                </div>
+              </div>
+            ))}
+
+          </div>
         </div>
       </section>
 
-      {/* FINDER EXPERIENCE */}
-      <section className="finderSection">
-        <div className="finderCopy">
-          <span className="sectionLabel">
-            FINDER EXPERIENCE
-          </span>
+      {/* DARK CATEGORY SECTION */}
+      <section className="categories">
+
+        <div className="categoryInner">
 
           <h2>
             {ka
-              ? "მპოვნელს აჩვენე მხოლოდ ის, რაც საჭიროა."
-              : "Show the finder only what matters."}
+              ? "დაარეგისტრირეთ სასურველი ნივთი ან ცხოველი."
+              : "Register your item or pet."}
           </h2>
 
-          <p>
-            {ka
-              ? "შენ აკონტროლებ როგორ დაგიკავშირდებიან. ტელეფონი, Live Chat, ლოკაციის გაზიარება და მპოვნელისთვის დამატებითი ინსტრუქცია — ერთ პროფილში."
-              : "You control how a finder reaches you. Phone, Live Chat, location sharing and return instructions live in one profile."}
-          </p>
-        </div>
+          <div className="categoryGrid">
 
-        <div className="featureList">
-          <div>
-            <span>01</span>
-            <strong>Live Chat</strong>
-          </div>
+            {categories.map((item) => (
+              <div
+                className="categoryCard"
+                key={item.id}
+              >
 
-          <div>
-            <span>02</span>
-            <strong>
-              {ka ? "ლოკაციის გაზიარება" : "Location sharing"}
-            </strong>
-          </div>
+                <div className="cardTop">
+                  <span>{item.number}</span>
+                  <span className="arrow">↗</span>
+                </div>
 
-          <div>
-            <span>03</span>
-            <strong>
-              {ka ? "მპოვნელის ჯილდო" : "Finder reward"}
-            </strong>
-          </div>
+                <div className="iconWrap">
 
-          <div>
-            <span>04</span>
-            <strong>
-              {ka ? "პირადი მონაცემების კონტროლი" : "Privacy control"}
-            </strong>
+                  <div className="categoryIcon">
+                    {item.icon}
+                  </div>
+
+                  <div className="qrTag">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+
+                </div>
+
+                <div className="categoryName">
+                  {ka ? item.ka : item.en}
+                </div>
+
+              </div>
+            ))}
+
           </div>
         </div>
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="contact">
-        <div>
-          <span>QR RETURN SUPPORT</span>
+      <section
+        id="contact"
+        className="contact"
+      >
 
-          <h2>
-            {ka
-              ? "დახმარება გჭირდება?"
-              : "Need help?"}
-          </h2>
+        <div className="contactInner">
 
-          <p>
-            {ka
-              ? "QR ტეგის რეგისტრაცია, პროფილის მართვა ან დაბრუნების პროცესი — დაგვიკავშირდი."
-              : "Questions about registration, your profile or the return process? Contact us."}
-          </p>
+          <div>
+
+            <div className="sectionLabel">
+              QR RETURN
+            </div>
+
+            <h2>
+              {ka
+                ? "დაგვიკავშირდით"
+                : "Contact us"}
+            </h2>
+
+            <p>
+              {ka
+                ? "კითხვა გაქვთ QR კოდის, რეგისტრაციის ან ჩვენი სერვისის შესახებ? დაგვიკავშირდით."
+                : "Questions about QR codes, registration or our service? Contact us."}
+            </p>
+
+          </div>
+
+          <a
+            href="mailto:hello@qrreturn.com"
+            className="contactButton"
+          >
+            {ka ? "მოგვწერეთ" : "Email us"} →
+          </a>
+
         </div>
-
-        <a href="mailto:support@qrreturn.com">
-          {ka ? "ჩვენთან კონტაქტი" : "Contact us"}
-          <span>↗</span>
-        </a>
       </section>
 
       {/* FOOTER */}
-      <footer>
-        <div className="footerBrand">
-          <strong>QR RETURN</strong>
-          <span>SMART LOST & FOUND</span>
+      <footer className="footer">
+
+        <div className="footerInner">
+
+          <div>
+
+            <div className="footerBrand">
+              QR RETURN
+            </div>
+
+            <div className="footerSub">
+              SMART LOST & FOUND
+            </div>
+
+          </div>
+
+          <div className="footerLinks">
+
+            <a href="#contact">
+              {ka ? "კონტაქტი" : "Contact"}
+            </a>
+
+            <span>
+              {ka
+                ? "კონფიდენციალურობა"
+                : "Privacy"}
+            </span>
+
+            <span>
+              {ka
+                ? "წესები და პირობები"
+                : "Terms & Conditions"}
+            </span>
+
+          </div>
+
+          <div className="copyright">
+            © 2026 QR RETURN
+          </div>
+
         </div>
-
-        <div className="footerLinks">
-          <a href="#contact">
-            {ka ? "კონტაქტი" : "Contact"}
-          </a>
-
-          <a href="/privacy">
-            {ka ? "კონფიდენციალურობა" : "Privacy"}
-          </a>
-
-          <a href="/terms">
-            {ka ? "წესები" : "Terms"}
-          </a>
-
-          <button onClick={() => setLang(ka ? "en" : "ka")}>
-            {ka ? "English" : "ქართული"}
-          </button>
-        </div>
-
-        <small>© 2026 QR RETURN</small>
       </footer>
 
       <style jsx>{`
+
         * {
           box-sizing: border-box;
         }
 
         .page {
-          min-height: 100vh;
-          overflow: hidden;
-          background: #f8fafc;
-          color: #07111f;
+          background: #ffffff;
+          color: #091426;
           font-family:
             Inter,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
+            Arial,
             sans-serif;
         }
 
-        button,
-        a {
-          font: inherit;
-        }
+        /* HEADER */
 
-        .nav {
-          max-width: 1320px;
-          height: 92px;
+        .header {
+          width: calc(100% - 48px);
+          max-width: 1240px;
+          min-height: 94px;
           margin: auto;
-          padding: 0 34px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 25px;
+          border-bottom: 1px solid #edf1f6;
         }
 
         .brand {
-          padding: 0;
-          border: 0;
-          background: none;
           display: flex;
           align-items: center;
           gap: 13px;
-          cursor: pointer;
-          text-align: left;
+          text-decoration: none;
         }
 
-        .brandIcon {
-          width: 46px;
-          height: 46px;
-          padding: 10px;
-          border-radius: 13px;
+        .brandMark {
+          width: 50px;
+          height: 50px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4px;
-          background: #1261e8;
-          box-shadow: 0 12px 30px rgba(18, 97, 232, 0.22);
+          place-items: center;
+          border-radius: 15px;
+          background: #1465e8;
+          color: white;
+          font-size: 15px;
+          font-weight: 900;
+          box-shadow:
+            0 9px 24px rgba(20,101,232,.22);
         }
 
-        .brandIcon span {
-          border: 2px solid white;
-          border-radius: 2px;
-        }
-
-        .brandWords {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .brandWords strong {
-          color: #1261e8;
-          font-size: 24px;
-          line-height: 1;
+        .brandName {
+          color: #1465e8;
+          font-size: 26px;
+          font-weight: 950;
           letter-spacing: -1px;
         }
 
-        .brandWords small {
-          margin-top: 5px;
-          color: #7b8799;
+        .brandSub {
+          margin-top: 4px;
+          color: #8792a4;
           font-size: 8px;
           font-weight: 800;
-          letter-spacing: 2.5px;
+          letter-spacing: 2.4px;
         }
 
-        .navActions {
+        .headerRight {
           display: flex;
           align-items: center;
-          gap: 9px;
+          gap: 18px;
         }
 
-        .navActions a {
-          margin-right: 9px;
-          color: #475569;
+        .nav {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .registerButton,
+        .loginButton {
           text-decoration: none;
-          font-size: 13px;
-          font-weight: 700;
-        }
-
-        .language {
-          padding: 10px 13px;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          background: white;
-          color: #1261e8;
-          font-size: 12px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .signin {
+          border-radius: 11px;
           padding: 11px 17px;
-          border: 0;
-          border-radius: 10px;
-          background: #07111f;
-          color: white;
           font-size: 13px;
-          font-weight: 800;
-          cursor: pointer;
-        }
-
-        .hero {
-          max-width: 1320px;
-          min-height: 690px;
-          margin: auto;
-          padding: 70px 34px 110px;
-          display: grid;
-          grid-template-columns: 1.05fr 0.95fr;
-          gap: 70px;
-          align-items: center;
-        }
-
-        .label {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          color: #1261e8;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 2.5px;
-        }
-
-        .label span {
-          width: 27px;
-          height: 2px;
-          background: #1261e8;
-        }
-
-        .hero h1 {
-          margin: 24px 0 0;
-          font-size: clamp(57px, 7vw, 96px);
-          line-height: 0.92;
-          letter-spacing: -6px;
           font-weight: 850;
         }
 
-        .hero h1 em {
-          color: #1261e8;
-          font-style: normal;
+        .registerButton {
+          background: #1465e8;
+          color: white;
+          box-shadow:
+            0 7px 20px rgba(20,101,232,.18);
         }
 
-        .heroCopy > p {
-          max-width: 610px;
-          margin: 33px 0 0;
-          color: #64748b;
-          font-size: 17px;
-          line-height: 1.75;
+        .loginButton {
+          color: #1d2939;
+          border: 1px solid #e2e7ee;
+          background: white;
         }
 
-        .heroMeta {
-          margin-top: 38px;
+        .language {
           display: flex;
-          gap: 25px;
-          flex-wrap: wrap;
+          padding: 4px;
+          background: #f1f4f8;
+          border-radius: 11px;
         }
 
-        .heroMeta span {
-          color: #718096;
-          font-size: 11px;
-          font-weight: 700;
+        .language button {
+          border: 0;
+          background: transparent;
+          color: #7c8798;
+          padding: 8px 10px;
+          border-radius: 8px;
+          font-size: 10px;
+          font-weight: 900;
+          cursor: pointer;
         }
 
-        .heroMeta b {
-          margin-right: 5px;
-          color: #1261e8;
+        .language .selected {
+          background: white;
+          color: #1465e8;
+          box-shadow:
+            0 2px 8px rgba(20,40,70,.08);
         }
 
-        .visual {
-          height: 520px;
+        /* HERO */
+
+        .hero {
+          max-width: 1240px;
+          min-height: 610px;
+          margin: auto;
+          padding: 100px 24px;
+          display: grid;
+          grid-template-columns: 1.2fr .8fr;
+          align-items: center;
+          gap: 50px;
           position: relative;
+          overflow: hidden;
+        }
+
+        .heroGlow {
+          position: absolute;
+          width: 480px;
+          height: 480px;
+          right: -100px;
+          top: 30px;
+          background: #e8f2ff;
+          filter: blur(100px);
+          border-radius: 50%;
+          opacity: .85;
+        }
+
+        .heroContent {
+          position: relative;
+          z-index: 2;
+        }
+
+        .heroBrand,
+        .infoLabel,
+        .sectionLabel {
+          color: #1465e8;
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 3px;
+        }
+
+        .hero h1 {
+          max-width: 830px;
+          margin: 24px 0 0;
+          font-size:
+            clamp(50px,6.5vw,82px);
+          line-height: 1.01;
+          letter-spacing: -4.5px;
+          font-weight: 900;
+        }
+
+        .hero h1 span {
+          color: #1465e8;
+        }
+
+        /* QR PHONE */
+
+        .heroVisual {
+          position: relative;
+          min-height: 420px;
+          display: grid;
+          place-items: center;
+          z-index: 2;
+        }
+
+        .phone {
+          width: 225px;
+          height: 420px;
+          padding: 10px;
+          border-radius: 38px;
+          background: #081426;
+          box-shadow:
+            0 35px 80px rgba(15,55,110,.22);
+          transform: rotate(5deg);
+        }
+
+        .phoneScreen {
+          width: 100%;
+          height: 100%;
+          border-radius: 29px;
+          background:
+            linear-gradient(
+              160deg,
+              #f9fbff,
+              #eaf3ff
+            );
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
         }
 
-        .orb {
-          position: absolute;
-          border-radius: 999px;
-          filter: blur(1px);
-        }
-
-        .orbOne {
-          width: 390px;
-          height: 390px;
-          background: #e7f0ff;
-        }
-
-        .orbTwo {
-          width: 230px;
-          height: 230px;
-          top: 25px;
-          right: 20px;
-          background: #dbeafe;
-          opacity: 0.7;
-        }
-
-        .phone {
-          position: relative;
-          z-index: 2;
-          width: 280px;
-          height: 500px;
-          padding: 18px;
-          border: 8px solid #07111f;
-          border-radius: 42px;
-          background: white;
-          box-shadow: 0 45px 90px rgba(15, 35, 65, 0.22);
-          transform: rotate(3deg);
-        }
-
-        .phoneTop {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #1261e8;
-          font-size: 10px;
-        }
-
         .miniLogo {
-          width: 25px;
-          height: 25px;
-          padding: 5px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2px;
-          border-radius: 7px;
-          background: #1261e8;
+          margin-bottom: 30px;
+          color: #1465e8;
+          font-size: 20px;
+          font-weight: 950;
         }
 
-        .miniLogo i {
-          border: 1px solid white;
-        }
-
-        .scanSuccess {
-          margin-top: 60px;
-          text-align: center;
-        }
-
-        .check {
-          width: 65px;
-          height: 65px;
-          margin: auto;
+        .scanBox {
+          width: 135px;
+          height: 135px;
+          position: relative;
           display: grid;
           place-items: center;
-          border-radius: 50%;
-          background: #eaf2ff;
-          color: #1261e8;
-          font-size: 28px;
-          font-weight: 900;
         }
 
-        .scanSuccess small {
-          display: block;
-          margin-top: 25px;
-          color: #1261e8;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 2px;
-        }
-
-        .scanSuccess strong {
-          display: block;
-          margin-top: 8px;
-          font-size: 23px;
-        }
-
-        .scanSuccess p {
-          margin: 9px auto;
-          max-width: 190px;
-          color: #8490a1;
-          font-size: 11px;
-          line-height: 1.5;
-        }
-
-        .finderActions {
-          margin-top: 40px;
+        .qrPattern {
+          width: 95px;
+          height: 95px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
+          grid-template-columns:
+            repeat(6,1fr);
+          gap: 3px;
         }
 
-        .finderActions div {
-          padding: 14px 7px;
-          border-radius: 12px;
-          background: #f4f7fb;
-          text-align: center;
-          color: #334155;
-          font-size: 10px;
-          font-weight: 800;
+        .qrPattern i {
+          background: #d7dfeb;
+          border-radius: 2px;
         }
 
-        .finderActions span {
-          display: block;
-          margin-bottom: 4px;
-          color: #1261e8;
-          font-size: 18px;
+        .qrPattern i.dark {
+          background: #0b1627;
+        }
+
+        .corner {
+          position: absolute;
+          width: 28px;
+          height: 28px;
+        }
+
+        .c1 {
+          top: 0;
+          left: 0;
+          border-top: 3px solid #1465e8;
+          border-left: 3px solid #1465e8;
+        }
+
+        .c2 {
+          top: 0;
+          right: 0;
+          border-top: 3px solid #1465e8;
+          border-right: 3px solid #1465e8;
+        }
+
+        .c3 {
+          bottom: 0;
+          left: 0;
+          border-bottom: 3px solid #1465e8;
+          border-left: 3px solid #1465e8;
+        }
+
+        .c4 {
+          bottom: 0;
+          right: 0;
+          border-bottom: 3px solid #1465e8;
+          border-right: 3px solid #1465e8;
         }
 
         .floatingTag {
           position: absolute;
-          z-index: 3;
-          right: 2%;
-          bottom: 65px;
-          width: 125px;
-          padding: 17px;
-          border-radius: 19px;
-          background: #07111f;
-          box-shadow: 0 25px 50px rgba(7, 17, 31, 0.3);
-          transform: rotate(-7deg);
+          right: 40px;
+          bottom: 60px;
+          width: 85px;
+          height: 85px;
+          border-radius: 23px;
+          background: #1465e8;
+          display: grid;
+          place-items: center;
+          transform: rotate(-9deg);
+          box-shadow:
+            0 20px 50px rgba(20,101,232,.3);
         }
 
-        .qrPattern {
-          aspect-ratio: 1;
-          padding: 8px;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 4px;
-          border-radius: 8px;
+        .tinyQR {
+          width: 44px;
+          height: 44px;
+          padding: 6px;
           background: white;
-        }
-
-        .qrPattern span {
-          background: #07111f;
-        }
-
-        .qrPattern span:nth-child(3n) {
-          background: #1261e8;
-        }
-
-        .floatingTag small {
-          display: block;
-          margin-top: 9px;
-          color: white;
-          text-align: center;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .selectorSection {
-          padding: 105px 34px 115px;
-          background: #07111f;
-          color: white;
-        }
-
-        .selectorIntro {
-          max-width: 1180px;
-          margin: auto;
-        }
-
-        .selectorIntro > span,
-        .sectionLabel,
-        .contact > div > span {
-          color: #69a1ff;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 2.5px;
-        }
-
-        .selectorIntro h2 {
-          max-width: 850px;
-          margin: 18px 0 0;
-          font-size: clamp(35px, 5vw, 57px);
-          line-height: 1.1;
-          letter-spacing: -2.8px;
-        }
-
-        .selectorIntro p {
-          margin: 18px 0 0;
-          color: #8fa1ba;
-          font-size: 14px;
-        }
-
-        .categorySelector {
-          max-width: 1180px;
-          margin: 55px auto 0;
-          border-top: 1px solid #26364c;
-        }
-
-        .categorySelector button {
-          width: 100%;
-          min-height: 82px;
-          padding: 0 8px;
-          border: 0;
-          border-bottom: 1px solid #26364c;
-          background: transparent;
-          color: white;
-          display: grid;
-          grid-template-columns: 80px 1fr 50px;
-          align-items: center;
-          text-align: left;
-          cursor: pointer;
-          transition: 0.2s ease;
-        }
-
-        .categorySelector button:hover {
-          padding-left: 20px;
-          background: #0c1c31;
-        }
-
-        .categoryNumber {
-          color: #56708f;
-          font-size: 10px;
-          font-weight: 900;
-        }
-
-        .categorySelector strong {
-          font-size: 20px;
-          font-weight: 750;
-        }
-
-        .categoryArrow {
-          color: #69a1ff;
-          font-size: 21px;
-        }
-
-        .finderSection {
-          max-width: 1180px;
-          margin: auto;
-          padding: 120px 34px;
+          border-radius: 8px;
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 100px;
+          gap: 4px;
         }
 
-        .sectionLabel {
-          color: #1261e8;
+        .tinyQR b {
+          background: #081426;
         }
 
-        .finderCopy h2 {
-          max-width: 550px;
-          margin: 18px 0 0;
-          font-size: clamp(37px, 5vw, 58px);
-          line-height: 1.05;
-          letter-spacing: -3px;
+        /* INFORMATION */
+
+        .information {
+          background: #f7f9fc;
+          padding: 105px 24px;
         }
 
-        .finderCopy p {
-          max-width: 540px;
-          margin: 27px 0 0;
-          color: #64748b;
+        .infoInner {
+          max-width: 1050px;
+          margin: auto;
+        }
+
+        .information h2 {
+          margin: 15px 0 45px;
+          font-size:
+            clamp(36px,5vw,58px);
+          letter-spacing: -2.5px;
+        }
+
+        .infoText {
+          max-width: 850px;
+        }
+
+        .infoText p {
+          margin: 0 0 21px;
+          color: #5e697b;
+          font-size: 17px;
           line-height: 1.75;
         }
 
-        .featureList {
-          border-top: 1px solid #dfe5ec;
+        .infoText strong {
+          color: #182438;
         }
 
-        .featureList div {
-          min-height: 80px;
+        .infoText .lead {
+          font-size: 20px;
+        }
+
+        .lastLine {
+          margin-top: 32px !important;
+        }
+
+        /* FEATURES */
+
+        .featureGrid {
+          margin-top: 60px;
           display: grid;
-          grid-template-columns: 65px 1fr;
-          align-items: center;
-          border-bottom: 1px solid #dfe5ec;
+          grid-template-columns:
+            repeat(4,1fr);
+          border-top:
+            1px solid #dfe5ed;
+          border-bottom:
+            1px solid #dfe5ed;
         }
 
-        .featureList span {
-          color: #1261e8;
-          font-size: 10px;
-          font-weight: 900;
+        .feature {
+          min-height: 120px;
+          padding: 28px 20px;
+          border-right:
+            1px solid #dfe5ed;
         }
 
-        .featureList strong {
-          font-size: 16px;
+        .feature:last-child {
+          border-right: 0;
         }
+
+        .featureNumber {
+          color: #1465e8;
+          font-size: 11px;
+          font-weight: 950;
+        }
+
+        .featureName {
+          margin-top: 17px;
+          color: #162238;
+          font-size: 15px;
+          font-weight: 850;
+        }
+
+        /* CATEGORIES */
+
+        .categories {
+          background:
+            radial-gradient(
+              circle at 15% 20%,
+              #143968 0%,
+              transparent 35%
+            ),
+            linear-gradient(
+              135deg,
+              #071321,
+              #0a1b30
+            );
+          color: white;
+          padding: 105px 24px 120px;
+        }
+
+        .categoryInner {
+          max-width: 1100px;
+          margin: auto;
+        }
+
+        .categories h2 {
+          max-width: 800px;
+          margin: 0 0 55px;
+          font-size:
+            clamp(36px,5vw,57px);
+          line-height: 1.08;
+          letter-spacing: -2.3px;
+        }
+
+        .categoryGrid {
+          display: grid;
+          grid-template-columns:
+            repeat(3,1fr);
+          gap: 15px;
+        }
+
+        .categoryCard {
+          min-height: 260px;
+          padding: 24px;
+          border-radius: 24px;
+          border:
+            1px solid rgba(130,170,225,.22);
+          background:
+            rgba(18,42,72,.72);
+        }
+
+        .cardTop {
+          display: flex;
+          justify-content: space-between;
+          color: #8da2bd;
+          font-size: 11px;
+          font-weight: 850;
+        }
+
+        .arrow {
+          color: #62a5ff;
+          font-size: 18px;
+        }
+
+        .iconWrap {
+          width: 110px;
+          height: 110px;
+          margin: 28px auto 20px;
+          border-radius: 30px;
+          background:
+            linear-gradient(
+              145deg,
+              #173c67,
+              #0d2038
+            );
+          display: grid;
+          place-items: center;
+          position: relative;
+        }
+
+        .categoryIcon {
+          font-size: 57px;
+        }
+
+        .qrTag {
+          position: absolute;
+          width: 37px;
+          height: 37px;
+          right: -5px;
+          bottom: 4px;
+          background: white;
+          padding: 7px;
+          border-radius: 9px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3px;
+          box-shadow:
+            0 8px 20px rgba(0,0,0,.2);
+        }
+
+        .qrTag i {
+          background: #071321;
+        }
+
+        .categoryName {
+          text-align: center;
+          font-size: 18px;
+          font-weight: 850;
+        }
+
+        /* CONTACT */
 
         .contact {
-          max-width: 1180px;
-          margin: 0 auto 100px;
-          padding: 55px 60px;
-          border-radius: 26px;
-          background: #1261e8;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 30px;
+          padding: 95px 24px;
+          background: white;
         }
 
-        .contact > div > span {
-          color: #bed5ff;
+        .contactInner {
+          max-width: 1100px;
+          margin: auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 50px;
         }
 
         .contact h2 {
-          margin: 12px 0 0;
-          font-size: 35px;
+          margin: 14px 0 15px;
+          font-size: 42px;
+          letter-spacing: -1.8px;
         }
 
         .contact p {
-          max-width: 600px;
-          margin: 10px 0 0;
-          color: #dce9ff;
-          font-size: 13px;
-          line-height: 1.6;
+          max-width: 650px;
+          margin: 0;
+          color: #697487;
+          line-height: 1.7;
         }
 
-        .contact > a {
+        .contactButton {
           flex-shrink: 0;
-          padding: 15px 20px;
-          border-radius: 11px;
-          background: white;
-          color: #1261e8;
+          padding: 15px 22px;
+          border-radius: 13px;
+          background: #1465e8;
+          color: white;
           text-decoration: none;
-          font-size: 13px;
-          font-weight: 900;
+          font-size: 14px;
+          font-weight: 850;
         }
 
-        .contact > a span {
-          margin-left: 15px;
+        /* FOOTER */
+
+        .footer {
+          background: #071321;
+          color: white;
         }
 
-        footer {
-          max-width: 1180px;
+        .footerInner {
+          max-width: 1100px;
+          min-height: 170px;
           margin: auto;
-          padding: 50px 34px 65px;
-          border-top: 1px solid #e2e8f0;
-          display: grid;
-          grid-template-columns: 1fr auto auto;
-          gap: 50px;
+          padding: 45px 24px;
+          display: flex;
           align-items: center;
+          justify-content: space-between;
+          gap: 35px;
         }
 
         .footerBrand {
-          display: flex;
-          flex-direction: column;
+          color: #5b9cff;
+          font-size: 20px;
+          font-weight: 950;
         }
 
-        .footerBrand strong {
-          color: #1261e8;
-          font-size: 19px;
-        }
-
-        .footerBrand span {
-          margin-top: 4px;
-          color: #94a3b8;
+        .footerSub {
+          margin-top: 6px;
+          color: #65758b;
           font-size: 8px;
+          font-weight: 800;
           letter-spacing: 2px;
         }
 
         .footerLinks {
           display: flex;
-          gap: 22px;
+          gap: 25px;
+          flex-wrap: wrap;
         }
 
         .footerLinks a,
-        .footerLinks button {
-          padding: 0;
-          border: 0;
-          background: none;
-          color: #64748b;
+        .footerLinks span {
+          color: #a4b0c0;
           text-decoration: none;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .copyright {
+          color: #59687c;
           font-size: 11px;
-          cursor: pointer;
         }
 
-        footer small {
-          color: #94a3b8;
-          font-size: 10px;
-        }
+        /* MOBILE */
 
-        @media (max-width: 850px) {
-          .navActions > a {
+        @media (max-width: 800px) {
+
+          .header {
+            width: calc(100% - 28px);
+          }
+
+          .headerRight {
+            gap: 8px;
+          }
+
+          .registerButton,
+          .loginButton {
+            padding: 9px 11px;
+            font-size: 11px;
+          }
+
+          .language button {
+            padding: 7px;
+          }
+
+          .brandName {
+            font-size: 20px;
+          }
+
+          .brandSub {
             display: none;
           }
 
           .hero {
             grid-template-columns: 1fr;
-            padding-top: 60px;
+            padding-top: 75px;
           }
 
           .hero h1 {
-            letter-spacing: -4px;
+            letter-spacing: -3px;
           }
 
-          .visual {
-            height: 480px;
+          .heroVisual {
+            min-height: 390px;
           }
 
-          .finderSection {
-            grid-template-columns: 1fr;
-            gap: 55px;
+          .featureGrid {
+            grid-template-columns:
+              repeat(2,1fr);
           }
 
-          .contact {
-            margin-left: 20px;
-            margin-right: 20px;
-            padding: 40px 30px;
-            flex-direction: column;
+          .feature:nth-child(2) {
+            border-right: 0;
+          }
+
+          .feature:nth-child(-n + 2) {
+            border-bottom:
+              1px solid #dfe5ed;
+          }
+
+          .categoryGrid {
+            grid-template-columns:
+              repeat(2,1fr);
+          }
+
+          .contactInner {
             align-items: flex-start;
+            flex-direction: column;
           }
 
-          footer {
-            grid-template-columns: 1fr;
-            gap: 25px;
+          .footerInner {
+            align-items: flex-start;
+            flex-direction: column;
           }
         }
 
-        @media (max-width: 560px) {
+        @media (max-width: 540px) {
+
+          .header {
+            min-height: 82px;
+          }
+
+          .brandMark {
+            width: 42px;
+            height: 42px;
+          }
+
+          .brandName {
+            font-size: 17px;
+          }
+
           .nav {
-            height: 80px;
-            padding: 0 16px;
+            gap: 5px;
           }
 
-          .brandWords strong {
-            font-size: 19px;
+          .registerButton {
+            padding: 9px 10px;
           }
 
-          .brandWords small {
+          .loginButton {
             display: none;
           }
 
-          .brandIcon {
-            width: 40px;
-            height: 40px;
-          }
-
-          .signin {
-            padding: 10px 12px;
+          .language button {
+            font-size: 9px;
           }
 
           .hero {
-            padding: 60px 20px 80px;
+            min-height: auto;
           }
 
-          .hero h1 {
-            font-size: 55px;
-            letter-spacing: -3.5px;
+          .heroVisual {
+            transform: scale(.9);
           }
 
-          .heroMeta {
-            flex-direction: column;
-            gap: 9px;
+          .categoryCard {
+            min-height: 220px;
+            padding: 18px;
           }
 
-          .visual {
-            height: 450px;
+          .iconWrap {
+            width: 90px;
+            height: 90px;
           }
 
-          .phone {
-            width: 245px;
-            height: 445px;
-          }
-
-          .floatingTag {
-            right: 0;
-            width: 105px;
-          }
-
-          .selectorSection {
-            padding: 80px 20px;
-          }
-
-          .categorySelector button {
-            grid-template-columns: 50px 1fr 35px;
-          }
-
-          .finderSection {
-            padding: 90px 20px;
-          }
-
-          .footerLinks {
-            flex-wrap: wrap;
+          .categoryIcon {
+            font-size: 47px;
           }
         }
+
       `}</style>
     </main>
   );
