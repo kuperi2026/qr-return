@@ -585,15 +585,8 @@ export default function RegistrationPage() {
         item_type: category.itemType,
         pet_type: category.petType,
 
-        /*
-         * ALWAYS VISIBLE:
-         * item type + item/pet name
-         */
         item_name: form.item_name.trim(),
 
-        /*
-         * OPTIONAL + VISIBILITY CONTROL
-         */
         colour:
           form.colour.trim() || null,
 
@@ -639,18 +632,8 @@ export default function RegistrationPage() {
         photo_url: photoUrl,
         owner_photo_url: ownerPhotoUrl,
 
-        /*
-         * OWNER NAME + PHONE:
-         * REQUIRED AND ALWAYS VISIBLE
-         */
         owner_name: ownerName,
         owner_phone: form.owner_phone.trim(),
-
-        /*
-         * EMAIL:
-         * REQUIRED TO COMPLETE REGISTRATION,
-         * BUT VISIBILITY IS USER'S CHOICE
-         */
         owner_email: form.owner_email.trim(),
 
         additional_contact_name:
@@ -675,10 +658,6 @@ export default function RegistrationPage() {
           form.lost_seen_location.trim() ||
           null,
 
-        /*
-         * CONTACT METHODS:
-         * ONE OR MORE
-         */
         phone_enabled: phoneEnabled,
         whatsapp_enabled: whatsappEnabled,
         live_chat_enabled: liveChatEnabled,
@@ -687,13 +666,15 @@ export default function RegistrationPage() {
           locationSharingEnabled,
 
         /*
-         * IMPORTANT:
-         * PHONE IS ALWAYS VISIBLE.
+         * ტელეფონის ნომერი:
+         * შევსებაც სავალდებულოა
+         * და მპოვნელისთვის ჩვენებაც სავალდებულოა.
          */
         show_owner_phone: true,
 
         /*
-         * Optional visibility values
+         * Email და სხვა არასავალდებულო
+         * ინფორმაციის ხილვადობა.
          */
         ...visibility,
 
@@ -812,7 +793,6 @@ export default function RegistrationPage() {
           </div>
         </div>
 
-        {/* IMPORTANT USER EXPLANATION */}
         <div className="privacyNotice">
           <div className="privacyIcon">
             ℹ️
@@ -1890,29 +1870,37 @@ function StepTitle({
   );
 }
 
+/*
+ * FIXED:
+ * required prop ახლა სწორადაა აღწერილი.
+ */
 function Field({
   label,
   value,
   onChange,
   type = "text",
   placeholder = "",
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   placeholder?: string;
+  required?: boolean;
 }) {
   return (
     <label className="field">
       <span>
         {label}
+        {required ? " *" : ""}
       </span>
 
       <input
         type={type}
         value={value}
         placeholder={placeholder}
+        required={required}
         onChange={(event) =>
           onChange(event.target.value)
         }
@@ -2323,6 +2311,7 @@ function ContactMethod({
           : "contactMethod"
       }
       onClick={onClick}
+      aria-pressed={active}
     >
       <span className="contactIcon">
         {icon}
