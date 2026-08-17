@@ -5,15 +5,18 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import {
   useParams,
   useRouter,
 } from "next/navigation";
+
 import { supabase } from "@/lib/supabase";
 
 type Profile = {
   tag_code: string;
   item_type: string;
+
   item_name: string | null;
   colour: string | null;
 
@@ -41,34 +44,39 @@ type Profile = {
   additional_contact_email: string | null;
 
   finder_message: string | null;
-  contact_preference: string | null;
+  reward: string | null;
+  lost_seen_location: string | null;
+
   location_sharing_enabled: boolean | null;
 
-  show_colour: boolean;
-  show_sex: boolean;
-  show_date_of_birth: boolean;
-  show_weight: boolean;
-  show_medical_info: boolean;
+  phone_enabled: boolean | null;
+  whatsapp_enabled: boolean | null;
+  live_chat_enabled: boolean | null;
 
-  show_brand: boolean;
-  show_model: boolean;
-  show_size: boolean;
-  show_material: boolean;
-  show_distinctive_features: boolean;
-  show_description: boolean;
+  show_colour: boolean | null;
+  show_sex: boolean | null;
+  show_date_of_birth: boolean | null;
+  show_weight: boolean | null;
+  show_medical_info: boolean | null;
 
-  show_photo: boolean;
-  show_owner_photo: boolean;
+  show_brand: boolean | null;
+  show_model: boolean | null;
+  show_size: boolean | null;
+  show_material: boolean | null;
+  show_distinctive_features: boolean | null;
+  show_description: boolean | null;
 
-  show_owner_phone: boolean;
-  show_owner_email: boolean;
+  show_photo: boolean | null;
+  show_owner_photo: boolean | null;
 
-  show_additional_contact: boolean;
+  show_owner_phone: boolean | null;
+  show_owner_email: boolean | null;
 
-  show_finder_message: boolean;
-  show_lost_seen_location: boolean;
+  show_additional_contact: boolean | null;
 
-  lost_seen_location: string | null;
+  show_finder_message: boolean | null;
+  show_reward: boolean | null;
+  show_lost_seen_location: boolean | null;
 };
 
 type FormState = {
@@ -96,9 +104,8 @@ type FormState = {
   additional_contact_email: string;
 
   finder_message: string;
+  reward: string;
   lost_seen_location: string;
-
-  contact_preference: string;
 };
 
 type VisibilityState = {
@@ -124,6 +131,7 @@ type VisibilityState = {
   show_additional_contact: boolean;
 
   show_finder_message: boolean;
+  show_reward: boolean;
   show_lost_seen_location: boolean;
 };
 
@@ -155,9 +163,8 @@ const emptyForm: FormState = {
   additional_contact_email: "",
 
   finder_message: "",
+  reward: "",
   lost_seen_location: "",
-
-  contact_preference: "phone_chat",
 };
 
 const defaultVisibility: VisibilityState = {
@@ -183,6 +190,7 @@ const defaultVisibility: VisibilityState = {
   show_additional_contact: false,
 
   show_finder_message: true,
+  show_reward: false,
   show_lost_seen_location: true,
 };
 
@@ -238,7 +246,9 @@ async function uploadImage(
           .slice(2)}`;
 
   const filePath =
-    `${folder}/${cleanTag(tagCode)}-${uniquePart}.${extension}`;
+    `${folder}/${cleanTag(
+      tagCode
+    )}-${uniquePart}.${extension}`;
 
   const { error: uploadError } =
     await supabase.storage
@@ -257,6 +267,10 @@ async function uploadImage(
     supabase.storage
       .from(BUCKET)
       .getPublicUrl(filePath);
+
+  if (!data.publicUrl) {
+    throw new Error("PUBLIC_URL_ERROR");
+  }
 
   return data.publicUrl;
 }
@@ -284,6 +298,21 @@ export default function EditProfilePage() {
     useState<VisibilityState>(
       defaultVisibility
     );
+
+  const [
+    phoneEnabled,
+    setPhoneEnabled,
+  ] = useState(true);
+
+  const [
+    whatsappEnabled,
+    setWhatsappEnabled,
+  ] = useState(false);
+
+  const [
+    liveChatEnabled,
+    setLiveChatEnabled,
+  ] = useState(true);
 
   const [
     locationSharingEnabled,
@@ -329,9 +358,12 @@ export default function EditProfilePage() {
         .maybeSingle();
 
       if (fetchError) {
+        console.error(fetchError);
+
         setError(
           `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
         );
+
         setLoading(false);
         return;
       }
@@ -340,6 +372,7 @@ export default function EditProfilePage() {
         setError(
           "ამ QR კოდზე პროფილი არ მოიძებნა."
         );
+
         setLoading(false);
         return;
       }
@@ -347,14 +380,6 @@ export default function EditProfilePage() {
       const current = data as Profile;
 
       setProfile(current);
-
-      let contactPreference =
-        current.contact_preference || "phone_chat";
-
-      // ძველი მნიშვნელობების თავსებადობა
-      if (contactPreference === "both") {
-        contactPreference = "phone_chat";
-      }
 
       setForm({
         item_name:
@@ -417,11 +442,11 @@ export default function EditProfilePage() {
         finder_message:
           current.finder_message || "",
 
+        reward:
+          current.reward || "",
+
         lost_seen_location:
           current.lost_seen_location || "",
-
-        contact_preference:
-          contactPreference,
       });
 
       setVisibility({
@@ -476,9 +501,24 @@ export default function EditProfilePage() {
         show_finder_message:
           current.show_finder_message ?? true,
 
+        show_reward:
+          current.show_reward ?? false,
+
         show_lost_seen_location:
           current.show_lost_seen_location ?? true,
       });
+
+      setPhoneEnabled(
+        current.phone_enabled ?? true
+      );
+
+      setWhatsappEnabled(
+        current.whatsapp_enabled ?? false
+      );
+
+      setLiveChatEnabled(
+        current.live_chat_enabled ?? true
+      );
 
       setLocationSharingEnabled(
         Boolean(
@@ -500,6 +540,10 @@ export default function EditProfilePage() {
       ...current,
       [field]: value,
     }));
+
+    if (error) {
+      setError("");
+    }
   }
 
   function toggleVisibility(
@@ -520,8 +564,9 @@ export default function EditProfilePage() {
 
     if (!file.type.startsWith("image/")) {
       setError(
-        "გთხოვთ აირჩიოთ სურათის ფაილი."
+        "გთხოვთ, აირჩიოთ სურათის ფაილი."
       );
+
       return false;
     }
 
@@ -529,6 +574,7 @@ export default function EditProfilePage() {
       setError(
         "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
       );
+
       return false;
     }
 
@@ -554,6 +600,13 @@ export default function EditProfilePage() {
       return;
     }
 
+    if (!form.owner_name.trim()) {
+      setError(
+        "მფლობელის სახელი და გვარი სავალდებულოა."
+      );
+      return;
+    }
+
     if (!form.owner_phone.trim()) {
       setError(
         "მფლობელის ტელეფონი სავალდებულოა."
@@ -569,9 +622,35 @@ export default function EditProfilePage() {
     }
 
     if (
+      !phoneEnabled &&
+      !whatsappEnabled &&
+      !liveChatEnabled
+    ) {
+      setError(
+        "აირჩიეთ დაკავშირების მინიმუმ ერთი მეთოდი."
+      );
+      return;
+    }
+
+    if (
       !validateImage(itemPhoto) ||
       !validateImage(ownerPhoto)
     ) {
+      return;
+    }
+
+    const weightNumber =
+      form.weight.trim()
+        ? Number(form.weight)
+        : null;
+
+    if (
+      weightNumber !== null &&
+      Number.isNaN(weightNumber)
+    ) {
+      setError(
+        "წონა სწორად მიუთითეთ."
+      );
       return;
     }
 
@@ -606,6 +685,9 @@ export default function EditProfilePage() {
         profile.item_type === "dog" ||
         profile.item_type === "cat";
 
+      const finderMessage =
+        form.finder_message.trim();
+
       const payload = {
         item_name:
           form.item_name.trim(),
@@ -624,9 +706,8 @@ export default function EditProfilePage() {
             : null,
 
         weight:
-          isPet &&
-          form.weight.trim()
-            ? Number(form.weight)
+          isPet
+            ? weightNumber
             : null,
 
         medical_info:
@@ -656,7 +737,8 @@ export default function EditProfilePage() {
 
         distinctive_features:
           !isPet
-            ? form.distinctive_features.trim() || null
+            ? form.distinctive_features.trim() ||
+              null
             : null,
 
         description:
@@ -669,7 +751,7 @@ export default function EditProfilePage() {
           ownerPhotoUrl,
 
         owner_name:
-          form.owner_name.trim() || null,
+          form.owner_name.trim(),
 
         owner_phone:
           form.owner_phone.trim(),
@@ -678,22 +760,38 @@ export default function EditProfilePage() {
           form.owner_email.trim(),
 
         additional_contact_name:
-          form.additional_contact_name.trim() || null,
+          form.additional_contact_name.trim() ||
+          null,
 
         additional_contact_phone:
-          form.additional_contact_phone.trim() || null,
+          form.additional_contact_phone.trim() ||
+          null,
 
         additional_contact_email:
-          form.additional_contact_email.trim() || null,
+          form.additional_contact_email.trim() ||
+          null,
 
         finder_message:
-          form.finder_message.trim() || null,
+          finderMessage || null,
+
+        owner_message_enabled:
+          finderMessage.length > 0,
+
+        reward:
+          form.reward.trim() || null,
 
         lost_seen_location:
-          form.lost_seen_location.trim() || null,
+          form.lost_seen_location.trim() ||
+          null,
 
-        contact_preference:
-          form.contact_preference,
+        phone_enabled:
+          phoneEnabled,
+
+        whatsapp_enabled:
+          whatsappEnabled,
+
+        live_chat_enabled:
+          liveChatEnabled,
 
         location_sharing_enabled:
           locationSharingEnabled,
@@ -706,13 +804,18 @@ export default function EditProfilePage() {
       } = await supabase
         .from("item")
         .update(payload)
-        .eq("tag_code", profile.tag_code);
+        .eq(
+          "tag_code",
+          profile.tag_code
+        );
 
       if (updateError) {
+        console.error(updateError);
+
         setError(
           `ცვლილებების შენახვა ვერ მოხერხდა: ${updateError.message}`
         );
-        setSaving(false);
+
         return;
       }
 
@@ -726,7 +829,7 @@ export default function EditProfilePage() {
             profile.tag_code
           )}`
         );
-      }, 800);
+      }, 700);
     } catch (err) {
       console.error(err);
 
@@ -742,6 +845,10 @@ export default function EditProfilePage() {
     return (
       <>
         <main className="center">
+          <div className="logo centerLogo">
+            QR
+          </div>
+
           <h1>QR RETURN</h1>
 
           <p>
@@ -761,6 +868,10 @@ export default function EditProfilePage() {
     return (
       <>
         <main className="center">
+          <div className="logo centerLogo">
+            QR
+          </div>
+
           <h1>QR RETURN</h1>
 
           <div className="error">
@@ -816,30 +927,29 @@ export default function EditProfilePage() {
 
         <section className="content">
           <div className="intro">
-            <div>
-              <div className="eyebrow">
-                QR RETURN
-              </div>
-
-              <h1>
-                პროფილის რედაქტირება
-              </h1>
-
-              <p>
-                შეგიძლია დაამატო ის ინფორმაციაც,
-                რომელიც რეგისტრაციის დროს არ შეგივსია.
-              </p>
+            <div className="eyebrow">
+              QR RETURN
             </div>
+
+            <h1>
+              პროფილის რედაქტირება
+            </h1>
+
+            <p>
+              აქ ჩანს სრული პროფილი — შეგიძლია
+              შეცვალო არსებული ინფორმაცია ან
+              დაამატო ის, რაც რეგისტრაციის დროს
+              არ შეგივსია.
+            </p>
           </div>
 
           <div className="locked">
-            QR კოდი:{" "}
             <strong>
-              {profile.tag_code}
+              QR კოდი: {profile.tag_code}
             </strong>
 
             <span>
-              კატეგორია და QR კოდი უცვლელია.
+              QR კოდი და კატეგორია არ იცვლება.
             </span>
           </div>
 
@@ -854,7 +964,7 @@ export default function EditProfilePage() {
                   ? "ცხოველის სრული ინფორმაცია"
                   : "ნივთის სრული ინფორმაცია"
               }
-              text="შეავსე ან შეცვალე ნებისმიერი ინფორმაცია."
+              text="არასავალდებულო ინფორმაციაზე თავად გადაწყვიტე გამოჩნდეს თუ არა მპოვნელისთვის."
             />
 
             <Field
@@ -1135,11 +1245,11 @@ export default function EditProfilePage() {
             <SectionTitle
               number="02"
               title="მფლობელის ინფორმაცია"
-              text="სავალდებულო მონაცემები და კონფიდენციალურობის კონტროლი."
+              text="სავალდებულო მონაცემები და დაკავშირების მეთოდები."
             />
 
             <Field
-              label="სახელი და გვარი"
+              label="სახელი და გვარი *"
               value={form.owner_name}
               onChange={(value) =>
                 updateField(
@@ -1149,7 +1259,7 @@ export default function EditProfilePage() {
               }
             />
 
-            <RequiredVisibilityField
+            <VisibilityField
               label="ტელეფონი *"
               type="tel"
               value={form.owner_phone}
@@ -1169,7 +1279,7 @@ export default function EditProfilePage() {
               }
             />
 
-            <RequiredVisibilityField
+            <VisibilityField
               label="ელფოსტა *"
               type="email"
               value={form.owner_email}
@@ -1206,73 +1316,61 @@ export default function EditProfilePage() {
               }
             />
 
-            <SelectField
-              label="როგორ გსურს მპოვნელმა დაგიკავშირდეს?"
-              value={
-                form.contact_preference
-              }
-              onChange={(value) =>
-                updateField(
-                  "contact_preference",
-                  value
-                )
-              }
-              options={[
-                {
-                  value: "phone",
-                  label: "📞 ტელეფონი",
-                },
-                {
-                  value: "whatsapp",
-                  label: "🟢 WhatsApp",
-                },
-                {
-                  value: "chat",
-                  label: "💬 Live Chat",
-                },
-                {
-                  value: "phone_whatsapp",
-                  label:
-                    "📞 ტელეფონი + 🟢 WhatsApp",
-                },
-                {
-                  value: "phone_chat",
-                  label:
-                    "📞 ტელეფონი + 💬 Live Chat",
-                },
-                {
-                  value: "whatsapp_chat",
-                  label:
-                    "🟢 WhatsApp + 💬 Live Chat",
-                },
-                {
-                  value: "all",
-                  label:
-                    "📞 ტელეფონი + 🟢 WhatsApp + 💬 Live Chat",
-                },
-              ]}
-            />
+            <div className="contactMethods">
+              <div className="contactTitle">
+                <strong>
+                  როგორ შეუძლია მპოვნელს დაგიკავშირდეს?
+                </strong>
 
-            <div className="contactNote">
-              <strong>
-                WhatsApp
-              </strong>
+                <p>
+                  მონიშნე ერთი, ორი ან სამივე.
+                </p>
+              </div>
 
-              <p>
-                WhatsApp გამოიყენებს იმავე მობილურის
-                ნომერს, რომელიც ზემოთ გაქვს მითითებული.
-              </p>
+              <ContactChoice
+                icon="📞"
+                title="ტელეფონი"
+                checked={phoneEnabled}
+                onClick={() =>
+                  setPhoneEnabled(
+                    !phoneEnabled
+                  )
+                }
+              />
+
+              <ContactChoice
+                icon="🟢"
+                title="WhatsApp"
+                text="გამოიყენებს მფლობელის მობილურის ნომერს."
+                checked={whatsappEnabled}
+                onClick={() =>
+                  setWhatsappEnabled(
+                    !whatsappEnabled
+                  )
+                }
+              />
+
+              <ContactChoice
+                icon="💬"
+                title="Live Chat"
+                checked={liveChatEnabled}
+                onClick={() =>
+                  setLiveChatEnabled(
+                    !liveChatEnabled
+                  )
+                }
+              />
             </div>
 
             <div className="optionalGroup">
-              <div className="optionalHeader">
+              <div className="groupHeader">
                 <div>
                   <strong>
                     დამატებითი საკონტაქტო პირი
                   </strong>
 
                   <p>
-                    მაგალითად ოჯახის წევრი ან მეგობარი.
+                    ოჯახის წევრი, მეგობარი ან სხვა სანდო პირი.
                   </p>
                 </div>
 
@@ -1328,6 +1426,12 @@ export default function EditProfilePage() {
                   )
                 }
               />
+
+              <VisibilityStatus
+                visible={
+                  visibility.show_additional_contact
+                }
+              />
             </div>
 
             <div className="divider" />
@@ -1335,7 +1439,7 @@ export default function EditProfilePage() {
             <SectionTitle
               number="03"
               title="ინფორმაცია მპოვნელისთვის"
-              text="შენ თვითონ აკონტროლებ რას ნახავს მპოვნელი."
+              text="ამ მონაცემების დამატება და ჩვენება შენს კონტროლშია."
             />
 
             <OptionalTextArea
@@ -1355,6 +1459,26 @@ export default function EditProfilePage() {
               onToggle={() =>
                 toggleVisibility(
                   "show_finder_message"
+                )
+              }
+            />
+
+            <OptionalField
+              label="მპოვნელის ჯილდო"
+              value={form.reward}
+              onChange={(value) =>
+                updateField(
+                  "reward",
+                  value
+                )
+              }
+              placeholder="მაგ. $100"
+              visible={
+                visibility.show_reward
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_reward"
                 )
               }
             />
@@ -1387,8 +1511,9 @@ export default function EditProfilePage() {
                 </strong>
 
                 <p>
-                  მპოვნელმა სურვილის შემთხვევაში შეძლოს
-                  თავისი მიმდინარე ლოკაციის გამოგზავნა.
+                  თუ ჩართულია, მპოვნელს შეუძლია
+                  სურვილის შემთხვევაში თავისი
+                  მიმდინარე მდებარეობა გაგიზიაროს.
                 </p>
               </div>
 
@@ -1470,11 +1595,15 @@ function Field({
   label,
   value,
   onChange,
+  placeholder = "",
   type = "text",
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
+  placeholder?: string;
   type?: string;
 }) {
   return (
@@ -1484,52 +1613,18 @@ function Field({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
     </label>
   );
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: {
-    value: string;
-    label: string;
-  }[];
-}) {
-  return (
-    <label className="field">
-      <span>{label}</span>
-
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-      >
-        {options.map((option) => (
-          <option
-            key={option.value || "empty"}
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function OptionalField({
+function VisibilityField({
   label,
   value,
   onChange,
@@ -1539,7 +1634,9 @@ function OptionalField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   type?: string;
@@ -1559,42 +1656,64 @@ function OptionalField({
         type={type}
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
 
-      <small>
-        მპოვნელისთვის ჩვენება:{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
-      </small>
+      <VisibilityStatus
+        visible={visible}
+      />
     </div>
   );
 }
 
-function RequiredVisibilityField({
+function OptionalField({
   label,
   value,
   onChange,
   visible,
   onToggle,
-  type,
+  placeholder = "",
+  type = "text",
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
-  type: string;
+  placeholder?: string;
+  type?: string;
 }) {
   return (
-    <OptionalField
-      label={label}
-      type={type}
-      value={value}
-      onChange={onChange}
-      visible={visible}
-      onToggle={onToggle}
-    />
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <span>{label}</span>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
+
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+      />
+
+      <VisibilityStatus
+        visible={visible}
+      />
+    </div>
   );
 }
 
@@ -1608,7 +1727,9 @@ function OptionalSelect({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   options: {
@@ -1630,23 +1751,29 @@ function OptionalSelect({
       <select
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       >
-        {options.map((option) => (
-          <option
-            key={option.value || "empty"}
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
+        {options.map(
+          (option) => (
+            <option
+              key={
+                option.value ||
+                "empty"
+              }
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          )
+        )}
       </select>
 
-      <small>
-        მპოვნელისთვის ჩვენება:{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
-      </small>
+      <VisibilityStatus
+        visible={visible}
+      />
     </div>
   );
 }
@@ -1660,7 +1787,9 @@ function OptionalTextArea({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
 }) {
@@ -1678,15 +1807,33 @@ function OptionalTextArea({
       <textarea
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
 
-      <small>
-        მპოვნელისთვის ჩვენება:{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
-      </small>
+      <VisibilityStatus
+        visible={visible}
+      />
     </div>
+  );
+}
+
+function VisibilityStatus({
+  visible,
+}: {
+  visible: boolean;
+}) {
+  return (
+    <small className="visibilityStatus">
+      მპოვნელისთვის ჩვენება:{" "}
+      <b>
+        {visible
+          ? "ON"
+          : "OFF"}
+      </b>
+    </small>
   );
 }
 
@@ -1699,9 +1846,13 @@ function PhotoEditor({
   onToggle,
 }: {
   title: string;
-  currentUrl: string | null;
+  currentUrl:
+    | string
+    | null;
   file: File | null;
-  setFile: (value: File | null) => void;
+  setFile: (
+    value: File | null
+  ) => void;
   visible: boolean;
   onToggle: () => void;
 }) {
@@ -1729,7 +1880,8 @@ function PhotoEditor({
           accept="image/*"
           onChange={(event) =>
             setFile(
-              event.target.files?.[0] ||
+              event.target
+                .files?.[0] ||
                 null
             )
           }
@@ -1742,10 +1894,67 @@ function PhotoEditor({
           : "ფოტოს დამატება"}
       </label>
 
-      <small>
+      <small className="photoHelp">
         ფოტო სავალდებულო არ არის • მაქს. 5 MB
       </small>
+
+      <VisibilityStatus
+        visible={visible}
+      />
     </div>
+  );
+}
+
+function ContactChoice({
+  icon,
+  title,
+  text,
+  checked,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  text?: string;
+  checked: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        checked
+          ? "contactChoice selected"
+          : "contactChoice"
+      }
+      onClick={onClick}
+      aria-pressed={checked}
+    >
+      <div className="contactIcon">
+        {icon}
+      </div>
+
+      <div className="contactText">
+        <strong>
+          {title}
+        </strong>
+
+        {text && (
+          <small>
+            {text}
+          </small>
+        )}
+      </div>
+
+      <div
+        className={
+          checked
+            ? "check checked"
+            : "check"
+        }
+      >
+        {checked ? "✓" : ""}
+      </div>
+    </button>
   );
 }
 
@@ -1765,6 +1974,7 @@ function VisibilityToggle({
           : "switch"
       }
       onClick={onClick}
+      aria-pressed={active}
     >
       <span />
     </button>
@@ -1793,7 +2003,10 @@ function Styles() {
         min-height: 100vh;
         background: #f8fafc;
         color: #101828;
-        font-family: Inter, Arial, sans-serif;
+        font-family:
+          Inter,
+          Arial,
+          sans-serif;
       }
 
       .header {
@@ -1803,8 +2016,10 @@ function Styles() {
         margin: auto;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e8ecf1;
+        justify-content:
+          space-between;
+        border-bottom:
+          1px solid #e8ecf1;
       }
 
       .brand {
@@ -1834,6 +2049,7 @@ function Styles() {
 
       .brand small {
         display: block;
+        margin-top: 2px;
         color: #98a2b3;
         font-size: 7px;
         letter-spacing: 2px;
@@ -1867,8 +2083,10 @@ function Styles() {
 
       .intro p {
         margin: 0;
+        max-width: 650px;
         color: #667085;
         font-size: 13px;
+        line-height: 1.6;
       }
 
       .locked {
@@ -1876,8 +2094,12 @@ function Styles() {
         padding: 14px 16px;
         border-radius: 13px;
         background: #eef4ff;
+      }
+
+      .locked strong {
+        display: block;
         color: #344054;
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .locked span {
@@ -1889,7 +2111,8 @@ function Styles() {
 
       .card {
         padding: 28px;
-        border: 1px solid #e2e7ed;
+        border:
+          1px solid #e2e7ed;
         border-radius: 23px;
         background: white;
       }
@@ -1901,6 +2124,7 @@ function Styles() {
       }
 
       .sectionTitle > b {
+        margin-top: 4px;
         color: #1465e8;
         font-size: 11px;
       }
@@ -1914,18 +2138,19 @@ function Styles() {
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 11px;
+        line-height: 1.5;
       }
 
       .divider {
         height: 1px;
-        margin: 32px 0;
+        margin: 34px 0;
         background: #edf0f3;
       }
 
       .field,
       .visibilityField {
         display: block;
-        margin-bottom: 17px;
+        margin-bottom: 18px;
       }
 
       .field > span,
@@ -1941,19 +2166,19 @@ function Styles() {
       }
 
       .field input,
-      .field select,
       .visibilityField input,
       .visibilityField select,
       .visibilityField textarea {
         width: 100%;
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
         border-radius: 12px;
         background: white;
+        color: #101828;
         outline: none;
       }
 
       .field input,
-      .field select,
       .visibilityField input,
       .visibilityField select {
         height: 54px;
@@ -1966,80 +2191,55 @@ function Styles() {
         resize: vertical;
       }
 
+      .field input:focus,
+      .visibilityField input:focus,
+      .visibilityField select:focus,
+      .visibilityField textarea:focus {
+        border-color: #1465e8;
+        box-shadow:
+          0 0 0 3px
+          rgba(
+            20,
+            101,
+            232,
+            0.08
+          );
+      }
+
       .visibilityHeader {
         margin-bottom: 8px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 15px;
       }
 
-      .visibilityField small {
+      .visibilityStatus {
         display: block;
-        margin-top: 6px;
+        margin-top: 7px;
         color: #98a2b3;
         font-size: 10px;
       }
 
-      .visibilityField small b {
+      .visibilityStatus b {
         color: #1465e8;
-      }
-
-      .contactNote {
-        margin: -5px 0 20px;
-        padding: 13px 15px;
-        border-radius: 12px;
-        background: #f3f7fd;
-      }
-
-      .contactNote strong {
-        color: #1465e8;
-        font-size: 12px;
-      }
-
-      .contactNote p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 10px;
-        line-height: 1.5;
-      }
-
-      .optionalGroup {
-        margin-top: 20px;
-        padding: 18px;
-        border-radius: 15px;
-        background: #f8fafc;
-      }
-
-      .optionalHeader {
-        margin-bottom: 17px;
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-      }
-
-      .optionalHeader strong {
-        font-size: 14px;
-      }
-
-      .optionalHeader p {
-        margin: 4px 0 0;
-        color: #98a2b3;
-        font-size: 10px;
       }
 
       .photoEditor {
         margin-bottom: 18px;
         padding: 16px;
-        border: 1px dashed #c7ced8;
+        border:
+          1px dashed #c7ced8;
         border-radius: 14px;
         background: #fafbfc;
       }
 
       .photoEditor img {
-        width: 100px;
-        height: 100px;
+        width: 110px;
+        height: 110px;
         margin: 12px 0;
+        display: block;
         border-radius: 15px;
         object-fit: cover;
       }
@@ -2061,9 +2261,131 @@ function Styles() {
         display: none;
       }
 
-      .photoEditor small {
+      .photoHelp {
         display: block;
         margin-top: 8px;
+        color: #98a2b3;
+        font-size: 10px;
+      }
+
+      .contactMethods {
+        margin: 22px 0;
+        padding: 18px;
+        border:
+          1px solid #e0e5eb;
+        border-radius: 15px;
+        background: #f8fafc;
+      }
+
+      .contactTitle {
+        margin-bottom: 13px;
+      }
+
+      .contactTitle strong {
+        display: block;
+        color: #344054;
+        font-size: 14px;
+      }
+
+      .contactTitle p {
+        margin: 5px 0 0;
+        color: #7b8492;
+        font-size: 11px;
+      }
+
+      .contactChoice {
+        width: 100%;
+        min-height: 64px;
+        margin-top: 9px;
+        padding: 11px 13px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border:
+          1px solid #dce2e9;
+        border-radius: 13px;
+        background: white;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .contactChoice.selected {
+        border-color: #1465e8;
+        background: #f3f7fd;
+      }
+
+      .contactIcon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        background: #eef4ff;
+        font-size: 18px;
+      }
+
+      .contactText {
+        flex: 1;
+      }
+
+      .contactText strong {
+        display: block;
+        color: #344054;
+        font-size: 13px;
+      }
+
+      .contactText small {
+        display: block;
+        margin-top: 4px;
+        color: #7b8492;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+
+      .check {
+        width: 23px;
+        height: 23px;
+        flex: 0 0 23px;
+        display: grid;
+        place-items: center;
+        border:
+          1px solid #cdd4dd;
+        border-radius: 7px;
+        background: white;
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .check.checked {
+        border-color: #1465e8;
+        background: #1465e8;
+      }
+
+      .optionalGroup {
+        margin-top: 20px;
+        padding: 18px;
+        border-radius: 15px;
+        background: #f8fafc;
+      }
+
+      .groupHeader {
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content:
+          space-between;
+        gap: 15px;
+      }
+
+      .groupHeader strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .groupHeader p {
+        margin: 4px 0 0;
         color: #98a2b3;
         font-size: 10px;
       }
@@ -2093,24 +2415,29 @@ function Styles() {
       }
 
       .switch.active span {
-        transform: translateX(21px);
+        transform:
+          translateX(21px);
       }
 
       .locationBox {
+        margin-top: 18px;
         padding: 17px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 20px;
         border-radius: 14px;
         background: #f8fafc;
       }
 
       .locationBox strong {
+        display: block;
         font-size: 14px;
       }
 
       .locationBox p {
+        max-width: 530px;
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 10px;
@@ -2124,6 +2451,7 @@ function Styles() {
         border-radius: 12px;
         font-size: 11px;
         font-weight: 800;
+        line-height: 1.5;
       }
 
       .error {
@@ -2137,9 +2465,10 @@ function Styles() {
       }
 
       .actions {
-        margin-top: 28px;
+        margin-top: 30px;
         display: grid;
-        grid-template-columns: 1fr 1.5fr;
+        grid-template-columns:
+          1fr 1.5fr;
         gap: 10px;
       }
 
@@ -2156,7 +2485,9 @@ function Styles() {
       }
 
       .cancelButton {
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
+        background: white;
         color: #475467;
       }
 
@@ -2169,15 +2500,39 @@ function Styles() {
 
       .saveButton:disabled {
         opacity: 0.6;
+        cursor: wait;
       }
 
       .center {
+        width: calc(100% - 24px);
+        max-width: 500px;
+        margin: auto;
         padding-top: 130px;
         text-align: center;
-        font-family: Arial, sans-serif;
+        font-family:
+          Arial,
+          sans-serif;
       }
 
-      @media (max-width: 600px) {
+      .centerLogo {
+        margin: auto;
+      }
+
+      .center h1 {
+        color: #1465e8;
+      }
+
+      .center p {
+        color: #667085;
+      }
+
+      @media (
+        max-width: 600px
+      ) {
+        .header {
+          min-height: 70px;
+        }
+
         .back {
           display: none;
         }
@@ -2192,18 +2547,24 @@ function Styles() {
 
         .card {
           padding: 20px 14px;
-        }
-
-        .actions {
-          grid-template-columns: 1fr;
+          border-radius: 18px;
         }
 
         .field input,
-        .field select,
         .visibilityField input,
         .visibilityField select,
         .visibilityField textarea {
           font-size: 16px;
+        }
+
+        .actions {
+          grid-template-columns:
+            1fr;
+        }
+
+        .locationBox {
+          align-items:
+            flex-start;
         }
       }
     `}</style>
