@@ -1,1375 +1,1180 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-type CategoryKey =
-  | "dog"
-  | "cat"
-  | "keys"
-  | "wallet"
-  | "suitcase"
-  | "bag";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-type Language = "ka" | "en";
+type FormData = {
+  tag_code: string;
+  item_type: string;
+  pet_type: string;
+  item_name: string;
+  sex: string;
+  colour: string;
+  date_of_birth: string;
+  weight: string;
+  photo: string;
+  owner_photo: string;
+  owner_email: string;
+  medical_info: string;
+  finder_message: string;
+  behaviour_note: string;
+  contact_preference: string;
+  location_sharing_enabled: boolean;
+  owner_message_enabled: boolean;
+  description: string;
+  lost_message: string;
+  lost_at: string;
+  lost_seen_location: string;
+  brand: string;
+  model: string;
+  size: string;
+  material: string;
+  distinctive_features: string;
+};
 
-const categories = {
-  dog: {
-    icon: "🐕",
-    ka: "ძაღლი",
-    en: "Dog",
-    pet: true,
-    itemType: "pet",
-    petType: "dog",
-  },
+const initialForm: FormData = {
+  tag_code: "",
+  item_type: "",
+  pet_type: "",
+  item_name: "",
+  sex: "",
+  colour: "",
+  date_of_birth: "",
+  weight: "",
+  photo: "",
+  owner_photo: "",
+  owner_email: "",
+  medical_info: "",
+  finder_message: "",
+  behaviour_note: "",
+  contact_preference: "email",
+  location_sharing_enabled: true,
+  owner_message_enabled: true,
+  description: "",
+  lost_message: "",
+  lost_at: "",
+  lost_seen_location: "",
+  brand: "",
+  model: "",
+  size: "",
+  material: "",
+  distinctive_features: "",
+};
 
-  cat: {
-    icon: "🐈",
-    ka: "კატა",
-    en: "Cat",
-    pet: true,
-    itemType: "pet",
-    petType: "cat",
-  },
+export default function RegisterPage() {
+  const [form, setForm] = useState<FormData>(initialForm);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
 
-  keys: {
-    icon: "🔑",
-    ka: "გასაღები",
-    en: "Keys",
-    pet: false,
-    itemType: "keys",
-    petType: "",
-  },
+  const isPet = form.item_type === "pet";
 
-  wallet: {
-    icon: "👛",
-    ka: "საფულე",
-    en: "Wallet",
-    pet: false,
-    itemType: "wallet",
-    petType: "",
-  },
+  const update = (
+    field: keyof FormData,
+    value: string | boolean
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-  suitcase: {
-    icon: "🧳",
-    ka: "ჩემოდანი",
-    en: "Suitcase",
-    pet: false,
-    itemType: "suitcase",
-    petType: "",
-  },
+  const chooseType = (
+    itemType: string,
+    petType = ""
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      item_type: itemType,
+      pet_type: petType,
+    }));
+  };
 
-  bag: {
-    icon: "🎒",
-    ka: "ჩანთა",
-    en: "Bag",
-    pet: false,
-    itemType: "bag",
-    petType: "",
-  },
-} as const;
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
 
-export default function RegistrationPage() {
-  const params = useParams();
+    setSaving(true);
+    setStatus("");
 
-  const rawType = Array.isArray(params.type)
-    ? params.type[0]
-    : params.type;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const type: CategoryKey =
-    rawType && rawType in categories
-      ? (rawType as CategoryKey)
-      : "dog";
+    const payload = {
+      tag_code: form.tag_code || null,
+      item_type: form.item_type || null,
+      item_name: form.item_name || null,
+      owner_id: user?.id || null,
 
-  const category = categories[type];
+      sex: isPet ? form.sex || null : null,
+      colour: isPet ? form.colour || null : null,
+      date_of_birth:
+        isPet && form.date_of_birth
+          ? form.date_of_birth
+          : null,
+      weight:
+        isPet && form.weight
+          ? Number(form.weight)
+          : null,
 
-  const [language, setLanguage] =
-    useState<Language>("ka");
+      photo: form.photo || null,
+      owner_photo: form.owner_photo || null,
+      owner_email: form.owner_email || null,
 
-  const [photoName, setPhotoName] =
-    useState("");
+      medical_info:
+        isPet ? form.medical_info || null : null,
 
-  const [ownerPhotoName, setOwnerPhotoName] =
-    useState("");
+      finder_message:
+        form.finder_message || null,
 
-  const [
-    locationSharingEnabled,
-    setLocationSharingEnabled,
-  ] = useState(true);
+      behaviour_note:
+        isPet ? form.behaviour_note || null : null,
 
-  const [
-    ownerMessageEnabled,
-    setOwnerMessageEnabled,
-  ] = useState(true);
+      contact_preference:
+        form.contact_preference || null,
 
-  const ka = language === "ka";
+      location_sharing_enabled:
+        form.location_sharing_enabled,
+
+      owner_message_enabled:
+        form.owner_message_enabled,
+
+      description: form.description || null,
+
+      lost_message: form.lost_message || null,
+      lost_at: form.lost_at || null,
+      lost_seen_location:
+        form.lost_seen_location || null,
+
+      brand: !isPet ? form.brand || null : null,
+      model: !isPet ? form.model || null : null,
+      size: !isPet ? form.size || null : null,
+      material:
+        !isPet ? form.material || null : null,
+
+      distinctive_features:
+        !isPet
+          ? form.distinctive_features || null
+          : null,
+
+      pet_type: isPet
+        ? form.pet_type || null
+        : null,
+
+      active: true,
+      scan_count: 0,
+      last_scanned_at: null,
+      last_scan_latitude: null,
+      last_scan_longitude: null,
+      last_scan_accuracy: null,
+    };
+
+    const { error } = await supabase
+      .from("items")
+      .insert(payload);
+
+    if (error) {
+      console.error(error);
+      setStatus("Error: " + error.message);
+    } else {
+      setStatus("Saved successfully");
+      setForm(initialForm);
+    }
+
+    setSaving(false);
+  }
 
   return (
-    <main className="page">
+    <main className="register-page">
+      <div className="wrapper">
 
-      {/* HEADER */}
+        <div className="header">
+          <span className="small-title">
+            QR TAG REGISTRATION
+          </span>
 
-      <header className="header">
-        <a href="/" className="brand">
+          <h1>Register your tag</h1>
 
-          <div className="brandMark">
-            QR
-          </div>
-
-          <div>
-            <div className="brandName">
-              QR RETURN
-            </div>
-
-            <div className="brandSub">
-              SMART LOST & FOUND
-            </div>
-          </div>
-
-        </a>
-
-        <div className="headerRight">
-
-          <a
-            href="/register"
-            className="back"
-          >
-            ← {ka ? "უკან" : "Back"}
-          </a>
-
-          <div className="language">
-
-            <button
-              type="button"
-              className={
-                ka ? "selected" : ""
-              }
-              onClick={() =>
-                setLanguage("ka")
-              }
-            >
-              GEO
-            </button>
-
-            <button
-              type="button"
-              className={
-                !ka ? "selected" : ""
-              }
-              onClick={() =>
-                setLanguage("en")
-              }
-            >
-              ENG
-            </button>
-
-          </div>
-
-        </div>
-      </header>
-
-
-      {/* INTRO */}
-
-      <section className="intro">
-
-        <div className="categoryIcon">
-          {category.icon}
+          <p>
+            Add the information that can help return your
+            pet or personal item safely.
+          </p>
         </div>
 
-        <div className="introContent">
+        <form onSubmit={handleSubmit}>
 
-          <div className="eyebrow">
-            QR RETURN
-          </div>
+          {/* TYPE */}
 
-          <h1>
-            {ka
-              ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
-              : "Complete the information that will make it easier for a finder to contact you if your pet or item is lost."}
-          </h1>
-
-        </div>
-
-      </section>
-
-
-      <form
-        className="form"
-        onSubmit={(e) =>
-          e.preventDefault()
-        }
-      >
-
-        {/* DATABASE VALUES */}
-
-        <input
-          type="hidden"
-          name="item_type"
-          value={category.itemType}
-        />
-
-        <input
-          type="hidden"
-          name="pet_type"
-          value={category.petType}
-        />
-
-
-        {/* SECTION 1 */}
-
-        <section className="panel">
-
-          <SectionTitle
-            number="01"
-            title={
-              ka
-                ? "ძირითადი ინფორმაცია"
-                : "Basic information"
-            }
-          />
-
-          <div className="fields">
-
-            <Field
-              label={
-                ka
-                  ? "QR კოდი"
-                  : "QR code"
-              }
-              name="tag_code"
-              placeholder="LF-XXXXXX"
-              required
-            />
-
-            <Field
-              label={
-                ka
-                  ? "სახელი"
-                  : "Name"
-              }
-              name="item_name"
-              placeholder={
-                category.pet
-                  ? ka
-                    ? "მაგ: ბობი"
-                    : "Example: Bobby"
-                  : ka
-                  ? "მაგ: ჩემი ჩემოდანი"
-                  : "Example: My suitcase"
-              }
-              required
-            />
-
-
-            <div className="field">
-
-              <label>
-                {ka
-                  ? "ფოტო"
-                  : "Photo"}
-              </label>
-
-              <label className="fileInput">
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setPhotoName(
-                      e.target.files?.[0]
-                        ?.name || ""
-                    )
-                  }
-                />
-
-                <span className="plus">
-                  +
-                </span>
-
-                <span className="fileName">
-                  {photoName ||
-                    (ka
-                      ? "ფოტოს არჩევა"
-                      : "Choose photo")}
-                </span>
-
-              </label>
-
+          <section className="box">
+            <div className="section-title">
+              <span>01</span>
+              <div>
+                <h2>What are you registering?</h2>
+                <p>
+                  Choose the pet or item connected to this tag.
+                </p>
+              </div>
             </div>
 
+            <div className="type-grid">
 
-            <Field
-              label={
-                ka
-                  ? "ფერი"
-                  : "Colour"
-              }
-              name="colour"
-              placeholder={
-                ka
-                  ? "მაგ: შავი"
-                  : "Example: Black"
-              }
-            />
+              <TypeButton
+                icon="🐕"
+                text="Dog"
+                active={
+                  form.item_type === "pet" &&
+                  form.pet_type === "dog"
+                }
+                onClick={() =>
+                  chooseType("pet", "dog")
+                }
+              />
 
+              <TypeButton
+                icon="🐈"
+                text="Cat"
+                active={
+                  form.item_type === "pet" &&
+                  form.pet_type === "cat"
+                }
+                onClick={() =>
+                  chooseType("pet", "cat")
+                }
+              />
 
-            {/* PET FIELDS */}
+              <TypeButton
+                icon="🔑"
+                text="Keys"
+                active={form.item_type === "keys"}
+                onClick={() => chooseType("keys")}
+              />
 
-            {category.pet && (
-              <>
+              <TypeButton
+                icon="👛"
+                text="Wallet"
+                active={form.item_type === "wallet"}
+                onClick={() => chooseType("wallet")}
+              />
 
-                <div className="field">
+              <TypeButton
+                icon="🧳"
+                text="Suitcase"
+                active={
+                  form.item_type === "suitcase"
+                }
+                onClick={() =>
+                  chooseType("suitcase")
+                }
+              />
 
-                  <label>
-                    {ka
-                      ? "სქესი"
-                      : "Sex"}
-                  </label>
+              <TypeButton
+                icon="🎒"
+                text="Bag"
+                active={form.item_type === "bag"}
+                onClick={() => chooseType("bag")}
+              />
 
-                  <select name="sex">
+            </div>
+          </section>
 
-                    <option value="">
-                      {ka
-                        ? "აირჩიეთ"
-                        : "Select"}
-                    </option>
+          {/* BASIC INFORMATION */}
 
-                    <option value="male">
-                      {ka
-                        ? "მამრობითი"
-                        : "Male"}
-                    </option>
+          <section className="box">
+            <div className="section-title">
+              <span>02</span>
 
-                    <option value="female">
-                      {ka
-                        ? "მდედრობითი"
-                        : "Female"}
-                    </option>
+              <div>
+                <h2>Basic information</h2>
+                <p>
+                  Add the main identifying information.
+                </p>
+              </div>
+            </div>
 
-                  </select>
+            <div className="grid">
 
-                </div>
+              <Input
+                label="Tag Code"
+                value={form.tag_code}
+                placeholder="FM-000001"
+                required
+                onChange={(v) =>
+                  update("tag_code", v)
+                }
+              />
 
+              <Input
+                label={
+                  isPet
+                    ? "Pet Name"
+                    : "Item Name"
+                }
+                value={form.item_name}
+                placeholder={
+                  isPet
+                    ? "Charlie"
+                    : "My travel bag"
+                }
+                required
+                onChange={(v) =>
+                  update("item_name", v)
+                }
+              />
 
-                <Field
-                  label={
-                    ka
-                      ? "დაბადების თარიღი"
-                      : "Date of birth"
-                  }
-                  name="date_of_birth"
-                  type="date"
-                />
+              {isPet && (
+                <>
+                  <Select
+                    label="Sex"
+                    value={form.sex}
+                    onChange={(v) =>
+                      update("sex", v)
+                    }
+                    options={[
+                      ["", "Select"],
+                      ["male", "Male"],
+                      ["female", "Female"],
+                    ]}
+                  />
 
-
-                <Field
-                  label={
-                    ka
-                      ? "წონა"
-                      : "Weight"
-                  }
-                  name="weight"
-                  type="number"
-                  placeholder="12.5"
-                />
-
-              </>
-            )}
-
-
-            {/* ITEM FIELDS */}
-
-            {!category.pet && (
-              <>
-
-                <Field
-                  label={
-                    ka
-                      ? "ბრენდი"
-                      : "Brand"
-                  }
-                  name="brand"
-                  placeholder={
-                    ka
-                      ? "მაგ: Samsonite"
-                      : "Example: Samsonite"
-                  }
-                />
-
-                <Field
-                  label={
-                    ka
-                      ? "მოდელი"
-                      : "Model"
-                  }
-                  name="model"
-                />
-
-                <Field
-                  label={
-                    ka
-                      ? "ზომა"
-                      : "Size"
-                  }
-                  name="size"
-                />
-
-                <Field
-                  label={
-                    ka
-                      ? "მასალა"
-                      : "Material"
-                  }
-                  name="material"
-                />
-
-                <div className="field full">
-
-                  <label>
-                    {ka
-                      ? "განმასხვავებელი ნიშნები"
-                      : "Distinctive features"}
-                  </label>
-
-                  <textarea
-                    name="distinctive_features"
-                    rows={4}
-                    placeholder={
-                      ka
-                        ? "აღწერეთ განსაკუთრებული ნიშნები..."
-                        : "Describe distinctive features..."
+                  <Input
+                    label="Colour"
+                    value={form.colour}
+                    placeholder="Brown / White"
+                    onChange={(v) =>
+                      update("colour", v)
                     }
                   />
 
-                </div>
+                  <Input
+                    label="Date of Birth"
+                    type="date"
+                    value={form.date_of_birth}
+                    onChange={(v) =>
+                      update(
+                        "date_of_birth",
+                        v
+                      )
+                    }
+                  />
 
-              </>
-            )}
-
-
-            <div className="field full">
-
-              <label>
-                {ka
-                  ? "აღწერა"
-                  : "Description"}
-              </label>
-
-              <textarea
-                name="description"
-                rows={4}
-                placeholder={
-                  ka
-                    ? "დამატებითი ინფორმაცია..."
-                    : "Additional information..."
-                }
-              />
+                  <Input
+                    label="Weight"
+                    type="number"
+                    value={form.weight}
+                    placeholder="Weight"
+                    onChange={(v) =>
+                      update("weight", v)
+                    }
+                  />
+                </>
+              )}
 
             </div>
 
-          </div>
-
-        </section>
-
-
-        {/* PET INFORMATION */}
-
-        {category.pet && (
-
-          <section className="panel">
-
-            <SectionTitle
-              number="02"
-              title={
-                ka
-                  ? "ცხოველის დამატებითი ინფორმაცია"
-                  : "Additional pet information"
+            <Textarea
+              label="Description"
+              value={form.description}
+              placeholder="Add a description..."
+              onChange={(v) =>
+                update("description", v)
               }
             />
-
-            <div className="fields">
-
-              <div className="field full">
-
-                <label>
-                  {ka
-                    ? "სამედიცინო ინფორმაცია"
-                    : "Medical information"}
-                </label>
-
-                <textarea
-                  name="medical_info"
-                  rows={4}
-                  placeholder={
-                    ka
-                      ? "მიუთითეთ მნიშვნელოვანი სამედიცინო ინფორმაცია..."
-                      : "Enter important medical information..."
-                  }
-                />
-
-              </div>
-
-
-              <div className="field full">
-
-                <label>
-                  {ka
-                    ? "ქცევის შესახებ ინფორმაცია"
-                    : "Behaviour note"}
-                </label>
-
-                <textarea
-                  name="behaviour_note"
-                  rows={4}
-                  placeholder={
-                    ka
-                      ? "მაგ: მეგობრულია, უცხოებთან ფრთხილია..."
-                      : "Example: Friendly, cautious with strangers..."
-                  }
-                />
-
-              </div>
-
-            </div>
 
           </section>
 
-        )}
+          {/* PET INFO */}
 
+          {isPet && (
+            <section className="box">
+              <div className="section-title">
+                <span>03</span>
 
-        {/* OWNER */}
+                <div>
+                  <h2>Pet information</h2>
+                  <p>
+                    Health and behaviour details.
+                  </p>
+                </div>
+              </div>
 
-        <section className="panel">
+              <Textarea
+                label="Medical Information"
+                value={form.medical_info}
+                placeholder="Medication, allergies, medical conditions..."
+                onChange={(v) =>
+                  update("medical_info", v)
+                }
+              />
 
-          <SectionTitle
-            number={
-              category.pet
-                ? "03"
-                : "02"
-            }
-            title={
-              ka
-                ? "მფლობელის ინფორმაცია"
-                : "Owner information"
-            }
-          />
+              <Textarea
+                label="Behaviour Note"
+                value={form.behaviour_note}
+                placeholder="Friendly, shy, afraid of loud sounds..."
+                onChange={(v) =>
+                  update("behaviour_note", v)
+                }
+              />
+            </section>
+          )}
 
-          <div className="fields">
+          {/* ITEM INFO */}
 
-            <div className="field">
+          {!isPet && form.item_type && (
+            <section className="box">
+              <div className="section-title">
+                <span>03</span>
 
-              <label>
-                {ka
-                  ? "მფლობელის ფოტო"
-                  : "Owner photo"}
-              </label>
+                <div>
+                  <h2>Item information</h2>
+                  <p>
+                    Add details that help identify it.
+                  </p>
+                </div>
+              </div>
 
-              <label className="fileInput">
+              <div className="grid">
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setOwnerPhotoName(
-                      e.target.files?.[0]
-                        ?.name || ""
-                    )
+                <Input
+                  label="Brand"
+                  value={form.brand}
+                  placeholder="Samsonite"
+                  onChange={(v) =>
+                    update("brand", v)
                   }
                 />
 
-                <span className="plus">
-                  +
-                </span>
+                <Input
+                  label="Model"
+                  value={form.model}
+                  placeholder="Model"
+                  onChange={(v) =>
+                    update("model", v)
+                  }
+                />
 
-                <span className="fileName">
-                  {ownerPhotoName ||
-                    (ka
-                      ? "ფოტოს არჩევა"
-                      : "Choose photo")}
-                </span>
+                <Input
+                  label="Size"
+                  value={form.size}
+                  placeholder="Small / Medium / Large"
+                  onChange={(v) =>
+                    update("size", v)
+                  }
+                />
 
-              </label>
+                <Input
+                  label="Material"
+                  value={form.material}
+                  placeholder="Leather"
+                  onChange={(v) =>
+                    update("material", v)
+                  }
+                />
 
+              </div>
+
+              <Textarea
+                label="Distinctive Features"
+                value={
+                  form.distinctive_features
+                }
+                placeholder="Stickers, scratches, initials, unique marks..."
+                onChange={(v) =>
+                  update(
+                    "distinctive_features",
+                    v
+                  )
+                }
+              />
+            </section>
+          )}
+
+          {/* PHOTOS */}
+
+          <section className="box">
+            <div className="section-title">
+              <span>04</span>
+
+              <div>
+                <h2>Photos</h2>
+                <p>
+                  Add photos of the pet/item and owner.
+                </p>
+              </div>
             </div>
 
+            <div className="grid">
 
-            <Field
-              label={
-                ka
-                  ? "მფლობელის ელფოსტა"
-                  : "Owner email"
-              }
-              name="owner_email"
-              type="email"
-              placeholder="name@example.com"
-              required
-            />
+              <Input
+                label={
+                  isPet
+                    ? "Pet Photo"
+                    : "Item Photo"
+                }
+                value={form.photo}
+                placeholder="Photo URL"
+                onChange={(v) =>
+                  update("photo", v)
+                }
+              />
 
-
-            <div className="field">
-
-              <label>
-                {ka
-                  ? "დაკავშირების მეთოდი"
-                  : "Contact preference"}
-              </label>
-
-              <select
-                name="contact_preference"
-              >
-
-                <option value="both">
-                  {ka
-                    ? "Live Chat და ტელეფონი"
-                    : "Live Chat & Phone"}
-                </option>
-
-                <option value="chat">
-                  Live Chat
-                </option>
-
-                <option value="phone">
-                  {ka
-                    ? "ტელეფონი"
-                    : "Phone"}
-                </option>
-
-              </select>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        {/* FINDER */}
-
-        <section className="panel">
-
-          <SectionTitle
-            number={
-              category.pet
-                ? "04"
-                : "03"
-            }
-            title={
-              ka
-                ? "ინფორმაცია მპოვნელისთვის"
-                : "Finder information"
-            }
-          />
-
-          <div className="fields">
-
-            <div className="field full">
-
-              <label>
-                {ka
-                  ? "შეტყობინება მპოვნელისთვის"
-                  : "Finder message"}
-              </label>
-
-              <textarea
-                name="finder_message"
-                rows={4}
-                placeholder={
-                  ka
-                    ? "ტექსტი, რომელსაც მპოვნელი დაინახავს..."
-                    : "Message visible to the finder..."
+              <Input
+                label="Owner Photo"
+                value={form.owner_photo}
+                placeholder="Owner photo URL"
+                onChange={(v) =>
+                  update("owner_photo", v)
                 }
               />
 
             </div>
+          </section>
 
+          {/* OWNER */}
 
-            <div className="field full">
+          <section className="box">
+            <div className="section-title">
+              <span>05</span>
 
-              <label>
-                {ka
-                  ? "დაკარგვის შეტყობინება"
-                  : "Lost message"}
-              </label>
+              <div>
+                <h2>Owner contact</h2>
+                <p>
+                  Choose how the finder can contact you.
+                </p>
+              </div>
+            </div>
 
-              <textarea
-                name="lost_message"
-                rows={4}
-                placeholder={
-                  ka
-                    ? "დაკარგვის შემთხვევაში გამოსაჩენი ინფორმაცია..."
-                    : "Message displayed if the item is lost..."
+            <div className="grid">
+
+              <Input
+                label="Owner Email"
+                type="email"
+                value={form.owner_email}
+                placeholder="name@email.com"
+                onChange={(v) =>
+                  update("owner_email", v)
                 }
+              />
+
+              <Select
+                label="Contact Preference"
+                value={
+                  form.contact_preference
+                }
+                onChange={(v) =>
+                  update(
+                    "contact_preference",
+                    v
+                  )
+                }
+                options={[
+                  ["email", "Email"],
+                  ["phone", "Phone"],
+                  ["whatsapp", "WhatsApp"],
+                  ["live_chat", "Live Chat"],
+                  ["both", "All available options"],
+                ]}
               />
 
             </div>
 
-
-            <Field
-              label={
-                ka
-                  ? "ბოლო ნანახი ადგილი"
-                  : "Last seen location"
-              }
-              name="lost_seen_location"
-              placeholder={
-                ka
-                  ? "მაგ: Central Park"
-                  : "Example: Central Park"
+            <Textarea
+              label="Message to Finder"
+              value={form.finder_message}
+              placeholder="Thank you for finding my pet/item. Please contact me..."
+              onChange={(v) =>
+                update("finder_message", v)
               }
             />
 
+          </section>
 
-            <Toggle
-              title={
-                ka
-                  ? "ლოკაციის გაზიარება"
-                  : "Location sharing"
-              }
-              description={
-                ka
-                  ? "მპოვნელს შეეძლება თავისი მდებარეობა გაგიზიაროთ."
-                  : "Allow the finder to share their location."
-              }
-              enabled={
-                locationSharingEnabled
-              }
-              onClick={() =>
-                setLocationSharingEnabled(
-                  !locationSharingEnabled
-                )
-              }
-            />
+          {/* LOST */}
 
+          <section className="box">
+            <div className="section-title">
+              <span>06</span>
 
-            <Toggle
-              title={
-                ka
-                  ? "მფლობელის შეტყობინება"
-                  : "Owner message"
-              }
-              description={
-                ka
-                  ? "QR გვერდზე გამოჩნდეს მფლობელის შეტყობინება."
-                  : "Show the owner's message on the QR page."
-              }
-              enabled={
-                ownerMessageEnabled
-              }
-              onClick={() =>
-                setOwnerMessageEnabled(
-                  !ownerMessageEnabled
-                )
-              }
-            />
-
-
-            <input
-              type="hidden"
-              name="location_sharing_enabled"
-              value={String(
-                locationSharingEnabled
-              )}
-            />
-
-            <input
-              type="hidden"
-              name="owner_message_enabled"
-              value={String(
-                ownerMessageEnabled
-              )}
-            />
-
-          </div>
-
-        </section>
-
-
-        {/* SUBMIT */}
-
-        <section className="submitPanel">
-
-          <div>
-            <div className="submitLabel">
-              QR RETURN
+              <div>
+                <h2>Lost information</h2>
+                <p>
+                  This can be updated if the tag becomes lost.
+                </p>
+              </div>
             </div>
 
-            <h2>
-              {ka
-                ? "ინფორმაცია მზადაა შესანახად."
-                : "Information ready to save."}
-            </h2>
-          </div>
+            <Textarea
+              label="Lost Message"
+              value={form.lost_message}
+              placeholder="This pet/item is currently missing..."
+              onChange={(v) =>
+                update("lost_message", v)
+              }
+            />
 
-          <button type="submit">
-            {ka
-              ? "შენახვა"
-              : "Save"}{" "}
-            →
+            <div className="grid">
+
+              <Input
+                label="Lost At"
+                type="datetime-local"
+                value={form.lost_at}
+                onChange={(v) =>
+                  update("lost_at", v)
+                }
+              />
+
+              <Input
+                label="Last Seen Location"
+                value={
+                  form.lost_seen_location
+                }
+                placeholder="Central Park, New York"
+                onChange={(v) =>
+                  update(
+                    "lost_seen_location",
+                    v
+                  )
+                }
+              />
+
+            </div>
+          </section>
+
+          {/* SETTINGS */}
+
+          <section className="box">
+
+            <div className="section-title">
+              <span>07</span>
+
+              <div>
+                <h2>Finder permissions</h2>
+                <p>
+                  Choose what the finder is allowed to do.
+                </p>
+              </div>
+            </div>
+
+            <Toggle
+              title="Location Sharing"
+              description="Allow the finder to share their current location with you."
+              checked={
+                form.location_sharing_enabled
+              }
+              onChange={(v) =>
+                update(
+                  "location_sharing_enabled",
+                  v
+                )
+              }
+            />
+
+            <Toggle
+              title="Owner Messages"
+              description="Allow the finder to send you a message."
+              checked={
+                form.owner_message_enabled
+              }
+              onChange={(v) =>
+                update(
+                  "owner_message_enabled",
+                  v
+                )
+              }
+            />
+
+          </section>
+
+          {status && (
+            <div
+              className={
+                status.startsWith("Error")
+                  ? "status error"
+                  : "status success"
+              }
+            >
+              {status}
+            </div>
+          )}
+
+          <button
+            className="submit"
+            type="submit"
+            disabled={
+              saving ||
+              !form.item_type ||
+              !form.tag_code ||
+              !form.item_name
+            }
+          >
+            {saving
+              ? "Saving..."
+              : "Register Tag"}
           </button>
 
-        </section>
+        </form>
+      </div>
 
-      </form>
-
-
-      <style jsx>{`
-
+      <style jsx global>{`
         * {
           box-sizing: border-box;
         }
 
-        .page {
-          min-height: 100vh;
-          background: #f5f7fb;
-          color: #0b1729;
+        body {
+          margin: 0;
+          background: #f6f7f7;
+          color: #17211d;
           font-family:
-            Inter,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
             Arial,
+            Helvetica,
             sans-serif;
         }
 
+        .register-page {
+          min-height: 100vh;
+          padding: 55px 20px 90px;
+        }
+
+        .wrapper {
+          width: 100%;
+          max-width: 960px;
+          margin: auto;
+        }
+
         .header {
-          max-width: 1100px;
-          min-height: 84px;
-          margin: auto;
-          padding: 0 22px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          margin-bottom: 35px;
         }
 
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 11px;
-          text-decoration: none;
-        }
-
-        .brandMark {
-          width: 46px;
-          height: 46px;
-          border-radius: 14px;
-          background: #1465e8;
-          color: white;
-          display: grid;
-          place-items: center;
-          font-weight: 950;
-        }
-
-        .brandName {
-          color: #1465e8;
-          font-size: 22px;
-          font-weight: 950;
-        }
-
-        .brandSub {
-          margin-top: 4px;
-          color: #8792a3;
-          font-size: 8px;
+        .small-title {
+          font-size: 12px;
+          letter-spacing: 1.5px;
           font-weight: 800;
-          letter-spacing: 2px;
+          color: #4d7566;
         }
 
-        .headerRight {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .back {
-          text-decoration: none;
-          color: #536276;
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        .language {
-          display: flex;
-          background: #e9eef5;
-          padding: 4px;
-          border-radius: 10px;
-        }
-
-        .language button {
-          border: 0;
-          background: transparent;
-          padding: 7px 9px;
-          border-radius: 7px;
-          color: #7e8999;
-          font-size: 9px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .language .selected {
-          background: white;
-          color: #1465e8;
-        }
-
-        .intro {
-          max-width: 950px;
-          margin: auto;
-          padding: 48px 22px 28px;
-          display: flex;
-          gap: 22px;
-          align-items: center;
-        }
-
-        .categoryIcon {
-          width: 76px;
-          height: 76px;
-          flex: 0 0 76px;
-          border-radius: 22px;
-          background: #eaf2ff;
-          border: 1px solid #dbe7f6;
-          display: grid;
-          place-items: center;
-          font-size: 43px;
-        }
-
-        .eyebrow {
-          color: #1465e8;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: 2.3px;
-        }
-
-        .intro h1 {
-          max-width: 780px;
-          margin: 9px 0 0;
-          font-size: clamp(
-            28px,
-            4vw,
-            40px
-          );
-          line-height: 1.18;
+        .header h1 {
+          font-size: 44px;
+          margin: 9px 0 10px;
           letter-spacing: -1.5px;
         }
 
-        .form {
-          max-width: 950px;
-          margin: auto;
-          padding: 0 22px 85px;
+        .header p {
+          max-width: 650px;
+          line-height: 1.6;
+          color: #6f7975;
         }
 
-        .panel {
-          margin-top: 17px;
-          padding: 29px;
-          background: white;
-          border: 1px solid #e2e8f0;
-          border-radius: 22px;
+        .box {
+          background: #fff;
+          border: 1px solid #e2e7e5;
+          border-radius: 18px;
+          padding: 30px;
+          margin-bottom: 20px;
         }
 
-        .sectionTitle {
+        .section-title {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 27px;
+        }
+
+        .section-title > span {
+          width: 36px;
+          height: 36px;
+          border-radius: 9px;
+          background: #eef4f1;
+          color: #3e6c5c;
           display: flex;
           align-items: center;
-          gap: 14px;
-          padding-bottom: 20px;
-          border-bottom:
-            1px solid #edf1f5;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 800;
+          flex-shrink: 0;
         }
 
-        .sectionTitle > span {
-          color: #1465e8;
-          font-size: 11px;
-          font-weight: 950;
-        }
-
-        .sectionTitle h2 {
-          margin: 0;
-          font-size: 19px;
-        }
-
-        /*
-          IMPORTANT:
-          All normal fields have
-          exactly the same width.
-        */
-
-        .fields {
-          margin-top: 23px;
-          display: grid;
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-          gap: 18px;
-        }
-
-        .field {
-          min-width: 0;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .field.full {
-          grid-column: 1 / -1;
-        }
-
-        .field label {
-          margin-bottom: 8px;
-          color: #28374e;
-          font-size: 13px;
-          font-weight: 850;
-        }
-
-        /*
-          input and select are IDENTICAL.
-          Same width + same height.
-        */
-
-        input,
-        select,
-        textarea {
-          width: 100%;
-          min-width: 0;
-          max-width: 100%;
-          border: 1px solid #d7e0ea;
-          border-radius: 11px;
-          background: white;
-          color: #111827;
-          font-family: inherit;
-          font-size: 16px;
-          outline: none;
-        }
-
-        input,
-        select {
-          height: 52px;
-          padding: 0 14px;
-        }
-
-        textarea {
-          min-height: 105px;
-          padding: 13px 14px;
-          line-height: 1.55;
-          resize: vertical;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-          border-color: #1465e8;
-          box-shadow:
-            0 0 0 3px
-            rgba(
-              20,
-              101,
-              232,
-              0.08
-            );
-        }
-
-        /*
-          Photo looks exactly like
-          a normal input.
-        */
-
-        .fileInput {
-          width: 100%;
-          height: 52px;
-          margin: 0;
-          padding: 0 14px;
-          border:
-            1px dashed #b8c6d7;
-          border-radius: 11px;
-          background: #f9fafc;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-        }
-
-        .fileInput input {
-          display: none;
-        }
-
-        .plus {
-          flex: 0 0 auto;
-          color: #1465e8;
+        .section-title h2 {
+          margin: 0 0 5px;
           font-size: 20px;
         }
 
-        .fileName {
-          min-width: 0;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          color: #526176;
-          font-size: 13px;
+        .section-title p {
+          margin: 0;
+          color: #7a8580;
+          font-size: 14px;
         }
 
-        .toggle {
-          grid-column: 1 / -1;
-          width: 100%;
-          min-height: 72px;
-          border: 1px solid #dae2eb;
-          border-radius: 13px;
+        .type-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .type-btn {
+          min-height: 70px;
+          border: 1px solid #d9e0dd;
           background: white;
-          padding: 15px;
+          border-radius: 13px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          text-align: left;
-          cursor: pointer;
+          justify-content: center;
+          gap: 9px;
         }
 
-        .toggle strong {
-          color: #17263d;
+        .type-btn.active {
+          background: #eff6f2;
+          border: 2px solid #4f796a;
+          color: #315b4c;
         }
 
-        .toggle p {
-          margin: 4px 0 0;
-          color: #8490a2;
-          font-size: 12px;
+        .type-icon {
+          font-size: 24px;
         }
 
-        .toggle > span {
-          flex: 0 0 auto;
-          color: #99a4b4;
-          font-size: 11px;
-          font-weight: 950;
+        .grid {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 18px;
+          margin-bottom: 18px;
         }
 
-        .toggle.active {
-          border-color: #1465e8;
-          background: #f2f7ff;
+        .field {
+          width: 100%;
+          margin-bottom: 18px;
         }
 
-        .toggle.active > span {
-          color: #1465e8;
+        .grid .field {
+          margin-bottom: 0;
         }
 
-        .submitPanel {
-          margin-top: 19px;
-          padding: 28px;
-          border-radius: 22px;
-          background:
-            linear-gradient(
-              135deg,
-              #07182e,
-              #11427d
-            );
-          color: white;
+        .field label {
+          display: block;
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+
+        .required {
+          color: #b84646;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+          width: 100%;
+          border: 1px solid #d7deda;
+          background: #fbfcfb;
+          border-radius: 11px;
+          outline: none;
+          font-size: 15px;
+        }
+
+        .field input,
+        .field select {
+          height: 54px;
+          padding: 0 15px;
+        }
+
+        .field textarea {
+          padding: 15px;
+          min-height: 115px;
+          resize: vertical;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+          background: #fff;
+          border-color: #5d8576;
+          box-shadow:
+            0 0 0 3px
+            rgba(93, 133, 118, 0.1);
+        }
+
+        .toggle-row {
           display: flex;
-          justify-content:
-            space-between;
+          justify-content: space-between;
           align-items: center;
           gap: 25px;
+          padding: 17px 0;
+          border-bottom: 1px solid #edf0ef;
         }
 
-        .submitLabel {
-          color: #69a6ff;
-          font-size: 10px;
-          font-weight: 950;
-          letter-spacing: 2.3px;
+        .toggle-row:last-child {
+          border-bottom: none;
         }
 
-        .submitPanel h2 {
-          margin: 8px 0 0;
-          font-size: 22px;
+        .toggle-title {
+          font-weight: 700;
+          margin-bottom: 5px;
         }
 
-        .submitPanel button {
-          flex: 0 0 auto;
-          height: 48px;
-          border: 0;
-          border-radius: 11px;
+        .toggle-description {
+          color: #78827e;
+          font-size: 13px;
+          line-height: 1.45;
+        }
+
+        .switch {
+          width: 54px;
+          height: 30px;
+          border: none;
+          border-radius: 30px;
+          background: #ccd4d0;
+          padding: 0;
+          position: relative;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+
+        .switch span {
+          width: 22px;
+          height: 22px;
           background: white;
-          color: #1465e8;
-          padding: 0 21px;
-          font-weight: 900;
+          border-radius: 50%;
+          position: absolute;
+          top: 4px;
+          left: 4px;
+          transition: 0.2s;
+        }
+
+        .switch.on {
+          background: #477565;
+        }
+
+        .switch.on span {
+          left: 28px;
+        }
+
+        .submit {
+          width: 100%;
+          height: 60px;
+          border: none;
+          border-radius: 13px;
+          background: #17251f;
+          color: white;
+          font-size: 16px;
+          font-weight: 800;
           cursor: pointer;
         }
 
-        /*
-          PHONE
-        */
-
-        @media (
-          max-width: 700px
-        ) {
-
-          .header {
-            padding-left: 14px;
-            padding-right: 14px;
-          }
-
-          .brandSub {
-            display: none;
-          }
-
-          .intro {
-            padding:
-              32px
-              15px
-              19px;
-            align-items: flex-start;
-          }
-
-          .categoryIcon {
-            width: 60px;
-            height: 60px;
-            flex-basis: 60px;
-            font-size: 34px;
-          }
-
-          .intro h1 {
-            font-size: 24px;
-            letter-spacing: -0.8px;
-          }
-
-          .form {
-            padding:
-              0
-              11px
-              60px;
-          }
-
-          .panel {
-            padding:
-              21px
-              16px;
-          }
-
-          /*
-            On phone EVERY field
-            gets the full width.
-          */
-
-          .fields {
-            grid-template-columns:
-              1fr;
-            gap: 15px;
-          }
-
-          .field.full,
-          .toggle {
-            grid-column: auto;
-          }
-
-          input,
-          select,
-          .fileInput {
-            height: 52px;
-          }
-
-          textarea {
-            min-height: 100px;
-          }
-
-          .submitPanel {
-            padding: 22px 18px;
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .submitPanel button {
-            width: 100%;
-          }
+        .submit:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
         }
 
-      `}</style>
+        .status {
+          padding: 15px;
+          border-radius: 10px;
+          margin-bottom: 15px;
+        }
 
+        .success {
+          background: #ecf8f1;
+          color: #27613e;
+        }
+
+        .error {
+          background: #fff0f0;
+          color: #9b3434;
+        }
+
+        @media (max-width: 700px) {
+          .register-page {
+            padding: 35px 12px 60px;
+          }
+
+          .box {
+            padding: 21px 16px;
+          }
+
+          .header h1 {
+            font-size: 35px;
+          }
+
+          .grid {
+            grid-template-columns: 1fr;
+          }
+
+          .type-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
-
-function SectionTitle({
-  number,
-  title,
-}: {
-  number: string;
-  title: string;
-}) {
-  return (
-    <div className="sectionTitle">
-      <span>{number}</span>
-      <h2>{title}</h2>
-    </div>
-  );
-}
-
-
-function Field({
-  label,
-  name,
-  type = "text",
-  placeholder = "",
-  required = false,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  placeholder?: string;
-  required?: boolean;
-}) {
-  return (
-    <div className="field">
-
-      <label>
-        {label}
-        {required ? " *" : ""}
-      </label>
-
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required={required}
-      />
-
-    </div>
-  );
-}
-
-
-function Toggle({
-  title,
-  description,
-  enabled,
+function TypeButton({
+  icon,
+  text,
+  active,
   onClick,
 }: {
-  title: string;
-  description: string;
-  enabled: boolean;
+  icon: string;
+  text: string;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className={
-        enabled
-          ? "toggle active"
-          : "toggle"
-      }
+      className={`type-btn ${
+        active ? "active" : ""
+      }`}
       onClick={onClick}
     >
+      <span className="type-icon">
+        {icon}
+      </span>
+      {text}
+    </button>
+  );
+}
 
+function Input({
+  label,
+  value,
+  onChange,
+  placeholder = "",
+  type = "text",
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  required?: boolean;
+}) {
+  return (
+    <div className="field">
+      <label>
+        {label}
+        {required && (
+          <span className="required"> *</span>
+        )}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        required={required}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+      />
+    </div>
+  );
+}
+
+function Textarea({
+  label,
+  value,
+  onChange,
+  placeholder = "",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="field">
+      <label>{label}</label>
+
+      <textarea
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+      />
+    </div>
+  );
+}
+
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: [string, string][];
+}) {
+  return (
+    <div className="field">
+      <label>{label}</label>
+
+      <select
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+      >
+        {options.map(
+          ([value, label]) => (
+            <option
+              key={value}
+              value={value}
+            >
+              {label}
+            </option>
+          )
+        )}
+      </select>
+    </div>
+  );
+}
+
+function Toggle({
+  title,
+  description,
+  checked,
+  onChange,
+}: {
+  title: string;
+  description: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="toggle-row">
       <div>
-        <strong>
+        <div className="toggle-title">
           {title}
-        </strong>
+        </div>
 
-        <p>
+        <div className="toggle-description">
           {description}
-        </p>
+        </div>
       </div>
 
-      <span>
-        {enabled
-          ? "ON"
-          : "OFF"}
-      </span>
-
-    </button>
+      <button
+        type="button"
+        className={`switch ${
+          checked ? "on" : ""
+        }`}
+        onClick={() =>
+          onChange(!checked)
+        }
+      >
+        <span />
+      </button>
+    </div>
   );
 }
