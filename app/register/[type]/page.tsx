@@ -46,7 +46,6 @@ type FormState = {
 };
 
 type VisibilityState = {
-  show_colour: boolean;
   show_sex: boolean;
   show_date_of_birth: boolean;
   show_weight: boolean;
@@ -159,7 +158,6 @@ const initialForm: FormState = {
 };
 
 const initialVisibility: VisibilityState = {
-  show_colour: true,
   show_sex: true,
   show_date_of_birth: false,
   show_weight: false,
@@ -183,12 +181,17 @@ const initialVisibility: VisibilityState = {
 };
 
 function cleanTag(tag: string) {
-  return tag.trim().replace(/[^a-zA-Z0-9_-]/g, "-");
+  return tag
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 function safeExtension(file: File) {
   const ext =
-    file.name.split(".").pop()?.toLowerCase() || "jpg";
+    file.name
+      .split(".")
+      .pop()
+      ?.toLowerCase() || "jpg";
 
   const allowed = [
     "jpg",
@@ -200,7 +203,9 @@ function safeExtension(file: File) {
     "heif",
   ];
 
-  return allowed.includes(ext) ? ext : "jpg";
+  return allowed.includes(ext)
+    ? ext
+    : "jpg";
 }
 
 async function uploadImage(
@@ -226,25 +231,28 @@ async function uploadImage(
           .toString(36)
           .slice(2)}`;
 
-  const path = `${folder}/${cleanTag(
-    tagCode
-  )}-${unique}.${ext}`;
+  const path =
+    `${folder}/${cleanTag(
+      tagCode
+    )}-${unique}.${ext}`;
 
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, {
-      cacheControl: "3600",
-      contentType: file.type,
-      upsert: false,
-    });
+  const { error } =
+    await supabase.storage
+      .from(BUCKET)
+      .upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
 
   if (error) {
     throw error;
   }
 
-  const { data } = supabase.storage
-    .from(BUCKET)
-    .getPublicUrl(path);
+  const { data } =
+    supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
 
   return data.publicUrl;
 }
@@ -252,9 +260,10 @@ async function uploadImage(
 export default function RegistrationPage() {
   const params = useParams();
 
-  const rawType = Array.isArray(params?.type)
-    ? params.type[0]
-    : params?.type;
+  const rawType =
+    Array.isArray(params?.type)
+      ? params.type[0]
+      : params?.type;
 
   const type: CategoryKey =
     typeof rawType === "string" &&
@@ -267,47 +276,85 @@ export default function RegistrationPage() {
   const [language, setLanguage] =
     useState<Language>("ka");
 
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] =
+    useState<Step>(1);
 
   const [form, setForm] =
-    useState<FormState>(initialForm);
+    useState<FormState>(
+      initialForm
+    );
 
-  const [visibility, setVisibility] =
+  const [
+    visibility,
+    setVisibility,
+  ] =
     useState<VisibilityState>(
       initialVisibility
     );
 
-  const [showExtraProfile, setShowExtraProfile] =
-    useState(false);
+  const [
+    showExtraProfile,
+    setShowExtraProfile,
+  ] = useState(false);
 
-  const [showExtraContact, setShowExtraContact] =
-    useState(false);
+  const [
+    showExtraContact,
+    setShowExtraContact,
+  ] = useState(false);
 
-  const [phoneEnabled, setPhoneEnabled] =
-    useState(true);
+  const [
+    phoneEnabled,
+    setPhoneEnabled,
+  ] = useState(true);
 
-  const [whatsappEnabled, setWhatsappEnabled] =
-    useState(false);
+  const [
+    whatsappEnabled,
+    setWhatsappEnabled,
+  ] = useState(false);
 
-  const [liveChatEnabled, setLiveChatEnabled] =
-    useState(true);
+  const [
+    liveChatEnabled,
+    setLiveChatEnabled,
+  ] = useState(true);
 
   const [
     locationSharingEnabled,
     setLocationSharingEnabled,
   ] = useState(false);
 
-  const [itemPhoto, setItemPhoto] =
-    useState<File | null>(null);
+  const [
+    itemPhoto,
+    setItemPhoto,
+  ] =
+    useState<File | null>(
+      null
+    );
 
-  const [ownerPhoto, setOwnerPhoto] =
-    useState<File | null>(null);
+  const [
+    ownerPhoto,
+    setOwnerPhoto,
+  ] =
+    useState<File | null>(
+      null
+    );
 
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [
+    saving,
+    setSaving,
+  ] = useState(false);
 
-  const ka = language === "ka";
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    success,
+    setSuccess,
+  ] = useState(false);
+
+  const ka =
+    language === "ka";
 
   function updateField(
     field: keyof FormState,
@@ -326,10 +373,13 @@ export default function RegistrationPage() {
   function toggleVisibility(
     field: keyof VisibilityState
   ) {
-    setVisibility((current) => ({
-      ...current,
-      [field]: !current[field],
-    }));
+    setVisibility(
+      (current) => ({
+        ...current,
+        [field]:
+          !current[field],
+      })
+    );
   }
 
   function goTop() {
@@ -339,12 +389,18 @@ export default function RegistrationPage() {
     });
   }
 
-  function validateImage(file: File | null) {
+  function validateImage(
+    file: File | null
+  ) {
     if (!file) {
       return true;
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
       setError(
         ka
           ? "გთხოვთ აირჩიოთ სურათის ფაილი."
@@ -354,7 +410,10 @@ export default function RegistrationPage() {
       return false;
     }
 
-    if (file.size > MAX_IMAGE_SIZE) {
+    if (
+      file.size >
+      MAX_IMAGE_SIZE
+    ) {
       setError(
         ka
           ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
@@ -371,7 +430,9 @@ export default function RegistrationPage() {
     setError("");
 
     if (step === 1) {
-      if (!form.tag_code.trim()) {
+      if (
+        !form.tag_code.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ QR კოდი."
@@ -381,7 +442,9 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!form.item_name.trim()) {
+      if (
+        !form.item_name.trim()
+      ) {
         setError(
           ka
             ? category.isPet
@@ -395,17 +458,39 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!validateImage(itemPhoto)) {
+      /*
+       * ფერი სავალდებულოა
+       */
+      if (
+        !form.colour.trim()
+      ) {
+        setError(
+          ka
+            ? "გთხოვთ მიუთითოთ ფერი."
+            : "Please enter the colour."
+        );
+
+        return;
+      }
+
+      if (
+        !validateImage(
+          itemPhoto
+        )
+      ) {
         return;
       }
 
       setStep(2);
       goTop();
+
       return;
     }
 
     if (step === 2) {
-      if (!form.owner_first_name.trim()) {
+      if (
+        !form.owner_first_name.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ მფლობელის სახელი."
@@ -415,7 +500,9 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!form.owner_last_name.trim()) {
+      if (
+        !form.owner_last_name.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ მფლობელის გვარი."
@@ -425,7 +512,9 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!form.owner_phone.trim()) {
+      if (
+        !form.owner_phone.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ მობილურის ნომერი."
@@ -435,7 +524,9 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!form.owner_email.trim()) {
+      if (
+        !form.owner_email.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ ელფოსტა."
@@ -459,7 +550,11 @@ export default function RegistrationPage() {
         return;
       }
 
-      if (!validateImage(ownerPhoto)) {
+      if (
+        !validateImage(
+          ownerPhoto
+        )
+      ) {
         return;
       }
 
@@ -495,13 +590,18 @@ export default function RegistrationPage() {
 
     try {
       if (
-        !validateImage(itemPhoto) ||
-        !validateImage(ownerPhoto)
+        !validateImage(
+          itemPhoto
+        ) ||
+        !validateImage(
+          ownerPhoto
+        )
       ) {
         return;
       }
 
-      const tagCode = form.tag_code.trim();
+      const tagCode =
+        form.tag_code.trim();
 
       const {
         data: existing,
@@ -509,7 +609,10 @@ export default function RegistrationPage() {
       } = await supabase
         .from("item")
         .select("tag_code")
-        .eq("tag_code", tagCode)
+        .eq(
+          "tag_code",
+          tagCode
+        )
         .maybeSingle();
 
       if (checkError) {
@@ -532,23 +635,30 @@ export default function RegistrationPage() {
         return;
       }
 
-      let photoUrl: string | null = null;
-      let ownerPhotoUrl: string | null = null;
+      let photoUrl:
+        | string
+        | null = null;
+
+      let ownerPhotoUrl:
+        | string
+        | null = null;
 
       if (itemPhoto) {
-        photoUrl = await uploadImage(
-          itemPhoto,
-          "items",
-          tagCode
-        );
+        photoUrl =
+          await uploadImage(
+            itemPhoto,
+            "items",
+            tagCode
+          );
       }
 
       if (ownerPhoto) {
-        ownerPhotoUrl = await uploadImage(
-          ownerPhoto,
-          "owners",
-          tagCode
-        );
+        ownerPhotoUrl =
+          await uploadImage(
+            ownerPhoto,
+            "owners",
+            tagCode
+          );
       }
 
       const ownerName = [
@@ -562,13 +672,18 @@ export default function RegistrationPage() {
         form.finder_message.trim();
 
       const weightValue =
-        form.weight.trim() !== ""
-          ? Number(form.weight)
+        form.weight.trim() !==
+        ""
+          ? Number(
+              form.weight
+            )
           : null;
 
       if (
         weightValue !== null &&
-        Number.isNaN(weightValue)
+        Number.isNaN(
+          weightValue
+        )
       ) {
         setError(
           ka
@@ -580,61 +695,106 @@ export default function RegistrationPage() {
       }
 
       const payload = {
-        tag_code: tagCode,
+        tag_code:
+          tagCode,
 
-        item_type: category.itemType,
-        pet_type: category.petType,
+        item_type:
+          category.itemType,
 
-        item_name: form.item_name.trim(),
+        pet_type:
+          category.petType,
+
+        /*
+         * სავალდებულო და ყოველთვის ხილული
+         */
+        item_name:
+          form.item_name.trim(),
 
         colour:
-          form.colour.trim() || null,
+          form.colour.trim(),
 
-        sex: category.isPet
-          ? form.sex || null
-          : null,
+        /*
+         * არასავალდებულო ინფორმაცია
+         */
+        sex:
+          category.isPet
+            ? form.sex ||
+              null
+            : null,
 
-        date_of_birth: category.isPet
-          ? form.date_of_birth || null
-          : null,
+        date_of_birth:
+          category.isPet
+            ? form.date_of_birth ||
+              null
+            : null,
 
-        weight: category.isPet
-          ? weightValue
-          : null,
+        weight:
+          category.isPet
+            ? weightValue
+            : null,
 
-        medical_info: category.isPet
-          ? form.medical_info.trim() || null
-          : null,
+        medical_info:
+          category.isPet
+            ? form.medical_info.trim() ||
+              null
+            : null,
 
-        brand: !category.isPet
-          ? form.brand.trim() || null
-          : null,
+        brand:
+          !category.isPet
+            ? form.brand.trim() ||
+              null
+            : null,
 
-        model: !category.isPet
-          ? form.model.trim() || null
-          : null,
+        model:
+          !category.isPet
+            ? form.model.trim() ||
+              null
+            : null,
 
-        size: !category.isPet
-          ? form.size.trim() || null
-          : null,
+        size:
+          !category.isPet
+            ? form.size.trim() ||
+              null
+            : null,
 
-        material: !category.isPet
-          ? form.material.trim() || null
-          : null,
+        material:
+          !category.isPet
+            ? form.material.trim() ||
+              null
+            : null,
 
-        distinctive_features: !category.isPet
-          ? form.distinctive_features.trim() || null
-          : null,
+        distinctive_features:
+          !category.isPet
+            ? form.distinctive_features.trim() ||
+              null
+            : null,
 
         description:
-          form.description.trim() || null,
+          form.description.trim() ||
+          null,
 
-        photo_url: photoUrl,
-        owner_photo_url: ownerPhotoUrl,
+        photo_url:
+          photoUrl,
 
-        owner_name: ownerName,
-        owner_phone: form.owner_phone.trim(),
-        owner_email: form.owner_email.trim(),
+        owner_photo_url:
+          ownerPhotoUrl,
+
+        /*
+         * მფლობელის სახელი/გვარი და
+         * მობილური სავალდებულო და ყოველთვის ხილულია
+         */
+        owner_name:
+          ownerName,
+
+        owner_phone:
+          form.owner_phone.trim(),
+
+        /*
+         * Email სავალდებულოა,
+         * მაგრამ ჩვენება არჩევითია
+         */
+        owner_email:
+          form.owner_email.trim(),
 
         additional_contact_name:
           form.additional_contact_name.trim() ||
@@ -649,45 +809,57 @@ export default function RegistrationPage() {
           null,
 
         finder_message:
-          finderMessage || null,
+          finderMessage ||
+          null,
 
         owner_message_enabled:
-          finderMessage.length > 0,
+          finderMessage.length >
+          0,
 
         lost_seen_location:
           form.lost_seen_location.trim() ||
           null,
 
-        phone_enabled: phoneEnabled,
-        whatsapp_enabled: whatsappEnabled,
-        live_chat_enabled: liveChatEnabled,
+        phone_enabled:
+          phoneEnabled,
+
+        whatsapp_enabled:
+          whatsappEnabled,
+
+        live_chat_enabled:
+          liveChatEnabled,
 
         location_sharing_enabled:
           locationSharingEnabled,
 
         /*
-         * ტელეფონის ნომერი:
-         * შევსებაც სავალდებულოა
-         * და მპოვნელისთვის ჩვენებაც სავალდებულოა.
+         * ფერი და ტელეფონი ყოველთვის ჩანს
          */
-        show_owner_phone: true,
+        show_colour:
+          true,
+
+        show_owner_phone:
+          true,
 
         /*
-         * Email და სხვა არასავალდებულო
-         * ინფორმაციის ხილვადობა.
+         * დანარჩენი ხილვადობები
          */
         ...visibility,
 
-        active: true,
+        active:
+          true,
       };
 
-      const { error: saveError } =
-        await supabase
-          .from("item")
-          .insert(payload);
+      const {
+        error: saveError,
+      } = await supabase
+        .from("item")
+        .insert(payload);
 
       if (saveError) {
-        console.error(saveError);
+        console.error(
+          saveError
+        );
 
         setError(
           ka
@@ -718,8 +890,12 @@ export default function RegistrationPage() {
       <main className="page">
         <Header
           ka={ka}
-          language={language}
-          setLanguage={setLanguage}
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
         />
 
         <section className="successPage">
@@ -764,8 +940,12 @@ export default function RegistrationPage() {
     <main className="page">
       <Header
         ka={ka}
-        language={language}
-        setLanguage={setLanguage}
+        language={
+          language
+        }
+        setLanguage={
+          setLanguage
+        }
       />
 
       <section className="content">
@@ -807,8 +987,8 @@ export default function RegistrationPage() {
 
             <p>
               {ka
-                ? "დაკარგულის ტიპი, ნივთის ან ცხოველის სახელი, მფლობელის სახელი და გვარი და მობილურის ნომერი ყოველთვის ხილული იქნება, რათა მპოვნელმა შეძლოს დაკარგულის იდენტიფიცირება და თქვენთან დაკავშირება. სხვა ინფორმაციის ხილვადობას თავად აკონტროლებთ."
-                : "The lost item or pet type, its name, the owner's full name and phone number are always visible so the finder can identify it and contact you. You control the visibility of other information."}
+                ? "დაკარგულის ტიპი, ნივთის ან ცხოველის სახელი, ფერი, მფლობელის სახელი და გვარი და მობილურის ნომერი ყოველთვის ხილული იქნება. სხვა ინფორმაციის ხილვადობას თავად აკონტროლებთ."
+                : "The lost item or pet type, its name, colour, owner's full name and phone number are always visible. You control the visibility of other information."}
             </p>
           </div>
         </div>
@@ -817,10 +997,16 @@ export default function RegistrationPage() {
           <Progress
             number="1"
             label={
-              ka ? "პროფილი" : "Profile"
+              ka
+                ? "პროფილი"
+                : "Profile"
             }
-            active={step >= 1}
-            current={step === 1}
+            active={
+              step >= 1
+            }
+            current={
+              step === 1
+            }
           />
 
           <div
@@ -834,10 +1020,16 @@ export default function RegistrationPage() {
           <Progress
             number="2"
             label={
-              ka ? "მფლობელი" : "Owner"
+              ka
+                ? "მფლობელი"
+                : "Owner"
             }
-            active={step >= 2}
-            current={step === 2}
+            active={
+              step >= 2
+            }
+            current={
+              step === 2
+            }
           />
 
           <div
@@ -851,16 +1043,24 @@ export default function RegistrationPage() {
           <Progress
             number="3"
             label={
-              ka ? "დასრულება" : "Finish"
+              ka
+                ? "დასრულება"
+                : "Finish"
             }
-            active={step >= 3}
-            current={step === 3}
+            active={
+              step >= 3
+            }
+            current={
+              step === 3
+            }
           />
         </div>
 
         <form
           className="card"
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
         >
           {step === 1 && (
             <>
@@ -888,8 +1088,12 @@ export default function RegistrationPage() {
                     ? "QR კოდი"
                     : "QR code"
                 }
-                value={form.tag_code}
-                onChange={(value) =>
+                value={
+                  form.tag_code
+                }
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "tag_code",
                     value
@@ -909,8 +1113,12 @@ export default function RegistrationPage() {
                     ? "ნივთის დასახელება"
                     : "Item name"
                 }
-                value={form.item_name}
-                onChange={(value) =>
+                value={
+                  form.item_name
+                }
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "item_name",
                     value
@@ -919,25 +1127,21 @@ export default function RegistrationPage() {
                 ka={ka}
               />
 
-              <OptionalField
+              <AlwaysVisibleField
                 label={
                   ka
                     ? "ფერი"
                     : "Colour"
                 }
-                value={form.colour}
-                onChange={(value) =>
+                value={
+                  form.colour
+                }
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "colour",
                     value
-                  )
-                }
-                visible={
-                  visibility.show_colour
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_colour"
                   )
                 }
                 ka={ka}
@@ -953,8 +1157,12 @@ export default function RegistrationPage() {
                     ? "ნივთის ფოტო"
                     : "Item photo"
                 }
-                file={itemPhoto}
-                setFile={setItemPhoto}
+                file={
+                  itemPhoto
+                }
+                setFile={
+                  setItemPhoto
+                }
                 visible={
                   visibility.show_photo
                 }
@@ -973,8 +1181,12 @@ export default function RegistrationPage() {
                       ? "სქესი"
                       : "Sex"
                   }
-                  value={form.sex}
-                  onChange={(value) =>
+                  value={
+                    form.sex
+                  }
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "sex",
                       value
@@ -997,13 +1209,15 @@ export default function RegistrationPage() {
                         : "Select",
                     },
                     {
-                      value: "male",
+                      value:
+                        "male",
                       label: ka
                         ? "მამრობითი"
                         : "Male",
                     },
                     {
-                      value: "female",
+                      value:
+                        "female",
                       label: ka
                         ? "მდედრობითი"
                         : "Female",
@@ -1017,8 +1231,12 @@ export default function RegistrationPage() {
                       ? "ბრენდი"
                       : "Brand"
                   }
-                  value={form.brand}
-                  onChange={(value) =>
+                  value={
+                    form.brand
+                  }
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "brand",
                       value
@@ -1067,7 +1285,9 @@ export default function RegistrationPage() {
                         value={
                           form.date_of_birth
                         }
-                        onChange={(value) =>
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "date_of_birth",
                             value
@@ -1094,7 +1314,9 @@ export default function RegistrationPage() {
                         value={
                           form.weight
                         }
-                        onChange={(value) =>
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "weight",
                             value
@@ -1120,7 +1342,9 @@ export default function RegistrationPage() {
                         value={
                           form.medical_info
                         }
-                        onChange={(value) =>
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "medical_info",
                             value
@@ -1145,8 +1369,12 @@ export default function RegistrationPage() {
                             ? "მოდელი"
                             : "Model"
                         }
-                        value={form.model}
-                        onChange={(value) =>
+                        value={
+                          form.model
+                        }
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "model",
                             value
@@ -1169,8 +1397,12 @@ export default function RegistrationPage() {
                             ? "ზომა"
                             : "Size"
                         }
-                        value={form.size}
-                        onChange={(value) =>
+                        value={
+                          form.size
+                        }
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "size",
                             value
@@ -1193,8 +1425,12 @@ export default function RegistrationPage() {
                             ? "მასალა"
                             : "Material"
                         }
-                        value={form.material}
-                        onChange={(value) =>
+                        value={
+                          form.material
+                        }
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "material",
                             value
@@ -1220,7 +1456,9 @@ export default function RegistrationPage() {
                         value={
                           form.distinctive_features
                         }
-                        onChange={(value) =>
+                        onChange={(
+                          value
+                        ) =>
                           updateField(
                             "distinctive_features",
                             value
@@ -1248,7 +1486,9 @@ export default function RegistrationPage() {
                     value={
                       form.description
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      value
+                    ) =>
                       updateField(
                         "description",
                         value
@@ -1268,13 +1508,17 @@ export default function RegistrationPage() {
               )}
 
               {error && (
-                <ErrorBox text={error} />
+                <ErrorBox
+                  text={error}
+                />
               )}
 
               <button
                 type="button"
                 className="mainButton full"
-                onClick={nextStep}
+                onClick={
+                  nextStep
+                }
               >
                 {ka
                   ? "შემდეგი"
@@ -1295,8 +1539,8 @@ export default function RegistrationPage() {
                 }
                 text={
                   ka
-                    ? "თქვენი სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილული იქნება."
-                    : "Your full name and phone number will always be visible to the finder."
+                    ? "სახელი, გვარი და მობილურის ნომერი სავალდებულოა და მპოვნელისთვის ყოველთვის ხილული იქნება."
+                    : "Name, surname and phone number are required and always visible to the finder."
                 }
               />
 
@@ -1309,8 +1553,8 @@ export default function RegistrationPage() {
 
                 <p>
                   {ka
-                    ? "სახელი, გვარი და მობილურის ნომერი საჭიროა, რათა მპოვნელმა შეძლოს თქვენთან დაკავშირება."
-                    : "Your name and phone number are required so the finder can contact you."}
+                    ? "მფლობელის სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის გამოჩნდება."
+                    : "The owner's full name and phone number will always be visible to the finder."}
                 </p>
               </div>
 
@@ -1324,7 +1568,9 @@ export default function RegistrationPage() {
                   value={
                     form.owner_first_name
                   }
-                  onChange={(value) =>
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "owner_first_name",
                       value
@@ -1342,7 +1588,9 @@ export default function RegistrationPage() {
                   value={
                     form.owner_last_name
                   }
-                  onChange={(value) =>
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "owner_last_name",
                       value
@@ -1362,7 +1610,9 @@ export default function RegistrationPage() {
                 value={
                   form.owner_phone
                 }
-                onChange={(value) =>
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "owner_phone",
                     value
@@ -1381,7 +1631,9 @@ export default function RegistrationPage() {
                 value={
                   form.owner_email
                 }
-                onChange={(value) =>
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "owner_email",
                     value
@@ -1404,8 +1656,12 @@ export default function RegistrationPage() {
                     ? "მფლობელის ფოტო"
                     : "Owner photo"
                 }
-                file={ownerPhoto}
-                setFile={setOwnerPhoto}
+                file={
+                  ownerPhoto
+                }
+                setFile={
+                  setOwnerPhoto
+                }
                 visible={
                   visibility.show_owner_photo
                 }
@@ -1529,7 +1785,9 @@ export default function RegistrationPage() {
                     value={
                       form.additional_contact_name
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      value
+                    ) =>
                       updateField(
                         "additional_contact_name",
                         value
@@ -1547,7 +1805,9 @@ export default function RegistrationPage() {
                     value={
                       form.additional_contact_phone
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      value
+                    ) =>
                       updateField(
                         "additional_contact_phone",
                         value
@@ -1565,7 +1825,9 @@ export default function RegistrationPage() {
                     value={
                       form.additional_contact_email
                     }
-                    onChange={(value) =>
+                    onChange={(
+                      value
+                    ) =>
                       updateField(
                         "additional_contact_email",
                         value
@@ -1576,14 +1838,18 @@ export default function RegistrationPage() {
               )}
 
               {error && (
-                <ErrorBox text={error} />
+                <ErrorBox
+                  text={error}
+                />
               )}
 
               <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
-                  onClick={previousStep}
+                  onClick={
+                    previousStep
+                  }
                 >
                   ←{" "}
                   {ka
@@ -1594,7 +1860,9 @@ export default function RegistrationPage() {
                 <button
                   type="button"
                   className="mainButton"
-                  onClick={nextStep}
+                  onClick={
+                    nextStep
+                  }
                 >
                   {ka
                     ? "შემდეგი"
@@ -1630,7 +1898,9 @@ export default function RegistrationPage() {
                 value={
                   form.finder_message
                 }
-                onChange={(value) =>
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "finder_message",
                     value
@@ -1656,7 +1926,9 @@ export default function RegistrationPage() {
                 value={
                   form.lost_seen_location
                 }
-                onChange={(value) =>
+                onChange={(
+                  value
+                ) =>
                   updateField(
                     "lost_seen_location",
                     value
@@ -1701,14 +1973,18 @@ export default function RegistrationPage() {
               </div>
 
               {error && (
-                <ErrorBox text={error} />
+                <ErrorBox
+                  text={error}
+                />
               )}
 
               <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
-                  onClick={previousStep}
+                  onClick={
+                    previousStep
+                  }
                 >
                   ←{" "}
                   {ka
@@ -1719,7 +1995,9 @@ export default function RegistrationPage() {
                 <button
                   type="submit"
                   className="mainButton"
-                  disabled={saving}
+                  disabled={
+                    saving
+                  }
                 >
                   {saving
                     ? ka
@@ -1747,7 +2025,9 @@ function Header({
 }: {
   ka: boolean;
   language: Language;
-  setLanguage: (value: Language) => void;
+  setLanguage: (
+    value: Language
+  ) => void;
 }) {
   return (
     <header className="header">
@@ -1775,7 +2055,10 @@ function Header({
           href="/register"
           className="headerBack"
         >
-          ← {ka ? "უკან" : "Back"}
+          ←{" "}
+          {ka
+            ? "უკან"
+            : "Back"}
         </a>
 
         <div className="languages">
@@ -1787,7 +2070,9 @@ function Header({
                 : ""
             }
             onClick={() =>
-              setLanguage("ka")
+              setLanguage(
+                "ka"
+              )
             }
           >
             GEO
@@ -1801,7 +2086,9 @@ function Header({
                 : ""
             }
             onClick={() =>
-              setLanguage("en")
+              setLanguage(
+                "en"
+              )
             }
           >
             ENG
@@ -1828,8 +2115,12 @@ function Progress({
       <span
         className={[
           "circle",
-          active ? "active" : "",
-          current ? "current" : "",
+          active
+            ? "active"
+            : "",
+          current
+            ? "current"
+            : "",
         ].join(" ")}
       >
         {number}
@@ -1870,10 +2161,6 @@ function StepTitle({
   );
 }
 
-/*
- * FIXED:
- * required prop ახლა სწორადაა აღწერილი.
- */
 function Field({
   label,
   value,
@@ -1884,7 +2171,9 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   type?: string;
   placeholder?: string;
   required?: boolean;
@@ -1893,16 +2182,26 @@ function Field({
     <label className="field">
       <span>
         {label}
-        {required ? " *" : ""}
+        {required
+          ? " *"
+          : ""}
       </span>
 
       <input
         type={type}
         value={value}
-        placeholder={placeholder}
-        required={required}
-        onChange={(event) =>
-          onChange(event.target.value)
+        placeholder={
+          placeholder
+        }
+        required={
+          required
+        }
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event.target.value
+          )
         }
       />
     </label>
@@ -1918,7 +2217,9 @@ function AlwaysVisibleField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   ka: boolean;
   type?: string;
 }) {
@@ -1933,7 +2234,9 @@ function AlwaysVisibleField({
           type={type}
           value={value}
           required
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             onChange(
               event.target.value
             )
@@ -1944,8 +2247,8 @@ function AlwaysVisibleField({
       <div className="alwaysVisibleBadge">
         ✓{" "}
         {ka
-          ? "სავალდებულო • მპოვნელისთვის ხილული"
-          : "Required • Visible to finder"}
+          ? "სავალდებულო • მპოვნელისთვის ყოველთვის ხილული"
+          : "Required • Always visible to finder"}
       </div>
     </div>
   );
@@ -1962,7 +2265,9 @@ function RequiredOptionalVisibilityField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -1984,8 +2289,12 @@ function RequiredOptionalVisibilityField({
         </div>
 
         <VisibilityToggle
-          active={visible}
-          onClick={onToggle}
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
         />
       </div>
 
@@ -1993,7 +2302,9 @@ function RequiredOptionalVisibilityField({
         type={type}
         required
         value={value}
-        onChange={(event) =>
+        onChange={(
+          event
+        ) =>
           onChange(
             event.target.value
           )
@@ -2029,7 +2340,9 @@ function OptionalField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -2051,16 +2364,24 @@ function OptionalField({
         </div>
 
         <VisibilityToggle
-          active={visible}
-          onClick={onToggle}
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
         />
       </div>
 
       <input
         type={type}
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event.target.value
+          )
         }
       />
 
@@ -2089,7 +2410,9 @@ function OptionalSelect({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   options: {
@@ -2114,27 +2437,40 @@ function OptionalSelect({
         </div>
 
         <VisibilityToggle
-          active={visible}
-          onClick={onToggle}
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
         />
       </div>
 
       <select
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event.target.value
+          )
         }
       >
-        {options.map((option) => (
-          <option
-            key={
-              option.value || "empty"
-            }
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
+        {options.map(
+          (option) => (
+            <option
+              key={
+                option.value ||
+                "empty"
+              }
+              value={
+                option.value
+              }
+            >
+              {option.label}
+            </option>
+          )
+        )}
       </select>
 
       <small>
@@ -2161,7 +2497,9 @@ function OptionalTextArea({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -2182,15 +2520,23 @@ function OptionalTextArea({
         </div>
 
         <VisibilityToggle
-          active={visible}
-          onClick={onToggle}
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
         />
       </div>
 
       <textarea
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event.target.value
+          )
         }
       />
 
@@ -2218,7 +2564,9 @@ function PhotoField({
 }: {
   label: string;
   file: File | null;
-  setFile: (file: File | null) => void;
+  setFile: (
+    file: File | null
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -2239,8 +2587,12 @@ function PhotoField({
         </div>
 
         <VisibilityToggle
-          active={visible}
-          onClick={onToggle}
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
         />
       </div>
 
@@ -2248,16 +2600,21 @@ function PhotoField({
         <input
           type="file"
           accept="image/*"
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             setFile(
-              event.target.files?.[0] ||
+              event.target
+                .files?.[0] ||
                 null
             )
           }
         />
 
         <b>
-          {file ? "✓" : "+"}
+          {file
+            ? "✓"
+            : "+"}
         </b>
 
         <div>
@@ -2310,8 +2667,12 @@ function ContactMethod({
           ? "contactMethod active"
           : "contactMethod"
       }
-      onClick={onClick}
-      aria-pressed={active}
+      onClick={
+        onClick
+      }
+      aria-pressed={
+        active
+      }
     >
       <span className="contactIcon">
         {icon}
@@ -2328,7 +2689,9 @@ function ContactMethod({
             : "check"
         }
       >
-        {active ? "✓" : ""}
+        {active
+          ? "✓"
+          : ""}
       </span>
     </button>
   );
@@ -2349,8 +2712,12 @@ function VisibilityToggle({
           ? "switch active"
           : "switch"
       }
-      onClick={onClick}
-      aria-pressed={active}
+      onClick={
+        onClick
+      }
+      aria-pressed={
+        active
+      }
     >
       <span />
     </button>
@@ -2405,7 +2772,8 @@ function Styles() {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid #e8ecf1;
+        border-bottom:
+          1px solid #e8ecf1;
       }
 
       .brand {
@@ -2436,7 +2804,7 @@ function Styles() {
       .brand small {
         display: block;
         color: #98a2b3;
-        font-size: 7px;
+        font-size: 8px;
         letter-spacing: 2px;
       }
 
@@ -2449,7 +2817,7 @@ function Styles() {
       .headerBack {
         color: #475467;
         text-decoration: none;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 700;
       }
 
@@ -2466,7 +2834,7 @@ function Styles() {
         border-radius: 7px;
         background: transparent;
         color: #7d8795;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 900;
         cursor: pointer;
       }
@@ -2501,7 +2869,7 @@ function Styles() {
 
       .eyebrow {
         color: #1465e8;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 900;
         letter-spacing: 2px;
       }
@@ -2514,23 +2882,24 @@ function Styles() {
       .intro p {
         margin: 0;
         color: #667085;
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .privacyNotice {
         margin-top: 24px;
-        padding: 17px;
+        padding: 18px;
         display: flex;
         gap: 12px;
-        border: 1px solid #d9e6fb;
+        border:
+          1px solid #d9e6fb;
         border-radius: 15px;
         background: #f2f7ff;
       }
 
       .privacyIcon {
-        width: 35px;
-        height: 35px;
-        flex: 0 0 35px;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
         display: grid;
         place-items: center;
         border-radius: 10px;
@@ -2539,33 +2908,33 @@ function Styles() {
 
       .privacyNotice strong {
         color: #344054;
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .privacyNotice p {
-        margin: 5px 0 0;
+        margin: 7px 0 0;
         color: #667085;
-        font-size: 10px;
-        line-height: 1.55;
+        font-size: 13px;
+        line-height: 1.6;
       }
 
       .importantNotice {
         margin-bottom: 18px;
-        padding: 15px;
+        padding: 16px;
         border-radius: 13px;
         background: #f2f7ff;
       }
 
       .importantNotice strong {
         color: #1465e8;
-        font-size: 11px;
+        font-size: 14px;
       }
 
       .importantNotice p {
-        margin: 5px 0 0;
+        margin: 6px 0 0;
         color: #667085;
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 13px;
+        line-height: 1.55;
       }
 
       .progress {
@@ -2585,11 +2954,12 @@ function Styles() {
         margin: auto;
         display: grid;
         place-items: center;
-        border: 1px solid #d4dae2;
+        border:
+          1px solid #d4dae2;
         border-radius: 50%;
         background: white;
         color: #98a2b3;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 900;
       }
 
@@ -2607,7 +2977,7 @@ function Styles() {
         display: block;
         margin-top: 6px;
         color: #7b8492;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 800;
       }
 
@@ -2624,7 +2994,8 @@ function Styles() {
 
       .card {
         padding: 28px;
-        border: 1px solid #e2e7ed;
+        border:
+          1px solid #e2e7ed;
         border-radius: 23px;
         background: white;
       }
@@ -2637,7 +3008,7 @@ function Styles() {
 
       .stepTitle > b {
         color: #1465e8;
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .stepTitle h2 {
@@ -2648,14 +3019,17 @@ function Styles() {
       .stepTitle p {
         margin: 6px 0 0;
         color: #7b8492;
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
       .grid2 {
         display: grid;
         grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
         gap: 14px;
       }
 
@@ -2663,7 +3037,7 @@ function Styles() {
       .visibilityField,
       .requiredVisibleField {
         display: block;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
       }
 
       .field > span,
@@ -2671,13 +3045,13 @@ function Styles() {
       .visibilityHeader strong {
         display: block;
         color: #344054;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 800;
       }
 
       .field > span,
       .requiredVisibleField label > span {
-        margin-bottom: 7px;
+        margin-bottom: 8px;
       }
 
       .field input,
@@ -2686,7 +3060,8 @@ function Styles() {
       .visibilityField select,
       .visibilityField textarea {
         width: 100%;
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
         border-radius: 12px;
         background: white;
         outline: none;
@@ -2706,51 +3081,68 @@ function Styles() {
         resize: vertical;
       }
 
+      /*
+       * სავალდებულო / ყოველთვის ხილული ტექსტი
+       * უფრო დიდი
+       */
       .alwaysVisibleBadge {
-        margin-top: 6px;
+        margin-top: 8px;
         color: #16803b;
-        font-size: 9px;
+        font-size: 14px;
+        line-height: 1.5;
         font-weight: 800;
       }
 
       .visibilityHeader {
-        margin-bottom: 8px;
+        margin-bottom: 9px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
       }
 
+      /*
+       * ნებაყოფლობითი ტექსტი
+       * უფრო დიდი
+       */
+      .optionalLabel,
+      .requiredFillLabel {
+        display: block;
+        margin-top: 5px;
+        color: #667085;
+        font-size: 14px;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
+      .requiredFillLabel {
+        color: #475467;
+      }
+
+      /*
+       * ON/OFF განმარტება
+       */
       .visibilityField > small,
       .visibilityStatus {
         display: block;
-        margin-top: 6px;
-        color: #98a2b3;
-        font-size: 10px;
+        margin-top: 8px;
+        color: #667085;
+        font-size: 13px;
+        line-height: 1.45;
       }
 
       .visibilityField > small b,
       .visibilityStatus b {
         color: #1465e8;
-      }
-
-      .optionalLabel,
-      .requiredFillLabel {
-        display: block;
-        margin-top: 3px;
-        color: #98a2b3;
-        font-size: 9px;
-        font-weight: 500;
-      }
-
-      .requiredFillLabel {
-        color: #667085;
+        font-size: 13px;
+        font-weight: 900;
       }
 
       .photoBox {
-        margin-bottom: 16px;
-        padding: 15px;
-        border: 1px dashed #c7ced8;
+        margin-bottom: 18px;
+        padding: 16px;
+        border:
+          1px dashed #c7ced8;
         border-radius: 14px;
         background: #fafbfc;
       }
@@ -2784,25 +3176,26 @@ function Styles() {
       }
 
       .photo strong {
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .photo small {
         margin-top: 4px;
         color: #8a94a3;
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .optionalButton {
         width: 100%;
         min-height: 50px;
         padding: 0 14px;
-        border: 1px solid #e0e5eb;
+        border:
+          1px solid #e0e5eb;
         border-radius: 12px;
         background: #f8fafc;
         color: #344054;
         text-align: left;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 800;
         cursor: pointer;
       }
@@ -2817,19 +3210,21 @@ function Styles() {
       .contactBox {
         margin: 20px 0;
         padding: 18px;
-        border: 1px solid #e0e5eb;
+        border:
+          1px solid #e0e5eb;
         border-radius: 15px;
         background: #f8fafc;
       }
 
       .contactBox > strong {
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .contactBox > p {
-        margin: 5px 0 12px;
+        margin: 6px 0 12px;
         color: #7b8492;
-        font-size: 10px;
+        font-size: 13px;
+        line-height: 1.5;
       }
 
       .contactMethod {
@@ -2840,7 +3235,8 @@ function Styles() {
         display: flex;
         align-items: center;
         gap: 12px;
-        border: 1px solid #dce2e9;
+        border:
+          1px solid #dce2e9;
         border-radius: 12px;
         background: white;
         cursor: pointer;
@@ -2864,7 +3260,7 @@ function Styles() {
         flex: 1;
         text-align: left;
         color: #344054;
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .check {
@@ -2872,7 +3268,8 @@ function Styles() {
         height: 23px;
         display: grid;
         place-items: center;
-        border: 1px solid #cdd4dd;
+        border:
+          1px solid #cdd4dd;
         border-radius: 7px;
         color: white;
       }
@@ -2907,7 +3304,8 @@ function Styles() {
       }
 
       .switch.active span {
-        transform: translateX(21px);
+        transform:
+          translateX(21px);
       }
 
       .locationCard {
@@ -2917,19 +3315,20 @@ function Styles() {
         align-items: center;
         justify-content: space-between;
         gap: 18px;
-        border: 1px solid #e0e5eb;
+        border:
+          1px solid #e0e5eb;
         border-radius: 14px;
         background: #f9fafb;
       }
 
       .locationCard strong {
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .locationCard p {
-        margin: 5px 0 0;
+        margin: 6px 0 0;
         color: #7b8492;
-        font-size: 10px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
@@ -2944,7 +3343,7 @@ function Styles() {
         min-height: 52px;
         padding: 0 20px;
         border-radius: 12px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 900;
         cursor: pointer;
       }
@@ -2962,7 +3361,8 @@ function Styles() {
       }
 
       .backButton {
-        border: 1px solid #d5dae1;
+        border:
+          1px solid #d5dae1;
         background: white;
         color: #475467;
       }
@@ -2973,11 +3373,12 @@ function Styles() {
 
       .error {
         margin-top: 17px;
-        padding: 13px;
+        padding: 14px;
         border-radius: 11px;
         background: #fff1f1;
         color: #b42318;
-        font-size: 11px;
+        font-size: 13px;
+        line-height: 1.5;
         font-weight: 700;
       }
 
@@ -2992,7 +3393,8 @@ function Styles() {
       .successIcon {
         width: 68px;
         height: 68px;
-        margin: 0 auto 22px;
+        margin:
+          0 auto 22px;
         display: grid;
         place-items: center;
         border-radius: 50%;
@@ -3009,7 +3411,9 @@ function Styles() {
         text-decoration: none;
       }
 
-      @media (max-width: 600px) {
+      @media (
+        max-width: 600px
+      ) {
         .headerBack {
           display: none;
         }
@@ -3023,12 +3427,14 @@ function Styles() {
         }
 
         .grid2 {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr;
           gap: 0;
         }
 
         .card {
-          padding: 20px 14px;
+          padding:
+            20px 14px;
         }
 
         .field input,
@@ -3039,9 +3445,16 @@ function Styles() {
           font-size: 16px;
         }
 
+        .alwaysVisibleBadge,
+        .optionalLabel,
+        .requiredFillLabel {
+          font-size: 13px;
+        }
+
         .buttons {
           display: grid;
-          grid-template-columns: 1fr 1.3fr;
+          grid-template-columns:
+            1fr 1.3fr;
         }
 
         .mainButton,
