@@ -299,13 +299,6 @@ export default function RegistrationPage() {
     setError("");
 
     try {
-      const ownerName = [
-        form.owner_first_name.trim(),
-        form.owner_last_name.trim(),
-      ]
-        .filter(Boolean)
-        .join(" ");
-
       const payload = {
         tag_code:
           form.tag_code.trim(),
@@ -370,9 +363,6 @@ export default function RegistrationPage() {
 
         description:
           form.description.trim() || null,
-
-        owner_name:
-          ownerName,
 
         owner_phone:
           form.owner_phone.trim(),
@@ -546,9 +536,7 @@ export default function RegistrationPage() {
           <ProgressItem
             number="2"
             label={
-              ka
-                ? "მფლობელი"
-                : "Owner"
+              ka ? "მფლობელი" : "Owner"
             }
             active={step >= 2}
             current={step === 2}
@@ -565,9 +553,7 @@ export default function RegistrationPage() {
           <ProgressItem
             number="3"
             label={
-              ka
-                ? "დასრულება"
-                : "Finish"
+              ka ? "დასრულება" : "Finish"
             }
             active={step >= 3}
             current={step === 3}
@@ -788,9 +774,7 @@ export default function RegistrationPage() {
                               : "Weight"
                           }
                           type="number"
-                          value={
-                            form.weight
-                          }
+                          value={form.weight}
                           onChange={(value) =>
                             updateField(
                               "weight",
@@ -816,11 +800,6 @@ export default function RegistrationPage() {
                             value
                           )
                         }
-                        placeholder={
-                          ka
-                            ? "მაგ. ალერგია, მედიკამენტები ან სხვა მნიშვნელოვანი სამედიცინო ინფორმაცია."
-                            : "Example: Allergies, medication or other important medical information."
-                        }
                       />
                     </>
                   ) : (
@@ -832,9 +811,7 @@ export default function RegistrationPage() {
                               ? "მოდელი"
                               : "Model"
                           }
-                          value={
-                            form.model
-                          }
+                          value={form.model}
                           onChange={(value) =>
                             updateField(
                               "model",
@@ -849,9 +826,7 @@ export default function RegistrationPage() {
                               ? "ზომა"
                               : "Size"
                           }
-                          value={
-                            form.size
-                          }
+                          value={form.size}
                           onChange={(value) =>
                             updateField(
                               "size",
@@ -867,9 +842,7 @@ export default function RegistrationPage() {
                             ? "მასალა"
                             : "Material"
                         }
-                        value={
-                          form.material
-                        }
+                        value={form.material}
                         onChange={(value) =>
                           updateField(
                             "material",
@@ -893,11 +866,6 @@ export default function RegistrationPage() {
                             value
                           )
                         }
-                        placeholder={
-                          ka
-                            ? "აღწერეთ ისეთი ნიშნები, რომლებიც ნივთის ამოცნობას გაამარტივებს."
-                            : "Describe details that make the item easier to identify."
-                        }
                       />
                     </>
                   )}
@@ -908,9 +876,7 @@ export default function RegistrationPage() {
                         ? "დამატებითი აღწერა"
                         : "Additional description"
                     }
-                    value={
-                      form.description
-                    }
+                    value={form.description}
                     onChange={(value) =>
                       updateField(
                         "description",
@@ -1003,9 +969,7 @@ export default function RegistrationPage() {
                     : "Email"
                 }
                 type="email"
-                value={
-                  form.owner_email
-                }
+                value={form.owner_email}
                 onChange={(value) =>
                   updateField(
                     "owner_email",
@@ -1023,9 +987,7 @@ export default function RegistrationPage() {
                     : "Phone number"
                 }
                 type="tel"
-                value={
-                  form.owner_phone
-                }
+                value={form.owner_phone}
                 onChange={(value) =>
                   updateField(
                     "owner_phone",
@@ -1232,9 +1194,7 @@ export default function RegistrationPage() {
                       : "Finder reward — optional"
                   }
                   type="number"
-                  value={
-                    form.reward
-                  }
+                  value={form.reward}
                   onChange={(value) =>
                     updateField(
                       "reward",
@@ -1375,10 +1335,7 @@ function Header({
 }) {
   return (
     <header className="header">
-      <a
-        href="/"
-        className="brand"
-      >
+      <a href="/" className="brand">
         <div className="brandMark">
           QR
         </div>
@@ -1495,9 +1452,7 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
   required?: boolean;
@@ -1515,9 +1470,7 @@ function Field({
         placeholder={placeholder}
         required={required}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       />
     </label>
@@ -1532,9 +1485,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   options: {
     value: string;
     label: string;
@@ -1547,26 +1498,17 @@ function SelectField({
       <select
         value={value}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       >
-        {options.map(
-          (option) => (
-            <option
-              key={
-                option.value ||
-                "empty"
-              }
-              value={
-                option.value
-              }
-            >
-              {option.label}
-            </option>
-          )
-        )}
+        {options.map((option) => (
+          <option
+            key={option.value || "empty"}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
       </select>
     </label>
   );
@@ -1580,9 +1522,7 @@ function TextArea({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
 }) {
   return (
@@ -1593,9 +1533,7 @@ function TextArea({
         value={value}
         placeholder={placeholder}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       />
     </label>
@@ -1773,9 +1711,6 @@ function Styles() {
       .language button.selected {
         background: white;
         color: #1465e8;
-        box-shadow:
-          0 2px 7px
-          rgba(0, 0, 0, 0.06);
       }
 
       .registration {
@@ -1888,9 +1823,6 @@ function Styles() {
         border: 1px solid #e2e7ed;
         border-radius: 24px;
         background: white;
-        box-shadow:
-          0 14px 40px
-          rgba(16, 24, 40, 0.04);
       }
 
       .stepHeader {
@@ -1910,7 +1842,6 @@ function Styles() {
       .stepHeader h2 {
         margin: 0;
         font-size: 23px;
-        letter-spacing: -0.7px;
       }
 
       .stepHeader p {
@@ -2206,7 +2137,6 @@ function Styles() {
         color: #b42318;
         font-size: 12px;
         font-weight: 700;
-        line-height: 1.5;
       }
 
       .successPage {
@@ -2233,7 +2163,6 @@ function Styles() {
       .successPage h1 {
         margin: 12px 0;
         font-size: 38px;
-        letter-spacing: -1.5px;
       }
 
       .successPage > p {
@@ -2282,12 +2211,9 @@ function Styles() {
         font-weight: 900;
       }
 
-      @media (
-        max-width: 600px
-      ) {
+      @media (max-width: 600px) {
         .header {
-          width:
-            calc(100% - 24px);
+          width: calc(100% - 24px);
           min-height: 72px;
         }
 
@@ -2299,7 +2225,7 @@ function Styles() {
           display: none;
         }
 
-        .headerMark {
+        .brandMark {
           width: 40px;
           height: 40px;
         }
@@ -2309,8 +2235,7 @@ function Styles() {
         }
 
         .registration {
-          width:
-            calc(100% - 20px);
+          width: calc(100% - 20px);
           padding-top: 30px;
         }
 
@@ -2343,8 +2268,7 @@ function Styles() {
         }
 
         .twoColumns {
-          grid-template-columns:
-            1fr;
+          grid-template-columns: 1fr;
           gap: 0;
         }
 
