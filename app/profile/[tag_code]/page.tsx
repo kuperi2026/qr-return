@@ -7,32 +7,33 @@ import { supabase } from "@/lib/supabase";
 type ItemProfile = {
   tag_code: string;
   item_type: string;
-  pet_type?: string | null;
-  item_name?: string | null;
-  colour?: string | null;
-  sex?: string | null;
-  date_of_birth?: string | null;
-  weight?: number | null;
-  medical_info?: string | null;
+  pet_type: string | null;
+  item_name: string | null;
+  colour: string | null;
 
-  brand?: string | null;
-  model?: string | null;
-  size?: string | null;
-  material?: string | null;
-  distinctive_features?: string | null;
-  description?: string | null;
+  sex: string | null;
+  date_of_birth: string | null;
+  weight: number | null;
+  medical_info: string | null;
 
-  photo_url?: string | null;
+  brand: string | null;
+  model: string | null;
+  size: string | null;
+  material: string | null;
+  distinctive_features: string | null;
+  description: string | null;
 
-  owner_name?: string | null;
-  owner_phone?: string | null;
-  owner_email?: string | null;
-  owner_photo_url?: string | null;
+  photo_url: string | null;
 
-  finder_message?: string | null;
-  contact_preference?: string | null;
-  location_sharing_enabled?: boolean | null;
-  active?: boolean | null;
+  owner_name: string | null;
+  owner_phone: string | null;
+  owner_email: string | null;
+  owner_photo_url: string | null;
+
+  finder_message: string | null;
+  contact_preference: string | null;
+  location_sharing_enabled: boolean | null;
+  active: boolean | null;
 };
 
 export default function ProfilePage() {
@@ -52,6 +53,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadProfile() {
+      setLoading(true);
+      setError("");
+
       if (!tagCode) {
         setError("QR კოდი ვერ მოიძებნა.");
         setLoading(false);
@@ -59,15 +63,19 @@ export default function ProfilePage() {
       }
 
       try {
+        const decodedTag = decodeURIComponent(tagCode);
+
         const { data, error: fetchError } = await supabase
           .from("item")
           .select("*")
-          .eq("tag_code", decodeURIComponent(tagCode))
+          .eq("tag_code", decodedTag)
           .maybeSingle();
 
         if (fetchError) {
-          console.error(fetchError);
-          setError("პროფილის ჩატვირთვა ვერ მოხერხდა.");
+          console.error("Profile load error:", fetchError);
+          setError(
+            `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
+          );
           setLoading(false);
           return;
         }
@@ -78,9 +86,9 @@ export default function ProfilePage() {
           return;
         }
 
-        setProfile(data);
+        setProfile(data as ItemProfile);
       } catch (err) {
-        console.error(err);
+        console.error("Profile error:", err);
         setError("პროფილის ჩატვირთვა ვერ მოხერხდა.");
       } finally {
         setLoading(false);
@@ -94,7 +102,7 @@ export default function ProfilePage() {
     return (
       <>
         <main className="centerPage">
-          <div className="loadingLogo">QR</div>
+          <div className="logo centerLogo">QR</div>
           <h1>QR RETURN</h1>
           <p>პროფილი იტვირთება...</p>
         </main>
@@ -108,7 +116,7 @@ export default function ProfilePage() {
     return (
       <>
         <main className="centerPage">
-          <div className="loadingLogo">QR</div>
+          <div className="logo centerLogo">QR</div>
 
           <h1>QR RETURN</h1>
 
@@ -116,7 +124,7 @@ export default function ProfilePage() {
             {error || "პროფილი ვერ მოიძებნა."}
           </div>
 
-          <a href="/" className="homeBtn">
+          <a href="/" className="homeButton">
             მთავარ გვერდზე დაბრუნება
           </a>
         </main>
@@ -189,7 +197,7 @@ export default function ProfilePage() {
                       : "status active"
                   }
                 >
-                  <span></span>
+                  <span />
 
                   {profile.active === false
                     ? "არააქტიური"
@@ -231,14 +239,12 @@ export default function ProfilePage() {
                   />
                 )}
 
-                {isPet &&
-                  profile.weight !== null &&
-                  profile.weight !== undefined && (
-                    <Info
-                      label="წონა"
-                      value={`${profile.weight}`}
-                    />
-                  )}
+                {isPet && profile.weight !== null && (
+                  <Info
+                    label="წონა"
+                    value={`${profile.weight}`}
+                  />
+                )}
 
                 {!isPet && profile.brand && (
                   <Info
@@ -285,7 +291,7 @@ export default function ProfilePage() {
 
               {profile.description && (
                 <LongInfo
-                  label="აღწერა"
+                  label="დამატებითი აღწერა"
                   value={profile.description}
                 />
               )}
@@ -380,12 +386,15 @@ export default function ProfilePage() {
                 href={`/profile/${encodeURIComponent(
                   profile.tag_code
                 )}/edit`}
-                className="editBtn"
+                className="editButton"
               >
                 ✏️ პროფილის რედაქტირება
               </a>
 
-              <a href="/" className="secondaryBtn">
+              <a
+                href="/"
+                className="secondaryButton"
+              >
                 მთავარ გვერდზე დაბრუნება
               </a>
             </div>
@@ -432,19 +441,14 @@ function getCategory(type: string) {
   switch (type) {
     case "dog":
       return "ძაღლი";
-
     case "cat":
       return "კატა";
-
     case "key":
       return "გასაღები";
-
     case "wallet":
       return "საფულე";
-
     case "luggage":
       return "ჩანთა / ჩემოდანი";
-
     default:
       return type;
   }
@@ -454,19 +458,14 @@ function getIcon(type: string) {
   switch (type) {
     case "dog":
       return "🐕";
-
     case "cat":
       return "🐈";
-
     case "key":
       return "🔑";
-
     case "wallet":
       return "👛";
-
     case "luggage":
       return "🧳";
-
     default:
       return "📦";
   }
@@ -475,7 +474,6 @@ function getIcon(type: string) {
 function translateSex(sex: string) {
   if (sex === "male") return "მამრობითი";
   if (sex === "female") return "მდედრობითი";
-
   return sex;
 }
 
@@ -536,8 +534,7 @@ function Styles() {
         text-decoration: none;
       }
 
-      .logo,
-      .loadingLogo {
+      .logo {
         width: 44px;
         height: 44px;
         display: grid;
@@ -582,7 +579,6 @@ function Styles() {
         border: 1px solid #e1e6ec;
         border-radius: 24px;
         background: white;
-        box-shadow: 0 15px 50px rgba(16, 24, 40, 0.05);
       }
 
       .hero {
@@ -601,7 +597,6 @@ function Styles() {
 
       .mainPhoto {
         object-fit: cover;
-        border: 1px solid #edf0f3;
       }
 
       .photoPlaceholder {
@@ -621,7 +616,6 @@ function Styles() {
       .heroText h1 {
         margin: 8px 0;
         font-size: 36px;
-        line-height: 1.1;
       }
 
       .category {
@@ -734,7 +728,6 @@ function Styles() {
         color: #344054;
         font-size: 12px;
         line-height: 1.6;
-        white-space: pre-wrap;
       }
 
       .ownerCard {
@@ -808,9 +801,9 @@ function Styles() {
         gap: 10px;
       }
 
-      .editBtn,
-      .secondaryBtn,
-      .homeBtn {
+      .editButton,
+      .secondaryButton,
+      .homeButton {
         min-height: 54px;
         padding: 0 20px;
         display: flex;
@@ -822,12 +815,12 @@ function Styles() {
         text-decoration: none;
       }
 
-      .editBtn {
+      .editButton {
         background: #1465e8;
         color: white;
       }
 
-      .secondaryBtn {
+      .secondaryButton {
         border: 1px solid #d5dae1;
         background: white;
         color: #475467;
@@ -838,21 +831,16 @@ function Styles() {
         max-width: 500px;
         margin: auto;
         padding-top: 130px;
-        color: #101828;
-        font-family: Arial, Helvetica, sans-serif;
         text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
-      .loadingLogo {
+      .centerLogo {
         margin: auto;
       }
 
       .centerPage h1 {
         color: #1465e8;
-      }
-
-      .centerPage p {
-        color: #667085;
       }
 
       .errorBox {
@@ -864,7 +852,7 @@ function Styles() {
         font-size: 12px;
       }
 
-      .homeBtn {
+      .homeButton {
         margin-top: 20px;
         background: #1465e8;
         color: white;
