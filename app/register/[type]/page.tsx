@@ -1,22 +1,77 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useParams } from "next/navigation";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type Language = "ka" | "en";
-type Step = 1 | 2 | 3;
+type Profile = {
+  tag_code: string;
+  item_type: string;
+  item_name: string | null;
+  colour: string | null;
 
-type CategoryKey =
-  | "dog"
-  | "cat"
-  | "keys"
-  | "wallet"
-  | "suitcase"
-  | "bag";
+  sex: string | null;
+  date_of_birth: string | null;
+  weight: number | null;
+  medical_info: string | null;
+
+  brand: string | null;
+  model: string | null;
+  size: string | null;
+  material: string | null;
+  distinctive_features: string | null;
+  description: string | null;
+
+  photo_url: string | null;
+  owner_photo_url: string | null;
+
+  owner_name: string | null;
+  owner_phone: string | null;
+  owner_email: string | null;
+
+  additional_contact_name: string | null;
+  additional_contact_phone: string | null;
+  additional_contact_email: string | null;
+
+  finder_message: string | null;
+  contact_preference: string | null;
+  location_sharing_enabled: boolean | null;
+
+  show_colour: boolean;
+  show_sex: boolean;
+  show_date_of_birth: boolean;
+  show_weight: boolean;
+  show_medical_info: boolean;
+
+  show_brand: boolean;
+  show_model: boolean;
+  show_size: boolean;
+  show_material: boolean;
+  show_distinctive_features: boolean;
+  show_description: boolean;
+
+  show_photo: boolean;
+  show_owner_photo: boolean;
+
+  show_owner_phone: boolean;
+  show_owner_email: boolean;
+
+  show_additional_contact: boolean;
+
+  show_finder_message: boolean;
+  show_lost_seen_location: boolean;
+
+  lost_seen_location: string | null;
+};
 
 type FormState = {
-  tag_code: string;
   item_name: string;
   colour: string;
 
@@ -32,8 +87,7 @@ type FormState = {
   distinctive_features: string;
   description: string;
 
-  owner_first_name: string;
-  owner_last_name: string;
+  owner_name: string;
   owner_phone: string;
   owner_email: string;
 
@@ -42,71 +96,41 @@ type FormState = {
   additional_contact_email: string;
 
   finder_message: string;
-  reward: string;
   lost_seen_location: string;
+
+  contact_preference: string;
+};
+
+type VisibilityState = {
+  show_colour: boolean;
+  show_sex: boolean;
+  show_date_of_birth: boolean;
+  show_weight: boolean;
+  show_medical_info: boolean;
+
+  show_brand: boolean;
+  show_model: boolean;
+  show_size: boolean;
+  show_material: boolean;
+  show_distinctive_features: boolean;
+  show_description: boolean;
+
+  show_photo: boolean;
+  show_owner_photo: boolean;
+
+  show_owner_phone: boolean;
+  show_owner_email: boolean;
+
+  show_additional_contact: boolean;
+
+  show_finder_message: boolean;
+  show_lost_seen_location: boolean;
 };
 
 const BUCKET = "qr-return-images";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
-const categories = {
-  dog: {
-    icon: "🐕",
-    ka: "ძაღლი",
-    en: "Dog",
-    itemType: "dog",
-    petType: "dog",
-    isPet: true,
-  },
-
-  cat: {
-    icon: "🐈",
-    ka: "კატა",
-    en: "Cat",
-    itemType: "cat",
-    petType: "cat",
-    isPet: true,
-  },
-
-  keys: {
-    icon: "🔑",
-    ka: "გასაღები",
-    en: "Keys",
-    itemType: "key",
-    petType: null,
-    isPet: false,
-  },
-
-  wallet: {
-    icon: "👛",
-    ka: "საფულე",
-    en: "Wallet",
-    itemType: "wallet",
-    petType: null,
-    isPet: false,
-  },
-
-  suitcase: {
-    icon: "🧳",
-    ka: "ჩემოდანი",
-    en: "Suitcase",
-    itemType: "suitcase",
-    petType: null,
-    isPet: false,
-  },
-
-  bag: {
-    icon: "🎒",
-    ka: "ჩანთა",
-    en: "Bag",
-    itemType: "bag",
-    petType: null,
-    isPet: false,
-  },
-} as const;
-
-const initialForm: FormState = {
-  tag_code: "",
+const emptyForm: FormState = {
   item_name: "",
   colour: "",
 
@@ -122,8 +146,7 @@ const initialForm: FormState = {
   distinctive_features: "",
   description: "",
 
-  owner_first_name: "",
-  owner_last_name: "",
+  owner_name: "",
   owner_phone: "",
   owner_email: "",
 
@@ -132,13 +155,49 @@ const initialForm: FormState = {
   additional_contact_email: "",
 
   finder_message: "",
-  reward: "",
   lost_seen_location: "",
+
+  contact_preference: "both",
 };
+
+const defaultVisibility: VisibilityState = {
+  show_colour: true,
+  show_sex: true,
+  show_date_of_birth: false,
+  show_weight: false,
+  show_medical_info: false,
+
+  show_brand: true,
+  show_model: true,
+  show_size: false,
+  show_material: false,
+  show_distinctive_features: true,
+  show_description: true,
+
+  show_photo: true,
+  show_owner_photo: false,
+
+  show_owner_phone: true,
+  show_owner_email: false,
+
+  show_additional_contact: false,
+
+  show_finder_message: true,
+  show_lost_seen_location: true,
+};
+
+function cleanTag(tag: string) {
+  return tag
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "-");
+}
 
 function safeExtension(file: File) {
   const extension =
-    file.name.split(".").pop()?.toLowerCase() || "jpg";
+    file.name
+      .split(".")
+      .pop()
+      ?.toLowerCase() || "jpg";
 
   const allowed = [
     "jpg",
@@ -153,12 +212,6 @@ function safeExtension(file: File) {
   return allowed.includes(extension)
     ? extension
     : "jpg";
-}
-
-function cleanTag(tag: string) {
-  return tag
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 async function uploadImage(
@@ -185,9 +238,7 @@ async function uploadImage(
           .slice(2)}`;
 
   const filePath =
-    `${folder}/${cleanTag(
-      tagCode
-    )}-${uniquePart}.${extension}`;
+    `${folder}/${cleanTag(tagCode)}-${uniquePart}.${extension}`;
 
   const { error: uploadError } =
     await supabase.storage
@@ -199,11 +250,6 @@ async function uploadImage(
       });
 
   if (uploadError) {
-    console.error(
-      "Storage upload error:",
-      uploadError
-    );
-
     throw uploadError;
   }
 
@@ -212,71 +258,46 @@ async function uploadImage(
       .from(BUCKET)
       .getPublicUrl(filePath);
 
-  if (!data.publicUrl) {
-    throw new Error("PUBLIC_URL_ERROR");
-  }
-
   return data.publicUrl;
 }
 
-export default function RegistrationPage() {
+export default function EditProfilePage() {
   const params = useParams();
+  const router = useRouter();
 
-  const rawType = Array.isArray(params.type)
-    ? params.type[0]
-    : params.type;
+  const rawTag = params?.tag_code;
 
-  const type: CategoryKey =
-    rawType && rawType in categories
-      ? (rawType as CategoryKey)
-      : "dog";
+  const tagCode =
+    Array.isArray(rawTag)
+      ? rawTag[0]
+      : typeof rawTag === "string"
+      ? rawTag
+      : "";
 
-  const category = categories[type];
-
-  const [language, setLanguage] =
-    useState<Language>("ka");
-
-  const [step, setStep] =
-    useState<Step>(1);
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
 
   const [form, setForm] =
-    useState<FormState>(initialForm);
+    useState<FormState>(emptyForm);
 
-  const [
-    showExtraProfile,
-    setShowExtraProfile,
-  ] = useState(false);
-
-  const [
-    showExtraContact,
-    setShowExtraContact,
-  ] = useState(false);
+  const [visibility, setVisibility] =
+    useState<VisibilityState>(
+      defaultVisibility
+    );
 
   const [
     locationSharingEnabled,
     setLocationSharingEnabled,
   ] = useState(false);
 
-  const [
-    phoneEnabled,
-    setPhoneEnabled,
-  ] = useState(true);
-
-  const [
-    whatsappEnabled,
-    setWhatsappEnabled,
-  ] = useState(false);
-
-  const [
-    liveChatEnabled,
-    setLiveChatEnabled,
-  ] = useState(true);
-
   const [itemPhoto, setItemPhoto] =
     useState<File | null>(null);
 
   const [ownerPhoto, setOwnerPhoto] =
     useState<File | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   const [saving, setSaving] =
     useState(false);
@@ -285,9 +306,183 @@ export default function RegistrationPage() {
     useState("");
 
   const [success, setSuccess] =
-    useState(false);
+    useState("");
 
-  const ka = language === "ka";
+  useEffect(() => {
+    async function loadProfile() {
+      if (!tagCode) {
+        setError("QR კოდი ვერ მოიძებნა.");
+        setLoading(false);
+        return;
+      }
+
+      const decodedTag =
+        decodeURIComponent(tagCode);
+
+      const {
+        data,
+        error: fetchError,
+      } = await supabase
+        .from("item")
+        .select("*")
+        .eq("tag_code", decodedTag)
+        .maybeSingle();
+
+      if (fetchError) {
+        setError(
+          `პროფილის ჩატვირთვა ვერ მოხერხდა: ${fetchError.message}`
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!data) {
+        setError(
+          "ამ QR კოდზე პროფილი არ მოიძებნა."
+        );
+        setLoading(false);
+        return;
+      }
+
+      const current = data as Profile;
+
+      setProfile(current);
+
+      setForm({
+        item_name:
+          current.item_name || "",
+
+        colour:
+          current.colour || "",
+
+        sex:
+          current.sex || "",
+
+        date_of_birth:
+          current.date_of_birth || "",
+
+        weight:
+          current.weight !== null &&
+          current.weight !== undefined
+            ? String(current.weight)
+            : "",
+
+        medical_info:
+          current.medical_info || "",
+
+        brand:
+          current.brand || "",
+
+        model:
+          current.model || "",
+
+        size:
+          current.size || "",
+
+        material:
+          current.material || "",
+
+        distinctive_features:
+          current.distinctive_features || "",
+
+        description:
+          current.description || "",
+
+        owner_name:
+          current.owner_name || "",
+
+        owner_phone:
+          current.owner_phone || "",
+
+        owner_email:
+          current.owner_email || "",
+
+        additional_contact_name:
+          current.additional_contact_name || "",
+
+        additional_contact_phone:
+          current.additional_contact_phone || "",
+
+        additional_contact_email:
+          current.additional_contact_email || "",
+
+        finder_message:
+          current.finder_message || "",
+
+        lost_seen_location:
+          current.lost_seen_location || "",
+
+        contact_preference:
+          current.contact_preference || "both",
+      });
+
+      setVisibility({
+        show_colour:
+          current.show_colour ?? true,
+
+        show_sex:
+          current.show_sex ?? true,
+
+        show_date_of_birth:
+          current.show_date_of_birth ?? false,
+
+        show_weight:
+          current.show_weight ?? false,
+
+        show_medical_info:
+          current.show_medical_info ?? false,
+
+        show_brand:
+          current.show_brand ?? true,
+
+        show_model:
+          current.show_model ?? true,
+
+        show_size:
+          current.show_size ?? false,
+
+        show_material:
+          current.show_material ?? false,
+
+        show_distinctive_features:
+          current.show_distinctive_features ?? true,
+
+        show_description:
+          current.show_description ?? true,
+
+        show_photo:
+          current.show_photo ?? true,
+
+        show_owner_photo:
+          current.show_owner_photo ?? false,
+
+        show_owner_phone:
+          current.show_owner_phone ?? true,
+
+        show_owner_email:
+          current.show_owner_email ?? false,
+
+        show_additional_contact:
+          current.show_additional_contact ?? false,
+
+        show_finder_message:
+          current.show_finder_message ?? true,
+
+        show_lost_seen_location:
+          current.show_lost_seen_location ?? true,
+      });
+
+      setLocationSharingEnabled(
+        Boolean(
+          current.location_sharing_enabled
+        )
+      );
+
+      setLoading(false);
+    }
+
+    loadProfile();
+  }, [tagCode]);
 
   function updateField(
     field: keyof FormState,
@@ -299,11 +494,13 @@ export default function RegistrationPage() {
     }));
   }
 
-  function goTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  function toggleVisibility(
+    field: keyof VisibilityState
+  ) {
+    setVisibility((current) => ({
+      ...current,
+      [field]: !current[field],
+    }));
   }
 
   function validateImage(
@@ -315,138 +512,19 @@ export default function RegistrationPage() {
 
     if (!file.type.startsWith("image/")) {
       setError(
-        ka
-          ? "გთხოვთ, აირჩიოთ მხოლოდ სურათის ფაილი."
-          : "Please select an image file only."
+        "გთხოვთ აირჩიოთ სურათის ფაილი."
       );
-
       return false;
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
       setError(
-        ka
-          ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
-          : "The image must not exceed 5 MB."
+        "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
       );
-
       return false;
     }
 
     return true;
-  }
-
-  function nextStep() {
-    setError("");
-
-    if (step === 1) {
-      if (!form.tag_code.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ QR კოდი."
-            : "Please enter the QR code."
-        );
-
-        return;
-      }
-
-      if (!form.item_name.trim()) {
-        setError(
-          ka
-            ? category.isPet
-              ? "გთხოვთ, მიუთითოთ ცხოველის სახელი."
-              : "გთხოვთ, მიუთითოთ ნივთის დასახელება."
-            : category.isPet
-            ? "Please enter the pet name."
-            : "Please enter the item name."
-        );
-
-        return;
-      }
-
-      if (!validateImage(itemPhoto)) {
-        return;
-      }
-
-      setStep(2);
-      goTop();
-      return;
-    }
-
-    if (step === 2) {
-      if (!form.owner_first_name.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მფლობელის სახელი."
-            : "Please enter the owner's first name."
-        );
-
-        return;
-      }
-
-      if (!form.owner_last_name.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მფლობელის გვარი."
-            : "Please enter the owner's last name."
-        );
-
-        return;
-      }
-
-      if (!form.owner_phone.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ მობილურის ნომერი."
-            : "Please enter the phone number."
-        );
-
-        return;
-      }
-
-      if (!form.owner_email.trim()) {
-        setError(
-          ka
-            ? "გთხოვთ, მიუთითოთ ელფოსტა."
-            : "Please enter an email address."
-        );
-
-        return;
-      }
-
-      if (
-        !phoneEnabled &&
-        !whatsappEnabled &&
-        !liveChatEnabled
-      ) {
-        setError(
-          ka
-            ? "აირჩიეთ დაკავშირების მინიმუმ ერთი მეთოდი."
-            : "Choose at least one contact method."
-        );
-
-        return;
-      }
-
-      if (!validateImage(ownerPhoto)) {
-        return;
-      }
-
-      setStep(3);
-      goTop();
-    }
-  }
-
-  function previousStep() {
-    setError("");
-
-    if (step === 3) {
-      setStep(2);
-    } else {
-      setStep(1);
-    }
-
-    goTop();
   }
 
   async function handleSubmit(
@@ -454,135 +532,73 @@ export default function RegistrationPage() {
   ) {
     event.preventDefault();
 
-    if (step !== 3) {
-      nextStep();
+    if (!profile) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+
+    if (!form.item_name.trim()) {
+      setError(
+        "სახელი ან ნივთის დასახელება სავალდებულოა."
+      );
+      return;
+    }
+
+    if (!form.owner_phone.trim()) {
+      setError(
+        "მფლობელის ტელეფონი სავალდებულოა."
+      );
+      return;
+    }
+
+    if (!form.owner_email.trim()) {
+      setError(
+        "მფლობელის ელფოსტა სავალდებულოა."
+      );
+      return;
+    }
+
+    if (
+      !validateImage(itemPhoto) ||
+      !validateImage(ownerPhoto)
+    ) {
       return;
     }
 
     setSaving(true);
-    setError("");
 
     try {
-      if (
-        !validateImage(itemPhoto) ||
-        !validateImage(ownerPhoto)
-      ) {
-        return;
-      }
+      let photoUrl =
+        profile.photo_url;
 
-      let photoUrl: string | null = null;
-
-      let ownerPhotoUrl: string | null =
-        null;
+      let ownerPhotoUrl =
+        profile.owner_photo_url;
 
       if (itemPhoto) {
-        try {
-          photoUrl =
-            await uploadImage(
-              itemPhoto,
-              "items",
-              form.tag_code
-            );
-        } catch (uploadError) {
-          console.error(uploadError);
-
-          const message =
-            uploadError instanceof Error
-              ? uploadError.message
-              : "";
-
-          if (
-            message === "IMAGE_TOO_LARGE"
-          ) {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფოტო 5 MB-ზე დიდია."
-                : "The pet/item image is larger than 5 MB."
-            );
-          } else if (
-            message === "INVALID_IMAGE_TYPE"
-          ) {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფაილი სურათი უნდა იყოს."
-                : "The pet/item file must be an image."
-            );
-          } else {
-            setError(
-              ka
-                ? "ცხოველის/ნივთის ფოტოს ატვირთვა ვერ მოხერხდა."
-                : "The pet/item image could not be uploaded."
-            );
-          }
-
-          return;
-        }
+        photoUrl =
+          await uploadImage(
+            itemPhoto,
+            "items",
+            profile.tag_code
+          );
       }
 
       if (ownerPhoto) {
-        try {
-          ownerPhotoUrl =
-            await uploadImage(
-              ownerPhoto,
-              "owners",
-              form.tag_code
-            );
-        } catch (uploadError) {
-          console.error(uploadError);
-
-          const message =
-            uploadError instanceof Error
-              ? uploadError.message
-              : "";
-
-          if (
-            message === "IMAGE_TOO_LARGE"
-          ) {
-            setError(
-              ka
-                ? "მფლობელის ფოტო 5 MB-ზე დიდია."
-                : "The owner image is larger than 5 MB."
-            );
-          } else if (
-            message === "INVALID_IMAGE_TYPE"
-          ) {
-            setError(
-              ka
-                ? "მფლობელის ფაილი სურათი უნდა იყოს."
-                : "The owner file must be an image."
-            );
-          } else {
-            setError(
-              ka
-                ? "მფლობელის ფოტოს ატვირთვა ვერ მოხერხდა."
-                : "The owner image could not be uploaded."
-            );
-          }
-
-          return;
-        }
+        ownerPhotoUrl =
+          await uploadImage(
+            ownerPhoto,
+            "owners",
+            profile.tag_code
+          );
       }
 
-      const ownerName = [
-        form.owner_first_name.trim(),
-        form.owner_last_name.trim(),
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      const finderMessage =
-        form.finder_message.trim();
+      const isPet =
+        profile.item_type === "dog" ||
+        profile.item_type === "cat";
 
       const payload = {
-        tag_code:
-          form.tag_code.trim(),
-
-        item_type:
-          category.itemType,
-
-        pet_type:
-          category.petType,
-
         item_name:
           form.item_name.trim(),
 
@@ -590,51 +606,49 @@ export default function RegistrationPage() {
           form.colour.trim() || null,
 
         sex:
-          category.isPet
+          isPet
             ? form.sex || null
             : null,
 
         date_of_birth:
-          category.isPet
+          isPet
             ? form.date_of_birth || null
             : null,
 
         weight:
-          category.isPet &&
+          isPet &&
           form.weight.trim()
             ? Number(form.weight)
             : null,
 
         medical_info:
-          category.isPet
-            ? form.medical_info.trim() ||
-              null
+          isPet
+            ? form.medical_info.trim() || null
             : null,
 
         brand:
-          !category.isPet
+          !isPet
             ? form.brand.trim() || null
             : null,
 
         model:
-          !category.isPet
+          !isPet
             ? form.model.trim() || null
             : null,
 
         size:
-          !category.isPet
+          !isPet
             ? form.size.trim() || null
             : null,
 
         material:
-          !category.isPet
+          !isPet
             ? form.material.trim() || null
             : null,
 
         distinctive_features:
-          !category.isPet
-            ? form.distinctive_features.trim() ||
-              null
+          !isPet
+            ? form.distinctive_features.trim() || null
             : null,
 
         description:
@@ -647,7 +661,7 @@ export default function RegistrationPage() {
           ownerPhotoUrl,
 
         owner_name:
-          ownerName,
+          form.owner_name.trim() || null,
 
         owner_phone:
           form.owner_phone.trim(),
@@ -656,1103 +670,747 @@ export default function RegistrationPage() {
           form.owner_email.trim(),
 
         additional_contact_name:
-          form.additional_contact_name.trim() ||
-          null,
+          form.additional_contact_name.trim() || null,
 
         additional_contact_phone:
-          form.additional_contact_phone.trim() ||
-          null,
+          form.additional_contact_phone.trim() || null,
 
         additional_contact_email:
-          form.additional_contact_email.trim() ||
-          null,
+          form.additional_contact_email.trim() || null,
 
         finder_message:
-          finderMessage || null,
+          form.finder_message.trim() || null,
 
-        /*
-         * Legacy field.
-         * ახალი სისტემა რეალურად ქვემოთ მოცემულ
-         * სამ boolean ველს იყენებს.
-         */
+        lost_seen_location:
+          form.lost_seen_location.trim() || null,
+
         contact_preference:
-          "both",
-
-        phone_enabled:
-          phoneEnabled,
-
-        whatsapp_enabled:
-          whatsappEnabled,
-
-        live_chat_enabled:
-          liveChatEnabled,
+          form.contact_preference,
 
         location_sharing_enabled:
           locationSharingEnabled,
 
-        owner_message_enabled:
-          finderMessage.length > 0,
-
-        lost_seen_location:
-          form.lost_seen_location.trim() ||
-          null,
-
-        active: true,
+        ...visibility,
       };
 
-      const { error: saveError } =
-        await supabase
-          .from("item")
-          .insert(payload);
+      const {
+        error: updateError,
+      } = await supabase
+        .from("item")
+        .update(payload)
+        .eq("tag_code", profile.tag_code);
 
-      if (saveError) {
-        console.error(
-          "Supabase save error:",
-          saveError
-        );
-
+      if (updateError) {
         setError(
-          ka
-            ? `შენახვა ვერ მოხერხდა: ${saveError.message}`
-            : `Save failed: ${saveError.message}`
+          `ცვლილებების შენახვა ვერ მოხერხდა: ${updateError.message}`
         );
-
+        setSaving(false);
         return;
       }
 
-      setSuccess(true);
-      goTop();
-    } catch (err) {
-      console.error(
-        "Registration error:",
-        err
+      setSuccess(
+        "ცვლილებები წარმატებით შეინახა."
       );
 
+      setTimeout(() => {
+        router.push(
+          `/profile/${encodeURIComponent(
+            profile.tag_code
+          )}`
+        );
+      }, 800);
+    } catch (err) {
+      console.error(err);
+
       setError(
-        ka
-          ? "ინფორმაციის შენახვისას დაფიქსირდა შეცდომა."
-          : "An error occurred while saving the information."
+        "ცვლილებების შენახვისას დაფიქსირდა შეცდომა."
       );
     } finally {
       setSaving(false);
     }
   }
 
-  if (success) {
+  if (loading) {
     return (
-      <main className="page">
-        <Header
-          ka={ka}
-          language={language}
-          setLanguage={setLanguage}
-        />
-
-        <section className="successPage">
-          <div className="successIcon">
-            ✓
-          </div>
-
-          <div className="eyebrow">
-            QR RETURN
-          </div>
-
+      <>
+        <main className="center">
           <h1>
-            {ka
-              ? "პროფილი წარმატებით შეიქმნა"
-              : "Profile created successfully"}
+            QR RETURN
           </h1>
 
           <p>
-            {ka
-              ? "ინფორმაცია და არჩეული ფოტოები წარმატებით შეინახა."
-              : "Your information and selected images have been saved successfully."}
+            პროფილი იტვირთება...
           </p>
+        </main>
 
-          <div className="successInfo">
+        <Styles />
+      </>
+    );
+  }
+
+  if (
+    error &&
+    !profile
+  ) {
+    return (
+      <>
+        <main className="center">
+          <h1>
+            QR RETURN
+          </h1>
+
+          <div className="error">
+            {error}
+          </div>
+        </main>
+
+        <Styles />
+      </>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
+  const isPet =
+    profile.item_type === "dog" ||
+    profile.item_type === "cat";
+
+  return (
+    <>
+      <main className="page">
+        <header className="header">
+          <a
+            href="/"
+            className="brand"
+          >
+            <div className="logo">
+              QR
+            </div>
+
+            <div>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <small>
+                EDIT PROFILE
+              </small>
+            </div>
+          </a>
+
+          <a
+            href={`/profile/${encodeURIComponent(
+              profile.tag_code
+            )}`}
+            className="back"
+          >
+            ← პროფილზე დაბრუნება
+          </a>
+        </header>
+
+        <section className="content">
+          <div className="intro">
+            <div>
+              <div className="eyebrow">
+                QR RETURN
+              </div>
+
+              <h1>
+                პროფილის რედაქტირება
+              </h1>
+
+              <p>
+                შეგიძლია დაამატო ის ინფორმაციაც,
+                რომელიც რეგისტრაციის დროს არ შეგივსია.
+              </p>
+            </div>
+          </div>
+
+          <div className="locked">
+            QR კოდი:{" "}
             <strong>
-              {category.icon}{" "}
-              {ka
-                ? category.ka
-                : category.en}
+              {profile.tag_code}
             </strong>
 
             <span>
-              {ka
-                ? "კატეგორია უცვლელი დარჩება. პროფილის სხვა მონაცემების რედაქტირებას მომავალშიც შეძლებთ."
-                : "The category will remain fixed. Other profile information can still be edited later."}
+              კატეგორია და QR კოდი უცვლელია.
             </span>
           </div>
 
-          <a
-            href="/"
-            className="homeButton"
+          <form
+            className="card"
+            onSubmit={handleSubmit}
           >
-            {ka
-              ? "მთავარ გვერდზე დაბრუნება"
-              : "Return to home"}
-          </a>
+            <SectionTitle
+              number="01"
+              title={
+                isPet
+                  ? "ცხოველის სრული ინფორმაცია"
+                  : "ნივთის სრული ინფორმაცია"
+              }
+              text="შეავსე ან შეცვალე ნებისმიერი ინფორმაცია."
+            />
+
+            <Field
+              label={
+                isPet
+                  ? "სახელი *"
+                  : "ნივთის დასახელება *"
+              }
+              value={form.item_name}
+              onChange={(value) =>
+                updateField(
+                  "item_name",
+                  value
+                )
+              }
+            />
+
+            <OptionalField
+              label="ფერი"
+              value={form.colour}
+              onChange={(value) =>
+                updateField(
+                  "colour",
+                  value
+                )
+              }
+              visible={
+                visibility.show_colour
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_colour"
+                )
+              }
+            />
+
+            <PhotoEditor
+              title={
+                isPet
+                  ? "ცხოველის ფოტო"
+                  : "ნივთის ფოტო"
+              }
+              currentUrl={
+                profile.photo_url
+              }
+              file={itemPhoto}
+              setFile={setItemPhoto}
+              visible={
+                visibility.show_photo
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_photo"
+                )
+              }
+            />
+
+            {isPet ? (
+              <>
+                <OptionalSelect
+                  label="სქესი"
+                  value={form.sex}
+                  onChange={(value) =>
+                    updateField(
+                      "sex",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_sex
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_sex"
+                    )
+                  }
+                  options={[
+                    {
+                      value: "",
+                      label: "აირჩიე",
+                    },
+                    {
+                      value: "male",
+                      label: "მამრობითი",
+                    },
+                    {
+                      value: "female",
+                      label: "მდედრობითი",
+                    },
+                  ]}
+                />
+
+                <OptionalField
+                  label="დაბადების თარიღი"
+                  type="date"
+                  value={
+                    form.date_of_birth
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "date_of_birth",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_date_of_birth
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_date_of_birth"
+                    )
+                  }
+                />
+
+                <OptionalField
+                  label="წონა"
+                  type="number"
+                  value={form.weight}
+                  onChange={(value) =>
+                    updateField(
+                      "weight",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_weight
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_weight"
+                    )
+                  }
+                />
+
+                <OptionalTextArea
+                  label="სამედიცინო ინფორმაცია"
+                  value={
+                    form.medical_info
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "medical_info",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_medical_info
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_medical_info"
+                    )
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <OptionalField
+                  label="ბრენდი"
+                  value={form.brand}
+                  onChange={(value) =>
+                    updateField(
+                      "brand",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_brand
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_brand"
+                    )
+                  }
+                />
+
+                <OptionalField
+                  label="მოდელი"
+                  value={form.model}
+                  onChange={(value) =>
+                    updateField(
+                      "model",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_model
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_model"
+                    )
+                  }
+                />
+
+                <OptionalField
+                  label="ზომა"
+                  value={form.size}
+                  onChange={(value) =>
+                    updateField(
+                      "size",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_size
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_size"
+                    )
+                  }
+                />
+
+                <OptionalField
+                  label="მასალა"
+                  value={form.material}
+                  onChange={(value) =>
+                    updateField(
+                      "material",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_material
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_material"
+                    )
+                  }
+                />
+
+                <OptionalTextArea
+                  label="განმასხვავებელი ნიშნები"
+                  value={
+                    form.distinctive_features
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "distinctive_features",
+                      value
+                    )
+                  }
+                  visible={
+                    visibility.show_distinctive_features
+                  }
+                  onToggle={() =>
+                    toggleVisibility(
+                      "show_distinctive_features"
+                    )
+                  }
+                />
+              </>
+            )}
+
+            <OptionalTextArea
+              label="დამატებითი აღწერა"
+              value={form.description}
+              onChange={(value) =>
+                updateField(
+                  "description",
+                  value
+                )
+              }
+              visible={
+                visibility.show_description
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_description"
+                )
+              }
+            />
+
+            <div className="divider" />
+
+            <SectionTitle
+              number="02"
+              title="მფლობელის ინფორმაცია"
+              text="სავალდებულო მონაცემები და კონფიდენციალურობის კონტროლი."
+            />
+
+            <Field
+              label="სახელი და გვარი"
+              value={form.owner_name}
+              onChange={(value) =>
+                updateField(
+                  "owner_name",
+                  value
+                )
+              }
+            />
+
+            <RequiredVisibilityField
+              label="ტელეფონი *"
+              type="tel"
+              value={form.owner_phone}
+              onChange={(value) =>
+                updateField(
+                  "owner_phone",
+                  value
+                )
+              }
+              visible={
+                visibility.show_owner_phone
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_owner_phone"
+                )
+              }
+            />
+
+            <RequiredVisibilityField
+              label="ელფოსტა *"
+              type="email"
+              value={form.owner_email}
+              onChange={(value) =>
+                updateField(
+                  "owner_email",
+                  value
+                )
+              }
+              visible={
+                visibility.show_owner_email
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_owner_email"
+                )
+              }
+            />
+
+            <PhotoEditor
+              title="მფლობელის ფოტო"
+              currentUrl={
+                profile.owner_photo_url
+              }
+              file={ownerPhoto}
+              setFile={setOwnerPhoto}
+              visible={
+                visibility.show_owner_photo
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_owner_photo"
+                )
+              }
+            />
+
+            <SelectField
+              label="დაკავშირების მეთოდი"
+              value={
+                form.contact_preference
+              }
+              onChange={(value) =>
+                updateField(
+                  "contact_preference",
+                  value
+                )
+              }
+              options={[
+                {
+                  value: "both",
+                  label:
+                    "Live Chat და ტელეფონი",
+                },
+                {
+                  value: "chat",
+                  label: "Live Chat",
+                },
+                {
+                  value: "phone",
+                  label: "ტელეფონი",
+                },
+              ]}
+            />
+
+            <div className="optionalGroup">
+              <div className="optionalHeader">
+                <div>
+                  <strong>
+                    დამატებითი საკონტაქტო პირი
+                  </strong>
+
+                  <p>
+                    მაგალითად ოჯახის წევრი ან მეგობარი.
+                  </p>
+                </div>
+
+                <VisibilityToggle
+                  active={
+                    visibility.show_additional_contact
+                  }
+                  onClick={() =>
+                    toggleVisibility(
+                      "show_additional_contact"
+                    )
+                  }
+                />
+              </div>
+
+              <Field
+                label="სახელი და გვარი"
+                value={
+                  form.additional_contact_name
+                }
+                onChange={(value) =>
+                  updateField(
+                    "additional_contact_name",
+                    value
+                  )
+                }
+              />
+
+              <Field
+                label="ტელეფონი"
+                type="tel"
+                value={
+                  form.additional_contact_phone
+                }
+                onChange={(value) =>
+                  updateField(
+                    "additional_contact_phone",
+                    value
+                  )
+                }
+              />
+
+              <Field
+                label="ელფოსტა"
+                type="email"
+                value={
+                  form.additional_contact_email
+                }
+                onChange={(value) =>
+                  updateField(
+                    "additional_contact_email",
+                    value
+                  )
+                }
+              />
+            </div>
+
+            <div className="divider" />
+
+            <SectionTitle
+              number="03"
+              title="ინფორმაცია მპოვნელისთვის"
+              text="შენ თვითონ აკონტროლებ რას ნახავს მპოვნელი."
+            />
+
+            <OptionalTextArea
+              label="შეტყობინება მპოვნელისთვის"
+              value={
+                form.finder_message
+              }
+              onChange={(value) =>
+                updateField(
+                  "finder_message",
+                  value
+                )
+              }
+              visible={
+                visibility.show_finder_message
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_finder_message"
+                )
+              }
+            />
+
+            <OptionalField
+              label="ბოლო ნანახი ადგილი"
+              value={
+                form.lost_seen_location
+              }
+              onChange={(value) =>
+                updateField(
+                  "lost_seen_location",
+                  value
+                )
+              }
+              visible={
+                visibility.show_lost_seen_location
+              }
+              onToggle={() =>
+                toggleVisibility(
+                  "show_lost_seen_location"
+                )
+              }
+            />
+
+            <div className="locationBox">
+              <div>
+                <strong>
+                  ლოკაციის გაზიარება
+                </strong>
+
+                <p>
+                  მპოვნელმა სურვილის შემთხვევაში შეძლოს თავისი მიმდინარე ლოკაციის გამოგზავნა.
+                </p>
+              </div>
+
+              <VisibilityToggle
+                active={
+                  locationSharingEnabled
+                }
+                onClick={() =>
+                  setLocationSharingEnabled(
+                    !locationSharingEnabled
+                  )
+                }
+              />
+            </div>
+
+            {error && (
+              <div className="error">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="success">
+                {success}
+              </div>
+            )}
+
+            <div className="actions">
+              <a
+                href={`/profile/${encodeURIComponent(
+                  profile.tag_code
+                )}`}
+                className="cancelButton"
+              >
+                გაუქმება
+              </a>
+
+              <button
+                type="submit"
+                className="saveButton"
+                disabled={saving}
+              >
+                {saving
+                  ? "ინახება..."
+                  : "ცვლილებების შენახვა"}
+              </button>
+            </div>
+          </form>
         </section>
 
         <Styles />
       </main>
-    );
-  }
-
-  return (
-    <main className="page">
-      <Header
-        ka={ka}
-        language={language}
-        setLanguage={setLanguage}
-      />
-
-      <section className="content">
-        <div className="intro">
-          <div className="categoryIcon">
-            {category.icon}
-          </div>
-
-          <div>
-            <div className="eyebrow">
-              QR RETURN
-            </div>
-
-            <h1>
-              {ka
-                ? "პროფილის შექმნა"
-                : "Create profile"}
-            </h1>
-
-            <p>
-              {ka
-                ? "შეავსეთ ინფორმაცია, რომელიც დაკარგვის შემთხვევაში მპოვნელს თქვენთან დაკავშირებას გაუმარტივებს."
-                : "Add information that will help a finder contact you if your pet or item is lost."}
-            </p>
-          </div>
-        </div>
-
-        <div className="progress">
-          <Progress
-            number="1"
-            label={
-              ka
-                ? "პროფილი"
-                : "Profile"
-            }
-            active={step >= 1}
-            current={step === 1}
-          />
-
-          <div
-            className={
-              step >= 2
-                ? "line active"
-                : "line"
-            }
-          />
-
-          <Progress
-            number="2"
-            label={
-              ka
-                ? "მფლობელი"
-                : "Owner"
-            }
-            active={step >= 2}
-            current={step === 2}
-          />
-
-          <div
-            className={
-              step >= 3
-                ? "line active"
-                : "line"
-            }
-          />
-
-          <Progress
-            number="3"
-            label={
-              ka
-                ? "დასრულება"
-                : "Finish"
-            }
-            active={step >= 3}
-            current={step === 3}
-          />
-        </div>
-
-        <form
-          className="card"
-          onSubmit={handleSubmit}
-        >
-          {step === 1 && (
-            <>
-              <StepTitle
-                number="01"
-                title={
-                  ka
-                    ? category.isPet
-                      ? "ცხოველის ინფორმაცია"
-                      : "ნივთის ინფორმაცია"
-                    : category.isPet
-                    ? "Pet information"
-                    : "Item information"
-                }
-                text={
-                  ka
-                    ? "შეავსეთ ძირითადი ინფორმაცია. დამატებითი ველები ნებაყოფლობითია."
-                    : "Complete the basic information. Additional fields are optional."
-                }
-              />
-
-              <Field
-                label={
-                  ka
-                    ? "QR კოდი"
-                    : "QR code"
-                }
-                value={form.tag_code}
-                onChange={(value) =>
-                  updateField(
-                    "tag_code",
-                    value
-                  )
-                }
-                placeholder="LF-XXXXXX"
-                required
-              />
-
-              <Field
-                label={
-                  category.isPet
-                    ? ka
-                      ? "სახელი"
-                      : "Pet name"
-                    : ka
-                    ? "ნივთის დასახელება"
-                    : "Item name"
-                }
-                value={form.item_name}
-                onChange={(value) =>
-                  updateField(
-                    "item_name",
-                    value
-                  )
-                }
-                required
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "ფერი"
-                      : "Colour"
-                  }
-                  value={form.colour}
-                  onChange={(value) =>
-                    updateField(
-                      "colour",
-                      value
-                    )
-                  }
-                />
-
-                {category.isPet ? (
-                  <SelectField
-                    label={
-                      ka
-                        ? "სქესი"
-                        : "Sex"
-                    }
-                    value={form.sex}
-                    onChange={(value) =>
-                      updateField(
-                        "sex",
-                        value
-                      )
-                    }
-                    options={[
-                      {
-                        value: "",
-                        label: ka
-                          ? "აირჩიეთ"
-                          : "Select",
-                      },
-                      {
-                        value: "male",
-                        label: ka
-                          ? "მამრობითი"
-                          : "Male",
-                      },
-                      {
-                        value: "female",
-                        label: ka
-                          ? "მდედრობითი"
-                          : "Female",
-                      },
-                    ]}
-                  />
-                ) : (
-                  <Field
-                    label={
-                      ka
-                        ? "ბრენდი"
-                        : "Brand"
-                    }
-                    value={form.brand}
-                    onChange={(value) =>
-                      updateField(
-                        "brand",
-                        value
-                      )
-                    }
-                  />
-                )}
-              </div>
-
-              <PhotoField
-                label={
-                  category.isPet
-                    ? ka
-                      ? "ცხოველის ფოტო — ნებაყოფლობითი"
-                      : "Pet photo — optional"
-                    : ka
-                    ? "ნივთის ფოტო — ნებაყოფლობითი"
-                    : "Item photo — optional"
-                }
-                file={itemPhoto}
-                setFile={setItemPhoto}
-                ka={ka}
-              />
-
-              <button
-                type="button"
-                className="optional"
-                onClick={() =>
-                  setShowExtraProfile(
-                    !showExtraProfile
-                  )
-                }
-              >
-                <b>
-                  {showExtraProfile
-                    ? "−"
-                    : "+"}
-                </b>
-
-                {ka
-                  ? "დამატებითი ინფორმაცია"
-                  : "Additional information"}
-              </button>
-
-              {showExtraProfile && (
-                <div className="optionalPanel">
-                  {category.isPet ? (
-                    <>
-                      <div className="grid2">
-                        <Field
-                          label={
-                            ka
-                              ? "დაბადების თარიღი"
-                              : "Date of birth"
-                          }
-                          type="date"
-                          value={
-                            form.date_of_birth
-                          }
-                          onChange={(value) =>
-                            updateField(
-                              "date_of_birth",
-                              value
-                            )
-                          }
-                        />
-
-                        <Field
-                          label={
-                            ka
-                              ? "წონა"
-                              : "Weight"
-                          }
-                          type="number"
-                          value={form.weight}
-                          onChange={(value) =>
-                            updateField(
-                              "weight",
-                              value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <TextArea
-                        label={
-                          ka
-                            ? "სამედიცინო ინფორმაცია"
-                            : "Medical information"
-                        }
-                        value={
-                          form.medical_info
-                        }
-                        onChange={(value) =>
-                          updateField(
-                            "medical_info",
-                            value
-                          )
-                        }
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <div className="grid2">
-                        <Field
-                          label={
-                            ka
-                              ? "მოდელი"
-                              : "Model"
-                          }
-                          value={form.model}
-                          onChange={(value) =>
-                            updateField(
-                              "model",
-                              value
-                            )
-                          }
-                        />
-
-                        <Field
-                          label={
-                            ka
-                              ? "ზომა"
-                              : "Size"
-                          }
-                          value={form.size}
-                          onChange={(value) =>
-                            updateField(
-                              "size",
-                              value
-                            )
-                          }
-                        />
-                      </div>
-
-                      <Field
-                        label={
-                          ka
-                            ? "მასალა"
-                            : "Material"
-                        }
-                        value={form.material}
-                        onChange={(value) =>
-                          updateField(
-                            "material",
-                            value
-                          )
-                        }
-                      />
-
-                      <TextArea
-                        label={
-                          ka
-                            ? "განმასხვავებელი ნიშნები"
-                            : "Distinctive features"
-                        }
-                        value={
-                          form.distinctive_features
-                        }
-                        onChange={(value) =>
-                          updateField(
-                            "distinctive_features",
-                            value
-                          )
-                        }
-                      />
-                    </>
-                  )}
-
-                  <TextArea
-                    label={
-                      ka
-                        ? "დამატებითი აღწერა"
-                        : "Additional description"
-                    }
-                    value={form.description}
-                    onChange={(value) =>
-                      updateField(
-                        "description",
-                        value
-                      )
-                    }
-                  />
-                </div>
-              )}
-
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <button
-                type="button"
-                className="mainButton full"
-                onClick={nextStep}
-              >
-                {ka
-                  ? "შემდეგი"
-                  : "Next"}{" "}
-                →
-              </button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <StepTitle
-                number="02"
-                title={
-                  ka
-                    ? "მფლობელის ინფორმაცია"
-                    : "Owner information"
-                }
-                text={
-                  ka
-                    ? "მიუთითეთ ინფორმაცია და აირჩიეთ როგორ გსურთ მპოვნელმა დაგიკავშირდეთ."
-                    : "Enter your information and choose how the finder can contact you."
-                }
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "სახელი"
-                      : "First name"
-                  }
-                  value={
-                    form.owner_first_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "owner_first_name",
-                      value
-                    )
-                  }
-                  required
-                />
-
-                <Field
-                  label={
-                    ka
-                      ? "გვარი"
-                      : "Last name"
-                  }
-                  value={
-                    form.owner_last_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "owner_last_name",
-                      value
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <Field
-                label={
-                  ka
-                    ? "მობილურის ნომერი"
-                    : "Phone number"
-                }
-                type="tel"
-                value={form.owner_phone}
-                onChange={(value) =>
-                  updateField(
-                    "owner_phone",
-                    value
-                  )
-                }
-                placeholder="+1 000 000 0000"
-                required
-              />
-
-              <Field
-                label={
-                  ka
-                    ? "ელფოსტა"
-                    : "Email"
-                }
-                type="email"
-                value={form.owner_email}
-                onChange={(value) =>
-                  updateField(
-                    "owner_email",
-                    value
-                  )
-                }
-                placeholder="name@example.com"
-                required
-              />
-
-              <PhotoField
-                label={
-                  ka
-                    ? "მფლობელის ფოტო — ნებაყოფლობითი"
-                    : "Owner photo — optional"
-                }
-                file={ownerPhoto}
-                setFile={setOwnerPhoto}
-                ka={ka}
-              />
-
-              <div className="contactMethods">
-                <div className="contactMethodsTitle">
-                  <strong>
-                    {ka
-                      ? "როგორ გსურთ მპოვნელმა დაგიკავშირდეთ?"
-                      : "How should the finder contact you?"}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "მონიშნეთ ერთი, ორი ან სამივე მეთოდი."
-                      : "Select one, two, or all three methods."}
-                  </p>
-                </div>
-
-                <ContactChoice
-                  icon="📞"
-                  title={
-                    ka
-                      ? "ტელეფონი"
-                      : "Phone"
-                  }
-                  checked={phoneEnabled}
-                  onClick={() =>
-                    setPhoneEnabled(
-                      !phoneEnabled
-                    )
-                  }
-                />
-
-                <ContactChoice
-                  icon="🟢"
-                  title="WhatsApp"
-                  text={
-                    ka
-                      ? "გამოიყენებს ზემოთ მითითებულ მობილურის ნომერს."
-                      : "Uses the phone number entered above."
-                  }
-                  checked={whatsappEnabled}
-                  onClick={() =>
-                    setWhatsappEnabled(
-                      !whatsappEnabled
-                    )
-                  }
-                />
-
-                <ContactChoice
-                  icon="💬"
-                  title="Live Chat"
-                  checked={liveChatEnabled}
-                  onClick={() =>
-                    setLiveChatEnabled(
-                      !liveChatEnabled
-                    )
-                  }
-                />
-              </div>
-
-              <button
-                type="button"
-                className="optional"
-                onClick={() =>
-                  setShowExtraContact(
-                    !showExtraContact
-                  )
-                }
-              >
-                <b>
-                  {showExtraContact
-                    ? "−"
-                    : "+"}
-                </b>
-
-                {ka
-                  ? "დამატებითი საკონტაქტო პირი"
-                  : "Additional contact person"}
-              </button>
-
-              {showExtraContact && (
-                <div className="optionalPanel">
-                  <Field
-                    label={
-                      ka
-                        ? "სახელი და გვარი"
-                        : "Full name"
-                    }
-                    value={
-                      form.additional_contact_name
-                    }
-                    onChange={(value) =>
-                      updateField(
-                        "additional_contact_name",
-                        value
-                      )
-                    }
-                  />
-
-                  <Field
-                    label={
-                      ka
-                        ? "ტელეფონი"
-                        : "Phone"
-                    }
-                    type="tel"
-                    value={
-                      form.additional_contact_phone
-                    }
-                    onChange={(value) =>
-                      updateField(
-                        "additional_contact_phone",
-                        value
-                      )
-                    }
-                  />
-
-                  <Field
-                    label={
-                      ka
-                        ? "ელფოსტა"
-                        : "Email"
-                    }
-                    type="email"
-                    value={
-                      form.additional_contact_email
-                    }
-                    onChange={(value) =>
-                      updateField(
-                        "additional_contact_email",
-                        value
-                      )
-                    }
-                  />
-                </div>
-              )}
-
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={previousStep}
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="button"
-                  className="mainButton"
-                  onClick={nextStep}
-                >
-                  {ka
-                    ? "შემდეგი"
-                    : "Next"}{" "}
-                  →
-                </button>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <StepTitle
-                number="03"
-                title={
-                  ka
-                    ? "ინფორმაცია მპოვნელისთვის"
-                    : "Information for the finder"
-                }
-                text={
-                  ka
-                    ? "დაასრულეთ პროფილის შექმნა."
-                    : "Finish creating your profile."
-                }
-              />
-
-              <TextArea
-                label={
-                  ka
-                    ? "შეტყობინება მპოვნელისთვის"
-                    : "Message for the finder"
-                }
-                value={
-                  form.finder_message
-                }
-                onChange={(value) =>
-                  updateField(
-                    "finder_message",
-                    value
-                  )
-                }
-              />
-
-              <div className="grid2">
-                <Field
-                  label={
-                    ka
-                      ? "მპოვნელის ჯილდო — ნებაყოფლობითი"
-                      : "Finder reward — optional"
-                  }
-                  type="number"
-                  value={form.reward}
-                  onChange={(value) =>
-                    updateField(
-                      "reward",
-                      value
-                    )
-                  }
-                />
-
-                <Field
-                  label={
-                    ka
-                      ? "ბოლო ნანახი ადგილი — ნებაყოფლობითი"
-                      : "Last seen location — optional"
-                  }
-                  value={
-                    form.lost_seen_location
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "lost_seen_location",
-                      value
-                    )
-                  }
-                />
-              </div>
-
-              <div className="locationCard">
-                <div>
-                  <strong>
-                    {ka
-                      ? "ლოკაციის გაზიარება"
-                      : "Location sharing"}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "თუ ჩართავთ, QR კოდის დამსკანერებელს სურვილის შემთხვევაში შეეძლება თავისი მიმდინარე ლოკაციის გამოგზავნა. ავტომატურად არაფერი იგზავნება."
-                      : "If enabled, the finder may choose to send their current location. Nothing is shared automatically."}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  className={
-                    locationSharingEnabled
-                      ? "switch active"
-                      : "switch"
-                  }
-                  onClick={() =>
-                    setLocationSharingEnabled(
-                      !locationSharingEnabled
-                    )
-                  }
-                  aria-pressed={
-                    locationSharingEnabled
-                  }
-                >
-                  <span />
-                </button>
-              </div>
-
-              <div className="summary">
-                <div>
-                  {category.icon}
-                </div>
-
-                <section>
-                  <small>
-                    {ka
-                      ? "იქმნება პროფილი"
-                      : "Creating profile"}
-                  </small>
-
-                  <strong>
-                    {form.item_name ||
-                      (ka
-                        ? category.ka
-                        : category.en)}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "კატეგორია უცვლელი დარჩება. სხვა მონაცემების რედაქტირება მომავალშიც შესაძლებელი იქნება."
-                      : "The category will remain fixed. Other profile details may be edited later."}
-                  </p>
-                </section>
-              </div>
-
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={previousStep}
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="submit"
-                  className="mainButton"
-                  disabled={saving}
-                >
-                  {saving
-                    ? ka
-                      ? "იტვირთება და ინახება..."
-                      : "Uploading and saving..."
-                    : ka
-                    ? "პროფილის შენახვა"
-                    : "Save profile"}
-                </button>
-              </div>
-            </>
-          )}
-        </form>
-      </section>
-
-      <Styles />
-    </main>
+    </>
   );
 }
 
-function Header({
-  ka,
-  language,
-  setLanguage,
-}: {
-  ka: boolean;
-  language: Language;
-  setLanguage: (
-    value: Language
-  ) => void;
-}) {
-  return (
-    <header className="header">
-      <a
-        href="/"
-        className="brand"
-      >
-        <div className="logo">
-          QR
-        </div>
-
-        <div>
-          <strong>
-            QR RETURN
-          </strong>
-
-          <small>
-            SMART LOST & FOUND
-          </small>
-        </div>
-      </a>
-
-      <div className="headerRight">
-        <a
-          href="/register"
-          className="headerBack"
-        >
-          ← {ka ? "უკან" : "Back"}
-        </a>
-
-        <div className="languages">
-          <button
-            type="button"
-            className={
-              language === "ka"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("ka")
-            }
-          >
-            GEO
-          </button>
-
-          <button
-            type="button"
-            className={
-              language === "en"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("en")
-            }
-          >
-            ENG
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function Progress({
-  number,
-  label,
-  active,
-  current,
-}: {
-  number: string;
-  label: string;
-  active: boolean;
-  current: boolean;
-}) {
-  return (
-    <div className="progressItem">
-      <span
-        className={[
-          "circle",
-          active ? "active" : "",
-          current ? "current" : "",
-        ].join(" ")}
-      >
-        {number}
-      </span>
-
-      <small>
-        {label}
-      </small>
-    </div>
-  );
-}
-
-function StepTitle({
+function SectionTitle({
   number,
   title,
   text,
@@ -1762,19 +1420,12 @@ function StepTitle({
   text: string;
 }) {
   return (
-    <div className="stepTitle">
-      <b>
-        {number}
-      </b>
+    <div className="sectionTitle">
+      <b>{number}</b>
 
       <div>
-        <h2>
-          {title}
-        </h2>
-
-        <p>
-          {text}
-        </p>
+        <h2>{title}</h2>
+        <p>{text}</p>
       </div>
     </div>
   );
@@ -1784,35 +1435,22 @@ function Field({
   label,
   value,
   onChange,
-  placeholder = "",
   type = "text",
-  required = false,
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
-  placeholder?: string;
+  onChange: (value: string) => void;
   type?: string;
-  required?: boolean;
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-        {required ? " *" : ""}
-      </span>
+      <span>{label}</span>
 
       <input
         type={type}
         value={value}
-        placeholder={placeholder}
-        required={required}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       />
     </label>
@@ -1827,9 +1465,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   options: {
     value: string;
     label: string;
@@ -1837,180 +1473,266 @@ function SelectField({
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
 
       <select
         value={value}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       >
-        {options.map(
-          (option) => (
-            <option
-              key={
-                option.value ||
-                "empty"
-              }
-              value={
-                option.value
-              }
-            >
-              {option.label}
-            </option>
-          )
-        )}
+        {options.map((option) => (
+          <option
+            key={option.value || "empty"}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
       </select>
     </label>
   );
 }
 
-function TextArea({
+function OptionalField({
   label,
   value,
   onChange,
+  visible,
+  onToggle,
+  type = "text",
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  type?: string;
 }) {
   return (
-    <label className="field">
-      <span>
-        {label}
-      </span>
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <span>{label}</span>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+      />
+
+      <small>
+        მპოვნელისთვის ჩვენება:{" "}
+        <b>{visible ? "ON" : "OFF"}</b>
+      </small>
+    </div>
+  );
+}
+
+function RequiredVisibilityField({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+  type,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  type: string;
+}) {
+  return (
+    <OptionalField
+      label={label}
+      type={type}
+      value={value}
+      onChange={onChange}
+      visible={visible}
+      onToggle={onToggle}
+    />
+  );
+}
+
+function OptionalSelect({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  options: {
+    value: string;
+    label: string;
+  }[];
+}) {
+  return (
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <span>{label}</span>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
+
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+      >
+        {options.map((option) => (
+          <option
+            key={option.value || "empty"}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      <small>
+        მპოვნელისთვის ჩვენება:{" "}
+        <b>{visible ? "ON" : "OFF"}</b>
+      </small>
+    </div>
+  );
+}
+
+function OptionalTextArea({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <span>{label}</span>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
 
       <textarea
         value={value}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
       />
-    </label>
+
+      <small>
+        მპოვნელისთვის ჩვენება:{" "}
+        <b>{visible ? "ON" : "OFF"}</b>
+      </small>
+    </div>
   );
 }
 
-function PhotoField({
-  label,
+function PhotoEditor({
+  title,
+  currentUrl,
   file,
   setFile,
-  ka,
+  visible,
+  onToggle,
 }: {
-  label: string;
+  title: string;
+  currentUrl: string | null;
   file: File | null;
-  setFile: (
-    file: File | null
-  ) => void;
-  ka: boolean;
+  setFile: (value: File | null) => void;
+  visible: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <label className="photo">
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(event) =>
-          setFile(
-            event.target.files?.[0] ||
-              null
-          )
-        }
-      />
+    <div className="photoEditor">
+      <div className="visibilityHeader">
+        <span>{title}</span>
 
-      <b>
-        {file ? "✓" : "+"}
-      </b>
-
-      <div>
-        <strong>
-          {label}
-        </strong>
-
-        <small>
-          {file
-            ? `${file.name} • ${(
-                file.size /
-                1024 /
-                1024
-              ).toFixed(2)} MB`
-            : ka
-            ? "დააჭირეთ ფოტოს ასარჩევად • მაქს. 5 MB"
-            : "Click to choose a photo • max 5 MB"}
-        </small>
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
       </div>
-    </label>
+
+      {currentUrl && (
+        <img
+          src={currentUrl}
+          alt=""
+        />
+      )}
+
+      <label className="upload">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(event) =>
+            setFile(
+              event.target.files?.[0] ||
+                null
+            )
+          }
+        />
+
+        {file
+          ? `✓ ${file.name}`
+          : currentUrl
+          ? "ფოტოს შეცვლა"
+          : "ფოტოს დამატება"}
+      </label>
+
+      <small>
+        ფოტო სავალდებულო არ არის • მაქს. 5 MB
+      </small>
+    </div>
   );
 }
 
-function ContactChoice({
-  icon,
-  title,
-  text,
-  checked,
+function VisibilityToggle({
+  active,
   onClick,
 }: {
-  icon: string;
-  title: string;
-  text?: string;
-  checked: boolean;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       className={
-        checked
-          ? "contactChoice selected"
-          : "contactChoice"
+        active
+          ? "switch active"
+          : "switch"
       }
       onClick={onClick}
-      aria-pressed={checked}
     >
-      <div className="contactChoiceIcon">
-        {icon}
-      </div>
-
-      <div className="contactChoiceText">
-        <strong>
-          {title}
-        </strong>
-
-        {text && (
-          <small>
-            {text}
-          </small>
-        )}
-      </div>
-
-      <div
-        className={
-          checked
-            ? "checkbox checked"
-            : "checkbox"
-        }
-      >
-        {checked ? "✓" : ""}
-      </div>
+      <span />
     </button>
-  );
-}
-
-function ErrorBox({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <div className="error">
-      {text}
-    </div>
   );
 }
 
@@ -2036,10 +1758,7 @@ function Styles() {
         min-height: 100vh;
         background: #f8fafc;
         color: #101828;
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
+        font-family: Inter, Arial, sans-serif;
       }
 
       .header {
@@ -2050,8 +1769,7 @@ function Styles() {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom:
-          1px solid #e8ecf1;
+        border-bottom: 1px solid #e8ecf1;
       }
 
       .brand {
@@ -2064,11 +1782,11 @@ function Styles() {
       .logo {
         width: 43px;
         height: 43px;
+        display: grid;
+        place-items: center;
         border-radius: 13px;
         background: #1465e8;
         color: white;
-        display: grid;
-        place-items: center;
         font-size: 12px;
         font-weight: 900;
       }
@@ -2081,46 +1799,16 @@ function Styles() {
 
       .brand small {
         display: block;
-        margin-top: 2px;
         color: #98a2b3;
         font-size: 7px;
         letter-spacing: 2px;
       }
 
-      .headerRight {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .headerBack {
+      .back {
         color: #475467;
         text-decoration: none;
         font-size: 12px;
-        font-weight: 700;
-      }
-
-      .languages {
-        padding: 4px;
-        display: flex;
-        background: #edf0f4;
-        border-radius: 10px;
-      }
-
-      .languages button {
-        padding: 7px 9px;
-        border: 0;
-        border-radius: 7px;
-        background: transparent;
-        color: #7d8795;
-        font-size: 9px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .languages .selected {
-        background: white;
-        color: #1465e8;
+        font-weight: 800;
       }
 
       .content {
@@ -2128,22 +1816,6 @@ function Styles() {
         max-width: 760px;
         margin: auto;
         padding: 45px 0 80px;
-      }
-
-      .intro {
-        display: flex;
-        gap: 16px;
-      }
-
-      .categoryIcon {
-        width: 58px;
-        height: 58px;
-        flex: 0 0 58px;
-        border-radius: 18px;
-        background: #eaf2ff;
-        display: grid;
-        place-items: center;
-        font-size: 31px;
       }
 
       .eyebrow {
@@ -2154,352 +1826,192 @@ function Styles() {
       }
 
       .intro h1 {
-        margin: 7px 0;
-        font-size: 40px;
-        line-height: 1.05;
+        margin: 8px 0;
+        font-size: 38px;
       }
 
       .intro p {
         margin: 0;
         color: #667085;
         font-size: 13px;
-        line-height: 1.6;
       }
 
-      .progress {
-        margin: 34px 0 24px;
-        display: flex;
-        align-items: center;
+      .locked {
+        margin: 24px 0;
+        padding: 14px 16px;
+        border-radius: 13px;
+        background: #eef4ff;
+        color: #344054;
+        font-size: 12px;
       }
 
-      .progressItem {
-        min-width: 72px;
-        text-align: center;
-      }
-
-      .circle {
-        width: 34px;
-        height: 34px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border:
-          1px solid #d4dae2;
-        border-radius: 50%;
-        background: white;
-        color: #98a2b3;
-        font-size: 10px;
-        font-weight: 900;
-      }
-
-      .circle.active {
-        border-color: #1465e8;
-        color: #1465e8;
-      }
-
-      .circle.current {
-        background: #1465e8;
-        color: white;
-      }
-
-      .progressItem small {
+      .locked span {
         display: block;
-        margin-top: 6px;
-        color: #7b8492;
-        font-size: 9px;
-        font-weight: 800;
-      }
-
-      .line {
-        flex: 1;
-        height: 1px;
-        margin-bottom: 20px;
-        background: #dce1e8;
-      }
-
-      .line.active {
-        background: #1465e8;
+        margin-top: 4px;
+        color: #667085;
+        font-size: 10px;
       }
 
       .card {
         padding: 28px;
-        border:
-          1px solid #e2e7ed;
+        border: 1px solid #e2e7ed;
         border-radius: 23px;
         background: white;
       }
 
-      .stepTitle {
-        margin-bottom: 26px;
+      .sectionTitle {
         display: flex;
-        gap: 13px;
+        gap: 12px;
+        margin-bottom: 23px;
       }
 
-      .stepTitle > b {
-        margin-top: 5px;
+      .sectionTitle > b {
         color: #1465e8;
-        font-size: 10px;
+        font-size: 11px;
       }
 
-      .stepTitle h2 {
+      .sectionTitle h2 {
         margin: 0;
-        font-size: 22px;
+        font-size: 21px;
       }
 
-      .stepTitle p {
-        margin: 6px 0 0;
+      .sectionTitle p {
+        margin: 5px 0 0;
         color: #7b8492;
-        font-size: 12px;
+        font-size: 11px;
       }
 
-      .grid2 {
-        display: grid;
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-        gap: 14px;
+      .divider {
+        height: 1px;
+        margin: 32px 0;
+        background: #edf0f3;
       }
 
-      .field {
+      .field,
+      .visibilityField {
         display: block;
-        margin-bottom: 16px;
+        margin-bottom: 17px;
       }
 
-      .field > span {
+      .field > span,
+      .visibilityHeader > span {
         display: block;
-        margin-bottom: 8px;
         color: #344054;
         font-size: 14px;
         font-weight: 800;
-        line-height: 1.35;
+      }
+
+      .field > span {
+        margin-bottom: 8px;
       }
 
       .field input,
       .field select,
-      .field textarea {
+      .visibilityField input,
+      .visibilityField select,
+      .visibilityField textarea {
         width: 100%;
-        border:
-          1px solid #d5dae1;
+        border: 1px solid #d5dae1;
         border-radius: 12px;
         background: white;
         outline: none;
       }
 
       .field input,
-      .field select {
+      .field select,
+      .visibilityField input,
+      .visibilityField select {
         height: 54px;
         padding: 0 14px;
       }
 
-      .field textarea {
-        min-height: 100px;
+      .visibilityField textarea {
+        min-height: 105px;
         padding: 14px;
         resize: vertical;
       }
 
-      .field input:focus,
-      .field select:focus,
-      .field textarea:focus {
-        border-color: #1465e8;
-        box-shadow:
-          0 0 0 3px
-          rgba(
-            20,
-            101,
-            232,
-            0.08
-          );
-      }
-
-      .photo {
-        min-height: 72px;
-        margin-bottom: 16px;
-        padding: 13px;
+      .visibilityHeader {
+        margin-bottom: 8px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        border:
-          1px dashed #c7ced8;
-        border-radius: 13px;
-        background: #fafbfc;
-        cursor: pointer;
+        justify-content: space-between;
+        gap: 15px;
       }
 
-      .photo input {
-        display: none;
-      }
-
-      .photo > b {
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        background: #eaf2ff;
-        color: #1465e8;
-        font-size: 20px;
-      }
-
-      .photo strong,
-      .photo small {
+      .visibilityField small {
         display: block;
-      }
-
-      .photo strong {
-        font-size: 12px;
-      }
-
-      .photo small {
-        margin-top: 4px;
-        color: #8a94a3;
+        margin-top: 6px;
+        color: #98a2b3;
         font-size: 10px;
       }
 
-      .contactMethods {
-        margin-bottom: 18px;
+      .visibilityField small b {
+        color: #1465e8;
+      }
+
+      .optionalGroup {
+        margin-top: 20px;
         padding: 18px;
-        border: 1px solid #e0e5eb;
         border-radius: 15px;
         background: #f8fafc;
       }
 
-      .contactMethodsTitle {
-        margin-bottom: 13px;
+      .optionalHeader {
+        margin-bottom: 17px;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
       }
 
-      .contactMethodsTitle strong {
-        display: block;
-        color: #344054;
+      .optionalHeader strong {
         font-size: 14px;
       }
 
-      .contactMethodsTitle p {
-        margin: 5px 0 0;
-        color: #7b8492;
-        font-size: 11px;
-      }
-
-      .contactChoice {
-        width: 100%;
-        min-height: 65px;
-        margin-top: 9px;
-        padding: 11px 13px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border: 1px solid #dce2e9;
-        border-radius: 13px;
-        background: white;
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .contactChoice.selected {
-        border-color: #1465e8;
-        background: #f3f7fd;
-      }
-
-      .contactChoiceIcon {
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        background: #eef4ff;
-        font-size: 18px;
-      }
-
-      .contactChoiceText {
-        flex: 1;
-      }
-
-      .contactChoiceText strong {
-        display: block;
-        color: #344054;
-        font-size: 13px;
-      }
-
-      .contactChoiceText small {
-        display: block;
-        margin-top: 4px;
-        color: #7b8492;
+      .optionalHeader p {
+        margin: 4px 0 0;
+        color: #98a2b3;
         font-size: 10px;
-        line-height: 1.4;
       }
 
-      .checkbox {
-        width: 23px;
-        height: 23px;
-        flex: 0 0 23px;
-        display: grid;
-        place-items: center;
-        border:
-          1px solid #cdd4dd;
-        border-radius: 7px;
-        background: white;
-        color: white;
-        font-size: 12px;
-        font-weight: 900;
+      .photoEditor {
+        margin-bottom: 18px;
+        padding: 16px;
+        border: 1px dashed #c7ced8;
+        border-radius: 14px;
+        background: #fafbfc;
       }
 
-      .checkbox.checked {
-        border-color: #1465e8;
-        background: #1465e8;
+      .photoEditor img {
+        width: 100px;
+        height: 100px;
+        margin: 12px 0;
+        border-radius: 15px;
+        object-fit: cover;
       }
 
-      .optional {
-        width: 100%;
-        min-height: 50px;
+      .upload {
+        min-height: 44px;
         padding: 0 14px;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 8px;
-        border:
-          1px solid #e0e5eb;
-        border-radius: 12px;
-        background: #f8fafc;
-        color: #344054;
-        font-size: 12px;
+        border-radius: 10px;
+        background: #eaf2ff;
+        color: #1465e8;
+        font-size: 11px;
         font-weight: 800;
         cursor: pointer;
       }
 
-      .optional b {
-        color: #1465e8;
-        font-size: 18px;
+      .upload input {
+        display: none;
       }
 
-      .optionalPanel {
-        margin-top: 13px;
-        padding: 18px;
-        border-radius: 14px;
-        background: #f8fafc;
-      }
-
-      .locationCard {
-        padding: 17px;
-        display: flex;
-        align-items: center;
-        justify-content:
-          space-between;
-        gap: 18px;
-        border:
-          1px solid #e0e5eb;
-        border-radius: 14px;
-        background: #f9fafb;
-      }
-
-      .locationCard strong {
-        font-size: 13px;
-      }
-
-      .locationCard p {
-        max-width: 520px;
-        margin: 5px 0 0;
-        color: #7b8492;
+      .photoEditor small {
+        display: block;
+        margin-top: 8px;
+        color: #98a2b3;
         font-size: 10px;
-        line-height: 1.5;
       }
 
       .switch {
@@ -2527,182 +2039,92 @@ function Styles() {
       }
 
       .switch.active span {
-        transform:
-          translateX(21px);
+        transform: translateX(21px);
       }
 
-      .summary {
-        margin-top: 16px;
-        padding: 16px;
+      .locationBox {
+        padding: 17px;
         display: flex;
-        gap: 12px;
         align-items: center;
-        border:
-          1px solid #dbe7f8;
+        justify-content: space-between;
+        gap: 20px;
         border-radius: 14px;
-        background: #f3f7fd;
+        background: #f8fafc;
       }
 
-      .summary > div {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: white;
-        font-size: 24px;
+      .locationBox strong {
+        font-size: 14px;
       }
 
-      .summary small,
-      .summary strong,
-      .summary p {
-        display: block;
-      }
-
-      .summary small {
+      .locationBox p {
+        margin: 5px 0 0;
         color: #7b8492;
-        font-size: 9px;
-      }
-
-      .summary strong {
-        margin-top: 2px;
-        font-size: 13px;
-      }
-
-      .summary p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 9px;
-        line-height: 1.4;
-      }
-
-      .buttons {
-        margin-top: 25px;
-        display: flex;
-        gap: 10px;
-      }
-
-      .mainButton,
-      .backButton {
-        min-height: 52px;
-        padding: 0 20px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .mainButton {
-        margin-left: auto;
-        border: 0;
-        background: #1465e8;
-        color: white;
-      }
-
-      .mainButton.full {
-        width: 100%;
-        margin-top: 25px;
-      }
-
-      .backButton {
-        border:
-          1px solid #d5dae1;
-        background: white;
-        color: #475467;
-      }
-
-      .mainButton:disabled {
-        opacity: 0.6;
-        cursor: wait;
-      }
-
-      .error {
-        margin-top: 17px;
-        padding: 13px;
-        border-radius: 11px;
-        background: #fff1f1;
-        color: #b42318;
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 1.5;
-      }
-
-      .successPage {
-        width: calc(100% - 24px);
-        max-width: 580px;
-        margin: auto;
-        padding: 110px 0;
-        text-align: center;
-      }
-
-      .successIcon {
-        width: 68px;
-        height: 68px;
-        margin: 0 auto 22px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: #e9f8ef;
-        color: #16803b;
-        font-size: 28px;
-        font-weight: 900;
-      }
-
-      .successPage h1 {
-        margin: 10px 0;
-        font-size: 35px;
-      }
-
-      .successPage > p {
-        color: #667085;
-      }
-
-      .successInfo {
-        margin-top: 22px;
-        padding: 16px;
-        border:
-          1px solid #dbe7f8;
-        border-radius: 14px;
-        background: #f3f7fd;
-        text-align: left;
-      }
-
-      .successInfo strong,
-      .successInfo span {
-        display: block;
-      }
-
-      .successInfo span {
-        margin-top: 5px;
-        color: #667085;
         font-size: 10px;
         line-height: 1.5;
       }
 
-      .homeButton {
-        min-height: 52px;
-        margin-top: 25px;
-        padding: 0 20px;
-        display: inline-flex;
-        align-items: center;
+      .error,
+      .success {
+        margin-top: 20px;
+        padding: 14px;
         border-radius: 12px;
-        background: #1465e8;
-        color: white;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 900;
+        font-size: 11px;
+        font-weight: 800;
       }
 
-      @media (
-        max-width: 600px
-      ) {
-        .header {
-          min-height: 70px;
-        }
+      .error {
+        background: #fff1f1;
+        color: #b42318;
+      }
 
-        .brand small,
-        .headerBack {
+      .success {
+        background: #ecfdf3;
+        color: #027a48;
+      }
+
+      .actions {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 10px;
+      }
+
+      .cancelButton,
+      .saveButton {
+        min-height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .cancelButton {
+        border: 1px solid #d5dae1;
+        color: #475467;
+      }
+
+      .saveButton {
+        border: 0;
+        background: #1465e8;
+        color: white;
+        cursor: pointer;
+      }
+
+      .saveButton:disabled {
+        opacity: 0.6;
+      }
+
+      .center {
+        padding-top: 130px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+
+      @media (max-width: 600px) {
+        .back {
           display: none;
         }
 
@@ -2714,37 +2136,20 @@ function Styles() {
           font-size: 29px;
         }
 
-        .grid2 {
-          grid-template-columns:
-            1fr;
-          gap: 0;
-        }
-
         .card {
           padding: 20px 14px;
-          border-radius: 18px;
+        }
+
+        .actions {
+          grid-template-columns: 1fr;
         }
 
         .field input,
         .field select,
-        .field textarea {
+        .visibilityField input,
+        .visibilityField select,
+        .visibilityField textarea {
           font-size: 16px;
-        }
-
-        .buttons {
-          display: grid;
-          grid-template-columns:
-            1fr 1.3fr;
-        }
-
-        .mainButton,
-        .backButton {
-          width: 100%;
-          margin: 0;
-        }
-
-        .successPage h1 {
-          font-size: 29px;
         }
       }
     `}</style>
