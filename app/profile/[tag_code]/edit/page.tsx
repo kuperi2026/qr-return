@@ -128,8 +128,7 @@ type VisibilityState = {
 };
 
 const BUCKET = "qr-return-images";
-const MAX_IMAGE_SIZE =
-  5 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 const emptyForm: FormState = {
   item_name: "",
@@ -190,10 +189,7 @@ const defaultVisibility: VisibilityState = {
 function cleanTag(tag: string) {
   return tag
     .trim()
-    .replace(
-      /[^a-zA-Z0-9_-]/g,
-      "-"
-    );
+    .replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 function safeExtension(file: File) {
@@ -213,9 +209,7 @@ function safeExtension(file: File) {
     "heif",
   ];
 
-  return allowed.includes(
-    extension
-  )
+  return allowed.includes(extension)
     ? extension
     : "jpg";
 }
@@ -225,31 +219,18 @@ async function uploadImage(
   folder: "items" | "owners",
   tagCode: string
 ) {
-  if (
-    !file.type.startsWith(
-      "image/"
-    )
-  ) {
-    throw new Error(
-      "INVALID_IMAGE_TYPE"
-    );
+  if (!file.type.startsWith("image/")) {
+    throw new Error("INVALID_IMAGE_TYPE");
   }
 
-  if (
-    file.size >
-    MAX_IMAGE_SIZE
-  ) {
-    throw new Error(
-      "IMAGE_TOO_LARGE"
-    );
+  if (file.size > MAX_IMAGE_SIZE) {
+    throw new Error("IMAGE_TOO_LARGE");
   }
 
-  const extension =
-    safeExtension(file);
+  const extension = safeExtension(file);
 
   const uniquePart =
-    typeof crypto !==
-      "undefined" &&
+    typeof crypto !== "undefined" &&
     "randomUUID" in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random()
@@ -257,25 +238,16 @@ async function uploadImage(
           .slice(2)}`;
 
   const filePath =
-    `${folder}/${cleanTag(
-      tagCode
-    )}-${uniquePart}.${extension}`;
+    `${folder}/${cleanTag(tagCode)}-${uniquePart}.${extension}`;
 
-  const {
-    error: uploadError,
-  } = await supabase.storage
-    .from(BUCKET)
-    .upload(
-      filePath,
-      file,
-      {
-        cacheControl:
-          "3600",
-        contentType:
-          file.type,
+  const { error: uploadError } =
+    await supabase.storage
+      .from(BUCKET)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
         upsert: false,
-      }
-    );
+      });
 
   if (uploadError) {
     throw uploadError;
@@ -284,9 +256,7 @@ async function uploadImage(
   const { data } =
     supabase.storage
       .from(BUCKET)
-      .getPublicUrl(
-        filePath
-      );
+      .getPublicUrl(filePath);
 
   return data.publicUrl;
 }
@@ -295,34 +265,22 @@ export default function EditProfilePage() {
   const params = useParams();
   const router = useRouter();
 
-  const rawTag =
-    params?.tag_code;
+  const rawTag = params?.tag_code;
 
   const tagCode =
     Array.isArray(rawTag)
       ? rawTag[0]
-      : typeof rawTag ===
-        "string"
+      : typeof rawTag === "string"
       ? rawTag
       : "";
 
-  const [
-    profile,
-    setProfile,
-  ] =
-    useState<Profile | null>(
-      null
-    );
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
 
   const [form, setForm] =
-    useState<FormState>(
-      emptyForm
-    );
+    useState<FormState>(emptyForm);
 
-  const [
-    visibility,
-    setVisibility,
-  ] =
+  const [visibility, setVisibility] =
     useState<VisibilityState>(
       defaultVisibility
     );
@@ -332,26 +290,13 @@ export default function EditProfilePage() {
     setLocationSharingEnabled,
   ] = useState(false);
 
-  const [
-    itemPhoto,
-    setItemPhoto,
-  ] =
-    useState<File | null>(
-      null
-    );
+  const [itemPhoto, setItemPhoto] =
+    useState<File | null>(null);
 
-  const [
-    ownerPhoto,
-    setOwnerPhoto,
-  ] =
-    useState<File | null>(
-      null
-    );
+  const [ownerPhoto, setOwnerPhoto] =
+    useState<File | null>(null);
 
-  const [
-    loading,
-    setLoading,
-  ] =
+  const [loading, setLoading] =
     useState(true);
 
   const [saving, setSaving] =
@@ -366,29 +311,21 @@ export default function EditProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       if (!tagCode) {
-        setError(
-          "QR კოდი ვერ მოიძებნა."
-        );
+        setError("QR კოდი ვერ მოიძებნა.");
         setLoading(false);
         return;
       }
 
       const decodedTag =
-        decodeURIComponent(
-          tagCode
-        );
+        decodeURIComponent(tagCode);
 
       const {
         data,
-        error:
-          fetchError,
+        error: fetchError,
       } = await supabase
         .from("item")
         .select("*")
-        .eq(
-          "tag_code",
-          decodedTag
-        )
+        .eq("tag_code", decodedTag)
         .maybeSingle();
 
       if (fetchError) {
@@ -407,40 +344,31 @@ export default function EditProfilePage() {
         return;
       }
 
-      const current =
-        data as Profile;
+      const current = data as Profile;
 
       setProfile(current);
 
       setForm({
         item_name:
-          current.item_name ||
-          "",
+          current.item_name || "",
 
         colour:
-          current.colour ||
-          "",
+          current.colour || "",
 
         sex:
           current.sex || "",
 
         date_of_birth:
-          current.date_of_birth ||
-          "",
+          current.date_of_birth || "",
 
         weight:
-          current.weight !==
-            null &&
-          current.weight !==
-            undefined
-            ? String(
-                current.weight
-              )
+          current.weight !== null &&
+          current.weight !== undefined
+            ? String(current.weight)
             : "",
 
         medical_info:
-          current.medical_info ||
-          "",
+          current.medical_info || "",
 
         brand:
           current.brand || "",
@@ -452,126 +380,96 @@ export default function EditProfilePage() {
           current.size || "",
 
         material:
-          current.material ||
-          "",
+          current.material || "",
 
         distinctive_features:
-          current.distinctive_features ||
-          "",
+          current.distinctive_features || "",
 
         description:
-          current.description ||
-          "",
+          current.description || "",
 
         owner_name:
-          current.owner_name ||
-          "",
+          current.owner_name || "",
 
         owner_phone:
-          current.owner_phone ||
-          "",
+          current.owner_phone || "",
 
         owner_email:
-          current.owner_email ||
-          "",
+          current.owner_email || "",
 
         additional_contact_name:
-          current.additional_contact_name ||
-          "",
+          current.additional_contact_name || "",
 
         additional_contact_phone:
-          current.additional_contact_phone ||
-          "",
+          current.additional_contact_phone || "",
 
         additional_contact_email:
-          current.additional_contact_email ||
-          "",
+          current.additional_contact_email || "",
 
         finder_message:
-          current.finder_message ||
-          "",
+          current.finder_message || "",
 
         lost_seen_location:
-          current.lost_seen_location ||
-          "",
+          current.lost_seen_location || "",
 
         contact_preference:
-          current.contact_preference ||
-          "both",
+          current.contact_preference || "both",
       });
 
       setVisibility({
         show_colour:
-          current.show_colour ??
-          true,
+          current.show_colour ?? true,
 
         show_sex:
-          current.show_sex ??
-          true,
+          current.show_sex ?? true,
 
         show_date_of_birth:
-          current.show_date_of_birth ??
-          false,
+          current.show_date_of_birth ?? false,
 
         show_weight:
-          current.show_weight ??
-          false,
+          current.show_weight ?? false,
 
         show_medical_info:
-          current.show_medical_info ??
-          false,
+          current.show_medical_info ?? false,
 
         show_brand:
-          current.show_brand ??
-          true,
+          current.show_brand ?? true,
 
         show_model:
-          current.show_model ??
-          true,
+          current.show_model ?? true,
 
         show_size:
-          current.show_size ??
-          false,
+          current.show_size ?? false,
 
         show_material:
-          current.show_material ??
-          false,
+          current.show_material ?? false,
 
         show_distinctive_features:
-          current.show_distinctive_features ??
-          true,
+          current.show_distinctive_features ?? true,
 
         show_description:
-          current.show_description ??
-          true,
+          current.show_description ?? true,
 
         show_photo:
-          current.show_photo ??
-          true,
+          current.show_photo ?? true,
 
         show_owner_photo:
-          current.show_owner_photo ??
-          false,
+          current.show_owner_photo ?? false,
 
         show_owner_phone:
-          current.show_owner_phone ??
-          true,
+          current.show_owner_phone ?? true,
 
         show_owner_email:
-          current.show_owner_email ??
-          false,
+          current.show_owner_email ?? false,
 
         show_additional_contact:
-          current.show_additional_contact ??
-          false,
+          current.show_additional_contact ?? false,
 
         show_finder_message:
-          current.show_finder_message ??
-          true,
+          current.show_finder_message ?? true,
 
         show_lost_seen_location:
-          current.show_lost_seen_location ??
-          true,
+          current.show_lost_seen_location ?? true,
       });
 
       setLocationSharingEnabled(
@@ -590,27 +488,19 @@ export default function EditProfilePage() {
     field: keyof FormState,
     value: string
   ) {
-    setForm(
-      (current) => ({
-        ...current,
-        [field]:
-          value,
-      })
-    );
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
   }
 
   function toggleVisibility(
     field: keyof VisibilityState
   ) {
-    setVisibility(
-      (current) => ({
-        ...current,
-        [field]:
-          !current[
-            field
-          ],
-      })
-    );
+    setVisibility((current) => ({
+      ...current,
+      [field]: !current[field],
+    }));
   }
 
   function validateImage(
@@ -620,21 +510,14 @@ export default function EditProfilePage() {
       return true;
     }
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
+    if (!file.type.startsWith("image/")) {
       setError(
         "გთხოვთ აირჩიოთ სურათის ფაილი."
       );
       return false;
     }
 
-    if (
-      file.size >
-      MAX_IMAGE_SIZE
-    ) {
+    if (file.size > MAX_IMAGE_SIZE) {
       setError(
         "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
       );
@@ -656,27 +539,21 @@ export default function EditProfilePage() {
     setError("");
     setSuccess("");
 
-    if (
-      !form.item_name.trim()
-    ) {
+    if (!form.item_name.trim()) {
       setError(
         "სახელი ან ნივთის დასახელება სავალდებულოა."
       );
       return;
     }
 
-    if (
-      !form.owner_phone.trim()
-    ) {
+    if (!form.owner_phone.trim()) {
       setError(
         "მფლობელის ტელეფონი სავალდებულოა."
       );
       return;
     }
 
-    if (
-      !form.owner_email.trim()
-    ) {
+    if (!form.owner_email.trim()) {
       setError(
         "მფლობელის ელფოსტა სავალდებულოა."
       );
@@ -684,12 +561,8 @@ export default function EditProfilePage() {
     }
 
     if (
-      !validateImage(
-        itemPhoto
-      ) ||
-      !validateImage(
-        ownerPhoto
-      )
+      !validateImage(itemPhoto) ||
+      !validateImage(ownerPhoto)
     ) {
       return;
     }
@@ -722,77 +595,64 @@ export default function EditProfilePage() {
       }
 
       const isPet =
-        profile.item_type ===
-          "dog" ||
-        profile.item_type ===
-          "cat";
+        profile.item_type === "dog" ||
+        profile.item_type === "cat";
 
       const payload = {
         item_name:
           form.item_name.trim(),
 
         colour:
-          form.colour.trim() ||
-          null,
+          form.colour.trim() || null,
 
-        sex: isPet
-          ? form.sex ||
-            null
-          : null,
+        sex:
+          isPet
+            ? form.sex || null
+            : null,
 
         date_of_birth:
           isPet
-            ? form.date_of_birth ||
-              null
+            ? form.date_of_birth || null
             : null,
 
         weight:
           isPet &&
           form.weight.trim()
-            ? Number(
-                form.weight
-              )
+            ? Number(form.weight)
             : null,
 
         medical_info:
           isPet
-            ? form.medical_info.trim() ||
-              null
+            ? form.medical_info.trim() || null
             : null,
 
         brand:
           !isPet
-            ? form.brand.trim() ||
-              null
+            ? form.brand.trim() || null
             : null,
 
         model:
           !isPet
-            ? form.model.trim() ||
-              null
+            ? form.model.trim() || null
             : null,
 
         size:
           !isPet
-            ? form.size.trim() ||
-              null
+            ? form.size.trim() || null
             : null,
 
         material:
           !isPet
-            ? form.material.trim() ||
-              null
+            ? form.material.trim() || null
             : null,
 
         distinctive_features:
           !isPet
-            ? form.distinctive_features.trim() ||
-              null
+            ? form.distinctive_features.trim() || null
             : null,
 
         description:
-          form.description.trim() ||
-          null,
+          form.description.trim() || null,
 
         photo_url:
           photoUrl,
@@ -801,8 +661,7 @@ export default function EditProfilePage() {
           ownerPhotoUrl,
 
         owner_name:
-          form.owner_name.trim() ||
-          null,
+          form.owner_name.trim() || null,
 
         owner_phone:
           form.owner_phone.trim(),
@@ -811,24 +670,19 @@ export default function EditProfilePage() {
           form.owner_email.trim(),
 
         additional_contact_name:
-          form.additional_contact_name.trim() ||
-          null,
+          form.additional_contact_name.trim() || null,
 
         additional_contact_phone:
-          form.additional_contact_phone.trim() ||
-          null,
+          form.additional_contact_phone.trim() || null,
 
         additional_contact_email:
-          form.additional_contact_email.trim() ||
-          null,
+          form.additional_contact_email.trim() || null,
 
         finder_message:
-          form.finder_message.trim() ||
-          null,
+          form.finder_message.trim() || null,
 
         lost_seen_location:
-          form.lost_seen_location.trim() ||
-          null,
+          form.lost_seen_location.trim() || null,
 
         contact_preference:
           form.contact_preference,
@@ -840,15 +694,11 @@ export default function EditProfilePage() {
       };
 
       const {
-        error:
-          updateError,
+        error: updateError,
       } = await supabase
         .from("item")
         .update(payload)
-        .eq(
-          "tag_code",
-          profile.tag_code
-        );
+        .eq("tag_code", profile.tag_code);
 
       if (updateError) {
         setError(
@@ -862,22 +712,15 @@ export default function EditProfilePage() {
         "ცვლილებები წარმატებით შეინახა."
       );
 
-      setTimeout(
-        () => {
-          router.push(
-            `/profile/${encodeURIComponent(
-              profile.tag_code
-            )}`
-          );
-        },
-        800
-      );
-    } catch (
-      err
-    ) {
-      console.error(
-        err
-      );
+      setTimeout(() => {
+        router.push(
+          `/profile/${encodeURIComponent(
+            profile.tag_code
+          )}`
+        );
+      }, 800);
+    } catch (err) {
+      console.error(err);
 
       setError(
         "ცვლილებების შენახვისას დაფიქსირდა შეცდომა."
@@ -931,10 +774,8 @@ export default function EditProfilePage() {
   }
 
   const isPet =
-    profile.item_type ===
-      "dog" ||
-    profile.item_type ===
-      "cat";
+    profile.item_type === "dog" ||
+    profile.item_type === "cat";
 
   return (
     <>
@@ -1000,9 +841,7 @@ export default function EditProfilePage() {
 
           <form
             className="card"
-            onSubmit={
-              handleSubmit
-            }
+            onSubmit={handleSubmit}
           >
             <SectionTitle
               number="01"
@@ -1020,12 +859,8 @@ export default function EditProfilePage() {
                   ? "სახელი *"
                   : "ნივთის დასახელება *"
               }
-              value={
-                form.item_name
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.item_name}
+              onChange={(value) =>
                 updateField(
                   "item_name",
                   value
@@ -1035,12 +870,8 @@ export default function EditProfilePage() {
 
             <OptionalField
               label="ფერი"
-              value={
-                form.colour
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.colour}
+              onChange={(value) =>
                 updateField(
                   "colour",
                   value
@@ -1065,12 +896,8 @@ export default function EditProfilePage() {
               currentUrl={
                 profile.photo_url
               }
-              file={
-                itemPhoto
-              }
-              setFile={
-                setItemPhoto
-              }
+              file={itemPhoto}
+              setFile={setItemPhoto}
               visible={
                 visibility.show_photo
               }
@@ -1085,12 +912,8 @@ export default function EditProfilePage() {
               <>
                 <OptionalSelect
                   label="სქესი"
-                  value={
-                    form.sex
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.sex}
+                  onChange={(value) =>
                     updateField(
                       "sex",
                       value
@@ -1106,22 +929,16 @@ export default function EditProfilePage() {
                   }
                   options={[
                     {
-                      value:
-                        "",
-                      label:
-                        "აირჩიე",
+                      value: "",
+                      label: "აირჩიე",
                     },
                     {
-                      value:
-                        "male",
-                      label:
-                        "მამრობითი",
+                      value: "male",
+                      label: "მამრობითი",
                     },
                     {
-                      value:
-                        "female",
-                      label:
-                        "მდედრობითი",
+                      value: "female",
+                      label: "მდედრობითი",
                     },
                   ]}
                 />
@@ -1132,9 +949,7 @@ export default function EditProfilePage() {
                   value={
                     form.date_of_birth
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
                       "date_of_birth",
                       value
@@ -1153,12 +968,8 @@ export default function EditProfilePage() {
                 <OptionalField
                   label="წონა"
                   type="number"
-                  value={
-                    form.weight
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.weight}
+                  onChange={(value) =>
                     updateField(
                       "weight",
                       value
@@ -1179,9 +990,7 @@ export default function EditProfilePage() {
                   value={
                     form.medical_info
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
                       "medical_info",
                       value
@@ -1201,12 +1010,8 @@ export default function EditProfilePage() {
               <>
                 <OptionalField
                   label="ბრენდი"
-                  value={
-                    form.brand
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.brand}
+                  onChange={(value) =>
                     updateField(
                       "brand",
                       value
@@ -1224,12 +1029,8 @@ export default function EditProfilePage() {
 
                 <OptionalField
                   label="მოდელი"
-                  value={
-                    form.model
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.model}
+                  onChange={(value) =>
                     updateField(
                       "model",
                       value
@@ -1247,12 +1048,8 @@ export default function EditProfilePage() {
 
                 <OptionalField
                   label="ზომა"
-                  value={
-                    form.size
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.size}
+                  onChange={(value) =>
                     updateField(
                       "size",
                       value
@@ -1270,12 +1067,8 @@ export default function EditProfilePage() {
 
                 <OptionalField
                   label="მასალა"
-                  value={
-                    form.material
-                  }
-                  onChange={(
-                    value
-                  ) =>
+                  value={form.material}
+                  onChange={(value) =>
                     updateField(
                       "material",
                       value
@@ -1296,9 +1089,7 @@ export default function EditProfilePage() {
                   value={
                     form.distinctive_features
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
                       "distinctive_features",
                       value
@@ -1318,12 +1109,8 @@ export default function EditProfilePage() {
 
             <OptionalTextArea
               label="დამატებითი აღწერა"
-              value={
-                form.description
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.description}
+              onChange={(value) =>
                 updateField(
                   "description",
                   value
@@ -1349,12 +1136,8 @@ export default function EditProfilePage() {
 
             <Field
               label="სახელი და გვარი"
-              value={
-                form.owner_name
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.owner_name}
+              onChange={(value) =>
                 updateField(
                   "owner_name",
                   value
@@ -1365,12 +1148,8 @@ export default function EditProfilePage() {
             <RequiredVisibilityField
               label="ტელეფონი *"
               type="tel"
-              value={
-                form.owner_phone
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.owner_phone}
+              onChange={(value) =>
                 updateField(
                   "owner_phone",
                   value
@@ -1389,12 +1168,8 @@ export default function EditProfilePage() {
             <RequiredVisibilityField
               label="ელფოსტა *"
               type="email"
-              value={
-                form.owner_email
-              }
-              onChange={(
-                value
-              ) =>
+              value={form.owner_email}
+              onChange={(value) =>
                 updateField(
                   "owner_email",
                   value
@@ -1415,12 +1190,8 @@ export default function EditProfilePage() {
               currentUrl={
                 profile.owner_photo_url
               }
-              file={
-                ownerPhoto
-              }
-              setFile={
-                setOwnerPhoto
-              }
+              file={ownerPhoto}
+              setFile={setOwnerPhoto}
               visible={
                 visibility.show_owner_photo
               }
@@ -1436,9 +1207,7 @@ export default function EditProfilePage() {
               value={
                 form.contact_preference
               }
-              onChange={(
-                value
-              ) =>
+              onChange={(value) =>
                 updateField(
                   "contact_preference",
                   value
@@ -1446,22 +1215,17 @@ export default function EditProfilePage() {
               }
               options={[
                 {
-                  value:
-                    "both",
+                  value: "both",
                   label:
                     "Live Chat და ტელეფონი",
                 },
                 {
-                  value:
-                    "chat",
-                  label:
-                    "Live Chat",
+                  value: "chat",
+                  label: "Live Chat",
                 },
                 {
-                  value:
-                    "phone",
-                  label:
-                    "ტელეფონი",
+                  value: "phone",
+                  label: "ტელეფონი",
                 },
               ]}
             />
@@ -1495,9 +1259,7 @@ export default function EditProfilePage() {
                 value={
                   form.additional_contact_name
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
                     "additional_contact_name",
                     value
@@ -1511,9 +1273,7 @@ export default function EditProfilePage() {
                 value={
                   form.additional_contact_phone
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
                     "additional_contact_phone",
                     value
@@ -1527,9 +1287,7 @@ export default function EditProfilePage() {
                 value={
                   form.additional_contact_email
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
                     "additional_contact_email",
                     value
@@ -1551,9 +1309,7 @@ export default function EditProfilePage() {
               value={
                 form.finder_message
               }
-              onChange={(
-                value
-              ) =>
+              onChange={(value) =>
                 updateField(
                   "finder_message",
                   value
@@ -1574,9 +1330,7 @@ export default function EditProfilePage() {
               value={
                 form.lost_seen_location
               }
-              onChange={(
-                value
-              ) =>
+              onChange={(value) =>
                 updateField(
                   "lost_seen_location",
                   value
@@ -1640,9 +1394,7 @@ export default function EditProfilePage() {
               <button
                 type="submit"
                 className="saveButton"
-                disabled={
-                  saving
-                }
+                disabled={saving}
               >
                 {saving
                   ? "ინახება..."
@@ -1669,18 +1421,11 @@ function SectionTitle({
 }) {
   return (
     <div className="sectionTitle">
-      <b>
-        {number}
-      </b>
+      <b>{number}</b>
 
       <div>
-        <h2>
-          {title}
-        </h2>
-
-        <p>
-          {text}
-        </p>
+        <h2>{title}</h2>
+        <p>{text}</p>
       </div>
     </div>
   );
@@ -1694,26 +1439,18 @@ function Field({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   type?: string;
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
 
       <input
         type={type}
         value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
+        onChange={(event) =>
+          onChange(event.target.value)
         }
       />
     </label>
@@ -1728,9 +1465,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   options: {
     value: string;
     label: string;
@@ -1738,39 +1473,22 @@ function SelectField({
 }) {
   return (
     <label className="field">
-      <span>
-        {label}
-      </span>
+      <span>{label}</span>
 
       <select
         value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
+        onChange={(event) =>
+          onChange(event.target.value)
         }
       >
-        {options.map(
-          (
-            option
-          ) => (
-            <option
-              key={
-                option.value ||
-                "empty"
-              }
-              value={
-                option.value
-              }
-            >
-              {
-                option.label
-              }
-            </option>
-          )
-        )}
+        {options.map((option) => (
+          <option
+            key={option.value || "empty"}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
       </select>
     </label>
   );
@@ -1786,9 +1504,7 @@ function OptionalField({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   visible: boolean;
   onToggle: () => void;
   type?: string;
@@ -1796,39 +1512,25 @@ function OptionalField({
   return (
     <div className="visibilityField">
       <div className="visibilityHeader">
-        <span>
-          {label}
-        </span>
+        <span>{label}</span>
 
         <VisibilityToggle
-          active={
-            visible
-          }
-          onClick={
-            onToggle
-          }
+          active={visible}
+          onClick={onToggle}
         />
       </div>
 
       <input
         type={type}
         value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
+        onChange={(event) =>
+          onChange(event.target.value)
         }
       />
 
       <small>
         მპოვნელისთვის ჩვენება:{" "}
-        <b>
-          {visible
-            ? "ON"
-            : "OFF"}
-        </b>
+        <b>{visible ? "ON" : "OFF"}</b>
       </small>
     </div>
   );
@@ -1844,9 +1546,7 @@ function RequiredVisibilityField({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   visible: boolean;
   onToggle: () => void;
   type: string;
@@ -1856,16 +1556,63 @@ function RequiredVisibilityField({
       label={label}
       type={type}
       value={value}
-      onChange={
-        onChange
-      }
-      visible={
-        visible
-      }
-      onToggle={
-        onToggle
-      }
+      onChange={onChange}
+      visible={visible}
+      onToggle={onToggle}
     />
+  );
+}
+
+function OptionalSelect({
+  label,
+  value,
+  onChange,
+  visible,
+  onToggle,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  visible: boolean;
+  onToggle: () => void;
+  options: {
+    value: string;
+    label: string;
+  }[];
+}) {
+  return (
+    <div className="visibilityField">
+      <div className="visibilityHeader">
+        <span>{label}</span>
+
+        <VisibilityToggle
+          active={visible}
+          onClick={onToggle}
+        />
+      </div>
+
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+      >
+        {options.map((option) => (
+          <option
+            key={option.value || "empty"}
+            value={option.value}
+          >
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      <small>
+        მპოვნელისთვის ჩვენება:{" "}
+        <b>{visible ? "ON" : "OFF"}</b>
+      </small>
+    </div>
   );
 }
 
@@ -1878,47 +1625,31 @@ function OptionalTextArea({
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string
-  ) => void;
+  onChange: (value: string) => void;
   visible: boolean;
   onToggle: () => void;
 }) {
   return (
     <div className="visibilityField">
       <div className="visibilityHeader">
-        <span>
-          {label}
-        </span>
+        <span>{label}</span>
 
         <VisibilityToggle
-          active={
-            visible
-          }
-          onClick={
-            onToggle
-          }
+          active={visible}
+          onClick={onToggle}
         />
       </div>
 
       <textarea
         value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
+        onChange={(event) =>
+          onChange(event.target.value)
         }
       />
 
       <small>
         მპოვნელისთვის ჩვენება:{" "}
-        <b>
-          {visible
-            ? "ON"
-            : "OFF"}
-        </b>
+        <b>{visible ? "ON" : "OFF"}</b>
       </small>
     </div>
   );
@@ -1933,38 +1664,26 @@ function PhotoEditor({
   onToggle,
 }: {
   title: string;
-  currentUrl:
-    | string
-    | null;
+  currentUrl: string | null;
   file: File | null;
-  setFile: (
-    value: File | null
-  ) => void;
+  setFile: (value: File | null) => void;
   visible: boolean;
   onToggle: () => void;
 }) {
   return (
     <div className="photoEditor">
       <div className="visibilityHeader">
-        <span>
-          {title}
-        </span>
+        <span>{title}</span>
 
         <VisibilityToggle
-          active={
-            visible
-          }
-          onClick={
-            onToggle
-          }
+          active={visible}
+          onClick={onToggle}
         />
       </div>
 
       {currentUrl && (
         <img
-          src={
-            currentUrl
-          }
+          src={currentUrl}
           alt=""
         />
       )}
@@ -1973,12 +1692,9 @@ function PhotoEditor({
         <input
           type="file"
           accept="image/*"
-          onChange={(
-            event
-          ) =>
+          onChange={(event) =>
             setFile(
-              event.target
-                .files?.[0] ||
+              event.target.files?.[0] ||
                 null
             )
           }
@@ -2013,9 +1729,7 @@ function VisibilityToggle({
           ? "switch active"
           : "switch"
       }
-      onClick={
-        onClick
-      }
+      onClick={onClick}
     >
       <span />
     </button>
@@ -2194,6 +1908,7 @@ function Styles() {
       .field input,
       .field select,
       .visibilityField input,
+      .visibilityField select,
       .visibilityField textarea {
         width: 100%;
         border: 1px solid #d5dae1;
@@ -2204,7 +1919,8 @@ function Styles() {
 
       .field input,
       .field select,
-      .visibilityField input {
+      .visibilityField input,
+      .visibilityField select {
         height: 54px;
         padding: 0 14px;
       }
@@ -2431,6 +2147,7 @@ function Styles() {
         .field input,
         .field select,
         .visibilityField input,
+        .visibilityField select,
         .visibilityField textarea {
           font-size: 16px;
         }
