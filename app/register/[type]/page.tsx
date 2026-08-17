@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
@@ -100,155 +101,245 @@ export default function RegistrationProfilePage() {
   const [saving, setSaving] =
     useState(false);
 
-  const [formReady, setFormReady] =
-    useState(false);
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
 
   const ka = language === "ka";
 
-  function handleSubmit(
+  async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    setFormReady(false);
     setSaving(true);
+    setSuccessMessage("");
+    setErrorMessage("");
 
-    const formData =
-      new FormData(event.currentTarget);
+    try {
+      const formData =
+        new FormData(event.currentTarget);
 
-    /*
-      კატეგორია ფიქსირებულია.
-      მომხმარებელი შემდგომ შეძლებს
-      პროფილის მონაცემების რედაქტირებას,
-      მაგრამ category / item_type / pet_type
-      აღარ შეიცვლება.
-    */
+      const itemName = String(
+        formData.get("item_name") || ""
+      ).trim();
 
-    console.log({
-      tag_code: formData.get("tag_code"),
+      const tagCode = String(
+        formData.get("tag_code") || ""
+      ).trim();
 
-      item_type: category.itemType,
+      const ownerEmail = String(
+        formData.get("owner_email") || ""
+      ).trim();
 
-      pet_type:
-        category.petType || null,
+      if (!tagCode) {
+        setErrorMessage(
+          ka
+            ? "გთხოვთ, მიუთითოთ QR კოდი."
+            : "Please enter the QR code."
+        );
+        return;
+      }
 
-      item_name:
-        formData.get("item_name"),
+      if (!itemName) {
+        setErrorMessage(
+          ka
+            ? "გთხოვთ, მიუთითოთ სახელი."
+            : "Please enter a name."
+        );
+        return;
+      }
 
-      colour:
-        formData.get("colour"),
+      if (!ownerEmail) {
+        setErrorMessage(
+          ka
+            ? "გთხოვთ, მიუთითოთ ელფოსტა."
+            : "Please enter an email address."
+        );
+        return;
+      }
 
-      sex:
-        category.isPet
-          ? formData.get("sex")
-          : null,
+      /*
+        ამ ეტაპზე მხოლოდ იმ მონაცემებს
+        ვაგზავნით Supabase-ში, რომლებიც
+        უკვე გვაქვს item ცხრილის სტრუქტურაში.
 
-      date_of_birth:
-        category.isPet
-          ? formData.get("date_of_birth")
-          : null,
+        ფოტოებს Storage-ს შემდეგ ეტაპზე მივაბამთ.
+      */
 
-      weight:
-        category.isPet
-          ? formData.get("weight")
-          : null,
+      const payload = {
+        tag_code: tagCode,
 
-      medical_info:
-        category.isPet
-          ? formData.get("medical_info")
-          : null,
+        item_type:
+          category.itemType,
 
-      behaviour_note:
-        category.isPet
-          ? formData.get("behaviour_note")
-          : null,
+        pet_type:
+          category.petType || null,
 
-      brand:
-        !category.isPet
-          ? formData.get("brand")
-          : null,
+        item_name:
+          itemName,
 
-      model:
-        !category.isPet
-          ? formData.get("model")
-          : null,
+        colour:
+          String(
+            formData.get("colour") || ""
+          ).trim() || null,
 
-      size:
-        !category.isPet
-          ? formData.get("size")
-          : null,
+        sex:
+          category.isPet
+            ? String(
+                formData.get("sex") || ""
+              ) || null
+            : null,
 
-      material:
-        !category.isPet
-          ? formData.get("material")
-          : null,
+        date_of_birth:
+          category.isPet
+            ? String(
+                formData.get(
+                  "date_of_birth"
+                ) || ""
+              ) || null
+            : null,
 
-      distinctive_features:
-        !category.isPet
-          ? formData.get(
-              "distinctive_features"
-            )
-          : null,
+        weight:
+          category.isPet &&
+          String(
+            formData.get("weight") || ""
+          ).trim()
+            ? Number(
+                formData.get("weight")
+              )
+            : null,
 
-      description:
-        formData.get("description"),
+        medical_info:
+          category.isPet
+            ? String(
+                formData.get(
+                  "medical_info"
+                ) || ""
+              ).trim() || null
+            : null,
 
-      owner_first_name:
-        formData.get("owner_first_name"),
+        behaviour_note:
+          category.isPet
+            ? String(
+                formData.get(
+                  "behaviour_note"
+                ) || ""
+              ).trim() || null
+            : null,
 
-      owner_last_name:
-        formData.get("owner_last_name"),
+        brand:
+          !category.isPet
+            ? String(
+                formData.get("brand") || ""
+              ).trim() || null
+            : null,
 
-      owner_phone:
-        formData.get("owner_phone"),
+        model:
+          !category.isPet
+            ? String(
+                formData.get("model") || ""
+              ).trim() || null
+            : null,
 
-      owner_email:
-        formData.get("owner_email"),
+        size:
+          !category.isPet
+            ? String(
+                formData.get("size") || ""
+              ).trim() || null
+            : null,
 
-      contact_preference:
-        formData.get(
-          "contact_preference"
-        ),
+        material:
+          !category.isPet
+            ? String(
+                formData.get("material") || ""
+              ).trim() || null
+            : null,
 
-      additional_contact_name:
-        formData.get(
-          "additional_contact_name"
-        ),
+        distinctive_features:
+          !category.isPet
+            ? String(
+                formData.get(
+                  "distinctive_features"
+                ) || ""
+              ).trim() || null
+            : null,
 
-      additional_contact_phone:
-        formData.get(
-          "additional_contact_phone"
-        ),
+        description:
+          String(
+            formData.get("description") || ""
+          ).trim() || null,
 
-      additional_contact_email:
-        formData.get(
-          "additional_contact_email"
-        ),
+        owner_email:
+          ownerEmail,
 
-      finder_message:
-        formData.get("finder_message"),
+        finder_message:
+          String(
+            formData.get(
+              "finder_message"
+            ) || ""
+          ).trim() || null,
 
-      reward:
-        formData.get("reward"),
+        contact_preference:
+          String(
+            formData.get(
+              "contact_preference"
+            ) || "both"
+          ),
 
-      lost_seen_location:
-        formData.get(
-          "lost_seen_location"
-        ),
+        location_sharing_enabled:
+          locationSharingEnabled,
 
-      location_sharing_enabled:
-        locationSharingEnabled,
-    });
+        lost_seen_location:
+          String(
+            formData.get(
+              "lost_seen_location"
+            ) || ""
+          ).trim() || null,
 
-    /*
-      Supabase-ის რეალურ შენახვას
-      შემდეგ ეტაპზე მივაბამთ.
-    */
+        active: true,
+      };
 
-    setTimeout(() => {
+      const { error } = await supabase
+        .from("item")
+        .insert(payload);
+
+      if (error) {
+        console.error(
+          "Supabase insert error:",
+          error
+        );
+
+        setErrorMessage(
+          ka
+            ? `შენახვა ვერ მოხერხდა: ${error.message}`
+            : `Save failed: ${error.message}`
+        );
+
+        return;
+      }
+
+      setSuccessMessage(
+        ka
+          ? "ინფორმაცია წარმატებით შეინახა."
+          : "Information saved successfully."
+      );
+    } catch (error) {
+      console.error(
+        "Registration error:",
+        error
+      );
+
+      setErrorMessage(
+        ka
+          ? "დაფიქსირდა შეცდომა ინფორმაციის შენახვისას."
+          : "An error occurred while saving the information."
+      );
+    } finally {
       setSaving(false);
-      setFormReady(true);
-    }, 300);
+    }
   }
 
   return (
@@ -256,7 +347,10 @@ export default function RegistrationProfilePage() {
       {/* HEADER */}
 
       <header className="header">
-        <a href="/" className="brand">
+        <a
+          href="/"
+          className="brand"
+        >
           <div className="brandMark">
             QR
           </div>
@@ -328,8 +422,8 @@ export default function RegistrationProfilePage() {
 
           <p>
             {ka
-              ? "პროფილის მონაცემების შეცვლას მომავალშიც ნებისმიერ დროს შეძლებთ. არჩეული კატეგორია კი უცვლელი დარჩება."
-              : "You can update the profile information at any time. The selected category will remain fixed."}
+              ? "პროფილის მონაცემების შეცვლას მომავალშიც შეძლებთ. არჩეული კატეგორია კი უცვლელი დარჩება."
+              : "You will be able to update the profile information later. The selected category will remain fixed."}
           </p>
         </div>
       </section>
@@ -547,7 +641,7 @@ export default function RegistrationProfilePage() {
           </>
         )}
 
-        {/* ITEM / PET PHOTO */}
+        {/* PHOTO - STORAGE NEXT */}
 
         <FileField
           label={
@@ -577,8 +671,8 @@ export default function RegistrationProfilePage() {
           name="description"
           placeholder={
             ka
-              ? "დაწერეთ დამატებითი ინფორმაცია, რომელიც შესაძლოა მპოვნელს ნივთის ან ცხოველის ამოცნობაში დაეხმაროს."
-              : "Add any additional information that may help the finder identify the pet or item."
+              ? "დაწერეთ დამატებითი ინფორმაცია, რომელიც შესაძლოა მპოვნელს დაეხმაროს."
+              : "Add any additional information that may help the finder."
           }
         />
 
@@ -817,6 +911,20 @@ export default function RegistrationProfilePage() {
           }
         />
 
+        {/* RESULT */}
+
+        {errorMessage && (
+          <div className="error">
+            {errorMessage}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="success">
+            ✓ {successMessage}
+          </div>
+        )}
+
         {/* SAVE */}
 
         <button
@@ -832,15 +940,6 @@ export default function RegistrationProfilePage() {
             ? "ინფორმაციის შენახვა"
             : "Save Information"}
         </button>
-
-        {formReady && (
-          <div className="success">
-            ✓{" "}
-            {ka
-              ? "ფორმა სწორად შეივსო. Supabase-ში რეალურ შენახვას შემდეგ ეტაპზე მივაბამთ."
-              : "The form is complete. Supabase persistence will be connected in the next step."}
-          </div>
-        )}
       </form>
 
       <style jsx>{`
@@ -865,7 +964,7 @@ export default function RegistrationProfilePage() {
           width: 100%;
           max-width: 1100px;
           min-height: 82px;
-          margin: 0 auto;
+          margin: auto;
           padding: 0 24px;
           display: flex;
           align-items: center;
@@ -946,7 +1045,7 @@ export default function RegistrationProfilePage() {
         .intro {
           width: 100%;
           max-width: 860px;
-          margin: 0 auto;
+          margin: auto;
           padding: 55px 24px 28px;
           display: flex;
           align-items: flex-start;
@@ -1030,9 +1129,6 @@ export default function RegistrationProfilePage() {
           font-family: inherit;
           font-size: 16px;
           outline: none;
-          transition:
-            border-color 0.15s ease,
-            box-shadow 0.15s ease;
         }
 
         :global(.formControl:focus) {
@@ -1140,10 +1236,31 @@ export default function RegistrationProfilePage() {
           color: #1465e8;
         }
 
+        .error {
+          margin-top: 20px;
+          padding: 14px 16px;
+          border-radius: 12px;
+          background: #fff1f1;
+          color: #b42318;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.5;
+        }
+
+        .success {
+          margin-top: 20px;
+          padding: 14px 16px;
+          border-radius: 12px;
+          background: #eef9f1;
+          color: #22743a;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
         .saveButton {
           width: 100%;
           min-height: 60px;
-          margin-top: 34px;
+          margin-top: 25px;
           border: 0;
           border-radius: 14px;
           background: #1465e8;
@@ -1157,16 +1274,6 @@ export default function RegistrationProfilePage() {
         .saveButton:disabled {
           opacity: 0.65;
           cursor: wait;
-        }
-
-        .success {
-          margin-top: 15px;
-          padding: 14px 16px;
-          border-radius: 12px;
-          background: #eef9f1;
-          color: #22743a;
-          font-size: 13px;
-          font-weight: 700;
         }
 
         @media (max-width: 600px) {
