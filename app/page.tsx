@@ -18,6 +18,7 @@ const categories = [
     en: "Dog",
     kaText: "QR პროფილი თქვენი ძაღლის უსაფრთხო დაბრუნებისთვის.",
     enText: "A QR profile to help your dog return home safely.",
+    href: "/register/dog",
   },
   {
     icon: "🐈",
@@ -25,6 +26,7 @@ const categories = [
     en: "Cat",
     kaText: "საკონტაქტო ინფორმაცია და მნიშვნელოვანი დეტალები ერთ QR-ში.",
     enText: "Contact information and important details in one QR.",
+    href: "/register/cat",
   },
   {
     icon: "🔑",
@@ -32,6 +34,7 @@ const categories = [
     en: "Keys",
     kaText: "მპოვნელმა მარტივად შეძლოს თქვენთან დაკავშირება.",
     enText: "Help a finder contact you quickly.",
+    href: "/register/keys",
   },
   {
     icon: "👛",
@@ -39,6 +42,7 @@ const categories = [
     en: "Wallet",
     kaText: "დაკარგული საფულის დაბრუნების უფრო მარტივი გზა.",
     enText: "A simpler way to get a lost wallet back.",
+    href: "/register/wallet",
   },
   {
     icon: "🧳",
@@ -46,6 +50,7 @@ const categories = [
     en: "Suitcase",
     kaText: "მოგზაურობისას თქვენი ბარგისთვის დამატებითი დაცვა.",
     enText: "Extra protection for your luggage while traveling.",
+    href: "/register/suitcase",
   },
   {
     icon: "🎒",
@@ -53,6 +58,7 @@ const categories = [
     en: "Bag",
     kaText: "QR პროფილი ჩანთის სწრაფად დასაბრუნებლად.",
     enText: "A QR profile to help return your bag quickly.",
+    href: "/register/bag",
   },
 ];
 
@@ -103,7 +109,6 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* HERO */}
       <section className="hero">
         <div className="heroContent">
           <div className="heroBrand">QR RETURN</div>
@@ -176,7 +181,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* WHAT CAN YOU REGISTER */}
       <section className="categorySection">
         <div className="categoryInner">
           <div className="sectionIntro">
@@ -188,8 +192,8 @@ export default function HomePage() {
 
             <p>
               {ka
-                ? "აირჩიეთ რა გსურთ დაიცვათ. რეგისტრაციის მეორე გვერდზე შეძლებთ შესაბამისი კატეგორიის არჩევას და პროფილის შექმნას."
-                : "See what you can protect. On the registration page you can choose the appropriate category and create its profile."}
+                ? "აირჩიეთ ცხოველი, ნივთი ან Emergency სამაჯური და პირდაპირ დაიწყეთ შესაბამისი პროფილის რეგისტრაცია."
+                : "Choose a pet, item or Emergency Bracelet and start registering the appropriate profile directly."}
             </p>
           </div>
 
@@ -198,7 +202,6 @@ export default function HomePage() {
               <div className="categoryCard" key={category.en}>
                 <div className="categoryTop">
                   <div className="categoryEmoji">{category.icon}</div>
-
                   <div className="categoryArrow">↗</div>
                 </div>
 
@@ -206,14 +209,13 @@ export default function HomePage() {
 
                 <p>{ka ? category.kaText : category.enText}</p>
 
-                <a href="/register" className="categoryRegister">
+                <a href={category.href} className="categoryRegister">
                   {ka ? "რეგისტრაცია" : "Register"} →
                 </a>
               </div>
             ))}
           </div>
 
-          {/* FEATURED EMERGENCY BRACELET */}
           <div className="emergencyFeatured">
             <div className="emergencyFeaturedContent">
               <div className="emergencyMark">
@@ -248,9 +250,7 @@ export default function HomePage() {
                 <div className="emergencyMiniFeatures">
                   <div>
                     <b>01</b>
-                    <span>
-                      {ka ? "Emergency Contact" : "Emergency Contact"}
-                    </span>
+                    <span>Emergency Contact</span>
                   </div>
 
                   <div>
@@ -266,8 +266,13 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <a href="/register" className="emergencyRegisterButton">
-                  {ka ? "Emergency სამაჯურის რეგისტრაცია" : "Register Emergency Bracelet"}{" "}
+                <a
+                  href="/register/emergency"
+                  className="emergencyRegisterButton"
+                >
+                  {ka
+                    ? "Emergency სამაჯურის რეგისტრაცია"
+                    : "Register Emergency Bracelet"}{" "}
                   →
                 </a>
               </div>
@@ -312,18 +317,17 @@ export default function HomePage() {
           <div className="categoryBottomCta">
             <p>
               {ka
-                ? "ყველა კატეგორიის რეგისტრაცია იწყება ერთ გვერდზე."
-                : "Registration for every category starts from one page."}
+                ? "თუ ჯერ არ გაქვთ არჩეული კატეგორია, გამოიყენეთ საერთო რეგისტრაციის გვერდი."
+                : "If you have not chosen a category yet, use the main registration page."}
             </p>
 
             <a href="/register">
-              {ka ? "გადადით რეგისტრაციაზე" : "Go to registration"} →
+              {ka ? "საერთო რეგისტრაცია" : "Registration"} →
             </a>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
       <section className="information">
         <div className="infoInner">
           <div className="infoLabel">QR RETURN</div>
@@ -415,7 +419,6 @@ export default function HomePage() {
             {features.map((feature) => (
               <div className="feature" key={feature.number}>
                 <div className="featureNumber">{feature.number}</div>
-
                 <div className="featureName">
                   {ka ? feature.ka : feature.en}
                 </div>
@@ -431,7 +434,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CONTACT */}
       <section id="contact" className="contact">
         <div className="contactInner">
           <div>
@@ -480,8 +482,6 @@ export default function HomePage() {
           font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
             Arial, sans-serif;
         }
-
-        /* HEADER */
 
         .header {
           width: calc(100% - 48px);
@@ -587,8 +587,6 @@ export default function HomePage() {
           color: #1465e8;
           box-shadow: 0 2px 8px rgba(20, 40, 70, 0.08);
         }
-
-        /* HERO */
 
         .hero {
           max-width: 1240px;
@@ -765,8 +763,6 @@ export default function HomePage() {
           background: #081426;
         }
 
-        /* CATEGORY SECTION */
-
         .categorySection {
           padding: 95px 24px;
           background: #f7f9fc;
@@ -782,7 +778,7 @@ export default function HomePage() {
         }
 
         .sectionIntro h2 {
-          margin: 15px 0 15px;
+          margin: 15px 0;
           font-size: clamp(38px, 5vw, 60px);
           line-height: 1.05;
           letter-spacing: -2.8px;
@@ -862,8 +858,6 @@ export default function HomePage() {
           font-weight: 900;
           text-decoration: none;
         }
-
-        /* EMERGENCY FEATURED */
 
         .emergencyFeatured {
           position: relative;
@@ -1149,8 +1143,6 @@ export default function HomePage() {
           text-decoration: none;
         }
 
-        /* INFORMATION */
-
         .information {
           background: #ffffff;
           padding: 95px 24px;
@@ -1235,8 +1227,6 @@ export default function HomePage() {
           font-weight: 900;
         }
 
-        /* CONTACT */
-
         .contact {
           padding: 80px 24px;
           background: #f7f9fc;
@@ -1274,8 +1264,6 @@ export default function HomePage() {
           font-size: 14px;
           font-weight: 850;
         }
-
-        /* FOOTER */
 
         .footer {
           background: #071321;
@@ -1326,8 +1314,6 @@ export default function HomePage() {
           font-size: 11px;
         }
 
-        /* TABLET */
-
         @media (max-width: 900px) {
           .header {
             width: calc(100% - 28px);
@@ -1363,8 +1349,6 @@ export default function HomePage() {
             align-items: flex-start;
           }
         }
-
-        /* MOBILE */
 
         @media (max-width: 600px) {
           .header {
