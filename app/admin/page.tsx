@@ -5,51 +5,30 @@ import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
 
-type AdminUser = {
-  user_id: string;
-};
-
 export default function AdminDashboardPage() {
   const [lang, setLang] = useState<Lang>("ka");
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [supportCount, setSupportCount] = useState(0);
-  const [error, setError] = useState("");
 
   const ka = lang === "ka";
 
   useEffect(() => {
-    async function loadAdmin() {
-      setLoading(true);
-      setError("");
+    async function checkAdmin() {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
 
-      const {
-        data: userData,
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !userData.user) {
+      if (!user) {
         setIsAdmin(false);
         setLoading(false);
         return;
       }
 
-      const {
-        data: adminData,
-        error: adminError,
-      } = await supabase
+      const { data: admin } = await supabase
         .from("admin_users")
         .select("user_id")
-        .eq("user_id", userData.user.id)
+        .eq("user_id", user.id)
         .maybeSingle();
-
-      if (adminError) {
-        setError(adminError.message);
-        setLoading(false);
-        return;
-      }
-
-      const admin = adminData as AdminUser | null;
 
       if (!admin) {
         setIsAdmin(false);
@@ -59,64 +38,27 @@ export default function AdminDashboardPage() {
 
       setIsAdmin(true);
 
-      const {
-        data: messageData,
-        error: messageError,
-      } = await supabase
+      const { count } = await supabase
         .from("support_messages")
-        .select("id, sender")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
         .eq("sender", "user");
 
-      if (!messageError) {
-        setSupportCount(messageData?.length || 0);
-      }
-
+      setSupportCount(count || 0);
       setLoading(false);
     }
 
-    void loadAdmin();
+    void checkAdmin();
   }, []);
-
-  useEffect(() => {
-    if (!isAdmin) {
-      return;
-    }
-
-    const channel = supabase
-      .channel("admin-dashboard-support")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "support_messages",
-        },
-        (payload) => {
-          const message = payload.new as {
-            sender?: string;
-          };
-
-          if (message.sender === "user") {
-            setSupportCount((current) => current + 1);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(channel);
-    };
-  }, [isAdmin]);
 
   if (loading) {
     return (
-      <main className="statePage">
+      <main className="center">
         <div className="loader" />
-
         <strong>
-          {ka
-            ? "Admin Dashboard იტვირთება..."
-            : "Loading Admin Dashboard..."}
+          {ka ? "იტვირთება..." : "Loading..."}
         </strong>
 
         <Styles />
@@ -126,7 +68,7 @@ export default function AdminDashboardPage() {
 
   if (!isAdmin) {
     return (
-      <main className="statePage">
+      <main className="center">
         <div className="lock">🔒</div>
 
         <h1>
@@ -137,14 +79,12 @@ export default function AdminDashboardPage() {
 
         <p>
           {ka
-            ? "ამ გვერდის ნახვა მხოლოდ QR RETURN ადმინისტრატორს შეუძლია."
-            : "Only a QR RETURN administrator can access this page."}
+            ? "შედით თქვენი QR RETURN Admin ანგარიშით."
+            : "Sign in with your QR RETURN Admin account."}
         </p>
 
-        <a href="/login">
-          {ka
-            ? "Admin ანგარიშით შესვლა"
-            : "Sign in as Admin"}
+        <a className="loginButton" href="/login">
+          {ka ? "შესვლა" : "Sign in"}
         </a>
 
         <Styles />
@@ -160,13 +100,12 @@ export default function AdminDashboardPage() {
 
           <div>
             <strong>QR RETURN</strong>
-            <small>ADMIN DASHBOARD</small>
+            <small>ADMIN</small>
           </div>
         </a>
 
         <div className="languages">
           <button
-            type="button"
             className={ka ? "active" : ""}
             onClick={() => setLang("ka")}
           >
@@ -174,7 +113,6 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            type="button"
             className={!ka ? "active" : ""}
             onClick={() => setLang("en")}
           >
@@ -183,38 +121,25 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <section className="dashboard">
-        <div className="intro">
-          <div className="eyebrow">
-            QR RETURN
-          </div>
+      <section className="content">
+        <div className="welcome">
+          <span>QR RETURN</span>
 
-          <h1>
-            Admin Dashboard
-          </h1>
+          <h1>Admin Dashboard</h1>
 
           <p>
             {ka
-              ? "მართეთ QR RETURN-ის Support, მომხმარებლები და QR პროფილები ერთი ადგილიდან."
-              : "Manage QR RETURN Support, users and QR profiles from one place."}
+              ? "მართეთ თქვენი პლატფორმა ერთი ადგილიდან."
+              : "Manage your platform from one place."}
           </p>
         </div>
 
-        {error && (
-          <div className="error">
-            ⚠ {error}
-          </div>
-        )}
-
         <div className="grid">
-          <a
-            href="/admin/support"
-            className="card support"
-          >
-            <div className="cardTop">
-              <div className="icon">
-                💬
-              </div>
+
+          {/* SUPPORT */}
+          <a href="/admin/support" className="card support">
+            <div className="top">
+              <div className="icon">💬</div>
 
               {supportCount > 0 && (
                 <div className="badge">
@@ -223,31 +148,22 @@ export default function AdminDashboardPage() {
               )}
             </div>
 
-            <h2>
-              Support Inbox
-            </h2>
+            <h2>Support Inbox</h2>
 
             <p>
               {ka
                 ? "ნახეთ მომხმარებლების შეტყობინებები და უპასუხეთ Live Chat-ში."
-                : "View customer messages and reply through Live Chat."}
+                : "View messages and reply through Live Chat."}
             </p>
 
-            <span className="openLink">
-              {ka ? "გახსენით" : "Open"} →
-            </span>
+            <strong className="open">
+              {ka ? "გახსნა" : "Open"} →
+            </strong>
           </a>
 
-          <div className="card disabled">
-            <div className="cardTop">
-              <div className="icon">
-                🔎
-              </div>
-
-              <div className="soon">
-                {ka ? "მალე" : "Soon"}
-              </div>
-            </div>
+          {/* QR SEARCH */}
+          <a href="/admin/search" className="card">
+            <div className="icon">🔎</div>
 
             <h2>
               {ka ? "QR ძებნა" : "QR Search"}
@@ -255,21 +171,18 @@ export default function AdminDashboardPage() {
 
             <p>
               {ka
-                ? "მოძებნეთ პროფილი QR კოდის საშუალებით."
-                : "Find a profile using its QR code."}
+                ? "მოძებნეთ მომხმარებელი ან პროფილი QR კოდის საშუალებით."
+                : "Find a user or profile using a QR code."}
             </p>
-          </div>
 
-          <div className="card disabled">
-            <div className="cardTop">
-              <div className="icon">
-                👥
-              </div>
+            <strong className="open">
+              {ka ? "გახსნა" : "Open"} →
+            </strong>
+          </a>
 
-              <div className="soon">
-                {ka ? "მალე" : "Soon"}
-              </div>
-            </div>
+          {/* USERS */}
+          <a href="/admin/users" className="card">
+            <div className="icon">👥</div>
 
             <h2>
               {ka ? "მომხმარებლები" : "Users"}
@@ -277,21 +190,18 @@ export default function AdminDashboardPage() {
 
             <p>
               {ka
-                ? "ნახეთ რეგისტრირებული ანგარიშები და პროფილები."
-                : "View registered accounts and profiles."}
+                ? "ნახეთ QR RETURN-ში რეგისტრირებული მომხმარებლები."
+                : "View registered QR RETURN users."}
             </p>
-          </div>
 
-          <div className="card disabled">
-            <div className="cardTop">
-              <div className="icon">
-                🏷️
-              </div>
+            <strong className="open">
+              {ka ? "გახსნა" : "Open"} →
+            </strong>
+          </a>
 
-              <div className="soon">
-                {ka ? "მალე" : "Soon"}
-              </div>
-            </div>
+          {/* QR PROFILES */}
+          <a href="/admin/items" className="card">
+            <div className="icon">🏷️</div>
 
             <h2>
               {ka ? "QR პროფილები" : "QR Profiles"}
@@ -299,26 +209,19 @@ export default function AdminDashboardPage() {
 
             <p>
               {ka
-                ? "ნახეთ აქტიური QR კოდები, ცხოველები, ნივთები და Emergency პროფილები."
-                : "View active QR codes, pets, items and Emergency profiles."}
+                ? "მართეთ ცხოველების, ნივთებისა და Emergency QR პროფილები."
+                : "Manage pet, item and Emergency QR profiles."}
             </p>
-          </div>
+
+            <strong className="open">
+              {ka ? "გახსნა" : "Open"} →
+            </strong>
+          </a>
+
         </div>
 
-        <div className="quickActions">
-          <a href="/admin/support">
-            💬{" "}
-            {ka
-              ? "Support შეტყობინებებზე გადასვლა"
-              : "Open Support messages"}
-          </a>
-
-          <a href="/">
-            ←{" "}
-            {ka
-              ? "მთავარ გვერდზე დაბრუნება"
-              : "Back to website"}
-          </a>
+        <div className="bottom">
+          <a href="/">← {ka ? "საიტზე დაბრუნება" : "Back to website"}</a>
         </div>
       </section>
 
@@ -334,40 +237,28 @@ function Styles() {
         box-sizing: border-box;
       }
 
-      html,
       body {
         margin: 0;
-        padding: 0;
-      }
-
-      body {
         background: #f5f7fb;
-      }
-
-      button {
-        font: inherit;
+        font-family: Inter, Arial, sans-serif;
+        color: #101828;
       }
 
       .page {
         min-height: 100vh;
-        color: #101828;
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
         background:
           radial-gradient(
-            circle at 95% 5%,
-            rgba(118, 85, 247, 0.1),
-            transparent 26%
+            circle at 95% 0%,
+            rgba(118,85,247,.12),
+            transparent 28%
           ),
           #f5f7fb;
       }
 
       .header {
         width: calc(100% - 32px);
-        max-width: 1180px;
-        min-height: 78px;
+        max-width: 1150px;
+        height: 80px;
         margin: auto;
         display: flex;
         align-items: center;
@@ -383,55 +274,47 @@ function Styles() {
       }
 
       .logo {
-        width: 45px;
-        height: 45px;
+        width: 46px;
+        height: 46px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
-        background:
-          linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+        border-radius: 14px;
+        background: linear-gradient(135deg,#1465e8,#7655f7);
         color: white;
         font-size: 12px;
         font-weight: 900;
       }
 
-      .brand strong,
-      .brand small {
-        display: block;
-      }
-
       .brand strong {
+        display: block;
         color: #1465e8;
         font-size: 18px;
         font-weight: 900;
       }
 
       .brand small {
-        margin-top: 3px;
+        display: block;
+        margin-top: 2px;
         color: #7655f7;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 900;
-        letter-spacing: 1.9px;
+        letter-spacing: 2px;
       }
 
       .languages {
-        padding: 4px;
         display: flex;
-        border-radius: 9px;
+        padding: 4px;
+        border-radius: 10px;
         background: #eaecf0;
       }
 
       .languages button {
-        padding: 7px 9px;
+        padding: 8px 10px;
         border: 0;
         border-radius: 7px;
         background: transparent;
         color: #667085;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 900;
         cursor: pointer;
       }
@@ -441,181 +324,125 @@ function Styles() {
         color: #1465e8;
       }
 
-      .dashboard {
+      .content {
         width: calc(100% - 32px);
-        max-width: 1080px;
+        max-width: 1050px;
         margin: auto;
-        padding: 55px 0 80px;
+        padding: 58px 0 80px;
       }
 
-      .intro {
-        max-width: 700px;
-      }
-
-      .eyebrow {
+      .welcome span {
         color: #7655f7;
         font-size: 10px;
         font-weight: 900;
         letter-spacing: 2px;
       }
 
-      .intro h1 {
-        margin: 10px 0 10px;
-        font-size: clamp(34px, 5vw, 52px);
+      .welcome h1 {
+        margin: 8px 0;
+        font-size: clamp(35px,5vw,50px);
         letter-spacing: -2px;
       }
 
-      .intro p {
+      .welcome p {
         margin: 0;
         color: #667085;
-        font-size: 14px;
-        line-height: 1.65;
+        font-size: 15px;
       }
 
       .grid {
-        margin-top: 36px;
+        margin-top: 38px;
         display: grid;
-        grid-template-columns:
-          repeat(2, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(2,1fr);
+        gap: 18px;
       }
 
       .card {
-        min-height: 220px;
-        padding: 24px;
+        min-height: 225px;
+        padding: 25px;
         display: flex;
         flex-direction: column;
         border: 1px solid #e4e7ec;
-        border-radius: 20px;
+        border-radius: 21px;
         background: white;
-        color: inherit;
+        color: #344054;
         text-decoration: none;
-        box-shadow:
-          0 12px 38px rgba(16, 24, 40, 0.05);
+        box-shadow: 0 12px 35px rgba(16,24,40,.05);
+        transition: .18s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 45px rgba(16,24,40,.1);
       }
 
       .card.support {
         border-color: #d9d6fe;
-        background:
-          linear-gradient(
-            135deg,
-            #ffffff,
-            #f5f3ff
-          );
+        background: linear-gradient(135deg,#fff,#f5f3ff);
       }
 
-      .card:not(.disabled) {
-        transition:
-          transform 0.18s ease,
-          box-shadow 0.18s ease;
-      }
-
-      .card:not(.disabled):hover {
-        transform: translateY(-3px);
-        box-shadow:
-          0 18px 48px rgba(16, 24, 40, 0.1);
-      }
-
-      .card.disabled {
-        opacity: 0.66;
-      }
-
-      .cardTop {
+      .top {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
       }
 
       .icon {
-        width: 54px;
-        height: 54px;
+        width: 56px;
+        height: 56px;
         display: grid;
         place-items: center;
-        border-radius: 15px;
+        border-radius: 16px;
         background: #eef4ff;
-        font-size: 26px;
-      }
-
-      .support .icon {
-        background:
-          linear-gradient(
-            135deg,
-            #e8efff,
-            #eee9ff
-          );
+        font-size: 27px;
       }
 
       .badge {
-        min-width: 30px;
-        height: 30px;
+        min-width: 31px;
+        height: 31px;
         padding: 0 8px;
         display: grid;
         place-items: center;
         border-radius: 20px;
         background: #d92d20;
         color: white;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 900;
-      }
-
-      .soon {
-        padding: 5px 8px;
-        border-radius: 7px;
-        background: #f2f4f7;
-        color: #667085;
-        font-size: 8px;
-        font-weight: 800;
       }
 
       .card h2 {
         margin: 20px 0 8px;
-        color: #344054;
-        font-size: 20px;
+        font-size: 21px;
       }
 
       .card p {
         flex: 1;
         margin: 0;
         color: #667085;
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.55;
       }
 
-      .openLink {
-        margin-top: 20px;
+      .open {
+        margin-top: 18px;
         color: #1465e8;
-        font-size: 11px;
-        font-weight: 900;
+        font-size: 12px;
       }
 
-      .quickActions {
-        margin-top: 28px;
+      .bottom {
+        margin-top: 30px;
         padding-top: 22px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
         border-top: 1px solid #e4e7ec;
       }
 
-      .quickActions a {
+      .bottom a {
         color: #1465e8;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 800;
         text-decoration: none;
       }
 
-      .error {
-        margin-top: 20px;
-        padding: 12px;
-        border: 1px solid #fecdca;
-        border-radius: 10px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 10px;
-      }
-
-      .statePage {
+      .center {
         min-height: 100vh;
         padding: 30px;
         display: flex;
@@ -623,64 +450,49 @@ function Styles() {
         align-items: center;
         justify-content: center;
         background: #f5f7fb;
-        color: #344054;
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
         text-align: center;
+        font-family: Inter,Arial,sans-serif;
       }
 
-      .statePage p {
-        max-width: 420px;
+      .lock {
+        font-size: 44px;
+      }
+
+      .center p {
         color: #667085;
-        font-size: 12px;
-        line-height: 1.55;
       }
 
-      .statePage a {
-        margin-top: 12px;
-        padding: 11px 15px;
-        border-radius: 9px;
+      .loginButton {
+        margin-top: 10px;
+        padding: 11px 17px;
+        border-radius: 10px;
         background: #1465e8;
         color: white;
-        font-size: 10px;
         font-weight: 900;
         text-decoration: none;
       }
 
-      .lock {
-        font-size: 42px;
-      }
-
       .loader {
-        width: 36px;
-        height: 36px;
-        margin-bottom: 11px;
+        width: 38px;
+        height: 38px;
+        margin-bottom: 12px;
         border: 3px solid #e4e7ec;
         border-top-color: #1465e8;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin .8s linear infinite;
       }
 
       @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
+        to { transform: rotate(360deg); }
       }
 
-      @media (max-width: 700px) {
-        .dashboard {
-          padding-top: 38px;
-        }
-
+      @media(max-width:700px) {
         .grid {
           grid-template-columns: 1fr;
         }
 
-        .quickActions {
-          align-items: flex-start;
-          flex-direction: column;
+        .content {
+          padding-top: 38px;
         }
       }
     `}</style>
