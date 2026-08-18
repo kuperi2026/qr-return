@@ -1,181 +1,88 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Language = "ka" | "en";
-type Step = 1 | 2 | 3 | 4;
-type ManagerType = "self" | "other";
+type Lang = "ka" | "en";
+type RegisterFor = "self" | "other";
 
-type FormState = {
+type FormData = {
+  register_for: RegisterFor;
+
+  manager_first_name: string;
+  manager_last_name: string;
+  manager_phone: string;
+  manager_email: string;
+  manager_address: string;
+
+  codeword: string;
+  codeword_confirm: string;
+
   tag_code: string;
 
   first_name: string;
   last_name: string;
+
   date_of_birth: string;
   country_code: string;
+  personal_number: string;
 
-  owner_email: string;
-  codeword: string;
-  codeword_confirm: string;
-
-  profile_manager_type: ManagerType;
-  manager_relationship: string;
-
-  owner_phone: string;
-
-  blood_type: string;
   address: string;
+  additional_info: string;
 
-  allergies: string;
-  medical_conditions: string;
-  medications: string;
-  medical_note: string;
-
-  emergency_contact_name: string;
-  emergency_contact_relationship: string;
-  emergency_contact_phone: string;
-
-  second_contact_name: string;
-  second_contact_relationship: string;
-  second_contact_phone: string;
-
-  emergency_message: string;
+  contact_first_name: string;
+  contact_last_name: string;
+  contact_phone: string;
 };
 
-type VisibilityState = {
-  show_photo: boolean;
+type Visibility = {
   show_date_of_birth: boolean;
-  show_owner_phone: boolean;
-
-  show_blood_type: boolean;
+  show_personal_number: boolean;
   show_address: boolean;
-
-  show_allergies: boolean;
-  show_medical_conditions: boolean;
-  show_medications: boolean;
-  show_medical_note: boolean;
-
-  show_second_contact: boolean;
-  show_emergency_message: boolean;
+  show_additional_info: boolean;
+  show_contact: boolean;
 };
 
-const BUCKET = "qr-return-images";
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const TERMS_VERSION = "emergency-2026-08-18";
+const TERMS_VERSION = "emergency-v3";
 
-const initialForm: FormState = {
+const initialForm: FormData = {
+  register_for: "self",
+
+  manager_first_name: "",
+  manager_last_name: "",
+  manager_phone: "",
+  manager_email: "",
+  manager_address: "",
+
+  codeword: "",
+  codeword_confirm: "",
+
   tag_code: "",
 
   first_name: "",
   last_name: "",
+
   date_of_birth: "",
   country_code: "",
+  personal_number: "",
 
-  owner_email: "",
-  codeword: "",
-  codeword_confirm: "",
-
-  profile_manager_type: "self",
-  manager_relationship: "",
-
-  owner_phone: "",
-
-  blood_type: "",
   address: "",
+  additional_info: "",
 
-  allergies: "",
-  medical_conditions: "",
-  medications: "",
-  medical_note: "",
-
-  emergency_contact_name: "",
-  emergency_contact_relationship: "",
-  emergency_contact_phone: "",
-
-  second_contact_name: "",
-  second_contact_relationship: "",
-  second_contact_phone: "",
-
-  emergency_message: "",
+  contact_first_name: "",
+  contact_last_name: "",
+  contact_phone: "",
 };
 
-const initialVisibility: VisibilityState = {
-  show_photo: true,
+const initialVisibility: Visibility = {
   show_date_of_birth: false,
-  show_owner_phone: false,
-
-  show_blood_type: true,
+  show_personal_number: false,
   show_address: false,
-
-  show_allergies: true,
-  show_medical_conditions: true,
-  show_medications: true,
-  show_medical_note: true,
-
-  show_second_contact: false,
-  show_emergency_message: true,
+  show_additional_info: false,
+  show_contact: true,
 };
 
-const relationshipOptions = {
-  ka: [
-    ["", "აირჩიეთ"],
-    ["mother", "დედა"],
-    ["father", "მამა"],
-    ["spouse", "მეუღლე"],
-    ["child", "შვილი"],
-    ["sister", "და"],
-    ["brother", "ძმა"],
-    ["relative", "ნათესავი"],
-    ["friend", "მეგობარი"],
-    ["caregiver", "მომვლელი"],
-    ["guardian", "მეურვე"],
-    ["other", "სხვა"],
-  ],
-
-  en: [
-    ["", "Select"],
-    ["mother", "Mother"],
-    ["father", "Father"],
-    ["spouse", "Spouse"],
-    ["child", "Child"],
-    ["sister", "Sister"],
-    ["brother", "Brother"],
-    ["relative", "Relative"],
-    ["friend", "Friend"],
-    ["caregiver", "Caregiver"],
-    ["guardian", "Guardian"],
-    ["other", "Other"],
-  ],
-};
-
-const managerRelationshipOptions = {
-  ka: [
-    ["", "აირჩიეთ"],
-    ["parent", "მშობელი"],
-    ["child", "შვილი"],
-    ["spouse", "მეუღლე"],
-    ["sibling", "და / ძმა"],
-    ["guardian", "მეურვე"],
-    ["caregiver", "მომვლელი"],
-    ["relative", "ნათესავი"],
-    ["other", "სხვა"],
-  ],
-
-  en: [
-    ["", "Select"],
-    ["parent", "Parent"],
-    ["child", "Child"],
-    ["spouse", "Spouse"],
-    ["sibling", "Sibling"],
-    ["guardian", "Guardian"],
-    ["caregiver", "Caregiver"],
-    ["relative", "Relative"],
-    ["other", "Other"],
-  ],
-};
-
-const countryOptions = [
+const countries = [
   {
     code: "US",
     ka: "🇺🇸 ამერიკის შეერთებული შტატები",
@@ -190,34 +97,12 @@ const countryOptions = [
   },
 ];
 
-function cleanTag(tag: string) {
-  return tag
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "-");
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
 }
 
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
-
-function safeExtension(file: File) {
-  const ext =
-    file.name
-      .split(".")
-      .pop()
-      ?.toLowerCase() || "jpg";
-
-  const allowed = [
-    "jpg",
-    "jpeg",
-    "png",
-    "webp",
-    "gif",
-    "heic",
-    "heif",
-  ];
-
-  return allowed.includes(ext) ? ext : "jpg";
+function normalizeTag(value: string) {
+  return value.trim().toUpperCase();
 }
 
 function bytesToBase64(bytes: Uint8Array) {
@@ -230,7 +115,7 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
-async function hashCodeword(codeword: string) {
+async function createCodewordHash(codeword: string) {
   const encoder = new TextEncoder();
 
   const salt = crypto.getRandomValues(
@@ -252,148 +137,41 @@ async function hashCodeword(codeword: string) {
     await crypto.subtle.deriveBits(
       {
         name: "PBKDF2",
+        hash: "SHA-256",
         salt,
         iterations,
-        hash: "SHA-256",
       },
       keyMaterial,
       256
     );
 
-  const hash =
-    new Uint8Array(derivedBits);
-
   return [
     "pbkdf2_sha256",
     iterations.toString(),
     bytesToBase64(salt),
-    bytesToBase64(hash),
+    bytesToBase64(
+      new Uint8Array(derivedBits)
+    ),
   ].join("$");
 }
 
-async function uploadEmergencyPhoto(
-  file: File,
-  tagCode: string
-) {
-  if (!file.type.startsWith("image/")) {
-    throw new Error("INVALID_IMAGE_TYPE");
-  }
-
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw new Error("IMAGE_TOO_LARGE");
-  }
-
-  const ext =
-    safeExtension(file);
-
-  const unique =
-    typeof crypto !== "undefined" &&
-    "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2)}`;
-
-  const path =
-    `emergency/${cleanTag(
-      tagCode
-    )}-${unique}.${ext}`;
-
-  const { error } =
-    await supabase.storage
-      .from(BUCKET)
-      .upload(path, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
-      });
-
-  if (error) {
-    throw error;
-  }
-
-  const { data } =
-    supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(path);
-
-  return data.publicUrl;
-}
-
-export default function EmergencyRegistrationPage() {
-  const [language, setLanguage] =
-    useState<Language>("ka");
+export default function EmergencyRegisterPage() {
+  const [lang, setLang] =
+    useState<Lang>("ka");
 
   const [step, setStep] =
-    useState<Step>(1);
+    useState<1 | 2 | 3>(1);
 
   const [form, setForm] =
-    useState<FormState>(
-      initialForm
-    );
+    useState<FormData>(initialForm);
 
   const [
     visibility,
     setVisibility,
   ] =
-    useState<VisibilityState>(
+    useState<Visibility>(
       initialVisibility
     );
-
-  const [photo, setPhoto] =
-    useState<File | null>(
-      null
-    );
-
-  const [
-    identityLocked,
-    setIdentityLocked,
-  ] = useState(false);
-
-  const [
-    emergencyContactEnabled,
-    setEmergencyContactEnabled,
-  ] = useState(false);
-
-  const [
-    secondContactEnabled,
-    setSecondContactEnabled,
-  ] = useState(false);
-
-  const [
-    emergencyMobileEnabled,
-    setEmergencyMobileEnabled,
-  ] = useState(false);
-
-  const [
-    emergencyWhatsappEnabled,
-    setEmergencyWhatsappEnabled,
-  ] = useState(false);
-
-  const [
-    emergencyLiveChatEnabled,
-    setEmergencyLiveChatEnabled,
-  ] = useState(false);
-
-  const [
-    secondMobileEnabled,
-    setSecondMobileEnabled,
-  ] = useState(false);
-
-  const [
-    secondWhatsappEnabled,
-    setSecondWhatsappEnabled,
-  ] = useState(false);
-
-  const [
-    secondLiveChatEnabled,
-    setSecondLiveChatEnabled,
-  ] = useState(false);
-
-  const [
-    locationSharing,
-    setLocationSharing,
-  ] = useState(false);
 
   const [
     termsAccepted,
@@ -409,18 +187,24 @@ export default function EmergencyRegistrationPage() {
   const [success, setSuccess] =
     useState(false);
 
-  const ka =
-    language === "ka";
+  const ka = lang === "ka";
 
   const selectedCountry =
-    countryOptions.find(
-      (country) =>
-        country.code ===
+    countries.find(
+      (item) =>
+        item.code ===
         form.country_code
     );
 
+  const hasContact =
+    Boolean(
+      form.contact_first_name.trim() ||
+        form.contact_last_name.trim() ||
+        form.contact_phone.trim()
+    );
+
   function updateField(
-    field: keyof FormState,
+    field: keyof FormData,
     value: string
   ) {
     setForm((current) => ({
@@ -434,15 +218,12 @@ export default function EmergencyRegistrationPage() {
   }
 
   function toggleVisibility(
-    field: keyof VisibilityState
+    field: keyof Visibility
   ) {
-    setVisibility(
-      (current) => ({
-        ...current,
-        [field]:
-          !current[field],
-      })
-    );
+    setVisibility((current) => ({
+      ...current,
+      [field]: !current[field],
+    }));
   }
 
   function goTop() {
@@ -452,33 +233,108 @@ export default function EmergencyRegistrationPage() {
     });
   }
 
-  function validatePhoto() {
-    if (!photo) {
-      return true;
-    }
+  function validEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email
+    );
+  }
 
+  function validateManager() {
     if (
-      !photo.type.startsWith(
-        "image/"
-      )
+      !form.manager_first_name.trim()
     ) {
       setError(
         ka
-          ? "გთხოვთ აირჩიოთ სურათის ფაილი."
-          : "Please select an image file."
+          ? "შეიყვანეთ ანგარიშის მმართველის სახელი."
+          : "Enter the account manager's first name."
       );
 
       return false;
     }
 
     if (
-      photo.size >
-      MAX_IMAGE_SIZE
+      !form.manager_last_name.trim()
     ) {
       setError(
         ka
-          ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
-          : "The image must not exceed 5 MB."
+          ? "შეიყვანეთ ანგარიშის მმართველის გვარი."
+          : "Enter the account manager's last name."
+      );
+
+      return false;
+    }
+
+    if (
+      !form.manager_phone.trim()
+    ) {
+      setError(
+        ka
+          ? "შეიყვანეთ ანგარიშის მმართველის მობილურის ნომერი."
+          : "Enter the account manager's mobile number."
+      );
+
+      return false;
+    }
+
+    if (
+      !form.manager_email.trim()
+    ) {
+      setError(
+        ka
+          ? "შეიყვანეთ ელფოსტა."
+          : "Enter an email address."
+      );
+
+      return false;
+    }
+
+    if (
+      !validEmail(
+        form.manager_email
+      )
+    ) {
+      setError(
+        ka
+          ? "ელფოსტა არასწორი ფორმატითაა."
+          : "Invalid email format."
+      );
+
+      return false;
+    }
+
+    if (
+      !form.manager_address.trim()
+    ) {
+      setError(
+        ka
+          ? "შეიყვანეთ ანგარიშის მმართველის მისამართი."
+          : "Enter the account manager's address."
+      );
+
+      return false;
+    }
+
+    if (
+      form.codeword.trim().length <
+      6
+    ) {
+      setError(
+        ka
+          ? "კოდური სიტყვა უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს."
+          : "The codeword must contain at least 6 characters."
+      );
+
+      return false;
+    }
+
+    if (
+      form.codeword !==
+      form.codeword_confirm
+    ) {
+      setError(
+        ka
+          ? "კოდური სიტყვები ერთმანეთს არ ემთხვევა."
+          : "The codewords do not match."
       );
 
       return false;
@@ -487,138 +343,99 @@ export default function EmergencyRegistrationPage() {
     return true;
   }
 
-  function isValidEmail(
-    email: string
-  ) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      email
-    );
+  function validateWearer() {
+    if (!form.tag_code.trim()) {
+      setError(
+        ka
+          ? "QR კოდის მითითება სავალდებულოა."
+          : "QR code is required."
+      );
+
+      return false;
+    }
+
+    if (!form.first_name.trim()) {
+      setError(
+        ka
+          ? "სამაჯურის მფლობელის სახელი სავალდებულოა."
+          : "The bracelet wearer's first name is required."
+      );
+
+      return false;
+    }
+
+    if (!form.last_name.trim()) {
+      setError(
+        ka
+          ? "სამაჯურის მფლობელის გვარი სავალდებულოა."
+          : "The bracelet wearer's last name is required."
+      );
+
+      return false;
+    }
+
+    if (!form.date_of_birth) {
+      setError(
+        ka
+          ? "დაბადების სრული თარიღის მითითება სავალდებულოა."
+          : "A complete date of birth is required."
+      );
+
+      return false;
+    }
+
+    if (!form.country_code) {
+      setError(
+        ka
+          ? "აირჩიეთ ქვეყანა."
+          : "Select a country."
+      );
+
+      return false;
+    }
+
+    if (
+      !form.personal_number.trim()
+    ) {
+      setError(
+        ka
+          ? "პირადი ნომრის მითითება სავალდებულოა."
+          : "Personal identification number is required."
+      );
+
+      return false;
+    }
+
+    return true;
   }
 
-  async function nextStep() {
+  function nextStep() {
     setError("");
 
     if (step === 1) {
-      if (
-        !form.tag_code.trim()
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ QR კოდი."
-            : "Please enter the QR code."
-        );
+      if (!validateManager()) {
         return;
       }
 
       if (
-        !form.first_name.trim()
+        form.register_for === "self"
       ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ სახელი."
-            : "Please enter the first name."
-        );
-        return;
-      }
+        setForm((current) => ({
+          ...current,
 
-      if (
-        !form.last_name.trim()
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ გვარი."
-            : "Please enter the last name."
-        );
-        return;
-      }
+          first_name:
+            current.first_name ||
+            current.manager_first_name,
 
-      if (
-        !form.date_of_birth
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ დაბადების სრული თარიღი — დღე, თვე და წელი."
-            : "Please enter the complete date of birth."
-        );
-        return;
-      }
+          last_name:
+            current.last_name ||
+            current.manager_last_name,
 
-      if (
-        !form.country_code
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ აირჩიოთ ქვეყანა."
-            : "Please select a country."
-        );
-        return;
+          address:
+            current.address ||
+            current.manager_address,
+        }));
       }
-
-      if (
-        !form.owner_email.trim()
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ მმართველის ელფოსტა."
-            : "Please enter the manager email."
-        );
-        return;
-      }
-
-      if (
-        !isValidEmail(
-          form.owner_email
-        )
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ სწორი ელფოსტა."
-            : "Please enter a valid email address."
-        );
-        return;
-      }
-
-      if (
-        form.profile_manager_type ===
-          "other" &&
-        !form.manager_relationship
-      ) {
-        setError(
-          ka
-            ? "გთხოვთ მიუთითოთ თქვენი კავშირი ამ პირთან."
-            : "Please select your relationship to this person."
-        );
-        return;
-      }
-
-      if (
-        form.codeword.length < 6
-      ) {
-        setError(
-          ka
-            ? "კოდური სიტყვა უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს."
-            : "The codeword must contain at least 6 characters."
-        );
-        return;
-      }
-
-      if (
-        form.codeword !==
-        form.codeword_confirm
-      ) {
-        setError(
-          ka
-            ? "კოდური სიტყვები ერთმანეთს არ ემთხვევა."
-            : "The codewords do not match."
-        );
-        return;
-      }
-
-      if (!validatePhoto()) {
-        return;
-      }
-
-      setIdentityLocked(true);
 
       setStep(2);
       goTop();
@@ -627,65 +444,11 @@ export default function EmergencyRegistrationPage() {
     }
 
     if (step === 2) {
+      if (!validateWearer()) {
+        return;
+      }
+
       setStep(3);
-      goTop();
-      return;
-    }
-
-    if (step === 3) {
-      if (
-        emergencyContactEnabled &&
-        emergencyMobileEnabled &&
-        !form.emergency_contact_phone.trim()
-      ) {
-        setError(
-          ka
-            ? "მობილური დაკავშირების ჩასართავად მიუთითეთ მთავარი საკონტაქტო პირის ტელეფონის ნომერი."
-            : "Enter the primary contact phone number to enable mobile calling."
-        );
-        return;
-      }
-
-      if (
-        emergencyContactEnabled &&
-        emergencyWhatsappEnabled &&
-        !form.emergency_contact_phone.trim()
-      ) {
-        setError(
-          ka
-            ? "WhatsApp-ის ჩასართავად მიუთითეთ მთავარი საკონტაქტო პირის ტელეფონის ნომერი."
-            : "Enter the primary contact phone number to enable WhatsApp."
-        );
-        return;
-      }
-
-      if (
-        secondContactEnabled &&
-        secondMobileEnabled &&
-        !form.second_contact_phone.trim()
-      ) {
-        setError(
-          ka
-            ? "მობილური დაკავშირების ჩასართავად მიუთითეთ დამატებითი საკონტაქტო პირის ნომერი."
-            : "Enter the second contact phone number to enable mobile calling."
-        );
-        return;
-      }
-
-      if (
-        secondContactEnabled &&
-        secondWhatsappEnabled &&
-        !form.second_contact_phone.trim()
-      ) {
-        setError(
-          ka
-            ? "WhatsApp-ის ჩასართავად მიუთითეთ დამატებითი საკონტაქტო პირის ნომერი."
-            : "Enter the second contact phone number to enable WhatsApp."
-        );
-        return;
-      }
-
-      setStep(4);
       goTop();
     }
   }
@@ -693,9 +456,7 @@ export default function EmergencyRegistrationPage() {
   function previousStep() {
     setError("");
 
-    if (step === 4) {
-      setStep(3);
-    } else if (step === 3) {
+    if (step === 3) {
       setStep(2);
     } else {
       setStep(1);
@@ -709,16 +470,16 @@ export default function EmergencyRegistrationPage() {
   ) {
     event.preventDefault();
 
-    if (step !== 4) {
-      await nextStep();
+    if (step !== 3) {
+      nextStep();
       return;
     }
 
     if (!termsAccepted) {
       setError(
         ka
-          ? "პროფილის შესაქმნელად საჭიროა წესებისა და კონფიდენციალურობის პირობების წაკითხვა და დადასტურება."
-          : "You must read and accept the terms and privacy conditions before creating the profile."
+          ? "პროფილის შესაქმნელად საჭიროა წესების წაკითხვა და დადასტურება."
+          : "You must read and accept the terms before creating the profile."
       );
 
       return;
@@ -729,10 +490,16 @@ export default function EmergencyRegistrationPage() {
 
     try {
       const tagCode =
-        form.tag_code.trim();
+        normalizeTag(
+          form.tag_code
+        );
 
+      /*
+       * ერთი QR = ერთი ადამიანი.
+       * ერთი და იგივე QR მეორედ ვერ დარეგისტრირდება.
+       */
       const {
-        data: existing,
+        data: existingProfile,
         error: checkError,
       } = await supabase
         .from(
@@ -749,40 +516,67 @@ export default function EmergencyRegistrationPage() {
         setError(
           ka
             ? `QR კოდის შემოწმება ვერ მოხერხდა: ${checkError.message}`
-            : `QR code check failed: ${checkError.message}`
+            : `Could not check QR code: ${checkError.message}`
         );
 
         return;
       }
 
-      if (existing) {
+      if (existingProfile) {
         setError(
           ka
-            ? "ეს QR კოდი უკვე რეგისტრირებულია. ერთი Emergency QR შეიძლება ეკუთვნოდეს მხოლოდ ერთ ადამიანს."
-            : "This QR code is already registered. One Emergency QR can belong to only one person."
+            ? "ეს QR კოდი უკვე რეგისტრირებულია და სხვა ადამიანზე გამოყენება შეუძლებელია."
+            : "This QR code is already registered and cannot be used for another person."
         );
 
         return;
-      }
-
-      let photoUrl:
-        | string
-        | null = null;
-
-      if (photo) {
-        photoUrl =
-          await uploadEmergencyPhoto(
-            photo,
-            tagCode
-          );
       }
 
       const codewordHash =
-        await hashCodeword(
+        await createCodewordHash(
           form.codeword
         );
 
+      const contactFullName = [
+        form.contact_first_name.trim(),
+        form.contact_last_name.trim(),
+      ]
+        .filter(Boolean)
+        .join(" ");
+
       const payload = {
+        /*
+         * ACCOUNT MANAGER
+         * ეს ინფორმაცია საჯარო QR პროფილზე არ გამოჩნდება.
+         */
+
+        profile_manager_type:
+          form.register_for,
+
+        manager_first_name:
+          form.manager_first_name.trim(),
+
+        manager_last_name:
+          form.manager_last_name.trim(),
+
+        owner_phone:
+          form.manager_phone.trim(),
+
+        owner_email:
+          normalizeEmail(
+            form.manager_email
+          ),
+
+        manager_address:
+          form.manager_address.trim(),
+
+        codeword_hash:
+          codewordHash,
+
+        /*
+         * BRACELET WEARER
+         */
+
         tag_code:
           tagCode,
 
@@ -798,173 +592,76 @@ export default function EmergencyRegistrationPage() {
         country_code:
           form.country_code,
 
-        owner_email:
-          normalizeEmail(
-            form.owner_email
-          ),
-
-        codeword_hash:
-          codewordHash,
-
-        profile_manager_type:
-          form.profile_manager_type,
-
-        manager_relationship:
-          form.profile_manager_type ===
-            "other"
-            ? form.manager_relationship ||
-              null
-            : null,
-
-        owner_phone:
-          form.owner_phone.trim() ||
-          null,
-
-        show_owner_phone:
-          visibility.show_owner_phone,
-
-        phone_verified:
-          false,
-
-        photo_url:
-          photoUrl,
-
-        show_photo:
-          visibility.show_photo,
-
-        show_date_of_birth:
-          visibility.show_date_of_birth,
-
-        blood_type:
-          form.blood_type ||
-          null,
-
-        show_blood_type:
-          visibility.show_blood_type,
+        personal_number:
+          form.personal_number.trim(),
 
         address:
           form.address.trim() ||
           null,
 
+        additional_info:
+          form.additional_info.trim() ||
+          null,
+
+        /*
+         * PUBLIC VISIBILITY
+         *
+         * სახელი და გვარი ყოველთვის გამოჩნდება.
+         * 911/112 ავტომატურად განისაზღვრება ქვეყნის მიხედვით.
+         */
+
+        show_date_of_birth:
+          visibility.show_date_of_birth,
+
+        show_personal_number:
+          visibility.show_personal_number,
+
         show_address:
+          Boolean(
+            form.address.trim()
+          ) &&
           visibility.show_address,
 
-        allergies:
-          form.allergies.trim() ||
-          null,
+        show_additional_info:
+          Boolean(
+            form.additional_info.trim()
+          ) &&
+          visibility.show_additional_info,
 
-        show_allergies:
-          visibility.show_allergies,
-
-        medical_conditions:
-          form.medical_conditions.trim() ||
-          null,
-
-        show_medical_conditions:
-          visibility.show_medical_conditions,
-
-        medications:
-          form.medications.trim() ||
-          null,
-
-        show_medications:
-          visibility.show_medications,
-
-        medical_note:
-          form.medical_note.trim() ||
-          null,
-
-        show_medical_note:
-          visibility.show_medical_note,
+        /*
+         * OPTIONAL CONTACT PERSON
+         */
 
         emergency_contact_enabled:
-          emergencyContactEnabled,
+          hasContact,
 
         emergency_contact_name:
-          emergencyContactEnabled
-            ? form.emergency_contact_name.trim() ||
-              null
-            : null,
-
-        emergency_contact_relationship:
-          emergencyContactEnabled
-            ? form.emergency_contact_relationship ||
-              null
+          hasContact
+            ? contactFullName || null
             : null,
 
         emergency_contact_phone:
-          emergencyContactEnabled
-            ? form.emergency_contact_phone.trim() ||
+          hasContact
+            ? form.contact_phone.trim() ||
               null
             : null,
 
-        emergency_contact_mobile_enabled:
-          emergencyContactEnabled
-            ? emergencyMobileEnabled
+        show_emergency_contact:
+          hasContact
+            ? visibility.show_contact
             : false,
 
-        emergency_contact_whatsapp_enabled:
-          emergencyContactEnabled
-            ? emergencyWhatsappEnabled
-            : false,
-
-        emergency_contact_live_chat_enabled:
-          emergencyContactEnabled
-            ? emergencyLiveChatEnabled
-            : false,
-
-        second_contact_enabled:
-          secondContactEnabled,
-
-        second_contact_name:
-          secondContactEnabled
-            ? form.second_contact_name.trim() ||
-              null
-            : null,
-
-        second_contact_relationship:
-          secondContactEnabled
-            ? form.second_contact_relationship ||
-              null
-            : null,
-
-        second_contact_phone:
-          secondContactEnabled
-            ? form.second_contact_phone.trim() ||
-              null
-            : null,
-
-        second_contact_mobile_enabled:
-          secondContactEnabled
-            ? secondMobileEnabled
-            : false,
-
-        second_contact_whatsapp_enabled:
-          secondContactEnabled
-            ? secondWhatsappEnabled
-            : false,
-
-        second_contact_live_chat_enabled:
-          secondContactEnabled
-            ? secondLiveChatEnabled
-            : false,
-
-        show_second_contact:
-          secondContactEnabled &&
-          visibility.show_second_contact,
-
-        emergency_message:
-          form.emergency_message.trim() ||
-          null,
-
-        show_emergency_message:
-          visibility.show_emergency_message,
-
-        location_sharing_enabled:
-          locationSharing,
+        /*
+         * ერთი სახელის/გვარის დაცული ცვლილება.
+         * რეგისტრაციისას ჯერ გამოყენებული არაა.
+         */
 
         identity_edit_used:
           false,
+
+        /*
+         * TERMS
+         */
 
         terms_accepted:
           true,
@@ -1008,7 +705,7 @@ export default function EmergencyRegistrationPage() {
         setError(
           ka
             ? `პროფილის შენახვა ვერ მოხერხდა: ${saveError.message}`
-            : `Profile could not be saved: ${saveError.message}`
+            : `Could not save profile: ${saveError.message}`
         );
 
         return;
@@ -1019,46 +716,27 @@ export default function EmergencyRegistrationPage() {
     } catch (err) {
       console.error(err);
 
-      if (
-        err instanceof Error &&
-        err.message ===
-          "IMAGE_TOO_LARGE"
-      ) {
-        setError(
-          ka
-            ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
-            : "The image must not exceed 5 MB."
-        );
-      } else if (
-        err instanceof Error &&
-        err.message ===
-          "INVALID_IMAGE_TYPE"
-      ) {
-        setError(
-          ka
-            ? "არჩეული ფაილი სურათი არ არის."
-            : "The selected file is not an image."
-        );
-      } else {
-        setError(
-          ka
-            ? "პროფილის შენახვისას დაფიქსირდა შეცდომა."
-            : "An error occurred while saving the profile."
-        );
-      }
+      setError(
+        ka
+          ? "პროფილის შენახვისას დაფიქსირდა შეცდომა."
+          : "An error occurred while saving the profile."
+      );
     } finally {
       setSaving(false);
     }
   }
 
   if (success) {
+    const tagCode =
+      normalizeTag(
+        form.tag_code
+      );
+
     return (
       <main className="page">
         <Header
-          language={language}
-          setLanguage={
-            setLanguage
-          }
+          lang={lang}
+          setLang={setLang}
         />
 
         <section className="successPage">
@@ -1078,14 +756,14 @@ export default function EmergencyRegistrationPage() {
 
           <p>
             {ka
-              ? `${form.first_name} ${form.last_name}-ის Emergency პროფილი წარმატებით შეინახა.`
-              : `${form.first_name} ${form.last_name}'s Emergency profile was saved successfully.`}
+              ? `${form.first_name} ${form.last_name}-ის Emergency პროფილი შენახულია.`
+              : `${form.first_name} ${form.last_name}'s Emergency profile has been saved.`}
           </p>
 
           <div className="successButtons">
             <a
               href={`/emergency/profile/${encodeURIComponent(
-                form.tag_code.trim()
+                tagCode
               )}`}
               className="viewButton"
             >
@@ -1095,25 +773,18 @@ export default function EmergencyRegistrationPage() {
             </a>
 
             <a
-              href="/register/emergency"
-              className="additionalButton"
+              href={`/emergency/edit/${encodeURIComponent(
+                tagCode
+              )}`}
+              className="manageButton"
             >
               {ka
-                ? "დამატებითი პროფილის რეგისტრაცია"
-                : "Register additional profile"}
-            </a>
-
-            <a
-              href="/"
-              className="homeButton"
-            >
-              {ka
-                ? "მთავარ გვერდზე"
-                : "Home"}
+                ? "პროფილის მართვა"
+                : "Manage profile"}
             </a>
           </div>
 
-          <div className="lockedNotice">
+          <div className="successNotice">
             <strong>
               🔒{" "}
               {ka
@@ -1123,8 +794,8 @@ export default function EmergencyRegistrationPage() {
 
             <p>
               {ka
-                ? "QR კოდი პროფილის შექმნის შემდეგ აღარ შეიცვლება. სახელი და გვარი დაცული მონაცემებია და მათი ერთჯერადი გასწორება შესაძლებელი იქნება პროფილის რედაქტირების დაცული პროცესიდან."
-                : "The QR code cannot be changed after the profile is created. First and last name are protected fields and may be corrected once through the protected edit process."}
+                ? "QR კოდი ამ კონკრეტულ ადამიანს მიება და სხვა ადამიანზე გადატანა შეუძლებელია. პროფილის მართვის გვერდიდან მომავალში შესაძლებელი იქნება მაქსიმუმ ორი დამატებითი ადამიანის პროფილის რეგისტრაცია, თითოეულისთვის ახალი QR კოდით."
+                : "This QR is permanently linked to this person. Up to two additional people may later be registered from profile management, each with their own QR code."}
             </p>
           </div>
         </section>
@@ -1137,13 +808,11 @@ export default function EmergencyRegistrationPage() {
   return (
     <main className="page">
       <Header
-        language={language}
-        setLanguage={
-          setLanguage
-        }
+        lang={lang}
+        setLang={setLang}
       />
 
-      <section className="content">
+      <section className="container">
         <div className="hero">
           <div className="emergencyIcon">
             ✚
@@ -1156,43 +825,27 @@ export default function EmergencyRegistrationPage() {
 
             <h1>
               {ka
-                ? "Emergency სამაჯურის რეგისტრაცია"
-                : "Emergency Bracelet Registration"}
+                ? "Emergency პროფილის რეგისტრაცია"
+                : "Emergency Profile Registration"}
             </h1>
 
             <p>
               {ka
-                ? "ერთი Emergency QR განკუთვნილია ერთი კონკრეტული ადამიანისთვის. შექმენით პროფილი და თავად აკონტროლეთ დამატებითი ინფორმაციის ხილვადობა."
-                : "One Emergency QR is intended for one person. Create the profile and control the visibility of optional information."}
+                ? "ერთი QR კოდი განკუთვნილია ერთი კონკრეტული ადამიანისთვის."
+                : "One QR code is intended for one specific person."}
             </p>
           </div>
         </div>
 
-        <div className="informationBox">
-          <strong>
-            {ka
-              ? "ერთი QR — ერთი ადამიანი"
-              : "One QR — one person"}
-          </strong>
-
-          <p>
-            {ka
-              ? "პროფილის შექმნის შემდეგ QR კოდი აღარ შეიცვლება. სახელი და გვარი დაცული ინფორმაციაა. სამედიცინო და სხვა დამატებითი მონაცემების განახლება მოგვიანებით შესაძლებელი იქნება."
-              : "After the profile is created, the QR code cannot be changed. First and last name are protected information. Medical and other optional information can be updated later."}
-          </p>
-        </div>
-
         <div className="progress">
-          <Progress
+          <StepIndicator
             number="1"
             label={
               ka
-                ? "პირადი"
-                : "Personal"
+                ? "მმართველი"
+                : "Manager"
             }
-            active={
-              step >= 1
-            }
+            active
             current={
               step === 1
             }
@@ -1201,17 +854,17 @@ export default function EmergencyRegistrationPage() {
           <div
             className={
               step >= 2
-                ? "line active"
-                : "line"
+                ? "progressLine active"
+                : "progressLine"
             }
           />
 
-          <Progress
+          <StepIndicator
             number="2"
             label={
               ka
-                ? "სამედიცინო"
-                : "Medical"
+                ? "პროფილი"
+                : "Profile"
             }
             active={
               step >= 2
@@ -1224,46 +877,23 @@ export default function EmergencyRegistrationPage() {
           <div
             className={
               step >= 3
-                ? "line active"
-                : "line"
+                ? "progressLine active"
+                : "progressLine"
             }
           />
 
-          <Progress
+          <StepIndicator
             number="3"
-            label={
-              ka
-                ? "კონტაქტი"
-                : "Contacts"
-            }
-            active={
-              step >= 3
-            }
-            current={
-              step === 3
-            }
-          />
-
-          <div
-            className={
-              step >= 4
-                ? "line active"
-                : "line"
-            }
-          />
-
-          <Progress
-            number="4"
             label={
               ka
                 ? "წესები"
                 : "Terms"
             }
             active={
-              step >= 4
+              step >= 3
             }
             current={
-              step === 4
+              step === 3
             }
           />
         </div>
@@ -1276,328 +906,194 @@ export default function EmergencyRegistrationPage() {
         >
           {step === 1 && (
             <>
-              <StepTitle
+              <SectionTitle
                 number="01"
                 title={
                   ka
-                    ? "პირადი ინფორმაცია"
-                    : "Personal information"
+                    ? "ვისთვის ქმნით პროფილს?"
+                    : "Who is this profile for?"
                 }
-                text={
+                description={
                   ka
-                    ? "მიუთითეთ Emergency პროფილის ძირითადი და მმართველის ინფორმაცია."
-                    : "Enter the basic Emergency profile and manager information."
+                    ? "აირჩიეთ, საკუთარ თავს არეგისტრირებთ თუ სხვა ადამიანს."
+                    : "Choose whether you are registering yourself or another person."
                 }
               />
 
-              {identityLocked && (
-                <div className="lockedBox">
-                  🔒{" "}
+              <div className="choiceGrid">
+                <button
+                  type="button"
+                  className={
+                    form.register_for ===
+                    "self"
+                      ? "choice active"
+                      : "choice"
+                  }
+                  onClick={() =>
+                    updateField(
+                      "register_for",
+                      "self"
+                    )
+                  }
+                >
+                  <span>
+                    👤
+                  </span>
+
+                  <strong>
+                    {ka
+                      ? "საკუთარი თავისთვის"
+                      : "For myself"}
+                  </strong>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    form.register_for ===
+                    "other"
+                      ? "choice active"
+                      : "choice"
+                  }
+                  onClick={() =>
+                    updateField(
+                      "register_for",
+                      "other"
+                    )
+                  }
+                >
+                  <span>
+                    👥
+                  </span>
+
+                  <strong>
+                    {ka
+                      ? "სხვა პირისთვის"
+                      : "For another person"}
+                  </strong>
+                </button>
+              </div>
+
+              <InfoBox>
+                <strong>
                   {ka
-                    ? "QR კოდი, სახელი და გვარი ამ რეგისტრაციისთვის დაფიქსირებულია."
-                    : "QR code, first name and last name are locked for this registration."}
-                </div>
-              )}
+                    ? "ანგარიშის მმართველი"
+                    : "Account manager"}
+                </strong>
 
-              <RequiredField
-                label={
-                  ka
-                    ? "QR კოდი"
-                    : "QR code"
-                }
-                value={
-                  form.tag_code
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "tag_code",
-                    value
-                  )
-                }
-                ka={ka}
-                locked={
-                  identityLocked
-                }
-              />
+                <p>
+                  {ka
+                    ? "ქვემოთ შეიყვანეთ იმ ადამიანის მონაცემები, ვინც Emergency პროფილს მართავს. ეს ინფორმაცია QR-ის საჯარო პროფილზე არ გამოჩნდება."
+                    : "Enter the information of the person who manages this Emergency profile. This information is never displayed on the public QR profile."}
+                </p>
+              </InfoBox>
 
               <div className="grid2">
-                <RequiredField
+                <RequiredInput
                   label={
                     ka
                       ? "სახელი"
                       : "First name"
                   }
                   value={
-                    form.first_name
+                    form.manager_first_name
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
-                      "first_name",
+                      "manager_first_name",
                       value
                     )
                   }
                   ka={ka}
-                  locked={
-                    identityLocked
-                  }
                 />
 
-                <RequiredField
+                <RequiredInput
                   label={
                     ka
                       ? "გვარი"
                       : "Last name"
                   }
                   value={
-                    form.last_name
+                    form.manager_last_name
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
-                      "last_name",
+                      "manager_last_name",
                       value
                     )
                   }
                   ka={ka}
-                  locked={
-                    identityLocked
-                  }
                 />
               </div>
 
-              <RequiredField
+              <RequiredInput
                 label={
                   ka
-                    ? "დაბადების სრული თარიღი"
-                    : "Date of birth"
+                    ? "მობილურის ნომერი"
+                    : "Mobile number"
                 }
-                type="date"
+                type="tel"
                 value={
-                  form.date_of_birth
+                  form.manager_phone
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
-                    "date_of_birth",
+                    "manager_phone",
                     value
                   )
                 }
                 ka={ka}
               />
 
-              <div className="visibilityRow">
-                <div>
-                  <strong>
-                    {ka
-                      ? "დაბადების თარიღის ჩვენება QR პროფილში"
-                      : "Show date of birth in QR profile"}
-                  </strong>
-
-                  <span>
-                    {ka
-                      ? "შევსება სავალდებულოა • ჩვენება თქვენი არჩევანია"
-                      : "Required to complete • Visibility is your choice"}
-                  </span>
-                </div>
-
-                <Switch
-                  active={
-                    visibility.show_date_of_birth
-                  }
-                  onClick={() =>
-                    toggleVisibility(
-                      "show_date_of_birth"
-                    )
-                  }
-                />
-              </div>
-
-              <RequiredSelect
+              <RequiredInput
                 label={
                   ka
-                    ? "ქვეყანა"
-                    : "Country"
-                }
-                value={
-                  form.country_code
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "country_code",
-                    value
-                  )
-                }
-                ka={ka}
-                options={[
-                  [
-                    "",
-                    ka
-                      ? "აირჩიეთ ქვეყანა"
-                      : "Select country",
-                  ],
-                  ...countryOptions.map(
-                    (country) => [
-                      country.code,
-                      ka
-                        ? country.ka
-                        : country.en,
-                    ]
-                  ),
-                ]}
-              />
-
-              {selectedCountry && (
-                <div className="emergencyNumberPreview">
-                  🚨{" "}
-                  {ka
-                    ? `ამ პროფილზე გამოჩნდება გადაუდებელი ნომერი: ${selectedCountry.emergency}`
-                    : `This profile will show emergency number: ${selectedCountry.emergency}`}
-                </div>
-              )}
-
-              <div className="managerBox">
-                <strong>
-                  {ka
-                    ? "ვისთვის ქმნით პროფილს?"
-                    : "Who is this profile for?"}
-                </strong>
-
-                <div className="choiceGrid">
-                  <button
-                    type="button"
-                    className={
-                      form.profile_manager_type ===
-                      "self"
-                        ? "choice active"
-                        : "choice"
-                    }
-                    onClick={() => {
-                      updateField(
-                        "profile_manager_type",
-                        "self"
-                      );
-
-                      updateField(
-                        "manager_relationship",
-                        ""
-                      );
-                    }}
-                  >
-                    <span>
-                      👤
-                    </span>
-
-                    <strong>
-                      {ka
-                        ? "საკუთარი თავისთვის"
-                        : "For myself"}
-                    </strong>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      form.profile_manager_type ===
-                      "other"
-                        ? "choice active"
-                        : "choice"
-                    }
-                    onClick={() =>
-                      updateField(
-                        "profile_manager_type",
-                        "other"
-                      )
-                    }
-                  >
-                    <span>
-                      👥
-                    </span>
-
-                    <strong>
-                      {ka
-                        ? "სხვა პირისთვის"
-                        : "For another person"}
-                    </strong>
-                  </button>
-                </div>
-              </div>
-
-              {form.profile_manager_type ===
-                "other" && (
-                <RequiredSelect
-                  label={
-                    ka
-                      ? "თქვენი კავშირი ამ პირთან"
-                      : "Your relationship to this person"
-                  }
-                  value={
-                    form.manager_relationship
-                  }
-                  onChange={(
-                    value
-                  ) =>
-                    updateField(
-                      "manager_relationship",
-                      value
-                    )
-                  }
-                  ka={ka}
-                  options={
-                    managerRelationshipOptions[
-                      language
-                    ]
-                  }
-                />
-              )}
-
-              <RequiredField
-                label={
-                  ka
-                    ? "მმართველის ელფოსტა"
-                    : "Manager email"
+                    ? "ელფოსტა"
+                    : "Email"
                 }
                 type="email"
                 value={
-                  form.owner_email
+                  form.manager_email
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
-                    "owner_email",
+                    "manager_email",
                     value
                   )
                 }
                 ka={ka}
               />
 
-              <div className="fieldHelp">
-                {ka
-                  ? "ეს ელფოსტა გამოიყენება პროფილის მართვისა და დაცული მონაცემების აღდგენის/დადასტურებისთვის. ერთი ელფოსტით შესაძლებელია რამდენიმე Emergency პროფილის მართვა."
-                  : "This email is used to manage the profile and recover or verify protected changes. One email can manage multiple Emergency profiles."}
-              </div>
+              <RequiredInput
+                label={
+                  ka
+                    ? "მისამართი"
+                    : "Address"
+                }
+                value={
+                  form.manager_address
+                }
+                onChange={(value) =>
+                  updateField(
+                    "manager_address",
+                    value
+                  )
+                }
+                ka={ka}
+              />
 
               <div className="grid2">
-                <RequiredSecretField
+                <RequiredInput
                   label={
                     ka
                       ? "კოდური სიტყვა"
                       : "Codeword"
                   }
+                  type="password"
                   value={
                     form.codeword
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
                       "codeword",
                       value
@@ -1606,18 +1102,17 @@ export default function EmergencyRegistrationPage() {
                   ka={ka}
                 />
 
-                <RequiredSecretField
+                <RequiredInput
                   label={
                     ka
                       ? "გაიმეორეთ კოდური სიტყვა"
                       : "Repeat codeword"
                   }
+                  type="password"
                   value={
                     form.codeword_confirm
                   }
-                  onChange={(
-                    value
-                  ) =>
+                  onChange={(value) =>
                     updateField(
                       "codeword_confirm",
                       value
@@ -1627,35 +1122,12 @@ export default function EmergencyRegistrationPage() {
                 />
               </div>
 
-              <div className="securityInfo">
+              <div className="securityBox">
                 🔐{" "}
                 {ka
-                  ? "კოდური სიტყვა დაგჭირდებათ დაცული რედაქტირებისას. თუ დაგავიწყდებათ, აღდგენა შესაძლებელი იქნება მმართველის ელფოსტით."
-                  : "The codeword will be used for protected edits. If forgotten, recovery will be available through the manager email."}
+                  ? "კოდური სიტყვა დაგჭირდებათ დაცული ინფორმაციის ცვლილებისთვის. სახელისა და გვარის ერთჯერადი ცვლილება შესაძლებელი იქნება კოდური სიტყვით ან რეგისტრირებულ ელფოსტაზე მიღებული კოდით."
+                  : "The codeword is used for protected changes. The one-time name correction can be verified with the codeword or a code sent to the registered email."}
               </div>
-
-              <OptionalPhoto
-                label={
-                  ka
-                    ? "ფოტო"
-                    : "Photo"
-                }
-                file={
-                  photo
-                }
-                setFile={
-                  setPhoto
-                }
-                visible={
-                  visibility.show_photo
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_photo"
-                  )
-                }
-                ka={ka}
-              />
 
               {error && (
                 <ErrorBox
@@ -1666,8 +1138,8 @@ export default function EmergencyRegistrationPage() {
               <button
                 type="button"
                 className="primaryButton full"
-                onClick={() =>
-                  void nextStep()
+                onClick={
+                  nextStep
                 }
               >
                 {ka
@@ -1680,99 +1152,223 @@ export default function EmergencyRegistrationPage() {
 
           {step === 2 && (
             <>
-              <StepTitle
+              <SectionTitle
                 number="02"
                 title={
                   ka
-                    ? "სამედიცინო და დამატებითი ინფორმაცია"
-                    : "Medical and additional information"
+                    ? "სამაჯურის მფლობელის ინფორმაცია"
+                    : "Bracelet wearer information"
                 }
-                text={
+                description={
                   ka
-                    ? "არასავალდებულო მონაცემების შევსებასა და QR პროფილში ჩვენებას თავად აკონტროლებთ."
-                    : "You control whether optional information is completed and displayed in the QR profile."
+                    ? "ეს არის ადამიანი, რომელსაც კონკრეტული Emergency QR ეკუთვნის."
+                    : "This is the person this specific Emergency QR belongs to."
                 }
               />
 
-              <OptionalField
+              <div className="alwaysVisibleBox">
+                <strong>
+                  {ka
+                    ? "სახელი და გვარი ყოველთვის გამოჩნდება"
+                    : "First and last name are always visible"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "სახელი და გვარი სავალდებულოა და QR კოდის დასკანერებისას ყოველთვის გამოჩნდება."
+                    : "First and last name are required and always visible when the QR code is scanned."}
+                </p>
+              </div>
+
+              <RequiredInput
                 label={
                   ka
-                    ? "პირის საკუთარი ტელეფონის ნომერი"
-                    : "Person's own phone number"
+                    ? "QR კოდი"
+                    : "QR code"
                 }
-                type="tel"
                 value={
-                  form.owner_phone
+                  form.tag_code
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
-                    "owner_phone",
+                    "tag_code",
                     value
                   )
                 }
-                visible={
-                  visibility.show_owner_phone
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_owner_phone"
-                  )
-                }
                 ka={ka}
-                note={
-                  ka
-                    ? "თუ ჩართავთ, პროფილზე ეწერება, რომ ეს ნომერი ეკუთვნის Emergency სამაჯურის მფლობელს."
-                    : "If enabled, the profile will clearly state that this number belongs to the Emergency Bracelet wearer."
-                }
               />
 
-              <OptionalSelect
-                label={
-                  ka
-                    ? "სისხლის ჯგუფი"
-                    : "Blood type"
-                }
-                value={
-                  form.blood_type
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "blood_type",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_blood_type
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_blood_type"
-                  )
-                }
-                ka={ka}
-                options={[
-                  [
-                    "",
+              <div className="grid2">
+                <RequiredAlwaysVisibleInput
+                  label={
                     ka
-                      ? "აირჩიეთ"
-                      : "Select",
-                  ],
-                  ["A+", "A+"],
-                  ["A-", "A-"],
-                  ["B+", "B+"],
-                  ["B-", "B-"],
-                  ["AB+", "AB+"],
-                  ["AB-", "AB-"],
-                  ["O+", "O+"],
-                  ["O-", "O-"],
-                ]}
+                      ? "სახელი"
+                      : "First name"
+                  }
+                  value={
+                    form.first_name
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "first_name",
+                      value
+                    )
+                  }
+                  ka={ka}
+                />
+
+                <RequiredAlwaysVisibleInput
+                  label={
+                    ka
+                      ? "გვარი"
+                      : "Last name"
+                  }
+                  value={
+                    form.last_name
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "last_name",
+                      value
+                    )
+                  }
+                  ka={ka}
+                />
+              </div>
+
+              <VisibilityField
+                label={
+                  ka
+                    ? "დაბადების სრული თარიღი"
+                    : "Complete date of birth"
+                }
+                type="date"
+                required
+                value={
+                  form.date_of_birth
+                }
+                onChange={(value) =>
+                  updateField(
+                    "date_of_birth",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_date_of_birth
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_date_of_birth"
+                  )
+                }
+                explanation={
+                  ka
+                    ? "შევსება სავალდებულოა. თქვენ წყვეტთ, გამოჩნდეს თუ არა დაბადების თარიღი QR პროფილზე."
+                    : "Required. You decide whether the date of birth appears on the QR profile."
+                }
+                ka={ka}
               />
 
-              <OptionalField
+              <div className="standardField">
+                <label>
+                  {ka
+                    ? "ქვეყანა *"
+                    : "Country *"}
+                </label>
+
+                <select
+                  value={
+                    form.country_code
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "country_code",
+                      event.target.value
+                    )
+                  }
+                >
+                  <option value="">
+                    {ka
+                      ? "აირჩიეთ ქვეყანა"
+                      : "Select country"}
+                  </option>
+
+                  {countries.map(
+                    (item) => (
+                      <option
+                        key={
+                          item.code
+                        }
+                        value={
+                          item.code
+                        }
+                      >
+                        {ka
+                          ? item.ka
+                          : item.en}
+                      </option>
+                    )
+                  )}
+                </select>
+
+                <small className="requiredNote">
+                  ✓{" "}
+                  {ka
+                    ? "სავალდებულო"
+                    : "Required"}
+                </small>
+              </div>
+
+              {selectedCountry && (
+                <div className="emergencyNumber">
+                  <strong>
+                    🚨{" "}
+                    {ka
+                      ? `გადაუდებელი დახმარება — ${selectedCountry.emergency}`
+                      : `Emergency services — ${selectedCountry.emergency}`}
+                  </strong>
+
+                  <p>
+                    {ka
+                      ? `${selectedCountry.emergency} QR პროფილზე ყოველთვის გამოჩნდება არჩეული ქვეყნის მიხედვით.`
+                      : `${selectedCountry.emergency} will always appear on the QR profile based on the selected country.`}
+                  </p>
+                </div>
+              )}
+
+              <VisibilityField
+                label={
+                  ka
+                    ? "პირადი ნომერი"
+                    : "Personal identification number"
+                }
+                required
+                value={
+                  form.personal_number
+                }
+                onChange={(value) =>
+                  updateField(
+                    "personal_number",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_personal_number
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_personal_number"
+                  )
+                }
+                explanation={
+                  ka
+                    ? "შევსება სავალდებულოა. უსაფრთხოების მიზნით QR პროფილზე გამოჩენა საწყისად გამორთულია. სურვილის შემთხვევაში შეგიძლიათ ჩართოთ."
+                    : "Required. Public visibility is off by default for privacy. You may enable it if you wish."
+                }
+                ka={ka}
+              />
+
+              <VisibilityField
                 label={
                   ka
                     ? "მისამართი"
@@ -1781,9 +1377,7 @@ export default function EmergencyRegistrationPage() {
                 value={
                   form.address
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
                     "address",
                     value
@@ -1797,140 +1391,144 @@ export default function EmergencyRegistrationPage() {
                     "show_address"
                   )
                 }
-                ka={ka}
-              />
-
-              <OptionalTextArea
-                label={
+                explanation={
                   ka
-                    ? "ალერგიები"
-                    : "Allergies"
-                }
-                placeholder={
-                  ka
-                    ? "მაგ: პენიცილინი, თხილი..."
-                    : "e.g. Penicillin, nuts..."
-                }
-                value={
-                  form.allergies
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "allergies",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_allergies
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_allergies"
-                  )
+                    ? "მისამართის მითითება ნებაყოფლობითია. თუ შეავსებთ, თავად ირჩევთ გამოჩნდეს თუ არა QR პროფილზე."
+                    : "Address is optional. If entered, you choose whether it appears on the QR profile."
                 }
                 ka={ka}
               />
 
-              <OptionalTextArea
+              <VisibilityTextarea
                 label={
                   ka
-                    ? "სამედიცინო მდგომარეობები"
-                    : "Medical conditions"
-                }
-                placeholder={
-                  ka
-                    ? "მაგ: დიაბეტი, ეპილეფსია, ასთმა..."
-                    : "e.g. Diabetes, epilepsy, asthma..."
+                    ? "დამატებითი ინფორმაცია"
+                    : "Additional information"
                 }
                 value={
-                  form.medical_conditions
+                  form.additional_info
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   updateField(
-                    "medical_conditions",
+                    "additional_info",
                     value
                   )
                 }
                 visible={
-                  visibility.show_medical_conditions
+                  visibility.show_additional_info
                 }
                 onToggle={() =>
                   toggleVisibility(
-                    "show_medical_conditions"
+                    "show_additional_info"
                   )
+                }
+                explanation={
+                  ka
+                    ? "ეს ველი ნებაყოფლობითია. შეგიძლიათ მიუთითოთ ინფორმაცია, რომელიც საგანგებო სიტუაციაში შეიძლება მნიშვნელოვანი იყოს."
+                    : "Optional. You may enter information that could be important in an emergency."
                 }
                 ka={ka}
               />
 
-              <OptionalTextArea
-                label={
-                  ka
-                    ? "მიღებული მედიკამენტები"
-                    : "Current medications"
-                }
-                placeholder={
-                  ka
-                    ? "მიუთითეთ რეგულარულად მიღებული მედიკამენტები"
-                    : "List regularly used medications"
-                }
-                value={
-                  form.medications
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "medications",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_medications
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_medications"
-                  )
-                }
-                ka={ka}
-              />
+              <div className="contactCard">
+                <div className="visibilityHeader">
+                  <div>
+                    <strong>
+                      {ka
+                        ? "საკონტაქტო პირი"
+                        : "Contact person"}
+                    </strong>
 
-              <OptionalTextArea
-                label={
-                  ka
-                    ? "მნიშვნელოვანი სამედიცინო ინფორმაცია"
-                    : "Important medical information"
-                }
-                placeholder={
-                  ka
-                    ? "სხვა მნიშვნელოვანი ინფორმაცია საგანგებო სიტუაციისთვის"
-                    : "Other important information for an emergency"
-                }
-                value={
-                  form.medical_note
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "medical_note",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_medical_note
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_medical_note"
-                  )
-                }
-                ka={ka}
-              />
+                    <span>
+                      {ka
+                        ? "ნებაყოფლობითი"
+                        : "Optional"}
+                    </span>
+                  </div>
+
+                  <Switch
+                    active={
+                      visibility.show_contact
+                    }
+                    onClick={() =>
+                      toggleVisibility(
+                        "show_contact"
+                      )
+                    }
+                  />
+                </div>
+
+                <p className="fieldExplanation">
+                  {ka
+                    ? "საკონტაქტო პირის დამატება ნებაყოფლობითია. თუ მიუთითებთ და ჩვენება ჩართულია, QR-ის დამსკანერებელს შეეძლება ამ პირთან დაკავშირება."
+                    : "Adding a contact person is optional. If added and visibility is enabled, the QR scanner can contact this person."}
+                </p>
+
+                <div className="grid2">
+                  <OptionalInput
+                    label={
+                      ka
+                        ? "სახელი"
+                        : "First name"
+                    }
+                    value={
+                      form.contact_first_name
+                    }
+                    onChange={(value) =>
+                      updateField(
+                        "contact_first_name",
+                        value
+                      )
+                    }
+                  />
+
+                  <OptionalInput
+                    label={
+                      ka
+                        ? "გვარი"
+                        : "Last name"
+                    }
+                    value={
+                      form.contact_last_name
+                    }
+                    onChange={(value) =>
+                      updateField(
+                        "contact_last_name",
+                        value
+                      )
+                    }
+                  />
+                </div>
+
+                <OptionalInput
+                  label={
+                    ka
+                      ? "მობილურის ნომერი"
+                      : "Mobile number"
+                  }
+                  type="tel"
+                  value={
+                    form.contact_phone
+                  }
+                  onChange={(value) =>
+                    updateField(
+                      "contact_phone",
+                      value
+                    )
+                  }
+                />
+
+                <div className="visibilityStatus">
+                  {ka
+                    ? "QR პროფილზე გამოჩენა:"
+                    : "Show on QR profile:"}{" "}
+                  <b>
+                    {visibility.show_contact
+                      ? "ON"
+                      : "OFF"}
+                  </b>
+                </div>
+              </div>
 
               {error && (
                 <ErrorBox
@@ -1955,8 +1553,8 @@ export default function EmergencyRegistrationPage() {
                 <button
                   type="button"
                   className="primaryButton"
-                  onClick={() =>
-                    void nextStep()
+                  onClick={
+                    nextStep
                   }
                 >
                   {ka
@@ -1970,415 +1568,132 @@ export default function EmergencyRegistrationPage() {
 
           {step === 3 && (
             <>
-              <StepTitle
+              <SectionTitle
                 number="03"
-                title={
-                  ka
-                    ? "საგანგებო კონტაქტები"
-                    : "Emergency contacts"
-                }
-                text={
-                  ka
-                    ? "საკონტაქტო პირების დამატება არჩევითია. ქვეყნის გადაუდებელი ნომერი 911 ან 112 პროფილზე მაინც ყოველთვის გამოჩნდება."
-                    : "Emergency contacts are optional. The country's emergency number, 911 or 112, will still always be shown."
-                }
-              />
-
-              <div className="emergencyServiceCard">
-                <span>
-                  🚨
-                </span>
-
-                <div>
-                  <strong>
-                    {selectedCountry
-                      ? ka
-                        ? `გადაუდებელი დახმარება: ${selectedCountry.emergency}`
-                        : `Emergency services: ${selectedCountry.emergency}`
-                      : ka
-                      ? "გადაუდებელი დახმარება"
-                      : "Emergency services"}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "ეს ღილაკი QR პროფილზე ყოველთვის იქნება ხელმისაწვდომი."
-                      : "This button will always be available on the QR profile."}
-                  </p>
-                </div>
-              </div>
-
-              <ContactSection
-                title={
-                  ka
-                    ? "მთავარი საგანგებო საკონტაქტო პირი"
-                    : "Primary emergency contact"
-                }
-                enabled={
-                  emergencyContactEnabled
-                }
-                setEnabled={
-                  setEmergencyContactEnabled
-                }
-                name={
-                  form.emergency_contact_name
-                }
-                setName={(
-                  value
-                ) =>
-                  updateField(
-                    "emergency_contact_name",
-                    value
-                  )
-                }
-                relationship={
-                  form.emergency_contact_relationship
-                }
-                setRelationship={(
-                  value
-                ) =>
-                  updateField(
-                    "emergency_contact_relationship",
-                    value
-                  )
-                }
-                phone={
-                  form.emergency_contact_phone
-                }
-                setPhone={(
-                  value
-                ) =>
-                  updateField(
-                    "emergency_contact_phone",
-                    value
-                  )
-                }
-                mobile={
-                  emergencyMobileEnabled
-                }
-                setMobile={
-                  setEmergencyMobileEnabled
-                }
-                whatsapp={
-                  emergencyWhatsappEnabled
-                }
-                setWhatsapp={
-                  setEmergencyWhatsappEnabled
-                }
-                liveChat={
-                  emergencyLiveChatEnabled
-                }
-                setLiveChat={
-                  setEmergencyLiveChatEnabled
-                }
-                language={
-                  language
-                }
-              />
-
-              <ContactSection
-                title={
-                  ka
-                    ? "დამატებითი საგანგებო საკონტაქტო პირი"
-                    : "Additional emergency contact"
-                }
-                enabled={
-                  secondContactEnabled
-                }
-                setEnabled={(
-                  value
-                ) => {
-                  setSecondContactEnabled(
-                    value
-                  );
-
-                  setVisibility(
-                    (current) => ({
-                      ...current,
-                      show_second_contact:
-                        value,
-                    })
-                  );
-                }}
-                name={
-                  form.second_contact_name
-                }
-                setName={(
-                  value
-                ) =>
-                  updateField(
-                    "second_contact_name",
-                    value
-                  )
-                }
-                relationship={
-                  form.second_contact_relationship
-                }
-                setRelationship={(
-                  value
-                ) =>
-                  updateField(
-                    "second_contact_relationship",
-                    value
-                  )
-                }
-                phone={
-                  form.second_contact_phone
-                }
-                setPhone={(
-                  value
-                ) =>
-                  updateField(
-                    "second_contact_phone",
-                    value
-                  )
-                }
-                mobile={
-                  secondMobileEnabled
-                }
-                setMobile={
-                  setSecondMobileEnabled
-                }
-                whatsapp={
-                  secondWhatsappEnabled
-                }
-                setWhatsapp={
-                  setSecondWhatsappEnabled
-                }
-                liveChat={
-                  secondLiveChatEnabled
-                }
-                setLiveChat={
-                  setSecondLiveChatEnabled
-                }
-                language={
-                  language
-                }
-              />
-
-              <OptionalTextArea
-                label={
-                  ka
-                    ? "დამატებითი Emergency შეტყობინება"
-                    : "Additional Emergency message"
-                }
-                placeholder={
-                  ka
-                    ? "მაგ: გთხოვთ დაუკავშირდეთ ოჯახის წევრს..."
-                    : "e.g. Please contact a family member..."
-                }
-                value={
-                  form.emergency_message
-                }
-                onChange={(
-                  value
-                ) =>
-                  updateField(
-                    "emergency_message",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_emergency_message
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_emergency_message"
-                  )
-                }
-                ka={ka}
-              />
-
-              <div className="locationCard">
-                <div className="locationText">
-                  <span className="locationIcon">
-                    ⌖
-                  </span>
-
-                  <div>
-                    <strong>
-                      {ka
-                        ? "ლოკაციის გაზიარება"
-                        : "Location sharing"}
-                    </strong>
-
-                    <p>
-                      {ka
-                        ? "ჩართვის შემთხვევაში QR კოდის დამსკანერებელს შეეძლება თავისი მიმდინარე ლოკაციის გაზიარება."
-                        : "When enabled, the person scanning the QR code can share their current location."}
-                    </p>
-                  </div>
-                </div>
-
-                <Switch
-                  active={
-                    locationSharing
-                  }
-                  onClick={() =>
-                    setLocationSharing(
-                      !locationSharing
-                    )
-                  }
-                />
-              </div>
-
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={
-                    previousStep
-                  }
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  onClick={() =>
-                    void nextStep()
-                  }
-                >
-                  {ka
-                    ? "შემდეგი"
-                    : "Next"}{" "}
-                  →
-                </button>
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <StepTitle
-                number="04"
                 title={
                   ka
                     ? "წესები და თანხმობა"
                     : "Terms and consent"
                 }
-                text={
+                description={
                   ka
-                    ? "გთხოვთ პროფილის შექმნამდე გაეცნოთ Emergency პროფილის გამოყენების ძირითად წესებს."
-                    : "Please review the main Emergency profile rules before creating the profile."
+                    ? "პროფილის შექმნამდე გაეცანით QR RETURN Emergency-ის ძირითად წესებს."
+                    : "Review the QR RETURN Emergency rules before creating the profile."
                 }
               />
 
               <div className="termsBox">
                 <h3>
-                  {ka
-                    ? "QR RETURN Emergency — გამოყენების წესები"
-                    : "QR RETURN Emergency — Terms of use"}
+                  QR RETURN Emergency
                 </h3>
 
                 <ol>
                   <li>
                     {ka
-                      ? "ერთი Emergency QR კოდი განკუთვნილია მხოლოდ ერთი კონკრეტული ადამიანისთვის."
-                      : "One Emergency QR code is intended for one specific person only."}
+                      ? "ერთი Emergency QR კოდი ეკუთვნის მხოლოდ ერთ კონკრეტულ ადამიანს."
+                      : "One Emergency QR code belongs to one specific person."}
                   </li>
 
                   <li>
                     {ka
-                      ? "QR კოდი პროფილის შექმნის შემდეგ აღარ იცვლება და სხვა ადამიანზე გადატანა არ შეიძლება."
-                      : "The QR code cannot be changed after profile creation and may not be transferred to another person."}
+                      ? "რეგისტრაციის შემდეგ QR კოდის სხვა ადამიანზე გადატანა შეუძლებელია."
+                      : "The QR code cannot be transferred to another person after registration."}
                   </li>
 
                   <li>
                     {ka
-                      ? "სახელი და გვარი დაცული ინფორმაციაა. მათი გასწორება შესაძლებელი იქნება მხოლოდ ერთხელ, დაცული დადასტურების პროცესით."
-                      : "First and last name are protected information. They may be corrected only once through a protected verification process."}
+                      ? "სამაჯურის მფლობელის სახელი და გვარი სავალდებულოა და QR პროფილზე ყოველთვის გამოჩნდება."
+                      : "The wearer's first and last name are required and always visible on the QR profile."}
                   </li>
 
                   <li>
                     {ka
-                      ? "დაბადების სრული თარიღის მითითება რეგისტრაციისთვის სავალდებულოა."
-                      : "A complete date of birth is required for registration."}
+                      ? "სახელისა და გვარის შეცვლა შესაძლებელია მხოლოდ ერთხელ. ეს შესაძლებლობა განკუთვნილია შეცდომის გასასწორებლად და არა QR-ის სხვა ადამიანისთვის გადასაცემად."
+                      : "First and last name may be changed only once. This is intended to correct an error, not transfer the QR to another person."}
                   </li>
 
                   <li>
                     {ka
-                      ? "მომხმარებელი პასუხისმგებელია მის მიერ შეყვანილი სამედიცინო, პირადი და საკონტაქტო ინფორმაციის სისწორეზე."
-                      : "The user is responsible for the accuracy of medical, personal and contact information entered."}
+                      ? "სახელისა და გვარის ერთჯერადი ცვლილება უნდა დადასტურდეს კოდური სიტყვით ან ანგარიშის მმართველის რეგისტრირებულ ელფოსტაზე მიღებული კოდით."
+                      : "The one-time name change must be verified with the codeword or a code sent to the account manager's registered email."}
                   </li>
 
                   <li>
                     {ka
-                      ? "არასავალდებულო ინფორმაციის QR პროფილში ჩვენებას მომხმარებელი ON/OFF პარამეტრებით აკონტროლებს."
-                      : "The user controls visibility of optional information using ON/OFF settings."}
+                      ? "დაბადების სრული თარიღისა და პირადი ნომრის შევსება სავალდებულოა, თუმცა QR პროფილზე მათი გამოჩენა მომხმარებლის არჩევანია."
+                      : "Date of birth and personal identification number are required, but public visibility is optional."}
                   </li>
 
                   <li>
                     {ka
-                      ? "ქვეყნის მიხედვით QR პროფილზე ავტომატურად გამოჩნდება შესაბამისი გადაუდებელი ნომერი — აშშ-ში 911, საქართველოში 112."
-                      : "The QR profile automatically shows the appropriate emergency number by country — 911 in the United States and 112 in Georgia."}
+                      ? "მისამართი და დამატებითი ინფორმაცია ნებაყოფლობითია და მომხმარებელი თავად ირჩევს მათ საჯაროდ გამოჩენას."
+                      : "Address and additional information are optional and their public visibility is controlled by the user."}
                   </li>
 
                   <li>
                     {ka
-                      ? "საგანგებო საკონტაქტო პირების დამატება და Mobile, WhatsApp ან Live Chat მეთოდების ჩართვა არჩევითია."
-                      : "Adding emergency contacts and enabling Mobile, WhatsApp or Live Chat methods is optional."}
+                      ? "საკონტაქტო პირის სახელი, გვარი და მობილურის ნომერი ნებაყოფლობითია. მომხმარებელი თავად ირჩევს გამოჩნდეს თუ არა ეს ინფორმაცია QR პროფილზე."
+                      : "The contact person's first name, last name and mobile number are optional. The user controls whether they are displayed."}
                   </li>
 
                   <li>
                     {ka
-                      ? "ერთი მმართველის ელფოსტას შეიძლება უკავშირდებოდეს რამდენიმე Emergency პროფილი, თუმცა თითოეულ ადამიანს უნდა ჰქონდეს საკუთარი უნიკალური QR კოდი."
-                      : "One manager email may manage multiple Emergency profiles, but each person must have their own unique QR code."}
+                      ? "ანგარიშის მმართველის სახელი, გვარი, ტელეფონი, ელფოსტა, მისამართი და კოდური სიტყვა QR-ის საჯარო პროფილზე არ გამოჩნდება."
+                      : "The account manager's name, phone, email, address and codeword are never displayed on the public QR profile."}
                   </li>
 
                   <li>
                     {ka
-                      ? "„დამატებითი პროფილის რეგისტრაცია“ ქმნის ახალ, დამოუკიდებელ Emergency პროფილს ახალი QR კოდით."
-                      : "Registering an additional profile creates a separate Emergency profile with a new QR code."}
+                      ? "არჩეული ქვეყნის მიხედვით QR პროფილზე ყოველთვის გამოჩნდება შესაბამისი გადაუდებელი დახმარების ნომერი — აშშ-ში 911, საქართველოში 112."
+                      : "The appropriate emergency number is always displayed based on the selected country — 911 in the United States and 112 in Georgia."}
                   </li>
 
                   <li>
                     {ka
-                      ? "Emergency პროფილი არ წარმოადგენს პროფესიულ სამედიცინო ჩანაწერს და არ ცვლის გადაუდებელი დახმარების მომსახურებას."
-                      : "The Emergency profile is not a professional medical record and does not replace emergency services."}
+                      ? "ანგარიშის მმართველს პროფილის მართვის გვერდიდან შეეძლება მაქსიმუმ ორი დამატებითი ადამიანის Emergency პროფილის რეგისტრაცია. თითოეულ ადამიანს უნდა ჰქონდეს საკუთარი უნიკალური QR კოდი."
+                      : "The account manager may register up to two additional Emergency profiles from profile management. Each person must have their own unique QR code."}
+                  </li>
+
+                  <li>
+                    {ka
+                      ? "მომხმარებელი პასუხისმგებელია მის მიერ მითითებული ინფორმაციის სისწორეზე."
+                      : "The user is responsible for the accuracy of the information provided."}
+                  </li>
+
+                  <li>
+                    {ka
+                      ? "QR RETURN Emergency არ ცვლის გადაუდებელი დახმარების სამსახურს ან პროფესიულ სამედიცინო მომსახურებას."
+                      : "QR RETURN Emergency does not replace emergency services or professional medical care."}
                   </li>
                 </ol>
               </div>
 
-              <label className="termsCheck">
+              <label className="termsConsent">
                 <input
                   type="checkbox"
                   checked={
                     termsAccepted
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     setTermsAccepted(
-                      event.target
-                        .checked
+                      event.target.checked
                     )
                   }
                 />
 
-                <span>
+                <div>
                   <strong>
                     {ka
                       ? "წავიკითხე და ვეთანხმები"
                       : "I have read and agree"}
                   </strong>
 
-                  <small>
+                  <p>
                     {ka
-                      ? "ვეთანხმები Emergency პროფილის გამოყენების წესებსა და კონფიდენციალურობის პირობებს."
-                      : "I agree to the Emergency profile terms of use and privacy conditions."}
-                  </small>
-                </span>
+                      ? "ვეთანხმები QR RETURN Emergency-ის გამოყენების წესებსა და კონფიდენციალურობის პირობებს."
+                      : "I agree to the QR RETURN Emergency terms of use and privacy conditions."}
+                  </p>
+                </div>
               </label>
 
               {error && (
@@ -2429,17 +1744,14 @@ export default function EmergencyRegistrationPage() {
 }
 
 function Header({
-  language,
-  setLanguage,
+  lang,
+  setLang,
 }: {
-  language: Language;
-  setLanguage: (
-    language: Language
+  lang: Lang;
+  setLang: (
+    value: Lang
   ) => void;
 }) {
-  const ka =
-    language === "ka";
-
   return (
     <header className="header">
       <a
@@ -2461,56 +1773,40 @@ function Header({
         </div>
       </a>
 
-      <div className="headerRight">
-        <a
-          href="/"
-          className="headerBack"
+      <div className="languages">
+        <button
+          type="button"
+          className={
+            lang === "ka"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setLang("ka")
+          }
         >
-          ←{" "}
-          {ka
-            ? "მთავარ გვერდზე"
-            : "Home"}
-        </a>
+          GEO
+        </button>
 
-        <div className="languages">
-          <button
-            type="button"
-            className={
-              language === "ka"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage(
-                "ka"
-              )
-            }
-          >
-            GEO
-          </button>
-
-          <button
-            type="button"
-            className={
-              language === "en"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setLanguage(
-                "en"
-              )
-            }
-          >
-            ENG
-          </button>
-        </div>
+        <button
+          type="button"
+          className={
+            lang === "en"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setLang("en")
+          }
+        >
+          ENG
+        </button>
       </div>
     </header>
   );
 }
 
-function Progress({
+function StepIndicator({
   number,
   label,
   active,
@@ -2522,16 +1818,10 @@ function Progress({
   current: boolean;
 }) {
   return (
-    <div className="progressItem">
+    <div className="stepIndicator">
       <span
-        className={`circle ${
-          active
-            ? "active"
-            : ""
-        } ${
-          current
-            ? "current"
-            : ""
+        className={`${active ? "active" : ""} ${
+          current ? "current" : ""
         }`}
       >
         {number}
@@ -2544,17 +1834,17 @@ function Progress({
   );
 }
 
-function StepTitle({
+function SectionTitle({
   number,
   title,
-  text,
+  description,
 }: {
   number: string;
   title: string;
-  text: string;
+  description: string;
 }) {
   return (
-    <div className="stepTitle">
+    <div className="sectionTitle">
       <b>
         {number}
       </b>
@@ -2565,20 +1855,31 @@ function StepTitle({
         </h2>
 
         <p>
-          {text}
+          {description}
         </p>
       </div>
     </div>
   );
 }
 
-function RequiredField({
+function InfoBox({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div className="infoBox">
+      {children}
+    </div>
+  );
+}
+
+function RequiredInput({
   label,
   value,
   onChange,
   ka,
   type = "text",
-  locked = false,
 }: {
   label: string;
   value: string;
@@ -2587,174 +1888,115 @@ function RequiredField({
   ) => void;
   ka: boolean;
   type?: string;
-  locked?: boolean;
 }) {
   return (
-    <div className="requiredField">
+    <div className="standardField">
       <label>
-        <strong>
-          {label} *
-          {locked
-            ? " 🔒"
-            : ""}
-        </strong>
-
-        <input
-          type={type}
-          value={value}
-          required
-          readOnly={
-            locked
-          }
-          className={
-            locked
-              ? "lockedInput"
-              : ""
-          }
-          onChange={(
-            event
-          ) =>
-            onChange(
-              event.target.value
-            )
-          }
-        />
+        {label} *
       </label>
 
-      <div className="requiredNote">
-        ✓{" "}
-        {ka
-          ? locked
-            ? "სავალდებულო • დაფიქსირებული"
-            : "სავალდებულო"
-          : locked
-          ? "Required • Locked"
-          : "Required"}
-      </div>
-    </div>
-  );
-}
+      <input
+        type={type}
+        value={value}
+        required
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+      />
 
-function RequiredSecretField({
-  label,
-  value,
-  onChange,
-  ka,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  ka: boolean;
-}) {
-  return (
-    <div className="requiredField">
-      <label>
-        <strong>
-          {label} *
-        </strong>
-
-        <input
-          type="password"
-          autoComplete="new-password"
-          value={value}
-          required
-          onChange={(
-            event
-          ) =>
-            onChange(
-              event.target.value
-            )
-          }
-        />
-      </label>
-
-      <div className="requiredNote">
-        ✓{" "}
-        {ka
-          ? "სავალდებულო • მინიმუმ 6 სიმბოლო"
-          : "Required • Minimum 6 characters"}
-      </div>
-    </div>
-  );
-}
-
-function RequiredSelect({
-  label,
-  value,
-  onChange,
-  ka,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  ka: boolean;
-  options: string[][];
-}) {
-  return (
-    <div className="requiredField">
-      <label>
-        <strong>
-          {label} *
-        </strong>
-
-        <select
-          value={value}
-          required
-          onChange={(
-            event
-          ) =>
-            onChange(
-              event.target.value
-            )
-          }
-        >
-          {options.map(
-            ([
-              optionValue,
-              optionLabel,
-            ]) => (
-              <option
-                key={
-                  optionValue ||
-                  "empty"
-                }
-                value={
-                  optionValue
-                }
-              >
-                {
-                  optionLabel
-                }
-              </option>
-            )
-          )}
-        </select>
-      </label>
-
-      <div className="requiredNote">
+      <small className="requiredNote">
         ✓{" "}
         {ka
           ? "სავალდებულო"
           : "Required"}
-      </div>
+      </small>
     </div>
   );
 }
 
-function OptionalField({
+function RequiredAlwaysVisibleInput({
+  label,
+  value,
+  onChange,
+  ka,
+}: {
+  label: string;
+  value: string;
+  onChange: (
+    value: string
+  ) => void;
+  ka: boolean;
+}) {
+  return (
+    <div className="standardField">
+      <label>
+        {label} *
+      </label>
+
+      <input
+        value={value}
+        required
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+      />
+
+      <small className="alwaysVisibleNote">
+        ✓{" "}
+        {ka
+          ? "სავალდებულო • QR პროფილზე ყოველთვის გამოჩნდება"
+          : "Required • Always visible on QR profile"}
+      </small>
+    </div>
+  );
+}
+
+function OptionalInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (
+    value: string
+  ) => void;
+  type?: string;
+}) {
+  return (
+    <div className="standardField">
+      <label>
+        {label}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+      />
+    </div>
+  );
+}
+
+function VisibilityField({
   label,
   value,
   onChange,
   visible,
   onToggle,
+  explanation,
   ka,
+  required = false,
   type = "text",
-  note,
 }: {
   label: string;
   value: string;
@@ -2763,22 +2005,30 @@ function OptionalField({
   ) => void;
   visible: boolean;
   onToggle: () => void;
+  explanation: string;
   ka: boolean;
+  required?: boolean;
   type?: string;
-  note?: string;
 }) {
   return (
-    <div className="optionalField">
-      <div className="fieldHeader">
+    <div className="visibilityCard">
+      <div className="visibilityHeader">
         <div>
           <strong>
             {label}
+            {required
+              ? " *"
+              : ""}
           </strong>
 
           <span>
-            {ka
-              ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
-              : "Optional • Completing this field is your choice"}
+            {required
+              ? ka
+                ? "შევსება სავალდებულოა • გამოჩენა თქვენი არჩევანია"
+                : "Required • Visibility is your choice"
+              : ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
           </span>
         </div>
 
@@ -2795,43 +2045,40 @@ function OptionalField({
       <input
         type={type}
         value={value}
-        onChange={(
-          event
-        ) =>
+        required={required}
+        onChange={(event) =>
           onChange(
             event.target.value
           )
         }
       />
 
-      <div className="optionalNote">
+      <p className="fieldExplanation">
+        {explanation}
+      </p>
+
+      <div className="visibilityStatus">
         {ka
-          ? "QR პროფილში ჩვენება:"
-          : "Show in QR profile:"}{" "}
+          ? "QR პროფილზე გამოჩენა:"
+          : "Show on QR profile:"}{" "}
         <b>
           {visible
             ? "ON"
             : "OFF"}
         </b>
       </div>
-
-      {note && (
-        <div className="fieldHelp">
-          {note}
-        </div>
-      )}
     </div>
   );
 }
 
-function OptionalSelect({
+function VisibilityTextarea({
   label,
   value,
   onChange,
   visible,
   onToggle,
+  explanation,
   ka,
-  options,
 }: {
   label: string;
   value: string;
@@ -2840,303 +2087,15 @@ function OptionalSelect({
   ) => void;
   visible: boolean;
   onToggle: () => void;
-  ka: boolean;
-  options: string[][];
-}) {
-  return (
-    <div className="optionalField">
-      <div className="fieldHeader">
-        <div>
-          <strong>
-            {label}
-          </strong>
-
-          <span>
-            {ka
-              ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
-              : "Optional • Completing this field is your choice"}
-          </span>
-        </div>
-
-        <Switch
-          active={visible}
-          onClick={onToggle}
-        />
-      </div>
-
-      <select
-        value={value}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
-        }
-      >
-        {options.map(
-          ([
-            optionValue,
-            optionLabel,
-          ]) => (
-            <option
-              key={
-                optionValue ||
-                "empty"
-              }
-              value={
-                optionValue
-              }
-            >
-              {
-                optionLabel
-              }
-            </option>
-          )
-        )}
-      </select>
-
-      <div className="optionalNote">
-        {ka
-          ? "QR პროფილში ჩვენება:"
-          : "Show in QR profile:"}{" "}
-        <b>
-          {visible
-            ? "ON"
-            : "OFF"}
-        </b>
-      </div>
-    </div>
-  );
-}
-
-function OptionalTextArea({
-  label,
-  placeholder,
-  value,
-  onChange,
-  visible,
-  onToggle,
-  ka,
-}: {
-  label: string;
-  placeholder?: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  visible: boolean;
-  onToggle: () => void;
+  explanation: string;
   ka: boolean;
 }) {
   return (
-    <div className="optionalField">
-      <div className="fieldHeader">
+    <div className="visibilityCard">
+      <div className="visibilityHeader">
         <div>
           <strong>
             {label}
-          </strong>
-
-          <span>
-            {ka
-              ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
-              : "Optional • Completing this field is your choice"}
-          </span>
-        </div>
-
-        <Switch
-          active={visible}
-          onClick={onToggle}
-        />
-      </div>
-
-      <textarea
-        value={value}
-        placeholder={placeholder}
-        onChange={(
-          event
-        ) =>
-          onChange(
-            event.target.value
-          )
-        }
-      />
-
-      <div className="optionalNote">
-        {ka
-          ? "QR პროფილში ჩვენება:"
-          : "Show in QR profile:"}{" "}
-        <b>
-          {visible
-            ? "ON"
-            : "OFF"}
-        </b>
-      </div>
-    </div>
-  );
-}
-
-function OptionalPhoto({
-  label,
-  file,
-  setFile,
-  visible,
-  onToggle,
-  ka,
-}: {
-  label: string;
-  file: File | null;
-  setFile: (
-    file: File | null
-  ) => void;
-  visible: boolean;
-  onToggle: () => void;
-  ka: boolean;
-}) {
-  return (
-    <div className="optionalField">
-      <div className="fieldHeader">
-        <div>
-          <strong>
-            {label}
-          </strong>
-
-          <span>
-            {ka
-              ? "ნებაყოფლობითი • დამატება თქვენი არჩევანია"
-              : "Optional • Adding a photo is your choice"}
-          </span>
-        </div>
-
-        <Switch
-          active={visible}
-          onClick={onToggle}
-        />
-      </div>
-
-      <label className="photoUpload">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(
-            event
-          ) =>
-            setFile(
-              event.target
-                .files?.[0] ||
-                null
-            )
-          }
-        />
-
-        <div className="photoIcon">
-          {file
-            ? "✓"
-            : "+"}
-        </div>
-
-        <div>
-          <strong>
-            {file
-              ? file.name
-              : ka
-              ? "ფოტოს დამატება"
-              : "Add photo"}
-          </strong>
-
-          <small>
-            {ka
-              ? "აირჩიეთ სურათი • მაქსიმუმ 5 MB"
-              : "Choose an image • Maximum 5 MB"}
-          </small>
-        </div>
-      </label>
-
-      <div className="optionalNote">
-        {ka
-          ? "QR პროფილში ჩვენება:"
-          : "Show in QR profile:"}{" "}
-        <b>
-          {visible
-            ? "ON"
-            : "OFF"}
-        </b>
-      </div>
-    </div>
-  );
-}
-
-function ContactSection({
-  title,
-  enabled,
-  setEnabled,
-  name,
-  setName,
-  relationship,
-  setRelationship,
-  phone,
-  setPhone,
-  mobile,
-  setMobile,
-  whatsapp,
-  setWhatsapp,
-  liveChat,
-  setLiveChat,
-  language,
-}: {
-  title: string;
-  enabled: boolean;
-  setEnabled: (
-    value: boolean
-  ) => void;
-
-  name: string;
-  setName: (
-    value: string
-  ) => void;
-
-  relationship: string;
-  setRelationship: (
-    value: string
-  ) => void;
-
-  phone: string;
-  setPhone: (
-    value: string
-  ) => void;
-
-  mobile: boolean;
-  setMobile: (
-    value: boolean
-  ) => void;
-
-  whatsapp: boolean;
-  setWhatsapp: (
-    value: boolean
-  ) => void;
-
-  liveChat: boolean;
-  setLiveChat: (
-    value: boolean
-  ) => void;
-
-  language: Language;
-}) {
-  const ka =
-    language === "ka";
-
-  return (
-    <div
-      className={
-        enabled
-          ? "contactSection enabled"
-          : "contactSection"
-      }
-    >
-      <div className="contactSectionHeader">
-        <div>
-          <strong>
-            {title}
           </strong>
 
           <span>
@@ -3147,209 +2106,39 @@ function ContactSection({
         </div>
 
         <Switch
-          active={enabled}
-          onClick={() =>
-            setEnabled(
-              !enabled
-            )
+          active={
+            visible
+          }
+          onClick={
+            onToggle
           }
         />
       </div>
 
-      {enabled && (
-        <div className="contactContent">
-          <label className="simpleLabel">
-            <strong>
-              {ka
-                ? "სახელი და გვარი"
-                : "Full name"}
-            </strong>
-
-            <input
-              value={name}
-              onChange={(
-                event
-              ) =>
-                setName(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>
-
-          <label className="simpleLabel">
-            <strong>
-              {ka
-                ? "თქვენთან კავშირი"
-                : "Relationship to person"}
-            </strong>
-
-            <select
-              value={
-                relationship
-              }
-              onChange={(
-                event
-              ) =>
-                setRelationship(
-                  event.target
-                    .value
-                )
-              }
-            >
-              {relationshipOptions[
-                language
-              ].map(
-                ([
-                  optionValue,
-                  optionLabel,
-                ]) => (
-                  <option
-                    key={
-                      optionValue ||
-                      "empty"
-                    }
-                    value={
-                      optionValue
-                    }
-                  >
-                    {
-                      optionLabel
-                    }
-                  </option>
-                )
-              )}
-            </select>
-          </label>
-
-          <label className="simpleLabel">
-            <strong>
-              {ka
-                ? "ტელეფონის ნომერი"
-                : "Phone number"}
-            </strong>
-
-            <input
-              type="tel"
-              value={phone}
-              onChange={(
-                event
-              ) =>
-                setPhone(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>
-
-          <div className="contactMethods">
-            <strong>
-              {ka
-                ? "დაკავშირების მეთოდები"
-                : "Contact methods"}
-            </strong>
-
-            <p>
-              {ka
-                ? "აირჩიეთ სურვილისამებრ ერთი, რამდენიმე ან არცერთი."
-                : "Choose one, several, or none."}
-            </p>
-
-            <ContactMethod
-              icon="📞"
-              title={
-                ka
-                  ? "მობილური"
-                  : "Mobile"
-              }
-              active={
-                mobile
-              }
-              onClick={() =>
-                setMobile(
-                  !mobile
-                )
-              }
-            />
-
-            <ContactMethod
-              icon="🟢"
-              title="WhatsApp"
-              active={
-                whatsapp
-              }
-              onClick={() =>
-                setWhatsapp(
-                  !whatsapp
-                )
-              }
-            />
-
-            <ContactMethod
-              icon="💬"
-              title="Live Chat"
-              active={
-                liveChat
-              }
-              onClick={() =>
-                setLiveChat(
-                  !liveChat
-                )
-              }
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ContactMethod({
-  icon,
-  title,
-  active,
-  onClick,
-}: {
-  icon: string;
-  title: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={
-        active
-          ? "contactMethod active"
-          : "contactMethod"
-      }
-      onClick={onClick}
-      aria-pressed={
-        active
-      }
-    >
-      <span className="contactIcon">
-        {icon}
-      </span>
-
-      <strong>
-        {title}
-      </strong>
-
-      <span
-        className={
-          active
-            ? "check active"
-            : "check"
+      <textarea
+        value={value}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
         }
-      >
-        {active
-          ? "✓"
-          : ""}
-      </span>
-    </button>
+      />
+
+      <p className="fieldExplanation">
+        {explanation}
+      </p>
+
+      <div className="visibilityStatus">
+        {ka
+          ? "QR პროფილზე გამოჩენა:"
+          : "Show on QR profile:"}{" "}
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
+      </div>
+    </div>
   );
 }
 
@@ -3385,7 +2174,7 @@ function ErrorBox({
 }) {
   return (
     <div className="errorBox">
-      {text}
+      ⚠ {text}
     </div>
   );
 }
@@ -3418,28 +2207,24 @@ function Styles() {
         min-height: 100vh;
         background:
           radial-gradient(
-            circle at 100% 0%,
-            rgba(21, 94, 239, 0.07),
-            transparent 26%
+            circle at top right,
+            rgba(21, 94, 239, 0.08),
+            transparent 28%
           ),
           #f7f9fc;
         color: #101828;
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
+        font-family: Arial, sans-serif;
       }
 
       .header {
         width: calc(100% - 32px);
-        max-width: 1080px;
-        min-height: 78px;
+        max-width: 1050px;
+        min-height: 77px;
         margin: auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom:
-          1px solid #e4e9f0;
+        border-bottom: 1px solid #e4e7ec;
       }
 
       .brand {
@@ -3456,7 +2241,7 @@ function Styles() {
         place-items: center;
         border-radius: 13px;
         background: #155eef;
-        color: #fff;
+        color: white;
         font-size: 12px;
         font-weight: 900;
       }
@@ -3477,45 +2262,32 @@ function Styles() {
         letter-spacing: 2px;
       }
 
-      .headerRight {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-      }
-
-      .headerBack {
-        color: #475467;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 800;
-      }
-
       .languages {
-        padding: 4px;
         display: flex;
-        border-radius: 10px;
-        background: #edf0f4;
+        padding: 4px;
+        border-radius: 9px;
+        background: #eaecf0;
       }
 
       .languages button {
-        padding: 7px 9px;
+        padding: 7px 10px;
         border: 0;
         border-radius: 7px;
         background: transparent;
-        color: #7d8795;
+        color: #667085;
         font-size: 10px;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .languages button.selected {
-        background: #fff;
+      .languages button.active {
+        background: white;
         color: #155eef;
       }
 
-      .content {
+      .container {
         width: calc(100% - 24px);
-        max-width: 800px;
+        max-width: 790px;
         margin: auto;
         padding: 44px 0 80px;
       }
@@ -3523,111 +2295,80 @@ function Styles() {
       .hero {
         display: flex;
         align-items: flex-start;
-        gap: 17px;
+        gap: 15px;
       }
 
       .emergencyIcon {
-        width: 62px;
-        height: 62px;
-        flex: 0 0 62px;
+        width: 60px;
+        height: 60px;
+        flex: 0 0 60px;
         display: grid;
         place-items: center;
-        border:
-          1px solid #ffd7d2;
-        border-radius: 19px;
-        background: #fff1ef;
+        border: 1px solid #fecdca;
+        border-radius: 18px;
+        background: #fff1f0;
         color: #d92d20;
-        font-size: 32px;
+        font-size: 30px;
         font-weight: 900;
       }
 
       .eyebrow {
         color: #d92d20;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 900;
         letter-spacing: 1.7px;
       }
 
       .hero h1 {
-        margin: 7px 0 8px;
-        font-size: 37px;
-        line-height: 1.13;
-        letter-spacing: -1px;
+        margin: 7px 0;
+        font-size: 35px;
+        line-height: 1.15;
       }
 
       .hero p {
-        max-width: 650px;
         margin: 0;
         color: #667085;
         font-size: 14px;
-        line-height: 1.65;
-      }
-
-      .informationBox {
-        margin-top: 25px;
-        padding: 17px 18px;
-        border:
-          1px solid #d8e5fb;
-        border-left:
-          4px solid #155eef;
-        border-radius: 14px;
-        background: #f2f7ff;
-      }
-
-      .informationBox strong {
-        color: #344054;
-        font-size: 15px;
-        font-weight: 850;
-      }
-
-      .informationBox p {
-        margin: 6px 0 0;
-        color: #667085;
-        font-size: 14px;
-        line-height: 1.6;
       }
 
       .progress {
-        margin: 35px 0 24px;
+        margin: 34px 0 24px;
         display: flex;
         align-items: center;
       }
 
-      .progressItem {
-        min-width: 70px;
+      .stepIndicator {
+        min-width: 75px;
         text-align: center;
       }
 
-      .circle {
+      .stepIndicator > span {
         width: 36px;
         height: 36px;
         margin: auto;
         display: grid;
         place-items: center;
-        border:
-          1px solid #d4dae2;
+        border: 1px solid #d0d5dd;
         border-radius: 50%;
-        background: #fff;
+        background: white;
         color: #98a2b3;
         font-size: 11px;
         font-weight: 900;
       }
 
-      .circle.active {
+      .stepIndicator > span.active {
         border-color: #155eef;
         color: #155eef;
       }
 
-      .circle.current {
+      .stepIndicator > span.current {
         border-color: #d92d20;
         background: #d92d20;
-        color: #fff;
-        box-shadow:
-          0 0 0 5px
-          rgba(217, 45, 32, 0.08);
+        color: white;
+        box-shadow: 0 0 0 5px rgba(217, 45, 32, 0.08);
       }
 
-      .progressItem small {
+      .stepIndicator small {
         display: block;
         margin-top: 7px;
         color: #667085;
@@ -3635,246 +2376,66 @@ function Styles() {
         font-weight: 800;
       }
 
-      .line {
+      .progressLine {
         flex: 1;
         height: 2px;
-        margin-bottom: 20px;
-        background: #e1e5eb;
+        margin-bottom: 19px;
+        background: #e4e7ec;
       }
 
-      .line.active {
+      .progressLine.active {
         background: #155eef;
       }
 
       .card {
         padding: 30px;
-        border:
-          1px solid #e2e7ed;
-        border-top:
-          4px solid #d92d20;
-        border-radius: 23px;
-        background: #fff;
-        box-shadow:
-          0 12px 38px
-          rgba(16, 24, 40, 0.055);
+        border: 1px solid #e4e7ec;
+        border-top: 4px solid #d92d20;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 12px 35px rgba(16, 24, 40, 0.06);
       }
 
-      .stepTitle {
-        margin-bottom: 27px;
+      .sectionTitle {
+        margin-bottom: 25px;
         display: flex;
-        gap: 13px;
+        gap: 12px;
       }
 
-      .stepTitle > b {
+      .sectionTitle > b {
         padding-top: 4px;
         color: #d92d20;
-        font-size: 12px;
-        font-weight: 900;
+        font-size: 11px;
       }
 
-      .stepTitle h2 {
+      .sectionTitle h2 {
         margin: 0;
         font-size: 23px;
       }
 
-      .stepTitle p {
+      .sectionTitle p {
         margin: 6px 0 0;
         color: #667085;
-        font-size: 14px;
-        line-height: 1.55;
-      }
-
-      .grid2 {
-        display: grid;
-        grid-template-columns:
-          repeat(
-            2,
-            minmax(0, 1fr)
-          );
-        gap: 14px;
-      }
-
-      .requiredField,
-      .optionalField {
-        margin-bottom: 21px;
-      }
-
-      .requiredField label > strong,
-      .fieldHeader strong,
-      .simpleLabel > strong {
-        display: block;
-        margin-bottom: 8px;
-        color: #344054;
-        font-size: 15px;
-        font-weight: 850;
-      }
-
-      .requiredField input,
-      .requiredField select,
-      .optionalField input,
-      .optionalField select,
-      .optionalField textarea,
-      .simpleLabel input,
-      .simpleLabel select {
-        width: 100%;
-        border:
-          1px solid #d0d5dd;
-        border-radius: 12px;
-        background: #fff;
-        color: #101828;
-        outline: none;
-      }
-
-      .requiredField input,
-      .requiredField select,
-      .optionalField input,
-      .optionalField select,
-      .simpleLabel input,
-      .simpleLabel select {
-        height: 54px;
-        padding: 0 14px;
-      }
-
-      .optionalField textarea {
-        min-height: 112px;
-        padding: 14px;
-        resize: vertical;
-        line-height: 1.5;
-      }
-
-      .requiredField input:focus,
-      .requiredField select:focus,
-      .optionalField input:focus,
-      .optionalField select:focus,
-      .optionalField textarea:focus,
-      .simpleLabel input:focus,
-      .simpleLabel select:focus {
-        border-color: #155eef;
-        box-shadow:
-          0 0 0 3px
-          rgba(21, 94, 239, 0.08);
-      }
-
-      .lockedInput {
-        background:
-          #f2f4f7 !important;
-        color:
-          #667085 !important;
-        cursor: not-allowed;
-      }
-
-      .requiredNote {
-        margin-top: 9px;
-        color: #16803b;
-        font-size: 14px;
-        line-height: 1.5;
-        font-weight: 800;
-      }
-
-      .fieldHelp {
-        margin:
-          -10px 0 20px;
-        color: #667085;
         font-size: 13px;
         line-height: 1.55;
-      }
-
-      .securityInfo {
-        margin-bottom: 22px;
-        padding: 14px 15px;
-        border:
-          1px solid #d8e5fb;
-        border-radius: 12px;
-        background: #f2f7ff;
-        color: #475467;
-        font-size: 13px;
-        line-height: 1.55;
-      }
-
-      .lockedBox {
-        margin-bottom: 20px;
-        padding: 14px;
-        border:
-          1px solid #d9e5fb;
-        border-radius: 12px;
-        background: #f2f7ff;
-        color: #344054;
-        font-size: 13px;
-        line-height: 1.5;
-        font-weight: 750;
-      }
-
-      .visibilityRow {
-        margin:
-          -8px 0 21px;
-        padding: 14px 15px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        border:
-          1px solid #e2e7ed;
-        border-radius: 12px;
-        background: #f9fafb;
-      }
-
-      .visibilityRow strong,
-      .visibilityRow span {
-        display: block;
-      }
-
-      .visibilityRow strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .visibilityRow span {
-        margin-top: 4px;
-        color: #667085;
-        font-size: 13px;
-      }
-
-      .emergencyNumberPreview {
-        margin:
-          -8px 0 22px;
-        padding: 13px 15px;
-        border:
-          1px solid #ffd7d2;
-        border-radius: 11px;
-        background: #fff5f4;
-        color: #b42318;
-        font-size: 13px;
-        font-weight: 800;
-      }
-
-      .managerBox {
-        margin-bottom: 21px;
-      }
-
-      .managerBox > strong {
-        display: block;
-        margin-bottom: 9px;
-        color: #344054;
-        font-size: 15px;
       }
 
       .choiceGrid {
+        margin-bottom: 22px;
         display: grid;
-        grid-template-columns:
-          1fr 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
 
       .choice {
         min-height: 82px;
-        padding: 13px;
+        padding: 14px;
         display: flex;
         align-items: center;
         gap: 10px;
-        border:
-          1px solid #d0d5dd;
+        border: 1px solid #d0d5dd;
         border-radius: 13px;
-        background: #fff;
+        background: white;
         color: #475467;
         cursor: pointer;
       }
@@ -3885,47 +2446,161 @@ function Styles() {
         color: #155eef;
       }
 
-      .choice > span {
+      .choice span {
         font-size: 25px;
       }
 
-      .choice strong {
-        text-align: left;
-        font-size: 13px;
+      .infoBox,
+      .securityBox,
+      .alwaysVisibleBox,
+      .emergencyNumber {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 12px;
       }
 
-      .fieldHeader {
-        margin-bottom: 9px;
+      .infoBox,
+      .securityBox {
+        border: 1px solid #d6e4ff;
+        background: #f2f7ff;
+      }
+
+      .alwaysVisibleBox {
+        border: 1px solid #d1fadf;
+        background: #ecfdf3;
+      }
+
+      .emergencyNumber {
+        border: 1px solid #fecdca;
+        background: #fff1f0;
+      }
+
+      .infoBox p,
+      .alwaysVisibleBox p,
+      .emergencyNumber p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .securityBox {
+        color: #475467;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .standardField {
+        margin-bottom: 19px;
+      }
+
+      .standardField label {
+        display: block;
+        margin-bottom: 8px;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .standardField input,
+      .standardField select,
+      .visibilityCard input,
+      .visibilityCard textarea {
+        width: 100%;
+        border: 1px solid #d0d5dd;
+        border-radius: 11px;
+        background: white;
+        color: #101828;
+        outline: none;
+      }
+
+      .standardField input,
+      .standardField select,
+      .visibilityCard input {
+        height: 53px;
+        padding: 0 13px;
+      }
+
+      .visibilityCard textarea {
+        min-height: 108px;
+        padding: 13px;
+        resize: vertical;
+      }
+
+      .standardField input:focus,
+      .standardField select:focus,
+      .visibilityCard input:focus,
+      .visibilityCard textarea:focus {
+        border-color: #155eef;
+        box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.08);
+      }
+
+      .requiredNote,
+      .alwaysVisibleNote {
+        display: block;
+        margin-top: 8px;
+        color: #16803b;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.45;
+      }
+
+      .visibilityCard,
+      .contactCard {
+        margin-bottom: 20px;
+        padding: 17px;
+        border: 1px solid #e4e7ec;
+        border-radius: 14px;
+        background: #fafbfc;
+      }
+
+      .visibilityHeader {
+        margin-bottom: 11px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 15px;
       }
 
-      .fieldHeader strong {
-        margin-bottom: 4px;
-      }
-
-      .fieldHeader span {
+      .visibilityHeader strong,
+      .visibilityHeader span {
         display: block;
-        color: #667085;
+      }
+
+      .visibilityHeader strong {
+        color: #344054;
         font-size: 14px;
-        line-height: 1.45;
+      }
+
+      .visibilityHeader span {
+        margin-top: 4px;
+        color: #667085;
+        font-size: 13px;
         font-weight: 700;
       }
 
-      .optionalNote {
-        margin-top: 9px;
+      .fieldExplanation {
+        margin: 9px 0 0;
         color: #667085;
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .visibilityStatus {
+        margin-top: 8px;
+        color: #667085;
+        font-size: 13px;
         font-weight: 700;
       }
 
-      .optionalNote b {
+      .visibilityStatus b {
         color: #155eef;
-        font-size: 14px;
-        font-weight: 900;
       }
 
       .switch {
@@ -3935,7 +2610,7 @@ function Styles() {
         padding: 3px;
         border: 0;
         border-radius: 30px;
-        background: #cdd3db;
+        background: #cfd4dc;
         cursor: pointer;
       }
 
@@ -3944,9 +2619,8 @@ function Styles() {
         width: 23px;
         height: 23px;
         border-radius: 50%;
-        background: #fff;
-        transition:
-          transform 0.2s ease;
+        background: white;
+        transition: transform 0.2s ease;
       }
 
       .switch.active {
@@ -3954,311 +2628,62 @@ function Styles() {
       }
 
       .switch.active span {
-        transform:
-          translateX(21px);
-      }
-
-      .photoUpload {
-        min-height: 76px;
-        padding: 13px;
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        border:
-          1px dashed #c7ced8;
-        border-radius: 13px;
-        background: #fafbfc;
-        cursor: pointer;
-      }
-
-      .photoUpload input {
-        display: none;
-      }
-
-      .photoIcon {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: #eaf2ff;
-        color: #155eef;
-        font-size: 21px;
-        font-weight: 900;
-      }
-
-      .photoUpload strong,
-      .photoUpload small {
-        display: block;
-      }
-
-      .photoUpload strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .photoUpload small {
-        margin-top: 4px;
-        color: #98a2b3;
-        font-size: 12px;
-      }
-
-      .emergencyServiceCard {
-        margin-bottom: 22px;
-        padding: 17px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border:
-          1px solid #ffd7d2;
-        border-radius: 14px;
-        background: #fff5f4;
-      }
-
-      .emergencyServiceCard > span {
-        font-size: 25px;
-      }
-
-      .emergencyServiceCard strong {
-        color: #b42318;
-        font-size: 15px;
-      }
-
-      .emergencyServiceCard p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 13px;
-      }
-
-      .contactSection {
-        margin-bottom: 18px;
-        padding: 18px;
-        border:
-          1px solid #e2e7ed;
-        border-radius: 15px;
-        background: #f9fafb;
-      }
-
-      .contactSection.enabled {
-        border-color: #cdddf9;
-        background: #f8fbff;
-      }
-
-      .contactSectionHeader {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-      }
-
-      .contactSectionHeader strong,
-      .contactSectionHeader span {
-        display: block;
-      }
-
-      .contactSectionHeader strong {
-        color: #344054;
-        font-size: 15px;
-      }
-
-      .contactSectionHeader span {
-        margin-top: 4px;
-        color: #667085;
-        font-size: 13px;
-      }
-
-      .contactContent {
-        margin-top: 20px;
-      }
-
-      .simpleLabel {
-        display: block;
-        margin-bottom: 17px;
-      }
-
-      .contactMethods {
-        margin-top: 18px;
-        padding: 16px;
-        border:
-          1px solid #e2e7ed;
-        border-radius: 13px;
-        background: #fff;
-      }
-
-      .contactMethods > strong {
-        font-size: 14px;
-      }
-
-      .contactMethods > p {
-        margin: 5px 0 12px;
-        color: #667085;
-        font-size: 13px;
-      }
-
-      .contactMethod {
-        width: 100%;
-        min-height: 57px;
-        margin-top: 8px;
-        padding: 10px 12px;
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        border:
-          1px solid #dce2e9;
-        border-radius: 12px;
-        background: #fff;
-        cursor: pointer;
-      }
-
-      .contactMethod.active {
-        border-color: #155eef;
-        background: #f3f7fd;
-      }
-
-      .contactIcon {
-        width: 37px;
-        height: 37px;
-        display: grid;
-        place-items: center;
-        border-radius: 10px;
-        background: #eef4ff;
-      }
-
-      .contactMethod strong {
-        flex: 1;
-        text-align: left;
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .check {
-        width: 23px;
-        height: 23px;
-        display: grid;
-        place-items: center;
-        border:
-          1px solid #cdd4dd;
-        border-radius: 7px;
-        color: #fff;
-      }
-
-      .check.active {
-        border-color: #155eef;
-        background: #155eef;
-      }
-
-      .locationCard {
-        margin-top: 24px;
-        padding: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18px;
-        border:
-          1px solid #d9e5fb;
-        border-radius: 15px;
-        background: #f4f8ff;
-      }
-
-      .locationText {
-        display: flex;
-        align-items: flex-start;
-        gap: 11px;
-      }
-
-      .locationIcon {
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
-        display: grid;
-        place-items: center;
-        border-radius: 10px;
-        background: #e5efff;
-        color: #155eef;
-        font-size: 18px;
-      }
-
-      .locationCard strong {
-        color: #344054;
-        font-size: 15px;
-      }
-
-      .locationCard p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.55;
+        transform: translateX(21px);
       }
 
       .termsBox {
-        max-height: 430px;
+        max-height: 470px;
         overflow-y: auto;
         padding: 20px;
-        border:
-          1px solid #e2e7ed;
-        border-radius: 15px;
+        border: 1px solid #e4e7ec;
+        border-radius: 14px;
         background: #f9fafb;
       }
 
       .termsBox h3 {
-        margin: 0 0 15px;
-        color: #344054;
-        font-size: 16px;
-      }
-
-      .termsBox ol {
-        margin: 0;
-        padding-left: 22px;
+        margin-top: 0;
       }
 
       .termsBox li {
-        margin-bottom: 12px;
-        padding-left: 4px;
+        margin-bottom: 11px;
         color: #475467;
         font-size: 13px;
         line-height: 1.6;
       }
 
-      .termsCheck {
+      .termsConsent {
         margin-top: 20px;
-        padding: 17px;
+        padding: 16px;
         display: flex;
         align-items: flex-start;
-        gap: 12px;
-        border:
-          1px solid #d9e5fb;
-        border-radius: 14px;
+        gap: 11px;
+        border: 1px solid #d6e4ff;
+        border-radius: 13px;
         background: #f2f7ff;
         cursor: pointer;
       }
 
-      .termsCheck input {
+      .termsConsent input {
         width: 20px;
         height: 20px;
         margin-top: 2px;
         accent-color: #155eef;
       }
 
-      .termsCheck strong,
-      .termsCheck small {
-        display: block;
-      }
-
-      .termsCheck strong {
+      .termsConsent strong {
         color: #344054;
         font-size: 14px;
       }
 
-      .termsCheck small {
-        margin-top: 5px;
+      .termsConsent p {
+        margin: 5px 0 0;
         color: #667085;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.5;
       }
 
       .buttons {
-        margin-top: 27px;
+        margin-top: 25px;
         display: flex;
         gap: 10px;
       }
@@ -4266,9 +2691,9 @@ function Styles() {
       .primaryButton,
       .backButton,
       .saveButton {
-        min-height: 53px;
-        padding: 0 21px;
-        border-radius: 12px;
+        min-height: 52px;
+        padding: 0 20px;
+        border-radius: 11px;
         font-size: 13px;
         font-weight: 900;
         cursor: pointer;
@@ -4276,24 +2701,19 @@ function Styles() {
 
       .primaryButton {
         margin-left: auto;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         border: 0;
         background: #155eef;
-        color: #fff;
-        text-decoration: none;
+        color: white;
       }
 
       .primaryButton.full {
         width: 100%;
-        margin-top: 12px;
+        margin: 10px 0 0;
       }
 
       .backButton {
-        border:
-          1px solid #d0d5dd;
-        background: #fff;
+        border: 1px solid #d0d5dd;
+        background: white;
         color: #475467;
       }
 
@@ -4301,76 +2721,69 @@ function Styles() {
         margin-left: auto;
         border: 0;
         background: #d92d20;
-        color: #fff;
+        color: white;
       }
 
       .saveButton:disabled {
-        opacity: 0.55;
+        opacity: 0.5;
         cursor: not-allowed;
       }
 
       .errorBox {
-        margin-top: 18px;
-        padding: 14px 15px;
-        border:
-          1px solid #fecdca;
+        margin-top: 17px;
+        padding: 14px;
+        border: 1px solid #fecdca;
         border-radius: 11px;
         background: #fff1f0;
         color: #b42318;
-        font-size: 14px;
-        line-height: 1.5;
-        font-weight: 750;
+        font-size: 13px;
+        font-weight: 700;
       }
 
       .successPage {
         width: calc(100% - 24px);
         max-width: 650px;
         margin: auto;
-        padding: 100px 0;
+        padding: 95px 0;
         text-align: center;
       }
 
       .successIcon {
-        width: 72px;
-        height: 72px;
-        margin:
-          0 auto 22px;
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
         display: grid;
         place-items: center;
         border-radius: 50%;
-        background: #e9f8ef;
+        background: #ecfdf3;
         color: #16803b;
         font-size: 30px;
         font-weight: 900;
       }
 
       .successPage h1 {
-        margin: 9px 0;
-        font-size: 30px;
+        margin: 8px 0;
       }
 
       .successPage > p {
-        margin: 0 0 25px;
         color: #667085;
-        line-height: 1.6;
       }
 
       .successButtons {
+        margin-top: 24px;
         display: grid;
-        grid-template-columns:
-          1fr 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
 
       .viewButton,
-      .additionalButton,
-      .homeButton {
-        min-height: 51px;
-        padding: 0 18px;
-        display: inline-flex;
+      .manageButton {
+        min-height: 50px;
+        display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
+        border-radius: 11px;
+        color: white;
         text-decoration: none;
         font-size: 13px;
         font-weight: 900;
@@ -4378,87 +2791,39 @@ function Styles() {
 
       .viewButton {
         background: #155eef;
-        color: #fff;
       }
 
-      .additionalButton {
+      .manageButton {
         background: #d92d20;
-        color: #fff;
       }
 
-      .homeButton {
-        grid-column:
-          1 / -1;
-        border:
-          1px solid #d0d5dd;
-        background: #fff;
-        color: #475467;
-      }
-
-      .lockedNotice {
-        margin-top: 25px;
+      .successNotice {
+        margin-top: 22px;
         padding: 16px;
-        border:
-          1px solid #d9e5fb;
-        border-radius: 13px;
+        border: 1px solid #d6e4ff;
+        border-radius: 12px;
         background: #f2f7ff;
         text-align: left;
       }
 
-      .lockedNotice strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .lockedNotice p {
+      .successNotice p {
         margin: 6px 0 0;
         color: #667085;
         font-size: 13px;
         line-height: 1.55;
       }
 
-      @media (
-        max-width: 650px
-      ) {
-        .headerBack {
-          display: none;
-        }
-
-        .content {
+      @media (max-width: 620px) {
+        .container {
           padding-top: 28px;
-        }
-
-        .hero {
-          gap: 12px;
-        }
-
-        .emergencyIcon {
-          width: 52px;
-          height: 52px;
-          flex-basis: 52px;
-          font-size: 27px;
         }
 
         .hero h1 {
           font-size: 27px;
         }
 
-        .progressItem {
-          min-width: 53px;
-        }
-
-        .progressItem small {
-          font-size: 9px;
-        }
-
-        .circle {
-          width: 32px;
-          height: 32px;
-        }
-
         .card {
           padding: 21px 14px;
-          border-radius: 18px;
         }
 
         .grid2,
@@ -4471,30 +2836,15 @@ function Styles() {
           margin-bottom: 8px;
         }
 
-        .requiredField input,
-        .requiredField select,
-        .optionalField input,
-        .optionalField select,
-        .optionalField textarea,
-        .simpleLabel input,
-        .simpleLabel select {
-          font-size: 16px;
-        }
-
-        .fieldHeader span,
-        .optionalNote,
-        .requiredNote {
-          font-size: 13px;
-        }
-
-        .locationCard {
-          align-items: flex-start;
+        input,
+        select,
+        textarea {
+          font-size: 16px !important;
         }
 
         .buttons {
           display: grid;
-          grid-template-columns:
-            0.9fr 1.5fr;
+          grid-template-columns: 0.9fr 1.5fr;
         }
 
         .primaryButton,
@@ -4507,10 +2857,6 @@ function Styles() {
 
         .successButtons {
           grid-template-columns: 1fr;
-        }
-
-        .homeButton {
-          grid-column: auto;
         }
       }
     `}</style>
