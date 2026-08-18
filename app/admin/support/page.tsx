@@ -10,6 +10,8 @@ import {
 
 import { supabase } from "@/lib/supabase";
 
+type Lang = "ka" | "en";
+
 type Conversation = {
   id: string;
   user_id: string;
@@ -19,7 +21,7 @@ type Conversation = {
   updated_at: string;
 };
 
-type SupportMessage = {
+type Message = {
   id: number;
   conversation_id: string;
   sender: "user" | "support" | "auto";
@@ -30,25 +32,32 @@ type SupportMessage = {
   created_at: string;
 };
 
-type ConversationPreview = Conversation & {
-  last_message: string;
-  last_sender: "user" | "support" | "auto" | null;
-  last_message_at: string;
+type ConversationView = Conversation & {
+  lastMessage: Message | null;
 };
 
-function formatDateTime(value: string) {
+function shortUserId(value: string) {
+  if (!value) return "Guest";
+
+  return `Guest • ${value.slice(0, 8)}`;
+}
+
+function formatDate(value: string, lang: Lang) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("ka-GE", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    lang === "ka" ? "ka-GE" : "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  ).format(date);
 }
 
 function playNotificationSound() {
@@ -67,21 +76,20 @@ function playNotificationSound() {
 
     const context = new AudioContextClass();
 
-    if (context.state === "suspended") {
-      void context.resume();
-    }
+    void context.resume();
 
     const oscillator = context.createOscillator();
     const gain = context.createGain();
 
     oscillator.type = "sine";
+
     oscillator.frequency.setValueAtTime(
       880,
       context.currentTime
     );
 
     gain.gain.setValueAtTime(
-      0.12,
+      0.11,
       context.currentTime
     );
 
@@ -98,27 +106,34 @@ function playNotificationSound() {
       context.currentTime + 0.22
     );
   } catch {
-    // Browser may block audio before user interaction.
+    // browser may block sound before user interaction
   }
 }
 
 export default function AdminSupportPage() {
-  const [conversations, setConversations] =
-    useState<ConversationPreview[]>([]);
+  const [lang, setLang] =
+    useState<Lang>("ka");
 
-  const [selectedId, setSelectedId] =
-    useState<string>("");
+  const [adminChecked, setAdminChecked] =
+    useState(false);
 
-  const [messages, setMessages] =
-    useState<SupportMessage[]>([]);
-
-  const [text, setText] = useState("");
+  const [isAdmin, setIsAdmin] =
+    useState(false);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [messagesLoading, setMessagesLoading] =
-    useState(false);
+  const [conversations, setConversations] =
+    useState<ConversationView[]>([]);
+
+  const [selectedId, setSelectedId] =
+    useState("");
+
+  const [messages, setMessages] =
+    useState<Message[]>([]);
+
+  const [reply, setReply] =
+    useState("");
 
   const [sending, setSending] =
     useState(false);
@@ -129,25 +144,33 @@ export default function AdminSupportPage() {
   const [soundEnabled, setSoundEnabled] =
     useState(false);
 
-  const [newCount, setNewCount] =
-    useState(0);
-
-  const [isAdmin, setIsAdmin] =
-    useState<boolean | null>(null);
-
   const bottomRef =
     useRef<HTMLDivElement | null>(null);
+
+  const ka = lang === "ka";
 
   const selectedConversation =
     useMemo(
       () =>
         conversations.find(
-          (conversation) =>
-            conversation.id ===
-            selectedId
+          (item) =>
+            item.id === selectedId
         ) || null,
       [conversations, selectedId]
     );
+
+  const newCount =
+    conversations.filter(
+      (conversation) =>
+        conversation.lastMessage?.sender ===
+        "user"
+    ).length;
+
+  /*
+    ==============================================
+    ADMIN CHECK
+    ==============================================
+  */
 
   useEffect(() => {
     async function checkAdmin() {
@@ -160,45 +183,50 @@ export default function AdminSupportPage() {
       } =
         await supabase.auth.getUser();
 
-      if (userError) {
-        setError(
-          userError.message
-        );
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-
-      const user =
-        userData.user;
-
-      if (!user) {
+      if (
+        userError ||
+        !userData.user
+      ) {
+        setAdminChecked(true);
         setIsAdmin(false);
         setLoading(false);
         return;
       }
 
       const {
-        data: adminRow,
+        data: adminRecord,
         error: adminError,
       } = await supabase
         .from("admin_users")
         .select("user_id")
-        .eq("user_id", user.id)
+        .eq(
+          "user_id",
+          userData.user.id
+        )
         .maybeSingle();
 
       if (adminError) {
         setError(
           adminError.message
         );
-        setIsAdmin(false);
+
+        setAdminChecked(true);
         setLoading(false);
         return;
       }
 
-      setIsAdmin(
-        Boolean(adminRow)
-      );
+      const allowed =
+        Boolean(adminRecord);
+
+      setIsAdmin(allowed);
+      setAdminChecked(true);
+
+      if (!allowed) {
+        setLoading(false);
+        return;
+      }
+
+      await loadConversations();
 
       setLoading(false);
     }
@@ -206,19 +234,20 @@ export default function AdminSupportPage() {
     void checkAdmin();
   }, []);
 
+  /*
+    ==============================================
+    LOAD ALL CONVERSATIONS
+    ==============================================
+  */
+
   async function loadConversations() {
-    if (!isAdmin) {
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
     const {
       data: conversationData,
       error: conversationError,
     } = await supabase
-      .from("support_conversations")
+      .from(
+        "support_conversations"
+      )
       .select(`
         id,
         user_id,
@@ -227,110 +256,137 @@ export default function AdminSupportPage() {
         created_at,
         updated_at
       `)
-      .order("updated_at", {
-        ascending: false,
-      });
+      .order(
+        "updated_at",
+        {
+          ascending: false,
+        }
+      );
 
     if (conversationError) {
       setError(
         conversationError.message
       );
-      setLoading(false);
+
+      return;
+    }
+
+    const {
+      data: messageData,
+      error: messageError,
+    } = await supabase
+      .from("support_messages")
+      .select(`
+        id,
+        conversation_id,
+        sender,
+        message,
+        attachment_path,
+        attachment_name,
+        attachment_type,
+        created_at
+      `)
+      .order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      )
+      .limit(3000);
+
+    if (messageError) {
+      setError(
+        messageError.message
+      );
+
       return;
     }
 
     const rows =
-      (conversationData ||
-        []) as Conversation[];
+      (messageData || []) as Message[];
 
-    const previews:
-      ConversationPreview[] =
-      [];
+    const lastMap =
+      new Map<string, Message>();
 
-    for (const conversation of rows) {
-      const {
-        data: lastMessageData,
-      } = await supabase
-        .from("support_messages")
-        .select(`
-          sender,
-          message,
-          created_at
-        `)
-        .eq(
-          "conversation_id",
-          conversation.id
+    for (const message of rows) {
+      if (
+        !lastMap.has(
+          message.conversation_id
         )
-        .order("created_at", {
-          ascending: false,
-        })
-        .limit(1)
-        .maybeSingle();
-
-      previews.push({
-        ...conversation,
-        last_message:
-          lastMessageData?.message ||
-          "",
-        last_sender:
-          (lastMessageData?.sender ||
-            null) as
-            | "user"
-            | "support"
-            | "auto"
-            | null,
-        last_message_at:
-          lastMessageData?.created_at ||
-          conversation.updated_at,
-      });
+      ) {
+        lastMap.set(
+          message.conversation_id,
+          message
+        );
+      }
     }
 
-    previews.sort(
-      (a, b) =>
-        new Date(
-          b.last_message_at
-        ).getTime() -
-        new Date(
-          a.last_message_at
-        ).getTime()
-    );
+    const view =
+      (
+        conversationData || []
+      ).map(
+        (conversation) => ({
+          ...(conversation as Conversation),
 
-    setConversations(
-      previews
-    );
+          lastMessage:
+            lastMap.get(
+              conversation.id
+            ) || null,
+        })
+      );
+
+    view.sort((a, b) => {
+      const aDate =
+        a.lastMessage?.created_at ||
+        a.updated_at;
+
+      const bDate =
+        b.lastMessage?.created_at ||
+        b.updated_at;
+
+      return (
+        new Date(bDate).getTime() -
+        new Date(aDate).getTime()
+      );
+    });
+
+    setConversations(view);
 
     if (
-      previews.length > 0 &&
-      !selectedId
+      !selectedId &&
+      view.length > 0
     ) {
       setSelectedId(
-        previews[0].id
+        view[0].id
       );
     }
-
-    setLoading(false);
   }
 
-  useEffect(() => {
-    if (isAdmin) {
-      void loadConversations();
-    }
-  }, [isAdmin]);
+  /*
+    ==============================================
+    LOAD SELECTED CHAT
+    ==============================================
+  */
 
   useEffect(() => {
-    if (!selectedId || !isAdmin) {
+    if (
+      !selectedId ||
+      !isAdmin
+    ) {
+      setMessages([]);
       return;
     }
 
-    async function loadMessages() {
-      setMessagesLoading(true);
-      setError("");
+    let active = true;
 
+    async function loadMessages() {
       const {
         data,
-        error: messagesError,
+        error: loadError,
       } = await supabase
-        .from("support_messages")
+        .from(
+          "support_messages"
+        )
         .select(`
           id,
           conversation_id,
@@ -345,28 +401,42 @@ export default function AdminSupportPage() {
           "conversation_id",
           selectedId
         )
-        .order("created_at", {
-          ascending: true,
-        });
-
-      if (messagesError) {
-        setError(
-          messagesError.message
+        .order(
+          "created_at",
+          {
+            ascending: true,
+          }
         );
-        setMessagesLoading(false);
+
+      if (!active) {
+        return;
+      }
+
+      if (loadError) {
+        setError(
+          loadError.message
+        );
+
         return;
       }
 
       setMessages(
-        (data ||
-          []) as SupportMessage[]
+        (data || []) as Message[]
       );
-
-      setMessagesLoading(false);
     }
 
     void loadMessages();
+
+    return () => {
+      active = false;
+    };
   }, [selectedId, isAdmin]);
+
+  /*
+    ==============================================
+    REALTIME
+    ==============================================
+  */
 
   useEffect(() => {
     if (!isAdmin) {
@@ -375,7 +445,7 @@ export default function AdminSupportPage() {
 
     const channel = supabase
       .channel(
-        "admin-support-live"
+        "admin-support-inbox"
       )
       .on(
         "postgres_changes",
@@ -387,20 +457,21 @@ export default function AdminSupportPage() {
         },
         (payload) => {
           const next =
-            payload.new as SupportMessage;
+            payload.new as Message;
 
           if (
-            next.sender === "user"
+            next.sender ===
+            "user"
           ) {
-            setNewCount(
-              (current) =>
-                current + 1
-            );
-
             if (soundEnabled) {
               playNotificationSound();
             }
           }
+
+          /*
+            თუ გახსნილი ჩატის მესიჯია,
+            პირდაპირ იქაც ვამატებთ.
+          */
 
           if (
             next.conversation_id ===
@@ -410,8 +481,8 @@ export default function AdminSupportPage() {
               (current) => {
                 const exists =
                   current.some(
-                    (item) =>
-                      item.id ===
+                    (message) =>
+                      message.id ===
                       next.id
                   );
 
@@ -426,6 +497,12 @@ export default function AdminSupportPage() {
               }
             );
           }
+
+          /*
+            Inbox-ს თავიდან ვტვირთავთ,
+            რომ ბოლო შეტყობინება ზედა
+            ნაწილში გადავიდეს.
+          */
 
           void loadConversations();
         }
@@ -449,17 +526,22 @@ export default function AdminSupportPage() {
     });
   }, [messages]);
 
-  async function sendMessage(
-    event:
-      FormEvent<HTMLFormElement>
+  /*
+    ==============================================
+    SEND ADMIN REPLY
+    ==============================================
+  */
+
+  async function sendReply(
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const cleanText =
-      text.trim();
+    const clean =
+      reply.trim();
 
     if (
-      !cleanText ||
+      !clean ||
       !selectedId ||
       sending
     ) {
@@ -474,13 +556,16 @@ export default function AdminSupportPage() {
         data,
         error: sendError,
       } = await supabase
-        .from("support_messages")
+        .from(
+          "support_messages"
+        )
         .insert({
           conversation_id:
             selectedId,
+
           sender: "support",
-          message:
-            cleanText,
+
+          message: clean,
         })
         .select(`
           id,
@@ -495,21 +580,23 @@ export default function AdminSupportPage() {
         .single();
 
       if (sendError) {
-        throw new Error(
+        setError(
           sendError.message
         );
+
+        return;
       }
 
       if (data) {
         const next =
-          data as SupportMessage;
+          data as Message;
 
         setMessages(
           (current) => {
             const exists =
               current.some(
-                (item) =>
-                  item.id ===
+                (message) =>
+                  message.id ===
                   next.id
               );
 
@@ -522,6 +609,8 @@ export default function AdminSupportPage() {
           }
         );
       }
+
+      setReply("");
 
       await supabase
         .from(
@@ -536,34 +625,74 @@ export default function AdminSupportPage() {
           selectedId
         );
 
-      setText("");
-
       await loadConversations();
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : String(err);
-
-      setError(
-        `პასუხი ვერ გაიგზავნა: ${message}`
-      );
     } finally {
       setSending(false);
     }
   }
 
-  function enableSound() {
-    setSoundEnabled(true);
-    playNotificationSound();
+  /*
+    ==============================================
+    CLOSE / REOPEN CONVERSATION
+    ==============================================
+  */
+
+  async function toggleStatus() {
+    if (!selectedConversation) {
+      return;
+    }
+
+    const nextStatus =
+      selectedConversation.status ===
+      "open"
+        ? "closed"
+        : "open";
+
+    const {
+      error: statusError,
+    } = await supabase
+      .from(
+        "support_conversations"
+      )
+      .update({
+        status: nextStatus,
+        updated_at:
+          new Date().toISOString(),
+      })
+      .eq(
+        "id",
+        selectedConversation.id
+      );
+
+    if (statusError) {
+      setError(
+        statusError.message
+      );
+
+      return;
+    }
+
+    await loadConversations();
   }
 
-  if (loading && isAdmin === null) {
+  /*
+    ==============================================
+    STATES
+    ==============================================
+  */
+
+  if (
+    loading ||
+    !adminChecked
+  ) {
     return (
       <main className="statePage">
         <div className="loader" />
+
         <strong>
-          Admin იტვირთება...
+          {ka
+            ? "Admin Support იტვირთება..."
+            : "Loading Admin Support..."}
         </strong>
 
         <Styles />
@@ -571,34 +700,30 @@ export default function AdminSupportPage() {
     );
   }
 
-  if (isAdmin === false) {
+  if (!isAdmin) {
     return (
       <main className="statePage">
-        <div className="lockIcon">
+        <div className="lock">
           🔒
         </div>
 
         <h1>
-          Admin Access
+          {ka
+            ? "Admin წვდომაა საჭირო"
+            : "Admin access required"}
         </h1>
 
         <p>
-          ამ გვერდზე წვდომა მხოლოდ
-          QR RETURN Admin-ს აქვს.
+          {ka
+            ? "ამ გვერდის ნახვა მხოლოდ QR RETURN ადმინისტრატორს შეუძლია."
+            : "Only a QR RETURN administrator can access this page."}
         </p>
 
-        <a
-          href="/login"
-          className="loginLink"
-        >
-          შესვლა
+        <a href="/login">
+          {ka
+            ? "Admin ანგარიშით შესვლა"
+            : "Sign in as Admin"}
         </a>
-
-        {error && (
-          <div className="error">
-            {error}
-          </div>
-        )}
 
         <Styles />
       </main>
@@ -632,282 +757,387 @@ export default function AdminSupportPage() {
             type="button"
             className={
               soundEnabled
-                ? "soundButton active"
-                : "soundButton"
+                ? "sound enabled"
+                : "sound"
             }
-            onClick={
-              enableSound
-            }
+            onClick={() => {
+              setSoundEnabled(true);
+              playNotificationSound();
+            }}
           >
             {soundEnabled
               ? "🔔"
               : "🔕"}
 
-            {soundEnabled
-              ? " ხმა ჩართულია"
-              : " ხმის ჩართვა"}
+            <span>
+              {ka
+                ? "ხმა"
+                : "Sound"}
+            </span>
           </button>
 
-          {newCount > 0 && (
-            <div className="newBadge">
-              {newCount} ახალი
-            </div>
-          )}
+          <div className="languages">
+            <button
+              type="button"
+              className={
+                ka
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLang("ka")
+              }
+            >
+              GEO
+            </button>
+
+            <button
+              type="button"
+              className={
+                !ka
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLang("en")
+              }
+            >
+              ENG
+            </button>
+          </div>
         </div>
       </header>
 
-      <section className="adminLayout">
-        <aside className="sidebar">
-          <div className="sidebarTitle">
+      <section className="dashboard">
+        <aside className="inbox">
+          <div className="inboxHeader">
             <div>
-              <span>
+              <span className="eyebrow">
                 SUPPORT INBOX
               </span>
 
               <h1>
-                შეტყობინებები
+                {ka
+                  ? "შეტყობინებები"
+                  : "Messages"}
               </h1>
             </div>
 
-            <button
-              type="button"
-              className="refresh"
-              onClick={() =>
-                void loadConversations()
-              }
-            >
-              ↻
-            </button>
+            {newCount > 0 && (
+              <div className="newBadge">
+                {newCount}
+              </div>
+            )}
           </div>
 
           {conversations.length ===
-            0 && (
-            <div className="emptySidebar">
-              ჯერ არავის მოუწერია.
+          0 ? (
+            <div className="emptyInbox">
+              <div>💬</div>
+
+              <strong>
+                {ka
+                  ? "შეტყობინებები ჯერ არ არის"
+                  : "No conversations yet"}
+              </strong>
             </div>
-          )}
+          ) : (
+            <div className="conversationList">
+              {conversations.map(
+                (conversation) => {
+                  const active =
+                    conversation.id ===
+                    selectedId;
 
-          <div className="conversationList">
-            {conversations.map(
-              (conversation) => {
-                const selected =
-                  conversation.id ===
-                  selectedId;
+                  const incoming =
+                    conversation
+                      .lastMessage
+                      ?.sender ===
+                    "user";
 
-                const fromUser =
-                  conversation.last_sender ===
-                  "user";
-
-                return (
-                  <button
-                    key={
-                      conversation.id
-                    }
-                    type="button"
-                    className={
-                      selected
-                        ? "conversation selected"
-                        : "conversation"
-                    }
-                    onClick={() => {
-                      setSelectedId(
+                  return (
+                    <button
+                      type="button"
+                      key={
                         conversation.id
-                      );
+                      }
+                      className={
+                        active
+                          ? "conversation active"
+                          : "conversation"
+                      }
+                      onClick={() =>
+                        setSelectedId(
+                          conversation.id
+                        )
+                      }
+                    >
+                      <div className="avatar">
+                        👤
 
-                      setNewCount(0);
-                    }}
-                  >
-                    <div className="avatar">
-                      👤
-                    </div>
-
-                    <div className="conversationCopy">
-                      <div className="conversationTop">
-                        <strong>
-                          Guest
-                        </strong>
-
-                        <time>
-                          {formatDateTime(
-                            conversation.last_message_at
-                          )}
-                        </time>
-                      </div>
-
-                      <div className="conversationId">
-                        {conversation.user_id.slice(
-                          0,
-                          8
+                        {incoming && (
+                          <i />
                         )}
                       </div>
 
-                      <p>
-                        {fromUser
-                          ? "● "
-                          : ""}
+                      <div className="conversationCopy">
+                        <div className="conversationTop">
+                          <strong>
+                            {shortUserId(
+                              conversation.user_id
+                            )}
+                          </strong>
 
-                        {conversation.last_message ||
-                          "ახალი საუბარი"}
-                      </p>
-                    </div>
-                  </button>
-                );
-              }
-            )}
-          </div>
+                          <time>
+                            {conversation.lastMessage
+                              ? formatDate(
+                                  conversation
+                                    .lastMessage
+                                    .created_at,
+                                  lang
+                                )
+                              : ""}
+                          </time>
+                        </div>
+
+                        <p>
+                          {conversation.lastMessage
+                            ?.message ||
+                            conversation.lastMessage
+                              ?.attachment_name ||
+                            (ka
+                              ? "ახალი საუბარი"
+                              : "New conversation")}
+                        </p>
+
+                        <div className="conversationMeta">
+                          {conversation.status ===
+                          "open"
+                            ? ka
+                              ? "🟢 ღია"
+                              : "🟢 Open"
+                            : ka
+                            ? "⚪ დახურული"
+                            : "⚪ Closed"}
+
+                          {incoming && (
+                            <span>
+                              {ka
+                                ? "ახალი"
+                                : "New"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+          )}
         </aside>
 
         <section className="chatPanel">
           {!selectedConversation ? (
-            <div className="emptyChat">
-              <div>
-                💬
-              </div>
+            <div className="selectChat">
+              <div>💬</div>
 
               <h2>
-                აირჩიეთ საუბარი
+                {ka
+                  ? "აირჩიეთ საუბარი"
+                  : "Select a conversation"}
               </h2>
             </div>
           ) : (
             <>
               <header className="chatHeader">
-                <div>
-                  <strong>
-                    Support Conversation
-                  </strong>
+                <div className="userIdentity">
+                  <div className="userAvatar">
+                    👤
+                  </div>
 
-                  <span>
-                    User:{" "}
-                    {selectedConversation.user_id}
-                  </span>
+                  <div>
+                    <strong>
+                      {shortUserId(
+                        selectedConversation.user_id
+                      )}
+                    </strong>
+
+                    <span>
+                      {selectedConversation.status ===
+                      "open"
+                        ? ka
+                          ? "🟢 აქტიური საუბარი"
+                          : "🟢 Active conversation"
+                        : ka
+                        ? "⚪ საუბარი დახურულია"
+                        : "⚪ Conversation closed"}
+                    </span>
+                  </div>
                 </div>
 
-                <div
-                  className={
-                    selectedConversation.status ===
-                    "open"
-                      ? "status open"
-                      : "status"
+                <button
+                  type="button"
+                  className="statusButton"
+                  onClick={
+                    toggleStatus
                   }
                 >
-                  ●{" "}
-                  {selectedConversation.status}
-                </div>
+                  {selectedConversation.status ===
+                  "open"
+                    ? ka
+                      ? "დახურვა"
+                      : "Close"
+                    : ka
+                    ? "ხელახლა გახსნა"
+                    : "Reopen"}
+                </button>
               </header>
 
               <div className="messages">
-                {messagesLoading && (
-                  <div className="loadingMessages">
-                    <div className="loader" />
+                {messages.length ===
+                  0 && (
+                  <div className="noMessages">
+                    {ka
+                      ? "საუბარი ჯერ ცარიელია."
+                      : "No messages in this conversation yet."}
                   </div>
                 )}
 
-                {!messagesLoading &&
-                  messages.map(
-                    (message) => {
-                      const mine =
-                        message.sender ===
-                        "support";
+                {messages.map(
+                  (message) => {
+                    const mine =
+                      message.sender ===
+                      "support";
 
-                      return (
+                    return (
+                      <div
+                        key={
+                          message.id
+                        }
+                        className={
+                          mine
+                            ? "messageRow mine"
+                            : "messageRow"
+                        }
+                      >
                         <div
-                          key={
-                            message.id
-                          }
                           className={
                             mine
-                              ? "messageRow mine"
-                              : "messageRow"
+                              ? "bubble mine"
+                              : "bubble"
                           }
                         >
-                          <div
-                            className={
-                              mine
-                                ? "bubble mine"
-                                : "bubble"
-                            }
-                          >
-                            <div className="sender">
-                              {message.sender ===
-                              "support"
-                                ? "QR RETURN"
-                                : message.sender ===
-                                  "auto"
-                                ? "Auto Reply"
-                                : "User"}
-                            </div>
-
-                            {message.message && (
-                              <div className="messageText">
-                                {
-                                  message.message
-                                }
-                              </div>
-                            )}
-
-                            {message.attachment_path && (
-                              <AdminAttachment
-                                path={
-                                  message.attachment_path
-                                }
-                                name={
-                                  message.attachment_name ||
-                                  "ფაილი"
-                                }
-                                type={
-                                  message.attachment_type
-                                }
-                              />
-                            )}
-
-                            <time>
-                              {formatDateTime(
-                                message.created_at
-                              )}
-                            </time>
+                          <div className="sender">
+                            {message.sender ===
+                            "support"
+                              ? "QR RETURN"
+                              : message.sender ===
+                                "auto"
+                              ? "AUTO"
+                              : ka
+                              ? "მომხმარებელი"
+                              : "User"}
                           </div>
-                        </div>
-                      );
-                    }
-                  )}
 
-                <div ref={bottomRef} />
+                          {message.message && (
+                            <div className="messageText">
+                              {
+                                message.message
+                              }
+                            </div>
+                          )}
+
+                          {message.attachment_path && (
+                            <AdminAttachment
+                              path={
+                                message.attachment_path
+                              }
+                              name={
+                                message.attachment_name ||
+                                (ka
+                                  ? "ფაილი"
+                                  : "File")
+                              }
+                              type={
+                                message.attachment_type
+                              }
+                              ka={ka}
+                            />
+                          )}
+
+                          <time>
+                            {formatDate(
+                              message.created_at,
+                              lang
+                            )}
+                          </time>
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+
+                <div
+                  ref={
+                    bottomRef
+                  }
+                />
               </div>
 
               {error && (
-                <div className="error">
+                <div className="errorBox">
                   ⚠ {error}
                 </div>
               )}
 
               <form
                 className="composer"
-                onSubmit={
-                  sendMessage
-                }
+                onSubmit={sendReply}
               >
                 <textarea
-                  value={text}
-                  placeholder="დაწერეთ პასუხი..."
+                  value={reply}
                   maxLength={2000}
-                  onChange={(event) =>
-                    setText(
-                      event.target.value
+                  placeholder={
+                    selectedConversation.status ===
+                    "closed"
+                      ? ka
+                        ? "საუბარი დახურულია..."
+                        : "Conversation is closed..."
+                      : ka
+                      ? "დაწერეთ პასუხი..."
+                      : "Write a reply..."
+                  }
+                  disabled={
+                    selectedConversation.status ===
+                    "closed"
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setReply(
+                      event.target
+                        .value
                     )
                   }
-                  onKeyDown={(event) => {
+                  onKeyDown={(
+                    event
+                  ) => {
                     if (
                       event.key ===
                         "Enter" &&
                       !event.shiftKey &&
-                      !event.nativeEvent
+                      !event
+                        .nativeEvent
                         .isComposing
                     ) {
                       event.preventDefault();
 
                       if (
+                        reply.trim() &&
                         !sending &&
-                        text.trim()
+                        selectedConversation.status ===
+                          "open"
                       ) {
                         event.currentTarget.form?.requestSubmit();
                       }
@@ -917,19 +1147,25 @@ export default function AdminSupportPage() {
 
                 <div className="composerBottom">
                   <span>
-                    Enter — გაგზავნა
+                    {ka
+                      ? "Enter — გაგზავნა • Shift + Enter — ახალი ხაზი"
+                      : "Enter — send • Shift + Enter — new line"}
                   </span>
 
                   <button
                     type="submit"
                     disabled={
+                      !reply.trim() ||
                       sending ||
-                      !text.trim()
+                      selectedConversation.status ===
+                        "closed"
                     }
                   >
                     {sending
-                      ? "იგზავნება..."
-                      : "გაგზავნა ➜"}
+                      ? "..."
+                      : ka
+                      ? "გაგზავნა ➜"
+                      : "Send ➜"}
                   </button>
                 </div>
               </form>
@@ -947,31 +1183,35 @@ function AdminAttachment({
   path,
   name,
   type,
+  ka,
 }: {
   path: string;
   name: string;
   type: string | null;
+  ka: boolean;
 }) {
   const [url, setUrl] =
     useState("");
 
   useEffect(() => {
-    let active = true;
+    let alive = true;
 
     async function loadUrl() {
       const {
         data,
+        error,
       } = await supabase.storage
         .from(
           "support-attachments"
         )
         .createSignedUrl(
           path,
-          3600
+          60 * 60
         );
 
       if (
-        active &&
+        alive &&
+        !error &&
         data?.signedUrl
       ) {
         setUrl(
@@ -983,32 +1223,44 @@ function AdminAttachment({
     void loadUrl();
 
     return () => {
-      active = false;
+      alive = false;
     };
   }, [path]);
 
   if (!url) {
     return (
-      <div className="fileLoading">
+      <div className="attachmentLoading">
         📎 {name}
       </div>
     );
   }
 
-  if (
-    type?.startsWith("image/")
-  ) {
+  const image =
+    Boolean(
+      type?.startsWith(
+        "image/"
+      )
+    );
+
+  if (image) {
     return (
       <a
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="imageLink"
+        className="imageAttachment"
       >
         <img
           src={url}
           alt={name}
         />
+
+        <span>
+          🔍{" "}
+          {ka
+            ? "ფოტოს გახსნა"
+            : "Open image"}
+        </span>
       </a>
     );
   }
@@ -1018,9 +1270,15 @@ function AdminAttachment({
       href={url}
       target="_blank"
       rel="noreferrer"
-      className="fileLink"
+      className="fileAttachment"
     >
-      📎 {name} — გახსნა
+      📎 {name}
+
+      <span>
+        {ka
+          ? "გახსნა"
+          : "Open"}
+      </span>
     </a>
   );
 }
@@ -1039,7 +1297,7 @@ function Styles() {
       }
 
       body {
-        background: #f4f6fa;
+        background: #f5f7fb;
       }
 
       button,
@@ -1054,16 +1312,15 @@ function Styles() {
           Inter,
           Arial,
           sans-serif;
+        background: #f5f7fb;
       }
 
       .topHeader {
-        min-height: 72px;
-        padding: 0 22px;
-
+        min-height: 74px;
+        padding: 0 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         border-bottom: 1px solid #e4e7ec;
         background: white;
       }
@@ -1076,17 +1333,17 @@ function Styles() {
       }
 
       .logo {
-        width: 42px;
-        height: 42px;
-
+        width: 43px;
+        height: 43px;
         display: grid;
         place-items: center;
-
         border-radius: 12px;
-
-        background: #1465e8;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
-
         font-size: 11px;
         font-weight: 900;
       }
@@ -1099,158 +1356,167 @@ function Styles() {
       .brand strong {
         color: #1465e8;
         font-size: 17px;
+        font-weight: 900;
       }
 
       .brand small {
         margin-top: 2px;
-        color: #667085;
+        color: #7655f7;
         font-size: 8px;
-        letter-spacing: 1.5px;
+        font-weight: 900;
+        letter-spacing: 1.8px;
+      }
+
+      .headerActions,
+      .languages {
+        display: flex;
+        align-items: center;
       }
 
       .headerActions {
-        display: flex;
-        align-items: center;
         gap: 9px;
       }
 
-      .soundButton {
-        padding: 9px 11px;
-
-        border: 1px solid #d0d5dd;
+      .languages {
+        padding: 4px;
         border-radius: 9px;
+        background: #eaecf0;
+      }
 
-        background: white;
-        color: #475467;
-
-        font-size: 10px;
-        font-weight: 800;
-
+      .languages button {
+        padding: 7px 9px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #667085;
+        font-size: 9px;
+        font-weight: 900;
         cursor: pointer;
       }
 
-      .soundButton.active {
+      .languages button.active {
+        background: white;
+        color: #1465e8;
+      }
+
+      .sound {
+        min-height: 38px;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid #e4e7ec;
+        border-radius: 9px;
+        background: white;
+        color: #667085;
+        font-size: 9px;
+        cursor: pointer;
+      }
+
+      .sound.enabled {
         border-color: #abefc6;
         background: #ecfdf3;
         color: #067647;
       }
 
-      .newBadge {
-        padding: 7px 10px;
-
-        border-radius: 20px;
-
-        background: #d92d20;
-        color: white;
-
-        font-size: 10px;
-        font-weight: 900;
-      }
-
-      .adminLayout {
-        height: calc(100vh - 72px);
-
+      .dashboard {
+        height: calc(100vh - 74px);
         display: grid;
-        grid-template-columns:
-          350px 1fr;
+        grid-template-columns: 350px minmax(0, 1fr);
       }
 
-      .sidebar {
-        overflow-y: auto;
-
+      .inbox {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
         border-right: 1px solid #e4e7ec;
-
         background: white;
       }
 
-      .sidebarTitle {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-
-        padding: 20px;
-
+      .inboxHeader {
+        min-height: 105px;
+        padding: 21px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         border-bottom: 1px solid #eaecf0;
-
-        background: white;
       }
 
-      .sidebarTitle span {
-        color: #1465e8;
-        font-size: 9px;
+      .eyebrow {
+        color: #7655f7;
+        font-size: 8px;
         font-weight: 900;
         letter-spacing: 1.4px;
       }
 
-      .sidebarTitle h1 {
+      .inboxHeader h1 {
         margin: 5px 0 0;
-        font-size: 21px;
+        font-size: 24px;
       }
 
-      .refresh {
-        width: 35px;
-        height: 35px;
-
-        border: 0;
-        border-radius: 9px;
-
-        background: #f2f4f7;
-
-        color: #475467;
-        font-size: 18px;
-
-        cursor: pointer;
+      .newBadge {
+        min-width: 29px;
+        height: 29px;
+        padding: 0 8px;
+        display: grid;
+        place-items: center;
+        border-radius: 20px;
+        background: #d92d20;
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
       }
 
       .conversationList {
-        padding: 10px;
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
       }
 
       .conversation {
         width: 100%;
-
-        padding: 12px;
-
+        margin-bottom: 5px;
+        padding: 11px;
         display: flex;
         align-items: center;
-
         gap: 10px;
-
         border: 0;
         border-radius: 12px;
-
         background: transparent;
-
+        color: inherit;
         text-align: left;
-
         cursor: pointer;
       }
 
       .conversation:hover {
-        background: #f7f9fc;
+        background: #f7f8fc;
       }
 
-      .conversation.selected {
-        background: #eef4ff;
+      .conversation.active {
+        background: #f2f0ff;
       }
 
       .avatar {
         width: 43px;
         height: 43px;
         flex: 0 0 43px;
-
+        position: relative;
         display: grid;
         place-items: center;
-
         border-radius: 12px;
+        background: #eef4ff;
+        font-size: 19px;
+      }
 
-        background: #f2f4f7;
-
-        font-size: 20px;
+      .avatar i {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 10px;
+        height: 10px;
+        border: 2px solid white;
+        border-radius: 50%;
+        background: #d92d20;
       }
 
       .conversationCopy {
@@ -1265,109 +1531,123 @@ function Styles() {
       }
 
       .conversationTop strong {
-        font-size: 12px;
+        color: #344054;
+        font-size: 11px;
       }
 
       .conversationTop time {
         color: #98a2b3;
-        font-size: 8px;
+        font-size: 7px;
         white-space: nowrap;
       }
 
-      .conversationId {
-        margin-top: 2px;
-
-        color: #1465e8;
-
-        font-size: 8px;
-        font-weight: 800;
-      }
-
       .conversation p {
-        margin: 5px 0 0;
-
+        margin: 5px 0;
         overflow: hidden;
-
         color: #667085;
-
-        font-size: 10px;
-
+        font-size: 9px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
-      .emptySidebar {
-        padding: 35px 20px;
-
+      .conversationMeta {
+        display: flex;
+        align-items: center;
+        gap: 7px;
         color: #98a2b3;
+        font-size: 7px;
+      }
 
-        font-size: 11px;
+      .conversationMeta span {
+        padding: 2px 5px;
+        border-radius: 5px;
+        background: #fff1f0;
+        color: #d92d20;
+        font-weight: 900;
+      }
 
+      .emptyInbox {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 7px;
+        color: #98a2b3;
         text-align: center;
+      }
+
+      .emptyInbox > div {
+        font-size: 35px;
       }
 
       .chatPanel {
         min-width: 0;
-
         display: flex;
         flex-direction: column;
-
-        background: #f8fafc;
+        background: #fafbff;
       }
 
       .chatHeader {
-        min-height: 70px;
-
-        padding: 15px 20px;
-
+        min-height: 76px;
+        padding: 13px 18px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         border-bottom: 1px solid #e4e7ec;
-
         background: white;
       }
 
-      .chatHeader strong,
-      .chatHeader span {
+      .userIdentity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .userAvatar {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: #eef4ff;
+        font-size: 20px;
+      }
+
+      .userIdentity strong,
+      .userIdentity span {
         display: block;
       }
 
-      .chatHeader strong {
-        font-size: 14px;
+      .userIdentity strong {
+        color: #344054;
+        font-size: 12px;
       }
 
-      .chatHeader span {
+      .userIdentity span {
         margin-top: 4px;
-
         color: #667085;
-
-        font-size: 9px;
+        font-size: 8px;
       }
 
-      .status {
-        color: #667085;
-
-        font-size: 9px;
+      .statusButton {
+        padding: 8px 11px;
+        border: 1px solid #d0d5dd;
+        border-radius: 8px;
+        background: white;
+        color: #475467;
+        font-size: 8px;
         font-weight: 800;
-      }
-
-      .status.open {
-        color: #067647;
+        cursor: pointer;
       }
 
       .messages {
         flex: 1;
-
-        padding: 20px;
-
+        padding: 22px;
         overflow-y: auto;
       }
 
       .messageRow {
-        margin-bottom: 10px;
-
+        margin-bottom: 9px;
         display: flex;
       }
 
@@ -1376,264 +1656,220 @@ function Styles() {
       }
 
       .bubble {
-        max-width: 65%;
-
+        max-width: 67%;
         padding: 10px 12px;
-
         border: 1px solid #e4e7ec;
-        border-radius:
-          5px 14px 14px 14px;
-
+        border-radius: 5px 14px 14px 14px;
         background: white;
-
         color: #344054;
-
-        font-size: 12px;
-        line-height: 1.5;
       }
 
       .bubble.mine {
         border-color: #1465e8;
-        border-radius:
-          14px 5px 14px 14px;
-
+        border-radius: 14px 5px 14px 14px;
         background: #1465e8;
-
         color: white;
       }
 
       .sender {
         margin-bottom: 5px;
-
         color: #667085;
-
-        font-size: 8px;
+        font-size: 7px;
         font-weight: 900;
       }
 
       .bubble.mine .sender {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.72
-        );
+        color: rgba(255,255,255,.75);
       }
 
       .messageText {
+        font-size: 11px;
+        line-height: 1.5;
         white-space: pre-wrap;
         word-break: break-word;
       }
 
       .bubble time {
         margin-top: 6px;
-
         display: block;
-
         color: #98a2b3;
-
         font-size: 7px;
-
         text-align: right;
       }
 
       .bubble.mine time {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.68
-        );
+        color: rgba(255,255,255,.65);
       }
 
-      .imageLink {
+      .imageAttachment {
         margin-top: 8px;
         display: block;
+        color: inherit;
+        text-decoration: none;
       }
 
-      .imageLink img {
-        width: 100%;
-        max-width: 320px;
-        max-height: 260px;
-
+      .imageAttachment img {
+        width: 180px;
+        max-width: 100%;
+        max-height: 160px;
+        display: block;
         object-fit: cover;
-
         border-radius: 9px;
       }
 
-      .fileLink,
-      .fileLoading {
-        margin-top: 8px;
-
+      .imageAttachment span {
+        margin-top: 4px;
         display: block;
+        font-size: 8px;
+        font-weight: 800;
+      }
 
-        color: inherit;
+      .fileAttachment {
+        margin-top: 8px;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border-radius: 8px;
+        background: rgba(242,244,247,.9);
+        color: #344054;
+        font-size: 9px;
+        font-weight: 800;
+        text-decoration: none;
+      }
 
-        font-size: 10px;
+      .fileAttachment span {
+        color: #1465e8;
+      }
+
+      .attachmentLoading {
+        margin-top: 7px;
+        font-size: 8px;
       }
 
       .composer {
-        padding: 12px;
-
+        padding: 12px 15px;
         border-top: 1px solid #e4e7ec;
-
         background: white;
       }
 
       .composer textarea {
         width: 100%;
-        min-height: 70px;
+        min-height: 64px;
         max-height: 120px;
-
-        padding: 10px;
-
+        padding: 9px;
         border: 1px solid #e4e7ec;
         border-radius: 10px;
-
         outline: none;
         resize: none;
-
-        font-size: 12px;
+        font-size: 11px;
       }
 
       .composerBottom {
         margin-top: 8px;
-
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
       }
 
       .composerBottom span {
         color: #98a2b3;
-
-        font-size: 8px;
+        font-size: 7px;
       }
 
       .composerBottom button {
-        min-height: 39px;
-
-        padding: 0 16px;
-
+        min-height: 37px;
+        padding: 0 15px;
         border: 0;
         border-radius: 9px;
-
         background: #1465e8;
         color: white;
-
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 900;
-
         cursor: pointer;
       }
 
       .composerBottom button:disabled {
-        opacity: 0.4;
+        opacity: .4;
+        cursor: not-allowed;
       }
 
-      .error {
-        margin: 10px 12px;
-
-        padding: 10px;
-
+      .errorBox {
+        margin: 7px 15px;
+        padding: 8px;
         border: 1px solid #fecdca;
-        border-radius: 9px;
-
+        border-radius: 8px;
         background: #fff1f0;
         color: #b42318;
-
-        font-size: 10px;
+        font-size: 8px;
       }
 
-      .emptyChat {
+      .selectChat,
+      .noMessages {
         flex: 1;
-
-        display: flex;
-        flex-direction: column;
-
-        align-items: center;
-        justify-content: center;
-
-        color: #98a2b3;
-      }
-
-      .emptyChat > div {
-        font-size: 40px;
-      }
-
-      .emptyChat h2 {
-        margin-top: 10px;
-        font-size: 15px;
-      }
-
-      .loadingMessages {
-        min-height: 200px;
-
         display: grid;
         place-items: center;
+        align-content: center;
+        gap: 5px;
+        color: #98a2b3;
+        text-align: center;
+      }
+
+      .selectChat > div {
+        font-size: 38px;
+      }
+
+      .selectChat h2 {
+        margin: 0;
+        color: #667085;
+        font-size: 15px;
       }
 
       .statePage {
         min-height: 100vh;
-
+        padding: 30px;
         display: flex;
         flex-direction: column;
-
         align-items: center;
         justify-content: center;
-
-        background: #f6f8fc;
-
-        font-family:
-          Inter,
-          Arial,
-          sans-serif;
-
+        background: #f5f7fb;
+        color: #344054;
+        font-family: Inter, Arial, sans-serif;
         text-align: center;
       }
 
-      .lockIcon {
-        font-size: 42px;
-      }
-
-      .statePage h1 {
-        margin: 12px 0 5px;
-      }
-
       .statePage p {
+        max-width: 420px;
         color: #667085;
-        font-size: 12px;
+        font-size: 11px;
+        line-height: 1.5;
       }
 
-      .loginLink {
-        margin-top: 15px;
-
-        padding: 10px 15px;
-
+      .statePage a {
+        margin-top: 10px;
+        padding: 10px 14px;
         border-radius: 9px;
-
         background: #1465e8;
         color: white;
-
-        text-decoration: none;
-
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 900;
+        text-decoration: none;
+      }
+
+      .lock {
+        font-size: 40px;
       }
 
       .loader {
-        width: 32px;
-        height: 32px;
-
+        width: 35px;
+        height: 35px;
         margin-bottom: 10px;
-
         border: 3px solid #e4e7ec;
         border-top-color: #1465e8;
-
         border-radius: 50%;
-
-        animation:
-          spin 0.8s linear infinite;
+        animation: spin .8s linear infinite;
       }
 
       @keyframes spin {
@@ -1642,25 +1878,25 @@ function Styles() {
         }
       }
 
-      @media (max-width: 850px) {
-        .adminLayout {
-          grid-template-columns: 1fr;
+      @media (max-width: 800px) {
+        .dashboard {
           height: auto;
+          min-height: calc(100vh - 74px);
+          grid-template-columns: 1fr;
         }
 
-        .sidebar {
-          max-height: 40vh;
-
+        .inbox {
+          max-height: 330px;
           border-right: 0;
           border-bottom: 1px solid #e4e7ec;
         }
 
         .chatPanel {
-          min-height: 60vh;
+          min-height: 600px;
         }
 
         .bubble {
-          max-width: 85%;
+          max-width: 84%;
         }
       }
     `}</style>
