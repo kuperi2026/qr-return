@@ -6,6 +6,20 @@ import { supabase } from "@/lib/supabase";
 type Lang = "ka" | "en";
 type RegisterFor = "self" | "other";
 
+type Screen =
+  | "choice"
+  | "self"
+  | "manager"
+  | "wearer"
+  | "terms"
+  | "success"
+  | "manage-find"
+  | "manage-verify"
+  | "manage-edit"
+  | "additional";
+
+type VerifyMethod = "codeword" | "email";
+
 type FormData = {
   register_for: RegisterFor;
 
@@ -14,6 +28,7 @@ type FormData = {
   manager_phone: string;
   manager_email: string;
   manager_address: string;
+  manager_relationship: string;
 
   codeword: string;
   codeword_confirm: string;
@@ -28,59 +43,73 @@ type FormData = {
   personal_number: string;
 
   address: string;
+
+  chronic_conditions: string;
   additional_info: string;
 
   contact_first_name: string;
   contact_last_name: string;
+  contact_relationship: string;
   contact_phone: string;
+
+  contact_mobile_enabled: boolean;
+  contact_whatsapp_enabled: boolean;
+  contact_live_chat_enabled: boolean;
 };
 
 type Visibility = {
   show_date_of_birth: boolean;
   show_personal_number: boolean;
   show_address: boolean;
+  show_chronic_conditions: boolean;
   show_additional_info: boolean;
   show_contact: boolean;
 };
 
-const TERMS_VERSION = "emergency-v3";
+type ManagedRow = {
+  tag_code: string;
 
-const initialForm: FormData = {
-  register_for: "self",
+  first_name: string;
+  last_name: string;
 
-  manager_first_name: "",
-  manager_last_name: "",
-  manager_phone: "",
-  manager_email: "",
-  manager_address: "",
+  date_of_birth: string | null;
+  country_code: string | null;
+  personal_number: string | null;
 
-  codeword: "",
-  codeword_confirm: "",
+  address: string | null;
+  medical_conditions: string | null;
+  additional_info: string | null;
 
-  tag_code: "",
+  show_date_of_birth: boolean;
+  show_personal_number: boolean;
+  show_address: boolean;
+  show_medical_conditions: boolean;
+  show_additional_info: boolean;
 
-  first_name: "",
-  last_name: "",
+  emergency_contact_enabled: boolean;
+  emergency_contact_name: string | null;
+  emergency_contact_relationship: string | null;
+  emergency_contact_phone: string | null;
+  show_emergency_contact: boolean;
 
-  date_of_birth: "",
-  country_code: "",
-  personal_number: "",
+  emergency_contact_mobile_enabled: boolean;
+  emergency_contact_whatsapp_enabled: boolean;
+  emergency_contact_live_chat_enabled: boolean;
 
-  address: "",
-  additional_info: "",
+  owner_email: string | null;
+  owner_phone: string | null;
 
-  contact_first_name: "",
-  contact_last_name: "",
-  contact_phone: "",
+  manager_first_name: string | null;
+  manager_last_name: string | null;
+  manager_address: string | null;
+  manager_relationship: string | null;
+
+  codeword_hash: string | null;
+
+  identity_edit_used: boolean;
 };
 
-const initialVisibility: Visibility = {
-  show_date_of_birth: false,
-  show_personal_number: false,
-  show_address: false,
-  show_additional_info: false,
-  show_contact: true,
-};
+const TERMS_VERSION = "emergency-v4";
 
 const countries = [
   {
@@ -97,6 +126,87 @@ const countries = [
   },
 ];
 
+const relationshipOptions = {
+  ka: [
+    ["", "აირჩიეთ"],
+    ["spouse", "მეუღლე"],
+    ["mother", "დედა"],
+    ["father", "მამა"],
+    ["child", "შვილი"],
+    ["sister", "და"],
+    ["brother", "ძმა"],
+    ["grandparent", "ბებია / ბაბუა"],
+    ["grandchild", "შვილიშვილი"],
+    ["guardian", "მეურვე"],
+    ["caregiver", "მომვლელი"],
+    ["relative", "ნათესავი"],
+    ["friend", "მეგობარი"],
+    ["other", "სხვა"],
+  ],
+  en: [
+    ["", "Select"],
+    ["spouse", "Spouse"],
+    ["mother", "Mother"],
+    ["father", "Father"],
+    ["child", "Child"],
+    ["sister", "Sister"],
+    ["brother", "Brother"],
+    ["grandparent", "Grandparent"],
+    ["grandchild", "Grandchild"],
+    ["guardian", "Guardian"],
+    ["caregiver", "Caregiver"],
+    ["relative", "Relative"],
+    ["friend", "Friend"],
+    ["other", "Other"],
+  ],
+};
+
+const initialForm: FormData = {
+  register_for: "self",
+
+  manager_first_name: "",
+  manager_last_name: "",
+  manager_phone: "",
+  manager_email: "",
+  manager_address: "",
+  manager_relationship: "",
+
+  codeword: "",
+  codeword_confirm: "",
+
+  tag_code: "",
+
+  first_name: "",
+  last_name: "",
+
+  date_of_birth: "",
+  country_code: "",
+  personal_number: "",
+
+  address: "",
+
+  chronic_conditions: "",
+  additional_info: "",
+
+  contact_first_name: "",
+  contact_last_name: "",
+  contact_relationship: "",
+  contact_phone: "",
+
+  contact_mobile_enabled: false,
+  contact_whatsapp_enabled: false,
+  contact_live_chat_enabled: false,
+};
+
+const initialVisibility: Visibility = {
+  show_date_of_birth: false,
+  show_personal_number: false,
+  show_address: false,
+  show_chronic_conditions: false,
+  show_additional_info: false,
+  show_contact: true,
+};
+
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
@@ -105,14 +215,29 @@ function normalizeTag(value: string) {
   return value.trim().toUpperCase();
 }
 
+function validEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 function bytesToBase64(bytes: Uint8Array) {
-  let binary = "";
+  let result = "";
 
   for (let i = 0; i < bytes.length; i += 1) {
-    binary += String.fromCharCode(bytes[i]);
+    result += String.fromCharCode(bytes[i]);
   }
 
-  return btoa(binary);
+  return btoa(result);
+}
+
+function base64ToBytes(value: string) {
+  const binary = atob(value);
+  const result = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i += 1) {
+    result[i] = binary.charCodeAt(i);
+  }
+
+  return result;
 }
 
 async function createCodewordHash(codeword: string) {
@@ -124,7 +249,7 @@ async function createCodewordHash(codeword: string) {
 
   const iterations = 210000;
 
-  const keyMaterial =
+  const material =
     await crypto.subtle.importKey(
       "raw",
       encoder.encode(codeword),
@@ -133,15 +258,15 @@ async function createCodewordHash(codeword: string) {
       ["deriveBits"]
     );
 
-  const derivedBits =
+  const bits =
     await crypto.subtle.deriveBits(
       {
         name: "PBKDF2",
-        hash: "SHA-256",
         salt,
         iterations,
+        hash: "SHA-256",
       },
-      keyMaterial,
+      material,
       256
     );
 
@@ -150,20 +275,125 @@ async function createCodewordHash(codeword: string) {
     iterations.toString(),
     bytesToBase64(salt),
     bytesToBase64(
-      new Uint8Array(derivedBits)
+      new Uint8Array(bits)
     ),
   ].join("$");
 }
 
-export default function EmergencyRegisterPage() {
+async function verifyCodeword(
+  codeword: string,
+  storedHash: string
+) {
+  try {
+    const parts = storedHash.split("$");
+
+    if (
+      parts.length !== 4 ||
+      parts[0] !== "pbkdf2_sha256"
+    ) {
+      return false;
+    }
+
+    const iterations = Number(parts[1]);
+
+    const salt =
+      base64ToBytes(parts[2]);
+
+    const expected =
+      base64ToBytes(parts[3]);
+
+    const encoder =
+      new TextEncoder();
+
+    const material =
+      await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(codeword),
+        "PBKDF2",
+        false,
+        ["deriveBits"]
+      );
+
+    const bits =
+      await crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt,
+          iterations,
+          hash: "SHA-256",
+        },
+        material,
+        expected.length * 8
+      );
+
+    const actual =
+      new Uint8Array(bits);
+
+    if (
+      actual.length !==
+      expected.length
+    ) {
+      return false;
+    }
+
+    let difference = 0;
+
+    for (
+      let i = 0;
+      i < actual.length;
+      i += 1
+    ) {
+      difference |=
+        actual[i] ^ expected[i];
+    }
+
+    return difference === 0;
+  } catch {
+    return false;
+  }
+}
+
+function splitName(
+  fullName: string | null
+) {
+  if (!fullName) {
+    return {
+      first: "",
+      last: "",
+    };
+  }
+
+  const parts =
+    fullName
+      .trim()
+      .split(/\s+/);
+
+  if (parts.length === 1) {
+    return {
+      first: parts[0],
+      last: "",
+    };
+  }
+
+  return {
+    first: parts[0],
+    last: parts
+      .slice(1)
+      .join(" "),
+  };
+}
+
+export default function EmergencyPage() {
   const [lang, setLang] =
     useState<Lang>("ka");
 
-  const [step, setStep] =
-    useState<1 | 2 | 3>(1);
+  const [screen, setScreen] =
+    useState<Screen>("choice");
 
   const [form, setForm] =
-    useState<FormData>(initialForm);
+    useState<FormData>(
+      initialForm
+    );
 
   const [
     visibility,
@@ -178,14 +408,92 @@ export default function EmergencyRegisterPage() {
     setTermsAccepted,
   ] = useState(false);
 
-  const [saving, setSaving] =
-    useState(false);
-
   const [error, setError] =
     useState("");
 
-  const [success, setSuccess] =
+  const [notice, setNotice] =
+    useState("");
+
+  const [saving, setSaving] =
     useState(false);
+
+  const [
+    createdTag,
+    setCreatedTag,
+  ] = useState("");
+
+  /*
+   * PROFILE MANAGEMENT
+   */
+
+  const [
+    manageTag,
+    setManageTag,
+  ] = useState("");
+
+  const [
+    managedRow,
+    setManagedRow,
+  ] =
+    useState<ManagedRow | null>(
+      null
+    );
+
+  const [
+    verifyMethod,
+    setVerifyMethod,
+  ] =
+    useState<VerifyMethod>(
+      "codeword"
+    );
+
+  const [
+    verifyCodewordInput,
+    setVerifyCodewordInput,
+  ] = useState("");
+
+  const [
+    emailOtp,
+    setEmailOtp,
+  ] = useState("");
+
+  const [
+    otpSent,
+    setOtpSent,
+  ] = useState(false);
+
+  const [
+    managerVerified,
+    setManagerVerified,
+  ] = useState(false);
+
+  const [
+    identityEditUnlocked,
+    setIdentityEditUnlocked,
+  ] = useState(false);
+
+  const [
+    originalFirstName,
+    setOriginalFirstName,
+  ] = useState("");
+
+  const [
+    originalLastName,
+    setOriginalLastName,
+  ] = useState("");
+
+  const [
+    managerHashForAdditional,
+    setManagerHashForAdditional,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const [
+    profileCount,
+    setProfileCount,
+  ] = useState(0);
 
   const ka = lang === "ka";
 
@@ -196,34 +504,40 @@ export default function EmergencyRegisterPage() {
         form.country_code
     );
 
-  const hasContact =
+  const contactExists =
     Boolean(
       form.contact_first_name.trim() ||
-        form.contact_last_name.trim() ||
-        form.contact_phone.trim()
+      form.contact_last_name.trim() ||
+      form.contact_phone.trim()
     );
 
-  function updateField(
+  function update(
     field: keyof FormData,
-    value: string
+    value: string | boolean
   ) {
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
 
-    if (error) {
-      setError("");
-    }
+    setError("");
   }
 
   function toggleVisibility(
     field: keyof Visibility
   ) {
-    setVisibility((current) => ({
-      ...current,
-      [field]: !current[field],
-    }));
+    setVisibility(
+      (current) => ({
+        ...current,
+        [field]:
+          !current[field],
+      })
+    );
+  }
+
+  function resetMessages() {
+    setError("");
+    setNotice("");
   }
 
   function goTop() {
@@ -233,10 +547,54 @@ export default function EmergencyRegisterPage() {
     });
   }
 
-  function validEmail(email: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      email
+  function resetRegistration() {
+    setForm(initialForm);
+    setVisibility(
+      initialVisibility
     );
+    setTermsAccepted(false);
+    setError("");
+    setNotice("");
+    setCreatedTag("");
+  }
+
+  function startSelf() {
+    resetRegistration();
+
+    setForm({
+      ...initialForm,
+      register_for: "self",
+    });
+
+    setScreen("self");
+    goTop();
+  }
+
+  function startOther() {
+    resetRegistration();
+
+    setForm({
+      ...initialForm,
+      register_for: "other",
+    });
+
+    setScreen("manager");
+    goTop();
+  }
+
+  function goHome() {
+    resetRegistration();
+
+    setManagedRow(null);
+    setManagerVerified(false);
+    setManageTag("");
+    setVerifyCodewordInput("");
+    setEmailOtp("");
+    setOtpSent(false);
+    setIdentityEditUnlocked(false);
+    setScreen("choice");
+
+    goTop();
   }
 
   function validateManager() {
@@ -245,10 +603,9 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "შეიყვანეთ ანგარიშის მმართველის სახელი."
-          : "Enter the account manager's first name."
+          ? "შეიყვანეთ მმართველის სახელი."
+          : "Enter the manager's first name."
       );
-
       return false;
     }
 
@@ -257,10 +614,9 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "შეიყვანეთ ანგარიშის მმართველის გვარი."
-          : "Enter the account manager's last name."
+          ? "შეიყვანეთ მმართველის გვარი."
+          : "Enter the manager's last name."
       );
-
       return false;
     }
 
@@ -269,10 +625,9 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "შეიყვანეთ ანგარიშის მმართველის მობილურის ნომერი."
-          : "Enter the account manager's mobile number."
+          ? "შეიყვანეთ მმართველის მობილურის ნომერი."
+          : "Enter the manager's mobile number."
       );
-
       return false;
     }
 
@@ -281,10 +636,9 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "შეიყვანეთ ელფოსტა."
-          : "Enter an email address."
+          ? "შეიყვანეთ მმართველის ელფოსტა."
+          : "Enter the manager's email."
       );
-
       return false;
     }
 
@@ -298,7 +652,6 @@ export default function EmergencyRegisterPage() {
           ? "ელფოსტა არასწორი ფორმატითაა."
           : "Invalid email format."
       );
-
       return false;
     }
 
@@ -307,23 +660,33 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "შეიყვანეთ ანგარიშის მმართველის მისამართი."
-          : "Enter the account manager's address."
+          ? "შეიყვანეთ მმართველის მისამართი."
+          : "Enter the manager's address."
       );
-
       return false;
     }
 
     if (
-      form.codeword.trim().length <
-      6
+      form.register_for ===
+        "other" &&
+      !form.manager_relationship
+    ) {
+      setError(
+        ka
+          ? "მიუთითეთ, ვინ ხართ სამაჯურის მფლობელისთვის."
+          : "Select your relationship to the bracelet wearer."
+      );
+      return false;
+    }
+
+    if (
+      form.codeword.length < 6
     ) {
       setError(
         ka
           ? "კოდური სიტყვა უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს."
-          : "The codeword must contain at least 6 characters."
+          : "Codeword must contain at least 6 characters."
       );
-
       return false;
     }
 
@@ -334,9 +697,8 @@ export default function EmergencyRegisterPage() {
       setError(
         ka
           ? "კოდური სიტყვები ერთმანეთს არ ემთხვევა."
-          : "The codewords do not match."
+          : "Codewords do not match."
       );
-
       return false;
     }
 
@@ -347,10 +709,9 @@ export default function EmergencyRegisterPage() {
     if (!form.tag_code.trim()) {
       setError(
         ka
-          ? "QR კოდის მითითება სავალდებულოა."
+          ? "QR კოდი სავალდებულოა."
           : "QR code is required."
       );
-
       return false;
     }
 
@@ -358,9 +719,8 @@ export default function EmergencyRegisterPage() {
       setError(
         ka
           ? "სამაჯურის მფლობელის სახელი სავალდებულოა."
-          : "The bracelet wearer's first name is required."
+          : "Wearer's first name is required."
       );
-
       return false;
     }
 
@@ -368,19 +728,17 @@ export default function EmergencyRegisterPage() {
       setError(
         ka
           ? "სამაჯურის მფლობელის გვარი სავალდებულოა."
-          : "The bracelet wearer's last name is required."
+          : "Wearer's last name is required."
       );
-
       return false;
     }
 
     if (!form.date_of_birth) {
       setError(
         ka
-          ? "დაბადების სრული თარიღის მითითება სავალდებულოა."
-          : "A complete date of birth is required."
+          ? "დაბადების სრული თარიღი სავალდებულოა."
+          : "Date of birth is required."
       );
-
       return false;
     }
 
@@ -390,7 +748,6 @@ export default function EmergencyRegisterPage() {
           ? "აირჩიეთ ქვეყანა."
           : "Select a country."
       );
-
       return false;
     }
 
@@ -399,145 +756,146 @@ export default function EmergencyRegisterPage() {
     ) {
       setError(
         ka
-          ? "პირადი ნომრის მითითება სავალდებულოა."
+          ? "პირადი/საიდენტიფიკაციო ნომერი სავალდებულოა."
           : "Personal identification number is required."
       );
+      return false;
+    }
 
+    if (
+      form.contact_mobile_enabled &&
+      !form.contact_phone.trim()
+    ) {
+      setError(
+        ka
+          ? "მობილური ზარის ჩასართავად მიუთითეთ საკონტაქტო პირის ნომერი."
+          : "Enter a contact phone number to enable mobile calling."
+      );
+      return false;
+    }
+
+    if (
+      form.contact_whatsapp_enabled &&
+      !form.contact_phone.trim()
+    ) {
+      setError(
+        ka
+          ? "WhatsApp-ის ჩასართავად მიუთითეთ საკონტაქტო პირის ნომერი."
+          : "Enter a contact phone number to enable WhatsApp."
+      );
       return false;
     }
 
     return true;
   }
 
-  function nextStep() {
-    setError("");
+  function selfToTerms() {
+    resetMessages();
 
-    if (step === 1) {
-      if (!validateManager()) {
-        return;
-      }
-
-      if (
-        form.register_for === "self"
-      ) {
-        setForm((current) => ({
-          ...current,
-
-          first_name:
-            current.first_name ||
-            current.manager_first_name,
-
-          last_name:
-            current.last_name ||
-            current.manager_last_name,
-
-          address:
-            current.address ||
-            current.manager_address,
-        }));
-      }
-
-      setStep(2);
-      goTop();
-
+    if (!validateManager()) {
       return;
     }
 
-    if (step === 2) {
-      if (!validateWearer()) {
-        return;
-      }
-
-      setStep(3);
-      goTop();
-    }
-  }
-
-  function previousStep() {
-    setError("");
-
-    if (step === 3) {
-      setStep(2);
-    } else {
-      setStep(1);
+    if (!validateWearer()) {
+      return;
     }
 
+    setScreen("terms");
     goTop();
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
+  function managerToWearer() {
+    resetMessages();
 
-    if (step !== 3) {
-      nextStep();
+    if (!validateManager()) {
       return;
     }
 
-    if (!termsAccepted) {
+    setScreen("wearer");
+    goTop();
+  }
+
+  function wearerToTerms() {
+    resetMessages();
+
+    if (!validateWearer()) {
+      return;
+    }
+
+    setScreen("terms");
+    goTop();
+  }
+
+  async function saveNewProfile(
+    existingHash?: string
+  ) {
+    if (!termsAccepted &&
+        screen === "terms") {
       setError(
         ka
-          ? "პროფილის შესაქმნელად საჭიროა წესების წაკითხვა და დადასტურება."
-          : "You must read and accept the terms before creating the profile."
+          ? "პროფილის შესაქმნელად უნდა დაეთანხმოთ წესებს."
+          : "You must accept the terms."
       );
+      return;
+    }
 
+    if (!validateWearer()) {
       return;
     }
 
     setSaving(true);
-    setError("");
+    resetMessages();
 
     try {
-      const tagCode =
+      const tag =
         normalizeTag(
           form.tag_code
         );
 
-      /*
-       * ერთი QR = ერთი ადამიანი.
-       * ერთი და იგივე QR მეორედ ვერ დარეგისტრირდება.
-       */
       const {
-        data: existingProfile,
-        error: checkError,
+        data: existingTag,
+        error: tagError,
       } = await supabase
         .from(
           "emergency_profiles"
         )
         .select("tag_code")
-        .eq(
-          "tag_code",
-          tagCode
-        )
+        .eq("tag_code", tag)
         .maybeSingle();
 
-      if (checkError) {
+      if (tagError) {
         setError(
           ka
-            ? `QR კოდის შემოწმება ვერ მოხერხდა: ${checkError.message}`
-            : `Could not check QR code: ${checkError.message}`
+            ? `QR კოდის შემოწმება ვერ მოხერხდა: ${tagError.message}`
+            : `QR check failed: ${tagError.message}`
         );
-
         return;
       }
 
-      if (existingProfile) {
+      if (existingTag) {
         setError(
           ka
-            ? "ეს QR კოდი უკვე რეგისტრირებულია და სხვა ადამიანზე გამოყენება შეუძლებელია."
-            : "This QR code is already registered and cannot be used for another person."
+            ? "ეს QR კოდი უკვე რეგისტრირებულია. ერთი QR მხოლოდ ერთ ადამიანს ეკუთვნის."
+            : "This QR code is already registered. One QR can belong to only one person."
         );
-
         return;
       }
 
-      const codewordHash =
-        await createCodewordHash(
-          form.codeword
-        );
+      let codewordHash =
+        existingHash || null;
 
-      const contactFullName = [
+      if (!codewordHash) {
+        if (!validateManager()) {
+          return;
+        }
+
+        codewordHash =
+          await createCodewordHash(
+            form.codeword
+          );
+      }
+
+      const contactName = [
         form.contact_first_name.trim(),
         form.contact_last_name.trim(),
       ]
@@ -546,8 +904,7 @@ export default function EmergencyRegisterPage() {
 
       const payload = {
         /*
-         * ACCOUNT MANAGER
-         * ეს ინფორმაცია საჯარო QR პროფილზე არ გამოჩნდება.
+         * PROFILE MANAGER — PRIVATE UI DATA
          */
 
         profile_manager_type:
@@ -570,6 +927,10 @@ export default function EmergencyRegisterPage() {
         manager_address:
           form.manager_address.trim(),
 
+        manager_relationship:
+          form.manager_relationship ||
+          null,
+
         codeword_hash:
           codewordHash,
 
@@ -577,8 +938,7 @@ export default function EmergencyRegisterPage() {
          * BRACELET WEARER
          */
 
-        tag_code:
-          tagCode,
+        tag_code: tag,
 
         first_name:
           form.first_name.trim(),
@@ -599,15 +959,16 @@ export default function EmergencyRegisterPage() {
           form.address.trim() ||
           null,
 
+        medical_conditions:
+          form.chronic_conditions.trim() ||
+          null,
+
         additional_info:
           form.additional_info.trim() ||
           null,
 
         /*
-         * PUBLIC VISIBILITY
-         *
-         * სახელი და გვარი ყოველთვის გამოჩნდება.
-         * 911/112 ავტომატურად განისაზღვრება ქვეყნის მიხედვით.
+         * VISIBILITY
          */
 
         show_date_of_birth:
@@ -622,6 +983,12 @@ export default function EmergencyRegisterPage() {
           ) &&
           visibility.show_address,
 
+        show_medical_conditions:
+          Boolean(
+            form.chronic_conditions.trim()
+          ) &&
+          visibility.show_chronic_conditions,
+
         show_additional_info:
           Boolean(
             form.additional_info.trim()
@@ -629,31 +996,51 @@ export default function EmergencyRegisterPage() {
           visibility.show_additional_info,
 
         /*
-         * OPTIONAL CONTACT PERSON
+         * CONTACT PERSON
          */
 
         emergency_contact_enabled:
-          hasContact,
+          contactExists,
 
         emergency_contact_name:
-          hasContact
-            ? contactFullName || null
+          contactExists
+            ? contactName || null
+            : null,
+
+        emergency_contact_relationship:
+          contactExists
+            ? form.contact_relationship ||
+              null
             : null,
 
         emergency_contact_phone:
-          hasContact
+          contactExists
             ? form.contact_phone.trim() ||
               null
             : null,
 
         show_emergency_contact:
-          hasContact
+          contactExists
             ? visibility.show_contact
             : false,
 
+        emergency_contact_mobile_enabled:
+          contactExists
+            ? form.contact_mobile_enabled
+            : false,
+
+        emergency_contact_whatsapp_enabled:
+          contactExists
+            ? form.contact_whatsapp_enabled
+            : false,
+
+        emergency_contact_live_chat_enabled:
+          contactExists
+            ? form.contact_live_chat_enabled
+            : false,
+
         /*
-         * ერთი სახელის/გვარის დაცული ცვლილება.
-         * რეგისტრაციისას ჯერ გამოყენებული არაა.
+         * NAME EDIT
          */
 
         identity_edit_used:
@@ -672,8 +1059,7 @@ export default function EmergencyRegisterPage() {
         terms_version:
           TERMS_VERSION,
 
-        active:
-          true,
+        active: true,
       };
 
       const {
@@ -685,10 +1071,6 @@ export default function EmergencyRegisterPage() {
         .insert(payload);
 
       if (saveError) {
-        console.error(
-          saveError
-        );
-
         if (
           saveError.code ===
           "23505"
@@ -698,7 +1080,6 @@ export default function EmergencyRegisterPage() {
               ? "ეს QR კოდი უკვე რეგისტრირებულია."
               : "This QR code is already registered."
           );
-
           return;
         }
 
@@ -707,11 +1088,11 @@ export default function EmergencyRegisterPage() {
             ? `პროფილის შენახვა ვერ მოხერხდა: ${saveError.message}`
             : `Could not save profile: ${saveError.message}`
         );
-
         return;
       }
 
-      setSuccess(true);
+      setCreatedTag(tag);
+      setScreen("success");
       goTop();
     } catch (err) {
       console.error(err);
@@ -726,408 +1107,1737 @@ export default function EmergencyRegisterPage() {
     }
   }
 
-  if (success) {
-    const tagCode =
-      normalizeTag(
-        form.tag_code
+  /*
+   * ========================================================
+   * PROFILE MANAGEMENT
+   * ========================================================
+   */
+
+  async function findProfile() {
+    resetMessages();
+
+    const tag =
+      normalizeTag(manageTag);
+
+    if (!tag) {
+      setError(
+        ka
+          ? "შეიყვანეთ QR კოდი."
+          : "Enter the QR code."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const {
+        data,
+        error: findError,
+      } = await supabase
+        .from(
+          "emergency_profiles"
+        )
+        .select(`
+          tag_code,
+          first_name,
+          last_name,
+          date_of_birth,
+          country_code,
+          personal_number,
+          address,
+          medical_conditions,
+          additional_info,
+          show_date_of_birth,
+          show_personal_number,
+          show_address,
+          show_medical_conditions,
+          show_additional_info,
+          emergency_contact_enabled,
+          emergency_contact_name,
+          emergency_contact_relationship,
+          emergency_contact_phone,
+          show_emergency_contact,
+          emergency_contact_mobile_enabled,
+          emergency_contact_whatsapp_enabled,
+          emergency_contact_live_chat_enabled,
+          owner_email,
+          owner_phone,
+          manager_first_name,
+          manager_last_name,
+          manager_address,
+          manager_relationship,
+          codeword_hash,
+          identity_edit_used
+        `)
+        .eq("tag_code", tag)
+        .maybeSingle();
+
+      if (findError) {
+        setError(
+          ka
+            ? `პროფილის მოძებნა ვერ მოხერხდა: ${findError.message}`
+            : `Could not find profile: ${findError.message}`
+        );
+        return;
+      }
+
+      if (!data) {
+        setError(
+          ka
+            ? "ამ QR კოდით Emergency პროფილი ვერ მოიძებნა."
+            : "No Emergency profile was found for this QR code."
+        );
+        return;
+      }
+
+      setManagedRow(
+        data as ManagedRow
       );
 
-    return (
-      <main className="page">
-        <Header
-          lang={lang}
-          setLang={setLang}
-        />
+      setVerifyCodewordInput("");
+      setEmailOtp("");
+      setOtpSent(false);
+      setVerifyMethod("codeword");
+      setScreen("manage-verify");
+      goTop();
+    } finally {
+      setSaving(false);
+    }
+  }
 
-        <section className="successPage">
-          <div className="successIcon">
-            ✓
-          </div>
+  async function verifyWithCodeword() {
+    resetMessages();
 
-          <div className="eyebrow">
-            QR RETURN • EMERGENCY ID
-          </div>
+    if (
+      !managedRow?.codeword_hash
+    ) {
+      setError(
+        ka
+          ? "ამ პროფილის კოდური სიტყვა ვერ მოიძებნა."
+          : "No codeword was found for this profile."
+      );
+      return;
+    }
 
-          <h1>
-            {ka
-              ? "Emergency პროფილი წარმატებით შეიქმნა"
-              : "Emergency profile created successfully"}
-          </h1>
+    if (
+      !verifyCodewordInput
+    ) {
+      setError(
+        ka
+          ? "შეიყვანეთ კოდური სიტყვა."
+          : "Enter the codeword."
+      );
+      return;
+    }
 
-          <p>
-            {ka
-              ? `${form.first_name} ${form.last_name}-ის Emergency პროფილი შენახულია.`
-              : `${form.first_name} ${form.last_name}'s Emergency profile has been saved.`}
-          </p>
+    setSaving(true);
 
-          <div className="successButtons">
-            <a
-              href={`/emergency/profile/${encodeURIComponent(
-                tagCode
-              )}`}
-              className="viewButton"
-            >
-              {ka
-                ? "პროფილის ნახვა"
-                : "View profile"}
-            </a>
+    try {
+      const ok =
+        await verifyCodeword(
+          verifyCodewordInput,
+          managedRow.codeword_hash
+        );
 
-            <a
-              href={`/emergency/edit/${encodeURIComponent(
-                tagCode
-              )}`}
-              className="manageButton"
-            >
-              {ka
-                ? "პროფილის მართვა"
-                : "Manage profile"}
-            </a>
-          </div>
+      if (!ok) {
+        setError(
+          ka
+            ? "კოდური სიტყვა არასწორია."
+            : "Incorrect codeword."
+        );
+        return;
+      }
 
-          <div className="successNotice">
-            <strong>
-              🔒{" "}
-              {ka
-                ? "ერთი QR — ერთი ადამიანი"
-                : "One QR — one person"}
-            </strong>
+      await openManageEditor();
+    } finally {
+      setSaving(false);
+    }
+  }
 
-            <p>
-              {ka
-                ? "QR კოდი ამ კონკრეტულ ადამიანს მიება და სხვა ადამიანზე გადატანა შეუძლებელია. პროფილის მართვის გვერდიდან მომავალში შესაძლებელი იქნება მაქსიმუმ ორი დამატებითი ადამიანის პროფილის რეგისტრაცია, თითოეულისთვის ახალი QR კოდით."
-                : "This QR is permanently linked to this person. Up to two additional people may later be registered from profile management, each with their own QR code."}
-            </p>
-          </div>
-        </section>
+  async function sendEmailCode() {
+    resetMessages();
 
-        <Styles />
-      </main>
+    const email =
+      managedRow?.owner_email;
+
+    if (!email) {
+      setError(
+        ka
+          ? "პროფილზე მმართველის ელფოსტა არ არის მითითებული."
+          : "No manager email is registered for this profile."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const {
+        error: otpError,
+      } =
+        await supabase.auth
+          .signInWithOtp({
+            email,
+            options: {
+              shouldCreateUser: true,
+            },
+          });
+
+      if (otpError) {
+        setError(
+          ka
+            ? `კოდის გაგზავნა ვერ მოხერხდა: ${otpError.message}`
+            : `Could not send code: ${otpError.message}`
+        );
+        return;
+      }
+
+      setOtpSent(true);
+
+      setNotice(
+        ka
+          ? `დადასტურების კოდი გაიგზავნა ელფოსტაზე ${email}.`
+          : `A verification code was sent to ${email}.`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function verifyEmailCode() {
+    resetMessages();
+
+    const email =
+      managedRow?.owner_email;
+
+    if (!email) {
+      setError(
+        ka
+          ? "ელფოსტა ვერ მოიძებნა."
+          : "Email not found."
+      );
+      return;
+    }
+
+    if (!emailOtp.trim()) {
+      setError(
+        ka
+          ? "შეიყვანეთ ელფოსტაზე მიღებული კოდი."
+          : "Enter the code received by email."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const {
+        error: otpError,
+      } =
+        await supabase.auth
+          .verifyOtp({
+            email,
+            token: emailOtp.trim(),
+            type: "email",
+          });
+
+      if (otpError) {
+        setError(
+          ka
+            ? `კოდი არასწორია ან ვადა გაუვიდა: ${otpError.message}`
+            : `The code is invalid or expired: ${otpError.message}`
+        );
+        return;
+      }
+
+      await openManageEditor();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function openManageEditor() {
+    if (!managedRow) {
+      return;
+    }
+
+    const contact =
+      splitName(
+        managedRow
+          .emergency_contact_name
+      );
+
+    setManagerVerified(true);
+
+    setOriginalFirstName(
+      managedRow.first_name
+    );
+
+    setOriginalLastName(
+      managedRow.last_name
+    );
+
+    setManagerHashForAdditional(
+      managedRow.codeword_hash
+    );
+
+    setForm({
+      ...initialForm,
+
+      register_for: "other",
+
+      manager_first_name:
+        managedRow
+          .manager_first_name ||
+        "",
+
+      manager_last_name:
+        managedRow
+          .manager_last_name ||
+        "",
+
+      manager_phone:
+        managedRow.owner_phone ||
+        "",
+
+      manager_email:
+        managedRow.owner_email ||
+        "",
+
+      manager_address:
+        managedRow
+          .manager_address ||
+        "",
+
+      manager_relationship:
+        managedRow
+          .manager_relationship ||
+        "",
+
+      tag_code:
+        managedRow.tag_code,
+
+      first_name:
+        managedRow.first_name,
+
+      last_name:
+        managedRow.last_name,
+
+      date_of_birth:
+        managedRow
+          .date_of_birth ||
+        "",
+
+      country_code:
+        managedRow
+          .country_code ||
+        "",
+
+      personal_number:
+        managedRow
+          .personal_number ||
+        "",
+
+      address:
+        managedRow.address ||
+        "",
+
+      chronic_conditions:
+        managedRow
+          .medical_conditions ||
+        "",
+
+      additional_info:
+        managedRow
+          .additional_info ||
+        "",
+
+      contact_first_name:
+        contact.first,
+
+      contact_last_name:
+        contact.last,
+
+      contact_relationship:
+        managedRow
+          .emergency_contact_relationship ||
+        "",
+
+      contact_phone:
+        managedRow
+          .emergency_contact_phone ||
+        "",
+
+      contact_mobile_enabled:
+        Boolean(
+          managedRow
+            .emergency_contact_mobile_enabled
+        ),
+
+      contact_whatsapp_enabled:
+        Boolean(
+          managedRow
+            .emergency_contact_whatsapp_enabled
+        ),
+
+      contact_live_chat_enabled:
+        Boolean(
+          managedRow
+            .emergency_contact_live_chat_enabled
+        ),
+    });
+
+    setVisibility({
+      show_date_of_birth:
+        Boolean(
+          managedRow
+            .show_date_of_birth
+        ),
+
+      show_personal_number:
+        Boolean(
+          managedRow
+            .show_personal_number
+        ),
+
+      show_address:
+        Boolean(
+          managedRow
+            .show_address
+        ),
+
+      show_chronic_conditions:
+        Boolean(
+          managedRow
+            .show_medical_conditions
+        ),
+
+      show_additional_info:
+        Boolean(
+          managedRow
+            .show_additional_info
+        ),
+
+      show_contact:
+        Boolean(
+          managedRow
+            .show_emergency_contact
+        ),
+    });
+
+    setIdentityEditUnlocked(
+      false
+    );
+
+    const {
+      count,
+    } = await supabase
+      .from(
+        "emergency_profiles"
+      )
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "owner_email",
+        managedRow.owner_email
+      );
+
+    setProfileCount(
+      count || 0
+    );
+
+    setScreen("manage-edit");
+    goTop();
+  }
+
+  async function saveProfileEdit() {
+    if (
+      !managedRow ||
+      !managerVerified
+    ) {
+      return;
+    }
+
+    resetMessages();
+
+    if (!validateWearer()) {
+      return;
+    }
+
+    const firstChanged =
+      form.first_name.trim() !==
+      originalFirstName.trim();
+
+    const lastChanged =
+      form.last_name.trim() !==
+      originalLastName.trim();
+
+    const nameChanged =
+      firstChanged ||
+      lastChanged;
+
+    if (
+      nameChanged &&
+      managedRow.identity_edit_used
+    ) {
+      setError(
+        ka
+          ? "სახელის/გვარის ერთჯერადი ცვლილების უფლება უკვე გამოყენებულია."
+          : "The one-time name correction has already been used."
+      );
+      return;
+    }
+
+    if (
+      nameChanged &&
+      !identityEditUnlocked
+    ) {
+      setError(
+        ka
+          ? "სახელის ან გვარის შესაცვლელად ჯერ დააჭირეთ „სახელის/გვარის ერთჯერადი ცვლილება“."
+          : "Use the one-time name correction option before changing the name."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const contactName = [
+        form.contact_first_name.trim(),
+        form.contact_last_name.trim(),
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      const updatePayload = {
+        /*
+         * QR კოდი შეგნებულად საერთოდ არ იგზავნება UPDATE-ში.
+         */
+
+        first_name:
+          form.first_name.trim(),
+
+        last_name:
+          form.last_name.trim(),
+
+        date_of_birth:
+          form.date_of_birth,
+
+        country_code:
+          form.country_code,
+
+        personal_number:
+          form.personal_number.trim(),
+
+        address:
+          form.address.trim() ||
+          null,
+
+        medical_conditions:
+          form.chronic_conditions.trim() ||
+          null,
+
+        additional_info:
+          form.additional_info.trim() ||
+          null,
+
+        show_date_of_birth:
+          visibility.show_date_of_birth,
+
+        show_personal_number:
+          visibility.show_personal_number,
+
+        show_address:
+          Boolean(
+            form.address.trim()
+          ) &&
+          visibility.show_address,
+
+        show_medical_conditions:
+          Boolean(
+            form.chronic_conditions.trim()
+          ) &&
+          visibility.show_chronic_conditions,
+
+        show_additional_info:
+          Boolean(
+            form.additional_info.trim()
+          ) &&
+          visibility.show_additional_info,
+
+        emergency_contact_enabled:
+          contactExists,
+
+        emergency_contact_name:
+          contactExists
+            ? contactName || null
+            : null,
+
+        emergency_contact_relationship:
+          contactExists
+            ? form.contact_relationship ||
+              null
+            : null,
+
+        emergency_contact_phone:
+          contactExists
+            ? form.contact_phone.trim() ||
+              null
+            : null,
+
+        show_emergency_contact:
+          contactExists
+            ? visibility.show_contact
+            : false,
+
+        emergency_contact_mobile_enabled:
+          contactExists
+            ? form.contact_mobile_enabled
+            : false,
+
+        emergency_contact_whatsapp_enabled:
+          contactExists
+            ? form.contact_whatsapp_enabled
+            : false,
+
+        emergency_contact_live_chat_enabled:
+          contactExists
+            ? form.contact_live_chat_enabled
+            : false,
+
+        ...(nameChanged
+          ? {
+              identity_edit_used:
+                true,
+              identity_updated_at:
+                new Date().toISOString(),
+            }
+          : {}),
+      };
+
+      const {
+        error: updateError,
+      } = await supabase
+        .from(
+          "emergency_profiles"
+        )
+        .update(updatePayload)
+        .eq(
+          "tag_code",
+          managedRow.tag_code
+        );
+
+      if (updateError) {
+        setError(
+          ka
+            ? `პროფილის განახლება ვერ მოხერხდა: ${updateError.message}`
+            : `Could not update profile: ${updateError.message}`
+        );
+        return;
+      }
+
+      setNotice(
+        ka
+          ? "პროფილი წარმატებით განახლდა."
+          : "Profile updated successfully."
+      );
+
+      if (nameChanged) {
+        setManagedRow({
+          ...managedRow,
+          first_name:
+            form.first_name.trim(),
+          last_name:
+            form.last_name.trim(),
+          identity_edit_used:
+            true,
+        });
+
+        setOriginalFirstName(
+          form.first_name.trim()
+        );
+
+        setOriginalLastName(
+          form.last_name.trim()
+        );
+
+        setIdentityEditUnlocked(
+          false
+        );
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function startAdditionalProfile() {
+    resetMessages();
+
+    if (!managedRow) {
+      return;
+    }
+
+    if (profileCount >= 3) {
+      setError(
+        ka
+          ? "ამ მმართველზე უკვე რეგისტრირებულია მაქსიმალური რაოდენობა — 3 Emergency პროფილი."
+          : "This manager already has the maximum of 3 Emergency profiles."
+      );
+      return;
+    }
+
+    setForm({
+      ...initialForm,
+
+      register_for: "other",
+
+      manager_first_name:
+        managedRow
+          .manager_first_name ||
+        "",
+
+      manager_last_name:
+        managedRow
+          .manager_last_name ||
+        "",
+
+      manager_phone:
+        managedRow.owner_phone ||
+        "",
+
+      manager_email:
+        managedRow.owner_email ||
+        "",
+
+      manager_address:
+        managedRow
+          .manager_address ||
+        "",
+
+      /*
+       * ახალი ადამიანის მიმართ კავშირი თავიდან უნდა აირჩიოს.
+       */
+      manager_relationship: "",
+    });
+
+    setVisibility(
+      initialVisibility
+    );
+
+    setScreen("additional");
+    goTop();
+  }
+
+  async function saveAdditionalProfile() {
+    resetMessages();
+
+    if (!managedRow) {
+      return;
+    }
+
+    if (!managerHashForAdditional) {
+      setError(
+        ka
+          ? "მმართველის დაცული მონაცემები ვერ მოიძებნა."
+          : "Manager verification data was not found."
+      );
+      return;
+    }
+
+    if (
+      !form.manager_relationship
+    ) {
+      setError(
+        ka
+          ? "მიუთითეთ თქვენი კავშირი ახალ პირთან."
+          : "Select your relationship to the new person."
+      );
+      return;
+    }
+
+    if (!validateWearer()) {
+      return;
+    }
+
+    const {
+      count,
+    } = await supabase
+      .from(
+        "emergency_profiles"
+      )
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "owner_email",
+        managedRow.owner_email
+      );
+
+    if ((count || 0) >= 3) {
+      setError(
+        ka
+          ? "დამატებითი პროფილის შექმნა აღარ შეიძლება. ერთ მმართველს მაქსიმუმ 3 Emergency პროფილი შეუძლია."
+          : "No more profiles can be added. One manager may manage up to 3 Emergency profiles."
+      );
+      return;
+    }
+
+    await saveNewProfile(
+      managerHashForAdditional
     );
   }
+
+  /*
+   * ========================================================
+   * PUBLIC UI
+   * ========================================================
+   */
 
   return (
     <main className="page">
       <Header
         lang={lang}
         setLang={setLang}
+        onHome={goHome}
       />
 
       <section className="container">
-        <div className="hero">
-          <div className="emergencyIcon">
-            ✚
-          </div>
+        {screen !== "success" && (
+          <div className="hero">
+            <div className="emergencyIcon">
+              ✚
+            </div>
 
-          <div>
+            <div>
+              <div className="eyebrow">
+                QR RETURN • EMERGENCY ID
+              </div>
+
+              <h1>
+                {ka
+                  ? "Emergency სამაჯური"
+                  : "Emergency Bracelet"}
+              </h1>
+
+              <p>
+                {ka
+                  ? "ერთი QR კოდი — ერთი კონკრეტული ადამიანი."
+                  : "One QR code — one specific person."}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {screen === "choice" && (
+          <ChoiceScreen
+            ka={ka}
+            onSelf={startSelf}
+            onOther={startOther}
+            onManage={() => {
+              resetMessages();
+              setScreen(
+                "manage-find"
+              );
+              goTop();
+            }}
+          />
+        )}
+
+        {screen === "self" && (
+          <div className="card">
+            <SectionTitle
+              number="01"
+              title={
+                ka
+                  ? "საკუთარი Emergency პროფილი"
+                  : "Your Emergency profile"
+              }
+              description={
+                ka
+                  ? "ცალკე მმართველის ფორმა არ გჭირდება — თქვენ თვითონ ხართ ანგარიშის მმართველიც და სამაჯურის მფლობელიც."
+                  : "No separate manager form is needed — you are both the account manager and the bracelet wearer."
+              }
+            />
+
+            <InfoBox>
+              <strong>
+                {ka
+                  ? "ანგარიშის ინფორმაცია"
+                  : "Account information"}
+              </strong>
+
+              <p>
+                {ka
+                  ? "ელფოსტა, ტელეფონი და კოდური სიტყვა საჯარო QR პროფილზე არ გამოჩნდება."
+                  : "Email, phone and codeword will not appear on the public QR profile."}
+              </p>
+            </InfoBox>
+
+            <div className="grid2">
+              <RequiredField
+                label={
+                  ka
+                    ? "სახელი"
+                    : "First name"
+                }
+                value={
+                  form.first_name
+                }
+                onChange={(v) => {
+                  update(
+                    "first_name",
+                    v
+                  );
+                  update(
+                    "manager_first_name",
+                    v
+                  );
+                }}
+                note={
+                  ka
+                    ? "სავალდებულო • QR პროფილზე ყოველთვის გამოჩნდება"
+                    : "Required • Always visible"
+                }
+              />
+
+              <RequiredField
+                label={
+                  ka
+                    ? "გვარი"
+                    : "Last name"
+                }
+                value={
+                  form.last_name
+                }
+                onChange={(v) => {
+                  update(
+                    "last_name",
+                    v
+                  );
+                  update(
+                    "manager_last_name",
+                    v
+                  );
+                }}
+                note={
+                  ka
+                    ? "სავალდებულო • QR პროფილზე ყოველთვის გამოჩნდება"
+                    : "Required • Always visible"
+                }
+              />
+            </div>
+
+            <RequiredField
+              label={
+                ka
+                  ? "მობილურის ნომერი"
+                  : "Mobile number"
+              }
+              type="tel"
+              value={
+                form.manager_phone
+              }
+              onChange={(v) =>
+                update(
+                  "manager_phone",
+                  v
+                )
+              }
+            />
+
+            <RequiredField
+              label={
+                ka
+                  ? "ელფოსტა"
+                  : "Email"
+              }
+              type="email"
+              value={
+                form.manager_email
+              }
+              onChange={(v) =>
+                update(
+                  "manager_email",
+                  v
+                )
+              }
+            />
+
+            <RequiredField
+              label={
+                ka
+                  ? "მისამართი"
+                  : "Address"
+              }
+              value={
+                form.manager_address
+              }
+              onChange={(v) => {
+                update(
+                  "manager_address",
+                  v
+                );
+                update(
+                  "address",
+                  v
+                );
+              }}
+            />
+
+            <div className="grid2">
+              <RequiredField
+                label={
+                  ka
+                    ? "კოდური სიტყვა"
+                    : "Codeword"
+                }
+                type="password"
+                value={
+                  form.codeword
+                }
+                onChange={(v) =>
+                  update(
+                    "codeword",
+                    v
+                  )
+                }
+              />
+
+              <RequiredField
+                label={
+                  ka
+                    ? "გაიმეორეთ კოდური სიტყვა"
+                    : "Repeat codeword"
+                }
+                type="password"
+                value={
+                  form.codeword_confirm
+                }
+                onChange={(v) =>
+                  update(
+                    "codeword_confirm",
+                    v
+                  )
+                }
+              />
+            </div>
+
+            <WearerFields
+              ka={ka}
+              lang={lang}
+              form={form}
+              update={update}
+              visibility={visibility}
+              toggleVisibility={
+                toggleVisibility
+              }
+              selectedCountry={
+                selectedCountry
+              }
+              hideNameFields
+            />
+
+            {error && (
+              <ErrorBox text={error} />
+            )}
+
+            <div className="buttons">
+              <button
+                type="button"
+                className="backButton"
+                onClick={goHome}
+              >
+                ←{" "}
+                {ka
+                  ? "უკან"
+                  : "Back"}
+              </button>
+
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={selfToTerms}
+              >
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {screen === "manager" && (
+          <div className="card">
+            <SectionTitle
+              number="01"
+              title={
+                ka
+                  ? "ანგარიშის მმართველი"
+                  : "Account manager"
+              }
+              description={
+                ka
+                  ? "ეს არის ადამიანი, ვინც სხვის Emergency პროფილს ქმნის და შემდგომ მართავს."
+                  : "This is the person creating and managing another person's Emergency profile."
+              }
+            />
+
+            <InfoBox>
+              <strong>
+                {ka
+                  ? "ეს ინფორმაცია საჯაროდ არ გამოჩნდება"
+                  : "This information stays private"}
+              </strong>
+
+              <p>
+                {ka
+                  ? "მმართველის მონაცემები გამოიყენება მხოლოდ პროფილის მართვისა და რედაქტირების დასადასტურებლად."
+                  : "Manager information is used only to manage and verify profile edits."}
+              </p>
+            </InfoBox>
+
+            <div className="grid2">
+              <RequiredField
+                label={
+                  ka
+                    ? "სახელი"
+                    : "First name"
+                }
+                value={
+                  form.manager_first_name
+                }
+                onChange={(v) =>
+                  update(
+                    "manager_first_name",
+                    v
+                  )
+                }
+              />
+
+              <RequiredField
+                label={
+                  ka
+                    ? "გვარი"
+                    : "Last name"
+                }
+                value={
+                  form.manager_last_name
+                }
+                onChange={(v) =>
+                  update(
+                    "manager_last_name",
+                    v
+                  )
+                }
+              />
+            </div>
+
+            <RequiredField
+              label={
+                ka
+                  ? "მობილურის ნომერი"
+                  : "Mobile number"
+              }
+              type="tel"
+              value={
+                form.manager_phone
+              }
+              onChange={(v) =>
+                update(
+                  "manager_phone",
+                  v
+                )
+              }
+            />
+
+            <RequiredField
+              label={
+                ka
+                  ? "ელფოსტა"
+                  : "Email"
+              }
+              type="email"
+              value={
+                form.manager_email
+              }
+              onChange={(v) =>
+                update(
+                  "manager_email",
+                  v
+                )
+              }
+            />
+
+            <RequiredField
+              label={
+                ka
+                  ? "მისამართი"
+                  : "Address"
+              }
+              value={
+                form.manager_address
+              }
+              onChange={(v) =>
+                update(
+                  "manager_address",
+                  v
+                )
+              }
+            />
+
+            <SelectField
+              label={
+                ka
+                  ? "ვინ ხართ სამაჯურის მფლობელისთვის?"
+                  : "What is your relationship to the wearer?"
+              }
+              value={
+                form.manager_relationship
+              }
+              onChange={(v) =>
+                update(
+                  "manager_relationship",
+                  v
+                )
+              }
+              options={
+                relationshipOptions[
+                  lang
+                ]
+              }
+              required
+            />
+
+            <div className="grid2">
+              <RequiredField
+                label={
+                  ka
+                    ? "კოდური სიტყვა"
+                    : "Codeword"
+                }
+                type="password"
+                value={
+                  form.codeword
+                }
+                onChange={(v) =>
+                  update(
+                    "codeword",
+                    v
+                  )
+                }
+              />
+
+              <RequiredField
+                label={
+                  ka
+                    ? "გაიმეორეთ კოდური სიტყვა"
+                    : "Repeat codeword"
+                }
+                type="password"
+                value={
+                  form.codeword_confirm
+                }
+                onChange={(v) =>
+                  update(
+                    "codeword_confirm",
+                    v
+                  )
+                }
+              />
+            </div>
+
+            {error && (
+              <ErrorBox text={error} />
+            )}
+
+            <div className="buttons">
+              <button
+                type="button"
+                className="backButton"
+                onClick={goHome}
+              >
+                ←{" "}
+                {ka
+                  ? "უკან"
+                  : "Back"}
+              </button>
+
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={
+                  managerToWearer
+                }
+              >
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {screen === "wearer" && (
+          <div className="card">
+            <SectionTitle
+              number="02"
+              title={
+                ka
+                  ? "სამაჯურის მფლობელი"
+                  : "Bracelet wearer"
+              }
+              description={
+                ka
+                  ? "ახლა შეიყვანეთ იმ ადამიანის მონაცემები, ვინც რეალურად ატარებს Emergency სამაჯურს."
+                  : "Now enter the details of the person who will actually wear the Emergency bracelet."
+              }
+            />
+
+            <WearerFields
+              ka={ka}
+              lang={lang}
+              form={form}
+              update={update}
+              visibility={visibility}
+              toggleVisibility={
+                toggleVisibility
+              }
+              selectedCountry={
+                selectedCountry
+              }
+            />
+
+            {error && (
+              <ErrorBox text={error} />
+            )}
+
+            <div className="buttons">
+              <button
+                type="button"
+                className="backButton"
+                onClick={() => {
+                  setScreen(
+                    "manager"
+                  );
+                  goTop();
+                }}
+              >
+                ←{" "}
+                {ka
+                  ? "უკან"
+                  : "Back"}
+              </button>
+
+              <button
+                type="button"
+                className="primaryButton"
+                onClick={
+                  wearerToTerms
+                }
+              >
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {screen === "terms" && (
+          <div className="card">
+            <SectionTitle
+              number="03"
+              title={
+                ka
+                  ? "წესები და თანხმობა"
+                  : "Terms and consent"
+              }
+              description={
+                ka
+                  ? "პროფილის შექმნამდე გაეცანით ძირითად წესებს."
+                  : "Review the main rules before creating the profile."
+              }
+            />
+
+            <Terms ka={ka} />
+
+            <label className="termsConsent">
+              <input
+                type="checkbox"
+                checked={
+                  termsAccepted
+                }
+                onChange={(e) =>
+                  setTermsAccepted(
+                    e.target.checked
+                  )
+                }
+              />
+
+              <div>
+                <strong>
+                  {ka
+                    ? "წავიკითხე და ვეთანხმები"
+                    : "I have read and agree"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "ვეთანხმები QR RETURN Emergency-ის გამოყენების წესებსა და კონფიდენციალურობის პირობებს."
+                    : "I agree to the QR RETURN Emergency terms and privacy conditions."}
+                </p>
+              </div>
+            </label>
+
+            {error && (
+              <ErrorBox text={error} />
+            )}
+
+            <div className="buttons">
+              <button
+                type="button"
+                className="backButton"
+                onClick={() => {
+                  setScreen(
+                    form.register_for ===
+                      "self"
+                      ? "self"
+                      : "wearer"
+                  );
+                  goTop();
+                }}
+              >
+                ←{" "}
+                {ka
+                  ? "უკან"
+                  : "Back"}
+              </button>
+
+              <button
+                type="button"
+                className="saveButton"
+                disabled={
+                  saving ||
+                  !termsAccepted
+                }
+                onClick={() =>
+                  void saveNewProfile()
+                }
+              >
+                {saving
+                  ? ka
+                    ? "ინახება..."
+                    : "Saving..."
+                  : ka
+                  ? "ვეთანხმები და ვქმნი პროფილს"
+                  : "Agree and create profile"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {screen === "success" && (
+          <div className="successPage">
+            <div className="successIcon">
+              ✓
+            </div>
+
             <div className="eyebrow">
               QR RETURN • EMERGENCY ID
             </div>
 
             <h1>
               {ka
-                ? "Emergency პროფილის რეგისტრაცია"
-                : "Emergency Profile Registration"}
+                ? "პროფილი წარმატებით შეიქმნა"
+                : "Profile created successfully"}
             </h1>
 
             <p>
               {ka
-                ? "ერთი QR კოდი განკუთვნილია ერთი კონკრეტული ადამიანისთვის."
-                : "One QR code is intended for one specific person."}
+                ? `${form.first_name} ${form.last_name}-ის Emergency პროფილი შენახულია.`
+                : `${form.first_name} ${form.last_name}'s Emergency profile has been saved.`}
             </p>
+
+            <div className="successButtons">
+              <button
+                type="button"
+                className="manageMainButton"
+                onClick={() => {
+                  setManageTag(
+                    createdTag
+                  );
+                  setScreen(
+                    "manage-find"
+                  );
+                  goTop();
+                }}
+              >
+                {ka
+                  ? "პროფილის მართვა"
+                  : "Manage profile"}
+              </button>
+
+              <button
+                type="button"
+                className="homeButton"
+                onClick={goHome}
+              >
+                {ka
+                  ? "მთავარ გვერდზე"
+                  : "Home"}
+              </button>
+            </div>
+
+            <InfoBox>
+              <strong>
+                🔒{" "}
+                {ka
+                  ? "ერთი QR — ერთი ადამიანი"
+                  : "One QR — one person"}
+              </strong>
+
+              <p>
+                {ka
+                  ? "პროფილის მმართველს შემდგომ შეუძლია მაქსიმუმ კიდევ ორი ადამიანის დამატება, მაგრამ თითოეულს თავისი უნიკალური QR კოდი სჭირდება."
+                  : "The manager may later add up to two additional people, but each person needs their own unique QR code."}
+              </p>
+            </InfoBox>
           </div>
-        </div>
+        )}
 
-        <div className="progress">
-          <StepIndicator
-            number="1"
-            label={
-              ka
-                ? "მმართველი"
-                : "Manager"
-            }
-            active
-            current={
-              step === 1
-            }
-          />
+        {screen === "manage-find" && (
+          <div className="card">
+            <SectionTitle
+              number="01"
+              title={
+                ka
+                  ? "პროფილის მართვა"
+                  : "Manage profile"
+              }
+              description={
+                ka
+                  ? "შეიყვანეთ იმ Emergency პროფილის QR კოდი, რომლის რედაქტირებაც გსურთ."
+                  : "Enter the QR code of the Emergency profile you want to manage."
+              }
+            />
 
-          <div
-            className={
-              step >= 2
-                ? "progressLine active"
-                : "progressLine"
-            }
-          />
+            <RequiredField
+              label={
+                ka
+                  ? "QR კოდი"
+                  : "QR code"
+              }
+              value={manageTag}
+              onChange={
+                setManageTag
+              }
+            />
 
-          <StepIndicator
-            number="2"
-            label={
-              ka
-                ? "პროფილი"
-                : "Profile"
-            }
-            active={
-              step >= 2
-            }
-            current={
-              step === 2
-            }
-          />
+            {error && (
+              <ErrorBox text={error} />
+            )}
 
-          <div
-            className={
-              step >= 3
-                ? "progressLine active"
-                : "progressLine"
-            }
-          />
+            <div className="buttons">
+              <button
+                type="button"
+                className="backButton"
+                onClick={goHome}
+              >
+                ←{" "}
+                {ka
+                  ? "უკან"
+                  : "Back"}
+              </button>
 
-          <StepIndicator
-            number="3"
-            label={
-              ka
-                ? "წესები"
-                : "Terms"
-            }
-            active={
-              step >= 3
-            }
-            current={
-              step === 3
-            }
-          />
-        </div>
+              <button
+                type="button"
+                className="primaryButton"
+                disabled={saving}
+                onClick={() =>
+                  void findProfile()
+                }
+              >
+                {saving
+                  ? ka
+                    ? "იძებნება..."
+                    : "Searching..."
+                  : ka
+                  ? "პროფილის მოძებნა"
+                  : "Find profile"}
+              </button>
+            </div>
+          </div>
+        )}
 
-        <form
-          className="card"
-          onSubmit={
-            handleSubmit
-          }
-        >
-          {step === 1 && (
-            <>
+        {screen ===
+          "manage-verify" &&
+          managedRow && (
+            <div className="card">
               <SectionTitle
-                number="01"
+                number="02"
                 title={
                   ka
-                    ? "ვისთვის ქმნით პროფილს?"
-                    : "Who is this profile for?"
+                    ? "დაადასტურეთ პროფილის მართვის უფლება"
+                    : "Verify profile management"
                 }
-                description={
-                  ka
-                    ? "აირჩიეთ, საკუთარ თავს არეგისტრირებთ თუ სხვა ადამიანს."
-                    : "Choose whether you are registering yourself or another person."
-                }
+                description={`${managedRow.first_name} ${managedRow.last_name} • ${managedRow.tag_code}`}
               />
 
-              <div className="choiceGrid">
+              <div className="verifyChoices">
                 <button
                   type="button"
                   className={
-                    form.register_for ===
-                    "self"
+                    verifyMethod ===
+                    "codeword"
                       ? "choice active"
                       : "choice"
                   }
                   onClick={() =>
-                    updateField(
-                      "register_for",
-                      "self"
+                    setVerifyMethod(
+                      "codeword"
                     )
                   }
                 >
-                  <span>
-                    👤
-                  </span>
-
+                  <span>🔐</span>
                   <strong>
                     {ka
-                      ? "საკუთარი თავისთვის"
-                      : "For myself"}
-                  </strong>
-                </button>
-
-                <button
-                  type="button"
-                  className={
-                    form.register_for ===
-                    "other"
-                      ? "choice active"
-                      : "choice"
-                  }
-                  onClick={() =>
-                    updateField(
-                      "register_for",
-                      "other"
-                    )
-                  }
-                >
-                  <span>
-                    👥
-                  </span>
-
-                  <strong>
-                    {ka
-                      ? "სხვა პირისთვის"
-                      : "For another person"}
-                  </strong>
-                </button>
-              </div>
-
-              <InfoBox>
-                <strong>
-                  {ka
-                    ? "ანგარიშის მმართველი"
-                    : "Account manager"}
-                </strong>
-
-                <p>
-                  {ka
-                    ? "ქვემოთ შეიყვანეთ იმ ადამიანის მონაცემები, ვინც Emergency პროფილს მართავს. ეს ინფორმაცია QR-ის საჯარო პროფილზე არ გამოჩნდება."
-                    : "Enter the information of the person who manages this Emergency profile. This information is never displayed on the public QR profile."}
-                </p>
-              </InfoBox>
-
-              <div className="grid2">
-                <RequiredInput
-                  label={
-                    ka
-                      ? "სახელი"
-                      : "First name"
-                  }
-                  value={
-                    form.manager_first_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "manager_first_name",
-                      value
-                    )
-                  }
-                  ka={ka}
-                />
-
-                <RequiredInput
-                  label={
-                    ka
-                      ? "გვარი"
-                      : "Last name"
-                  }
-                  value={
-                    form.manager_last_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "manager_last_name",
-                      value
-                    )
-                  }
-                  ka={ka}
-                />
-              </div>
-
-              <RequiredInput
-                label={
-                  ka
-                    ? "მობილურის ნომერი"
-                    : "Mobile number"
-                }
-                type="tel"
-                value={
-                  form.manager_phone
-                }
-                onChange={(value) =>
-                  updateField(
-                    "manager_phone",
-                    value
-                  )
-                }
-                ka={ka}
-              />
-
-              <RequiredInput
-                label={
-                  ka
-                    ? "ელფოსტა"
-                    : "Email"
-                }
-                type="email"
-                value={
-                  form.manager_email
-                }
-                onChange={(value) =>
-                  updateField(
-                    "manager_email",
-                    value
-                  )
-                }
-                ka={ka}
-              />
-
-              <RequiredInput
-                label={
-                  ka
-                    ? "მისამართი"
-                    : "Address"
-                }
-                value={
-                  form.manager_address
-                }
-                onChange={(value) =>
-                  updateField(
-                    "manager_address",
-                    value
-                  )
-                }
-                ka={ka}
-              />
-
-              <div className="grid2">
-                <RequiredInput
-                  label={
-                    ka
                       ? "კოდური სიტყვა"
-                      : "Codeword"
+                      : "Codeword"}
+                  </strong>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    verifyMethod ===
+                    "email"
+                      ? "choice active"
+                      : "choice"
                   }
-                  type="password"
-                  value={
-                    form.codeword
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "codeword",
-                      value
+                  onClick={() =>
+                    setVerifyMethod(
+                      "email"
                     )
                   }
-                  ka={ka}
-                />
-
-                <RequiredInput
-                  label={
-                    ka
-                      ? "გაიმეორეთ კოდური სიტყვა"
-                      : "Repeat codeword"
-                  }
-                  type="password"
-                  value={
-                    form.codeword_confirm
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "codeword_confirm",
-                      value
-                    )
-                  }
-                  ka={ka}
-                />
+                >
+                  <span>✉️</span>
+                  <strong>
+                    {ka
+                      ? "ელფოსტის კოდი"
+                      : "Email code"}
+                  </strong>
+                </button>
               </div>
 
-              <div className="securityBox">
-                🔐{" "}
-                {ka
-                  ? "კოდური სიტყვა დაგჭირდებათ დაცული ინფორმაციის ცვლილებისთვის. სახელისა და გვარის ერთჯერადი ცვლილება შესაძლებელი იქნება კოდური სიტყვით ან რეგისტრირებულ ელფოსტაზე მიღებული კოდით."
-                  : "The codeword is used for protected changes. The one-time name correction can be verified with the codeword or a code sent to the registered email."}
-              </div>
+              {verifyMethod ===
+                "codeword" && (
+                <>
+                  <RequiredField
+                    label={
+                      ka
+                        ? "კოდური სიტყვა"
+                        : "Codeword"
+                    }
+                    type="password"
+                    value={
+                      verifyCodewordInput
+                    }
+                    onChange={
+                      setVerifyCodewordInput
+                    }
+                  />
+
+                  <button
+                    type="button"
+                    className="primaryButton full"
+                    disabled={saving}
+                    onClick={() =>
+                      void verifyWithCodeword()
+                    }
+                  >
+                    {ka
+                      ? "დადასტურება"
+                      : "Verify"}
+                  </button>
+                </>
+              )}
+
+              {verifyMethod ===
+                "email" && (
+                <>
+                  <InfoBox>
+                    <strong>
+                      {ka
+                        ? "დადასტურება ელფოსტით"
+                        : "Verify by email"}
+                    </strong>
+
+                    <p>
+                      {ka
+                        ? `კოდი გაიგზავნება რეგისტრირებულ ელფოსტაზე: ${managedRow.owner_email || "—"}`
+                        : `A code will be sent to: ${managedRow.owner_email || "—"}`}
+                    </p>
+                  </InfoBox>
+
+                  {!otpSent && (
+                    <button
+                      type="button"
+                      className="primaryButton full"
+                      disabled={saving}
+                      onClick={() =>
+                        void sendEmailCode()
+                      }
+                    >
+                      {ka
+                        ? "კოდის გაგზავნა"
+                        : "Send code"}
+                    </button>
+                  )}
+
+                  {otpSent && (
+                    <>
+                      <RequiredField
+                        label={
+                          ka
+                            ? "ელფოსტაზე მიღებული კოდი"
+                            : "Email verification code"
+                        }
+                        value={emailOtp}
+                        onChange={
+                          setEmailOtp
+                        }
+                      />
+
+                      <button
+                        type="button"
+                        className="primaryButton full"
+                        disabled={saving}
+                        onClick={() =>
+                          void verifyEmailCode()
+                        }
+                      >
+                        {ka
+                          ? "კოდის დადასტურება"
+                          : "Verify code"}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {notice && (
+                <NoticeBox
+                  text={notice}
+                />
+              )}
 
               {error && (
                 <ErrorBox
@@ -1137,564 +2847,171 @@ export default function EmergencyRegisterPage() {
 
               <button
                 type="button"
-                className="primaryButton full"
-                onClick={
-                  nextStep
-                }
+                className="textButton"
+                onClick={() => {
+                  setScreen(
+                    "manage-find"
+                  );
+                  resetMessages();
+                }}
               >
+                ←{" "}
                 {ka
-                  ? "შემდეგი"
-                  : "Next"}{" "}
-                →
+                  ? "სხვა QR კოდის შეყვანა"
+                  : "Use another QR code"}
               </button>
-            </>
+            </div>
           )}
 
-          {step === 2 && (
-            <>
+        {screen ===
+          "manage-edit" &&
+          managedRow && (
+            <div className="card">
               <SectionTitle
-                number="02"
+                number="03"
                 title={
                   ka
-                    ? "სამაჯურის მფლობელის ინფორმაცია"
-                    : "Bracelet wearer information"
+                    ? "Emergency პროფილის რედაქტირება"
+                    : "Edit Emergency profile"
                 }
-                description={
+                description={`${managedRow.tag_code} • ${profileCount}/3 ${
                   ka
-                    ? "ეს არის ადამიანი, რომელსაც კონკრეტული Emergency QR ეკუთვნის."
-                    : "This is the person this specific Emergency QR belongs to."
-                }
+                    ? "პროფილი ამ მმართველზე"
+                    : "profiles for this manager"
+                }`}
               />
 
-              <div className="alwaysVisibleBox">
+              <div className="lockedQr">
                 <strong>
-                  {ka
-                    ? "სახელი და გვარი ყოველთვის გამოჩნდება"
-                    : "First and last name are always visible"}
+                  🔒 QR CODE
                 </strong>
+
+                <span>
+                  {
+                    managedRow.tag_code
+                  }
+                </span>
 
                 <p>
                   {ka
-                    ? "სახელი და გვარი სავალდებულოა და QR კოდის დასკანერებისას ყოველთვის გამოჩნდება."
-                    : "First and last name are required and always visible when the QR code is scanned."}
+                    ? "QR კოდი რეგისტრაციის შემდეგ აღარ იცვლება."
+                    : "The QR code cannot be changed after registration."}
                 </p>
               </div>
 
-              <RequiredInput
-                label={
-                  ka
-                    ? "QR კოდი"
-                    : "QR code"
-                }
-                value={
-                  form.tag_code
-                }
-                onChange={(value) =>
-                  updateField(
-                    "tag_code",
-                    value
-                  )
-                }
-                ka={ka}
-              />
-
-              <div className="grid2">
-                <RequiredAlwaysVisibleInput
-                  label={
-                    ka
-                      ? "სახელი"
-                      : "First name"
-                  }
-                  value={
-                    form.first_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "first_name",
-                      value
-                    )
-                  }
-                  ka={ka}
-                />
-
-                <RequiredAlwaysVisibleInput
-                  label={
-                    ka
-                      ? "გვარი"
-                      : "Last name"
-                  }
-                  value={
-                    form.last_name
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "last_name",
-                      value
-                    )
-                  }
-                  ka={ka}
-                />
-              </div>
-
-              <VisibilityField
-                label={
-                  ka
-                    ? "დაბადების სრული თარიღი"
-                    : "Complete date of birth"
-                }
-                type="date"
-                required
-                value={
-                  form.date_of_birth
-                }
-                onChange={(value) =>
-                  updateField(
-                    "date_of_birth",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_date_of_birth
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_date_of_birth"
-                  )
-                }
-                explanation={
-                  ka
-                    ? "შევსება სავალდებულოა. თქვენ წყვეტთ, გამოჩნდეს თუ არა დაბადების თარიღი QR პროფილზე."
-                    : "Required. You decide whether the date of birth appears on the QR profile."
-                }
-                ka={ka}
-              />
-
-              <div className="standardField">
-                <label>
-                  {ka
-                    ? "ქვეყანა *"
-                    : "Country *"}
-                </label>
-
-                <select
-                  value={
-                    form.country_code
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "country_code",
-                      event.target.value
-                    )
-                  }
-                >
-                  <option value="">
-                    {ka
-                      ? "აირჩიეთ ქვეყანა"
-                      : "Select country"}
-                  </option>
-
-                  {countries.map(
-                    (item) => (
-                      <option
-                        key={
-                          item.code
-                        }
-                        value={
-                          item.code
-                        }
-                      >
-                        {ka
-                          ? item.ka
-                          : item.en}
-                      </option>
-                    )
-                  )}
-                </select>
-
-                <small className="requiredNote">
-                  ✓{" "}
-                  {ka
-                    ? "სავალდებულო"
-                    : "Required"}
-                </small>
-              </div>
-
-              {selectedCountry && (
-                <div className="emergencyNumber">
-                  <strong>
-                    🚨{" "}
-                    {ka
-                      ? `გადაუდებელი დახმარება — ${selectedCountry.emergency}`
-                      : `Emergency services — ${selectedCountry.emergency}`}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? `${selectedCountry.emergency} QR პროფილზე ყოველთვის გამოჩნდება არჩეული ქვეყნის მიხედვით.`
-                      : `${selectedCountry.emergency} will always appear on the QR profile based on the selected country.`}
-                  </p>
-                </div>
-              )}
-
-              <VisibilityField
-                label={
-                  ka
-                    ? "პირადი ნომერი"
-                    : "Personal identification number"
-                }
-                required
-                value={
-                  form.personal_number
-                }
-                onChange={(value) =>
-                  updateField(
-                    "personal_number",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_personal_number
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_personal_number"
-                  )
-                }
-                explanation={
-                  ka
-                    ? "შევსება სავალდებულოა. უსაფრთხოების მიზნით QR პროფილზე გამოჩენა საწყისად გამორთულია. სურვილის შემთხვევაში შეგიძლიათ ჩართოთ."
-                    : "Required. Public visibility is off by default for privacy. You may enable it if you wish."
-                }
-                ka={ka}
-              />
-
-              <VisibilityField
-                label={
-                  ka
-                    ? "მისამართი"
-                    : "Address"
-                }
-                value={
-                  form.address
-                }
-                onChange={(value) =>
-                  updateField(
-                    "address",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_address
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_address"
-                  )
-                }
-                explanation={
-                  ka
-                    ? "მისამართის მითითება ნებაყოფლობითია. თუ შეავსებთ, თავად ირჩევთ გამოჩნდეს თუ არა QR პროფილზე."
-                    : "Address is optional. If entered, you choose whether it appears on the QR profile."
-                }
-                ka={ka}
-              />
-
-              <VisibilityTextarea
-                label={
-                  ka
-                    ? "დამატებითი ინფორმაცია"
-                    : "Additional information"
-                }
-                value={
-                  form.additional_info
-                }
-                onChange={(value) =>
-                  updateField(
-                    "additional_info",
-                    value
-                  )
-                }
-                visible={
-                  visibility.show_additional_info
-                }
-                onToggle={() =>
-                  toggleVisibility(
-                    "show_additional_info"
-                  )
-                }
-                explanation={
-                  ka
-                    ? "ეს ველი ნებაყოფლობითია. შეგიძლიათ მიუთითოთ ინფორმაცია, რომელიც საგანგებო სიტუაციაში შეიძლება მნიშვნელოვანი იყოს."
-                    : "Optional. You may enter information that could be important in an emergency."
-                }
-                ka={ka}
-              />
-
-              <div className="contactCard">
-                <div className="visibilityHeader">
+              <div className="identityCard">
+                <div className="identityHeader">
                   <div>
                     <strong>
                       {ka
-                        ? "საკონტაქტო პირი"
-                        : "Contact person"}
+                        ? "სახელი და გვარი"
+                        : "First and last name"}
                     </strong>
 
                     <span>
-                      {ka
-                        ? "ნებაყოფლობითი"
-                        : "Optional"}
+                      {managedRow.identity_edit_used
+                        ? ka
+                          ? "ერთჯერადი ცვლილება უკვე გამოყენებულია"
+                          : "One-time correction already used"
+                        : ka
+                        ? "ერთჯერადი ცვლილება ხელმისაწვდომია"
+                        : "One-time correction available"}
                     </span>
                   </div>
 
-                  <Switch
-                    active={
-                      visibility.show_contact
-                    }
-                    onClick={() =>
-                      toggleVisibility(
-                        "show_contact"
-                      )
-                    }
-                  />
+                  {!managedRow.identity_edit_used &&
+                    !identityEditUnlocked && (
+                      <button
+                        type="button"
+                        className="smallButton"
+                        onClick={() =>
+                          setIdentityEditUnlocked(
+                            true
+                          )
+                        }
+                      >
+                        {ka
+                          ? "შეცვლა ერთხელ"
+                          : "Correct once"}
+                      </button>
+                    )}
                 </div>
 
-                <p className="fieldExplanation">
-                  {ka
-                    ? "საკონტაქტო პირის დამატება ნებაყოფლობითია. თუ მიუთითებთ და ჩვენება ჩართულია, QR-ის დამსკანერებელს შეეძლება ამ პირთან დაკავშირება."
-                    : "Adding a contact person is optional. If added and visibility is enabled, the QR scanner can contact this person."}
-                </p>
-
                 <div className="grid2">
-                  <OptionalInput
+                  <LockedOrEditable
                     label={
                       ka
                         ? "სახელი"
                         : "First name"
                     }
                     value={
-                      form.contact_first_name
+                      form.first_name
                     }
-                    onChange={(value) =>
-                      updateField(
-                        "contact_first_name",
-                        value
+                    onChange={(v) =>
+                      update(
+                        "first_name",
+                        v
                       )
+                    }
+                    editable={
+                      identityEditUnlocked &&
+                      !managedRow.identity_edit_used
                     }
                   />
 
-                  <OptionalInput
+                  <LockedOrEditable
                     label={
                       ka
                         ? "გვარი"
                         : "Last name"
                     }
                     value={
-                      form.contact_last_name
+                      form.last_name
                     }
-                    onChange={(value) =>
-                      updateField(
-                        "contact_last_name",
-                        value
+                    onChange={(v) =>
+                      update(
+                        "last_name",
+                        v
                       )
+                    }
+                    editable={
+                      identityEditUnlocked &&
+                      !managedRow.identity_edit_used
                     }
                   />
                 </div>
 
-                <OptionalInput
-                  label={
-                    ka
-                      ? "მობილურის ნომერი"
-                      : "Mobile number"
-                  }
-                  type="tel"
-                  value={
-                    form.contact_phone
-                  }
-                  onChange={(value) =>
-                    updateField(
-                      "contact_phone",
-                      value
-                    )
-                  }
-                />
-
-                <div className="visibilityStatus">
-                  {ka
-                    ? "QR პროფილზე გამოჩენა:"
-                    : "Show on QR profile:"}{" "}
-                  <b>
-                    {visibility.show_contact
-                      ? "ON"
-                      : "OFF"}
-                  </b>
-                </div>
+                {identityEditUnlocked &&
+                  !managedRow.identity_edit_used && (
+                    <p className="warningText">
+                      {ka
+                        ? "⚠️ ეს არის სახელისა და გვარის ერთადერთი ცვლილება ამ QR პროფილზე."
+                        : "⚠️ This is the only name correction allowed for this QR profile."}
+                    </p>
+                  )}
               </div>
 
-              {error && (
-                <ErrorBox
-                  text={error}
-                />
-              )}
-
-              <div className="buttons">
-                <button
-                  type="button"
-                  className="backButton"
-                  onClick={
-                    previousStep
-                  }
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  onClick={
-                    nextStep
-                  }
-                >
-                  {ka
-                    ? "შემდეგი"
-                    : "Next"}{" "}
-                  →
-                </button>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <SectionTitle
-                number="03"
-                title={
-                  ka
-                    ? "წესები და თანხმობა"
-                    : "Terms and consent"
+              <WearerFields
+                ka={ka}
+                lang={lang}
+                form={form}
+                update={update}
+                visibility={visibility}
+                toggleVisibility={
+                  toggleVisibility
                 }
-                description={
-                  ka
-                    ? "პროფილის შექმნამდე გაეცანით QR RETURN Emergency-ის ძირითად წესებს."
-                    : "Review the QR RETURN Emergency rules before creating the profile."
+                selectedCountry={
+                  selectedCountry
                 }
+                hideQr
+                hideNameFields
               />
 
-              <div className="termsBox">
-                <h3>
-                  QR RETURN Emergency
-                </h3>
-
-                <ol>
-                  <li>
-                    {ka
-                      ? "ერთი Emergency QR კოდი ეკუთვნის მხოლოდ ერთ კონკრეტულ ადამიანს."
-                      : "One Emergency QR code belongs to one specific person."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "რეგისტრაციის შემდეგ QR კოდის სხვა ადამიანზე გადატანა შეუძლებელია."
-                      : "The QR code cannot be transferred to another person after registration."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "სამაჯურის მფლობელის სახელი და გვარი სავალდებულოა და QR პროფილზე ყოველთვის გამოჩნდება."
-                      : "The wearer's first and last name are required and always visible on the QR profile."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "სახელისა და გვარის შეცვლა შესაძლებელია მხოლოდ ერთხელ. ეს შესაძლებლობა განკუთვნილია შეცდომის გასასწორებლად და არა QR-ის სხვა ადამიანისთვის გადასაცემად."
-                      : "First and last name may be changed only once. This is intended to correct an error, not transfer the QR to another person."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "სახელისა და გვარის ერთჯერადი ცვლილება უნდა დადასტურდეს კოდური სიტყვით ან ანგარიშის მმართველის რეგისტრირებულ ელფოსტაზე მიღებული კოდით."
-                      : "The one-time name change must be verified with the codeword or a code sent to the account manager's registered email."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "დაბადების სრული თარიღისა და პირადი ნომრის შევსება სავალდებულოა, თუმცა QR პროფილზე მათი გამოჩენა მომხმარებლის არჩევანია."
-                      : "Date of birth and personal identification number are required, but public visibility is optional."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "მისამართი და დამატებითი ინფორმაცია ნებაყოფლობითია და მომხმარებელი თავად ირჩევს მათ საჯაროდ გამოჩენას."
-                      : "Address and additional information are optional and their public visibility is controlled by the user."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "საკონტაქტო პირის სახელი, გვარი და მობილურის ნომერი ნებაყოფლობითია. მომხმარებელი თავად ირჩევს გამოჩნდეს თუ არა ეს ინფორმაცია QR პროფილზე."
-                      : "The contact person's first name, last name and mobile number are optional. The user controls whether they are displayed."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "ანგარიშის მმართველის სახელი, გვარი, ტელეფონი, ელფოსტა, მისამართი და კოდური სიტყვა QR-ის საჯარო პროფილზე არ გამოჩნდება."
-                      : "The account manager's name, phone, email, address and codeword are never displayed on the public QR profile."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "არჩეული ქვეყნის მიხედვით QR პროფილზე ყოველთვის გამოჩნდება შესაბამისი გადაუდებელი დახმარების ნომერი — აშშ-ში 911, საქართველოში 112."
-                      : "The appropriate emergency number is always displayed based on the selected country — 911 in the United States and 112 in Georgia."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "ანგარიშის მმართველს პროფილის მართვის გვერდიდან შეეძლება მაქსიმუმ ორი დამატებითი ადამიანის Emergency პროფილის რეგისტრაცია. თითოეულ ადამიანს უნდა ჰქონდეს საკუთარი უნიკალური QR კოდი."
-                      : "The account manager may register up to two additional Emergency profiles from profile management. Each person must have their own unique QR code."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "მომხმარებელი პასუხისმგებელია მის მიერ მითითებული ინფორმაციის სისწორეზე."
-                      : "The user is responsible for the accuracy of the information provided."}
-                  </li>
-
-                  <li>
-                    {ka
-                      ? "QR RETURN Emergency არ ცვლის გადაუდებელი დახმარების სამსახურს ან პროფესიულ სამედიცინო მომსახურებას."
-                      : "QR RETURN Emergency does not replace emergency services or professional medical care."}
-                  </li>
-                </ol>
-              </div>
-
-              <label className="termsConsent">
-                <input
-                  type="checkbox"
-                  checked={
-                    termsAccepted
-                  }
-                  onChange={(event) =>
-                    setTermsAccepted(
-                      event.target.checked
-                    )
-                  }
+              {notice && (
+                <NoticeBox
+                  text={notice}
                 />
-
-                <div>
-                  <strong>
-                    {ka
-                      ? "წავიკითხე და ვეთანხმები"
-                      : "I have read and agree"}
-                  </strong>
-
-                  <p>
-                    {ka
-                      ? "ვეთანხმები QR RETURN Emergency-ის გამოყენების წესებსა და კონფიდენციალურობის პირობებს."
-                      : "I agree to the QR RETURN Emergency terms of use and privacy conditions."}
-                  </p>
-                </div>
-              </label>
+              )}
 
               {error && (
                 <ErrorBox
@@ -1702,26 +3019,13 @@ export default function EmergencyRegisterPage() {
                 />
               )}
 
-              <div className="buttons">
+              <div className="managementActions">
                 <button
                   type="button"
-                  className="backButton"
-                  onClick={
-                    previousStep
-                  }
-                >
-                  ←{" "}
-                  {ka
-                    ? "უკან"
-                    : "Back"}
-                </button>
-
-                <button
-                  type="submit"
                   className="saveButton"
-                  disabled={
-                    saving ||
-                    !termsAccepted
+                  disabled={saving}
+                  onClick={() =>
+                    void saveProfileEdit()
                   }
                 >
                   {saving
@@ -1729,13 +3033,157 @@ export default function EmergencyRegisterPage() {
                       ? "ინახება..."
                       : "Saving..."
                     : ka
-                    ? "ვეთანხმები და პროფილს ვქმნი"
-                    : "Agree and create profile"}
+                    ? "ცვლილებების შენახვა"
+                    : "Save changes"}
+                </button>
+
+                <button
+                  type="button"
+                  className="addProfileButton"
+                  onClick={
+                    startAdditionalProfile
+                  }
+                >
+                  +{" "}
+                  {ka
+                    ? "დამატებითი პროფილის რეგისტრაცია"
+                    : "Register additional profile"}
                 </button>
               </div>
-            </>
+
+              <div className="profileLimitBox">
+                <strong>
+                  {ka
+                    ? `მმართველზე რეგისტრირებულია ${profileCount} / 3 პროფილი`
+                    : `${profileCount} / 3 profiles registered`}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "შეგიძლიათ დაამატოთ მაქსიმუმ ორი დამატებითი ადამიანი — მაგალითად მეუღლე, დედა, მამა ან შვილი. თითოეულს ახალი QR კოდი სჭირდება."
+                    : "You may add up to two additional people, such as a spouse, parent or child. Each needs a new QR code."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="textButton"
+                onClick={goHome}
+              >
+                ←{" "}
+                {ka
+                  ? "დასრულება"
+                  : "Finish"}
+              </button>
+            </div>
           )}
-        </form>
+
+        {screen ===
+          "additional" &&
+          managedRow && (
+            <div className="card">
+              <SectionTitle
+                number="04"
+                title={
+                  ka
+                    ? "დამატებითი პროფილის რეგისტრაცია"
+                    : "Register additional profile"
+                }
+                description={
+                  ka
+                    ? "მმართველის მონაცემები უკვე დადასტურებულია. შეიყვანეთ მხოლოდ ახალი ადამიანის ინფორმაცია."
+                    : "The manager is already verified. Enter only the new person's information."
+                }
+              />
+
+              <InfoBox>
+                <strong>
+                  {ka
+                    ? "იგივე ანგარიშის მმართველი"
+                    : "Same account manager"}
+                </strong>
+
+                <p>
+                  {`${form.manager_first_name} ${form.manager_last_name} • ${form.manager_email}`}
+                </p>
+              </InfoBox>
+
+              <SelectField
+                label={
+                  ka
+                    ? "ვინ არის ეს ახალი პირი თქვენთვის?"
+                    : "What is your relationship to this new person?"
+                }
+                value={
+                  form.manager_relationship
+                }
+                onChange={(v) =>
+                  update(
+                    "manager_relationship",
+                    v
+                  )
+                }
+                options={
+                  relationshipOptions[
+                    lang
+                  ]
+                }
+                required
+              />
+
+              <WearerFields
+                ka={ka}
+                lang={lang}
+                form={form}
+                update={update}
+                visibility={visibility}
+                toggleVisibility={
+                  toggleVisibility
+                }
+                selectedCountry={
+                  selectedCountry
+                }
+              />
+
+              {error && (
+                <ErrorBox
+                  text={error}
+                />
+              )}
+
+              <div className="buttons">
+                <button
+                  type="button"
+                  className="backButton"
+                  onClick={() => {
+                    void openManageEditor();
+                  }}
+                >
+                  ←{" "}
+                  {ka
+                    ? "უკან"
+                    : "Back"}
+                </button>
+
+                <button
+                  type="button"
+                  className="saveButton"
+                  disabled={saving}
+                  onClick={() =>
+                    void saveAdditionalProfile()
+                  }
+                >
+                  {saving
+                    ? ka
+                      ? "ინახება..."
+                      : "Saving..."
+                    : ka
+                    ? "დამატებითი პროფილის შექმნა"
+                    : "Create additional profile"}
+                </button>
+              </div>
+            </div>
+          )}
       </section>
 
       <Styles />
@@ -1743,20 +3191,29 @@ export default function EmergencyRegisterPage() {
   );
 }
 
+/*
+ * ========================================================
+ * REUSABLE UI
+ * ========================================================
+ */
+
 function Header({
   lang,
   setLang,
+  onHome,
 }: {
   lang: Lang;
   setLang: (
-    value: Lang
+    lang: Lang
   ) => void;
+  onHome: () => void;
 }) {
   return (
     <header className="header">
-      <a
-        href="/"
+      <button
+        type="button"
         className="brand"
+        onClick={onHome}
       >
         <div className="logo">
           QR
@@ -1771,7 +3228,7 @@ function Header({
             EMERGENCY ID
           </small>
         </div>
-      </a>
+      </button>
 
       <div className="languages">
         <button
@@ -1806,30 +3263,710 @@ function Header({
   );
 }
 
-function StepIndicator({
-  number,
-  label,
-  active,
-  current,
+function ChoiceScreen({
+  ka,
+  onSelf,
+  onOther,
+  onManage,
 }: {
-  number: string;
-  label: string;
-  active: boolean;
-  current: boolean;
+  ka: boolean;
+  onSelf: () => void;
+  onOther: () => void;
+  onManage: () => void;
 }) {
   return (
-    <div className="stepIndicator">
-      <span
-        className={`${active ? "active" : ""} ${
-          current ? "current" : ""
-        }`}
-      >
-        {number}
-      </span>
+    <div className="card choiceCard">
+      <SectionTitle
+        number="01"
+        title={
+          ka
+            ? "ვისთვის ქმნით პროფილს?"
+            : "Who is this profile for?"
+        }
+        description={
+          ka
+            ? "აირჩიეთ მხოლოდ ერთი ვარიანტი და შემდეგ გაიხსნება შესაბამისი რეგისტრაციის ფორმა."
+            : "Choose one option and the appropriate registration form will open."
+        }
+      />
 
-      <small>
-        {label}
-      </small>
+      <div className="bigChoices">
+        <button
+          type="button"
+          className="bigChoice"
+          onClick={onSelf}
+        >
+          <span>👤</span>
+
+          <div>
+            <strong>
+              {ka
+                ? "საკუთარი თავისთვის"
+                : "For myself"}
+            </strong>
+
+            <small>
+              {ka
+                ? "თქვენ თვითონ ხართ პროფილის მმართველიც და სამაჯურის მფლობელიც."
+                : "You are both the account manager and bracelet wearer."}
+            </small>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          className="bigChoice"
+          onClick={onOther}
+        >
+          <span>👥</span>
+
+          <div>
+            <strong>
+              {ka
+                ? "სხვა პირისთვის"
+                : "For another person"}
+            </strong>
+
+            <small>
+              {ka
+                ? "მაგალითად: მეუღლე, მშობელი, შვილი ან სხვა ადამიანი."
+                : "For example: spouse, parent, child or another person."}
+            </small>
+          </div>
+        </button>
+      </div>
+
+      <div className="existingProfile">
+        <span>
+          {ka
+            ? "უკვე გაქვთ Emergency პროფილი?"
+            : "Already have an Emergency profile?"}
+        </span>
+
+        <button
+          type="button"
+          onClick={onManage}
+        >
+          {ka
+            ? "პროფილის რედაქტირება / მართვა"
+            : "Edit / manage profile"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WearerFields({
+  ka,
+  lang,
+  form,
+  update,
+  visibility,
+  toggleVisibility,
+  selectedCountry,
+  hideQr = false,
+  hideNameFields = false,
+}: {
+  ka: boolean;
+  lang: Lang;
+  form: FormData;
+  update: (
+    field: keyof FormData,
+    value: string | boolean
+  ) => void;
+  visibility: Visibility;
+  toggleVisibility: (
+    field: keyof Visibility
+  ) => void;
+  selectedCountry:
+    | (typeof countries)[number]
+    | undefined;
+  hideQr?: boolean;
+  hideNameFields?: boolean;
+}) {
+  return (
+    <>
+      {!hideQr && (
+        <RequiredField
+          label={
+            ka
+              ? "QR კოდი"
+              : "QR code"
+          }
+          value={
+            form.tag_code
+          }
+          onChange={(v) =>
+            update(
+              "tag_code",
+              v
+            )
+          }
+        />
+      )}
+
+      {!hideNameFields && (
+        <>
+          <InfoBox>
+            <strong>
+              {ka
+                ? "სახელი და გვარი"
+                : "First and last name"}
+            </strong>
+
+            <p>
+              {ka
+                ? "სახელი და გვარი სავალდებულოა და QR პროფილზე ყოველთვის გამოჩნდება."
+                : "First and last name are required and always visible on the QR profile."}
+            </p>
+          </InfoBox>
+
+          <div className="grid2">
+            <RequiredField
+              label={
+                ka
+                  ? "სახელი"
+                  : "First name"
+              }
+              value={
+                form.first_name
+              }
+              onChange={(v) =>
+                update(
+                  "first_name",
+                  v
+                )
+              }
+            />
+
+            <RequiredField
+              label={
+                ka
+                  ? "გვარი"
+                  : "Last name"
+              }
+              value={
+                form.last_name
+              }
+              onChange={(v) =>
+                update(
+                  "last_name",
+                  v
+                )
+              }
+            />
+          </div>
+        </>
+      )}
+
+      <VisibilityField
+        label={
+          ka
+            ? "დაბადების სრული თარიღი"
+            : "Complete date of birth"
+        }
+        type="date"
+        required
+        value={
+          form.date_of_birth
+        }
+        onChange={(v) =>
+          update(
+            "date_of_birth",
+            v
+          )
+        }
+        active={
+          visibility.show_date_of_birth
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_date_of_birth"
+          )
+        }
+        text={
+          ka
+            ? "შევსება სავალდებულოა. თქვენ წყვეტთ, გამოჩნდეს თუ არა QR პროფილზე."
+            : "Required. You decide whether it appears on the QR profile."
+        }
+        ka={ka}
+      />
+
+      <SelectField
+        label={
+          ka
+            ? "ქვეყანა"
+            : "Country"
+        }
+        value={
+          form.country_code
+        }
+        onChange={(v) =>
+          update(
+            "country_code",
+            v
+          )
+        }
+        options={[
+          [
+            "",
+            ka
+              ? "აირჩიეთ ქვეყანა"
+              : "Select country",
+          ],
+          ...countries.map(
+            (item) => [
+              item.code,
+              ka
+                ? item.ka
+                : item.en,
+            ]
+          ),
+        ]}
+        required
+      />
+
+      {selectedCountry && (
+        <div className="emergencyBox">
+          <strong>
+            🚨{" "}
+            {ka
+              ? `გადაუდებელი დახმარება — ${selectedCountry.emergency}`
+              : `Emergency services — ${selectedCountry.emergency}`}
+          </strong>
+
+          <p>
+            {ka
+              ? `${selectedCountry.emergency} QR პროფილზე ყოველთვის გამოჩნდება არჩეული ქვეყნის მიხედვით.`
+              : `${selectedCountry.emergency} will always be displayed based on the selected country.`}
+          </p>
+        </div>
+      )}
+
+      <VisibilityField
+        label={
+          ka
+            ? "პირადი / საიდენტიფიკაციო ნომერი"
+            : "Personal identification number"
+        }
+        required
+        value={
+          form.personal_number
+        }
+        onChange={(v) =>
+          update(
+            "personal_number",
+            v
+          )
+        }
+        active={
+          visibility.show_personal_number
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_personal_number"
+          )
+        }
+        text={
+          ka
+            ? "შევსება სავალდებულოა. საჯაროდ ჩვენება საწყისად გამორთულია."
+            : "Required. Public visibility is off by default."
+        }
+        ka={ka}
+      />
+
+      <VisibilityField
+        label={
+          ka
+            ? "მისამართი"
+            : "Address"
+        }
+        value={
+          form.address
+        }
+        onChange={(v) =>
+          update(
+            "address",
+            v
+          )
+        }
+        active={
+          visibility.show_address
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_address"
+          )
+        }
+        text={
+          ka
+            ? "ნებაყოფლობითია. თუ შეავსებთ, თავად ირჩევთ გამოჩნდეს თუ არა."
+            : "Optional. If entered, you decide whether it is displayed."
+        }
+        ka={ka}
+      />
+
+      <VisibilityTextarea
+        label={
+          ka
+            ? "ქრონიკული დაავადებები"
+            : "Chronic conditions"
+        }
+        value={
+          form.chronic_conditions
+        }
+        onChange={(v) =>
+          update(
+            "chronic_conditions",
+            v
+          )
+        }
+        active={
+          visibility.show_chronic_conditions
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_chronic_conditions"
+          )
+        }
+        text={
+          ka
+            ? "ნებაყოფლობითია. მიუთითეთ მხოლოდ ინფორმაცია, რომელიც შეიძლება მნიშვნელოვანი იყოს საგანგებო სიტუაციაში."
+            : "Optional. Enter information that may be important in an emergency."
+        }
+        ka={ka}
+      />
+
+      <VisibilityTextarea
+        label={
+          ka
+            ? "დამატებითი ინფორმაცია"
+            : "Additional information"
+        }
+        value={
+          form.additional_info
+        }
+        onChange={(v) =>
+          update(
+            "additional_info",
+            v
+          )
+        }
+        active={
+          visibility.show_additional_info
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_additional_info"
+          )
+        }
+        text={
+          ka
+            ? "ნებაყოფლობითი ველია. თქვენ ირჩევთ გამოჩნდეს თუ არა QR პროფილზე."
+            : "Optional. You decide whether it appears on the QR profile."
+        }
+        ka={ka}
+      />
+
+      <ContactCard
+        ka={ka}
+        lang={lang}
+        form={form}
+        update={update}
+        active={
+          visibility.show_contact
+        }
+        onToggle={() =>
+          toggleVisibility(
+            "show_contact"
+          )
+        }
+      />
+    </>
+  );
+}
+
+function ContactCard({
+  ka,
+  lang,
+  form,
+  update,
+  active,
+  onToggle,
+}: {
+  ka: boolean;
+  lang: Lang;
+  form: FormData;
+  update: (
+    field: keyof FormData,
+    value: string | boolean
+  ) => void;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="contactCard">
+      <div className="visibilityHeader">
+        <div>
+          <strong>
+            {ka
+              ? "საკონტაქტო პირი"
+              : "Contact person"}
+          </strong>
+
+          <span>
+            {ka
+              ? "ნებაყოფლობითი"
+              : "Optional"}
+          </span>
+        </div>
+
+        <Switch
+          active={active}
+          onClick={onToggle}
+        />
+      </div>
+
+      <p className="fieldHelp">
+        {ka
+          ? "თუ დაამატებთ საკონტაქტო პირს, მიუთითეთ ვინ არის ის სამაჯურის მფლობელისთვის და თავად აირჩიეთ დაკავშირების მეთოდები."
+          : "If you add a contact person, specify their relationship to the wearer and choose the available contact methods."}
+      </p>
+
+      <div className="grid2">
+        <OptionalField
+          label={
+            ka
+              ? "სახელი"
+              : "First name"
+          }
+          value={
+            form.contact_first_name
+          }
+          onChange={(v) =>
+            update(
+              "contact_first_name",
+              v
+            )
+          }
+        />
+
+        <OptionalField
+          label={
+            ka
+              ? "გვარი"
+              : "Last name"
+          }
+          value={
+            form.contact_last_name
+          }
+          onChange={(v) =>
+            update(
+              "contact_last_name",
+              v
+            )
+          }
+        />
+      </div>
+
+      <SelectField
+        label={
+          ka
+            ? "ვინ არის ეს პირი სამაჯურის მფლობელისთვის?"
+            : "Relationship to the bracelet wearer"
+        }
+        value={
+          form.contact_relationship
+        }
+        onChange={(v) =>
+          update(
+            "contact_relationship",
+            v
+          )
+        }
+        options={
+          relationshipOptions[
+            lang
+          ]
+        }
+      />
+
+      <OptionalField
+        label={
+          ka
+            ? "მობილურის ნომერი"
+            : "Mobile number"
+        }
+        type="tel"
+        value={
+          form.contact_phone
+        }
+        onChange={(v) =>
+          update(
+            "contact_phone",
+            v
+          )
+        }
+      />
+
+      <div className="contactMethods">
+        <strong>
+          {ka
+            ? "დაკავშირების მეთოდები"
+            : "Contact methods"}
+        </strong>
+
+        <p>
+          {ka
+            ? "ყველა არჩევითია. შეგიძლიათ ჩართოთ ერთი, რამდენიმე ან არცერთი."
+            : "All are optional. Choose one, several, or none."}
+        </p>
+
+        <ContactMethod
+          icon="📞"
+          label={
+            ka
+              ? "ტელეფონით დარეკვა"
+              : "Phone call"
+          }
+          active={
+            form.contact_mobile_enabled
+          }
+          onClick={() =>
+            update(
+              "contact_mobile_enabled",
+              !form.contact_mobile_enabled
+            )
+          }
+        />
+
+        <ContactMethod
+          icon="🟢"
+          label="WhatsApp"
+          active={
+            form.contact_whatsapp_enabled
+          }
+          onClick={() =>
+            update(
+              "contact_whatsapp_enabled",
+              !form.contact_whatsapp_enabled
+            )
+          }
+        />
+
+        <ContactMethod
+          icon="💬"
+          label="Live Chat"
+          active={
+            form.contact_live_chat_enabled
+          }
+          onClick={() =>
+            update(
+              "contact_live_chat_enabled",
+              !form.contact_live_chat_enabled
+            )
+          }
+        />
+      </div>
+
+      <div className="visibilityStatus">
+        {ka
+          ? "QR პროფილზე საკონტაქტო პირის გამოჩენა:"
+          : "Show contact person on QR profile:"}{" "}
+        <b>
+          {active
+            ? "ON"
+            : "OFF"}
+        </b>
+      </div>
+    </div>
+  );
+}
+
+function Terms({
+  ka,
+}: {
+  ka: boolean;
+}) {
+  return (
+    <div className="termsBox">
+      <h3>
+        QR RETURN Emergency
+      </h3>
+
+      <ol>
+        <li>
+          {ka
+            ? "ერთი Emergency QR კოდი განკუთვნილია მხოლოდ ერთი კონკრეტული ადამიანისთვის."
+            : "One Emergency QR code is intended for one specific person."}
+        </li>
+
+        <li>
+          {ka
+            ? "QR კოდი რეგისტრაციის შემდეგ აღარ იცვლება და სხვა ადამიანზე გადატანა შეუძლებელია."
+            : "The QR code cannot be changed or transferred after registration."}
+        </li>
+
+        <li>
+          {ka
+            ? "სამაჯურის მფლობელის სახელი და გვარი სავალდებულოა და QR პროფილზე ყოველთვის გამოჩნდება."
+            : "The wearer's first and last name are required and always visible."}
+        </li>
+
+        <li>
+          {ka
+            ? "სახელისა და გვარის შეცვლა შესაძლებელია მხოლოდ ერთხელ, შეცდომის გასასწორებლად."
+            : "First and last name may be corrected only once."}
+        </li>
+
+        <li>
+          {ka
+            ? "პროფილის რედაქტირების უფლება დასტურდება კოდური სიტყვით ან მმართველის რეგისტრირებულ ელფოსტაზე მიღებული კოდით."
+            : "Profile editing is verified with the codeword or a code sent to the manager's registered email."}
+        </li>
+
+        <li>
+          {ka
+            ? "დაბადების თარიღისა და პირადი ნომრის შევსება სავალდებულოა, მაგრამ მათი საჯაროდ ჩვენება მომხმარებლის არჩევანია."
+            : "Date of birth and personal ID are required, but public visibility is optional."}
+        </li>
+
+        <li>
+          {ka
+            ? "მისამართი, ქრონიკული დაავადებები, დამატებითი ინფორმაცია და საკონტაქტო პირი ნებაყოფლობითია."
+            : "Address, chronic conditions, additional information and contact person are optional."}
+        </li>
+
+        <li>
+          {ka
+            ? "საკონტაქტო პირთან დაკავშირების Phone, WhatsApp და Live Chat მეთოდები არჩევითია."
+            : "Phone, WhatsApp and Live Chat contact methods are optional."}
+        </li>
+
+        <li>
+          {ka
+            ? "ანგარიშის მმართველის პირადი მონაცემები QR-ის საჯარო პროფილზე არ გამოჩნდება."
+            : "The account manager's private data is not displayed publicly."}
+        </li>
+
+        <li>
+          {ka
+            ? "არჩეული ქვეყნის მიხედვით QR პროფილზე ყოველთვის გამოჩნდება 911 აშშ-ში ან 112 საქართველოში."
+            : "The QR profile always displays 911 in the United States or 112 in Georgia."}
+        </li>
+
+        <li>
+          {ka
+            ? "ერთ ანგარიშის მმართველს შეუძლია ერთი ძირითადი და მაქსიმუმ ორი დამატებითი Emergency პროფილის მართვა. თითოეულ ადამიანს თავისი QR სჭირდება."
+            : "One manager may manage one primary and up to two additional Emergency profiles. Each person needs their own QR."}
+        </li>
+
+        <li>
+          {ka
+            ? "მომხმარებელი პასუხისმგებელია შეყვანილი ინფორმაციის სისწორეზე."
+            : "The user is responsible for the accuracy of the information provided."}
+        </li>
+      </ol>
     </div>
   );
 }
@@ -1874,23 +4011,23 @@ function InfoBox({
   );
 }
 
-function RequiredInput({
+function RequiredField({
   label,
   value,
   onChange,
-  ka,
   type = "text",
+  note,
 }: {
   label: string;
   value: string;
   onChange: (
     value: string
   ) => void;
-  ka: boolean;
   type?: string;
+  note?: string;
 }) {
   return (
-    <div className="standardField">
+    <div className="field">
       <label>
         {label} *
       </label>
@@ -1899,63 +4036,23 @@ function RequiredInput({
         type={type}
         value={value}
         required
-        onChange={(event) =>
+        onChange={(e) =>
           onChange(
-            event.target.value
+            e.target.value
           )
         }
       />
 
       <small className="requiredNote">
         ✓{" "}
-        {ka
-          ? "სავალდებულო"
-          : "Required"}
+        {note ||
+          "სავალდებულო"}
       </small>
     </div>
   );
 }
 
-function RequiredAlwaysVisibleInput({
-  label,
-  value,
-  onChange,
-  ka,
-}: {
-  label: string;
-  value: string;
-  onChange: (
-    value: string
-  ) => void;
-  ka: boolean;
-}) {
-  return (
-    <div className="standardField">
-      <label>
-        {label} *
-      </label>
-
-      <input
-        value={value}
-        required
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
-      />
-
-      <small className="alwaysVisibleNote">
-        ✓{" "}
-        {ka
-          ? "სავალდებულო • QR პროფილზე ყოველთვის გამოჩნდება"
-          : "Required • Always visible on QR profile"}
-      </small>
-    </div>
-  );
-}
-
-function OptionalInput({
+function OptionalField({
   label,
   value,
   onChange,
@@ -1969,7 +4066,7 @@ function OptionalInput({
   type?: string;
 }) {
   return (
-    <div className="standardField">
+    <div className="field">
       <label>
         {label}
       </label>
@@ -1977,12 +4074,70 @@ function OptionalInput({
       <input
         type={type}
         value={value}
-        onChange={(event) =>
+        onChange={(e) =>
           onChange(
-            event.target.value
+            e.target.value
           )
         }
       />
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (
+    value: string
+  ) => void;
+  options: string[][];
+  required?: boolean;
+}) {
+  return (
+    <div className="field">
+      <label>
+        {label}
+        {required
+          ? " *"
+          : ""}
+      </label>
+
+      <select
+        value={value}
+        required={required}
+        onChange={(e) =>
+          onChange(
+            e.target.value
+          )
+        }
+      >
+        {options.map(
+          ([
+            optionValue,
+            optionLabel,
+          ]) => (
+            <option
+              key={
+                optionValue ||
+                "empty"
+              }
+              value={
+                optionValue
+              }
+            >
+              {
+                optionLabel
+              }
+            </option>
+          )
+        )}
+      </select>
     </div>
   );
 }
@@ -1991,24 +4146,24 @@ function VisibilityField({
   label,
   value,
   onChange,
-  visible,
+  active,
   onToggle,
-  explanation,
+  text,
   ka,
-  required = false,
   type = "text",
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (
     value: string
   ) => void;
-  visible: boolean;
+  active: boolean;
   onToggle: () => void;
-  explanation: string;
+  text: string;
   ka: boolean;
-  required?: boolean;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <div className="visibilityCard">
@@ -2033,12 +4188,8 @@ function VisibilityField({
         </div>
 
         <Switch
-          active={
-            visible
-          }
-          onClick={
-            onToggle
-          }
+          active={active}
+          onClick={onToggle}
         />
       </div>
 
@@ -2046,15 +4197,15 @@ function VisibilityField({
         type={type}
         value={value}
         required={required}
-        onChange={(event) =>
+        onChange={(e) =>
           onChange(
-            event.target.value
+            e.target.value
           )
         }
       />
 
-      <p className="fieldExplanation">
-        {explanation}
+      <p className="fieldHelp">
+        {text}
       </p>
 
       <div className="visibilityStatus">
@@ -2062,7 +4213,7 @@ function VisibilityField({
           ? "QR პროფილზე გამოჩენა:"
           : "Show on QR profile:"}{" "}
         <b>
-          {visible
+          {active
             ? "ON"
             : "OFF"}
         </b>
@@ -2075,9 +4226,9 @@ function VisibilityTextarea({
   label,
   value,
   onChange,
-  visible,
+  active,
   onToggle,
-  explanation,
+  text,
   ka,
 }: {
   label: string;
@@ -2085,9 +4236,9 @@ function VisibilityTextarea({
   onChange: (
     value: string
   ) => void;
-  visible: boolean;
+  active: boolean;
   onToggle: () => void;
-  explanation: string;
+  text: string;
   ka: boolean;
 }) {
   return (
@@ -2106,26 +4257,22 @@ function VisibilityTextarea({
         </div>
 
         <Switch
-          active={
-            visible
-          }
-          onClick={
-            onToggle
-          }
+          active={active}
+          onClick={onToggle}
         />
       </div>
 
       <textarea
         value={value}
-        onChange={(event) =>
+        onChange={(e) =>
           onChange(
-            event.target.value
+            e.target.value
           )
         }
       />
 
-      <p className="fieldExplanation">
-        {explanation}
+      <p className="fieldHelp">
+        {text}
       </p>
 
       <div className="visibilityStatus">
@@ -2133,12 +4280,50 @@ function VisibilityTextarea({
           ? "QR პროფილზე გამოჩენა:"
           : "Show on QR profile:"}{" "}
         <b>
-          {visible
+          {active
             ? "ON"
             : "OFF"}
         </b>
       </div>
     </div>
+  );
+}
+
+function ContactMethod({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        active
+          ? "contactMethod active"
+          : "contactMethod"
+      }
+      onClick={onClick}
+    >
+      <span>
+        {icon}
+      </span>
+
+      <strong>
+        {label}
+      </strong>
+
+      <b>
+        {active
+          ? "✓"
+          : ""}
+      </b>
+    </button>
   );
 }
 
@@ -2158,12 +4343,46 @@ function Switch({
           : "switch"
       }
       onClick={onClick}
-      aria-pressed={
-        active
-      }
     >
       <span />
     </button>
+  );
+}
+
+function LockedOrEditable({
+  label,
+  value,
+  onChange,
+  editable,
+}: {
+  label: string;
+  value: string;
+  onChange: (
+    value: string
+  ) => void;
+  editable: boolean;
+}) {
+  return (
+    <div className="field">
+      <label>
+        {label}
+      </label>
+
+      <input
+        value={value}
+        readOnly={!editable}
+        className={
+          editable
+            ? ""
+            : "lockedInput"
+        }
+        onChange={(e) =>
+          onChange(
+            e.target.value
+          )
+        }
+      />
+    </div>
   );
 }
 
@@ -2175,6 +4394,18 @@ function ErrorBox({
   return (
     <div className="errorBox">
       ⚠ {text}
+    </div>
+  );
+}
+
+function NoticeBox({
+  text,
+}: {
+  text: string;
+}) {
+  return (
+    <div className="noticeBox">
+      ✓ {text}
     </div>
   );
 }
@@ -2228,10 +4459,14 @@ function Styles() {
       }
 
       .brand {
+        padding: 0;
         display: flex;
         align-items: center;
         gap: 10px;
-        text-decoration: none;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
       }
 
       .logo {
@@ -2263,8 +4498,8 @@ function Styles() {
       }
 
       .languages {
-        display: flex;
         padding: 4px;
+        display: flex;
         border-radius: 9px;
         background: #eaecf0;
       }
@@ -2293,6 +4528,7 @@ function Styles() {
       }
 
       .hero {
+        margin-bottom: 30px;
         display: flex;
         align-items: flex-start;
         gap: 15px;
@@ -2331,62 +4567,6 @@ function Styles() {
         font-size: 14px;
       }
 
-      .progress {
-        margin: 34px 0 24px;
-        display: flex;
-        align-items: center;
-      }
-
-      .stepIndicator {
-        min-width: 75px;
-        text-align: center;
-      }
-
-      .stepIndicator > span {
-        width: 36px;
-        height: 36px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border: 1px solid #d0d5dd;
-        border-radius: 50%;
-        background: white;
-        color: #98a2b3;
-        font-size: 11px;
-        font-weight: 900;
-      }
-
-      .stepIndicator > span.active {
-        border-color: #155eef;
-        color: #155eef;
-      }
-
-      .stepIndicator > span.current {
-        border-color: #d92d20;
-        background: #d92d20;
-        color: white;
-        box-shadow: 0 0 0 5px rgba(217, 45, 32, 0.08);
-      }
-
-      .stepIndicator small {
-        display: block;
-        margin-top: 7px;
-        color: #667085;
-        font-size: 10px;
-        font-weight: 800;
-      }
-
-      .progressLine {
-        flex: 1;
-        height: 2px;
-        margin-bottom: 19px;
-        background: #e4e7ec;
-      }
-
-      .progressLine.active {
-        background: #155eef;
-      }
-
       .card {
         padding: 30px;
         border: 1px solid #e4e7ec;
@@ -2394,6 +4574,10 @@ function Styles() {
         border-radius: 22px;
         background: white;
         box-shadow: 0 12px 35px rgba(16, 24, 40, 0.06);
+      }
+
+      .choiceCard {
+        margin-top: 8px;
       }
 
       .sectionTitle {
@@ -2420,72 +4604,108 @@ function Styles() {
         line-height: 1.55;
       }
 
-      .choiceGrid {
-        margin-bottom: 22px;
+      .bigChoices {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 12px;
       }
 
-      .choice {
-        min-height: 82px;
-        padding: 14px;
+      .bigChoice {
+        min-height: 125px;
+        padding: 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        border: 1px solid #d0d5dd;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .bigChoice:hover {
+        border-color: #155eef;
+        background: #f6f9ff;
+      }
+
+      .bigChoice > span {
+        font-size: 30px;
+      }
+
+      .bigChoice strong,
+      .bigChoice small {
+        display: block;
+      }
+
+      .bigChoice strong {
+        margin-bottom: 7px;
+        color: #101828;
+        font-size: 15px;
+      }
+
+      .bigChoice small {
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .existingProfile {
+        margin-top: 20px;
+        padding-top: 18px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        border: 1px solid #d0d5dd;
-        border-radius: 13px;
-        background: white;
-        color: #475467;
+        justify-content: space-between;
+        gap: 12px;
+        border-top: 1px solid #eaecf0;
+      }
+
+      .existingProfile span {
+        color: #667085;
+        font-size: 13px;
+      }
+
+      .existingProfile button,
+      .textButton {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #155eef;
+        font-size: 13px;
+        font-weight: 800;
         cursor: pointer;
       }
 
-      .choice.active {
-        border-color: #155eef;
-        background: #f2f7ff;
-        color: #155eef;
-      }
-
-      .choice span {
-        font-size: 25px;
-      }
-
       .infoBox,
-      .securityBox,
-      .alwaysVisibleBox,
-      .emergencyNumber {
+      .emergencyBox,
+      .profileLimitBox {
         margin-bottom: 20px;
         padding: 15px;
         border-radius: 12px;
       }
 
       .infoBox,
-      .securityBox {
+      .profileLimitBox {
         border: 1px solid #d6e4ff;
         background: #f2f7ff;
       }
 
-      .alwaysVisibleBox {
-        border: 1px solid #d1fadf;
-        background: #ecfdf3;
-      }
-
-      .emergencyNumber {
+      .emergencyBox {
         border: 1px solid #fecdca;
         background: #fff1f0;
       }
 
-      .infoBox p,
-      .alwaysVisibleBox p,
-      .emergencyNumber p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.55;
+      .infoBox strong,
+      .emergencyBox strong,
+      .profileLimitBox strong {
+        color: #344054;
+        font-size: 14px;
       }
 
-      .securityBox {
-        color: #475467;
+      .infoBox p,
+      .emergencyBox p,
+      .profileLimitBox p {
+        margin: 5px 0 0;
+        color: #667085;
         font-size: 13px;
         line-height: 1.55;
       }
@@ -2496,11 +4716,11 @@ function Styles() {
         gap: 14px;
       }
 
-      .standardField {
+      .field {
         margin-bottom: 19px;
       }
 
-      .standardField label {
+      .field label {
         display: block;
         margin-bottom: 8px;
         color: #344054;
@@ -2508,8 +4728,8 @@ function Styles() {
         font-weight: 800;
       }
 
-      .standardField input,
-      .standardField select,
+      .field input,
+      .field select,
       .visibilityCard input,
       .visibilityCard textarea {
         width: 100%;
@@ -2520,8 +4740,8 @@ function Styles() {
         outline: none;
       }
 
-      .standardField input,
-      .standardField select,
+      .field input,
+      .field select,
       .visibilityCard input {
         height: 53px;
         padding: 0 13px;
@@ -2533,26 +4753,25 @@ function Styles() {
         resize: vertical;
       }
 
-      .standardField input:focus,
-      .standardField select:focus,
+      .field input:focus,
+      .field select:focus,
       .visibilityCard input:focus,
       .visibilityCard textarea:focus {
         border-color: #155eef;
         box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.08);
       }
 
-      .requiredNote,
-      .alwaysVisibleNote {
+      .requiredNote {
         display: block;
         margin-top: 8px;
         color: #16803b;
         font-size: 13px;
         font-weight: 800;
-        line-height: 1.45;
       }
 
       .visibilityCard,
-      .contactCard {
+      .contactCard,
+      .identityCard {
         margin-bottom: 20px;
         padding: 17px;
         border: 1px solid #e4e7ec;
@@ -2560,7 +4779,8 @@ function Styles() {
         background: #fafbfc;
       }
 
-      .visibilityHeader {
+      .visibilityHeader,
+      .identityHeader {
         margin-bottom: 11px;
         display: flex;
         align-items: center;
@@ -2569,24 +4789,27 @@ function Styles() {
       }
 
       .visibilityHeader strong,
-      .visibilityHeader span {
+      .visibilityHeader span,
+      .identityHeader strong,
+      .identityHeader span {
         display: block;
       }
 
-      .visibilityHeader strong {
+      .visibilityHeader strong,
+      .identityHeader strong {
         color: #344054;
         font-size: 14px;
       }
 
-      .visibilityHeader span {
+      .visibilityHeader span,
+      .identityHeader span {
         margin-top: 4px;
         color: #667085;
-        font-size: 13px;
-        font-weight: 700;
+        font-size: 12px;
       }
 
-      .fieldExplanation {
-        margin: 9px 0 0;
+      .fieldHelp {
+        margin: 9px 0;
         color: #667085;
         font-size: 13px;
         line-height: 1.55;
@@ -2629,6 +4852,59 @@ function Styles() {
 
       .switch.active span {
         transform: translateX(21px);
+      }
+
+      .contactMethods {
+        margin-top: 15px;
+        padding: 15px;
+        border: 1px solid #e4e7ec;
+        border-radius: 12px;
+        background: white;
+      }
+
+      .contactMethods > p {
+        margin: 5px 0 11px;
+        color: #667085;
+        font-size: 12px;
+      }
+
+      .contactMethod {
+        width: 100%;
+        min-height: 52px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #d0d5dd;
+        border-radius: 11px;
+        background: white;
+        cursor: pointer;
+      }
+
+      .contactMethod.active {
+        border-color: #155eef;
+        background: #f2f7ff;
+      }
+
+      .contactMethod > span {
+        font-size: 19px;
+      }
+
+      .contactMethod > strong {
+        flex: 1;
+        text-align: left;
+        color: #344054;
+      }
+
+      .contactMethod > b {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border-radius: 6px;
+        background: #155eef;
+        color: white;
       }
 
       .termsBox {
@@ -2682,7 +4958,9 @@ function Styles() {
         line-height: 1.5;
       }
 
-      .buttons {
+      .buttons,
+      .managementActions,
+      .successButtons {
         margin-top: 25px;
         display: flex;
         gap: 10px;
@@ -2690,7 +4968,10 @@ function Styles() {
 
       .primaryButton,
       .backButton,
-      .saveButton {
+      .saveButton,
+      .manageMainButton,
+      .homeButton,
+      .addProfileButton {
         min-height: 52px;
         padding: 0 20px;
         border-radius: 11px;
@@ -2711,40 +4992,137 @@ function Styles() {
         margin: 10px 0 0;
       }
 
-      .backButton {
+      .backButton,
+      .homeButton {
         border: 1px solid #d0d5dd;
         background: white;
         color: #475467;
       }
 
-      .saveButton {
-        margin-left: auto;
+      .saveButton,
+      .manageMainButton {
         border: 0;
         background: #d92d20;
         color: white;
       }
 
-      .saveButton:disabled {
+      .addProfileButton {
+        flex: 1;
+        border: 0;
+        background: #155eef;
+        color: white;
+      }
+
+      .saveButton:disabled,
+      .primaryButton:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
 
-      .errorBox {
+      .verifyChoices {
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .choice {
+        min-height: 72px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #d0d5dd;
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+      }
+
+      .choice.active {
+        border-color: #155eef;
+        background: #f2f7ff;
+        color: #155eef;
+      }
+
+      .choice span {
+        font-size: 22px;
+      }
+
+      .lockedQr {
+        margin-bottom: 20px;
+        padding: 16px;
+        border: 1px solid #e4e7ec;
+        border-radius: 13px;
+        background: #f2f4f7;
+      }
+
+      .lockedQr strong,
+      .lockedQr span,
+      .lockedQr p {
+        display: block;
+      }
+
+      .lockedQr span {
+        margin-top: 7px;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .lockedQr p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 12px;
+      }
+
+      .lockedInput {
+        background: #f2f4f7 !important;
+        color: #667085 !important;
+      }
+
+      .smallButton {
+        padding: 8px 11px;
+        border: 0;
+        border-radius: 8px;
+        background: #d92d20;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .warningText {
+        margin: 0;
+        color: #b42318;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .errorBox,
+      .noticeBox {
         margin-top: 17px;
         padding: 14px;
-        border: 1px solid #fecdca;
         border-radius: 11px;
-        background: #fff1f0;
-        color: #b42318;
         font-size: 13px;
         font-weight: 700;
       }
 
+      .errorBox {
+        border: 1px solid #fecdca;
+        background: #fff1f0;
+        color: #b42318;
+      }
+
+      .noticeBox {
+        border: 1px solid #abefc6;
+        background: #ecfdf3;
+        color: #067647;
+      }
+
       .successPage {
-        width: calc(100% - 24px);
-        max-width: 650px;
+        width: 100%;
+        max-width: 620px;
         margin: auto;
-        padding: 95px 0;
+        padding: 55px 0;
         text-align: center;
       }
 
@@ -2769,50 +5147,6 @@ function Styles() {
         color: #667085;
       }
 
-      .successButtons {
-        margin-top: 24px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .viewButton,
-      .manageButton {
-        min-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 11px;
-        color: white;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .viewButton {
-        background: #155eef;
-      }
-
-      .manageButton {
-        background: #d92d20;
-      }
-
-      .successNotice {
-        margin-top: 22px;
-        padding: 16px;
-        border: 1px solid #d6e4ff;
-        border-radius: 12px;
-        background: #f2f7ff;
-        text-align: left;
-      }
-
-      .successNotice p {
-        margin: 6px 0 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.55;
-      }
-
       @media (max-width: 620px) {
         .container {
           padding-top: 28px;
@@ -2827,13 +5161,20 @@ function Styles() {
         }
 
         .grid2,
-        .choiceGrid {
+        .bigChoices,
+        .verifyChoices {
           grid-template-columns: 1fr;
           gap: 0;
         }
 
+        .bigChoice,
         .choice {
-          margin-bottom: 8px;
+          margin-bottom: 9px;
+        }
+
+        .existingProfile {
+          align-items: flex-start;
+          flex-direction: column;
         }
 
         input,
@@ -2842,21 +5183,22 @@ function Styles() {
           font-size: 16px !important;
         }
 
-        .buttons {
-          display: grid;
-          grid-template-columns: 0.9fr 1.5fr;
-        }
-
-        .primaryButton,
-        .backButton,
-        .saveButton {
-          width: 100%;
-          margin: 0;
-          padding: 0 10px;
-        }
-
+        .buttons,
+        .managementActions,
         .successButtons {
+          display: grid;
           grid-template-columns: 1fr;
+        }
+
+        .primaryButton {
+          margin-left: 0;
+        }
+
+        .saveButton,
+        .addProfileButton,
+        .manageMainButton,
+        .homeButton {
+          width: 100%;
         }
       }
     `}</style>
