@@ -59,11 +59,15 @@ export default function SupportLauncher({
     useState<SupportMessage[]>([]);
 
   const [userId, setUserId] = useState("");
+
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+
+  const [ready, setReady] = useState(false);
+
   const [error, setError] = useState("");
 
   const fileInputRef =
@@ -72,167 +76,278 @@ export default function SupportLauncher({
   const bottomRef =
     useRef<HTMLDivElement | null>(null);
 
+  /*
+    ==================================================
+    OPEN SUPPORT CHAT
+    ==================================================
+  */
+
   useEffect(() => {
-    if (!open || conversation) {
+    if (!open || ready) {
       return;
     }
 
+    let cancelled = false;
+
     async function startSupport() {
       setLoading(true);
+      setReady(false);
       setError("");
 
-      let { data: sessionData } =
-        await supabase.auth.getSession();
+      try {
+        /*
+          1. ჯერ ვამოწმებთ უკვე არსებობს თუ არა user.
+        */
 
-      if (!sessionData.session) {
-        const {
-          data,
-          error: anonymousError,
-        } =
-          await supabase.auth.signInAnonymously();
+        let {
+          data: userData,
+          error: userError,
+        } = await supabase.auth.getUser();
 
-        if (anonymousError) {
-          setError(
-            ka
-              ? `ჩატის გახსნა ვერ მოხერხდა: ${anonymousError.message}`
-              : `Could not open chat: ${anonymousError.message}`
+        /*
+          2. თუ user არ არსებობს,
+          ვქმნით anonymous user-ს.
+        */
+
+        if (!userData.user) {
+          const {
+            data: anonymousData,
+            error: anonymousError,
+          } =
+            await supabase.auth.signInAnonymously();
+
+          if (anonymousError) {
+            throw new Error(
+              anonymousError.message
+            );
+          }
+
+          if (!anonymousData.user) {
+            throw new Error(
+              ka
+                ? "Anonymous მომხმარებელი ვერ შეიქმნა."
+                : "Anonymous user could not be created."
+            );
+          }
+
+          /*
+            Anonymous sign-in-ის შემდეგ
+            user-ს თავიდან ვიღებთ.
+          */
+
+          const result =
+            await supabase.auth.getUser();
+
+          userData = result.data;
+          userError = result.error;
+        }
+
+        if (userError) {
+          throw new Error(
+            userError.message
           );
+        }
 
-          setLoading(false);
+        const user =
+          userData.user;
+
+        if (!user) {
+          throw new Error(
+            ka
+              ? "Support მომხმარებელი ვერ მოიძებნა."
+              : "Support user could not be found."
+          );
+        }
+
+        if (cancelled) {
           return;
         }
 
-        sessionData = {
-          session: data.session,
-        };
-      }
+        setUserId(user.id);
 
-      const user =
-        sessionData.session?.user;
+        /*
+          ==================================================
+          FIND EXISTING OPEN CONVERSATION
+          ==================================================
+        */
 
-      if (!user) {
-        setError(
-          ka
-            ? "Support Chat-ის გახსნა ვერ მოხერხდა."
-            : "Could not open Support Chat."
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      setUserId(user.id);
-
-      const {
-        data: existingConversation,
-        error: conversationError,
-      } = await supabase
-        .from("support_conversations")
-        .select(`
-          id,
-          user_id,
-          status,
-          auto_welcome_sent
-        `)
-        .eq("user_id", user.id)
-        .eq("status", "open")
-        .order("created_at", {
-          ascending: false,
-        })
-        .limit(1)
-        .maybeSingle();
-
-      if (conversationError) {
-        setError(
-          conversationError.message
-        );
-        setLoading(false);
-        return;
-      }
-
-      let currentConversation:
-        SupportConversation;
-
-      if (existingConversation) {
-        currentConversation =
-          existingConversation as SupportConversation;
-      } else {
         const {
-          data: created,
-          error: createError,
+          data: existingConversation,
+          error: findError,
         } = await supabase
           .from("support_conversations")
-          .insert({
-            user_id: user.id,
-          })
           .select(`
             id,
             user_id,
             status,
             auto_welcome_sent
           `)
-          .single();
+          .eq("user_id", user.id)
+          .eq("status", "open")
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(1)
+          .maybeSingle();
 
-        if (!created || createError) {
-          setError(
-            createError?.message ||
-              "Could not create support conversation."
+        if (findError) {
+          throw new Error(
+            findError.message
           );
+        }
 
-          setLoading(false);
+        let currentConversation:
+          SupportConversation;
+
+        /*
+          ==================================================
+          CREATE CONVERSATION IF NEEDED
+          ==================================================
+        */
+
+        if (existingConversation) {
+          currentConversation =
+            existingConversation as SupportConversation;
+        } else {
+          const {
+            data: createdConversation,
+            error: createError,
+          } = await supabase
+            .from(
+              "support_conversations"
+            )
+            .insert({
+              user_id: user.id,
+              status: "open",
+            })
+            .select(`
+              id,
+              user_id,
+              status,
+              auto_welcome_sent
+            `)
+            .single();
+
+          if (createError) {
+            throw new Error(
+              createError.message
+            );
+          }
+
+          if (
+            !createdConversation
+          ) {
+            throw new Error(
+              ka
+                ? "Support საუბარი ვერ შეიქმნა."
+                : "Support conversation could not be created."
+            );
+          }
+
+          currentConversation =
+            createdConversation as SupportConversation;
+        }
+
+        if (cancelled) {
           return;
         }
 
-        currentConversation =
-          created as SupportConversation;
+        setConversation(
+          currentConversation
+        );
+
+        /*
+          ==================================================
+          LOAD EXISTING MESSAGES
+          ==================================================
+        */
+
+        const {
+          data: messageData,
+          error: messagesError,
+        } = await supabase
+          .from("support_messages")
+          .select(`
+            id,
+            conversation_id,
+            sender,
+            message,
+            attachment_path,
+            attachment_name,
+            attachment_type,
+            created_at
+          `)
+          .eq(
+            "conversation_id",
+            currentConversation.id
+          )
+          .order("created_at", {
+            ascending: true,
+          });
+
+        if (messagesError) {
+          throw new Error(
+            messagesError.message
+          );
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setMessages(
+          (messageData ||
+            []) as SupportMessage[]
+        );
+
+        /*
+          ყველაფერი მზადაა.
+          ახლა Send აქტიურდება.
+        */
+
+        setReady(true);
+      } catch (err) {
+        console.error(
+          "Support initialization error:",
+          err
+        );
+
+        const message =
+          err instanceof Error
+            ? err.message
+            : String(err);
+
+        if (!cancelled) {
+          setError(
+            ka
+              ? `ჩატის გახსნა ვერ მოხერხდა: ${message}`
+              : `Could not open chat: ${message}`
+          );
+
+          setReady(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-
-      setConversation(
-        currentConversation
-      );
-
-      const {
-        data: messageData,
-        error: messagesError,
-      } = await supabase
-        .from("support_messages")
-        .select(`
-          id,
-          conversation_id,
-          sender,
-          message,
-          attachment_path,
-          attachment_name,
-          attachment_type,
-          created_at
-        `)
-        .eq(
-          "conversation_id",
-          currentConversation.id
-        )
-        .order("created_at", {
-          ascending: true,
-        });
-
-      if (messagesError) {
-        setError(messagesError.message);
-        setLoading(false);
-        return;
-      }
-
-      setMessages(
-        (messageData ||
-          []) as SupportMessage[]
-      );
-
-      setLoading(false);
     }
 
     void startSupport();
-  }, [open, conversation, ka]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, ready, ka]);
+
+  /*
+    ==================================================
+    REALTIME
+    ==================================================
+  */
 
   useEffect(() => {
-    if (!conversation) {
+    if (!conversation?.id) {
       return;
     }
 
@@ -253,22 +368,25 @@ export default function SupportLauncher({
           const next =
             payload.new as SupportMessage;
 
-          setMessages((current) => {
-            const exists =
-              current.some(
-                (item) =>
-                  item.id === next.id
-              );
+          setMessages(
+            (current) => {
+              const alreadyExists =
+                current.some(
+                  (item) =>
+                    item.id ===
+                    next.id
+                );
 
-            if (exists) {
-              return current;
+              if (alreadyExists) {
+                return current;
+              }
+
+              return [
+                ...current,
+                next,
+              ];
             }
-
-            return [
-              ...current,
-              next,
-            ];
-          });
+          );
         }
       )
       .subscribe();
@@ -278,13 +396,27 @@ export default function SupportLauncher({
         channel
       );
     };
-  }, [conversation]);
+  }, [conversation?.id]);
+
+  /*
+    Scroll bottom
+  */
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
+
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages, open]);
+
+  /*
+    ==================================================
+    FILE
+    ==================================================
+  */
 
   function selectFile(
     event: ChangeEvent<HTMLInputElement>
@@ -314,18 +446,25 @@ export default function SupportLauncher({
     setError("");
   }
 
-  async function maybeSendAutomaticWelcome(
-    current:
+  /*
+    ==================================================
+    AUTOMATIC WELCOME
+    ==================================================
+  */
+
+  async function sendAutomaticWelcome(
+    currentConversation:
       SupportConversation
   ) {
     if (
-      current.auto_welcome_sent
+      currentConversation.auto_welcome_sent
     ) {
       return;
     }
 
     const {
-      data: updated,
+      data: updatedConversation,
+      error: updateError,
     } = await supabase
       .from(
         "support_conversations"
@@ -335,34 +474,79 @@ export default function SupportLauncher({
         updated_at:
           new Date().toISOString(),
       })
-      .eq("id", current.id)
+      .eq(
+        "id",
+        currentConversation.id
+      )
       .eq(
         "auto_welcome_sent",
         false
       )
-      .select("id")
+      .select(`
+        id,
+        user_id,
+        status,
+        auto_welcome_sent
+      `)
       .maybeSingle();
 
-    if (!updated) {
+    if (updateError) {
+      console.error(
+        updateError
+      );
+
       return;
     }
 
-    await supabase
+    /*
+      თუ უკვე სხვა request-მა გააგზავნა,
+      მეორედ აღარ ვაგზავნით.
+    */
+
+    if (!updatedConversation) {
+      return;
+    }
+
+    const {
+      error: welcomeError,
+    } = await supabase
       .from("support_messages")
       .insert({
         conversation_id:
-          current.id,
+          currentConversation.id,
+
         sender: "auto",
+
         message: ka
           ? KA_WELCOME
           : EN_WELCOME,
       });
 
-    setConversation({
-      ...current,
-      auto_welcome_sent: true,
-    });
+    if (welcomeError) {
+      console.error(
+        welcomeError
+      );
+
+      return;
+    }
+
+    setConversation(
+      (current) =>
+        current
+          ? {
+              ...current,
+              auto_welcome_sent:
+                true,
+            }
+          : current
+    );
   }
+
+  /*
+    ==================================================
+    SEND MESSAGE
+    ==================================================
+  */
 
   async function sendMessage(
     event:
@@ -370,11 +554,44 @@ export default function SupportLauncher({
   ) {
     event.preventDefault();
 
-    if (
-      !conversation ||
-      !userId ||
-      sending
-    ) {
+    setError("");
+
+    /*
+      აქ უკვე მომხმარებელს ვაჩვენებთ
+      თუ რატომ ვერ იგზავნება.
+    */
+
+    if (!ready) {
+      setError(
+        ka
+          ? "ჩატი ჯერ იტვირთება. სცადეთ რამდენიმე წამში."
+          : "Chat is still loading. Please try again in a moment."
+      );
+
+      return;
+    }
+
+    if (!conversation) {
+      setError(
+        ka
+          ? "Support საუბარი ვერ მოიძებნა."
+          : "Support conversation was not found."
+      );
+
+      return;
+    }
+
+    if (!userId) {
+      setError(
+        ka
+          ? "მომხმარებელი ვერ მოიძებნა."
+          : "User was not found."
+      );
+
+      return;
+    }
+
+    if (sending) {
       return;
     }
 
@@ -389,11 +606,16 @@ export default function SupportLauncher({
     }
 
     setSending(true);
-    setError("");
 
     try {
       let attachmentPath:
         string | null = null;
+
+      /*
+        ==================================================
+        UPLOAD FILE
+        ==================================================
+      */
 
       if (file) {
         const fileName =
@@ -416,7 +638,9 @@ export default function SupportLauncher({
             {
               cacheControl:
                 "3600",
+
               upsert: false,
+
               contentType:
                 file.type ||
                 undefined,
@@ -424,17 +648,22 @@ export default function SupportLauncher({
           );
 
         if (uploadError) {
-          setError(
+          throw new Error(
             ka
-              ? `ფაილი ვერ აიტვირთა: ${uploadError.message}`
+              ? `ფაილის ატვირთვა ვერ მოხერხდა: ${uploadError.message}`
               : `Could not upload file: ${uploadError.message}`
           );
-
-          return;
         }
       }
 
+      /*
+        ==================================================
+        INSERT MESSAGE
+        ==================================================
+      */
+
       const {
+        data: insertedMessage,
         error: sendError,
       } = await supabase
         .from("support_messages")
@@ -458,16 +687,51 @@ export default function SupportLauncher({
           attachment_type:
             file?.type ||
             null,
-        });
+        })
+        .select(`
+          id,
+          conversation_id,
+          sender,
+          message,
+          attachment_path,
+          attachment_name,
+          attachment_type,
+          created_at
+        `)
+        .single();
 
       if (sendError) {
-        setError(
-          ka
-            ? `შეტყობინება ვერ გაიგზავნა: ${sendError.message}`
-            : `Could not send message: ${sendError.message}`
+        throw new Error(
+          sendError.message
         );
+      }
 
-        return;
+      /*
+        Realtime რომც დაგვიანდეს,
+        user თავის შეტყობინებას მაშინვე დაინახავს.
+      */
+
+      if (insertedMessage) {
+        const next =
+          insertedMessage as SupportMessage;
+
+        setMessages(
+          (current) => {
+            const exists =
+              current.some(
+                (item) =>
+                  item.id ===
+                  next.id
+              );
+
+            return exists
+              ? current
+              : [
+                  ...current,
+                  next,
+                ];
+          }
+        );
       }
 
       setText("");
@@ -480,12 +744,47 @@ export default function SupportLauncher({
           "";
       }
 
-      await maybeSendAutomaticWelcome(
+      /*
+        პირველი მესიჯის მერე
+        automatic reply.
+      */
+
+      await sendAutomaticWelcome(
         conversation
+      );
+    } catch (err) {
+      console.error(
+        "Support send error:",
+        err
+      );
+
+      const message =
+        err instanceof Error
+          ? err.message
+          : String(err);
+
+      setError(
+        ka
+          ? `შეტყობინება ვერ გაიგზავნა: ${message}`
+          : `Message could not be sent: ${message}`
       );
     } finally {
       setSending(false);
     }
+  }
+
+  /*
+    ==================================================
+    RESET / RETRY
+    ==================================================
+  */
+
+  function retryChat() {
+    setConversation(null);
+    setMessages([]);
+    setUserId("");
+    setReady(false);
+    setError("");
   }
 
   return (
@@ -511,9 +810,21 @@ export default function SupportLauncher({
               </strong>
 
               <span>
-                {ka
-                  ? "Live Support"
-                  : "Live Support"}
+                <i
+                  className={
+                    ready
+                      ? "statusDot ready"
+                      : "statusDot"
+                  }
+                />
+
+                {ready
+                  ? ka
+                    ? "Support • მზადაა"
+                    : "Support • Ready"
+                  : ka
+                  ? "Support • დაკავშირება..."
+                  : "Support • Connecting..."}
               </span>
             </div>
 
@@ -533,13 +844,24 @@ export default function SupportLauncher({
             {loading && (
               <div className="loading">
                 <div className="loader" />
+
+                <span>
+                  {ka
+                    ? "Live Chat იტვირთება..."
+                    : "Loading Live Chat..."}
+                </span>
               </div>
             )}
 
             {!loading &&
+              ready &&
               messages.length ===
                 0 && (
                 <div className="welcome">
+                  <div className="welcomeAgent">
+                    👩‍💻🎧
+                  </div>
+
                   <strong>
                     {ka
                       ? "მოგესალმებით 👋"
@@ -551,6 +873,29 @@ export default function SupportLauncher({
                       ? "როგორ შეგვიძლია დაგეხმაროთ?"
                       : "How can we help you?"}
                   </p>
+                </div>
+              )}
+
+            {!loading &&
+              !ready &&
+              error && (
+                <div className="loadError">
+                  <strong>
+                    {ka
+                      ? "ჩატი ვერ დაუკავშირდა"
+                      : "Chat could not connect"}
+                  </strong>
+
+                  <button
+                    type="button"
+                    onClick={
+                      retryChat
+                    }
+                  >
+                    {ka
+                      ? "სცადეთ თავიდან"
+                      : "Try again"}
+                  </button>
                 </div>
               )}
 
@@ -578,8 +923,22 @@ export default function SupportLauncher({
                           : "bubble"
                       }
                     >
+                      <div className="senderLabel">
+                        {message.sender ===
+                        "user"
+                          ? ka
+                            ? "თქვენ"
+                            : "You"
+                          : message.sender ===
+                            "auto"
+                          ? "QR RETURN"
+                          : ka
+                          ? "ჩვენი წარმომადგენელი"
+                          : "Support"}
+                      </div>
+
                       {message.message && (
-                        <div>
+                        <div className="messageText">
                           {
                             message.message
                           }
@@ -619,7 +978,7 @@ export default function SupportLauncher({
             <div ref={bottomRef} />
           </div>
 
-          {error && (
+          {error && ready && (
             <div className="errorBox">
               ⚠ {error}
             </div>
@@ -633,9 +992,16 @@ export default function SupportLauncher({
 
               <button
                 type="button"
-                onClick={() =>
-                  setFile(null)
-                }
+                onClick={() => {
+                  setFile(null);
+
+                  if (
+                    fileInputRef.current
+                  ) {
+                    fileInputRef.current.value =
+                      "";
+                  }
+                }}
               >
                 ×
               </button>
@@ -649,14 +1015,19 @@ export default function SupportLauncher({
             <textarea
               value={text}
               maxLength={2000}
+              disabled={!ready}
               placeholder={
-                ka
+                loading
+                  ? ka
+                    ? "ჩატი იტვირთება..."
+                    : "Loading chat..."
+                  : ka
                   ? "დაწერეთ შეტყობინება..."
                   : "Write a message..."
               }
-              onChange={(e) =>
+              onChange={(event) =>
                 setText(
-                  e.target.value
+                  event.target.value
                 )
               }
               onKeyDown={(event) => {
@@ -670,6 +1041,7 @@ export default function SupportLauncher({
                   event.preventDefault();
 
                   if (
+                    ready &&
                     !sending &&
                     (text.trim() ||
                       file)
@@ -686,28 +1058,56 @@ export default function SupportLauncher({
                 id="support-widget-file"
                 type="file"
                 hidden
+                disabled={!ready}
                 accept="image/*,.pdf,.txt,.doc,.docx"
                 onChange={selectFile}
               />
 
               <label
                 htmlFor="support-widget-file"
-                className="attach"
+                className={
+                  ready
+                    ? "attach"
+                    : "attach disabled"
+                }
+                title={
+                  ka
+                    ? "ფოტო ან ფაილი"
+                    : "Photo or file"
+                }
               >
                 📎
               </label>
 
-              <button
-                type="submit"
-                className="send"
-                disabled={
-                  sending ||
-                  (!text.trim() &&
-                    !file)
-                }
-              >
-                ➜
-              </button>
+              <div className="sendArea">
+                {!ready && (
+                  <span className="connectingText">
+                    {ka
+                      ? "დაკავშირება..."
+                      : "Connecting..."}
+                  </span>
+                )}
+
+                <button
+                  type="submit"
+                  className="send"
+                  disabled={
+                    !ready ||
+                    sending ||
+                    (!text.trim() &&
+                      !file)
+                  }
+                  title={
+                    ka
+                      ? "გაგზავნა"
+                      : "Send"
+                  }
+                >
+                  {sending
+                    ? "•••"
+                    : "➜"}
+                </button>
+              </div>
             </div>
           </form>
         </section>
@@ -718,7 +1118,8 @@ export default function SupportLauncher({
         className="supportLauncher"
         onClick={() =>
           setOpen(
-            (current) => !current
+            (current) =>
+              !current
           )
         }
       >
@@ -755,37 +1156,83 @@ export default function SupportLauncher({
         .supportLauncher {
           position: fixed;
           z-index: 9999;
-
-          /* ოდნავ აწეულია */
           right: 22px;
-          bottom: 105px;
+          bottom: 125px;
 
-          min-width: 190px;
-          padding: 9px 13px 9px 9px;
+          min-width: 188px;
+
+          padding:
+            9px 13px 9px 9px;
 
           display: flex;
           align-items: center;
+
           gap: 10px;
 
-          border: 1px solid rgba(92, 79, 220, 0.2);
+          border:
+            1px solid
+            rgba(
+              92,
+              79,
+              220,
+              0.2
+            );
+
           border-radius: 17px;
 
-          background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.98),
-            rgba(242, 240, 255, 0.98)
-          );
+          background:
+            linear-gradient(
+              135deg,
+              rgba(
+                255,
+                255,
+                255,
+                0.98
+              ),
+              rgba(
+                242,
+                240,
+                255,
+                0.98
+              )
+            );
 
           box-shadow:
-            0 14px 35px rgba(49, 42, 120, 0.18);
+            0 14px 35px
+            rgba(
+              49,
+              42,
+              120,
+              0.18
+            );
 
           color: #101828;
+
           cursor: pointer;
+
+          transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+        }
+
+        .supportLauncher:hover {
+          transform:
+            translateY(-2px);
+
+          box-shadow:
+            0 18px 42px
+            rgba(
+              49,
+              42,
+              120,
+              0.22
+            );
         }
 
         .agent {
           width: 46px;
           height: 46px;
+
           flex: 0 0 46px;
 
           position: relative;
@@ -795,11 +1242,12 @@ export default function SupportLauncher({
 
           border-radius: 14px;
 
-          background: linear-gradient(
-            135deg,
-            #dbeafe,
-            #ede9fe
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #dbeafe,
+              #ede9fe
+            );
         }
 
         .face {
@@ -808,20 +1256,25 @@ export default function SupportLauncher({
 
         .launcherHeadset {
           position: absolute;
+
           right: -4px;
           top: -6px;
+
           font-size: 14px;
         }
 
         .onlineDot {
           position: absolute;
+
           right: 1px;
           bottom: 1px;
 
           width: 10px;
           height: 10px;
 
-          border: 2px solid white;
+          border:
+            2px solid white;
+
           border-radius: 50%;
 
           background: #12b76a;
@@ -829,6 +1282,7 @@ export default function SupportLauncher({
 
         .copy {
           flex: 1;
+
           text-align: left;
         }
 
@@ -839,66 +1293,90 @@ export default function SupportLauncher({
 
         .copy strong {
           color: #4f46e5;
+
           font-size: 13px;
           font-weight: 900;
         }
 
         .copy span {
           margin-top: 3px;
+
           color: #667085;
+
           font-size: 9px;
           font-weight: 700;
         }
 
         .arrow {
           color: #7655f7;
+
           font-size: 21px;
         }
 
+        /*
+          ==============================================
+          CHAT WINDOW
+          ==============================================
+        */
+
         .supportWindow {
           position: fixed;
+
           z-index: 10000;
 
           right: 22px;
-          bottom: 172px;
+          bottom: 190px;
 
           width: 340px;
-          height: 470px;
+          height: 465px;
 
           display: flex;
           flex-direction: column;
 
           overflow: hidden;
 
-          border: 1px solid #e4e7ec;
+          border:
+            1px solid #e4e7ec;
+
           border-radius: 18px;
 
           background: white;
 
           box-shadow:
-            0 20px 55px rgba(25, 30, 70, 0.2);
+            0 22px 60px
+            rgba(
+              25,
+              30,
+              70,
+              0.22
+            );
         }
 
         .chatHeader {
           min-height: 65px;
+
           padding: 11px 13px;
 
           display: flex;
           align-items: center;
+
           gap: 10px;
 
-          border-bottom: 1px solid #eaecf0;
+          border-bottom:
+            1px solid #eaecf0;
 
-          background: linear-gradient(
-            135deg,
-            #ffffff,
-            #f4f3ff
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #ffffff,
+              #f4f3ff
+            );
         }
 
         .agentSmall {
           width: 42px;
           height: 42px;
+
           position: relative;
 
           display: grid;
@@ -906,11 +1384,12 @@ export default function SupportLauncher({
 
           border-radius: 12px;
 
-          background: linear-gradient(
-            135deg,
-            #dbeafe,
-            #ede9fe
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #dbeafe,
+              #ede9fe
+            );
         }
 
         .girl {
@@ -919,20 +1398,25 @@ export default function SupportLauncher({
 
         .headset {
           position: absolute;
+
           right: -3px;
           top: -5px;
+
           font-size: 13px;
         }
 
-        .agentSmall i {
+        .agentSmall > i {
           position: absolute;
+
           right: 1px;
           bottom: 1px;
 
           width: 9px;
           height: 9px;
 
-          border: 2px solid white;
+          border:
+            2px solid white;
+
           border-radius: 50%;
 
           background: #12b76a;
@@ -949,14 +1433,34 @@ export default function SupportLauncher({
 
         .headerCopy strong {
           color: #1465e8;
+
           font-size: 13px;
           font-weight: 900;
         }
 
         .headerCopy span {
-          margin-top: 2px;
+          margin-top: 3px;
+
           color: #667085;
+
           font-size: 9px;
+        }
+
+        .statusDot {
+          width: 6px;
+          height: 6px;
+
+          margin-right: 4px;
+
+          display: inline-block;
+
+          border-radius: 50%;
+
+          background: #f79009;
+        }
+
+        .statusDot.ready {
+          background: #12b76a;
         }
 
         .close {
@@ -964,27 +1468,49 @@ export default function SupportLauncher({
           height: 31px;
 
           border: 0;
+
           border-radius: 8px;
 
           background: #f2f4f7;
+
           color: #667085;
 
           font-size: 18px;
+
           cursor: pointer;
         }
 
+        /*
+          ==============================================
+          MESSAGES
+          ==============================================
+        */
+
         .messages {
           flex: 1;
+
           padding: 13px;
 
           overflow-y: auto;
 
-          background: #fafbff;
+          background:
+            linear-gradient(
+              180deg,
+              #fafbff,
+              #ffffff
+            );
         }
 
         .welcome {
-          margin-top: 25px;
+          margin-top: 40px;
+
           text-align: center;
+        }
+
+        .welcomeAgent {
+          margin-bottom: 8px;
+
+          font-size: 32px;
         }
 
         .welcome strong {
@@ -993,32 +1519,87 @@ export default function SupportLauncher({
 
         .welcome p {
           margin: 4px 0 0;
+
           color: #98a2b3;
+
           font-size: 10px;
         }
 
         .loading {
-          min-height: 200px;
+          min-height: 250px;
 
-          display: grid;
-          place-items: center;
+          display: flex;
+          flex-direction: column;
+
+          align-items: center;
+          justify-content: center;
+
+          gap: 11px;
+
+          color: #667085;
+
+          font-size: 10px;
         }
 
         .loader {
-          width: 28px;
-          height: 28px;
+          width: 29px;
+          height: 29px;
 
-          border: 3px solid #e4e7ec;
-          border-top-color: #1465e8;
+          border:
+            3px solid #e4e7ec;
+
+          border-top-color:
+            #1465e8;
+
           border-radius: 50%;
 
-          animation: spin 0.8s linear infinite;
+          animation:
+            spin 0.8s
+            linear infinite;
         }
 
         @keyframes spin {
           to {
-            transform: rotate(360deg);
+            transform:
+              rotate(360deg);
           }
+        }
+
+        .loadError {
+          min-height: 220px;
+
+          display: flex;
+          flex-direction: column;
+
+          align-items: center;
+          justify-content: center;
+
+          gap: 10px;
+
+          color: #b42318;
+
+          text-align: center;
+        }
+
+        .loadError strong {
+          font-size: 11px;
+        }
+
+        .loadError button {
+          padding:
+            8px 12px;
+
+          border: 0;
+
+          border-radius: 8px;
+
+          background: #1465e8;
+
+          color: white;
+
+          font-size: 9px;
+
+          cursor: pointer;
         }
 
         .messageRow {
@@ -1028,36 +1609,80 @@ export default function SupportLauncher({
         }
 
         .messageRow.mine {
-          justify-content: flex-end;
+          justify-content:
+            flex-end;
         }
 
         .bubble {
-          max-width: 78%;
+          max-width: 79%;
+
           padding: 8px 10px;
 
-          border: 1px solid #e4e7ec;
-          border-radius: 5px 13px 13px 13px;
+          border:
+            1px solid #e4e7ec;
+
+          border-radius:
+            5px
+            13px
+            13px
+            13px;
 
           background: white;
 
           color: #344054;
 
           font-size: 11px;
+
           line-height: 1.45;
         }
 
         .bubble.mine {
-          border-color: #5b5ce2;
+          border-color:
+            #5b5ce2;
 
-          border-radius: 13px 5px 13px 13px;
+          border-radius:
+            13px
+            5px
+            13px
+            13px;
 
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #6c55e8
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #6c55e8
+            );
 
           color: white;
+        }
+
+        .senderLabel {
+          margin-bottom: 4px;
+
+          color: #667085;
+
+          font-size: 8px;
+
+          font-weight: 800;
+        }
+
+        .bubble.mine
+          .senderLabel {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.72
+            );
+        }
+
+        .messageText {
+          white-space:
+            pre-wrap;
+
+          word-break:
+            break-word;
         }
 
         .bubble time {
@@ -1073,19 +1698,36 @@ export default function SupportLauncher({
         }
 
         .bubble.mine time {
-          color: rgba(255, 255, 255, 0.7);
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.7
+            );
         }
 
         .attachmentName {
           margin-top: 5px;
+
           font-size: 9px;
         }
 
+        /*
+          ==============================================
+          ERROR + FILE
+          ==============================================
+        */
+
         .errorBox {
-          margin: 7px 10px;
+          margin:
+            7px 10px;
+
           padding: 8px;
 
-          border: 1px solid #fecdca;
+          border:
+            1px solid #fecdca;
+
           border-radius: 8px;
 
           background: #fff1f0;
@@ -1096,12 +1738,18 @@ export default function SupportLauncher({
         }
 
         .filePreview {
-          margin: 6px 10px 0;
-          padding: 7px 9px;
+          margin:
+            6px 10px 0;
+
+          padding:
+            7px 9px;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           border-radius: 8px;
 
@@ -1114,38 +1762,64 @@ export default function SupportLauncher({
 
         .filePreview button {
           border: 0;
-          background: transparent;
+
+          background:
+            transparent;
+
           color: #5925dc;
+
           cursor: pointer;
         }
+
+        /*
+          ==============================================
+          COMPOSER
+          ==============================================
+        */
 
         .composer {
           padding: 9px;
 
-          border-top: 1px solid #eaecf0;
+          border-top:
+            1px solid #eaecf0;
 
           background: white;
         }
 
         .composer textarea {
           width: 100%;
-          min-height: 52px;
+
+          min-height: 54px;
           max-height: 90px;
 
           padding: 8px;
 
           border: 0;
+
           outline: none;
 
           resize: none;
 
+          color: #101828;
+
           font-size: 11px;
+        }
+
+        .composer textarea:disabled {
+          background: white;
+
+          color: #98a2b3;
         }
 
         .composerBottom {
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
+
+          gap: 8px;
         }
 
         .attach {
@@ -1162,37 +1836,90 @@ export default function SupportLauncher({
           cursor: pointer;
         }
 
+        .attach.disabled {
+          opacity: 0.4;
+
+          pointer-events: none;
+        }
+
+        .sendArea {
+          display: flex;
+
+          align-items: center;
+
+          gap: 8px;
+        }
+
+        .connectingText {
+          color: #98a2b3;
+
+          font-size: 8px;
+        }
+
         .send {
-          width: 38px;
-          height: 34px;
+          width: 42px;
+          height: 36px;
 
           border: 0;
-          border-radius: 8px;
+
+          border-radius: 9px;
 
           background: #1465e8;
 
           color: white;
 
+          font-size: 17px;
+
+          font-weight: 900;
+
           cursor: pointer;
+
+          transition:
+            opacity 0.15s ease,
+            transform 0.15s ease;
+        }
+
+        .send:hover:not(
+            :disabled
+          ) {
+          transform:
+            translateX(1px);
         }
 
         .send:disabled {
-          opacity: 0.45;
+          opacity: 0.35;
+
+          cursor:
+            not-allowed;
         }
 
-        @media (max-width: 600px) {
+        /*
+          ==============================================
+          MOBILE
+          ==============================================
+        */
+
+        @media (
+          max-width: 600px
+        ) {
           .supportLauncher {
             right: 12px;
-            bottom: 110px;
+
+            bottom: 125px;
 
             min-width: 165px;
           }
 
           .supportWindow {
             right: 12px;
-            bottom: 170px;
 
-            width: calc(100vw - 24px);
+            bottom: 190px;
+
+            width:
+              calc(
+                100vw - 24px
+              );
+
             max-width: 340px;
 
             height: 450px;
