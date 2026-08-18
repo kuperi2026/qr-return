@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SupportLauncher from "./components/SupportLauncher";
+import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
@@ -65,7 +66,38 @@ const categories = [
 
 export default function HomePage() {
   const [language, setLanguage] = useState<Language>("ka");
+  const [isAdmin, setIsAdmin] = useState(false);
   const ka = language === "ka";
+
+  useEffect(() => {
+    async function checkAdmin() {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const { data: adminData } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setIsAdmin(Boolean(adminData));
+    }
+
+    void checkAdmin();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      void checkAdmin();
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <main className="page">
@@ -84,6 +116,12 @@ export default function HomePage() {
             <a href="/register" className="registerButton">
               {ka ? "რეგისტრაცია" : "Register"}
             </a>
+
+            {isAdmin && (
+              <a href="/admin" className="adminButton">
+                ⚙️ Admin
+              </a>
+            )}
 
             <a href="/login" className="loginButton">
               {ka ? "შესვლა" : "Sign in"}
@@ -549,7 +587,8 @@ export default function HomePage() {
         }
 
         .registerButton,
-        .loginButton {
+        .loginButton,
+        .adminButton {
           text-decoration: none;
           border-radius: 11px;
           padding: 11px 17px;
@@ -566,6 +605,13 @@ export default function HomePage() {
           color: #1d2939;
           border: 1px solid #e2e7ee;
           background: white;
+        }
+
+        .adminButton {
+          color: #ffffff;
+          border: 1px solid #6d5dfc;
+          background: linear-gradient(135deg, #1465e8, #7655f7);
+          box-shadow: 0 7px 18px rgba(87, 74, 214, 0.18);
         }
 
         .language {
@@ -1368,7 +1414,8 @@ export default function HomePage() {
           }
 
           .registerButton,
-          .loginButton {
+          .loginButton,
+          .adminButton {
             padding: 9px 10px;
             font-size: 11px;
           }
