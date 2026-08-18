@@ -458,9 +458,6 @@ export default function RegistrationPage() {
         return;
       }
 
-      /*
-       * ფერი სავალდებულოა
-       */
       if (
         !form.colour.trim()
       ) {
@@ -704,18 +701,12 @@ export default function RegistrationPage() {
         pet_type:
           category.petType,
 
-        /*
-         * სავალდებულო და ყოველთვის ხილული
-         */
         item_name:
           form.item_name.trim(),
 
         colour:
           form.colour.trim(),
 
-        /*
-         * არასავალდებულო ინფორმაცია
-         */
         sex:
           category.isPet
             ? form.sex ||
@@ -779,20 +770,12 @@ export default function RegistrationPage() {
         owner_photo_url:
           ownerPhotoUrl,
 
-        /*
-         * მფლობელის სახელი/გვარი და
-         * მობილური სავალდებულო და ყოველთვის ხილულია
-         */
         owner_name:
           ownerName,
 
         owner_phone:
           form.owner_phone.trim(),
 
-        /*
-         * Email სავალდებულოა,
-         * მაგრამ ჩვენება არჩევითია
-         */
         owner_email:
           form.owner_email.trim(),
 
@@ -832,18 +815,12 @@ export default function RegistrationPage() {
         location_sharing_enabled:
           locationSharingEnabled,
 
-        /*
-         * ფერი და ტელეფონი ყოველთვის ჩანს
-         */
         show_colour:
           true,
 
         show_owner_phone:
           true,
 
-        /*
-         * დანარჩენი ხილვადობები
-         */
         ...visibility,
 
         active:
@@ -2052,7 +2029,7 @@ function Header({
 
       <div className="headerRight">
         <a
-          href="/register"
+          href="/"
           className="headerBack"
         >
           ←{" "}
@@ -3081,10 +3058,6 @@ function Styles() {
         resize: vertical;
       }
 
-      /*
-       * სავალდებულო / ყოველთვის ხილული ტექსტი
-       * უფრო დიდი
-       */
       .alwaysVisibleBadge {
         margin-top: 8px;
         color: #16803b;
@@ -3101,10 +3074,6 @@ function Styles() {
         gap: 12px;
       }
 
-      /*
-       * ნებაყოფლობითი ტექსტი
-       * უფრო დიდი
-       */
       .optionalLabel,
       .requiredFillLabel {
         display: block;
@@ -3119,9 +3088,6 @@ function Styles() {
         color: #475467;
       }
 
-      /*
-       * ON/OFF განმარტება
-       */
       .visibilityField > small,
       .visibilityStatus {
         display: block;
