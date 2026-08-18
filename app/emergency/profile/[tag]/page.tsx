@@ -118,7 +118,6 @@ export default function EmergencyPublicProfilePage() {
     useState<EmergencyProfile | null>(null);
 
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
 
   const ka = lang === "ka";
@@ -131,11 +130,13 @@ export default function EmergencyPublicProfilePage() {
   useEffect(() => {
     if (!tag) {
       setLoading(false);
+
       setError(
         ka
           ? "QR კოდი ვერ მოიძებნა."
           : "QR code was not found."
       );
+
       return;
     }
 
@@ -219,7 +220,7 @@ export default function EmergencyPublicProfilePage() {
     }
 
     void loadProfile();
-  }, [tag]);
+  }, [tag, ka]);
 
   if (loading) {
     return (
@@ -253,9 +254,7 @@ export default function EmergencyPublicProfilePage() {
         />
 
         <section className="centerState">
-          <div className="errorIcon">
-            !
-          </div>
+          <div className="errorIcon">!</div>
 
           <h1>
             {ka
@@ -263,9 +262,7 @@ export default function EmergencyPublicProfilePage() {
               : "Profile not found"}
           </h1>
 
-          <p>
-            {error}
-          </p>
+          <p>{error}</p>
 
           <a
             href="/"
@@ -287,7 +284,7 @@ export default function EmergencyPublicProfilePage() {
     Boolean(profile.show_emergency_contact) &&
     Boolean(
       profile.emergency_contact_name ||
-      profile.emergency_contact_phone
+        profile.emergency_contact_phone
     );
 
   const whatsappPhone =
@@ -306,18 +303,11 @@ export default function EmergencyPublicProfilePage() {
 
       <section className="container">
         <div className="emergencyBadge">
-          <div className="cross">
-            ✚
-          </div>
+          <div className="cross">✚</div>
 
           <div>
-            <span>
-              QR RETURN
-            </span>
-
-            <strong>
-              EMERGENCY ID
-            </strong>
+            <span>QR RETURN</span>
+            <strong>EMERGENCY ID</strong>
           </div>
         </div>
 
@@ -333,8 +323,7 @@ export default function EmergencyPublicProfilePage() {
           </div>
 
           <h1>
-            {profile.first_name}{" "}
-            {profile.last_name}
+            {profile.first_name} {profile.last_name}
           </h1>
 
           {profile.country_code && (
@@ -418,9 +407,7 @@ export default function EmergencyPublicProfilePage() {
                     ? "პირადი / საიდენტიფიკაციო ნომერი"
                     : "Personal identification number"
                 }
-                value={
-                  profile.personal_number
-                }
+                value={profile.personal_number}
               />
             )}
 
@@ -433,9 +420,7 @@ export default function EmergencyPublicProfilePage() {
                     ? "მისამართი"
                     : "Address"
                 }
-                value={
-                  profile.address
-                }
+                value={profile.address}
               />
             )}
         </section>
@@ -455,9 +440,7 @@ export default function EmergencyPublicProfilePage() {
                 </span>
 
                 <p>
-                  {
-                    profile.medical_conditions
-                  }
+                  {profile.medical_conditions}
                 </p>
               </div>
             </section>
@@ -473,9 +456,7 @@ export default function EmergencyPublicProfilePage() {
               </span>
 
               <p>
-                {
-                  profile.additional_info
-                }
+                {profile.additional_info}
               </p>
             </section>
           )}
@@ -509,6 +490,7 @@ export default function EmergencyPublicProfilePage() {
                       {ka
                         ? "კავშირი პირთან: "
                         : "Relationship: "}
+
                       <strong>
                         {
                           profile.emergency_contact_relationship
@@ -534,9 +516,7 @@ export default function EmergencyPublicProfilePage() {
                       className="contactButton"
                       href={`tel:${profile.emergency_contact_phone}`}
                     >
-                      <span>
-                        📞
-                      </span>
+                      <span>📞</span>
 
                       <strong>
                         {ka
@@ -554,9 +534,7 @@ export default function EmergencyPublicProfilePage() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span>
-                        🟢
-                      </span>
+                      <span>🟢</span>
 
                       <strong>
                         WhatsApp
@@ -567,13 +545,11 @@ export default function EmergencyPublicProfilePage() {
                 {profile.emergency_contact_live_chat_enabled && (
                   <a
                     className="contactButton chat"
-                    href={`/emergency/chat/${encodeURIComponent(
+                    href={`/chat/emergency/${encodeURIComponent(
                       profile.tag_code
                     )}`}
                   >
-                    <span>
-                      💬
-                    </span>
+                    <span>💬</span>
 
                     <strong>
                       Live Chat
@@ -607,13 +583,8 @@ export default function EmergencyPublicProfilePage() {
         </section>
 
         <footer className="footer">
-          <strong>
-            QR RETURN
-          </strong>
-
-          <span>
-            Emergency ID
-          </span>
+          <strong>QR RETURN</strong>
+          <span>Emergency ID</span>
         </footer>
       </section>
 
@@ -627,9 +598,7 @@ function Header({
   setLang,
 }: {
   lang: Lang;
-  setLang: (
-    lang: Lang
-  ) => void;
+  setLang: (lang: Lang) => void;
 }) {
   return (
     <header className="header">
@@ -642,13 +611,8 @@ function Header({
         </div>
 
         <div>
-          <strong>
-            QR RETURN
-          </strong>
-
-          <small>
-            EMERGENCY ID
-          </small>
+          <strong>QR RETURN</strong>
+          <small>EMERGENCY ID</small>
         </div>
       </a>
 
@@ -701,13 +665,8 @@ function InfoCard({
       </div>
 
       <div>
-        <span>
-          {title}
-        </span>
-
-        <strong>
-          {value}
-        </strong>
+        <span>{title}</span>
+        <strong>{value}</strong>
       </div>
     </div>
   );
@@ -745,10 +704,7 @@ function Styles() {
           ),
           #f6f8fb;
         color: #101828;
-        font-family:
-          Arial,
-          Helvetica,
-          sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
       .header {
@@ -871,9 +827,7 @@ function Styles() {
         border-top: 4px solid #155eef;
         border-radius: 20px;
         background: #ffffff;
-        box-shadow:
-          0 12px 35px
-          rgba(16, 24, 40, 0.06);
+        box-shadow: 0 12px 35px rgba(16, 24, 40, 0.06);
       }
 
       .statusRow {
@@ -921,12 +875,11 @@ function Styles() {
         gap: 18px;
         border: 1px solid #fecdca;
         border-radius: 18px;
-        background:
-          linear-gradient(
-            135deg,
-            #fff1f0,
-            #fff8f7
-          );
+        background: linear-gradient(
+          135deg,
+          #fff1f0,
+          #fff8f7
+        );
       }
 
       .smallLabel {
@@ -966,9 +919,7 @@ function Styles() {
         text-decoration: none;
         font-size: 18px;
         font-weight: 900;
-        box-shadow:
-          0 8px 20px
-          rgba(217, 45, 32, 0.2);
+        box-shadow: 0 8px 20px rgba(217, 45, 32, 0.2);
       }
 
       .sectionHeading {
@@ -985,11 +936,7 @@ function Styles() {
 
       .infoGrid {
         display: grid;
-        grid-template-columns:
-          repeat(
-            2,
-            minmax(0, 1fr)
-          );
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
 
@@ -1087,9 +1034,7 @@ function Styles() {
         border: 1px solid #d6e4ff;
         border-radius: 18px;
         background: #ffffff;
-        box-shadow:
-          0 8px 24px
-          rgba(16, 24, 40, 0.045);
+        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.045);
       }
 
       .contactPerson {
@@ -1129,11 +1074,7 @@ function Styles() {
       .contactActions {
         margin-top: 18px;
         display: grid;
-        grid-template-columns:
-          repeat(
-            3,
-            minmax(0, 1fr)
-          );
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
       }
 
