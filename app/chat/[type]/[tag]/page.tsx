@@ -140,11 +140,13 @@ export default function LiveChatPage() {
   useEffect(() => {
     if (!validChat) {
       setLoading(false);
+
       setError(
         ka
           ? "ჩატის მისამართი არასწორია."
           : "Invalid chat address."
       );
+
       return;
     }
 
@@ -167,10 +169,14 @@ export default function LiveChatPage() {
         `)
         .eq("profile_type", profileType)
         .eq("tag_code", tagCode)
-        .order("created_at", { ascending: true })
+        .order("created_at", {
+          ascending: true,
+        })
         .limit(200);
 
-      if (!alive) return;
+      if (!alive) {
+        return;
+      }
 
       if (loadError) {
         setError(
@@ -178,6 +184,7 @@ export default function LiveChatPage() {
             ? `ჩატის გახსნა ვერ მოხერხდა: ${loadError.message}`
             : `Could not open chat: ${loadError.message}`
         );
+
         setLoading(false);
         return;
       }
@@ -201,14 +208,18 @@ export default function LiveChatPage() {
         (payload) => {
           const next = payload.new as Message;
 
-          if (next.profile_type !== profileType) return;
+          if (next.profile_type !== profileType) {
+            return;
+          }
 
           setMessages((current) => {
             const exists = current.some(
               (message) => message.id === next.id
             );
 
-            if (exists) return current;
+            if (exists) {
+              return current;
+            }
 
             return [...current, next];
           });
@@ -235,7 +246,9 @@ export default function LiveChatPage() {
 
     const message = text.trim();
 
-    if (!message || !sessionId || !validChat) return;
+    if (!message || !sessionId || !validChat || sending) {
+      return;
+    }
 
     if (message.length > 2000) {
       setError(
@@ -243,6 +256,7 @@ export default function LiveChatPage() {
           ? "შეტყობინება მაქსიმუმ 2000 სიმბოლო შეიძლება იყოს."
           : "Message cannot exceed 2000 characters."
       );
+
       return;
     }
 
@@ -266,6 +280,7 @@ export default function LiveChatPage() {
             ? `შეტყობინება ვერ გაიგზავნა: ${sendError.message}`
             : `Could not send message: ${sendError.message}`
         );
+
         return;
       }
 
@@ -282,7 +297,13 @@ export default function LiveChatPage() {
 
         <section className="statePage">
           <div className="errorIcon">!</div>
-          <h1>{ka ? "ჩატი ვერ გაიხსნა" : "Chat unavailable"}</h1>
+
+          <h1>
+            {ka
+              ? "ჩატი ვერ გაიხსნა"
+              : "Chat unavailable"}
+          </h1>
+
           <p>{error}</p>
         </section>
 
@@ -302,7 +323,9 @@ export default function LiveChatPage() {
           </div>
 
           <div>
-            <div className="eyebrow">QR RETURN • LIVE CHAT</div>
+            <div className="eyebrow">
+              QR RETURN • LIVE CHAT
+            </div>
 
             <h1>{title}</h1>
 
@@ -331,8 +354,8 @@ export default function LiveChatPage() {
 
           <p>
             {ka
-              ? "ჩატი განკუთვნილია QR პროფილის მფლობელსა და მპოვნელს შორის კომუნიკაციისთვის."
-              : "This chat is for communication between the QR profile owner and finder."}
+              ? "ჩატი განკუთვნილია QR პროფილის მმართველსა და მპოვნელს შორის კომუნიკაციისთვის."
+              : "This chat is for communication between the QR profile manager and finder."}
           </p>
         </div>
 
@@ -340,8 +363,11 @@ export default function LiveChatPage() {
           {loading && (
             <div className="loading">
               <div className="loader" />
+
               <span>
-                {ka ? "ჩატი იტვირთება..." : "Loading chat..."}
+                {ka
+                  ? "ჩატი იტვირთება..."
+                  : "Loading chat..."}
               </span>
             </div>
           )}
@@ -351,7 +377,9 @@ export default function LiveChatPage() {
               <div className="emptyIcon">💬</div>
 
               <strong>
-                {ka ? "ჩატი ჯერ ცარიელია" : "No messages yet"}
+                {ka
+                  ? "ჩატი ჯერ ცარიელია"
+                  : "No messages yet"}
               </strong>
 
               <p>
@@ -363,14 +391,25 @@ export default function LiveChatPage() {
           )}
 
           {messages.map((message) => {
-            const mine = message.sender_session === sessionId;
+            const mine =
+              message.sender_session === sessionId;
 
             return (
               <div
                 key={message.id}
-                className={mine ? "messageRow mine" : "messageRow"}
+                className={
+                  mine
+                    ? "messageRow mine"
+                    : "messageRow"
+                }
               >
-                <div className={mine ? "bubble mine" : "bubble"}>
+                <div
+                  className={
+                    mine
+                      ? "bubble mine"
+                      : "bubble"
+                  }
+                >
                   <div className="sender">
                     {message.sender_type === "owner"
                       ? ka
@@ -386,7 +425,9 @@ export default function LiveChatPage() {
                   </div>
 
                   <time>
-                    {new Date(message.created_at).toLocaleTimeString(
+                    {new Date(
+                      message.created_at
+                    ).toLocaleTimeString(
                       ka ? "ka-GE" : "en-US",
                       {
                         hour: "2-digit",
@@ -402,9 +443,16 @@ export default function LiveChatPage() {
           <div ref={bottomRef} />
         </section>
 
-        {error && <div className="errorBox">⚠ {error}</div>}
+        {error && (
+          <div className="errorBox">
+            ⚠ {error}
+          </div>
+        )}
 
-        <form className="composer" onSubmit={sendMessage}>
+        <form
+          className="composer"
+          onSubmit={sendMessage}
+        >
           <textarea
             value={text}
             maxLength={2000}
@@ -413,11 +461,30 @@ export default function LiveChatPage() {
                 ? "დაწერეთ შეტყობინება..."
                 : "Write a message..."
             }
-            onChange={(event) => setText(event.target.value)}
+            onChange={(event) =>
+              setText(event.target.value)
+            }
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+
+                if (!sending && text.trim()) {
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }
+            }}
           />
 
           <div className="composerBottom">
-            <span>{text.length}/2000</span>
+            <div className="keyboardHint">
+              {ka
+                ? "Enter — გაგზავნა • Shift + Enter — ახალი ხაზი"
+                : "Enter — send • Shift + Enter — new line"}
+            </div>
 
             <button
               type="submit"
@@ -810,16 +877,19 @@ function Styles() {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
         border-top: 1px solid #f2f4f7;
       }
 
-      .composerBottom span {
+      .keyboardHint {
         color: #98a2b3;
         font-size: 9px;
+        line-height: 1.4;
       }
 
       .composerBottom button {
         min-height: 41px;
+        flex-shrink: 0;
         padding: 0 17px;
         border: 0;
         border-radius: 10px;
@@ -907,6 +977,14 @@ function Styles() {
 
         .bubble {
           max-width: 88%;
+        }
+
+        .composerBottom {
+          align-items: flex-end;
+        }
+
+        .keyboardHint {
+          max-width: 180px;
         }
       }
     `}</style>
