@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 type Step = 1 | 2 | 3;
@@ -12,16 +13,20 @@ type FormState = {
   date_of_birth: string;
   blood_type: string;
   address: string;
+
   allergies: string;
   medical_conditions: string;
   medications: string;
   medical_note: string;
+
   emergency_contact_name: string;
   emergency_contact_relationship: string;
   emergency_contact_phone: string;
+
   second_contact_name: string;
   second_contact_relationship: string;
   second_contact_phone: string;
+
   emergency_message: string;
 };
 
@@ -30,13 +35,18 @@ type VisibilityState = {
   show_date_of_birth: boolean;
   show_blood_type: boolean;
   show_address: boolean;
+
   show_allergies: boolean;
   show_medical_conditions: boolean;
   show_medications: boolean;
   show_medical_note: boolean;
+
   show_second_contact: boolean;
   show_emergency_message: boolean;
 };
+
+const BUCKET = "qr-return-images";
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 const initialForm: FormState = {
   tag_code: "",
@@ -45,16 +55,20 @@ const initialForm: FormState = {
   date_of_birth: "",
   blood_type: "",
   address: "",
+
   allergies: "",
   medical_conditions: "",
   medications: "",
   medical_note: "",
+
   emergency_contact_name: "",
   emergency_contact_relationship: "",
   emergency_contact_phone: "",
+
   second_contact_name: "",
   second_contact_relationship: "",
   second_contact_phone: "",
+
   emergency_message: "",
 };
 
@@ -63,10 +77,12 @@ const initialVisibility: VisibilityState = {
   show_date_of_birth: false,
   show_blood_type: true,
   show_address: false,
+
   show_allergies: true,
   show_medical_conditions: true,
   show_medications: true,
   show_medical_note: true,
+
   show_second_contact: false,
   show_emergency_message: true,
 };
@@ -85,6 +101,7 @@ const relationshipOptions = {
     ["caregiver", "მომვლელი"],
     ["other", "სხვა"],
   ],
+
   en: [
     ["", "Select"],
     ["mother", "Mother"],
@@ -100,39 +117,162 @@ const relationshipOptions = {
   ],
 };
 
+function cleanTag(tag: string) {
+  return tag
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function safeExtension(file: File) {
+  const ext =
+    file.name
+      .split(".")
+      .pop()
+      ?.toLowerCase() || "jpg";
+
+  const allowed = [
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "gif",
+    "heic",
+    "heif",
+  ];
+
+  return allowed.includes(ext)
+    ? ext
+    : "jpg";
+}
+
+async function uploadEmergencyPhoto(
+  file: File,
+  tagCode: string
+) {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("INVALID_IMAGE_TYPE");
+  }
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    throw new Error("IMAGE_TOO_LARGE");
+  }
+
+  const ext = safeExtension(file);
+
+  const unique =
+    typeof crypto !== "undefined" &&
+    "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}`;
+
+  const path =
+    `emergency/${cleanTag(
+      tagCode
+    )}-${unique}.${ext}`;
+
+  const { error } =
+    await supabase.storage
+      .from(BUCKET)
+      .upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } =
+    supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
 export default function EmergencyRegistrationPage() {
-  const [language, setLanguage] = useState<Language>("ka");
-  const [step, setStep] = useState<Step>(1);
+  const [language, setLanguage] =
+    useState<Language>("ka");
 
-  const [form, setForm] = useState<FormState>(initialForm);
+  const [step, setStep] =
+    useState<Step>(1);
 
-  const [visibility, setVisibility] =
-    useState<VisibilityState>(initialVisibility);
+  const [form, setForm] =
+    useState<FormState>(
+      initialForm
+    );
 
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [
+    visibility,
+    setVisibility,
+  ] =
+    useState<VisibilityState>(
+      initialVisibility
+    );
 
-  const [locationSharing, setLocationSharing] = useState(false);
+  const [
+    photo,
+    setPhoto,
+  ] =
+    useState<File | null>(
+      null
+    );
 
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [
+    locationSharing,
+    setLocationSharing,
+  ] = useState(false);
 
-  const ka = language === "ka";
+  const [
+    identityLocked,
+    setIdentityLocked,
+  ] = useState(false);
 
-  function updateField(field: keyof FormState, value: string) {
+  const [
+    saving,
+    setSaving,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    success,
+    setSuccess,
+  ] = useState(false);
+
+  const ka =
+    language === "ka";
+
+  function updateField(
+    field: keyof FormState,
+    value: string
+  ) {
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
 
-    if (error) setError("");
+    if (error) {
+      setError("");
+    }
   }
 
-  function toggle(field: keyof VisibilityState) {
-    setVisibility((current) => ({
-      ...current,
-      [field]: !current[field],
-    }));
+  function toggleVisibility(
+    field: keyof VisibilityState
+  ) {
+    setVisibility(
+      (current) => ({
+        ...current,
+        [field]:
+          !current[field],
+      })
+    );
   }
 
   function goTop() {
@@ -142,39 +282,96 @@ export default function EmergencyRegistrationPage() {
     });
   }
 
-  function nextStep() {
+  function validatePhoto() {
+    if (!photo) {
+      return true;
+    }
+
+    if (
+      !photo.type.startsWith(
+        "image/"
+      )
+    ) {
+      setError(
+        ka
+          ? "გთხოვთ აირჩიოთ სურათის ფაილი."
+          : "Please select an image file."
+      );
+
+      return false;
+    }
+
+    if (
+      photo.size >
+      MAX_IMAGE_SIZE
+    ) {
+      setError(
+        ka
+          ? "ფოტოს ზომა არ უნდა აღემატებოდეს 5 MB-ს."
+          : "The image must not exceed 5 MB."
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  async function nextStep() {
     setError("");
 
     if (step === 1) {
-      if (!form.tag_code.trim()) {
+      if (
+        !form.tag_code.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ QR კოდი."
             : "Please enter the QR code."
         );
+
         return;
       }
 
-      if (!form.first_name.trim()) {
+      if (
+        !form.first_name.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ სახელი."
             : "Please enter the first name."
         );
+
         return;
       }
 
-      if (!form.last_name.trim()) {
+      if (
+        !form.last_name.trim()
+      ) {
         setError(
           ka
             ? "გთხოვთ მიუთითოთ გვარი."
             : "Please enter the last name."
         );
+
         return;
       }
 
+      if (
+        !validatePhoto()
+      ) {
+        return;
+      }
+
+      /*
+       * პირველი ნაბიჯის დასრულების შემდეგ
+       * QR კოდი, სახელი და გვარი იკეტება.
+       */
+      setIdentityLocked(true);
+
       setStep(2);
       goTop();
+
       return;
     }
 
@@ -196,69 +393,285 @@ export default function EmergencyRegistrationPage() {
     goTop();
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     if (step !== 3) {
-      nextStep();
+      await nextStep();
       return;
     }
 
-    if (!form.emergency_contact_name.trim()) {
+    if (
+      !form.emergency_contact_name.trim()
+    ) {
       setError(
         ka
           ? "გთხოვთ მიუთითოთ საგანგებო საკონტაქტო პირის სახელი და გვარი."
           : "Please enter the emergency contact's full name."
       );
+
       return;
     }
 
-    if (!form.emergency_contact_relationship) {
+    if (
+      !form.emergency_contact_relationship
+    ) {
       setError(
         ka
-          ? "გთხოვთ მიუთითოთ საგანგებო საკონტაქტო პირის თქვენთან კავშირი."
+          ? "გთხოვთ მიუთითოთ, ვინ არის საგანგებო საკონტაქტო პირი თქვენთვის."
           : "Please select the emergency contact's relationship to you."
       );
+
       return;
     }
 
-    if (!form.emergency_contact_phone.trim()) {
+    if (
+      !form.emergency_contact_phone.trim()
+    ) {
       setError(
         ka
           ? "გთხოვთ მიუთითოთ საგანგებო საკონტაქტო პირის ტელეფონის ნომერი."
           : "Please enter the emergency contact's phone number."
       );
+
+      return;
+    }
+
+    if (
+      !validatePhoto()
+    ) {
       return;
     }
 
     setSaving(true);
     setError("");
 
-    /*
-      შემდეგ ეტაპზე აქ მივაბამთ Supabase-ს.
+    try {
+      const tagCode =
+        form.tag_code.trim();
 
-      ამ ეტაპზე სპეციალურად არ ვწერთ მონაცემებს
-      არსებულ "item" ცხრილში, რადგან Emergency პროფილისთვის
-      ცალკე ცხრილი უნდა შევქმნათ.
-    */
+      /*
+       * ვამოწმებთ QR უკვე რეგისტრირებულია თუ არა.
+       */
+      const {
+        data: existing,
+        error: checkError,
+      } = await supabase
+        .from("emergency_profiles")
+        .select("tag_code")
+        .eq(
+          "tag_code",
+          tagCode
+        )
+        .maybeSingle();
 
-    setTimeout(() => {
-      setSaving(false);
+      if (checkError) {
+        setError(
+          ka
+            ? `QR კოდის შემოწმება ვერ მოხერხდა: ${checkError.message}`
+            : `QR code check failed: ${checkError.message}`
+        );
+
+        return;
+      }
+
+      if (existing) {
+        setError(
+          ka
+            ? "ეს QR კოდი უკვე რეგისტრირებულია. არსებული პროფილის შესაცვლელად გამოიყენეთ რედაქტირება."
+            : "This QR code is already registered. Use Edit to update the existing profile."
+        );
+
+        return;
+      }
+
+      let photoUrl:
+        | string
+        | null = null;
+
+      if (photo) {
+        photoUrl =
+          await uploadEmergencyPhoto(
+            photo,
+            tagCode
+          );
+      }
+
+      const payload = {
+        /*
+         * ეს სამი მნიშვნელობა პროფილის შექმნის შემდეგ
+         * Supabase-ის trigger-ითაც დაცულია.
+         */
+        tag_code:
+          tagCode,
+
+        first_name:
+          form.first_name.trim(),
+
+        last_name:
+          form.last_name.trim(),
+
+        photo_url:
+          photoUrl,
+
+        date_of_birth:
+          form.date_of_birth ||
+          null,
+
+        blood_type:
+          form.blood_type ||
+          null,
+
+        address:
+          form.address.trim() ||
+          null,
+
+        allergies:
+          form.allergies.trim() ||
+          null,
+
+        medical_conditions:
+          form.medical_conditions.trim() ||
+          null,
+
+        medications:
+          form.medications.trim() ||
+          null,
+
+        medical_note:
+          form.medical_note.trim() ||
+          null,
+
+        emergency_contact_name:
+          form.emergency_contact_name.trim(),
+
+        emergency_contact_relationship:
+          form.emergency_contact_relationship,
+
+        emergency_contact_phone:
+          form.emergency_contact_phone.trim(),
+
+        second_contact_name:
+          form.second_contact_name.trim() ||
+          null,
+
+        second_contact_relationship:
+          form.second_contact_relationship ||
+          null,
+
+        second_contact_phone:
+          form.second_contact_phone.trim() ||
+          null,
+
+        emergency_message:
+          form.emergency_message.trim() ||
+          null,
+
+        location_sharing_enabled:
+          locationSharing,
+
+        show_photo:
+          visibility.show_photo,
+
+        show_date_of_birth:
+          visibility.show_date_of_birth,
+
+        show_blood_type:
+          visibility.show_blood_type,
+
+        show_address:
+          visibility.show_address,
+
+        show_allergies:
+          visibility.show_allergies,
+
+        show_medical_conditions:
+          visibility.show_medical_conditions,
+
+        show_medications:
+          visibility.show_medications,
+
+        show_medical_note:
+          visibility.show_medical_note,
+
+        show_second_contact:
+          visibility.show_second_contact,
+
+        show_emergency_message:
+          visibility.show_emergency_message,
+
+        active:
+          true,
+      };
+
+      const {
+        error: saveError,
+      } = await supabase
+        .from(
+          "emergency_profiles"
+        )
+        .insert(payload);
+
+      if (saveError) {
+        console.error(
+          saveError
+        );
+
+        if (
+          saveError.code ===
+          "23505"
+        ) {
+          setError(
+            ka
+              ? "ეს QR კოდი უკვე რეგისტრირებულია."
+              : "This QR code is already registered."
+          );
+
+          return;
+        }
+
+        setError(
+          ka
+            ? `პროფილის შენახვა ვერ მოხერხდა: ${saveError.message}`
+            : `Profile could not be saved: ${saveError.message}`
+        );
+
+        return;
+      }
+
       setSuccess(true);
       goTop();
-    }, 400);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        ka
+          ? "პროფილის შენახვისას დაფიქსირდა შეცდომა."
+          : "An error occurred while saving the profile."
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (success) {
     return (
       <main className="page">
         <Header
-          language={language}
-          setLanguage={setLanguage}
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
         />
 
         <section className="successPage">
-          <div className="successIcon">✓</div>
+          <div className="successIcon">
+            ✓
+          </div>
 
           <div className="eyebrow">
             QR RETURN • EMERGENCY ID
@@ -266,19 +679,52 @@ export default function EmergencyRegistrationPage() {
 
           <h1>
             {ka
-              ? "Emergency პროფილი მზადაა"
-              : "Emergency profile is ready"}
+              ? "Emergency პროფილი წარმატებით შეიქმნა"
+              : "Emergency profile created successfully"}
           </h1>
 
           <p>
             {ka
-              ? "რეგისტრაციის ფორმა წარმატებით დასრულდა."
-              : "The registration form was completed successfully."}
+              ? "თქვენი Emergency ინფორმაცია წარმატებით შეინახა."
+              : "Your Emergency information was saved successfully."}
           </p>
 
-          <a href="/" className="primaryButton successButton">
-            {ka ? "მთავარ გვერდზე დაბრუნება" : "Return home"}
-          </a>
+          <div className="successButtons">
+            <a
+              href={`/emergency/profile/${encodeURIComponent(
+                form.tag_code.trim()
+              )}`}
+              className="viewButton"
+            >
+              {ka
+                ? "პროფილის ნახვა"
+                : "View profile"}
+            </a>
+
+            <a
+              href="/"
+              className="homeButton"
+            >
+              {ka
+                ? "მთავარ გვერდზე"
+                : "Home"}
+            </a>
+          </div>
+
+          <div className="identityLockedNotice">
+            <strong>
+              🔒{" "}
+              {ka
+                ? "პიროვნება დაფიქსირებულია"
+                : "Identity locked"}
+            </strong>
+
+            <p>
+              {ka
+                ? `${form.first_name} ${form.last_name} — ამ Emergency პროფილზე QR კოდი, სახელი და გვარი აღარ შეიცვლება.`
+                : `${form.first_name} ${form.last_name} — the QR code, first name and last name cannot be changed on this Emergency profile.`}
+            </p>
+          </div>
         </section>
 
         <Styles />
@@ -289,13 +735,19 @@ export default function EmergencyRegistrationPage() {
   return (
     <main className="page">
       <Header
-        language={language}
-        setLanguage={setLanguage}
+        language={
+          language
+        }
+        setLanguage={
+          setLanguage
+        }
       />
 
       <section className="content">
         <div className="hero">
-          <div className="emergencyIcon">✚</div>
+          <div className="emergencyIcon">
+            ✚
+          </div>
 
           <div>
             <div className="eyebrow">
@@ -325,44 +777,89 @@ export default function EmergencyRegistrationPage() {
 
           <p>
             {ka
-              ? "სავალდებულო ველები აუცილებლად უნდა შეივსოს და ყოველთვის გამოჩნდება. დანარჩენი ინფორმაციის შევსებაც და QR კოდის დასკანერებისას ჩვენებაც თქვენი არჩევანია."
-              : "Required fields must be completed and are always visible. Completing and displaying all other information is your choice."}
+              ? "სავალდებულო ინფორმაცია აუცილებლად უნდა შეივსოს და ყოველთვის გამოჩნდება. დანარჩენი ინფორმაციის შევსებაც და QR პროფილში ჩვენებაც თქვენი არჩევანია."
+              : "Required information must be completed and is always visible. Completing and displaying other information is your choice."}
           </p>
         </div>
 
         <div className="progress">
           <Progress
             number="1"
-            label={ka ? "პირადი" : "Personal"}
-            active={step >= 1}
-            current={step === 1}
+            label={
+              ka
+                ? "პირადი"
+                : "Personal"
+            }
+            active={
+              step >= 1
+            }
+            current={
+              step === 1
+            }
           />
 
-          <div className={step >= 2 ? "line active" : "line"} />
+          <div
+            className={
+              step >= 2
+                ? "line active"
+                : "line"
+            }
+          />
 
           <Progress
             number="2"
-            label={ka ? "სამედიცინო" : "Medical"}
-            active={step >= 2}
-            current={step === 2}
+            label={
+              ka
+                ? "სამედიცინო"
+                : "Medical"
+            }
+            active={
+              step >= 2
+            }
+            current={
+              step === 2
+            }
           />
 
-          <div className={step >= 3 ? "line active" : "line"} />
+          <div
+            className={
+              step >= 3
+                ? "line active"
+                : "line"
+            }
+          />
 
           <Progress
             number="3"
-            label={ka ? "კონტაქტი" : "Contact"}
-            active={step >= 3}
-            current={step === 3}
+            label={
+              ka
+                ? "კონტაქტი"
+                : "Contact"
+            }
+            active={
+              step >= 3
+            }
+            current={
+              step === 3
+            }
           />
         </div>
 
-        <form className="card" onSubmit={handleSubmit}>
+        <form
+          className="card"
+          onSubmit={
+            handleSubmit
+          }
+        >
           {step === 1 && (
             <>
               <StepTitle
                 number="01"
-                title={ka ? "პირადი ინფორმაცია" : "Personal information"}
+                title={
+                  ka
+                    ? "პირადი ინფორმაცია"
+                    : "Personal information"
+                }
                 text={
                   ka
                     ? "Emergency პროფილის ძირითადი ინფორმაცია."
@@ -370,67 +867,171 @@ export default function EmergencyRegistrationPage() {
                 }
               />
 
+              {identityLocked && (
+                <div className="lockedBox">
+                  🔒{" "}
+                  {ka
+                    ? "QR კოდი, სახელი და გვარი დაფიქსირებულია ამ რეგისტრაციისთვის."
+                    : "QR code, first name and last name are locked for this registration."}
+                </div>
+              )}
+
               <RequiredField
-                label={ka ? "QR კოდი" : "QR code"}
-                value={form.tag_code}
-                onChange={(value) =>
-                  updateField("tag_code", value)
+                label={
+                  ka
+                    ? "QR კოდი"
+                    : "QR code"
+                }
+                value={
+                  form.tag_code
+                }
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "tag_code",
+                    value
+                  )
                 }
                 ka={ka}
+                locked={
+                  identityLocked
+                }
               />
 
               <div className="grid2">
                 <RequiredField
-                  label={ka ? "სახელი" : "First name"}
-                  value={form.first_name}
-                  onChange={(value) =>
-                    updateField("first_name", value)
+                  label={
+                    ka
+                      ? "სახელი"
+                      : "First name"
+                  }
+                  value={
+                    form.first_name
+                  }
+                  onChange={(
+                    value
+                  ) =>
+                    updateField(
+                      "first_name",
+                      value
+                    )
                   }
                   ka={ka}
+                  locked={
+                    identityLocked
+                  }
                 />
 
                 <RequiredField
-                  label={ka ? "გვარი" : "Last name"}
-                  value={form.last_name}
-                  onChange={(value) =>
-                    updateField("last_name", value)
+                  label={
+                    ka
+                      ? "გვარი"
+                      : "Last name"
+                  }
+                  value={
+                    form.last_name
+                  }
+                  onChange={(
+                    value
+                  ) =>
+                    updateField(
+                      "last_name",
+                      value
+                    )
                   }
                   ka={ka}
+                  locked={
+                    identityLocked
+                  }
                 />
               </div>
 
               <OptionalPhoto
-                label={ka ? "ფოტო" : "Photo"}
-                file={photo}
-                setFile={setPhoto}
-                visible={visibility.show_photo}
-                onToggle={() => toggle("show_photo")}
+                label={
+                  ka
+                    ? "ფოტო"
+                    : "Photo"
+                }
+                file={
+                  photo
+                }
+                setFile={
+                  setPhoto
+                }
+                visible={
+                  visibility.show_photo
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_photo"
+                  )
+                }
                 ka={ka}
               />
 
               <OptionalField
-                label={ka ? "დაბადების თარიღი" : "Date of birth"}
-                type="date"
-                value={form.date_of_birth}
-                onChange={(value) =>
-                  updateField("date_of_birth", value)
+                label={
+                  ka
+                    ? "დაბადების თარიღი"
+                    : "Date of birth"
                 }
-                visible={visibility.show_date_of_birth}
-                onToggle={() => toggle("show_date_of_birth")}
+                type="date"
+                value={
+                  form.date_of_birth
+                }
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "date_of_birth",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_date_of_birth
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_date_of_birth"
+                  )
+                }
                 ka={ka}
               />
 
               <OptionalSelect
-                label={ka ? "სისხლის ჯგუფი" : "Blood type"}
-                value={form.blood_type}
-                onChange={(value) =>
-                  updateField("blood_type", value)
+                label={
+                  ka
+                    ? "სისხლის ჯგუფი"
+                    : "Blood type"
                 }
-                visible={visibility.show_blood_type}
-                onToggle={() => toggle("show_blood_type")}
+                value={
+                  form.blood_type
+                }
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "blood_type",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_blood_type
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_blood_type"
+                  )
+                }
                 ka={ka}
                 options={[
-                  ["", ka ? "აირჩიეთ" : "Select"],
+                  [
+                    "",
+                    ka
+                      ? "აირჩიეთ"
+                      : "Select",
+                  ],
                   ["A+", "A+"],
                   ["A-", "A-"],
                   ["B+", "B+"],
@@ -443,24 +1044,52 @@ export default function EmergencyRegistrationPage() {
               />
 
               <OptionalField
-                label={ka ? "მისამართი" : "Address"}
-                value={form.address}
-                onChange={(value) =>
-                  updateField("address", value)
+                label={
+                  ka
+                    ? "მისამართი"
+                    : "Address"
                 }
-                visible={visibility.show_address}
-                onToggle={() => toggle("show_address")}
+                value={
+                  form.address
+                }
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "address",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_address
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_address"
+                  )
+                }
                 ka={ka}
               />
 
-              {error && <ErrorBox text={error} />}
+              {error && (
+                <ErrorBox
+                  text={
+                    error
+                  }
+                />
+              )}
 
               <button
                 type="button"
                 className="primaryButton full"
-                onClick={nextStep}
+                onClick={() =>
+                  void nextStep()
+                }
               >
-                {ka ? "შემდეგი" : "Next"} →
+                {ka
+                  ? "შემდეგი"
+                  : "Next"}{" "}
+                →
               </button>
             </>
           )}
@@ -482,18 +1111,35 @@ export default function EmergencyRegistrationPage() {
               />
 
               <OptionalTextArea
-                label={ka ? "ალერგიები" : "Allergies"}
+                label={
+                  ka
+                    ? "ალერგიები"
+                    : "Allergies"
+                }
                 placeholder={
                   ka
                     ? "მაგ: პენიცილინი, თხილი..."
                     : "e.g. Penicillin, nuts..."
                 }
-                value={form.allergies}
-                onChange={(value) =>
-                  updateField("allergies", value)
+                value={
+                  form.allergies
                 }
-                visible={visibility.show_allergies}
-                onToggle={() => toggle("show_allergies")}
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "allergies",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_allergies
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_allergies"
+                  )
+                }
                 ka={ka}
               />
 
@@ -508,13 +1154,24 @@ export default function EmergencyRegistrationPage() {
                     ? "მაგ: დიაბეტი, ეპილეფსია, ასთმა..."
                     : "e.g. Diabetes, epilepsy, asthma..."
                 }
-                value={form.medical_conditions}
-                onChange={(value) =>
-                  updateField("medical_conditions", value)
+                value={
+                  form.medical_conditions
                 }
-                visible={visibility.show_medical_conditions}
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "medical_conditions",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_medical_conditions
+                }
                 onToggle={() =>
-                  toggle("show_medical_conditions")
+                  toggleVisibility(
+                    "show_medical_conditions"
+                  )
                 }
                 ka={ka}
               />
@@ -530,12 +1187,25 @@ export default function EmergencyRegistrationPage() {
                     ? "მიუთითეთ რეგულარულად მიღებული მედიკამენტები"
                     : "List regularly used medications"
                 }
-                value={form.medications}
-                onChange={(value) =>
-                  updateField("medications", value)
+                value={
+                  form.medications
                 }
-                visible={visibility.show_medications}
-                onToggle={() => toggle("show_medications")}
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "medications",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_medications
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_medications"
+                  )
+                }
                 ka={ka}
               />
 
@@ -550,32 +1220,61 @@ export default function EmergencyRegistrationPage() {
                     ? "სხვა მნიშვნელოვანი ინფორმაცია საგანგებო სიტუაციისთვის"
                     : "Other important information for an emergency"
                 }
-                value={form.medical_note}
-                onChange={(value) =>
-                  updateField("medical_note", value)
+                value={
+                  form.medical_note
                 }
-                visible={visibility.show_medical_note}
-                onToggle={() => toggle("show_medical_note")}
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "medical_note",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_medical_note
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_medical_note"
+                  )
+                }
                 ka={ka}
               />
 
-              {error && <ErrorBox text={error} />}
+              {error && (
+                <ErrorBox
+                  text={
+                    error
+                  }
+                />
+              )}
 
               <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
-                  onClick={previousStep}
+                  onClick={
+                    previousStep
+                  }
                 >
-                  ← {ka ? "უკან" : "Back"}
+                  ←{" "}
+                  {ka
+                    ? "უკან"
+                    : "Back"}
                 </button>
 
                 <button
                   type="button"
                   className="primaryButton"
-                  onClick={nextStep}
+                  onClick={() =>
+                    void nextStep()
+                  }
                 >
-                  {ka ? "შემდეგი" : "Next"} →
+                  {ka
+                    ? "შემდეგი"
+                    : "Next"}{" "}
+                  →
                 </button>
               </div>
             </>
@@ -599,7 +1298,9 @@ export default function EmergencyRegistrationPage() {
 
               <div className="requiredContactBox">
                 <div className="requiredContactTitle">
-                  <span>☎</span>
+                  <span>
+                    ☎
+                  </span>
 
                   <div>
                     <strong>
@@ -617,9 +1318,17 @@ export default function EmergencyRegistrationPage() {
                 </div>
 
                 <RequiredField
-                  label={ka ? "სახელი და გვარი" : "Full name"}
-                  value={form.emergency_contact_name}
-                  onChange={(value) =>
+                  label={
+                    ka
+                      ? "სახელი და გვარი"
+                      : "Full name"
+                  }
+                  value={
+                    form.emergency_contact_name
+                  }
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "emergency_contact_name",
                       value
@@ -634,14 +1343,20 @@ export default function EmergencyRegistrationPage() {
                       ? "თქვენთან კავშირი"
                       : "Relationship to you"
                   }
-                  value={form.emergency_contact_relationship}
-                  onChange={(value) =>
+                  value={
+                    form.emergency_contact_relationship
+                  }
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "emergency_contact_relationship",
                       value
                     )
                   }
-                  language={language}
+                  language={
+                    language
+                  }
                 />
 
                 <RequiredField
@@ -651,8 +1366,12 @@ export default function EmergencyRegistrationPage() {
                       : "Phone number"
                   }
                   type="tel"
-                  value={form.emergency_contact_phone}
-                  onChange={(value) =>
+                  value={
+                    form.emergency_contact_phone
+                  }
+                  onChange={(
+                    value
+                  ) =>
                     updateField(
                       "emergency_contact_phone",
                       value
@@ -665,11 +1384,23 @@ export default function EmergencyRegistrationPage() {
               <div className="sectionDivider" />
 
               <OptionalContactSection
-                form={form}
-                updateField={updateField}
-                visible={visibility.show_second_contact}
-                onToggle={() => toggle("show_second_contact")}
-                language={language}
+                form={
+                  form
+                }
+                updateField={
+                  updateField
+                }
+                visible={
+                  visibility.show_second_contact
+                }
+                onToggle={() =>
+                  toggleVisibility(
+                    "show_second_contact"
+                  )
+                }
+                language={
+                  language
+                }
               />
 
               <OptionalTextArea
@@ -683,20 +1414,33 @@ export default function EmergencyRegistrationPage() {
                     ? "მაგ: გთხოვთ დაუკავშირდეთ ჩემს ოჯახის წევრს..."
                     : "e.g. Please contact my family member..."
                 }
-                value={form.emergency_message}
-                onChange={(value) =>
-                  updateField("emergency_message", value)
+                value={
+                  form.emergency_message
                 }
-                visible={visibility.show_emergency_message}
+                onChange={(
+                  value
+                ) =>
+                  updateField(
+                    "emergency_message",
+                    value
+                  )
+                }
+                visible={
+                  visibility.show_emergency_message
+                }
                 onToggle={() =>
-                  toggle("show_emergency_message")
+                  toggleVisibility(
+                    "show_emergency_message"
+                  )
                 }
                 ka={ka}
               />
 
               <div className="locationCard">
                 <div className="locationText">
-                  <span className="locationIcon">⌖</span>
+                  <span className="locationIcon">
+                    ⌖
+                  </span>
 
                   <div>
                     <strong>
@@ -714,16 +1458,22 @@ export default function EmergencyRegistrationPage() {
                 </div>
 
                 <Switch
-                  active={locationSharing}
+                  active={
+                    locationSharing
+                  }
                   onClick={() =>
-                    setLocationSharing(!locationSharing)
+                    setLocationSharing(
+                      !locationSharing
+                    )
                   }
                 />
               </div>
 
               <div className="disclaimer">
                 <strong>
-                  {ka ? "მნიშვნელოვანი ინფორმაცია" : "Important"}
+                  {ka
+                    ? "მნიშვნელოვანი ინფორმაცია"
+                    : "Important"}
                 </strong>
 
                 <p>
@@ -733,21 +1483,34 @@ export default function EmergencyRegistrationPage() {
                 </p>
               </div>
 
-              {error && <ErrorBox text={error} />}
+              {error && (
+                <ErrorBox
+                  text={
+                    error
+                  }
+                />
+              )}
 
               <div className="buttons">
                 <button
                   type="button"
                   className="backButton"
-                  onClick={previousStep}
+                  onClick={
+                    previousStep
+                  }
                 >
-                  ← {ka ? "უკან" : "Back"}
+                  ←{" "}
+                  {ka
+                    ? "უკან"
+                    : "Back"}
                 </button>
 
                 <button
                   type="submit"
                   className="saveButton"
-                  disabled={saving}
+                  disabled={
+                    saving
+                  }
                 >
                   {saving
                     ? ka
@@ -773,39 +1536,74 @@ function Header({
   setLanguage,
 }: {
   language: Language;
-  setLanguage: (language: Language) => void;
+  setLanguage: (
+    language: Language
+  ) => void;
 }) {
-  const ka = language === "ka";
+  const ka =
+    language === "ka";
 
   return (
     <header className="header">
-      <a href="/" className="brand">
-        <div className="logo">QR</div>
+      <a
+        href="/"
+        className="brand"
+      >
+        <div className="logo">
+          QR
+        </div>
 
         <div>
-          <strong>QR RETURN</strong>
-          <small>SMART LOST & FOUND</small>
+          <strong>
+            QR RETURN
+          </strong>
+
+          <small>
+            SMART LOST & FOUND
+          </small>
         </div>
       </a>
 
       <div className="headerRight">
-        <a href="/" className="headerBack">
-          ← {ka ? "უკან" : "Back"}
+        <a
+          href="/"
+          className="headerBack"
+        >
+          ←{" "}
+          {ka
+            ? "უკან"
+            : "Back"}
         </a>
 
         <div className="languages">
           <button
             type="button"
-            className={language === "ka" ? "selected" : ""}
-            onClick={() => setLanguage("ka")}
+            className={
+              language === "ka"
+                ? "selected"
+                : ""
+            }
+            onClick={() =>
+              setLanguage(
+                "ka"
+              )
+            }
           >
             GEO
           </button>
 
           <button
             type="button"
-            className={language === "en" ? "selected" : ""}
-            onClick={() => setLanguage("en")}
+            className={
+              language === "en"
+                ? "selected"
+                : ""
+            }
+            onClick={() =>
+              setLanguage(
+                "en"
+              )
+            }
           >
             ENG
           </button>
@@ -829,14 +1627,22 @@ function Progress({
   return (
     <div className="progressItem">
       <span
-        className={`circle ${active ? "active" : ""} ${
-          current ? "current" : ""
+        className={`circle ${
+          active
+            ? "active"
+            : ""
+        } ${
+          current
+            ? "current"
+            : ""
         }`}
       >
         {number}
       </span>
 
-      <small>{label}</small>
+      <small>
+        {label}
+      </small>
     </div>
   );
 }
@@ -852,11 +1658,18 @@ function StepTitle({
 }) {
   return (
     <div className="stepTitle">
-      <b>{number}</b>
+      <b>
+        {number}
+      </b>
 
       <div>
-        <h2>{title}</h2>
-        <p>{text}</p>
+        <h2>
+          {title}
+        </h2>
+
+        <p>
+          {text}
+        </p>
       </div>
     </div>
   );
@@ -868,30 +1681,63 @@ function RequiredField({
   onChange,
   ka,
   type = "text",
+  locked = false,
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   ka: boolean;
   type?: string;
+  locked?: boolean;
 }) {
   return (
     <div className="requiredField">
       <label>
-        <strong>{label} *</strong>
+        <strong>
+          {label} *
+          {locked
+            ? " 🔒"
+            : ""}
+        </strong>
 
         <input
-          type={type}
-          value={value}
+          type={
+            type
+          }
+          value={
+            value
+          }
           required
-          onChange={(event) => onChange(event.target.value)}
+          readOnly={
+            locked
+          }
+          className={
+            locked
+              ? "lockedInput"
+              : ""
+          }
+          onChange={(
+            event
+          ) =>
+            onChange(
+              event
+                .target
+                .value
+            )
+          }
         />
       </label>
 
       <div className="requiredNote">
         ✓{" "}
         {ka
-          ? "სავალდებულო • ყოველთვის ხილული"
+          ? locked
+            ? "სავალდებულო • ყოველთვის ხილული • დაფიქსირებული"
+            : "სავალდებულო • ყოველთვის ხილული"
+          : locked
+          ? "Required • Always visible • Locked"
           : "Required • Always visible"}
       </div>
     </div>
@@ -906,26 +1752,58 @@ function RequiredRelationship({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   language: Language;
 }) {
-  const ka = language === "ka";
+  const ka =
+    language === "ka";
 
   return (
     <div className="requiredField">
       <label>
-        <strong>{label} *</strong>
+        <strong>
+          {label} *
+        </strong>
 
         <select
-          value={value}
+          value={
+            value
+          }
           required
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(
+            event
+          ) =>
+            onChange(
+              event
+                .target
+                .value
+            )
+          }
         >
-          {relationshipOptions[language].map(([value, label]) => (
-            <option key={value || "empty"} value={value}>
-              {label}
-            </option>
-          ))}
+          {relationshipOptions[
+            language
+          ].map(
+            ([
+              optionValue,
+              optionLabel,
+            ]) => (
+              <option
+                key={
+                  optionValue ||
+                  "empty"
+                }
+                value={
+                  optionValue
+                }
+              >
+                {
+                  optionLabel
+                }
+              </option>
+            )
+          )}
         </select>
       </label>
 
@@ -950,7 +1828,9 @@ function OptionalField({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -960,7 +1840,10 @@ function OptionalField({
     <div className="optionalField">
       <div className="fieldHeader">
         <div>
-          <strong>{label}</strong>
+          <strong>
+            {label}
+          </strong>
+
           <span>
             {ka
               ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
@@ -968,20 +1851,43 @@ function OptionalField({
           </span>
         </div>
 
-        <Switch active={visible} onClick={onToggle} />
+        <Switch
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
+        />
       </div>
 
       <input
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
+        type={
+          type
+        }
+        value={
+          value
+        }
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event
+              .target
+              .value
+          )
+        }
       />
 
       <div className="optionalNote">
         {ka
           ? "QR პროფილში ჩვენება:"
           : "Show in QR profile:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </div>
     </div>
   );
@@ -999,7 +1905,9 @@ function OptionalTextArea({
   label: string;
   placeholder?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -1008,7 +1916,10 @@ function OptionalTextArea({
     <div className="optionalField">
       <div className="fieldHeader">
         <div>
-          <strong>{label}</strong>
+          <strong>
+            {label}
+          </strong>
+
           <span>
             {ka
               ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
@@ -1016,20 +1927,43 @@ function OptionalTextArea({
           </span>
         </div>
 
-        <Switch active={visible} onClick={onToggle} />
+        <Switch
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
+        />
       </div>
 
       <textarea
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
+        value={
+          value
+        }
+        placeholder={
+          placeholder
+        }
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event
+              .target
+              .value
+          )
+        }
       />
 
       <div className="optionalNote">
         {ka
           ? "QR პროფილში ჩვენება:"
           : "Show in QR profile:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </div>
     </div>
   );
@@ -1046,7 +1980,9 @@ function OptionalSelect({
 }: {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -1056,7 +1992,10 @@ function OptionalSelect({
     <div className="optionalField">
       <div className="fieldHeader">
         <div>
-          <strong>{label}</strong>
+          <strong>
+            {label}
+          </strong>
+
           <span>
             {ka
               ? "ნებაყოფლობითი • შევსება თქვენი არჩევანია"
@@ -1064,25 +2003,61 @@ function OptionalSelect({
           </span>
         </div>
 
-        <Switch active={visible} onClick={onToggle} />
+        <Switch
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
+        />
       </div>
 
       <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
+        value={
+          value
+        }
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event
+              .target
+              .value
+          )
+        }
       >
-        {options.map(([value, label]) => (
-          <option key={value || "empty"} value={value}>
-            {label}
-          </option>
-        ))}
+        {options.map(
+          ([
+            optionValue,
+            optionLabel,
+          ]) => (
+            <option
+              key={
+                optionValue ||
+                "empty"
+              }
+              value={
+                optionValue
+              }
+            >
+              {
+                optionLabel
+              }
+            </option>
+          )
+        )}
       </select>
 
       <div className="optionalNote">
         {ka
           ? "QR პროფილში ჩვენება:"
           : "Show in QR profile:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </div>
     </div>
   );
@@ -1098,7 +2073,9 @@ function OptionalPhoto({
 }: {
   label: string;
   file: File | null;
-  setFile: (file: File | null) => void;
+  setFile: (
+    file: File | null
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   ka: boolean;
@@ -1107,7 +2084,10 @@ function OptionalPhoto({
     <div className="optionalField">
       <div className="fieldHeader">
         <div>
-          <strong>{label}</strong>
+          <strong>
+            {label}
+          </strong>
+
           <span>
             {ka
               ? "ნებაყოფლობითი • დამატება თქვენი არჩევანია"
@@ -1115,19 +2095,37 @@ function OptionalPhoto({
           </span>
         </div>
 
-        <Switch active={visible} onClick={onToggle} />
+        <Switch
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
+        />
       </div>
 
       <label className="photoUpload">
         <input
           type="file"
           accept="image/*"
-          onChange={(event) =>
-            setFile(event.target.files?.[0] || null)
+          onChange={(
+            event
+          ) =>
+            setFile(
+              event
+                .target
+                .files?.[0] ||
+                null
+            )
           }
         />
 
-        <div className="photoIcon">{file ? "✓" : "+"}</div>
+        <div className="photoIcon">
+          {file
+            ? "✓"
+            : "+"}
+        </div>
 
         <div>
           <strong>
@@ -1140,8 +2138,8 @@ function OptionalPhoto({
 
           <small>
             {ka
-              ? "აირჩიეთ სურათი მოწყობილობიდან"
-              : "Choose an image from your device"}
+              ? "აირჩიეთ სურათი მოწყობილობიდან • მაქსიმუმ 5 MB"
+              : "Choose an image from your device • Maximum 5 MB"}
           </small>
         </div>
       </label>
@@ -1150,7 +2148,11 @@ function OptionalPhoto({
         {ka
           ? "QR პროფილში ჩვენება:"
           : "Show in QR profile:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </div>
     </div>
   );
@@ -1164,12 +2166,16 @@ function OptionalContactSection({
   language,
 }: {
   form: FormState;
-  updateField: (field: keyof FormState, value: string) => void;
+  updateField: (
+    field: keyof FormState,
+    value: string
+  ) => void;
   visible: boolean;
   onToggle: () => void;
   language: Language;
 }) {
-  const ka = language === "ka";
+  const ka =
+    language === "ka";
 
   return (
     <div className="optionalContactBox">
@@ -1188,50 +2194,108 @@ function OptionalContactSection({
           </span>
         </div>
 
-        <Switch active={visible} onClick={onToggle} />
+        <Switch
+          active={
+            visible
+          }
+          onClick={
+            onToggle
+          }
+        />
       </div>
 
       <label className="simpleLabel">
-        <strong>{ka ? "სახელი და გვარი" : "Full name"}</strong>
+        <strong>
+          {ka
+            ? "სახელი და გვარი"
+            : "Full name"}
+        </strong>
 
         <input
-          value={form.second_contact_name}
-          onChange={(event) =>
-            updateField("second_contact_name", event.target.value)
+          value={
+            form.second_contact_name
+          }
+          onChange={(
+            event
+          ) =>
+            updateField(
+              "second_contact_name",
+              event
+                .target
+                .value
+            )
           }
         />
       </label>
 
       <label className="simpleLabel">
         <strong>
-          {ka ? "თქვენთან კავშირი" : "Relationship to you"}
+          {ka
+            ? "თქვენთან კავშირი"
+            : "Relationship to you"}
         </strong>
 
         <select
-          value={form.second_contact_relationship}
-          onChange={(event) =>
+          value={
+            form.second_contact_relationship
+          }
+          onChange={(
+            event
+          ) =>
             updateField(
               "second_contact_relationship",
-              event.target.value
+              event
+                .target
+                .value
             )
           }
         >
-          {relationshipOptions[language].map(([value, label]) => (
-            <option key={value || "empty"} value={value}>
-              {label}
-            </option>
-          ))}
+          {relationshipOptions[
+            language
+          ].map(
+            ([
+              optionValue,
+              optionLabel,
+            ]) => (
+              <option
+                key={
+                  optionValue ||
+                  "empty"
+                }
+                value={
+                  optionValue
+                }
+              >
+                {
+                  optionLabel
+                }
+              </option>
+            )
+          )}
         </select>
       </label>
 
       <label className="simpleLabel">
-        <strong>{ka ? "ტელეფონის ნომერი" : "Phone number"}</strong>
+        <strong>
+          {ka
+            ? "ტელეფონის ნომერი"
+            : "Phone number"}
+        </strong>
 
         <input
           type="tel"
-          value={form.second_contact_phone}
-          onChange={(event) =>
-            updateField("second_contact_phone", event.target.value)
+          value={
+            form.second_contact_phone
+          }
+          onChange={(
+            event
+          ) =>
+            updateField(
+              "second_contact_phone",
+              event
+                .target
+                .value
+            )
           }
         />
       </label>
@@ -1240,7 +2304,11 @@ function OptionalContactSection({
         {ka
           ? "QR პროფილში ჩვენება:"
           : "Show in QR profile:"}{" "}
-        <b>{visible ? "ON" : "OFF"}</b>
+        <b>
+          {visible
+            ? "ON"
+            : "OFF"}
+        </b>
       </div>
     </div>
   );
@@ -1256,17 +2324,33 @@ function Switch({
   return (
     <button
       type="button"
-      className={active ? "switch active" : "switch"}
-      onClick={onClick}
-      aria-pressed={active}
+      className={
+        active
+          ? "switch active"
+          : "switch"
+      }
+      onClick={
+        onClick
+      }
+      aria-pressed={
+        active
+      }
     >
       <span />
     </button>
   );
 }
 
-function ErrorBox({ text }: { text: string }) {
-  return <div className="errorBox">{text}</div>;
+function ErrorBox({
+  text,
+}: {
+  text: string;
+}) {
+  return (
+    <div className="errorBox">
+      {text}
+    </div>
+  );
 }
 
 function Styles() {
@@ -1543,7 +2627,6 @@ function Styles() {
         margin: 0;
         color: #101828;
         font-size: 23px;
-        letter-spacing: -0.3px;
       }
 
       .stepTitle p {
@@ -1587,7 +2670,6 @@ function Styles() {
         background: #ffffff;
         color: #101828;
         outline: none;
-        transition: 0.15s ease;
       }
 
       .requiredField input,
@@ -1607,15 +2689,10 @@ function Styles() {
         line-height: 1.5;
       }
 
-      .requiredField input:focus,
-      .requiredField select:focus,
-      .optionalField input:focus,
-      .optionalField select:focus,
-      .optionalField textarea:focus,
-      .simpleLabel input:focus,
-      .simpleLabel select:focus {
-        border-color: #155eef;
-        box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.08);
+      .lockedInput {
+        background: #f2f4f7 !important;
+        color: #667085 !important;
+        cursor: not-allowed;
       }
 
       .requiredNote {
@@ -1624,6 +2701,18 @@ function Styles() {
         font-size: 14px;
         line-height: 1.5;
         font-weight: 800;
+      }
+
+      .lockedBox {
+        margin-bottom: 20px;
+        padding: 14px;
+        border: 1px solid #d9e5fb;
+        border-radius: 12px;
+        background: #f2f7ff;
+        color: #344054;
+        font-size: 13px;
+        line-height: 1.5;
+        font-weight: 750;
       }
 
       .fieldHeader {
@@ -1678,7 +2767,6 @@ function Styles() {
         border-radius: 50%;
         background: #ffffff;
         transition: transform 0.2s ease;
-        box-shadow: 0 1px 3px rgba(16, 24, 40, 0.15);
       }
 
       .switch.active {
@@ -1759,7 +2847,6 @@ function Styles() {
         background: #fff0ee;
         color: #d92d20;
         font-size: 18px;
-        font-weight: 900;
       }
 
       .requiredContactTitle strong {
@@ -1821,7 +2908,6 @@ function Styles() {
         background: #e5efff;
         color: #155eef;
         font-size: 18px;
-        font-weight: 900;
       }
 
       .locationCard strong {
@@ -1905,7 +2991,6 @@ function Styles() {
 
       .saveButton:disabled {
         opacity: 0.6;
-        cursor: not-allowed;
       }
 
       .errorBox {
@@ -1922,9 +3007,9 @@ function Styles() {
 
       .successPage {
         width: calc(100% - 24px);
-        max-width: 580px;
+        max-width: 620px;
         margin: auto;
-        padding: 110px 0;
+        padding: 100px 0;
         text-align: center;
       }
 
@@ -1946,13 +3031,60 @@ function Styles() {
         font-size: 30px;
       }
 
-      .successPage p {
+      .successPage > p {
         margin: 0 0 25px;
         color: #667085;
       }
 
-      .successButton {
-        margin: auto;
+      .successButtons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .viewButton,
+      .homeButton {
+        min-height: 50px;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .viewButton {
+        background: #155eef;
+        color: #ffffff;
+      }
+
+      .homeButton {
+        border: 1px solid #d0d5dd;
+        background: #ffffff;
+        color: #475467;
+      }
+
+      .identityLockedNotice {
+        margin-top: 25px;
+        padding: 16px;
+        border: 1px solid #d9e5fb;
+        border-radius: 13px;
+        background: #f2f7ff;
+        text-align: left;
+      }
+
+      .identityLockedNotice strong {
+        color: #344054;
+        font-size: 14px;
+      }
+
+      .identityLockedNotice p {
+        margin: 6px 0 0;
+        color: #667085;
+        font-size: 13px;
+        line-height: 1.55;
       }
 
       @media (max-width: 600px) {
@@ -1964,38 +3096,17 @@ function Styles() {
           padding-top: 28px;
         }
 
-        .hero {
-          gap: 12px;
-        }
-
-        .emergencyIcon {
-          width: 52px;
-          height: 52px;
-          flex-basis: 52px;
-          font-size: 27px;
-        }
-
         .hero h1 {
           font-size: 27px;
-          letter-spacing: -0.5px;
-        }
-
-        .hero p {
-          font-size: 13px;
-        }
-
-        .progressItem {
-          min-width: 68px;
-        }
-
-        .card {
-          padding: 21px 14px;
-          border-radius: 18px;
         }
 
         .grid2 {
           grid-template-columns: 1fr;
           gap: 0;
+        }
+
+        .card {
+          padding: 21px 14px;
         }
 
         .requiredField input,
@@ -2014,10 +3125,6 @@ function Styles() {
           font-size: 13px;
         }
 
-        .locationCard {
-          align-items: flex-start;
-        }
-
         .buttons {
           display: grid;
           grid-template-columns: 0.9fr 1.4fr;
@@ -2031,9 +3138,13 @@ function Styles() {
           padding: 0 10px;
         }
 
-        .requiredContactBox,
-        .optionalContactBox {
-          padding: 15px;
+        .successButtons {
+          flex-direction: column;
+        }
+
+        .viewButton,
+        .homeButton {
+          width: 100%;
         }
       }
     `}</style>
