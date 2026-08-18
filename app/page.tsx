@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SupportLauncher from "./components/SupportLauncher";
 
 type Language = "ka" | "en";
 
@@ -453,6 +454,8 @@ export default function HomePage() {
           </a>
         </div>
       </section>
+
+      <SupportLauncher language={language} />
 
       <footer className="footer">
         <div className="footerInner">
