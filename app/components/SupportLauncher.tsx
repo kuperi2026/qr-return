@@ -45,6 +45,10 @@ function safeFileName(name: string) {
     .slice(-120);
 }
 
+function isImageType(type: string | null) {
+  return Boolean(type?.startsWith("image/"));
+}
+
 export default function SupportLauncher({
   language,
 }: Props) {
@@ -65,7 +69,6 @@ export default function SupportLauncher({
 
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-
   const [ready, setReady] = useState(false);
 
   const [error, setError] = useState("");
@@ -75,12 +78,6 @@ export default function SupportLauncher({
 
   const bottomRef =
     useRef<HTMLDivElement | null>(null);
-
-  /*
-    ==================================================
-    OPEN SUPPORT CHAT
-    ==================================================
-  */
 
   useEffect(() => {
     if (!open || ready) {
@@ -95,26 +92,16 @@ export default function SupportLauncher({
       setError("");
 
       try {
-        /*
-          1. ჯერ ვამოწმებთ უკვე არსებობს თუ არა user.
-        */
-
         let {
           data: userData,
           error: userError,
         } = await supabase.auth.getUser();
 
-        /*
-          2. თუ user არ არსებობს,
-          ვქმნით anonymous user-ს.
-        */
-
         if (!userData.user) {
           const {
             data: anonymousData,
             error: anonymousError,
-          } =
-            await supabase.auth.signInAnonymously();
+          } = await supabase.auth.signInAnonymously();
 
           if (anonymousError) {
             throw new Error(
@@ -129,11 +116,6 @@ export default function SupportLauncher({
                 : "Anonymous user could not be created."
             );
           }
-
-          /*
-            Anonymous sign-in-ის შემდეგ
-            user-ს თავიდან ვიღებთ.
-          */
 
           const result =
             await supabase.auth.getUser();
@@ -165,12 +147,6 @@ export default function SupportLauncher({
 
         setUserId(user.id);
 
-        /*
-          ==================================================
-          FIND EXISTING OPEN CONVERSATION
-          ==================================================
-        */
-
         const {
           data: existingConversation,
           error: findError,
@@ -199,12 +175,6 @@ export default function SupportLauncher({
         let currentConversation:
           SupportConversation;
 
-        /*
-          ==================================================
-          CREATE CONVERSATION IF NEEDED
-          ==================================================
-        */
-
         if (existingConversation) {
           currentConversation =
             existingConversation as SupportConversation;
@@ -213,9 +183,7 @@ export default function SupportLauncher({
             data: createdConversation,
             error: createError,
           } = await supabase
-            .from(
-              "support_conversations"
-            )
+            .from("support_conversations")
             .insert({
               user_id: user.id,
               status: "open",
@@ -234,9 +202,7 @@ export default function SupportLauncher({
             );
           }
 
-          if (
-            !createdConversation
-          ) {
+          if (!createdConversation) {
             throw new Error(
               ka
                 ? "Support საუბარი ვერ შეიქმნა."
@@ -255,12 +221,6 @@ export default function SupportLauncher({
         setConversation(
           currentConversation
         );
-
-        /*
-          ==================================================
-          LOAD EXISTING MESSAGES
-          ==================================================
-        */
 
         const {
           data: messageData,
@@ -300,11 +260,6 @@ export default function SupportLauncher({
             []) as SupportMessage[]
         );
 
-        /*
-          ყველაფერი მზადაა.
-          ახლა Send აქტიურდება.
-        */
-
         setReady(true);
       } catch (err) {
         console.error(
@@ -339,12 +294,6 @@ export default function SupportLauncher({
       cancelled = true;
     };
   }, [open, ready, ka]);
-
-  /*
-    ==================================================
-    REALTIME
-    ==================================================
-  */
 
   useEffect(() => {
     if (!conversation?.id) {
@@ -398,10 +347,6 @@ export default function SupportLauncher({
     };
   }, [conversation?.id]);
 
-  /*
-    Scroll bottom
-  */
-
   useEffect(() => {
     if (!open) {
       return;
@@ -411,12 +356,6 @@ export default function SupportLauncher({
       behavior: "smooth",
     });
   }, [messages, open]);
-
-  /*
-    ==================================================
-    FILE
-    ==================================================
-  */
 
   function selectFile(
     event: ChangeEvent<HTMLInputElement>
@@ -446,12 +385,6 @@ export default function SupportLauncher({
     setError("");
   }
 
-  /*
-    ==================================================
-    AUTOMATIC WELCOME
-    ==================================================
-  */
-
   async function sendAutomaticWelcome(
     currentConversation:
       SupportConversation
@@ -466,9 +399,7 @@ export default function SupportLauncher({
       data: updatedConversation,
       error: updateError,
     } = await supabase
-      .from(
-        "support_conversations"
-      )
+      .from("support_conversations")
       .update({
         auto_welcome_sent: true,
         updated_at:
@@ -497,11 +428,6 @@ export default function SupportLauncher({
 
       return;
     }
-
-    /*
-      თუ უკვე სხვა request-მა გააგზავნა,
-      მეორედ აღარ ვაგზავნით.
-    */
 
     if (!updatedConversation) {
       return;
@@ -542,12 +468,6 @@ export default function SupportLauncher({
     );
   }
 
-  /*
-    ==================================================
-    SEND MESSAGE
-    ==================================================
-  */
-
   async function sendMessage(
     event:
       FormEvent<HTMLFormElement>
@@ -555,11 +475,6 @@ export default function SupportLauncher({
     event.preventDefault();
 
     setError("");
-
-    /*
-      აქ უკვე მომხმარებელს ვაჩვენებთ
-      თუ რატომ ვერ იგზავნება.
-    */
 
     if (!ready) {
       setError(
@@ -611,12 +526,6 @@ export default function SupportLauncher({
       let attachmentPath:
         string | null = null;
 
-      /*
-        ==================================================
-        UPLOAD FILE
-        ==================================================
-      */
-
       if (file) {
         const fileName =
           `${Date.now()}-${safeFileName(
@@ -655,12 +564,6 @@ export default function SupportLauncher({
           );
         }
       }
-
-      /*
-        ==================================================
-        INSERT MESSAGE
-        ==================================================
-      */
 
       const {
         data: insertedMessage,
@@ -706,11 +609,6 @@ export default function SupportLauncher({
         );
       }
 
-      /*
-        Realtime რომც დაგვიანდეს,
-        user თავის შეტყობინებას მაშინვე დაინახავს.
-      */
-
       if (insertedMessage) {
         const next =
           insertedMessage as SupportMessage;
@@ -744,11 +642,6 @@ export default function SupportLauncher({
           "";
       }
 
-      /*
-        პირველი მესიჯის მერე
-        automatic reply.
-      */
-
       await sendAutomaticWelcome(
         conversation
       );
@@ -772,12 +665,6 @@ export default function SupportLauncher({
       setSending(false);
     }
   }
-
-  /*
-    ==================================================
-    RESET / RETRY
-    ==================================================
-  */
 
   function retryChat() {
     setConversation(null);
@@ -945,13 +832,22 @@ export default function SupportLauncher({
                         </div>
                       )}
 
-                      {message.attachment_name && (
-                        <div className="attachmentName">
-                          📎{" "}
-                          {
-                            message.attachment_name
+                      {message.attachment_path && (
+                        <AttachmentPreview
+                          path={
+                            message.attachment_path
                           }
-                        </div>
+                          name={
+                            message.attachment_name ||
+                            (ka
+                              ? "ფაილი"
+                              : "File")
+                          }
+                          type={
+                            message.attachment_type
+                          }
+                          ka={ka}
+                        />
                       )}
 
                       <time>
@@ -1159,15 +1055,15 @@ export default function SupportLauncher({
           right: 22px;
           bottom: 125px;
 
-          min-width: 188px;
+          min-width: 190px;
 
           padding:
-            9px 13px 9px 9px;
+            10px 14px 10px 10px;
 
           display: flex;
           align-items: center;
 
-          gap: 10px;
+          gap: 11px;
 
           border:
             1px solid
@@ -1209,31 +1105,13 @@ export default function SupportLauncher({
           color: #101828;
 
           cursor: pointer;
-
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease;
-        }
-
-        .supportLauncher:hover {
-          transform:
-            translateY(-2px);
-
-          box-shadow:
-            0 18px 42px
-            rgba(
-              49,
-              42,
-              120,
-              0.22
-            );
         }
 
         .agent {
-          width: 46px;
-          height: 46px;
+          width: 50px;
+          height: 50px;
 
-          flex: 0 0 46px;
+          flex: 0 0 50px;
 
           position: relative;
 
@@ -1251,7 +1129,7 @@ export default function SupportLauncher({
         }
 
         .face {
-          font-size: 24px;
+          font-size: 27px;
         }
 
         .launcherHeadset {
@@ -1260,7 +1138,7 @@ export default function SupportLauncher({
           right: -4px;
           top: -6px;
 
-          font-size: 14px;
+          font-size: 15px;
         }
 
         .onlineDot {
@@ -1269,8 +1147,8 @@ export default function SupportLauncher({
           right: 1px;
           bottom: 1px;
 
-          width: 10px;
-          height: 10px;
+          width: 11px;
+          height: 11px;
 
           border:
             2px solid white;
@@ -1294,30 +1172,24 @@ export default function SupportLauncher({
         .copy strong {
           color: #4f46e5;
 
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 900;
         }
 
         .copy span {
-          margin-top: 3px;
+          margin-top: 4px;
 
           color: #667085;
 
-          font-size: 9px;
+          font-size: 11px;
           font-weight: 700;
         }
 
         .arrow {
           color: #7655f7;
 
-          font-size: 21px;
+          font-size: 22px;
         }
-
-        /*
-          ==============================================
-          CHAT WINDOW
-          ==============================================
-        */
 
         .supportWindow {
           position: fixed;
@@ -1325,10 +1197,10 @@ export default function SupportLauncher({
           z-index: 10000;
 
           right: 22px;
-          bottom: 190px;
+          bottom: 195px;
 
-          width: 340px;
-          height: 465px;
+          width: 350px;
+          height: 480px;
 
           display: flex;
           flex-direction: column;
@@ -1338,7 +1210,7 @@ export default function SupportLauncher({
           border:
             1px solid #e4e7ec;
 
-          border-radius: 18px;
+          border-radius: 19px;
 
           background: white;
 
@@ -1353,14 +1225,14 @@ export default function SupportLauncher({
         }
 
         .chatHeader {
-          min-height: 65px;
+          min-height: 72px;
 
-          padding: 11px 13px;
+          padding: 13px 15px;
 
           display: flex;
           align-items: center;
 
-          gap: 10px;
+          gap: 11px;
 
           border-bottom:
             1px solid #eaecf0;
@@ -1374,15 +1246,15 @@ export default function SupportLauncher({
         }
 
         .agentSmall {
-          width: 42px;
-          height: 42px;
+          width: 48px;
+          height: 48px;
 
           position: relative;
 
           display: grid;
           place-items: center;
 
-          border-radius: 12px;
+          border-radius: 13px;
 
           background:
             linear-gradient(
@@ -1393,7 +1265,7 @@ export default function SupportLauncher({
         }
 
         .girl {
-          font-size: 22px;
+          font-size: 25px;
         }
 
         .headset {
@@ -1402,7 +1274,7 @@ export default function SupportLauncher({
           right: -3px;
           top: -5px;
 
-          font-size: 13px;
+          font-size: 14px;
         }
 
         .agentSmall > i {
@@ -1411,8 +1283,8 @@ export default function SupportLauncher({
           right: 1px;
           bottom: 1px;
 
-          width: 9px;
-          height: 9px;
+          width: 10px;
+          height: 10px;
 
           border:
             2px solid white;
@@ -1434,23 +1306,24 @@ export default function SupportLauncher({
         .headerCopy strong {
           color: #1465e8;
 
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 900;
         }
 
         .headerCopy span {
-          margin-top: 3px;
+          margin-top: 4px;
 
-          color: #667085;
+          color: #475467;
 
-          font-size: 9px;
+          font-size: 11px;
+          font-weight: 700;
         }
 
         .statusDot {
-          width: 6px;
-          height: 6px;
+          width: 7px;
+          height: 7px;
 
-          margin-right: 4px;
+          margin-right: 5px;
 
           display: inline-block;
 
@@ -1464,8 +1337,8 @@ export default function SupportLauncher({
         }
 
         .close {
-          width: 31px;
-          height: 31px;
+          width: 34px;
+          height: 34px;
 
           border: 0;
 
@@ -1475,21 +1348,15 @@ export default function SupportLauncher({
 
           color: #667085;
 
-          font-size: 18px;
+          font-size: 20px;
 
           cursor: pointer;
         }
 
-        /*
-          ==============================================
-          MESSAGES
-          ==============================================
-        */
-
         .messages {
           flex: 1;
 
-          padding: 13px;
+          padding: 15px;
 
           overflow-y: auto;
 
@@ -1508,21 +1375,21 @@ export default function SupportLauncher({
         }
 
         .welcomeAgent {
-          margin-bottom: 8px;
+          margin-bottom: 10px;
 
-          font-size: 32px;
+          font-size: 36px;
         }
 
         .welcome strong {
-          font-size: 14px;
+          font-size: 16px;
         }
 
         .welcome p {
-          margin: 4px 0 0;
+          margin: 5px 0 0;
 
-          color: #98a2b3;
+          color: #667085;
 
-          font-size: 10px;
+          font-size: 12px;
         }
 
         .loading {
@@ -1538,12 +1405,12 @@ export default function SupportLauncher({
 
           color: #667085;
 
-          font-size: 10px;
+          font-size: 12px;
         }
 
         .loader {
-          width: 29px;
-          height: 29px;
+          width: 30px;
+          height: 30px;
 
           border:
             3px solid #e4e7ec;
@@ -1582,12 +1449,12 @@ export default function SupportLauncher({
         }
 
         .loadError strong {
-          font-size: 11px;
+          font-size: 12px;
         }
 
         .loadError button {
           padding:
-            8px 12px;
+            9px 13px;
 
           border: 0;
 
@@ -1597,13 +1464,13 @@ export default function SupportLauncher({
 
           color: white;
 
-          font-size: 9px;
+          font-size: 10px;
 
           cursor: pointer;
         }
 
         .messageRow {
-          margin-bottom: 8px;
+          margin-bottom: 10px;
 
           display: flex;
         }
@@ -1614,26 +1481,26 @@ export default function SupportLauncher({
         }
 
         .bubble {
-          max-width: 79%;
+          max-width: 82%;
 
-          padding: 8px 10px;
+          padding: 10px 12px;
 
           border:
             1px solid #e4e7ec;
 
           border-radius:
-            5px
-            13px
-            13px
-            13px;
+            6px
+            14px
+            14px
+            14px;
 
           background: white;
 
           color: #344054;
 
-          font-size: 11px;
+          font-size: 13px;
 
-          line-height: 1.45;
+          line-height: 1.5;
         }
 
         .bubble.mine {
@@ -1641,10 +1508,10 @@ export default function SupportLauncher({
             #5b5ce2;
 
           border-radius:
-            13px
-            5px
-            13px
-            13px;
+            14px
+            6px
+            14px
+            14px;
 
           background:
             linear-gradient(
@@ -1657,11 +1524,11 @@ export default function SupportLauncher({
         }
 
         .senderLabel {
-          margin-bottom: 4px;
+          margin-bottom: 5px;
 
           color: #667085;
 
-          font-size: 8px;
+          font-size: 9px;
 
           font-weight: 800;
         }
@@ -1673,7 +1540,7 @@ export default function SupportLauncher({
               255,
               255,
               255,
-              0.72
+              0.75
             );
         }
 
@@ -1686,13 +1553,13 @@ export default function SupportLauncher({
         }
 
         .bubble time {
-          margin-top: 4px;
+          margin-top: 6px;
 
           display: block;
 
           color: #98a2b3;
 
-          font-size: 7px;
+          font-size: 8px;
 
           text-align: right;
         }
@@ -1707,23 +1574,91 @@ export default function SupportLauncher({
             );
         }
 
-        .attachmentName {
-          margin-top: 5px;
-
-          font-size: 9px;
+        .attachmentPreview {
+          margin-top: 9px;
         }
 
-        /*
-          ==============================================
-          ERROR + FILE
-          ==============================================
-        */
+        .attachmentImage {
+          display: block;
+
+          width: 100%;
+          max-height: 180px;
+
+          object-fit: cover;
+
+          border-radius: 10px;
+
+          cursor: pointer;
+
+          border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .fileCard {
+          display: flex;
+
+          align-items: center;
+          justify-content: space-between;
+
+          gap: 8px;
+
+          padding: 9px 10px;
+
+          border-radius: 9px;
+
+          background: rgba(
+            255,
+            255,
+            255,
+            0.16
+          );
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.18
+            );
+        }
+
+        .bubble:not(.mine)
+          .fileCard {
+          background: #f8fafc;
+
+          border-color:
+            #e4e7ec;
+        }
+
+        .fileCard span {
+          min-width: 0;
+
+          overflow: hidden;
+
+          text-overflow: ellipsis;
+
+          white-space: nowrap;
+
+          font-size: 10px;
+        }
+
+        .fileCard a {
+          flex: 0 0 auto;
+
+          color: inherit;
+
+          font-size: 10px;
+
+          font-weight: 800;
+
+          text-decoration: underline;
+        }
 
         .errorBox {
           margin:
             7px 10px;
 
-          padding: 8px;
+          padding: 9px;
 
           border:
             1px solid #fecdca;
@@ -1734,7 +1669,7 @@ export default function SupportLauncher({
 
           color: #b42318;
 
-          font-size: 9px;
+          font-size: 10px;
         }
 
         .filePreview {
@@ -1742,7 +1677,7 @@ export default function SupportLauncher({
             6px 10px 0;
 
           padding:
-            7px 9px;
+            8px 10px;
 
           display: flex;
 
@@ -1757,7 +1692,7 @@ export default function SupportLauncher({
 
           color: #5925dc;
 
-          font-size: 9px;
+          font-size: 10px;
         }
 
         .filePreview button {
@@ -1771,14 +1706,8 @@ export default function SupportLauncher({
           cursor: pointer;
         }
 
-        /*
-          ==============================================
-          COMPOSER
-          ==============================================
-        */
-
         .composer {
-          padding: 9px;
+          padding: 10px;
 
           border-top:
             1px solid #eaecf0;
@@ -1789,10 +1718,10 @@ export default function SupportLauncher({
         .composer textarea {
           width: 100%;
 
-          min-height: 54px;
-          max-height: 90px;
+          min-height: 58px;
+          max-height: 100px;
 
-          padding: 8px;
+          padding: 9px;
 
           border: 0;
 
@@ -1802,7 +1731,7 @@ export default function SupportLauncher({
 
           color: #101828;
 
-          font-size: 11px;
+          font-size: 13px;
         }
 
         .composer textarea:disabled {
@@ -1823,8 +1752,8 @@ export default function SupportLauncher({
         }
 
         .attach {
-          width: 34px;
-          height: 34px;
+          width: 36px;
+          height: 36px;
 
           display: grid;
           place-items: center;
@@ -1834,6 +1763,8 @@ export default function SupportLauncher({
           background: #f2f4f7;
 
           cursor: pointer;
+
+          font-size: 17px;
         }
 
         .attach.disabled {
@@ -1853,12 +1784,12 @@ export default function SupportLauncher({
         .connectingText {
           color: #98a2b3;
 
-          font-size: 8px;
+          font-size: 9px;
         }
 
         .send {
-          width: 42px;
-          height: 36px;
+          width: 44px;
+          height: 38px;
 
           border: 0;
 
@@ -1868,22 +1799,11 @@ export default function SupportLauncher({
 
           color: white;
 
-          font-size: 17px;
+          font-size: 18px;
 
           font-weight: 900;
 
           cursor: pointer;
-
-          transition:
-            opacity 0.15s ease,
-            transform 0.15s ease;
-        }
-
-        .send:hover:not(
-            :disabled
-          ) {
-          transform:
-            translateX(1px);
         }
 
         .send:disabled {
@@ -1893,39 +1813,153 @@ export default function SupportLauncher({
             not-allowed;
         }
 
-        /*
-          ==============================================
-          MOBILE
-          ==============================================
-        */
-
         @media (
           max-width: 600px
         ) {
           .supportLauncher {
             right: 12px;
 
-            bottom: 125px;
+            bottom: 130px;
 
-            min-width: 165px;
+            min-width: 170px;
           }
 
           .supportWindow {
             right: 12px;
 
-            bottom: 190px;
+            bottom: 200px;
 
             width:
               calc(
                 100vw - 24px
               );
 
-            max-width: 340px;
+            max-width: 350px;
 
-            height: 450px;
+            height: 460px;
           }
         }
       `}</style>
     </>
+  );
+}
+
+function AttachmentPreview({
+  path,
+  name,
+  type,
+  ka,
+}: {
+  path: string;
+  name: string;
+  type: string | null;
+  ka: boolean;
+}) {
+  const [url, setUrl] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSignedUrl() {
+      const {
+        data,
+        error,
+      } = await supabase.storage
+        .from(
+          "support-attachments"
+        )
+        .createSignedUrl(
+          path,
+          60 * 60
+        );
+
+      if (
+        !active
+      ) {
+        return;
+      }
+
+      if (
+        error ||
+        !data?.signedUrl
+      ) {
+        setUrl("");
+        return;
+      }
+
+      setUrl(
+        data.signedUrl
+      );
+    }
+
+    void loadSignedUrl();
+
+    return () => {
+      active = false;
+    };
+  }, [path]);
+
+  if (!url) {
+    return (
+      <div className="attachmentPreview">
+        <div className="fileCard">
+          <span>
+            📎 {name}
+          </span>
+
+          <span>
+            {ka
+              ? "იტვირთება..."
+              : "Loading..."}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    isImageType(type)
+  ) {
+    return (
+      <div className="attachmentPreview">
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          title={
+            ka
+              ? "ფოტოს გახსნა"
+              : "Open image"
+          }
+        >
+          <img
+            src={url}
+            alt={name}
+            className="attachmentImage"
+          />
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="attachmentPreview">
+      <div className="fileCard">
+        <span>
+          📎 {name}
+        </span>
+
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {ka
+            ? "გახსნა"
+            : "Open"}
+        </a>
+      </div>
+    </div>
   );
 }
