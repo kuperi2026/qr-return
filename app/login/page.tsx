@@ -7,18 +7,24 @@ type Lang = "ka" | "en";
 
 export default function LoginPage() {
   const [lang, setLang] = useState<Lang>("ka");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+
+  const [resetLoading, setResetLoading] = useState(false);
+
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const ka = lang === "ka";
 
   useEffect(() => {
-    checkExistingSession();
+    void checkExistingSession();
   }, []);
 
   async function routeUser() {
@@ -31,7 +37,6 @@ export default function LoginPage() {
       return false;
     }
 
-    // 1. ჯერ ვამოწმებთ — ეს მომხმარებელი Owner არის თუ არა.
     const { data: ownerData, error: ownerError } = await supabase
       .from("owner_accounts")
       .select("user_id")
@@ -47,10 +52,8 @@ export default function LoginPage() {
       return true;
     }
 
-    // 2. თუ Owner არ არის, ვცდილობთ Admin access-ის claim-ს.
-    const { data: adminData, error: adminError } = await supabase.rpc(
-      "claim_admin_access"
-    );
+    const { data: adminData, error: adminError } =
+      await supabase.rpc("claim_admin_access");
 
     if (adminError) {
       throw adminError;
@@ -61,7 +64,6 @@ export default function LoginPage() {
       return true;
     }
 
-    // 3. თუ არც Owner არის და არც Admin assignment აქვს.
     setError(
       ka
         ? "ამ ანგარიშთან Owner ან Admin პროფილი დაკავშირებული არ არის."
@@ -89,10 +91,13 @@ export default function LoginPage() {
     }
   }
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  async function handleLogin(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setError("");
+    setMessage("");
 
     const cleanEmail = email.trim().toLowerCase();
 
@@ -128,12 +133,12 @@ export default function LoginPage() {
 
       await routeUser();
     } catch (err) {
-      const message =
+      const text =
         err instanceof Error ? err.message : "";
 
       if (
-        message.toLowerCase().includes("invalid login") ||
-        message.toLowerCase().includes("invalid credentials")
+        text.toLowerCase().includes("invalid login") ||
+        text.toLowerCase().includes("invalid credentials")
       ) {
         setError(
           ka
@@ -142,7 +147,7 @@ export default function LoginPage() {
         );
       } else {
         setError(
-          message ||
+          text ||
             (ka
               ? "ანგარიშზე შესვლა ვერ მოხერხდა."
               : "Could not sign in.")
@@ -153,9 +158,61 @@ export default function LoginPage() {
     }
   }
 
+  async function handleForgotPassword() {
+    setError("");
+    setMessage("");
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      setError(
+        ka
+          ? "ჯერ შეიყვანეთ თქვენი ელფოსტა."
+          : "Enter your email first."
+      );
+      return;
+    }
+
+    setResetLoading(true);
+
+    try {
+      const redirectTo =
+        `${window.location.origin}/reset-password`;
+
+      const { error: resetError } =
+        await supabase.auth.resetPasswordForEmail(
+          cleanEmail,
+          {
+            redirectTo,
+          }
+        );
+
+      if (resetError) {
+        throw resetError;
+      }
+
+      setMessage(
+        ka
+          ? "პაროლის აღდგენის ბმული გამოგზავნილია თქვენს ელფოსტაზე. შეამოწმეთ Inbox და Spam."
+          : "A password reset link has been sent to your email. Check your Inbox and Spam folder."
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : ka
+          ? "პაროლის აღდგენის წერილის გაგზავნა ვერ მოხერხდა."
+          : "Could not send the password reset email."
+      );
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     setError("");
+    setMessage("");
     setChecking(false);
   }
 
@@ -163,6 +220,7 @@ export default function LoginPage() {
     return (
       <main className="statePage">
         <div className="stateLogo">QR</div>
+
         <strong>QR RETURN</strong>
 
         <p>
@@ -171,55 +229,16 @@ export default function LoginPage() {
             : "Checking account type..."}
         </p>
 
-        <button type="button" onClick={handleLogout}>
-          {ka ? "სხვა ანგარიშით შესვლა" : "Use another account"}
+        <button
+          type="button"
+          onClick={handleLogout}
+        >
+          {ka
+            ? "სხვა ანგარიშით შესვლა"
+            : "Use another account"}
         </button>
 
-        <style jsx>{`
-          .statePage {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f7f9fc;
-            font-family: Inter, Arial, sans-serif;
-            color: #667085;
-          }
-
-          .stateLogo {
-            width: 55px;
-            height: 55px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 12px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #1465e8, #7655f7);
-            color: white;
-            font-weight: 900;
-          }
-
-          strong {
-            color: #1465e8;
-            font-size: 21px;
-          }
-
-          p {
-            font-size: 12px;
-          }
-
-          button {
-            margin-top: 10px;
-            padding: 10px 14px;
-            border: 1px solid #d0d5dd;
-            border-radius: 9px;
-            background: white;
-            color: #475467;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-          }
-        `}</style>
+        <Styles />
       </main>
     );
   }
@@ -258,7 +277,9 @@ export default function LoginPage() {
       <section className="container">
         <div className="intro">
           <div className="eyebrow">
-            {ka ? "QR RETURN ანგარიში" : "QR RETURN ACCOUNT"}
+            {ka
+              ? "QR RETURN ანგარიში"
+              : "QR RETURN ACCOUNT"}
           </div>
 
           <h1>
@@ -277,7 +298,7 @@ export default function LoginPage() {
             <div className="roleIcon">👤</div>
 
             <div>
-              <strong>{ka ? "Owner" : "Owner"}</strong>
+              <strong>Owner</strong>
 
               <p>
                 {ka
@@ -320,12 +341,16 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin}>
             <label>
-              <span>{ka ? "ელფოსტა" : "Email"} *</span>
+              <span>
+                {ka ? "ელფოსტა" : "Email"} *
+              </span>
 
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 placeholder="name@example.com"
                 autoComplete="email"
                 required
@@ -333,13 +358,21 @@ export default function LoginPage() {
             </label>
 
             <label>
-              <span>{ka ? "პაროლი" : "Password"} *</span>
+              <span>
+                {ka ? "პაროლი" : "Password"} *
+              </span>
 
               <div className="passwordField">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required
@@ -349,7 +382,9 @@ export default function LoginPage() {
                   type="button"
                   className="passwordToggle"
                   onClick={() =>
-                    setShowPassword((current) => !current)
+                    setShowPassword(
+                      (current) => !current
+                    )
                   }
                 >
                   {showPassword ? "🙈" : "👁"}
@@ -358,20 +393,17 @@ export default function LoginPage() {
             </label>
 
             <div className="forgotRow">
-              <span />
-
               <button
                 type="button"
                 className="forgotButton"
-                onClick={() =>
-                  setError(
-                    ka
-                      ? "პაროლის აღდგენის სისტემა შემდეგ ეტაპზე გააქტიურდება."
-                      : "Password recovery will be activated later."
-                  )
-                }
+                onClick={handleForgotPassword}
+                disabled={resetLoading}
               >
-                {ka
+                {resetLoading
+                  ? ka
+                    ? "იგზავნება..."
+                    : "Sending..."
+                  : ka
                   ? "დაგავიწყდათ პაროლი?"
                   : "Forgot password?"}
               </button>
@@ -381,6 +413,13 @@ export default function LoginPage() {
               <div className="errorBox">
                 <strong>!</strong>
                 <span>{error}</span>
+              </div>
+            )}
+
+            {message && (
+              <div className="successBox">
+                <strong>✓</strong>
+                <span>{message}</span>
               </div>
             )}
 
@@ -408,378 +447,469 @@ export default function LoginPage() {
                 : "Don't have a QR RETURN account?"}
             </span>
 
-            <a href="/signup">
-              {ka ? "ანგარიშის შექმნა" : "Create account"} →
+            <a href="/account/register">
+              {ka
+                ? "ანგარიშის შექმნა"
+                : "Create account"}{" "}
+              →
             </a>
           </div>
         </div>
       </section>
 
-      <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
+      <Styles />
+    </main>
+  );
+}
 
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-        }
+function Styles() {
+  return (
+    <style jsx global>{`
+      * {
+        box-sizing: border-box;
+      }
 
-        body {
-          background: #f7f9fc;
-          color: #101828;
-          font-family: Inter, Arial, sans-serif;
-        }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
 
-        input,
-        button {
-          font: inherit;
-        }
+      body {
+        background: #f7f9fc;
+        color: #101828;
+        font-family: Inter, Arial, sans-serif;
+      }
 
-        .page {
-          min-height: 100vh;
-          background:
-            radial-gradient(
-              circle at 8% 15%,
-              rgba(20, 101, 232, 0.09),
-              transparent 27%
-            ),
-            radial-gradient(
-              circle at 93% 10%,
-              rgba(118, 85, 247, 0.1),
-              transparent 28%
-            ),
-            #f7f9fc;
-        }
+      input,
+      button {
+        font: inherit;
+      }
 
-        .header {
-          width: calc(100% - 36px);
-          max-width: 1100px;
-          min-height: 86px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid #e4e7ec;
-        }
+      .page {
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            circle at 8% 15%,
+            rgba(20, 101, 232, 0.09),
+            transparent 27%
+          ),
+          radial-gradient(
+            circle at 93% 10%,
+            rgba(118, 85, 247, 0.1),
+            transparent 28%
+          ),
+          #f7f9fc;
+      }
 
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-        }
+      .statePage {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f7f9fc;
+        color: #667085;
+      }
 
-        .logo {
-          width: 50px;
-          height: 50px;
-          display: grid;
-          place-items: center;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-weight: 900;
-        }
+      .stateLogo {
+        width: 55px;
+        height: 55px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 12px;
+        border-radius: 15px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
+        color: white;
+        font-weight: 900;
+      }
 
-        .brand strong,
-        .brand small {
-          display: block;
-        }
+      .statePage > strong {
+        color: #1465e8;
+        font-size: 21px;
+      }
 
-        .brand strong {
-          color: #1465e8;
-          font-size: 21px;
-          font-weight: 900;
-        }
+      .statePage p {
+        font-size: 12px;
+      }
 
-        .brand small {
-          margin-top: 3px;
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 1.6px;
-        }
+      .statePage button {
+        margin-top: 10px;
+        padding: 10px 14px;
+        border: 1px solid #d0d5dd;
+        border-radius: 9px;
+        background: white;
+        color: #475467;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+      }
 
-        .languages {
-          padding: 4px;
-          display: flex;
-          border-radius: 10px;
-          background: #eaecf0;
-        }
+      .header {
+        width: calc(100% - 36px);
+        max-width: 1100px;
+        min-height: 86px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #e4e7ec;
+      }
 
-        .languages button {
-          padding: 8px 10px;
-          border: 0;
-          border-radius: 8px;
-          background: transparent;
-          color: #667085;
-          font-size: 11px;
-          font-weight: 900;
-          cursor: pointer;
-        }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
 
-        .languages button.active {
-          background: white;
-          color: #1465e8;
-        }
+      .logo {
+        width: 50px;
+        height: 50px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
+        color: white;
+        font-weight: 900;
+      }
 
+      .brand strong,
+      .brand small {
+        display: block;
+      }
+
+      .brand strong {
+        color: #1465e8;
+        font-size: 21px;
+        font-weight: 900;
+      }
+
+      .brand small {
+        margin-top: 3px;
+        color: #7655f7;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 1.6px;
+      }
+
+      .languages {
+        padding: 4px;
+        display: flex;
+        border-radius: 10px;
+        background: #eaecf0;
+      }
+
+      .languages button {
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #667085;
+        font-size: 11px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .languages button.active {
+        background: white;
+        color: #1465e8;
+      }
+
+      .container {
+        width: calc(100% - 36px);
+        max-width: 1000px;
+        min-height: calc(100vh - 86px);
+        margin: auto;
+        padding: 65px 0;
+        display: grid;
+        grid-template-columns: 1fr 445px;
+        align-items: center;
+        gap: 70px;
+      }
+
+      .intro {
+        max-width: 480px;
+      }
+
+      .eyebrow {
+        color: #7655f7;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 1.6px;
+      }
+
+      .intro h1 {
+        margin: 12px 0 15px;
+        font-size: clamp(42px, 5vw, 57px);
+        line-height: 1.04;
+        letter-spacing: -2.4px;
+      }
+
+      .intro > p {
+        margin: 0 0 28px;
+        color: #667085;
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .roleCard {
+        margin-top: 11px;
+        padding: 15px;
+        display: flex;
+        gap: 12px;
+        border: 1px solid #e4e7ec;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.75);
+      }
+
+      .roleIcon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #eef4ff;
+      }
+
+      .roleCard strong {
+        font-size: 12px;
+      }
+
+      .roleCard p {
+        margin: 4px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .card {
+        padding: 32px;
+        border: 1px solid #e4e7ec;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
+      }
+
+      .cardHeader {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+
+      .loginIcon {
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        background: linear-gradient(
+          135deg,
+          #eef4ff,
+          #f0edff
+        );
+        font-size: 26px;
+      }
+
+      .cardHeader span {
+        color: #7655f7;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+      }
+
+      .cardHeader h2 {
+        margin: 4px 0 0;
+        font-size: 25px;
+      }
+
+      .description {
+        margin: 17px 0 24px;
+        color: #667085;
+        font-size: 12px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+      }
+
+      label > span {
+        display: block;
+        margin-bottom: 7px;
+        color: #475467;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      input {
+        width: 100%;
+        height: 52px;
+        padding: 0 13px;
+        border: 1px solid #d0d5dd;
+        border-radius: 11px;
+        background: white;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: #84adff;
+        box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
+      }
+
+      .passwordField {
+        position: relative;
+      }
+
+      .passwordField input {
+        padding-right: 50px;
+      }
+
+      .passwordToggle {
+        position: absolute;
+        top: 0;
+        right: 4px;
+        width: 44px;
+        height: 52px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .forgotRow {
+        margin-top: -6px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .forgotButton {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #1465e8;
+        font-size: 10px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .forgotButton:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .errorBox,
+      .successBox {
+        padding: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        border-radius: 10px;
+        font-size: 11px;
+      }
+
+      .errorBox {
+        border: 1px solid #fecdca;
+        background: #fff1f0;
+        color: #b42318;
+      }
+
+      .successBox {
+        border: 1px solid #abefc6;
+        background: #ecfdf3;
+        color: #027a48;
+      }
+
+      .errorBox strong,
+      .successBox strong {
+        width: 20px;
+        height: 20px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: white;
+        font-size: 10px;
+      }
+
+      .errorBox strong {
+        background: #d92d20;
+      }
+
+      .successBox strong {
+        background: #12b76a;
+      }
+
+      .submitButton {
+        width: 100%;
+        min-height: 53px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: 0;
+        border-radius: 11px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
+        color: white;
+        font-size: 13px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .submitButton:disabled {
+        opacity: 0.65;
+      }
+
+      .signupBox {
+        margin-top: 22px;
+        padding-top: 18px;
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+        border-top: 1px solid #eaecf0;
+        color: #667085;
+        font-size: 10px;
+      }
+
+      .signupBox a {
+        color: #1465e8;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      @media (max-width: 850px) {
         .container {
-          width: calc(100% - 36px);
-          max-width: 1000px;
-          min-height: calc(100vh - 86px);
-          margin: auto;
-          padding: 65px 0;
-          display: grid;
-          grid-template-columns: 1fr 445px;
-          align-items: center;
-          gap: 70px;
+          max-width: 600px;
+          grid-template-columns: 1fr;
+          gap: 35px;
         }
+      }
 
-        .intro {
-          max-width: 480px;
-        }
-
-        .eyebrow {
-          color: #7655f7;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 1.6px;
+      @media (max-width: 550px) {
+        .container {
+          padding-top: 40px;
         }
 
         .intro h1 {
-          margin: 12px 0 15px;
-          font-size: clamp(42px, 5vw, 57px);
-          line-height: 1.04;
-          letter-spacing: -2.4px;
-        }
-
-        .intro > p {
-          margin: 0 0 28px;
-          color: #667085;
-          font-size: 15px;
-          line-height: 1.7;
-        }
-
-        .roleCard {
-          margin-top: 11px;
-          padding: 15px;
-          display: flex;
-          gap: 12px;
-          border: 1px solid #e4e7ec;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.75);
-        }
-
-        .roleIcon {
-          width: 38px;
-          height: 38px;
-          flex: 0 0 38px;
-          display: grid;
-          place-items: center;
-          border-radius: 10px;
-          background: #eef4ff;
-        }
-
-        .roleCard strong {
-          font-size: 12px;
-        }
-
-        .roleCard p {
-          margin: 4px 0 0;
-          color: #667085;
-          font-size: 10px;
-          line-height: 1.5;
+          font-size: 38px;
         }
 
         .card {
-          padding: 32px;
-          border: 1px solid #e4e7ec;
-          border-radius: 24px;
-          background: white;
-          box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
+          padding: 23px;
         }
-
-        .cardHeader {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-        }
-
-        .loginIcon {
-          width: 54px;
-          height: 54px;
-          display: grid;
-          place-items: center;
-          border-radius: 15px;
-          background: linear-gradient(135deg, #eef4ff, #f0edff);
-          font-size: 26px;
-        }
-
-        .cardHeader span {
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-        }
-
-        .cardHeader h2 {
-          margin: 4px 0 0;
-          font-size: 25px;
-        }
-
-        .description {
-          margin: 17px 0 24px;
-          color: #667085;
-          font-size: 12px;
-        }
-
-        form {
-          display: flex;
-          flex-direction: column;
-          gap: 17px;
-        }
-
-        label > span {
-          display: block;
-          margin-bottom: 7px;
-          color: #475467;
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        input {
-          width: 100%;
-          height: 52px;
-          padding: 0 13px;
-          border: 1px solid #d0d5dd;
-          border-radius: 11px;
-          background: white;
-          outline: none;
-        }
-
-        input:focus {
-          border-color: #84adff;
-          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
-        }
-
-        .passwordField {
-          position: relative;
-        }
-
-        .passwordField input {
-          padding-right: 50px;
-        }
-
-        .passwordToggle {
-          position: absolute;
-          top: 0;
-          right: 4px;
-          width: 44px;
-          height: 52px;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-        }
-
-        .forgotRow {
-          margin-top: -6px;
-          display: flex;
-          justify-content: flex-end;
-        }
-
-        .forgotButton {
-          padding: 0;
-          border: 0;
-          background: transparent;
-          color: #1465e8;
-          font-size: 10px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .errorBox {
-          padding: 12px;
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          border: 1px solid #fecdca;
-          border-radius: 10px;
-          background: #fff1f0;
-          color: #b42318;
-          font-size: 11px;
-        }
-
-        .errorBox strong {
-          width: 20px;
-          height: 20px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #d92d20;
-          color: white;
-          font-size: 10px;
-        }
-
-        .submitButton {
-          width: 100%;
-          min-height: 53px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 9px;
-          border: 0;
-          border-radius: 11px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-size: 13px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .submitButton:disabled {
-          opacity: 0.65;
-        }
-
-        .signupBox {
-          margin-top: 22px;
-          padding-top: 18px;
-          display: flex;
-          justify-content: center;
-          gap: 7px;
-          border-top: 1px solid #eaecf0;
-          color: #667085;
-          font-size: 10px;
-        }
-
-        .signupBox a {
-          color: #1465e8;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        @media (max-width: 850px) {
-          .container {
-            max-width: 600px;
-            grid-template-columns: 1fr;
-            gap: 35px;
-          }
-        }
-
-        @media (max-width: 550px) {
-          .container {
-            padding-top: 40px;
-          }
-
-          .intro h1 {
-            font-size: 38px;
-          }
-
-          .card {
-            padding: 23px;
-          }
-        }
-      `}</style>
-    </main>
+      }
+    `}</style>
   );
 }
