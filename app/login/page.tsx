@@ -7,15 +7,12 @@ type Lang = "ka" | "en";
 
 export default function LoginPage() {
   const [lang, setLang] = useState<Lang>("ka");
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
-
   const [error, setError] = useState("");
 
   const ka = lang === "ka";
@@ -24,17 +21,70 @@ export default function LoginPage() {
     checkExistingSession();
   }, []);
 
+  async function routeUser() {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return false;
+    }
+
+    // 1. ჯერ ვამოწმებთ — ეს მომხმარებელი Owner არის თუ არა.
+    const { data: ownerData, error: ownerError } = await supabase
+      .from("owner_accounts")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (ownerError) {
+      throw ownerError;
+    }
+
+    if (ownerData) {
+      window.location.href = "/account";
+      return true;
+    }
+
+    // 2. თუ Owner არ არის, ვცდილობთ Admin access-ის claim-ს.
+    const { data: adminData, error: adminError } = await supabase.rpc(
+      "claim_admin_access"
+    );
+
+    if (adminError) {
+      throw adminError;
+    }
+
+    if (adminData && adminData.length > 0) {
+      window.location.href = "/admin-dashboard";
+      return true;
+    }
+
+    // 3. თუ არც Owner არის და არც Admin assignment აქვს.
+    setError(
+      ka
+        ? "ამ ანგარიშთან Owner ან Admin პროფილი დაკავშირებული არ არის."
+        : "No Owner or Admin profile is connected to this account."
+    );
+
+    return false;
+  }
+
   async function checkExistingSession() {
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user) {
-        window.location.href = "/account";
+      if (!user) {
+        setChecking(false);
         return;
       }
-    } finally {
+
+      await routeUser();
+    } catch (err) {
+      console.error(err);
       setChecking(false);
     }
   }
@@ -52,7 +102,6 @@ export default function LoginPage() {
           ? "შეიყვანეთ ელფოსტა და პაროლი."
           : "Enter your email and password."
       );
-
       return;
     }
 
@@ -77,17 +126,10 @@ export default function LoginPage() {
         );
       }
 
-      /*
-        ახალი მთავარი Account გვერდი.
-        ძველ /my-profiles გვერდზე აღარ გადავდივართ.
-      */
-
-      window.location.href = "/account";
+      await routeUser();
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "";
+        err instanceof Error ? err.message : "";
 
       if (
         message.toLowerCase().includes("invalid login") ||
@@ -111,18 +153,73 @@ export default function LoginPage() {
     }
   }
 
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setError("");
+    setChecking(false);
+  }
+
   if (checking) {
     return (
       <main className="statePage">
         <div className="stateLogo">QR</div>
-
         <strong>QR RETURN</strong>
 
         <p>
           {ka
-            ? "ანგარიში მოწმდება..."
-            : "Checking account..."}
+            ? "ანგარიშის ტიპი მოწმდება..."
+            : "Checking account type..."}
         </p>
+
+        <button type="button" onClick={handleLogout}>
+          {ka ? "სხვა ანგარიშით შესვლა" : "Use another account"}
+        </button>
+
+        <style jsx>{`
+          .statePage {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f7f9fc;
+            font-family: Inter, Arial, sans-serif;
+            color: #667085;
+          }
+
+          .stateLogo {
+            width: 55px;
+            height: 55px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 12px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #1465e8, #7655f7);
+            color: white;
+            font-weight: 900;
+          }
+
+          strong {
+            color: #1465e8;
+            font-size: 21px;
+          }
+
+          p {
+            font-size: 12px;
+          }
+
+          button {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border: 1px solid #d0d5dd;
+            border-radius: 9px;
+            background: white;
+            color: #475467;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+          }
+        `}</style>
       </main>
     );
   }
@@ -131,46 +228,27 @@ export default function LoginPage() {
     <main className="page">
       <header className="header">
         <a href="/" className="brand">
-          <div className="logo">
-            QR
-          </div>
+          <div className="logo">QR</div>
 
           <div>
-            <strong>
-              QR RETURN
-            </strong>
-
-            <small>
-              OWNER ACCOUNT
-            </small>
+            <strong>QR RETURN</strong>
+            <small>OWNER & ADMIN ACCESS</small>
           </div>
         </a>
 
         <div className="languages">
           <button
             type="button"
-            className={
-              ka
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLang("ka")
-            }
+            className={ka ? "active" : ""}
+            onClick={() => setLang("ka")}
           >
             GEO
           </button>
 
           <button
             type="button"
-            className={
-              !ka
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLang("en")
-            }
+            className={!ka ? "active" : ""}
+            onClick={() => setLang("en")}
           >
             ENG
           </button>
@@ -180,9 +258,7 @@ export default function LoginPage() {
       <section className="container">
         <div className="intro">
           <div className="eyebrow">
-            {ka
-              ? "QR RETURN ანგარიში"
-              : "QR RETURN ACCOUNT"}
+            {ka ? "QR RETURN ანგარიში" : "QR RETURN ACCOUNT"}
           </div>
 
           <h1>
@@ -193,115 +269,63 @@ export default function LoginPage() {
 
           <p>
             {ka
-              ? "ერთი ანგარიშიდან მართეთ თქვენი მფლობელის პროფილი, QR პროფილები, Lost Mode, მპოვნელისთვის ხილვადობა და საკონტაქტო მეთოდები."
-              : "Manage your Owner Profile, QR profiles, Lost Mode, finder visibility and contact methods from one account."}
+              ? "ერთი უსაფრთხო შესვლა Owner-ისა და დამატებული Admin-ისთვის."
+              : "One secure sign-in for Owners and authorized Admins."}
           </p>
 
-          <div className="featureList">
-            <div className="feature">
-              <span>
-                ✓
-              </span>
+          <div className="roleCard">
+            <div className="roleIcon">👤</div>
 
-              <div>
-                <strong>
-                  {ka
-                    ? "ერთი Owner Account"
-                    : "One Owner Account"}
-                </strong>
+            <div>
+              <strong>{ka ? "Owner" : "Owner"}</strong>
 
-                <p>
-                  {ka
-                    ? "რამდენიც გსურთ იმდენი QR პროფილი."
-                    : "Create as many QR profiles as you need."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "მართავს საკუთარ პროფილს, QR პროფილებს, Admin-ს და ყველა პარამეტრს."
+                  : "Manages the Owner profile, QR profiles, Admin and all settings."}
+              </p>
             </div>
+          </div>
 
-            <div className="feature">
-              <span>
-                ✓
-              </span>
+          <div className="roleCard">
+            <div className="roleIcon">👥</div>
 
-              <div>
-                <strong>
-                  {ka
-                    ? "მპოვნელის კონტროლი"
-                    : "Finder controls"}
-                </strong>
+            <div>
+              <strong>Admin</strong>
 
-                <p>
-                  {ka
-                    ? "თავად განსაზღვრეთ რა ინფორმაცია გამოჩნდება."
-                    : "Choose exactly what a finder can see."}
-                </p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <span>
-                ✓
-              </span>
-
-              <div>
-                <strong>
-                  {ka
-                    ? "Lost Mode"
-                    : "Lost Mode"}
-                </strong>
-
-                <p>
-                  {ka
-                    ? "დაკარგვისას გააქტიურეთ საკონტაქტო ფუნქციები."
-                    : "Activate finder contact options when needed."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "ხედავს და მართავს მხოლოდ იმას, რისი უფლებაც Owner-მა მისცა."
+                  : "Can only access features specifically authorized by the Owner."}
+              </p>
             </div>
           </div>
         </div>
 
         <div className="card">
           <div className="cardHeader">
-            <div className="userIcon">
-              👤
-            </div>
+            <div className="loginIcon">🔐</div>
 
             <div>
-              <span>
-                QR RETURN
-              </span>
-
-              <h2>
-                {ka
-                  ? "შესვლა"
-                  : "Sign in"}
-              </h2>
+              <span>QR RETURN</span>
+              <h2>{ka ? "შესვლა" : "Sign in"}</h2>
             </div>
           </div>
 
           <p className="description">
             {ka
-              ? "გამოიყენეთ თქვენი რეგისტრირებული ელფოსტა და პაროლი."
-              : "Use your registered email and password."}
+              ? "შეიყვანეთ რეგისტრირებული ელფოსტა და პაროლი."
+              : "Enter your registered email and password."}
           </p>
 
           <form onSubmit={handleLogin}>
             <label>
-              <span>
-                {ka
-                  ? "ელფოსტა"
-                  : "Email"}{" "}
-                *
-              </span>
+              <span>{ka ? "ელფოსტა" : "Email"} *</span>
 
               <input
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 autoComplete="email"
                 required
@@ -309,26 +333,13 @@ export default function LoginPage() {
             </label>
 
             <label>
-              <span>
-                {ka
-                  ? "პაროლი"
-                  : "Password"}{" "}
-                *
-              </span>
+              <span>{ka ? "პაროლი" : "Password"} *</span>
 
               <div className="passwordField">
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) =>
-                    setPassword(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required
@@ -338,15 +349,10 @@ export default function LoginPage() {
                   type="button"
                   className="passwordToggle"
                   onClick={() =>
-                    setShowPassword(
-                      (value) =>
-                        !value
-                    )
+                    setShowPassword((current) => !current)
                   }
                 >
-                  {showPassword
-                    ? "🙈"
-                    : "👁"}
+                  {showPassword ? "🙈" : "👁"}
                 </button>
               </div>
             </label>
@@ -357,13 +363,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="forgotButton"
-                onClick={() => {
+                onClick={() =>
                   setError(
                     ka
-                      ? "პაროლის აღდგენის სისტემა მოგვიანებით გააქტიურდება."
+                      ? "პაროლის აღდგენის სისტემა შემდეგ ეტაპზე გააქტიურდება."
                       : "Password recovery will be activated later."
-                  );
-                }}
+                  )
+                }
               >
                 {ka
                   ? "დაგავიწყდათ პაროლი?"
@@ -373,13 +379,8 @@ export default function LoginPage() {
 
             {error && (
               <div className="errorBox">
-                <strong>
-                  !
-                </strong>
-
-                <span>
-                  {error}
-                </span>
+                <strong>!</strong>
+                <span>{error}</span>
               </div>
             )}
 
@@ -390,17 +391,13 @@ export default function LoginPage() {
             >
               {loading
                 ? ka
-                  ? "შესვლა..."
-                  : "Signing in..."
+                  ? "მოწმდება..."
+                  : "Checking..."
                 : ka
                 ? "შესვლა"
                 : "Sign in"}
 
-              {!loading && (
-                <span>
-                  →
-                </span>
-              )}
+              {!loading && <span>→</span>}
             </button>
           </form>
 
@@ -408,14 +405,11 @@ export default function LoginPage() {
             <span>
               {ka
                 ? "ჯერ არ გაქვთ QR RETURN ანგარიში?"
-                : "Don't have a QR RETURN account yet?"}
+                : "Don't have a QR RETURN account?"}
             </span>
 
             <a href="/signup">
-              {ka
-                ? "ანგარიშის შექმნა"
-                : "Create account"}{" "}
-              →
+              {ka ? "ანგარიშის შექმნა" : "Create account"} →
             </a>
           </div>
         </div>
@@ -459,44 +453,9 @@ export default function LoginPage() {
             #f7f9fc;
         }
 
-        .statePage {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          color: #667085;
-        }
-
-        .stateLogo {
-          width: 52px;
-          height: 52px;
-          margin-bottom: 10px;
-          display: grid;
-          place-items: center;
-          border-radius: 15px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
-          color: white;
-          font-weight: 900;
-        }
-
-        .statePage strong {
-          color: #1465e8;
-          font-size: 20px;
-        }
-
-        .statePage p {
-          font-size: 12px;
-        }
-
         .header {
           width: calc(100% - 36px);
-          max-width: 1180px;
+          max-width: 1100px;
           min-height: 86px;
           margin: auto;
           display: flex;
@@ -518,11 +477,7 @@ export default function LoginPage() {
           display: grid;
           place-items: center;
           border-radius: 14px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg, #1465e8, #7655f7);
           color: white;
           font-weight: 900;
         }
@@ -543,7 +498,7 @@ export default function LoginPage() {
           color: #7655f7;
           font-size: 9px;
           font-weight: 900;
-          letter-spacing: 1.7px;
+          letter-spacing: 1.6px;
         }
 
         .languages {
@@ -578,7 +533,7 @@ export default function LoginPage() {
           display: grid;
           grid-template-columns: 1fr 445px;
           align-items: center;
-          gap: 72px;
+          gap: 70px;
         }
 
         .intro {
@@ -589,70 +544,52 @@ export default function LoginPage() {
           color: #7655f7;
           font-size: 11px;
           font-weight: 900;
-          letter-spacing: 1.7px;
+          letter-spacing: 1.6px;
         }
 
         .intro h1 {
-          margin: 12px 0 16px;
-          font-size: clamp(
-            43px,
-            5vw,
-            58px
-          );
+          margin: 12px 0 15px;
+          font-size: clamp(42px, 5vw, 57px);
           line-height: 1.04;
-          letter-spacing: -2.5px;
+          letter-spacing: -2.4px;
         }
 
         .intro > p {
-          margin: 0;
+          margin: 0 0 28px;
           color: #667085;
-          font-size: 16px;
+          font-size: 15px;
           line-height: 1.7;
         }
 
-        .featureList {
-          margin-top: 30px;
+        .roleCard {
+          margin-top: 11px;
+          padding: 15px;
           display: flex;
-          flex-direction: column;
-          gap: 11px;
-        }
-
-        .feature {
-          padding: 14px;
-          display: flex;
-          align-items: flex-start;
-          gap: 11px;
+          gap: 12px;
           border: 1px solid #e4e7ec;
-          border-radius: 13px;
-          background: rgba(
-            255,
-            255,
-            255,
-            0.7
-          );
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.75);
         }
 
-        .feature > span {
-          width: 28px;
-          height: 28px;
-          flex: 0 0 28px;
+        .roleIcon {
+          width: 38px;
+          height: 38px;
+          flex: 0 0 38px;
           display: grid;
           place-items: center;
-          border-radius: 8px;
+          border-radius: 10px;
           background: #eef4ff;
-          color: #1465e8;
-          font-weight: 900;
         }
 
-        .feature strong {
+        .roleCard strong {
           font-size: 12px;
         }
 
-        .feature p {
-          margin: 3px 0 0;
+        .roleCard p {
+          margin: 4px 0 0;
           color: #667085;
           font-size: 10px;
-          line-height: 1.45;
+          line-height: 1.5;
         }
 
         .card {
@@ -660,14 +597,7 @@ export default function LoginPage() {
           border: 1px solid #e4e7ec;
           border-radius: 24px;
           background: white;
-          box-shadow:
-            0 25px 65px
-            rgba(
-              16,
-              24,
-              40,
-              0.1
-            );
+          box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
         }
 
         .cardHeader {
@@ -676,18 +606,14 @@ export default function LoginPage() {
           gap: 13px;
         }
 
-        .userIcon {
+        .loginIcon {
           width: 54px;
           height: 54px;
           display: grid;
           place-items: center;
           border-radius: 15px;
-          background: linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
-          font-size: 27px;
+          background: linear-gradient(135deg, #eef4ff, #f0edff);
+          font-size: 26px;
         }
 
         .cardHeader span {
@@ -734,14 +660,7 @@ export default function LoginPage() {
 
         input:focus {
           border-color: #84adff;
-          box-shadow:
-            0 0 0 3px
-            rgba(
-              20,
-              101,
-              232,
-              0.08
-            );
+          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
         }
 
         .passwordField {
@@ -782,8 +701,8 @@ export default function LoginPage() {
         .errorBox {
           padding: 12px;
           display: flex;
-          align-items: center;
           gap: 8px;
+          align-items: center;
           border: 1px solid #fecdca;
           border-radius: 10px;
           background: #fff1f0;
@@ -805,18 +724,13 @@ export default function LoginPage() {
         .submitButton {
           width: 100%;
           min-height: 53px;
-          padding: 0 18px;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 9px;
           border: 0;
           border-radius: 11px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg, #1465e8, #7655f7);
           color: white;
           font-size: 13px;
           font-weight: 900;
@@ -849,15 +763,6 @@ export default function LoginPage() {
             max-width: 600px;
             grid-template-columns: 1fr;
             gap: 35px;
-          }
-
-          .intro {
-            max-width: none;
-            text-align: center;
-          }
-
-          .feature {
-            text-align: left;
           }
         }
 
