@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
 
-type ItemProfile = {
+type Profile = {
   id: string;
   tag_code: string;
 
+  item_name: string | null;
   item_type: string | null;
   pet_type: string | null;
-  item_name: string | null;
 
+  photo: string | null;
   colour: string | null;
+  description: string | null;
+
   sex: string | null;
   date_of_birth: string | null;
-  weight: string | number | null;
+  weight: string | null;
   medical_info: string | null;
   behaviour_note: string | null;
 
@@ -26,69 +29,66 @@ type ItemProfile = {
   size: string | null;
   material: string | null;
   distinctive_features: string | null;
-  description: string | null;
-
-  photo: string | null;
-  photo_url: string | null;
 
   owner_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
-
+  owner_address: string | null;
   owner_photo: string | null;
-  owner_photo_url: string | null;
 
   additional_contact_name: string | null;
   additional_contact_phone: string | null;
   additional_contact_email: string | null;
 
   finder_message: string | null;
-  lost_seen_location: string | null;
 
   phone_enabled: boolean | null;
   whatsapp_enabled: boolean | null;
   live_chat_enabled: boolean | null;
   location_sharing_enabled: boolean | null;
 
+  show_owner_name: boolean | null;
+  show_owner_phone: boolean | null;
+  show_owner_email: boolean | null;
+  show_owner_address: boolean | null;
+  show_owner_photo: boolean | null;
+
+  show_photo: boolean | null;
   show_colour: boolean | null;
+  show_description: boolean | null;
+
   show_sex: boolean | null;
   show_date_of_birth: boolean | null;
   show_weight: boolean | null;
   show_medical_info: boolean | null;
+  show_behaviour_note: boolean | null;
 
   show_brand: boolean | null;
   show_model: boolean | null;
   show_size: boolean | null;
   show_material: boolean | null;
   show_distinctive_features: boolean | null;
-  show_description: boolean | null;
-
-  show_photo: boolean | null;
-  show_owner_photo: boolean | null;
-
-  show_owner_phone: boolean | null;
-  show_owner_email: boolean | null;
 
   show_additional_contact: boolean | null;
   show_finder_message: boolean | null;
-  show_lost_seen_location: boolean | null;
 
   active: boolean | null;
 };
 
-export default function ProfilePage() {
+export default function PublicProfilePage() {
   const params = useParams();
 
-  const rawTag = params?.tag_code;
+  const rawTag = Array.isArray(params.tag_code)
+    ? params.tag_code[0]
+    : params.tag_code;
 
-  const tagCode = Array.isArray(rawTag)
-    ? rawTag[0]
-    : typeof rawTag === "string"
-    ? rawTag
-    : "";
+  const tagCode =
+    typeof rawTag === "string"
+      ? decodeURIComponent(rawTag)
+      : "";
 
   const [lang, setLang] = useState<Lang>("ka");
-  const [profile, setProfile] = useState<ItemProfile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -98,49 +98,53 @@ export default function ProfilePage() {
 
   const ka = lang === "ka";
 
+  const isPet = useMemo(() => {
+    if (!profile) return false;
+
+    return (
+      profile.item_type === "pet" ||
+      profile.pet_type === "dog" ||
+      profile.pet_type === "cat"
+    );
+  }, [profile]);
+
   useEffect(() => {
     loadProfile();
   }, [tagCode]);
 
   async function loadProfile() {
-    setLoading(true);
-    setError("");
-
     if (!tagCode) {
       setError(
         ka
           ? "QR კოდი ვერ მოიძებნა."
-          : "QR code was not found."
+          : "QR code not found."
       );
-
       setLoading(false);
       return;
     }
 
-    try {
-      const decodedTag = decodeURIComponent(tagCode);
+    setLoading(true);
+    setError("");
 
-      const { data, error: fetchError } = await supabase
+    try {
+      const { data, error } = await supabase
         .from("item")
         .select("*")
-        .eq("tag_code", decodedTag)
+        .eq("tag_code", tagCode)
         .maybeSingle();
 
-      if (fetchError) {
-        throw fetchError;
-      }
+      if (error) throw error;
 
       if (!data) {
         setError(
           ka
-            ? "ამ QR კოდზე პროფილი არ მოიძებნა."
+            ? "ამ QR კოდზე პროფილი ვერ მოიძებნა."
             : "No profile was found for this QR code."
         );
-
         return;
       }
 
-      setProfile(data as ItemProfile);
+      setProfile(data as Profile);
     } catch (err) {
       setError(
         err instanceof Error
@@ -155,9 +159,7 @@ export default function ProfilePage() {
   }
 
   async function shareLocation() {
-    if (!profile || locationLoading) return;
-
-    setLocationMessage("");
+    if (!profile || !profile.location_sharing_enabled) return;
 
     if (!navigator.geolocation) {
       setLocationMessage(
@@ -169,15 +171,14 @@ export default function ProfilePage() {
     }
 
     setLocationLoading(true);
+    setLocationMessage("");
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
-          const accuracy = position.coords.accuracy;
+          const { latitude, longitude, accuracy } = position.coords;
 
-          const { error: updateError } = await supabase
+          const { error } = await supabase
             .from("item")
             .update({
               last_scan_latitude: latitude,
@@ -188,9 +189,7 @@ export default function ProfilePage() {
             .eq("id", profile.id)
             .eq("tag_code", profile.tag_code);
 
-          if (updateError) {
-            throw updateError;
-          }
+          if (error) throw error;
 
           setLocationMessage(
             ka
@@ -209,17 +208,14 @@ export default function ProfilePage() {
           setLocationLoading(false);
         }
       },
-
       () => {
+        setLocationLoading(false);
         setLocationMessage(
           ka
             ? "ლოკაციაზე წვდომა არ მოგიციათ."
             : "Location permission was not granted."
         );
-
-        setLocationLoading(false);
       },
-
       {
         enableHighAccuracy: true,
         timeout: 12000,
@@ -228,25 +224,92 @@ export default function ProfilePage() {
     );
   }
 
+  function typeInfo() {
+    if (!profile) {
+      return {
+        icon: "🏷️",
+        ka: "QR პროფილი",
+        en: "QR Profile",
+        chatType: "profile",
+      };
+    }
+
+    if (profile.pet_type === "dog") {
+      return {
+        icon: "🐶",
+        ka: "ძაღლი",
+        en: "Dog",
+        chatType: "dog",
+      };
+    }
+
+    if (profile.pet_type === "cat") {
+      return {
+        icon: "🐱",
+        ka: "კატა",
+        en: "Cat",
+        chatType: "cat",
+      };
+    }
+
+    if (profile.item_type === "keys") {
+      return {
+        icon: "🔑",
+        ka: "გასაღები",
+        en: "Keys",
+        chatType: "key",
+      };
+    }
+
+    if (profile.item_type === "wallet") {
+      return {
+        icon: "👛",
+        ka: "საფულე",
+        en: "Wallet",
+        chatType: "wallet",
+      };
+    }
+
+    if (profile.item_type === "bag") {
+      return {
+        icon: "👜",
+        ka: "ჩანთა",
+        en: "Bag",
+        chatType: "bag",
+      };
+    }
+
+    if (profile.item_type === "suitcase") {
+      return {
+        icon: "🧳",
+        ka: "ჩემოდანი",
+        en: "Suitcase",
+        chatType: "suitcase",
+      };
+    }
+
+    return {
+      icon: "🏷️",
+      ka: "QR პროფილი",
+      en: "QR Profile",
+      chatType: "profile",
+    };
+  }
+
   if (loading) {
     return (
       <main className="statePage">
-        <div className="stateLogo">QR</div>
-
+        <div className="logo">QR</div>
         <h1>QR RETURN</h1>
-
-        <p>
-          {ka ? "პროფილი იტვირთება..." : "Loading profile..."}
-        </p>
+        <p>{ka ? "იტვირთება..." : "Loading..."}</p>
       </main>
     );
   }
 
-  if (error || !profile) {
+  if (!profile || error) {
     return (
       <main className="statePage">
-        <div className="stateLogo">QR</div>
-
+        <div className="logo">QR</div>
         <h1>QR RETURN</h1>
 
         <div className="errorBox">
@@ -263,63 +326,17 @@ export default function ProfilePage() {
     );
   }
 
-  const isPet =
-    profile.item_type === "pet" ||
-    profile.pet_type === "dog" ||
-    profile.pet_type === "cat" ||
-    profile.item_type === "dog" ||
-    profile.item_type === "cat";
-
-  const realType = getRealType(profile);
-
-  const profilePhoto =
-    profile.photo ||
-    profile.photo_url ||
-    null;
-
-  const ownerPhoto =
-    profile.owner_photo ||
-    profile.owner_photo_url ||
-    null;
-
-  const lost = profile.active === true;
+  const type = typeInfo();
+  const lost = Boolean(profile.active);
 
   const cleanPhone =
-    profile.owner_phone?.replace(/[^\d+]/g, "") || "";
+    profile.owner_phone?.replace(/[^\d+]/g, "") ?? "";
 
   const whatsappPhone =
-    profile.owner_phone?.replace(/\D/g, "") || "";
+    profile.owner_phone?.replace(/\D/g, "") ?? "";
 
-  const showPhone =
-    lost &&
-    profile.phone_enabled === true &&
-    Boolean(profile.owner_phone);
-
-  const showWhatsApp =
-    lost &&
-    profile.whatsapp_enabled === true &&
-    Boolean(whatsappPhone);
-
-  const showChat =
-    lost &&
-    profile.live_chat_enabled === true;
-
-  const chatType = normalizeChatType(realType);
-
-  const hasContact =
-    showPhone ||
-    showWhatsApp ||
-    showChat;
-
-  const showFinderMessage =
-    lost &&
-    Boolean(profile.finder_message) &&
-    profile.show_finder_message !== false;
-
-  const showLastSeen =
-    lost &&
-    Boolean(profile.lost_seen_location) &&
-    profile.show_lost_seen_location !== false;
+  const additionalCleanPhone =
+    profile.additional_contact_phone?.replace(/[^\d+]/g, "") ?? "";
 
   return (
     <main className="page">
@@ -329,7 +346,7 @@ export default function ProfilePage() {
 
           <div>
             <strong>QR RETURN</strong>
-            <small>FOUND PROFILE</small>
+            <small>FINDER VIEW</small>
           </div>
         </a>
 
@@ -355,26 +372,24 @@ export default function ProfilePage() {
       <section className="container">
         <div className="profileCard">
           <section className="hero">
-            <div className="photoWrapper">
-              {profilePhoto && profile.show_photo !== false ? (
+            <div className="mainPhotoWrap">
+              {profile.photo && profile.show_photo !== false ? (
                 <img
-                  src={profilePhoto}
-                  alt={profile.item_name || "QR profile"}
+                  src={profile.photo}
+                  alt={profile.item_name ?? ""}
                   className="mainPhoto"
                 />
               ) : (
                 <div className="photoPlaceholder">
-                  {getIcon(realType)}
+                  {type.icon}
                 </div>
               )}
 
               <div
-                className={`statusBadge ${
+                className={`status ${
                   lost ? "lost" : "safe"
                 }`}
               >
-                <span />
-
                 {lost
                   ? ka
                     ? "დაკარგულია"
@@ -385,30 +400,29 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="heroText">
+            <div className="heroInfo">
               <div className="eyebrow">
                 QR RETURN PROFILE
               </div>
 
               <h1>
                 {profile.item_name ||
-                  getCategory(realType, lang)}
+                  (ka ? type.ka : type.en)}
               </h1>
 
               <div className="category">
-                {getIcon(realType)}{" "}
-                {getCategory(realType, lang)}
+                {type.icon} {ka ? type.ka : type.en}
               </div>
 
-              <p className="tagCode">
-                QR: <strong>{profile.tag_code}</strong>
-              </p>
+              <div className="tagCode">
+                QR · {profile.tag_code}
+              </div>
             </div>
           </section>
 
           {!lost && (
             <section className="safeNotice">
-              <div className="safeNoticeIcon">✓</div>
+              <div className="safeIcon">✓</div>
 
               <div>
                 <strong>
@@ -419,31 +433,71 @@ export default function ProfilePage() {
 
                 <p>
                   {ka
-                    ? "მფლობელის საკონტაქტო ინფორმაცია დაცულია. თუ ფიქრობთ, რომ ეს ნივთი ან ცხოველი დაკარგულია, შეინახეთ QR კოდი და სცადეთ მოგვიანებით."
-                    : "The owner's contact information is protected. If you believe this item or pet is lost, save the QR code and try again later."}
+                    ? "ძირითადი ინფორმაცია შეგიძლიათ ნახოთ, თუმცა საკონტაქტო მოქმედებები მხოლოდ Lost Mode-ის დროს აქტიურდება."
+                    : "Basic profile information is available, but contact actions are enabled only when Lost Mode is active."}
                 </p>
               </div>
             </section>
           )}
 
           <section className="section">
-            <div className="sectionTitle">
-              <span>01</span>
+            <SectionTitle
+              number="01"
+              title={ka ? "მფლობელი" : "Owner"}
+            />
 
-              <h2>
-                {isPet
+            <div className="ownerCard">
+              {profile.show_owner_photo &&
+              profile.owner_photo ? (
+                <img
+                  src={profile.owner_photo}
+                  alt=""
+                  className="ownerPhoto"
+                />
+              ) : (
+                <div className="ownerPlaceholder">👤</div>
+              )}
+
+              <div className="ownerInfo">
+                <strong>
+                  {profile.owner_name ||
+                    (ka ? "მფლობელი" : "Owner")}
+                </strong>
+
+                {profile.owner_phone && (
+                  <p>📞 {profile.owner_phone}</p>
+                )}
+
+                {profile.show_owner_email &&
+                  profile.owner_email && (
+                    <p>✉️ {profile.owner_email}</p>
+                  )}
+
+                {profile.show_owner_address &&
+                  profile.owner_address && (
+                    <p>📍 {profile.owner_address}</p>
+                  )}
+              </div>
+            </div>
+          </section>
+
+          <section className="section">
+            <SectionTitle
+              number="02"
+              title={
+                isPet
                   ? ka
                     ? "ცხოველის ინფორმაცია"
                     : "Pet information"
                   : ka
                   ? "ნივთის ინფორმაცია"
-                  : "Item information"}
-              </h2>
-            </div>
+                  : "Item information"
+              }
+            />
 
             <div className="infoGrid">
-              {profile.colour &&
-                profile.show_colour !== false && (
+              {profile.show_colour !== false &&
+                profile.colour && (
                   <Info
                     label={ka ? "ფერი" : "Color"}
                     value={profile.colour}
@@ -451,17 +505,27 @@ export default function ProfilePage() {
                 )}
 
               {isPet &&
-                profile.sex &&
-                profile.show_sex !== false && (
+                profile.show_sex !== false &&
+                profile.sex && (
                   <Info
                     label={ka ? "სქესი" : "Sex"}
-                    value={translateSex(profile.sex, lang)}
+                    value={
+                      profile.sex === "male"
+                        ? ka
+                          ? "მამრობითი"
+                          : "Male"
+                        : profile.sex === "female"
+                        ? ka
+                          ? "მდედრობითი"
+                          : "Female"
+                        : profile.sex
+                    }
                   />
                 )}
 
               {isPet &&
-                profile.date_of_birth &&
-                profile.show_date_of_birth !== false && (
+                profile.show_date_of_birth !== false &&
+                profile.date_of_birth && (
                   <Info
                     label={
                       ka
@@ -473,18 +537,17 @@ export default function ProfilePage() {
                 )}
 
               {isPet &&
-                profile.weight !== null &&
-                profile.weight !== undefined &&
-                profile.show_weight !== false && (
+                profile.show_weight !== false &&
+                profile.weight && (
                   <Info
                     label={ka ? "წონა" : "Weight"}
-                    value={`${profile.weight}`}
+                    value={profile.weight}
                   />
                 )}
 
               {!isPet &&
-                profile.brand &&
-                profile.show_brand !== false && (
+                profile.show_brand !== false &&
+                profile.brand && (
                   <Info
                     label={ka ? "ბრენდი" : "Brand"}
                     value={profile.brand}
@@ -492,8 +555,8 @@ export default function ProfilePage() {
                 )}
 
               {!isPet &&
-                profile.model &&
-                profile.show_model !== false && (
+                profile.show_model !== false &&
+                profile.model && (
                   <Info
                     label={ka ? "მოდელი" : "Model"}
                     value={profile.model}
@@ -501,8 +564,8 @@ export default function ProfilePage() {
                 )}
 
               {!isPet &&
-                profile.size &&
-                profile.show_size !== false && (
+                profile.show_size !== false &&
+                profile.size && (
                   <Info
                     label={ka ? "ზომა" : "Size"}
                     value={profile.size}
@@ -510,8 +573,8 @@ export default function ProfilePage() {
                 )}
 
               {!isPet &&
-                profile.material &&
-                profile.show_material !== false && (
+                profile.show_material !== false &&
+                profile.material && (
                   <Info
                     label={ka ? "მასალა" : "Material"}
                     value={profile.material}
@@ -520,8 +583,8 @@ export default function ProfilePage() {
             </div>
 
             {isPet &&
-              profile.medical_info &&
-              profile.show_medical_info !== false && (
+              profile.show_medical_info !== false &&
+              profile.medical_info && (
                 <LongInfo
                   label={
                     ka
@@ -532,20 +595,22 @@ export default function ProfilePage() {
                 />
               )}
 
-            {isPet && profile.behaviour_note && (
-              <LongInfo
-                label={
-                  ka
-                    ? "ქცევის შესახებ ინფორმაცია"
-                    : "Behaviour information"
-                }
-                value={profile.behaviour_note}
-              />
-            )}
+            {isPet &&
+              profile.show_behaviour_note !== false &&
+              profile.behaviour_note && (
+                <LongInfo
+                  label={
+                    ka
+                      ? "ქცევის შესახებ ინფორმაცია"
+                      : "Behaviour information"
+                  }
+                  value={profile.behaviour_note}
+                />
+              )}
 
             {!isPet &&
-              profile.distinctive_features &&
-              profile.show_distinctive_features !== false && (
+              profile.show_distinctive_features !== false &&
+              profile.distinctive_features && (
                 <LongInfo
                   label={
                     ka
@@ -556,261 +621,202 @@ export default function ProfilePage() {
                 />
               )}
 
-            {profile.description &&
-              profile.show_description !== false && (
+            {profile.show_description !== false &&
+              profile.description && (
                 <LongInfo
-                  label={
-                    ka
-                      ? "დამატებითი აღწერა"
-                      : "Additional description"
-                  }
+                  label={ka ? "აღწერა" : "Description"}
                   value={profile.description}
                 />
               )}
           </section>
 
-          {lost && (
-            <section className="section contactSection">
-              <div className="sectionTitle">
-                <span>02</span>
+          {profile.show_finder_message !== false &&
+            profile.finder_message && (
+              <section className="section">
+                <SectionTitle
+                  number="03"
+                  title={
+                    ka
+                      ? "მპოვნელისთვის შეტყობინება"
+                      : "Message for the finder"
+                  }
+                />
 
-                <h2>
-                  {ka
-                    ? "დაუკავშირდით მფლობელს"
-                    : "Contact the owner"}
-                </h2>
-              </div>
+                <div className="finderMessage">
+                  “{profile.finder_message}”
+                </div>
+              </section>
+            )}
 
-              <div className="ownerCard">
-                {ownerPhoto &&
-                profile.show_owner_photo !== false ? (
-                  <img
-                    src={ownerPhoto}
-                    alt="Owner"
-                    className="ownerPhoto"
-                  />
-                ) : (
-                  <div className="ownerPlaceholder">
-                    👤
-                  </div>
-                )}
+          {profile.show_additional_contact &&
+            (profile.additional_contact_name ||
+              profile.additional_contact_phone ||
+              profile.additional_contact_email) && (
+              <section className="section">
+                <SectionTitle
+                  number="04"
+                  title={
+                    ka
+                      ? "დამატებითი საკონტაქტო პირი"
+                      : "Additional contact"
+                  }
+                />
 
-                <div className="ownerInfo">
-                  <small>
-                    {ka ? "მფლობელი" : "Owner"}
-                  </small>
+                <div className="additionalCard">
+                  {profile.additional_contact_name && (
+                    <p>
+                      👤 {profile.additional_contact_name}
+                    </p>
+                  )}
 
-                  <strong>
-                    {profile.owner_name ||
-                      (ka
-                        ? "პროფილის მმართველი"
-                        : "Profile manager")}
-                  </strong>
+                  {profile.additional_contact_phone && (
+                    <p>
+                      📞 {profile.additional_contact_phone}
+                    </p>
+                  )}
 
-                  {profile.show_owner_phone === true &&
-                    profile.owner_phone && (
-                      <a href={`tel:${cleanPhone}`}>
-                        📞 {profile.owner_phone}
-                      </a>
-                    )}
+                  {profile.additional_contact_email && (
+                    <p>
+                      ✉️ {profile.additional_contact_email}
+                    </p>
+                  )}
 
-                  {profile.show_owner_email === true &&
-                    profile.owner_email && (
+                  {lost &&
+                    profile.additional_contact_phone && (
                       <a
-                        href={`mailto:${profile.owner_email}`}
+                        href={`tel:${additionalCleanPhone}`}
                       >
-                        ✉️ {profile.owner_email}
+                        {ka
+                          ? "დარეკვა დამატებით კონტაქტთან"
+                          : "Call additional contact"}
                       </a>
                     )}
                 </div>
-              </div>
+              </section>
+            )}
 
-              {hasContact ? (
-                <div className="contactButtons">
-                  {showPhone && (
+          {lost && (
+            <section className="section">
+              <SectionTitle
+                number="05"
+                title={
+                  ka
+                    ? "დაუკავშირდით მფლობელს"
+                    : "Contact the owner"
+                }
+              />
+
+              <div className="contactGrid">
+                {profile.phone_enabled &&
+                  profile.owner_phone && (
                     <a
                       href={`tel:${cleanPhone}`}
-                      className="contactButton phoneButton"
+                      className="contactButton phone"
                     >
                       <span>📞</span>
-
                       <div>
                         <small>
                           {ka ? "მობილური" : "Mobile"}
                         </small>
-
                         <strong>
-                          {ka ? "დარეკვა" : "Call owner"}
+                          {ka ? "დარეკვა" : "Call"}
                         </strong>
                       </div>
                     </a>
                   )}
 
-                  {showWhatsApp && (
+                {profile.whatsapp_enabled &&
+                  whatsappPhone && (
                     <a
                       href={`https://wa.me/${whatsappPhone}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="contactButton whatsappButton"
+                      className="contactButton whatsapp"
                     >
                       <span>💬</span>
-
                       <div>
                         <small>WhatsApp</small>
                         <strong>
-                          {ka
-                            ? "WhatsApp-ით დაკავშირება"
-                            : "Open WhatsApp"}
+                          {ka ? "დაკავშირება" : "Open"}
                         </strong>
                       </div>
                     </a>
                   )}
 
-                  {showChat && (
-                    <a
-                      href={`/chat/${chatType}/${encodeURIComponent(
-                        profile.tag_code
-                      )}`}
-                      className="contactButton chatButton"
-                    >
-                      <span>💬</span>
-
-                      <div>
-                        <small>QR RETURN</small>
-
-                        <strong>Live Chat</strong>
-                      </div>
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <div className="noContact">
-                  {ka
-                    ? "მფლობელს პირდაპირი დაკავშირების მეთოდი ჯერ არ აქვს ჩართული."
-                    : "The owner has not enabled a direct contact method."}
-                </div>
-              )}
-
-              {profile.show_additional_contact === true &&
-                (profile.additional_contact_name ||
-                  profile.additional_contact_phone ||
-                  profile.additional_contact_email) && (
-                  <div className="additionalContact">
-                    <strong>
-                      {ka
-                        ? "დამატებითი საკონტაქტო პირი"
-                        : "Additional contact"}
-                    </strong>
-
-                    {profile.additional_contact_name && (
-                      <p>
-                        👤 {profile.additional_contact_name}
-                      </p>
-                    )}
-
-                    {profile.additional_contact_phone && (
-                      <a
-                        href={`tel:${profile.additional_contact_phone}`}
-                      >
-                        📞 {profile.additional_contact_phone}
-                      </a>
-                    )}
-
-                    {profile.additional_contact_email && (
-                      <a
-                        href={`mailto:${profile.additional_contact_email}`}
-                      >
-                        ✉️ {profile.additional_contact_email}
-                      </a>
-                    )}
-                  </div>
+                {profile.live_chat_enabled && (
+                  <a
+                    href={`/chat/${type.chatType}/${encodeURIComponent(
+                      profile.tag_code
+                    )}`}
+                    className="contactButton chat"
+                  >
+                    <span>💬</span>
+                    <div>
+                      <small>QR RETURN</small>
+                      <strong>Live Chat</strong>
+                    </div>
+                  </a>
                 )}
+              </div>
             </section>
           )}
 
-          {lost &&
-            (showFinderMessage ||
-              showLastSeen ||
-              profile.location_sharing_enabled === true) && (
-              <section className="section">
-                <div className="sectionTitle">
-                  <span>03</span>
+          {lost && profile.location_sharing_enabled && (
+            <section className="section">
+              <SectionTitle
+                number="06"
+                title={
+                  ka
+                    ? "ლოკაციის გაზიარება"
+                    : "Share location"
+                }
+              />
 
-                  <h2>
+              <div className="locationCard">
+                <div className="locationIcon">📍</div>
+
+                <div className="locationText">
+                  <strong>
                     {ka
-                      ? "მპოვნელისთვის"
-                      : "For the finder"}
-                  </h2>
+                      ? "გაუზიარეთ თქვენი ლოკაცია მფლობელს"
+                      : "Share your location with the owner"}
+                  </strong>
+
+                  <p>
+                    {ka
+                      ? "ერთი ღილაკით გაუგზავნეთ მფლობელს ადგილი, სადაც QR კოდი დაასკანერეთ."
+                      : "Send the location where you scanned this QR code."}
+                  </p>
                 </div>
 
-                {showFinderMessage &&
-                  profile.finder_message && (
-                    <div className="finderMessage">
-                      <div className="quote">“</div>
+                <button
+                  type="button"
+                  onClick={shareLocation}
+                  disabled={locationLoading}
+                >
+                  {locationLoading
+                    ? ka
+                      ? "იგზავნება..."
+                      : "Sharing..."
+                    : ka
+                    ? "გაზიარება"
+                    : "Share"}
+                </button>
+              </div>
 
-                      <p>{profile.finder_message}</p>
-                    </div>
-                  )}
-
-                {showLastSeen &&
-                  profile.lost_seen_location && (
-                    <LongInfo
-                      label={
-                        ka
-                          ? "ბოლო ნანახი ადგილი"
-                          : "Last seen location"
-                      }
-                      value={profile.lost_seen_location}
-                    />
-                  )}
-
-                {profile.location_sharing_enabled === true && (
-                  <div className="locationCard">
-                    <div className="locationIcon">📍</div>
-
-                    <div className="locationText">
-                      <strong>
-                        {ka
-                          ? "გაუზიარეთ თქვენი ლოკაცია მფლობელს"
-                          : "Share your location with the owner"}
-                      </strong>
-
-                      <p>
-                        {ka
-                          ? "ერთი ღილაკით გაუგზავნეთ მფლობელს ადგილი, სადაც QR კოდი დაასკანერეთ."
-                          : "Send the owner the location where you scanned this QR code."}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={shareLocation}
-                      disabled={locationLoading}
-                    >
-                      {locationLoading
-                        ? ka
-                          ? "იგზავნება..."
-                          : "Sharing..."
-                        : ka
-                        ? "ლოკაციის გაზიარება"
-                        : "Share location"}
-                    </button>
-                  </div>
-                )}
-
-                {locationMessage && (
-                  <div
-                    className={
-                      locationMessage.startsWith("✓")
-                        ? "locationResult success"
-                        : "locationResult"
-                    }
-                  >
-                    {locationMessage}
-                  </div>
-                )}
-              </section>
-            )}
+              {locationMessage && (
+                <div
+                  className={`locationMessage ${
+                    locationMessage.startsWith("✓")
+                      ? "success"
+                      : ""
+                  }`}
+                >
+                  {locationMessage}
+                </div>
+              )}
+            </section>
+          )}
 
           <div className="privacyBox">
             <span>🔒</span>
@@ -818,22 +824,21 @@ export default function ProfilePage() {
             <div>
               <strong>
                 {ka
-                  ? "თქვენი კონფიდენციალურობა დაცულია"
-                  : "Privacy protected"}
+                  ? "მფლობელი თავად აკონტროლებს ხილვადობას"
+                  : "Visibility is controlled by the owner"}
               </strong>
 
               <p>
                 {ka
-                  ? "QR RETURN აჩვენებს მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც პროფილის მფლობელმა გადაწყვიტა."
-                  : "QR RETURN shows only information the profile owner has chosen to share."}
+                  ? "QR RETURN აჩვენებს მხოლოდ იმ დამატებით ინფორმაციას, რომლის გაზიარებაც მფლობელმა ჩართო."
+                  : "QR RETURN shows only the additional information the owner has chosen to share."}
               </p>
             </div>
           </div>
 
-          <footer className="footer">
+          <footer>
             <div>
               <strong>QR RETURN</strong>
-
               <span>
                 {ka
                   ? "დაკარგვა არ ნიშნავს დამშვიდობებას."
@@ -850,6 +855,21 @@ export default function ProfilePage() {
 
       <Styles />
     </main>
+  );
+}
+
+function SectionTitle({
+  number,
+  title,
+}: {
+  number: string;
+  title: string;
+}) {
+  return (
+    <div className="sectionTitle">
+      <span>{number}</span>
+      <h2>{title}</h2>
+    </div>
   );
 }
 
@@ -883,93 +903,6 @@ function LongInfo({
   );
 }
 
-function getRealType(profile: ItemProfile) {
-  if (profile.pet_type === "dog") return "dog";
-  if (profile.pet_type === "cat") return "cat";
-
-  if (profile.item_type === "dog") return "dog";
-  if (profile.item_type === "cat") return "cat";
-
-  if (profile.item_type === "key") return "keys";
-
-  return profile.item_type || "profile";
-}
-
-function normalizeChatType(type: string) {
-  if (type === "keys") return "key";
-  return type;
-}
-
-function getCategory(type: string, lang: Lang) {
-  const ka = lang === "ka";
-
-  switch (type) {
-    case "dog":
-      return ka ? "ძაღლი" : "Dog";
-
-    case "cat":
-      return ka ? "კატა" : "Cat";
-
-    case "key":
-    case "keys":
-      return ka ? "გასაღები" : "Keys";
-
-    case "wallet":
-      return ka ? "საფულე" : "Wallet";
-
-    case "bag":
-      return ka ? "ჩანთა" : "Bag";
-
-    case "suitcase":
-      return ka ? "ჩემოდანი" : "Suitcase";
-
-    case "luggage":
-      return ka ? "ჩემოდანი" : "Luggage";
-
-    default:
-      return ka ? "QR პროფილი" : "QR Profile";
-  }
-}
-
-function getIcon(type: string) {
-  switch (type) {
-    case "dog":
-      return "🐶";
-
-    case "cat":
-      return "🐱";
-
-    case "key":
-    case "keys":
-      return "🔑";
-
-    case "wallet":
-      return "👛";
-
-    case "bag":
-      return "👜";
-
-    case "suitcase":
-    case "luggage":
-      return "🧳";
-
-    default:
-      return "🏷️";
-  }
-}
-
-function translateSex(sex: string, lang: Lang) {
-  if (sex === "male") {
-    return lang === "ka" ? "მამრობითი" : "Male";
-  }
-
-  if (sex === "female") {
-    return lang === "ka" ? "მდედრობითი" : "Female";
-  }
-
-  return sex;
-}
-
 function Styles() {
   return (
     <style jsx global>{`
@@ -984,7 +917,9 @@ function Styles() {
       }
 
       body {
-        background: #f6f8fc;
+        background: #f7f9fc;
+        color: #101828;
+        font-family: Inter, Arial, sans-serif;
       }
 
       button {
@@ -993,26 +928,47 @@ function Styles() {
 
       .page {
         min-height: 100vh;
-        color: #101828;
-        font-family: Inter, Arial, sans-serif;
         background:
           radial-gradient(
-            circle at 7% 10%,
-            rgba(20, 101, 232, 0.08),
+            circle at 8% 10%,
+            rgba(20, 101, 232, 0.07),
             transparent 28%
           ),
           radial-gradient(
-            circle at 95% 8%,
-            rgba(118, 85, 247, 0.08),
+            circle at 94% 8%,
+            rgba(118, 85, 247, 0.07),
             transparent 28%
           ),
-          #f6f8fc;
+          #f7f9fc;
+      }
+
+      .statePage {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .statePage .logo {
+        margin-bottom: 10px;
+      }
+
+      .statePage h1 {
+        margin: 0;
+        color: #1465e8;
+      }
+
+      .statePage p {
+        color: #667085;
       }
 
       .header {
-        width: calc(100% - 32px);
+        width: calc(100% - 36px);
         max-width: 900px;
-        min-height: 80px;
+        min-height: 82px;
         margin: auto;
         display: flex;
         align-items: center;
@@ -1027,20 +983,14 @@ function Styles() {
         text-decoration: none;
       }
 
-      .logo,
-      .stateLogo {
-        width: 46px;
-        height: 46px;
+      .logo {
+        width: 48px;
+        height: 48px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
-        font-size: 12px;
         font-weight: 900;
       }
 
@@ -1058,22 +1008,22 @@ function Styles() {
       .brand small {
         margin-top: 2px;
         color: #7655f7;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 900;
-        letter-spacing: 1.8px;
+        letter-spacing: 1.5px;
       }
 
       .languages {
         padding: 4px;
         display: flex;
-        border-radius: 9px;
+        border-radius: 10px;
         background: #eaecf0;
       }
 
       .languages button {
-        padding: 7px 10px;
+        padding: 8px 10px;
         border: 0;
-        border-radius: 7px;
+        border-radius: 8px;
         background: transparent;
         color: #667085;
         font-size: 10px;
@@ -1090,15 +1040,15 @@ function Styles() {
         width: calc(100% - 24px);
         max-width: 780px;
         margin: auto;
-        padding: 42px 0 70px;
+        padding: 38px 0 70px;
       }
 
       .profileCard {
         padding: 30px;
         border: 1px solid #e4e7ec;
         border-radius: 26px;
-        background: rgba(255, 255, 255, 0.98);
-        box-shadow: 0 24px 65px rgba(16, 24, 40, 0.08);
+        background: white;
+        box-shadow: 0 22px 60px rgba(16, 24, 40, 0.08);
       }
 
       .hero {
@@ -1107,10 +1057,10 @@ function Styles() {
         gap: 25px;
       }
 
-      .photoWrapper {
-        width: 170px;
-        height: 170px;
-        flex: 0 0 170px;
+      .mainPhotoWrap {
+        width: 175px;
+        height: 175px;
+        flex: 0 0 175px;
         position: relative;
       }
 
@@ -1128,64 +1078,41 @@ function Styles() {
       .photoPlaceholder {
         display: grid;
         place-items: center;
-        background: linear-gradient(
-          135deg,
-          #eef4ff,
-          #f1edff
-        );
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
         font-size: 60px;
       }
 
-      .statusBadge {
+      .status {
         position: absolute;
         left: 12px;
         bottom: 12px;
         padding: 7px 10px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
         border-radius: 999px;
-        backdrop-filter: blur(10px);
         font-size: 9px;
         font-weight: 900;
       }
 
-      .statusBadge span {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-      }
-
-      .statusBadge.lost {
-        background: rgba(255, 241, 240, 0.94);
-        color: #b42318;
-      }
-
-      .statusBadge.lost span {
-        background: #d92d20;
-      }
-
-      .statusBadge.safe {
-        background: rgba(236, 253, 243, 0.94);
+      .status.safe {
+        background: rgba(236, 253, 243, 0.95);
         color: #027a48;
       }
 
-      .statusBadge.safe span {
-        background: #12b76a;
+      .status.lost {
+        background: rgba(255, 241, 240, 0.95);
+        color: #b42318;
       }
 
       .eyebrow {
         color: #7655f7;
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: 1.7px;
+        letter-spacing: 1.5px;
       }
 
-      .heroText h1 {
+      .heroInfo h1 {
         margin: 8px 0 10px;
         font-size: 37px;
-        line-height: 1.1;
-        letter-spacing: -1.5px;
+        line-height: 1.05;
       }
 
       .category {
@@ -1194,28 +1121,28 @@ function Styles() {
         border-radius: 999px;
         background: #eef4ff;
         color: #1465e8;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
       }
 
       .tagCode {
-        margin: 12px 0 0;
+        margin-top: 10px;
         color: #98a2b3;
-        font-size: 11px;
+        font-size: 10px;
       }
 
       .safeNotice {
-        margin-top: 28px;
-        padding: 18px;
+        margin-top: 27px;
+        padding: 17px;
         display: flex;
         align-items: flex-start;
-        gap: 13px;
+        gap: 12px;
         border: 1px solid #abefc6;
-        border-radius: 16px;
+        border-radius: 15px;
         background: #ecfdf3;
       }
 
-      .safeNoticeIcon {
+      .safeIcon {
         width: 34px;
         height: 34px;
         flex: 0 0 34px;
@@ -1229,30 +1156,30 @@ function Styles() {
 
       .safeNotice strong {
         color: #027a48;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .safeNotice p {
         margin: 5px 0 0;
         color: #475467;
-        font-size: 12px;
-        line-height: 1.6;
+        font-size: 11px;
+        line-height: 1.55;
       }
 
       .section {
-        margin-top: 30px;
-        padding-top: 28px;
+        margin-top: 29px;
+        padding-top: 27px;
         border-top: 1px solid #eaecf0;
       }
 
       .sectionTitle {
-        margin-bottom: 19px;
+        margin-bottom: 18px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 9px;
       }
 
-      .sectionTitle > span {
+      .sectionTitle span {
         width: 31px;
         height: 31px;
         display: grid;
@@ -1269,66 +1196,21 @@ function Styles() {
         font-size: 20px;
       }
 
-      .infoGrid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .infoBox {
-        padding: 15px;
-        border: 1px solid #eaecf0;
-        border-radius: 13px;
-        background: #fafbfc;
-      }
-
-      .infoBox span,
-      .longInfo span {
-        display: block;
-        margin-bottom: 5px;
-        color: #98a2b3;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.7px;
-      }
-
-      .infoBox strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .longInfo {
-        margin-top: 12px;
-        padding: 16px;
-        border: 1px solid #eaecf0;
-        border-radius: 13px;
-        background: #fafbfc;
-      }
-
-      .longInfo p {
-        margin: 0;
-        color: #475467;
-        font-size: 13px;
-        line-height: 1.65;
-        white-space: pre-wrap;
-      }
-
       .ownerCard {
-        padding: 17px;
+        padding: 15px;
         display: flex;
         align-items: center;
-        gap: 14px;
-        border: 1px solid #e4e7ec;
-        border-radius: 16px;
+        gap: 13px;
+        border: 1px solid #eaecf0;
+        border-radius: 14px;
         background: #fafbfc;
       }
 
       .ownerPhoto,
       .ownerPlaceholder {
-        width: 58px;
-        height: 58px;
-        flex: 0 0 58px;
+        width: 60px;
+        height: 60px;
+        flex: 0 0 60px;
         border-radius: 15px;
       }
 
@@ -1343,42 +1225,97 @@ function Styles() {
         font-size: 26px;
       }
 
-      .ownerInfo small,
-      .ownerInfo strong {
-        display: block;
+      .ownerInfo p {
+        margin: 4px 0;
+        color: #475467;
+        font-size: 11px;
       }
 
-      .ownerInfo small {
+      .infoGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 11px;
+      }
+
+      .infoBox {
+        padding: 14px;
+        border: 1px solid #eaecf0;
+        border-radius: 12px;
+        background: #fafbfc;
+      }
+
+      .infoBox span,
+      .longInfo span {
+        display: block;
+        margin-bottom: 5px;
         color: #98a2b3;
         font-size: 9px;
         font-weight: 900;
         text-transform: uppercase;
       }
 
-      .ownerInfo strong {
-        margin: 3px 0 5px;
+      .infoBox strong {
         color: #344054;
-        font-size: 15px;
+        font-size: 13px;
       }
 
-      .ownerInfo a {
-        display: block;
-        margin-top: 4px;
-        color: #1465e8;
+      .longInfo {
+        margin-top: 11px;
+        padding: 14px;
+        border: 1px solid #eaecf0;
+        border-radius: 12px;
+        background: #fafbfc;
+      }
+
+      .longInfo p {
+        margin: 0;
+        color: #475467;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .finderMessage {
+        padding: 17px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        color: #344054;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .additionalCard {
+        padding: 16px;
+        border: 1px solid #eaecf0;
+        border-radius: 14px;
+        background: #fafbfc;
+      }
+
+      .additionalCard p {
+        margin: 6px 0;
         font-size: 11px;
-        font-weight: 700;
+      }
+
+      .additionalCard a {
+        margin-top: 10px;
+        display: inline-flex;
+        padding: 10px 13px;
+        border-radius: 9px;
+        background: #1465e8;
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
         text-decoration: none;
       }
 
-      .contactButtons {
-        margin-top: 14px;
+      .contactGrid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
       }
 
       .contactButton {
-        min-height: 78px;
+        min-height: 76px;
         padding: 13px;
         display: flex;
         align-items: center;
@@ -1389,7 +1326,7 @@ function Styles() {
       }
 
       .contactButton > span {
-        font-size: 23px;
+        font-size: 22px;
       }
 
       .contactButton small,
@@ -1400,108 +1337,44 @@ function Styles() {
       .contactButton small {
         opacity: 0.8;
         font-size: 8px;
-        text-transform: uppercase;
       }
 
       .contactButton strong {
-        margin-top: 3px;
+        margin-top: 2px;
         font-size: 11px;
       }
 
-      .phoneButton {
+      .phone {
         background: #1465e8;
       }
 
-      .whatsappButton {
+      .whatsapp {
         background: #16a765;
       }
 
-      .chatButton {
-        background: linear-gradient(
-          135deg,
-          #7655f7,
-          #5635da
-        );
-      }
-
-      .noContact {
-        margin-top: 14px;
-        padding: 14px;
-        border-radius: 12px;
-        background: #f2f4f7;
-        color: #667085;
-        font-size: 12px;
-      }
-
-      .additionalContact {
-        margin-top: 14px;
-        padding: 15px;
-        border: 1px solid #e4e7ec;
-        border-radius: 13px;
-      }
-
-      .additionalContact strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 12px;
-      }
-
-      .additionalContact p,
-      .additionalContact a {
-        display: block;
-        margin: 5px 0;
-        color: #475467;
-        font-size: 11px;
-        text-decoration: none;
-      }
-
-      .finderMessage {
-        padding: 18px;
-        display: flex;
-        gap: 12px;
-        border-radius: 16px;
-        background: linear-gradient(
-          135deg,
-          #eef4ff,
-          #f3f0ff
-        );
-      }
-
-      .quote {
-        color: #7655f7;
-        font-family: Georgia, serif;
-        font-size: 35px;
-        line-height: 1;
-      }
-
-      .finderMessage p {
-        margin: 0;
-        color: #344054;
-        font-size: 14px;
-        line-height: 1.7;
-        white-space: pre-wrap;
+      .chat {
+        background: linear-gradient(135deg, #7655f7, #5635da);
       }
 
       .locationCard {
-        margin-top: 14px;
-        padding: 17px;
+        padding: 16px;
         display: flex;
         align-items: center;
-        gap: 13px;
+        gap: 12px;
         border: 1px solid #dbe7ff;
-        border-radius: 16px;
+        border-radius: 14px;
         background: #f5f9ff;
       }
 
       .locationIcon {
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
+        border-radius: 12px;
         background: white;
-        font-size: 22px;
+        font-size: 21px;
       }
 
       .locationText {
@@ -1509,21 +1382,21 @@ function Styles() {
       }
 
       .locationText strong {
-        font-size: 13px;
+        font-size: 12px;
       }
 
       .locationText p {
         margin: 4px 0 0;
         color: #667085;
-        font-size: 11px;
+        font-size: 10px;
         line-height: 1.5;
       }
 
       .locationCard button {
-        min-height: 42px;
-        padding: 0 14px;
+        min-height: 40px;
+        padding: 0 13px;
         border: 0;
-        border-radius: 10px;
+        border-radius: 9px;
         background: #1465e8;
         color: white;
         font-size: 10px;
@@ -1532,34 +1405,30 @@ function Styles() {
       }
 
       .locationCard button:disabled {
-        opacity: 0.6;
+        opacity: 0.65;
       }
 
-      .locationResult {
+      .locationMessage {
         margin-top: 10px;
-        padding: 11px;
-        border-radius: 10px;
+        padding: 10px;
+        border-radius: 9px;
         background: #fff1f0;
         color: #b42318;
-        font-size: 11px;
+        font-size: 10px;
       }
 
-      .locationResult.success {
+      .locationMessage.success {
         background: #ecfdf3;
         color: #027a48;
       }
 
       .privacyBox {
         margin-top: 28px;
-        padding: 16px;
+        padding: 15px;
         display: flex;
         gap: 11px;
-        border-radius: 14px;
+        border-radius: 13px;
         background: #f2f4f7;
-      }
-
-      .privacyBox > span {
-        font-size: 19px;
       }
 
       .privacyBox strong {
@@ -1573,81 +1442,54 @@ function Styles() {
         line-height: 1.5;
       }
 
-      .footer {
+      footer {
         margin-top: 27px;
-        padding-top: 20px;
+        padding-top: 19px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 20px;
         border-top: 1px solid #eaecf0;
       }
 
-      .footer strong,
-      .footer span {
+      footer strong,
+      footer span {
         display: block;
       }
 
-      .footer strong {
+      footer strong {
         color: #1465e8;
         font-size: 12px;
       }
 
-      .footer span {
+      footer span {
         margin-top: 3px;
         color: #98a2b3;
         font-size: 9px;
       }
 
-      .footer a {
+      footer a {
         color: #1465e8;
         font-size: 10px;
         font-weight: 900;
         text-decoration: none;
       }
 
-      .statePage {
-        min-height: 100vh;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-family: Inter, Arial, sans-serif;
-        background: #f7f9fc;
-      }
-
-      .stateLogo {
-        margin-bottom: 12px;
-      }
-
-      .statePage h1 {
-        margin: 0 0 8px;
-        color: #1465e8;
-      }
-
-      .statePage p {
-        color: #667085;
-      }
-
       .errorBox {
-        max-width: 500px;
-        padding: 14px;
+        padding: 13px;
         border: 1px solid #fecdca;
-        border-radius: 11px;
+        border-radius: 10px;
         background: #fff1f0;
         color: #b42318;
-        font-size: 13px;
+        font-size: 12px;
       }
 
       .homeButton {
-        margin-top: 16px;
-        padding: 12px 17px;
-        border-radius: 10px;
+        margin-top: 15px;
+        padding: 11px 15px;
+        border-radius: 9px;
         background: #1465e8;
         color: white;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 900;
         text-decoration: none;
       }
@@ -1662,26 +1504,14 @@ function Styles() {
           flex-direction: column;
         }
 
-        .photoWrapper {
+        .mainPhotoWrap {
           width: 100%;
           height: 290px;
           flex: none;
         }
 
-        .heroText h1 {
-          font-size: 31px;
-        }
-
-        .infoGrid {
+        .contactGrid {
           grid-template-columns: 1fr;
-        }
-
-        .contactButtons {
-          grid-template-columns: 1fr;
-        }
-
-        .contactButton {
-          min-height: 68px;
         }
 
         .locationCard {
@@ -1691,6 +1521,10 @@ function Styles() {
 
         .locationCard button {
           width: 100%;
+        }
+
+        .infoGrid {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -1702,16 +1536,10 @@ function Styles() {
 
         .profileCard {
           padding: 17px;
-          border-radius: 20px;
         }
 
-        .photoWrapper {
+        .mainPhotoWrap {
           height: 250px;
-        }
-
-        .footer {
-          align-items: flex-start;
-          flex-direction: column;
         }
       }
     `}</style>
