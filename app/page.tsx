@@ -7,53 +7,53 @@ import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
-const products = [
+const ecosystemItems = [
   {
     id: "dog",
     ka: "ძაღლი",
     en: "Dog",
     image:
-      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=500&q=88",
-    className: "productDog",
+      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=700&q=88",
+    className: "dog",
   },
   {
     id: "cat",
     ka: "კატა",
     en: "Cat",
     image:
-      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=500&q=88",
-    className: "productCat",
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=700&q=88",
+    className: "cat",
   },
   {
     id: "keys",
     ka: "სახლის + მანქანის გასაღები",
     en: "Home + Car Keys",
     image: "",
-    className: "productKeys",
+    className: "keys",
   },
   {
     id: "wallet",
     ka: "საფულე",
     en: "Wallet",
     image:
-      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=500&q=88",
-    className: "productWallet",
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=700&q=88",
+    className: "wallet",
   },
   {
     id: "luggage",
     ka: "ჩემოდანი",
     en: "Luggage",
     image:
-      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=500&q=88",
-    className: "productLuggage",
+      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=700&q=88",
+    className: "luggage",
   },
   {
     id: "bag",
     ka: "ჩანთა",
     en: "Bag",
     image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=88",
-    className: "productBag",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=700&q=88",
+    className: "bag",
   },
 ];
 
@@ -100,13 +100,13 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* ======================================================
+      {/* =========================================================
           HEADER
-      ====================================================== */}
+      ========================================================= */}
 
       <header className="header">
         <a href="/" className="brand">
-          <div className="brandMark">
+          <div className="brandIcon">
             <QrIcon />
           </div>
 
@@ -119,24 +119,24 @@ export default function HomePage() {
         <div className="headerRight">
           <nav className="nav">
             {isAdmin && (
-              <a href="/admin" className="adminButton">
+              <a href="/admin" className="adminBtn">
                 <AdminIcon />
                 <span>Admin Panel</span>
               </a>
             )}
 
             {isLoggedIn ? (
-              <a href="/account" className="accountButton">
+              <a href="/account" className="accountBtn">
                 <UserIcon />
                 <span>{ka ? "ჩემი ანგარიში" : "My Account"}</span>
               </a>
             ) : (
               <>
-                <a href="/account/register" className="accountButton">
+                <a href="/account/register" className="accountBtn">
                   {ka ? "ანგარიშის შექმნა" : "Create Account"}
                 </a>
 
-                <a href="/login" className="loginButton">
+                <a href="/login" className="loginBtn">
                   {ka ? "შესვლა" : "Sign In"}
                 </a>
               </>
@@ -165,23 +165,23 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ======================================================
-          HERO
-      ====================================================== */}
+      {/* =========================================================
+          PREMIUM HERO
+      ========================================================= */}
 
       <section className="hero">
-        <div className="heroGlow glowRed" />
-        <div className="heroGlow glowBlue" />
+        <div className="heroGlow glowOne" />
+        <div className="heroGlow glowTwo" />
 
         <div className="heroInner">
-          {/* ==================================================
+          {/* =====================================================
               LEFT — EMERGENCY
-          ================================================== */}
+          ===================================================== */}
 
-          <section className="emergencySide">
-            <div className="emergencyLabel">
-              <span className="medicalDot">+</span>
-              <strong>QR RETURN • EMERGENCY ID</strong>
+          <div className="emergencyColumn">
+            <div className="emergencyEyebrow">
+              <span className="medicalMark">+</span>
+              <span>QR RETURN • EMERGENCY ID</span>
             </div>
 
             <h1>
@@ -190,183 +190,178 @@ export default function HomePage() {
                 : "When you cannot speak, essential information can still speak for you."}
             </h1>
 
-            <p className="lead">
+            <p className="heroLead">
               {ka
-                ? "Emergency QR გაძლევთ საშუალებას წინასწარ განსაზღვროთ რა ინფორმაცია უნდა ნახოს დამხმარემ საგანგებო სიტუაციაში."
-                : "Emergency QR lets you choose in advance what information a helper can see in an emergency."}
+                ? "Emergency QR პროფილი გაძლევთ საშუალებას წინასწარ განსაზღვროთ რა უნდა იცოდეს დამხმარემ და ვის დაუკავშირდეს საგანგებო სიტუაციაში."
+                : "Emergency QR lets you decide in advance what a helper should know and who they should contact in an emergency."}
             </p>
 
-            {/* RED + BLUE BRACELET */}
+            {/* PREMIUM BRACELET */}
 
-            <div className="emergencyVisual">
-              <div className="braceletWrap">
-                <div className="braceletShadow" />
+            <div className="braceletArea">
+              <div className="bracelet">
+                <div className="strap strapRed">
+                  <div className="strapDetail" />
+                </div>
 
-                <div className="bracelet">
-                  <div className="strapRed">
-                    <span />
-                    <span />
-                    <span />
+                <div className="braceletPlate">
+                  <div className="plateTop">
+                    <span className="plateCross">+</span>
+                    <span>EMERGENCY QR</span>
                   </div>
 
-                  <div className="watchFace">
-                    <span className="watchTitle">
-                      EMERGENCY
-                    </span>
-
-                    <span className="watchQrTitle">
-                      QR
-                    </span>
-
-                    <div className="watchQr">
-                      <QrCode size={60} />
-                    </div>
+                  <div className="plateQr">
+                    <QrCode size={64} />
                   </div>
 
-                  <div className="strapBlue">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
+                  <div className="plateBottom">
+                    <strong>QR RETURN</strong>
+                    <span>SCAN FOR EMERGENCY INFO</span>
                   </div>
+                </div>
+
+                <div className="strap strapBlue">
+                  <div className="strapDetail" />
                 </div>
               </div>
 
-              {/* INFO */}
+              <div className="braceletShadow" />
+            </div>
 
-              <div className="emergencyInfo">
-                <div className="infoTop">
-                  <div>
-                    <span>EMERGENCY PROFILE</span>
-                    <strong>
-                      {ka
-                        ? "საჭირო ინფორმაცია ერთ ადგილას"
-                        : "Essential information in one place"}
-                    </strong>
-                  </div>
+            {/* CLEAN PROFILE */}
 
-                  <span className="sos">SOS READY</span>
+            <div className="emergencyProfile">
+              <div className="profileHeading">
+                <div>
+                  <span>EMERGENCY PROFILE</span>
+
+                  <strong>
+                    {ka
+                      ? "მხოლოდ საჭირო ინფორმაცია."
+                      : "Only what matters."}
+                  </strong>
                 </div>
 
-                <InfoRow
+                <span className="statusDot">
+                  <i />
+                  SOS READY
+                </span>
+              </div>
+
+              <div className="profileGrid">
+                <EmergencyItem
                   icon={<PhoneIcon />}
                   title={
                     ka
                       ? "საგანგებო კონტაქტი"
                       : "Emergency Contact"
                   }
-                  value={
+                  text={
                     ka
                       ? "თქვენ მიერ არჩეული პირი"
                       : "Your trusted contact"
                   }
                 />
 
-                <InfoRow
+                <EmergencyItem
                   icon={<HeartIcon />}
                   title={
                     ka
                       ? "სამედიცინო ინფორმაცია"
                       : "Medical Information"
                   }
-                  value={
+                  text={
                     ka
                       ? "მხოლოდ ნებადართული მონაცემები"
                       : "Only approved information"
                   }
                 />
 
-                <InfoRow
+                <EmergencyItem
                   icon={<AlertIcon />}
                   title={ka ? "ალერგიები" : "Allergies"}
-                  value={
+                  text={
                     ka
                       ? "საჭიროების შემთხვევაში"
                       : "When relevant"
                   }
                 />
 
-                <InfoRow
+                <EmergencyItem
                   icon={<ShieldIcon />}
                   title="Privacy Control"
-                  value={
+                  text={
                     ka
                       ? "თქვენ აკონტროლებთ მონაცემებს"
-                      : "You control your data"
+                      : "You stay in control"
                   }
                 />
               </div>
             </div>
 
-            <div className="emergencyMeta">
-              <span>EMERGENCY CONTACT</span>
-              <span>MEDICAL INFO</span>
-              <span>NO APP</span>
-              <span>PRIVACY CONTROL</span>
-            </div>
-
-            <div className="heroButtons">
+            <div className="heroActions">
               <a
                 href={
                   isLoggedIn
                     ? "/account"
                     : "/account/register"
                 }
-                className="mainCta"
+                className="primaryCta"
               >
                 {isLoggedIn
                   ? ka
                     ? "ჩემი ანგარიში"
                     : "My Account"
                   : ka
-                    ? "ანგარიშის შექმნა"
-                    : "Create Account"}
+                  ? "ანგარიშის შექმნა"
+                  : "Create Account"}
 
                 <ArrowIcon />
               </a>
 
-              <a href="#video" className="lightCta">
+              <a href="#video" className="secondaryCta">
                 {ka ? "როგორ მუშაობს" : "How it works"}
               </a>
             </div>
-          </section>
+          </div>
 
-          {/* ==================================================
-              RIGHT — QR RETURN ECOSYSTEM
-          ================================================== */}
+          {/* =====================================================
+              RIGHT — PRODUCT ECOSYSTEM
+          ===================================================== */}
 
-          <section className="ecosystem">
-            <div className="softOrbit orbitOne" />
-            <div className="softOrbit orbitTwo" />
+          <div className="ecosystem">
+            <div className="orbit orbitLarge" />
+            <div className="orbit orbitSmall" />
 
-            {/* CENTRAL PHONE */}
+            {/* CENTER PHONE */}
 
             <div className="phone">
               <div className="phoneNotch" />
 
               <div className="phoneScreen">
-                <div className="phoneTop">
-                  <div className="tinyLogo">
+                <div className="phoneHeader">
+                  <div className="phoneLogo">
                     <QrIcon />
                   </div>
 
                   <div>
                     <span>QR RETURN</span>
+
                     <strong>
-                      {ka
-                        ? "მპოვნელის გვერდი"
-                        : "Finder Access"}
+                      {ka ? "მპოვნელის გვერდი" : "Finder Access"}
                     </strong>
                   </div>
                 </div>
 
-                <div className="phoneCode">
-                  <QrCode size={104} />
+                <div className="phoneState">
+                  <div className="stateIcon">
+                    <CheckIcon />
+                  </div>
+
+                  <span>SCAN COMPLETE</span>
                 </div>
 
-                <div className="phoneText">
-                  <span>SCAN COMPLETE</span>
-
+                <div className="phoneContent">
                   <strong>
                     {ka
                       ? "დაუკავშირდი მფლობელს"
@@ -375,103 +370,98 @@ export default function HomePage() {
 
                   <p>
                     {ka
-                      ? "აირჩიეთ დაკავშირების მეთოდი"
-                      : "Choose a contact option"}
+                      ? "აირჩიე შენთვის მოსახერხებელი მეთოდი."
+                      : "Choose the contact method that works for you."}
                   </p>
                 </div>
 
-                <div className="phoneActions">
-                  <div className="phoneAction primary">
+                <div className="phoneButtons">
+                  <button type="button" className="chatBtn">
                     <ChatIcon />
-                    <span>Live Chat</span>
-                  </div>
 
-                  <div className="phoneAction">
+                    <span>Live Chat</span>
+                  </button>
+
+                  <button type="button">
                     <LocationIcon />
-                    <span>
-                      {ka ? "ლოკაცია" : "Location"}
-                    </span>
-                  </div>
+
+                    <span>{ka ? "ლოკაცია" : "Location"}</span>
+                  </button>
                 </div>
 
-                <div className="phonePrivacy">
+                <div className="privacyLine">
                   <ShieldIcon />
 
                   <span>
                     {ka
                       ? "პირადი მონაცემები დაცულია"
-                      : "Personal data protected"}
+                      : "Private information protected"}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* 6 ROTATING PRODUCTS */}
+            {/* ROTATING / FLOATING PRODUCTS */}
 
             <div className="productOrbit">
-              {products.map((product) => (
+              {ecosystemItems.map((item) => (
                 <div
-                  className={`orbitProduct ${product.className}`}
-                  key={product.id}
+                  key={item.id}
+                  className={`productBubble ${item.className}`}
                 >
-                  <div className="productPhoto">
-                    {product.id === "keys" ? (
-                      <KeysVisual />
+                  <div className="bubblePhoto">
+                    {item.id === "keys" ? (
+                      <KeysScene />
                     ) : (
                       <img
-                        src={product.image}
-                        alt={
-                          ka ? product.ka : product.en
-                        }
+                        src={item.image}
+                        alt={ka ? item.ka : item.en}
                       />
                     )}
 
-                    <div className="photoOverlay" />
+                    <div className="imageShade" />
 
-                    <div
-                      className={`realTag realTag-${product.id}`}
-                    >
-                      <span className="tagLoop" />
+                    {/* only small physical tag */}
 
-                      <div className="tinyTagFace">
-                        <MiniQr />
-                      </div>
+                    <div className={`smallTag ${item.id}`}>
+                      <span className="tagRing" />
+                      <MiniQr />
                     </div>
 
-                    {product.id === "luggage" && (
-                      <div className="airportBadge">
+                    {item.id === "luggage" && (
+                      <span className="airport">
                         AIRPORT
-                      </div>
+                      </span>
                     )}
                   </div>
 
-                  <strong className="productName">
-                    {ka ? product.ka : product.en}
+                  <strong>
+                    {ka ? item.ka : item.en}
                   </strong>
                 </div>
               ))}
             </div>
 
-            <div className="ecosystemText">
+            <div className="ecosystemLabel">
               <span>QR RETURN</span>
 
               <strong>
                 {ka
-                  ? "ერთი სისტემა სხვადასხვა ნივთისთვის"
-                  : "One system for what matters"}
+                  ? "ერთი სისტემა. ბევრი გამოყენება."
+                  : "One system. Many uses."}
               </strong>
             </div>
-          </section>
+          </div>
         </div>
       </section>
 
-      {/* ======================================================
-          VIDEO
-      ====================================================== */}
+      {/* =========================================================
+          VIDEO SECTION
+      ========================================================= */}
 
       <section id="video" className="videoSection">
         <div className="shell">
-          <div className="videoGrid">
+          <div className="videoLayout">
             <div className="videoCopy">
               <span className="eyebrow">
                 QR RETURN IN ACTION
@@ -485,38 +475,38 @@ export default function HomePage() {
 
               <p>
                 {ka
-                  ? "აქ მოგვიანებით დაემატება მოკლე ვიდეო, რომელიც რეალურ სიტუაციაში აჩვენებს QR RETURN-ის გამოყენებას."
-                  : "A short product video will be added here to show QR RETURN in a real-life situation."}
+                  ? "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას."
+                  : "A short real-world video will show how a finder notices QR RETURN, scans it and starts connecting with the owner."}
               </p>
             </div>
 
             <div className="videoCard">
               <div className="videoBrand">
                 <QrIcon />
-                <span>QR RETURN DEMO</span>
+                <span>QR RETURN PRODUCT DEMO</span>
               </div>
 
-              <button type="button" className="play">
+              <button type="button" className="playButton">
                 <PlayIcon />
               </button>
 
-              <span className="comingSoon">
+              <span className="videoSoon">
                 {ka
-                  ? "პროდუქტის ვიდეო დაემატება"
-                  : "Product video coming soon"}
+                  ? "ვიდეო დაემატება"
+                  : "Video coming soon"}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ======================================================
-          FOUR STEPS
-      ====================================================== */}
+      {/* =========================================================
+          4 STEPS
+      ========================================================= */}
 
-      <section className="flowSection">
+      <section className="stepsSection">
         <div className="shell">
-          <div className="flowHeader">
+          <div className="stepsHeader">
             <span className="eyebrow">
               FIND → SCAN → CONNECT → RETURN
             </span>
@@ -528,8 +518,8 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="flow">
-            <FlowStep
+          <div className="steps">
+            <Step
               number="01"
               icon={<SearchIcon />}
               title={ka ? "იპოვეს" : "Found"}
@@ -540,9 +530,9 @@ export default function HomePage() {
               }
             />
 
-            <span className="flowConnector" />
+            <span className="stepLine" />
 
-            <FlowStep
+            <Step
               number="02"
               icon={<ScanIcon />}
               title={ka ? "დაასკანერეს" : "Scanned"}
@@ -553,24 +543,26 @@ export default function HomePage() {
               }
             />
 
-            <span className="flowConnector" />
+            <span className="stepLine" />
 
-            <FlowStep
+            <Step
               number="03"
               icon={<ChatIcon />}
               title={
-                ka ? "დაგიკავშირდნენ" : "Connected"
+                ka
+                  ? "დაგიკავშირდნენ"
+                  : "Connected"
               }
               text={
                 ka
                   ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
-                  : "Live Chat, call or another contact option."
+                  : "Live Chat, call or another contact method."
               }
             />
 
-            <span className="flowConnector" />
+            <span className="stepLine" />
 
-            <FlowStep
+            <Step
               number="04"
               icon={<ReturnIcon />}
               title={ka ? "დაბრუნდა" : "Returned"}
@@ -584,9 +576,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
+      {/* =========================================================
           FEATURES
-      ====================================================== */}
+      ========================================================= */}
 
       <section className="featuresSection">
         <div className="shell">
@@ -600,15 +592,15 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="featureGrid">
+          <div className="features">
             <Feature
               number="01"
               icon={<ChatIcon />}
               title="Live Chat"
               text={
                 ka
-                  ? "პირდაპირი კავშირი მპოვნელთან."
-                  : "Direct connection with the finder."
+                  ? "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე."
+                  : "Connect directly without showing your private phone number."
               }
             />
 
@@ -623,7 +615,7 @@ export default function HomePage() {
               text={
                 ka
                   ? "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ."
-                  : "A finder can share the location in one tap."
+                  : "The finder can share the location in one tap."
               }
             />
 
@@ -637,8 +629,8 @@ export default function HomePage() {
               }
               text={
                 ka
-                  ? "სურვილის შემთხვევაში მიუთითეთ ჯილდო."
-                  : "Optionally offer a reward."
+                  ? "სურვილის შემთხვევაში შესთავაზეთ ჯილდო."
+                  : "Optionally offer a reward for a safe return."
               }
             />
 
@@ -648,17 +640,17 @@ export default function HomePage() {
               title="Privacy Control"
               text={
                 ka
-                  ? "თქვენ ირჩევთ რა ინფორმაცია გამოჩნდება."
-                  : "You decide what information is visible."
+                  ? "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება."
+                  : "You decide exactly what information is visible."
               }
             />
           </div>
         </div>
       </section>
 
-      {/* ======================================================
+      {/* =========================================================
           RULES
-      ====================================================== */}
+      ========================================================= */}
 
       <section className="rulesSection">
         <div className="shell">
@@ -674,14 +666,14 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="ruleGrid">
+          <div className="rules">
             <Rule
               number="01"
               title={ka ? "აპის გარეშე" : "No App"}
               text={
                 ka
                   ? "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის."
-                  : "The finder does not need an app or an account."
+                  : "The finder does not need to download an app or create an account."
               }
             />
 
@@ -689,13 +681,13 @@ export default function HomePage() {
               number="02"
               title={
                 ka
-                  ? "თქვენი მონაცემები"
+                  ? "თქვენი ინფორმაცია"
                   : "Your Information"
               }
               text={
                 ka
-                  ? "თქვენ თავად წყვეტთ რა იქნება საჯაროდ ხელმისაწვდომი."
-                  : "You decide exactly what can be shown."
+                  ? "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი."
+                  : "You decide exactly what information can be shown."
               }
             />
 
@@ -708,7 +700,7 @@ export default function HomePage() {
               }
               text={
                 ka
-                  ? "ყველა ცხოველი, ნივთი და Emergency ID ერთ სივრცეში."
+                  ? "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში."
                   : "Pets, belongings and Emergency ID in one place."
               }
             />
@@ -716,9 +708,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
-          ACCOUNT
-      ====================================================== */}
+      {/* =========================================================
+          ACCOUNT CTA
+      ========================================================= */}
 
       <section className="accountSection">
         <div className="shell">
@@ -727,7 +719,7 @@ export default function HomePage() {
               <UserIcon />
             </div>
 
-            <div>
+            <div className="accountCopy">
               <span>ONE OWNER ACCOUNT</span>
 
               <h2>
@@ -738,8 +730,8 @@ export default function HomePage() {
 
               <p>
                 {ka
-                  ? "მართეთ QR პროფილები, Live Chat, დაკარგვის რეჟიმი და Emergency ID."
-                  : "Manage QR profiles, Live Chat, lost mode and Emergency ID."}
+                  ? "მართეთ QR პროფილები, დაკარგვის რეჟიმი, Live Chat და Emergency ID."
+                  : "Manage QR profiles, lost mode, Live Chat and Emergency ID."}
               </p>
             </div>
 
@@ -755,8 +747,8 @@ export default function HomePage() {
                   ? "ჩემი ანგარიში"
                   : "My Account"
                 : ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create Account"}
+                ? "ანგარიშის შექმნა"
+                : "Create Account"}
 
               <ArrowIcon />
             </a>
@@ -764,17 +756,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
+      {/* =========================================================
           CONTACT
-      ====================================================== */}
+      ========================================================= */}
 
-      <section className="contact">
+      <section className="contactSection">
         <div className="shell contactInner">
           <div>
             <span className="eyebrow">CONTACT</span>
 
             <h2>
-              {ka ? "დაგვიკავშირდით" : "Contact us"}
+              {ka
+                ? "დაგვიკავშირდით"
+                : "Contact us"}
             </h2>
 
             <p>
@@ -791,11 +785,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* EXISTING LIVE CHAT */}
+
       <SupportLauncher language={language} />
 
-      {/* ======================================================
+      {/* =========================================================
           FOOTER
-      ====================================================== */}
+      ========================================================= */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -823,9 +819,7 @@ export default function HomePage() {
                 : "Privacy"}
             </span>
 
-            <span>
-              {ka ? "პირობები" : "Terms"}
-            </span>
+            <span>{ka ? "პირობები" : "Terms"}</span>
           </div>
 
           <span className="copyright">
@@ -834,9 +828,9 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* ======================================================
-          CSS
-      ====================================================== */}
+      {/* =========================================================
+          GLOBAL PAGE CSS
+      ========================================================= */}
 
       <style jsx>{`
         :global(*) {
@@ -849,13 +843,13 @@ export default function HomePage() {
 
         :global(body) {
           margin: 0;
-          background: #f7f7f5;
+          background: #f8f8f5;
         }
 
         .page {
           overflow: hidden;
-          background: #f7f7f5;
-          color: #17212b;
+          color: #18212b;
+          background: #f8f8f5;
           font-family:
             Inter,
             -apple-system,
@@ -866,31 +860,31 @@ export default function HomePage() {
         }
 
         .shell {
-          width: calc(100% - 52px);
+          width: calc(100% - 56px);
           max-width: 1180px;
           margin: auto;
         }
 
         .eyebrow {
-          color: #d8464d;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: 1.8px;
+          color: #c84a50;
+          font-size: 9px;
+          font-weight: 850;
+          letter-spacing: 1.7px;
         }
 
         /* HEADER */
 
         .header {
-          width: calc(100% - 52px);
+          width: calc(100% - 56px);
           max-width: 1280px;
           min-height: 78px;
           margin: auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(25, 33, 43, 0.08);
           position: relative;
-          z-index: 20;
+          z-index: 40;
+          border-bottom: 1px solid rgba(20, 28, 38, 0.075);
         }
 
         .brand,
@@ -906,17 +900,17 @@ export default function HomePage() {
           text-decoration: none;
         }
 
-        .brandMark {
+        .brandIcon {
           width: 39px;
           height: 39px;
           display: grid;
           place-items: center;
           border-radius: 11px;
-          color: #fff;
-          background: #1c2835;
+          color: white;
+          background: #202b37;
         }
 
-        .brandMark :global(svg) {
+        .brandIcon :global(svg) {
           width: 20px;
         }
 
@@ -926,30 +920,31 @@ export default function HomePage() {
         }
 
         .brandText strong {
-          color: #1c2835;
+          color: #202b37;
           font-size: 17px;
           font-weight: 850;
+          letter-spacing: -0.4px;
         }
 
         .brandText span {
           margin-top: 3px;
-          color: #929aa4;
+          color: #929aa3;
           font-size: 6px;
-          font-weight: 900;
+          font-weight: 850;
           letter-spacing: 1.7px;
         }
 
         .headerRight {
-          gap: 13px;
+          gap: 14px;
         }
 
         .nav {
           gap: 7px;
         }
 
-        .adminButton,
-        .accountButton,
-        .loginButton {
+        .adminBtn,
+        .accountBtn,
+        .loginBtn {
           min-height: 38px;
           padding: 0 13px;
           display: inline-flex;
@@ -957,30 +952,30 @@ export default function HomePage() {
           justify-content: center;
           gap: 7px;
           border-radius: 10px;
+          text-decoration: none;
           font-size: 10px;
           font-weight: 800;
-          text-decoration: none;
         }
 
-        .adminButton {
-          color: #a43d42;
-          border: 1px solid #edd7d9;
-          background: #fff7f7;
+        .adminBtn {
+          color: #9d4044;
+          border: 1px solid #ecd8da;
+          background: #fff8f8;
         }
 
-        .adminButton :global(svg),
-        .accountButton :global(svg) {
+        .adminBtn :global(svg),
+        .accountBtn :global(svg) {
           width: 13px;
         }
 
-        .accountButton {
+        .accountBtn {
           color: white;
-          background: #1c2835;
+          background: #202b37;
         }
 
-        .loginButton {
-          color: #4e5865;
-          border: 1px solid #dde1e5;
+        .loginBtn {
+          color: #53606d;
+          border: 1px solid #dce0e4;
         }
 
         .language {
@@ -990,380 +985,382 @@ export default function HomePage() {
         .language > span {
           width: 1px;
           height: 12px;
-          background: #d2d7dc;
+          background: #d6dade;
         }
 
         .language button {
-          border: 0;
           padding: 0;
-          background: none;
-          color: #979fa9;
+          border: 0;
+          color: #999fa8;
+          background: transparent;
           font-size: 8px;
           font-weight: 900;
           cursor: pointer;
         }
 
         .language button.active {
-          color: #d8464d;
+          color: #c84a50;
         }
 
-        /* HERO */
+        /* ======================================================
+           PREMIUM HERO
+        ====================================================== */
 
         .hero {
-          min-height: 720px;
+          min-height: 760px;
           position: relative;
+          overflow: hidden;
           background:
+            radial-gradient(
+              circle at 90% 10%,
+              rgba(47, 89, 139, 0.075),
+              transparent 30%
+            ),
+            radial-gradient(
+              circle at 8% 85%,
+              rgba(194, 65, 73, 0.055),
+              transparent 25%
+            ),
             linear-gradient(
               120deg,
-              #faf9f6 0%,
-              #f3f4f3 51%,
-              #edf0f2 100%
+              #fbfaf7 0%,
+              #f6f6f3 52%,
+              #f1f3f4 100%
             );
-        }
-
-        .heroInner {
-          width: calc(100% - 52px);
-          max-width: 1280px;
-          min-height: 720px;
-          margin: auto;
-          display: grid;
-          grid-template-columns: 0.94fr 1.06fr;
-          align-items: center;
-          gap: 55px;
-          position: relative;
-          z-index: 2;
         }
 
         .heroGlow {
           position: absolute;
           border-radius: 50%;
           pointer-events: none;
+          filter: blur(2px);
         }
 
-        .glowRed {
-          width: 380px;
-          height: 380px;
-          left: -190px;
-          bottom: -180px;
-          background: radial-gradient(
-            circle,
-            rgba(216, 70, 77, 0.07),
-            transparent 70%
-          );
-        }
-
-        .glowBlue {
-          width: 590px;
-          height: 590px;
-          right: -210px;
+        .glowOne {
+          width: 500px;
+          height: 500px;
+          right: -230px;
           top: -220px;
-          background: radial-gradient(
-            circle,
-            rgba(46, 92, 150, 0.11),
-            transparent 69%
-          );
+          background: rgba(50, 89, 140, 0.045);
         }
 
-        /* EMERGENCY LEFT */
+        .glowTwo {
+          width: 360px;
+          height: 360px;
+          left: -190px;
+          bottom: -190px;
+          background: rgba(196, 72, 80, 0.04);
+        }
 
-        .emergencySide {
+        .heroInner {
+          width: calc(100% - 56px);
+          max-width: 1280px;
+          min-height: 760px;
+          margin: auto;
+          display: grid;
+          grid-template-columns: 0.96fr 1.04fr;
+          align-items: center;
+          gap: 65px;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* LEFT */
+
+        .emergencyColumn {
           max-width: 580px;
         }
 
-        .emergencyLabel {
+        .emergencyEyebrow {
           display: flex;
           align-items: center;
-          gap: 8px;
-          color: #a8393f;
-          font-size: 8px;
-          letter-spacing: 1.2px;
+          gap: 9px;
+          color: #a84248;
+          font-size: 9px;
+          font-weight: 850;
+          letter-spacing: 1.3px;
         }
 
-        .medicalDot {
+        .medicalMark {
           width: 25px;
           height: 25px;
           display: grid;
           place-items: center;
           border-radius: 7px;
           color: white;
-          background: #d8464d;
-          font-size: 16px;
-          font-weight: 500;
+          background: #c94a50;
+          font-size: 17px;
         }
 
-        .emergencySide h1 {
-          max-width: 560px;
-          margin: 20px 0 0;
+        .emergencyColumn h1 {
+          max-width: 565px;
+          margin: 22px 0 0;
           color: #17212b;
-          font-size: clamp(34px, 3.7vw, 47px);
-          line-height: 1.08;
-          letter-spacing: -2.2px;
-          font-weight: 700;
+          font-size: clamp(37px, 3.9vw, 49px);
+          line-height: 1.07;
+          letter-spacing: -2.4px;
+          font-weight: 690;
         }
 
-        .lead {
-          max-width: 530px;
+        .heroLead {
+          max-width: 535px;
           margin: 18px 0 0;
-          color: #66717d;
-          font-size: 14px;
-          line-height: 1.7;
-        }
-
-        .emergencyVisual {
-          margin-top: 25px;
-          display: grid;
-          grid-template-columns: 0.95fr 1.05fr;
-          align-items: center;
-          gap: 17px;
+          color: #68727c;
+          font-size: 15px;
+          line-height: 1.72;
         }
 
         /* BRACELET */
 
-        .braceletWrap {
-          min-height: 220px;
+        .braceletArea {
+          height: 180px;
+          margin-top: 27px;
           position: relative;
-          display: grid;
-          place-items: center;
-        }
-
-        .braceletShadow {
-          width: 190px;
-          height: 35px;
-          position: absolute;
-          bottom: 27px;
-          border-radius: 50%;
-          background: rgba(25, 35, 48, 0.12);
-          filter: blur(13px);
+          display: flex;
+          align-items: center;
         }
 
         .bracelet {
-          width: 230px;
-          height: 210px;
+          width: 470px;
+          height: 120px;
+          display: flex;
+          align-items: center;
           position: relative;
-          transform: rotate(-8deg);
+          z-index: 2;
+          transform: rotate(-4deg);
         }
 
-        .strapRed,
-        .strapBlue {
-          width: 104px;
-          height: 188px;
-          position: absolute;
-          top: 13px;
-          border: 18px solid;
-          border-radius: 55px;
+        .strap {
+          height: 48px;
+          flex: 1;
+          position: relative;
+          box-shadow: inset 0 1px rgba(255,255,255,.25);
         }
 
         .strapRed {
-          left: 18px;
-          border-color: #dc3941;
-          border-right-color: transparent;
+          border-radius: 25px 0 0 25px;
+          background:
+            linear-gradient(
+              180deg,
+              #de4a50,
+              #bf343a
+            );
         }
 
         .strapBlue {
-          right: 18px;
-          border-color: #176fc3;
-          border-left-color: transparent;
+          border-radius: 0 25px 25px 0;
+          background:
+            linear-gradient(
+              180deg,
+              #2c78bd,
+              #145c9c
+            );
         }
 
-        .strapRed span,
-        .strapBlue span {
-          width: 8px;
-          height: 15px;
+        .strapDetail {
+          width: 70%;
+          height: 2px;
           position: absolute;
-          border-radius: 5px;
-          background: rgba(255, 255, 255, 0.27);
+          top: 50%;
+          left: 15%;
+          border-radius: 99px;
+          background: rgba(255,255,255,.18);
         }
 
-        .strapRed span:nth-child(1) {
-          left: -12px;
-          top: 47px;
-        }
-
-        .strapRed span:nth-child(2) {
-          left: -12px;
-          top: 77px;
-        }
-
-        .strapRed span:nth-child(3) {
-          left: -12px;
-          top: 107px;
-        }
-
-        .strapBlue span:nth-child(1) {
-          right: -12px;
-          top: 42px;
-        }
-
-        .strapBlue span:nth-child(2) {
-          right: -12px;
-          top: 70px;
-        }
-
-        .strapBlue span:nth-child(3) {
-          right: -12px;
-          top: 98px;
-        }
-
-        .strapBlue span:nth-child(4) {
-          right: -12px;
-          top: 126px;
-        }
-
-        .watchFace {
-          width: 112px;
-          height: 145px;
-          padding: 12px;
-          position: absolute;
-          z-index: 4;
-          top: 32px;
-          left: 50%;
+        .braceletPlate {
+          width: 158px;
+          height: 118px;
+          flex: 0 0 158px;
+          padding: 11px 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          border: 4px solid #252c34;
-          border-radius: 24px;
-          color: white;
+          border: 4px solid #b8bec5;
+          border-radius: 25px;
           background:
             linear-gradient(
-              160deg,
-              #151a20,
-              #030608
+              145deg,
+              #ffffff,
+              #f3f4f4
             );
           box-shadow:
-            0 22px 40px
-            rgba(20, 27, 35, 0.28);
-          transform: translateX(-50%);
+            0 18px 34px rgba(29, 38, 49, 0.16),
+            inset 0 1px white;
         }
 
-        .watchTitle {
-          color: #ffffff;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 0.5px;
-        }
-
-        .watchQrTitle {
-          margin-top: 2px;
-          color: #ffffff;
-          font-size: 18px;
-          font-weight: 900;
-        }
-
-        .watchQr {
-          margin-top: 7px;
-          padding: 5px;
-          border-radius: 7px;
-          background: white;
-        }
-
-        /* EMERGENCY INFO */
-
-        .emergencyInfo {
-          padding: 15px;
-          border: 1px solid #e0e4e7;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: 0 14px 32px rgba(25, 35, 48, 0.055);
-        }
-
-        .infoTop {
-          padding-bottom: 10px;
+        .plateTop {
+          width: 100%;
           display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 8px;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          color: #a43f45;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 0.6px;
         }
 
-        .infoTop div span,
-        .infoTop div strong {
+        .plateCross {
+          width: 16px;
+          height: 16px;
+          display: grid;
+          place-items: center;
+          border-radius: 5px;
+          color: white;
+          background: #c94a50;
+          font-size: 11px;
+        }
+
+        .plateQr {
+          margin-top: 7px;
+        }
+
+        .plateBottom {
+          margin-top: 5px;
+          text-align: center;
+        }
+
+        .plateBottom strong,
+        .plateBottom span {
           display: block;
         }
 
-        .infoTop div span {
-          color: #d8464d;
+        .plateBottom strong {
+          color: #27323d;
           font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
+          letter-spacing: 0.5px;
         }
 
-        .infoTop div strong {
-          margin-top: 4px;
-          color: #33404d;
-          font-size: 10px;
-          line-height: 1.4;
+        .plateBottom span {
+          margin-top: 2px;
+          color: #8c949c;
+          font-size: 4px;
+          letter-spacing: 0.4px;
         }
 
-        .sos {
-          padding: 5px 7px;
-          border-radius: 999px;
-          color: white;
-          background: #d8464d;
-          font-size: 5px;
-          font-weight: 900;
+        .braceletShadow {
+          width: 370px;
+          height: 24px;
+          position: absolute;
+          left: 50px;
+          bottom: 16px;
+          border-radius: 50%;
+          background: rgba(27, 37, 49, 0.09);
+          filter: blur(13px);
         }
 
-        .emergencyMeta {
-          margin-top: 17px;
+        /* PROFILE */
+
+        .emergencyProfile {
+          margin-top: 8px;
+          padding: 17px;
+          border: 1px solid #e0e3e6;
+          border-radius: 19px;
+          background: rgba(255, 255, 255, 0.86);
+          box-shadow: 0 14px 36px rgba(31, 40, 53, 0.045);
+          backdrop-filter: blur(14px);
+        }
+
+        .profileHeading {
           display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 15px;
+          padding-bottom: 12px;
         }
 
-        .emergencyMeta span {
-          padding: 7px 9px;
-          border: 1px solid #e7d9da;
+        .profileHeading span,
+        .profileHeading strong {
+          display: block;
+        }
+
+        .profileHeading > div span {
+          color: #c94a50;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 0.9px;
+        }
+
+        .profileHeading > div strong {
+          margin-top: 4px;
+          color: #36414d;
+          font-size: 12px;
+        }
+
+        .statusDot {
+          padding: 6px 8px;
+          display: flex !important;
+          align-items: center;
+          gap: 5px;
           border-radius: 999px;
-          color: #9d3c42;
-          background: rgba(255, 255, 255, 0.65);
-          font-size: 6px;
-          font-weight: 850;
+          color: #3c6e50;
+          background: #edf8f1;
+          font-size: 6px !important;
+          font-weight: 900;
         }
 
-        .heroButtons {
-          margin-top: 22px;
+        .statusDot i {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #2aa76b;
+        }
+
+        .profileGrid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          border-top: 1px solid #e7eaed;
+          border-left: 1px solid #e7eaed;
+        }
+
+        .heroActions {
+          margin-top: 24px;
           display: flex;
           gap: 9px;
         }
 
-        .mainCta,
-        .lightCta {
-          min-height: 43px;
-          padding: 0 15px;
+        .primaryCta,
+        .secondaryCta {
+          min-height: 44px;
+          padding: 0 16px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
           border-radius: 10px;
           text-decoration: none;
-          font-size: 9px;
-          font-weight: 850;
+          font-size: 10px;
+          font-weight: 820;
         }
 
-        .mainCta {
+        .primaryCta {
           color: white;
-          background: #1c2835;
+          background: #202b37;
+          box-shadow: 0 8px 20px rgba(32, 43, 55, 0.11);
         }
 
-        .mainCta :global(svg) {
+        .primaryCta :global(svg) {
           width: 12px;
         }
 
-        .lightCta {
-          color: #505b68;
-          border: 1px solid #d9dde2;
-          background: rgba(255, 255, 255, 0.55);
+        .secondaryCta {
+          color: #4d5865;
+          border: 1px solid #d9dde1;
+          background: rgba(255, 255, 255, 0.62);
         }
 
-        /* ECOSYSTEM */
+        /* ======================================================
+           RIGHT ECOSYSTEM
+        ====================================================== */
 
         .ecosystem {
           width: 590px;
-          height: 590px;
+          height: 600px;
           margin: auto;
           position: relative;
         }
 
-        .softOrbit {
+        .orbit {
           position: absolute;
           top: 50%;
           left: 50%;
@@ -1371,16 +1368,16 @@ export default function HomePage() {
           transform: translate(-50%, -50%);
         }
 
-        .orbitOne {
-          width: 505px;
-          height: 505px;
-          border: 1px solid rgba(59, 76, 98, 0.12);
+        .orbitLarge {
+          width: 500px;
+          height: 500px;
+          border: 1px solid rgba(86, 104, 126, 0.11);
         }
 
-        .orbitTwo {
-          width: 395px;
-          height: 395px;
-          border: 1px dashed rgba(59, 76, 98, 0.09);
+        .orbitSmall {
+          width: 385px;
+          height: 385px;
+          border: 1px dashed rgba(86, 104, 126, 0.08);
         }
 
         /* PHONE */
@@ -1394,340 +1391,354 @@ export default function HomePage() {
           top: 50%;
           left: 50%;
           border-radius: 29px;
-          background: #111820;
-          box-shadow: 0 30px 65px rgba(26, 35, 46, 0.2);
+          background:
+            linear-gradient(
+              145deg,
+              #171e26,
+              #070b10
+            );
+          box-shadow:
+            0 32px 70px rgba(24, 33, 44, 0.2);
           transform: translate(-50%, -50%);
         }
 
         .phoneNotch {
-          width: 47px;
+          width: 46px;
           height: 9px;
           position: absolute;
           top: 10px;
           left: 50%;
           z-index: 4;
-          border-radius: 999px;
-          background: #05090d;
+          border-radius: 99px;
+          background: #05080c;
           transform: translateX(-50%);
         }
 
         .phoneScreen {
           height: 100%;
-          padding: 27px 12px 12px;
+          padding: 27px 13px 13px;
           border-radius: 23px;
-          background: linear-gradient(180deg, #ffffff, #f6f8fa);
+          background:
+            linear-gradient(
+              180deg,
+              #ffffff,
+              #f6f8fa
+            );
         }
 
-        .phoneTop {
+        .phoneHeader {
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 8px;
         }
 
-        .tinyLogo {
-          width: 29px;
-          height: 29px;
+        .phoneLogo {
+          width: 30px;
+          height: 30px;
           display: grid;
           place-items: center;
-          flex: 0 0 29px;
-          border-radius: 8px;
+          border-radius: 9px;
           color: white;
-          background: #1c2835;
+          background: #202b37;
         }
 
-        .tinyLogo :global(svg) {
-          width: 14px;
+        .phoneLogo :global(svg) {
+          width: 15px;
         }
 
-        .phoneTop span,
-        .phoneTop strong {
+        .phoneHeader span,
+        .phoneHeader strong {
           display: block;
         }
 
-        .phoneTop span {
-          color: #d8464d;
+        .phoneHeader span {
+          color: #c94a50;
           font-size: 6px;
           font-weight: 900;
+          letter-spacing: 0.7px;
         }
 
-        .phoneTop strong {
+        .phoneHeader strong {
           margin-top: 2px;
-          color: #4b5663;
+          color: #4a5562;
           font-size: 8px;
         }
 
-        .phoneCode {
-          width: 125px;
-          height: 125px;
-          margin: 24px auto 0;
-          display: grid;
-          place-items: center;
-          border-radius: 16px;
-          background: white;
-          box-shadow: 0 12px 25px rgba(35, 45, 58, 0.06);
-        }
-
-        .phoneText {
-          margin-top: 16px;
+        .phoneState {
+          margin-top: 32px;
           text-align: center;
         }
 
-        .phoneText > span {
-          color: #9ba2ab;
+        .stateIcon {
+          width: 62px;
+          height: 62px;
+          margin: auto;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          color: #2b9663;
+          background: #edf8f2;
+        }
+
+        .stateIcon :global(svg) {
+          width: 27px;
+        }
+
+        .phoneState > span {
+          display: block;
+          margin-top: 9px;
+          color: #83909c;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .phoneText strong {
+        .phoneContent {
+          margin-top: 15px;
+          text-align: center;
+        }
+
+        .phoneContent strong {
           display: block;
-          margin-top: 5px;
-          color: #27323e;
-          font-size: 13px;
+          color: #27323d;
+          font-size: 14px;
           line-height: 1.3;
         }
 
-        .phoneText p {
-          margin: 5px 0 0;
-          color: #7f8995;
+        .phoneContent p {
+          margin: 6px 0 0;
+          color: #7d8793;
           font-size: 8px;
+          line-height: 1.5;
         }
 
-        .phoneActions {
-          margin-top: 14px;
+        .phoneButtons {
+          margin-top: 18px;
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 6px;
         }
 
-        .phoneAction {
-          min-height: 43px;
+        .phoneButtons button {
+          min-height: 47px;
           padding: 7px;
           display: flex;
           flex-direction: column;
+          align-items: flex-start;
           justify-content: space-between;
           border: 1px solid #e0e4e7;
-          border-radius: 9px;
-          color: #596571;
+          border-radius: 10px;
+          color: #56616d;
           background: white;
           font-size: 7px;
           font-weight: 800;
         }
 
-        .phoneAction.primary {
+        .phoneButtons .chatBtn {
           color: white;
-          background: #1c2835;
-          border-color: #1c2835;
+          border-color: #202b37;
+          background: #202b37;
         }
 
-        .phoneAction :global(svg) {
+        .phoneButtons :global(svg) {
           width: 13px;
         }
 
-        .phonePrivacy {
-          margin-top: 9px;
-          padding-top: 8px;
+        .privacyLine {
+          margin-top: 11px;
+          padding-top: 9px;
           display: flex;
           align-items: center;
-          gap: 5px;
-          border-top: 1px solid #e5e8eb;
-          color: #8a929c;
+          justify-content: center;
+          gap: 6px;
+          border-top: 1px solid #e5e8ea;
+          color: #838d98;
           font-size: 6px;
         }
 
-        .phonePrivacy :global(svg) {
+        .privacyLine :global(svg) {
           width: 11px;
-          color: #d8464d;
+          color: #c94a50;
         }
 
-        /* PRODUCT ORBIT */
+        /* FLOATING PRODUCTS */
 
         .productOrbit {
           position: absolute;
           inset: 0;
-          animation: orbitFloat 14s ease-in-out infinite alternate;
+          animation: orbitMotion 18s ease-in-out infinite alternate;
         }
 
-        @keyframes orbitFloat {
-          0% {
-            transform: rotate(-1.3deg);
+        @keyframes orbitMotion {
+          from {
+            transform: rotate(-1.2deg);
           }
 
-          100% {
-            transform: rotate(1.3deg);
+          to {
+            transform: rotate(1.2deg);
           }
         }
 
-        .orbitProduct {
-          width: 118px;
+        .productBubble {
+          width: 116px;
           position: absolute;
           text-align: center;
         }
 
-        .productPhoto {
-          width: 118px;
-          height: 94px;
+        .bubblePhoto {
+          width: 116px;
+          height: 92px;
           position: relative;
           overflow: hidden;
           border: 4px solid rgba(255, 255, 255, 0.94);
           border-radius: 18px;
-          background: #dde2e6;
-          box-shadow: 0 12px 28px rgba(34, 44, 57, 0.11);
+          background: #e1e4e7;
+          box-shadow:
+            0 13px 28px rgba(31, 41, 54, 0.11);
         }
 
-        .productPhoto > img {
+        .bubblePhoto > img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .photoOverlay {
+        .imageShade {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            180deg,
-            transparent 55%,
-            rgba(7, 11, 16, 0.17)
-          );
+          background:
+            linear-gradient(
+              180deg,
+              transparent 58%,
+              rgba(7, 11, 16, 0.13)
+            );
         }
 
-        .productName {
+        .productBubble > strong {
           display: inline-block;
-          max-width: 128px;
-          margin-top: 7px;
-          padding: 5px 7px;
-          border: 1px solid #e0e3e6;
+          max-width: 130px;
+          margin-top: 8px;
+          padding: 5px 8px;
+          border: 1px solid rgba(221, 225, 228, 0.92);
           border-radius: 999px;
-          color: #46525f;
-          background: rgba(255, 255, 255, 0.9);
-          font-size: 7px;
+          color: #465260;
+          background: rgba(255, 255, 255, 0.88);
+          font-size: 8px;
           line-height: 1.3;
-          white-space: normal;
+          font-weight: 800;
         }
 
-        /* MINI TAG ON PRODUCTS */
-
-        .realTag {
-          width: 25px;
-          height: 31px;
+        .smallTag {
+          width: 26px;
+          height: 32px;
           position: absolute;
           display: grid;
           place-items: center;
           border-radius: 6px;
           background: white;
-          box-shadow: 0 4px 11px rgba(0, 0, 0, 0.15);
-          transform: scale(0.7);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.13);
+          transform: scale(0.72);
         }
 
-        .tagLoop {
+        .tagRing {
           width: 7px;
           height: 7px;
           position: absolute;
           top: -5px;
-          border: 1px solid #929ca6;
+          border: 1px solid #919ba5;
           border-radius: 50%;
         }
 
-        .tinyTagFace {
-          transform: scale(0.68);
-        }
-
-        .realTag-dog,
-        .realTag-cat {
+        .smallTag.dog,
+        .smallTag.cat {
           left: 50%;
           bottom: -3px;
-          transform: translateX(-50%) scale(0.68);
+          transform: translateX(-50%) scale(0.7);
         }
 
-        .realTag-keys {
-          right: 10px;
-          bottom: 9px;
-        }
-
-        .realTag-wallet {
-          right: 10px;
+        .smallTag.keys,
+        .smallTag.wallet {
+          right: 9px;
           bottom: 8px;
         }
 
-        .realTag-luggage {
-          left: 51%;
+        .smallTag.luggage {
           top: 12px;
+          left: 50%;
           transform: translateX(-50%) scale(0.72);
         }
 
-        .realTag-bag {
-          right: 15px;
-          top: 19px;
+        .smallTag.bag {
+          top: 17px;
+          right: 13px;
         }
 
-        .airportBadge {
+        .airport {
           position: absolute;
-          left: 7px;
-          bottom: 7px;
+          left: 6px;
+          bottom: 6px;
           padding: 4px 5px;
           border-radius: 999px;
-          color: #3f4b59;
+          color: #42505f;
           background: rgba(255, 255, 255, 0.88);
           font-size: 5px;
           font-weight: 900;
         }
 
-        /* POSITIONS */
-
-        .productDog {
+        .dog {
+          top: 25px;
           left: 92px;
-          top: 30px;
         }
 
-        .productCat {
+        .cat {
+          top: 25px;
           right: 88px;
-          top: 30px;
         }
 
-        .productKeys {
-          left: 0;
-          top: 235px;
+        .keys {
+          top: 236px;
+          left: 2px;
         }
 
-        .productWallet {
-          right: 0;
-          top: 235px;
+        .wallet {
+          top: 236px;
+          right: 2px;
         }
 
-        .productLuggage {
+        .luggage {
           left: 93px;
-          bottom: 32px;
+          bottom: 28px;
         }
 
-        .productBag {
+        .bag {
           right: 88px;
-          bottom: 32px;
+          bottom: 28px;
         }
 
-        .ecosystemText {
+        .ecosystemLabel {
           position: absolute;
           left: 50%;
-          bottom: 7px;
+          bottom: 0;
           text-align: center;
           transform: translateX(-50%);
         }
 
-        .ecosystemText span,
-        .ecosystemText strong {
+        .ecosystemLabel span,
+        .ecosystemLabel strong {
           display: block;
         }
 
-        .ecosystemText span {
-          color: #d8464d;
+        .ecosystemLabel span {
+          color: #c94a50;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .ecosystemText strong {
+        .ecosystemLabel strong {
           margin-top: 3px;
-          color: #697481;
-          font-size: 7px;
+          color: #6d7782;
+          font-size: 8px;
         }
 
         /* VIDEO */
@@ -1737,7 +1748,7 @@ export default function HomePage() {
           background: #fbfbf9;
         }
 
-        .videoGrid {
+        .videoLayout {
           display: grid;
           grid-template-columns: 0.75fr 1.25fr;
           align-items: center;
@@ -1745,21 +1756,21 @@ export default function HomePage() {
         }
 
         .videoCopy h2,
-        .flowHeader h2,
+        .stepsHeader h2,
         .rulesHeader h2 {
-          margin: 10px 0 0;
+          margin: 11px 0 0;
           color: #18222c;
-          font-size: clamp(31px, 3.6vw, 42px);
+          font-size: clamp(32px, 3.7vw, 43px);
           line-height: 1.07;
           letter-spacing: -2px;
-          font-weight: 680;
+          font-weight: 670;
         }
 
         .videoCopy p {
           margin: 15px 0 0;
           color: #6d7782;
-          font-size: 11px;
-          line-height: 1.7;
+          font-size: 12px;
+          line-height: 1.72;
         }
 
         .videoCard {
@@ -1769,7 +1780,17 @@ export default function HomePage() {
           place-items: center;
           border: 1px solid #e0e4e7;
           border-radius: 24px;
-          background: linear-gradient(135deg, #ebeff2, #fafaf8);
+          background:
+            radial-gradient(
+              circle at 80% 10%,
+              rgba(50, 89, 140, 0.055),
+              transparent 28%
+            ),
+            linear-gradient(
+              135deg,
+              #eef1f3,
+              #fafaf8
+            );
         }
 
         .videoBrand {
@@ -1779,7 +1800,7 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: #58636f;
+          color: #59646f;
           font-size: 7px;
           font-weight: 900;
         }
@@ -1788,7 +1809,7 @@ export default function HomePage() {
           width: 18px;
         }
 
-        .play {
+        .playButton {
           width: 64px;
           height: 64px;
           display: grid;
@@ -1796,44 +1817,45 @@ export default function HomePage() {
           border: 0;
           border-radius: 50%;
           color: white;
-          background: #1c2835;
+          background: #202b37;
+          box-shadow: 0 14px 30px rgba(32, 43, 55, 0.15);
           cursor: pointer;
         }
 
-        .play :global(svg) {
+        .playButton :global(svg) {
           width: 22px;
         }
 
-        .comingSoon {
+        .videoSoon {
           position: absolute;
           bottom: 18px;
           color: #8b949e;
           font-size: 8px;
         }
 
-        /* FLOW */
+        /* STEPS */
 
-        .flowSection {
+        .stepsSection {
           padding: 90px 0;
-          background: #f0f1ef;
+          background: #f1f2ef;
         }
 
-        .flowHeader {
-          max-width: 670px;
+        .stepsHeader {
+          max-width: 690px;
         }
 
-        .flow {
-          margin-top: 43px;
+        .steps {
+          margin-top: 44px;
           display: grid;
           grid-template-columns:
             1fr auto 1fr auto 1fr auto 1fr;
           align-items: start;
         }
 
-        .flowConnector {
+        .stepLine {
           width: 55px;
           height: 1px;
-          margin: 35px 17px 0;
+          margin: 36px 17px 0;
           background: #d5dade;
         }
 
@@ -1842,31 +1864,32 @@ export default function HomePage() {
         .featuresSection {
           padding: 88px 0;
           color: white;
-          background: #1c2835;
+          background: #202b37;
         }
 
         .featuresHeader > span {
-          color: #e08d91;
+          color: #df8c90;
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 1.6px;
         }
 
         .featuresHeader h2 {
-          max-width: 710px;
+          max-width: 730px;
           margin: 10px 0 0;
           color: white;
-          font-size: clamp(30px, 3.5vw, 41px);
+          font-size: clamp(31px, 3.6vw, 42px);
           line-height: 1.07;
           letter-spacing: -1.9px;
+          font-weight: 650;
         }
 
-        .featureGrid {
+        .features {
           margin-top: 40px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-top: 1px solid rgba(255,255,255,.1);
+          border-bottom: 1px solid rgba(255,255,255,.1);
         }
 
         /* RULES */
@@ -1880,8 +1903,8 @@ export default function HomePage() {
           max-width: 720px;
         }
 
-        .ruleGrid {
-          margin-top: 37px;
+        .rules {
+          margin-top: 38px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           border-top: 1px solid #e0e3e6;
@@ -1892,27 +1915,27 @@ export default function HomePage() {
 
         .accountSection {
           padding: 68px 0;
-          background: #f0f1ef;
+          background: #f1f2ef;
         }
 
         .accountPanel {
-          padding: 27px;
+          padding: 28px;
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
-          gap: 20px;
+          gap: 21px;
           border: 1px solid #dee2e5;
           border-radius: 20px;
           background: white;
         }
 
         .accountIcon {
-          width: 55px;
-          height: 55px;
+          width: 56px;
+          height: 56px;
           display: grid;
           place-items: center;
           border-radius: 15px;
-          color: #1c2835;
+          color: #202b37;
           background: #eef1f3;
         }
 
@@ -1920,38 +1943,39 @@ export default function HomePage() {
           width: 23px;
         }
 
-        .accountPanel > div:nth-child(2) > span {
-          color: #d8464d;
-          font-size: 6px;
+        .accountCopy > span {
+          color: #c94a50;
+          font-size: 7px;
           font-weight: 900;
           letter-spacing: 1.2px;
         }
 
-        .accountPanel h2 {
+        .accountCopy h2 {
           margin: 7px 0 0;
           color: #19232d;
           font-size: 31px;
           letter-spacing: -1.6px;
         }
 
-        .accountPanel p {
-          margin: 7px 0 0;
+        .accountCopy p {
+          margin: 8px 0 0;
           color: #707a85;
           font-size: 10px;
+          line-height: 1.6;
         }
 
         .accountPanel > a {
-          min-height: 41px;
+          min-height: 42px;
           padding: 0 14px;
           display: inline-flex;
           align-items: center;
           gap: 7px;
           border-radius: 10px;
           color: white;
-          background: #1c2835;
-          font-size: 8.5px;
-          font-weight: 850;
+          background: #202b37;
           text-decoration: none;
+          font-size: 9px;
+          font-weight: 850;
         }
 
         .accountPanel > a :global(svg) {
@@ -1960,7 +1984,7 @@ export default function HomePage() {
 
         /* CONTACT */
 
-        .contact {
+        .contactSection {
           padding: 67px 0;
           background: #eaeae8;
         }
@@ -1973,7 +1997,8 @@ export default function HomePage() {
         }
 
         .contactInner h2 {
-          margin: 9px 0 7px;
+          margin: 9px 0 8px;
+          color: #19232d;
           font-size: 34px;
           letter-spacing: -1.6px;
         }
@@ -1992,10 +2017,10 @@ export default function HomePage() {
           gap: 7px;
           border-radius: 10px;
           color: white;
-          background: #1c2835;
-          font-size: 8.5px;
-          font-weight: 850;
+          background: #202b37;
           text-decoration: none;
+          font-size: 9px;
+          font-weight: 850;
         }
 
         .contactInner > a :global(svg) {
@@ -2032,7 +2057,7 @@ export default function HomePage() {
           display: grid;
           place-items: center;
           border-radius: 10px;
-          background: #d8464d;
+          background: #c94a50;
         }
 
         .footerBrand > div :global(svg) {
@@ -2072,36 +2097,42 @@ export default function HomePage() {
           font-size: 7px;
         }
 
+        /* TABLET */
+
         @media (max-width: 1080px) {
           .heroInner {
             grid-template-columns: 1fr;
-            padding: 60px 0 85px;
+            padding: 60px 0 90px;
+          }
+
+          .emergencyColumn {
+            max-width: 720px;
           }
 
           .ecosystem {
-            margin-top: 20px;
+            margin-top: 15px;
           }
 
-          .videoGrid {
+          .videoLayout {
             grid-template-columns: 1fr;
           }
         }
 
         @media (max-width: 900px) {
-          .flow {
+          .steps {
             grid-template-columns: repeat(2, 1fr);
-            gap: 27px;
+            gap: 28px;
           }
 
-          .flowConnector {
+          .stepLine {
             display: none;
           }
 
-          .featureGrid {
+          .features {
             grid-template-columns: repeat(2, 1fr);
           }
 
-          .ruleGrid {
+          .rules {
             grid-template-columns: 1fr;
           }
 
@@ -2121,6 +2152,8 @@ export default function HomePage() {
           }
         }
 
+        /* MOBILE */
+
         @media (max-width: 650px) {
           .header {
             width: calc(100% - 18px);
@@ -2131,13 +2164,13 @@ export default function HomePage() {
             display: none;
           }
 
-          .adminButton span {
+          .adminBtn span {
             display: none;
           }
 
-          .adminButton,
-          .accountButton,
-          .loginButton {
+          .adminBtn,
+          .accountBtn,
+          .loginBtn {
             min-height: 35px;
             padding: 0 9px;
             font-size: 8px;
@@ -2154,31 +2187,46 @@ export default function HomePage() {
 
           .heroInner {
             min-height: unset;
-            padding: 45px 0 75px;
+            padding: 46px 0 74px;
           }
 
-          .emergencySide h1 {
-            font-size: 34px;
+          .emergencyColumn h1 {
+            font-size: 35px;
+            letter-spacing: -1.9px;
           }
 
-          .lead {
-            font-size: 12px;
+          .heroLead {
+            font-size: 13px;
           }
 
-          .emergencyVisual {
+          .braceletArea {
+            height: 170px;
+            overflow: visible;
+          }
+
+          .bracelet {
+            width: 330px;
+            transform:
+              translateX(-10px)
+              rotate(-4deg)
+              scale(0.83);
+            transform-origin: left center;
+          }
+
+          .emergencyProfile {
+            margin-top: 0;
+          }
+
+          .profileGrid {
             grid-template-columns: 1fr;
           }
 
-          .braceletWrap {
-            min-height: 210px;
-          }
-
-          .heroButtons {
+          .heroActions {
             flex-direction: column;
           }
 
-          .mainCta,
-          .lightCta {
+          .primaryCta,
+          .secondaryCta {
             width: 100%;
           }
 
@@ -2187,12 +2235,12 @@ export default function HomePage() {
             height: 600px;
           }
 
-          .orbitOne {
+          .orbitLarge {
             width: 330px;
             height: 330px;
           }
 
-          .orbitTwo {
+          .orbitSmall {
             width: 260px;
             height: 260px;
           }
@@ -2202,83 +2250,74 @@ export default function HomePage() {
             height: 320px;
           }
 
-          .phoneCode {
-            width: 105px;
-            height: 105px;
+          .phoneState {
+            margin-top: 23px;
           }
 
-          .phoneText strong {
-            font-size: 11px;
-          }
-
-          .orbitProduct {
+          .productBubble {
             width: 92px;
           }
 
-          .productPhoto {
+          .bubblePhoto {
             width: 92px;
             height: 74px;
           }
 
-          .productName {
-            max-width: 100px;
+          .productBubble > strong {
+            max-width: 105px;
             font-size: 6px;
           }
 
-          .productDog {
+          .dog {
             left: 12px;
             top: 40px;
           }
 
-          .productCat {
+          .cat {
             right: 12px;
             top: 40px;
           }
 
-          .productKeys {
+          .keys {
             left: -5px;
             top: 245px;
           }
 
-          .productWallet {
+          .wallet {
             right: -5px;
             top: 245px;
           }
 
-          .productLuggage {
-            left: 19px;
-            bottom: 50px;
+          .luggage {
+            left: 18px;
+            bottom: 52px;
           }
 
-          .productBag {
-            right: 19px;
-            bottom: 50px;
-          }
-
-          .ecosystemText {
-            bottom: 7px;
+          .bag {
+            right: 18px;
+            bottom: 52px;
           }
 
           .videoSection,
-          .flowSection,
+          .stepsSection,
           .featuresSection,
           .rulesSection {
             padding: 68px 0;
           }
 
           .videoCopy h2,
-          .flowHeader h2,
+          .stepsHeader h2,
           .rulesHeader h2 {
             font-size: 31px;
           }
 
-          .flow,
-          .featureGrid {
-            grid-template-columns: 1fr;
-          }
-
           .videoCard {
             min-height: 270px;
+          }
+
+          .steps,
+          .features {
+            grid-template-columns: 1fr;
           }
 
           .footerLinks {
@@ -2290,81 +2329,82 @@ export default function HomePage() {
   );
 }
 
-/* ======================================================
-   COMPONENTS
-====================================================== */
+/* =============================================================
+   EMERGENCY ITEM
+============================================================= */
 
-function InfoRow({
+function EmergencyItem({
   icon,
   title,
-  value,
+  text,
 }: {
   icon: ReactNode;
   title: string;
-  value: string;
+  text: string;
 }) {
   return (
-    <div className="infoRow">
-      <div className="infoIcon">{icon}</div>
-
-      <div>
-        <span>{title}</span>
-        <strong>{value}</strong>
+    <div className="emergencyItem">
+      <div className="emergencyItemIcon">
+        {icon}
       </div>
 
-      <CheckIcon />
+      <div>
+        <strong>{title}</strong>
+        <span>{text}</span>
+      </div>
 
       <style jsx>{`
-        .infoRow {
-          min-height: 45px;
+        .emergencyItem {
+          min-height: 65px;
+          padding: 11px;
           display: grid;
-          grid-template-columns: auto 1fr auto;
+          grid-template-columns: auto 1fr;
           align-items: center;
           gap: 9px;
-          border-top: 1px solid #e7eaed;
+          border-right: 1px solid #e7eaed;
+          border-bottom: 1px solid #e7eaed;
         }
 
-        .infoIcon {
-          width: 29px;
-          height: 29px;
+        .emergencyItemIcon {
+          width: 31px;
+          height: 31px;
           display: grid;
           place-items: center;
-          border-radius: 8px;
-          color: #d8464d;
-          background: #fff0f0;
+          border-radius: 9px;
+          color: #c94a50;
+          background: #fff1f1;
         }
 
-        .infoIcon :global(svg) {
-          width: 14px;
+        .emergencyItemIcon :global(svg) {
+          width: 15px;
         }
 
-        span,
-        strong {
+        strong,
+        span {
           display: block;
         }
 
-        span {
-          color: #8d959f;
-          font-size: 7px;
-          font-weight: 700;
-        }
-
         strong {
-          margin-top: 2px;
-          color: #46515e;
-          font-size: 8px;
+          color: #3d4854;
+          font-size: 10px;
         }
 
-        .infoRow > :global(svg) {
-          width: 12px;
-          color: #28a76c;
+        span {
+          margin-top: 3px;
+          color: #87909a;
+          font-size: 8px;
+          line-height: 1.35;
         }
       `}</style>
     </div>
   );
 }
 
-function FlowStep({
+/* =============================================================
+   STEP
+============================================================= */
+
+function Step({
   number,
   icon,
   title,
@@ -2379,7 +2419,7 @@ function FlowStep({
     <article className="step">
       <span>{number}</span>
 
-      <div>{icon}</div>
+      <div className="stepIcon">{icon}</div>
 
       <strong>{title}</strong>
 
@@ -2392,23 +2432,23 @@ function FlowStep({
           font-weight: 900;
         }
 
-        .step > div {
-          width: 47px;
-          height: 47px;
+        .stepIcon {
+          width: 48px;
+          height: 48px;
           margin-top: 14px;
           display: grid;
           place-items: center;
           border: 1px solid #dde1e4;
           border-radius: 13px;
-          color: #1c2835;
+          color: #202b37;
           background: white;
         }
 
-        .step > div :global(svg) {
-          width: 18px;
+        .stepIcon :global(svg) {
+          width: 19px;
         }
 
-        .step strong {
+        .step > strong {
           display: block;
           margin-top: 17px;
           color: #2d3844;
@@ -2425,6 +2465,10 @@ function FlowStep({
     </article>
   );
 }
+
+/* =============================================================
+   FEATURE
+============================================================= */
 
 function Feature({
   number,
@@ -2451,7 +2495,7 @@ function Feature({
         .feature {
           min-height: 190px;
           padding: 21px 19px;
-          border-right: 1px solid rgba(255, 255, 255, 0.1);
+          border-right: 1px solid rgba(255,255,255,.1);
         }
 
         .feature:last-child {
@@ -2476,8 +2520,8 @@ function Feature({
           display: grid;
           place-items: center;
           border-radius: 10px;
-          color: #e08d91;
-          background: rgba(255, 255, 255, 0.06);
+          color: #df8c90;
+          background: rgba(255,255,255,.06);
         }
 
         .featureTop > div :global(svg) {
@@ -2500,13 +2544,17 @@ function Feature({
         @media (max-width: 900px) {
           .feature {
             border-right: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255,255,255,.1);
           }
         }
       `}</style>
     </article>
   );
 }
+
+/* =============================================================
+   RULE
+============================================================= */
 
 function Rule({
   number,
@@ -2525,7 +2573,7 @@ function Rule({
 
       <style jsx>{`
         .rule {
-          min-height: 150px;
+          min-height: 155px;
           padding: 22px;
           border-right: 1px solid #e0e3e6;
         }
@@ -2535,7 +2583,7 @@ function Rule({
         }
 
         .rule > span {
-          color: #d8464d;
+          color: #c94a50;
           font-size: 8px;
           font-weight: 900;
         }
@@ -2565,25 +2613,23 @@ function Rule({
   );
 }
 
-/* ======================================================
-   HOUSE + CAR KEYS
-====================================================== */
+/* =============================================================
+   KEYS SCENE
+============================================================= */
 
-function KeysVisual() {
+function KeysScene() {
   return (
     <div className="keysScene">
-      <div className="keySurface" />
-
       <div className="homeKey">
-        <span className="homeKeyRing" />
-        <span className="homeKeyStem" />
-        <span className="homeKeyTeeth" />
+        <span className="keyCircle" />
+        <span className="keyStem" />
+        <span className="keyTeeth" />
       </div>
 
       <div className="carKey">
-        <span className="carRing" />
+        <span className="keyRing" />
 
-        <div className="fob">
+        <div className="carFob">
           <span />
           <span />
         </div>
@@ -2595,73 +2641,67 @@ function KeysVisual() {
           height: 100%;
           position: relative;
           overflow: hidden;
-          background: linear-gradient(
-            135deg,
-            #e6ddd0,
-            #f5f0e8
-          );
-        }
-
-        .keySurface {
-          position: absolute;
-          inset: 60% -10px -10px;
-          background: rgba(255, 255, 255, 0.28);
-          transform: rotate(-5deg);
+          background:
+            linear-gradient(
+              145deg,
+              #ece4d9,
+              #f7f3ed
+            );
         }
 
         .homeKey {
           position: absolute;
-          left: 18px;
-          top: 25px;
-          transform: rotate(-20deg);
+          left: 17px;
+          top: 27px;
+          transform: rotate(-19deg);
         }
 
-        .homeKeyRing {
+        .keyCircle {
           width: 29px;
           height: 29px;
           display: block;
-          border: 7px solid #bca36e;
+          border: 7px solid #c1a569;
           border-radius: 50%;
         }
 
-        .homeKeyStem {
+        .keyStem {
           width: 52px;
           height: 8px;
           position: absolute;
           left: 24px;
           top: 11px;
           border-radius: 3px;
-          background: #bca36e;
+          background: #c1a569;
         }
 
-        .homeKeyTeeth {
+        .keyTeeth {
           width: 17px;
           height: 14px;
           position: absolute;
-          left: 64px;
+          left: 65px;
           top: 13px;
-          border-right: 6px solid #bca36e;
-          border-bottom: 6px solid #bca36e;
+          border-right: 6px solid #c1a569;
+          border-bottom: 6px solid #c1a569;
         }
 
         .carKey {
           position: absolute;
           right: 20px;
           bottom: 11px;
-          transform: rotate(13deg);
+          transform: rotate(12deg);
         }
 
-        .carRing {
+        .keyRing {
           width: 20px;
           height: 20px;
           position: absolute;
           top: -8px;
           left: 8px;
-          border: 4px solid #9aa3ad;
+          border: 4px solid #9ca4ad;
           border-radius: 50%;
         }
 
-        .fob {
+        .carFob {
           width: 40px;
           height: 55px;
           padding: 12px 9px;
@@ -2670,27 +2710,28 @@ function KeysVisual() {
           position: relative;
           z-index: 2;
           border-radius: 11px;
-          background: linear-gradient(
-            145deg,
-            #59636d,
-            #252c34
-          );
-          box-shadow: 0 8px 15px rgba(24, 30, 37, 0.18);
+          background:
+            linear-gradient(
+              145deg,
+              #606a75,
+              #2b3138
+            );
+          box-shadow: 0 8px 15px rgba(24,30,37,.18);
         }
 
-        .fob span {
+        .carFob span {
           height: 7px;
           border-radius: 999px;
-          background: #89929b;
+          background: #9199a2;
         }
       `}</style>
     </div>
   );
 }
 
-/* ======================================================
+/* =============================================================
    ICONS
-====================================================== */
+============================================================= */
 
 function QrIcon() {
   return (
@@ -2738,22 +2779,6 @@ function UserIcon() {
   );
 }
 
-function ArrowIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="m14 7 5 5-5 5" />
-    </svg>
-  );
-}
-
 function PhoneIcon() {
   return (
     <svg
@@ -2776,7 +2801,6 @@ function HeartIcon() {
       strokeWidth="1.7"
     >
       <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />
-      <path d="M7.5 12h2.1l1-2.1 2.1 4.2 1.2-2.1h2.4" />
     </svg>
   );
 }
@@ -2894,6 +2918,22 @@ function ReturnIcon() {
   );
 }
 
+function ArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m14 7 5 5-5 5" />
+    </svg>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg
@@ -2922,15 +2962,20 @@ function PlayIcon() {
   );
 }
 
-/* ======================================================
-   QR
-====================================================== */
+/* =============================================================
+   QR VISUALS
+============================================================= */
 
-function QrCode({ size = 100 }: { size?: number }) {
+function QrCode({ size = 64 }: { size?: number }) {
   const dark = [
-    0, 1, 2, 5, 6, 7, 9, 11, 13, 14, 16, 18, 20,
-    21, 22, 24, 26, 27, 28, 30, 32, 34, 35, 36,
-    38, 40, 42, 43, 44, 46, 47, 48,
+    0, 1, 2, 5, 6,
+    7, 9, 11, 13,
+    14, 16, 18, 20,
+    21, 22, 24, 26,
+    27, 28, 30, 32,
+    34, 35, 36, 38,
+    40, 42, 43, 44,
+    46, 47, 48,
   ];
 
   return (
@@ -2940,7 +2985,7 @@ function QrCode({ size = 100 }: { size?: number }) {
         height: size,
         display: "grid",
         gridTemplateColumns: "repeat(7,1fr)",
-        gap: Math.max(2, size / 38),
+        gap: Math.max(1.6, size / 38),
       }}
     >
       {Array.from({ length: 49 }).map((_, i) => (
@@ -2961,7 +3006,9 @@ function QrCode({ size = 100 }: { size?: number }) {
 
 function MiniQr() {
   const dark = [
-    0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 15, 17, 18,
+    0, 1, 2, 4, 6,
+    7, 8, 10, 12,
+    14, 15, 17, 18,
     20, 21, 22, 24,
   ];
 
