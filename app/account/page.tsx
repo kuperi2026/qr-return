@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
@@ -25,26 +25,21 @@ type QrProfile = {
   active: boolean | null;
 };
 
+type AdminRecord = {
+  id: number;
+  admin_email: string;
+  active: boolean;
+};
+
 export default function AccountPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
   const [owner, setOwner] = useState<OwnerAccount | null>(null);
   const [profiles, setProfiles] = useState<QrProfile[]>([]);
-
-  const [editing, setEditing] = useState(false);
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [admin, setAdmin] = useState<AdminRecord | null>(null);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const ka = lang === "ka";
 
@@ -79,9 +74,7 @@ export default function AccountPage() {
         throw ownerError;
       }
 
-      let finalOwner = ownerData as OwnerAccount | null;
-
-      if (!finalOwner) {
+      if (!ownerData) {
         const newOwner = {
           user_id: user.id,
           first_name: user.user_metadata?.first_name ?? "",
@@ -104,15 +97,10 @@ export default function AccountPage() {
           throw createError;
         }
 
-        finalOwner = createdOwner as OwnerAccount;
+        setOwner(createdOwner as OwnerAccount);
+      } else {
+        setOwner(ownerData as OwnerAccount);
       }
-
-      setOwner(finalOwner);
-
-      setFirstName(finalOwner.first_name ?? "");
-      setLastName(finalOwner.last_name ?? "");
-      setPhone(finalOwner.phone ?? "");
-      setAddress(finalOwner.address ?? "");
 
       const { data: profileData, error: profileError } = await supabase
         .from("item")
@@ -126,6 +114,18 @@ export default function AccountPage() {
       }
 
       setProfiles((profileData ?? []) as QrProfile[]);
+
+      const { data: adminData, error: adminError } = await supabase
+        .from("owner_admins")
+        .select("id, admin_email, active")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (adminError) {
+        throw adminError;
+      }
+
+      setAdmin((adminData ?? null) as AdminRecord | null);
     } catch (err) {
       setError(
         err instanceof Error
@@ -136,106 +136,6 @@ export default function AccountPage() {
       );
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function uploadOwnerPhoto(userId: string) {
-    if (!photoFile) {
-      return owner?.photo ?? null;
-    }
-
-    const safeName = photoFile.name.replace(
-      /[^a-zA-Z0-9._-]/g,
-      "-"
-    );
-
-    const path = `${userId}/owner-${Date.now()}-${safeName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("qr-return-images")
-      .upload(path, photoFile);
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const { data } = supabase.storage
-      .from("qr-return-images")
-      .getPublicUrl(path);
-
-    return data.publicUrl;
-  }
-
-  async function saveOwner(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    if (!firstName.trim() || !lastName.trim() || !phone.trim()) {
-      setError(
-        ka
-          ? "სახელი, გვარი და ტელეფონი სავალდებულოა."
-          : "First name, last name and phone are required."
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      const photo = await uploadOwnerPhoto(user.id);
-
-      const updates = {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        phone: phone.trim(),
-        address: address.trim() || null,
-        photo,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { data, error: updateError } = await supabase
-        .from("owner_accounts")
-        .update(updates)
-        .eq("user_id", user.id)
-        .select(
-          "user_id, first_name, last_name, email, phone, address, photo"
-        )
-        .single();
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      setOwner(data as OwnerAccount);
-      setEditing(false);
-
-      setSuccess(
-        ka
-          ? "პროფილი წარმატებით განახლდა."
-          : "Profile updated successfully."
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "ცვლილებების შენახვა ვერ მოხერხდა."
-          : "Could not save changes."
-      );
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -319,7 +219,7 @@ export default function AccountPage() {
 
           <div>
             <strong>QR RETURN</strong>
-            <small>OWNER ACCOUNT</small>
+            <small>OWNER DASHBOARD</small>
           </div>
         </a>
 
@@ -353,289 +253,204 @@ export default function AccountPage() {
       </header>
 
       <section className="container">
-        <div className="pageTitle">
+        <div className="welcome">
           <div>
             <div className="eyebrow">
-              {ka ? "მფლობელის პროფილი" : "OWNER PROFILE"}
+              {ka ? "მფლობელის ანგარიში" : "OWNER ACCOUNT"}
             </div>
 
             <h1>
-              {owner.first_name} {owner.last_name}
+              {ka
+                ? `გამარჯობა, ${owner.first_name}`
+                : `Hello, ${owner.first_name}`}
             </h1>
 
             <p>
               {ka
-                ? "მართეთ თქვენი პირადი ინფორმაცია, ადმინისტრატორი და ყველა QR პროფილი ერთი ანგარიშიდან."
-                : "Manage your personal information, administrator and all QR profiles from one account."}
+                ? "აქედან მართავთ თქვენს პროფილს, უსაფრთხოებას, ადმინისტრატორს და ყველა QR პროფილს."
+                : "Manage your profile, security, administrator and all QR profiles from here."}
             </p>
           </div>
+
+          <a href="/add-profile" className="primaryButton">
+            + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
+          </a>
         </div>
 
         {error && <div className="errorBox">{error}</div>}
-        {success && <div className="successBox">{success}</div>}
 
-        <section className="ownerCard">
-          <div className="ownerTop">
-            <div className="ownerPhotoWrap">
-              {owner.photo ? (
-                <img
-                  src={owner.photo}
-                  alt={`${owner.first_name} ${owner.last_name}`}
-                />
-              ) : (
-                <div className="ownerPlaceholder">👤</div>
-              )}
+        <div className="topGrid">
+          <section className="panel ownerPanel">
+            <div className="panelHeader">
+              <div className="panelTitle">
+                <div className="panelIcon">👤</div>
+
+                <div>
+                  <span>{ka ? "მფლობელი" : "OWNER"}</span>
+                  <h2>
+                    {owner.first_name} {owner.last_name}
+                  </h2>
+                </div>
+              </div>
+
+              <a href="/account/profile" className="smallButton">
+                ✏️ {ka ? "რედაქტირება" : "Edit"}
+              </a>
             </div>
 
-            <div className="ownerIdentity">
-              <span>
-                {ka ? "ანგარიშის მფლობელი" : "Account owner"}
-              </span>
-
-              <h2>
-                {owner.first_name} {owner.last_name}
-              </h2>
-
-              <p>{owner.email}</p>
-              <p>{owner.phone}</p>
-            </div>
-
-            {!editing && (
-              <button
-                type="button"
-                className="editOwnerButton"
-                onClick={() => {
-                  setSuccess("");
-                  setEditing(true);
-                }}
-              >
-                ✏️ {ka ? "პროფილის რედაქტირება" : "Edit profile"}
-              </button>
-            )}
-          </div>
-
-          {!editing ? (
-            <div className="ownerInfoGrid">
-              <div className="infoBox">
-                <span>{ka ? "სახელი" : "First name"}</span>
-                <strong>{owner.first_name}</strong>
+            <div className="ownerBody">
+              <div className="avatar">
+                {owner.photo ? (
+                  <img src={owner.photo} alt="" />
+                ) : (
+                  <div className="avatarPlaceholder">👤</div>
+                )}
               </div>
 
-              <div className="infoBox">
-                <span>{ka ? "გვარი" : "Last name"}</span>
-                <strong>{owner.last_name}</strong>
-              </div>
+              <div className="ownerData">
+                <div>
+                  <span>{ka ? "ელფოსტა" : "Email"}</span>
+                  <strong>{owner.email}</strong>
+                </div>
 
-              <div className="infoBox">
-                <span>{ka ? "ელფოსტა" : "Email"}</span>
-                <strong>{owner.email}</strong>
-              </div>
+                <div>
+                  <span>{ka ? "ტელეფონი" : "Phone"}</span>
+                  <strong>{owner.phone}</strong>
+                </div>
 
-              <div className="infoBox">
-                <span>{ka ? "ტელეფონი" : "Phone"}</span>
-                <strong>{owner.phone}</strong>
-              </div>
-
-              <div className="infoBox full">
-                <span>
-                  {ka
-                    ? "მისამართი — ნებაყოფლობითი"
-                    : "Address — optional"}
-                </span>
-
-                <strong>
-                  {owner.address ||
-                    (ka ? "არ არის მითითებული" : "Not provided")}
-                </strong>
+                <div>
+                  <span>{ka ? "მისამართი" : "Address"}</span>
+                  <strong>
+                    {owner.address ||
+                      (ka ? "არ არის მითითებული" : "Not provided")}
+                  </strong>
+                </div>
               </div>
             </div>
-          ) : (
-            <form className="editForm" onSubmit={saveOwner}>
-              <div className="twoColumns">
-                <label>
-                  <span>{ka ? "სახელი" : "First name"} *</span>
+          </section>
 
-                  <input
-                    value={firstName}
-                    onChange={(e) =>
-                      setFirstName(e.target.value)
-                    }
-                    required
-                  />
-                </label>
+          <section className="panel">
+            <div className="panelHeader">
+              <div className="panelTitle">
+                <div className="panelIcon">🔐</div>
 
-                <label>
-                  <span>{ka ? "გვარი" : "Last name"} *</span>
-
-                  <input
-                    value={lastName}
-                    onChange={(e) =>
-                      setLastName(e.target.value)
-                    }
-                    required
-                  />
-                </label>
+                <div>
+                  <span>{ka ? "უსაფრთხოება" : "SECURITY"}</span>
+                  <h2>
+                    {ka
+                      ? "ანგარიშის უსაფრთხოება"
+                      : "Account security"}
+                  </h2>
+                </div>
               </div>
 
-              <label>
-                <span>{ka ? "ელფოსტა" : "Email"}</span>
+              <a href="/account/security" className="smallButton">
+                {ka ? "მართვა" : "Manage"} →
+              </a>
+            </div>
 
-                <input
-                  value={owner.email}
-                  disabled
-                />
-
-                <small>
-                  {ka
-                    ? "ელფოსტას ახლა არ ვცვლით — ეს Login-ის მისამართია."
-                    : "Email is not editable here because it is used for login."}
-                </small>
-              </label>
-
-              <label>
-                <span>{ka ? "ტელეფონი" : "Phone"} *</span>
-
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(e.target.value)
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                <span>
-                  {ka
-                    ? "მისამართი — ნებაყოფლობითი"
-                    : "Address — optional"}
-                </span>
-
-                <input
-                  value={address}
-                  onChange={(e) =>
-                    setAddress(e.target.value)
-                  }
-                />
-              </label>
-
-              <label>
-                <span>
-                  {ka
-                    ? "პროფილის ფოტო"
-                    : "Profile photo"}
-                </span>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setPhotoFile(
-                      e.target.files?.[0] ?? null
-                    )
-                  }
-                />
-              </label>
-
-              <div className="formActions">
-                <button
-                  type="button"
-                  className="cancelButton"
-                  onClick={() => {
-                    setFirstName(owner.first_name);
-                    setLastName(owner.last_name);
-                    setPhone(owner.phone);
-                    setAddress(owner.address ?? "");
-                    setPhotoFile(null);
-                    setEditing(false);
-                  }}
-                >
-                  {ka ? "გაუქმება" : "Cancel"}
-                </button>
-
-                <button
-                  type="submit"
-                  className="saveButton"
-                  disabled={saving}
-                >
-                  {saving
-                    ? ka
-                      ? "ინახება..."
-                      : "Saving..."
-                    : ka
-                    ? "შენახვა"
-                    : "Save changes"}
-                </button>
-              </div>
-            </form>
-          )}
-        </section>
-
-        <section className="adminCard">
-          <div className="sectionHeader">
-            <div>
-              <span className="eyebrow">
-                {ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}
-              </span>
-
-              <h2>
-                {ka
-                  ? "დამატებითი ადმინისტრატორი"
-                  : "Secondary administrator"}
-              </h2>
-
+            <div className="securityText">
               <p>
                 {ka
-                  ? "შეგიძლიათ დაამატოთ მაქსიმუმ ერთი ადმინისტრატორი. მისი უფლებები თქვენ გადაწყვიტეთ."
-                  : "You may add one administrator and control their permissions."}
+                  ? "კოდური სიტყვა და პირადი ნომერი დაცულია და მპოვნელისთვის არასდროს გამოჩნდება."
+                  : "Your code word and personal ID remain private and are never shown to finders."}
               </p>
             </div>
+          </section>
+        </div>
 
-            <a href="/account/admin" className="manageButton">
+        <section className="panel adminPanel">
+          <div className="panelHeader">
+            <div className="panelTitle">
+              <div className="panelIcon">👥</div>
+
+              <div>
+                <span>{ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}</span>
+
+                <h2>
+                  {admin
+                    ? ka
+                      ? "დამატებული Admin"
+                      : "Secondary Admin"
+                    : ka
+                    ? "Admin ჯერ არ არის დამატებული"
+                    : "No Admin added yet"}
+                </h2>
+              </div>
+            </div>
+
+            <a href="/account/admin" className="smallButton">
               {ka ? "მართვა" : "Manage"} →
             </a>
           </div>
 
-          <div className="adminNotice">
-            <span>🔐</span>
+          {admin ? (
+            <div className="adminStatus">
+              <div>
+                <strong>{admin.admin_email}</strong>
 
-            <p>
-              {ka
-                ? "ადმინისტრატორი ვერ დაამატებს სხვა ადმინისტრატორს და ვერ შეცვლის თქვენი ანგარიშის უსაფრთხოების მონაცემებს."
-                : "The administrator cannot add another administrator or change your account security information."}
-            </p>
-          </div>
+                <p>
+                  {ka
+                    ? "Owner თავად განსაზღვრავს მის თითოეულ უფლებას."
+                    : "The Owner controls each permission separately."}
+                </p>
+              </div>
+
+              <span
+                className={`statusBadge ${
+                  admin.active ? "active" : "inactive"
+                }`}
+              >
+                {admin.active
+                  ? ka
+                    ? "აქტიურია"
+                    : "Active"
+                  : ka
+                  ? "გათიშულია"
+                  : "Disabled"}
+              </span>
+            </div>
+          ) : (
+            <div className="emptyAdmin">
+              <p>
+                {ka
+                  ? "შეგიძლიათ დაამატოთ მაქსიმუმ ერთი Admin."
+                  : "You can add one secondary Admin."}
+              </p>
+
+              <a href="/account/admin">
+                + {ka ? "Admin-ის დამატება" : "Add Admin"}
+              </a>
+            </div>
+          )}
         </section>
 
-        <section className="qrSection">
-          <div className="qrHeader">
+        <section className="profilesSection">
+          <div className="profilesHeader">
             <div>
-              <span className="eyebrow">
+              <div className="eyebrow">
                 {ka ? "ჩემი QR პროფილები" : "MY QR PROFILES"}
-              </span>
+              </div>
 
               <h2>
-                {ka
-                  ? "ცხოველები და ნივთები"
-                  : "Pets and items"}
+                {ka ? "ცხოველები და ნივთები" : "Pets and items"}
               </h2>
 
               <p>
                 {ka
-                  ? "ერთ ანგარიშზე შეგიძლიათ შექმნათ რამდენიც გსურთ იმდენი QR პროფილი."
-                  : "Create as many QR profiles as you need under one account."}
+                  ? "ერთ Owner Account-ზე შეგიძლიათ რამდენიც გსურთ იმდენი QR პროფილი შექმნათ."
+                  : "Create as many QR profiles as you need under one Owner Account."}
               </p>
             </div>
 
-            <a href="/add-profile" className="addProfileButton">
-              + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
+            <a href="/add-profile" className="primaryButton">
+              + {ka ? "დამატება" : "Add profile"}
             </a>
           </div>
 
           {profiles.length === 0 ? (
-            <div className="emptyState">
-              <div className="emptyIcon">🏷️</div>
+            <div className="emptyProfiles">
+              <div className="bigIcon">🏷️</div>
 
               <h3>
                 {ka
@@ -660,24 +475,19 @@ export default function AccountPage() {
 
                 return (
                   <article className="profileCard" key={profile.id}>
-                    <div className="profileVisual">
+                    <div className="visual">
                       {profile.photo ? (
-                        <img
-                          src={profile.photo}
-                          alt={profile.item_name ?? ""}
-                        />
+                        <img src={profile.photo} alt="" />
                       ) : (
-                        <div className="profilePlaceholder">
+                        <div className="visualPlaceholder">
                           {type.icon}
                         </div>
                       )}
 
                       <span
-                        className={
-                          profile.active
-                            ? "status lost"
-                            : "status safe"
-                        }
+                        className={`lostStatus ${
+                          profile.active ? "lost" : "safe"
+                        }`}
                       >
                         {profile.active
                           ? ka
@@ -689,28 +499,24 @@ export default function AccountPage() {
                       </span>
                     </div>
 
-                    <div className="profileBody">
+                    <div className="profileContent">
                       <span className="profileType">
                         {type.label}
                       </span>
 
                       <h3>
                         {profile.item_name ||
-                          (ka
-                            ? "უსახელო პროფილი"
-                            : "Unnamed profile")}
+                          (ka ? "უსახელო პროფილი" : "Unnamed profile")}
                       </h3>
 
                       {profile.tag_code && (
-                        <p className="qrCode">
+                        <p className="tagCode">
                           QR · {profile.tag_code}
                         </p>
                       )}
 
                       <div className="profileActions">
-                        <a
-                          href={`/edit-profile/${profile.id}`}
-                        >
+                        <a href={`/edit-profile/${profile.id}`}>
                           ✏️ {ka ? "რედაქტირება" : "Edit"}
                         </a>
 
@@ -720,7 +526,7 @@ export default function AccountPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            👁 {ka ? "მპოვნელის ნახვა" : "Finder view"}
+                            👁 {ka ? "მპოვნელის ხედვა" : "Finder view"}
                           </a>
                         )}
                       </div>
@@ -746,34 +552,41 @@ export default function AccountPage() {
 
         body {
           background: #f7f9fc;
+          color: #101828;
+          font-family: Inter, Arial, sans-serif;
         }
 
-        input,
         button {
           font: inherit;
         }
 
         .page {
           min-height: 100vh;
-          color: #101828;
-          font-family: Inter, Arial, sans-serif;
           background:
             radial-gradient(
-              circle at 7% 10%,
-              rgba(20, 101, 232, 0.08),
+              circle at 8% 10%,
+              rgba(20, 101, 232, 0.07),
               transparent 28%
             ),
             radial-gradient(
-              circle at 94% 7%,
-              rgba(118, 85, 247, 0.08),
+              circle at 94% 8%,
+              rgba(118, 85, 247, 0.07),
               transparent 28%
             ),
             #f7f9fc;
         }
 
+        .statePage {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          padding: 30px;
+          color: #667085;
+        }
+
         .header {
           width: calc(100% - 36px);
-          max-width: 1180px;
+          max-width: 1120px;
           min-height: 86px;
           margin: auto;
           display: flex;
@@ -795,29 +608,28 @@ export default function AccountPage() {
           display: grid;
           place-items: center;
           border-radius: 14px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg, #1465e8, #7655f7);
           color: white;
           font-weight: 900;
         }
 
-        .brand strong {
+        .brand strong,
+        .brand small {
           display: block;
+        }
+
+        .brand strong {
           color: #1465e8;
           font-size: 21px;
           font-weight: 900;
         }
 
         .brand small {
-          display: block;
           margin-top: 3px;
           color: #7655f7;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
-          letter-spacing: 1.7px;
+          letter-spacing: 1.6px;
         }
 
         .headerRight {
@@ -834,7 +646,7 @@ export default function AccountPage() {
         }
 
         .languages button {
-          padding: 8px 11px;
+          padding: 8px 10px;
           border: 0;
           border-radius: 8px;
           background: transparent;
@@ -856,8 +668,8 @@ export default function AccountPage() {
           border-radius: 9px;
           background: white;
           color: #475467;
-          font-size: 12px;
-          font-weight: 800;
+          font-size: 11px;
+          font-weight: 900;
           cursor: pointer;
         }
 
@@ -868,281 +680,261 @@ export default function AccountPage() {
           padding: 58px 0 90px;
         }
 
-        .pageTitle {
-          margin-bottom: 32px;
+        .welcome {
+          margin-bottom: 28px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 30px;
         }
 
         .eyebrow {
           color: #7655f7;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: 1.6px;
+          letter-spacing: 1.5px;
         }
 
-        .pageTitle h1 {
-          margin: 9px 0;
-          font-size: clamp(38px, 5vw, 52px);
-          line-height: 1.05;
+        .welcome h1 {
+          margin: 8px 0 8px;
+          font-size: clamp(40px, 5vw, 52px);
           letter-spacing: -2px;
         }
 
-        .pageTitle p,
-        .sectionHeader p,
-        .qrHeader p {
+        .welcome p,
+        .profilesHeader p {
           margin: 0;
           max-width: 650px;
           color: #667085;
-          font-size: 14px;
-          line-height: 1.65;
+          font-size: 13px;
+          line-height: 1.6;
         }
 
-        .ownerCard,
-        .adminCard,
-        .qrSection {
-          margin-top: 22px;
-          padding: 28px;
+        .primaryButton {
+          min-height: 48px;
+          padding: 0 17px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #1465e8, #7655f7);
+          color: white;
+          font-size: 11px;
+          font-weight: 900;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .topGrid {
+          display: grid;
+          grid-template-columns: 1.5fr 1fr;
+          gap: 20px;
+        }
+
+        .panel,
+        .profilesSection {
+          margin-top: 20px;
+          padding: 25px;
           border: 1px solid #e4e7ec;
-          border-radius: 22px;
+          border-radius: 20px;
           background: white;
-          box-shadow: 0 12px 35px rgba(16, 24, 40, 0.05);
+          box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
         }
 
-        .ownerTop {
+        .panelHeader {
           display: flex;
           align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+        }
+
+        .panelTitle {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .panelIcon {
+          width: 48px;
+          height: 48px;
+          display: grid;
+          place-items: center;
+          border-radius: 13px;
+          background: linear-gradient(135deg, #eef4ff, #f0edff);
+          font-size: 23px;
+        }
+
+        .panelTitle span {
+          color: #7655f7;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.3px;
+        }
+
+        .panelTitle h2 {
+          margin: 4px 0 0;
+          font-size: 20px;
+        }
+
+        .smallButton {
+          min-height: 40px;
+          padding: 0 13px;
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid #dbe7ff;
+          border-radius: 9px;
+          background: #f5f9ff;
+          color: #1465e8;
+          font-size: 10px;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .ownerBody {
+          margin-top: 22px;
+          display: flex;
           gap: 16px;
         }
 
-        .ownerPhotoWrap {
-          width: 78px;
-          height: 78px;
-          flex: 0 0 78px;
+        .avatar {
+          width: 85px;
+          height: 85px;
+          flex: 0 0 85px;
           overflow: hidden;
           border-radius: 20px;
         }
 
-        .ownerPhotoWrap img {
+        .avatar img,
+        .avatarPlaceholder {
           width: 100%;
           height: 100%;
+        }
+
+        .avatar img {
           object-fit: cover;
         }
 
-        .ownerPlaceholder {
-          width: 100%;
-          height: 100%;
+        .avatarPlaceholder {
           display: grid;
           place-items: center;
-          background: linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
+          background: #eef4ff;
           font-size: 34px;
         }
 
-        .ownerIdentity {
+        .ownerData {
           flex: 1;
-        }
-
-        .ownerIdentity > span {
-          color: #7655f7;
-          font-size: 10px;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-        .ownerIdentity h2 {
-          margin: 5px 0 6px;
-          font-size: 25px;
-        }
-
-        .ownerIdentity p {
-          margin: 3px 0;
-          color: #667085;
-          font-size: 12px;
-        }
-
-        .editOwnerButton,
-        .manageButton,
-        .addProfileButton {
-          min-height: 44px;
-          padding: 0 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid #dbe7ff;
-          border-radius: 10px;
-          background: #f5f9ff;
-          color: #1465e8;
-          font-size: 12px;
-          font-weight: 900;
-          text-decoration: none;
-          cursor: pointer;
-        }
-
-        .ownerInfoGrid {
-          margin-top: 26px;
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
+          gap: 10px;
         }
 
-        .infoBox {
-          padding: 15px;
-          border: 1px solid #eaecf0;
-          border-radius: 13px;
-          background: #fafbfc;
-        }
-
-        .infoBox.full {
-          grid-column: 1 / -1;
-        }
-
-        .infoBox span {
+        .ownerData span {
           display: block;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
           color: #98a2b3;
-          font-size: 10px;
-          font-weight: 800;
+          font-size: 9px;
+          font-weight: 900;
           text-transform: uppercase;
         }
 
-        .infoBox strong {
+        .ownerData strong {
           color: #344054;
-          font-size: 14px;
+          font-size: 12px;
         }
 
-        .editForm {
-          margin-top: 27px;
+        .securityText {
+          margin-top: 22px;
+          padding: 15px;
+          border-radius: 12px;
+          background: #f7f9fc;
+        }
+
+        .securityText p {
+          margin: 0;
+          color: #667085;
+          font-size: 11px;
+          line-height: 1.6;
+        }
+
+        .adminStatus {
+          margin-top: 20px;
+          padding: 15px;
           display: flex;
-          flex-direction: column;
-          gap: 17px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-radius: 13px;
+          background: #f7f9fc;
         }
 
-        .twoColumns {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
+        .adminStatus strong {
+          font-size: 12px;
         }
 
-        label > span {
-          display: block;
-          margin-bottom: 7px;
-          color: #475467;
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        label small {
-          display: block;
-          margin-top: 5px;
-          color: #98a2b3;
+        .adminStatus p {
+          margin: 4px 0 0;
+          color: #667085;
           font-size: 10px;
         }
 
-        input {
-          width: 100%;
-          height: 50px;
-          padding: 0 13px;
-          border: 1px solid #d0d5dd;
-          border-radius: 10px;
-          background: white;
-          outline: none;
+        .statusBadge {
+          padding: 6px 9px;
+          border-radius: 999px;
+          font-size: 9px;
+          font-weight: 900;
         }
 
-        input:focus {
-          border-color: #84adff;
-          box-shadow:
-            0 0 0 3px rgba(20, 101, 232, 0.08);
+        .statusBadge.active {
+          background: #ecfdf3;
+          color: #027a48;
         }
 
-        input:disabled {
+        .statusBadge.inactive {
           background: #f2f4f7;
           color: #667085;
         }
 
-        .formActions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 10px;
+        .emptyAdmin {
+          margin-top: 18px;
+          padding: 15px;
+          border-radius: 12px;
+          background: #f7f9fc;
         }
 
-        .cancelButton,
-        .saveButton {
-          min-height: 46px;
-          padding: 0 17px;
-          border-radius: 10px;
+        .emptyAdmin p {
+          margin: 0 0 9px;
+          color: #667085;
+          font-size: 11px;
+        }
+
+        .emptyAdmin a {
+          color: #1465e8;
+          font-size: 10px;
           font-weight: 900;
-          cursor: pointer;
+          text-decoration: none;
         }
 
-        .cancelButton {
-          border: 1px solid #d0d5dd;
-          background: white;
-          color: #475467;
-        }
-
-        .saveButton {
-          border: 0;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
-          color: white;
-        }
-
-        .sectionHeader,
-        .qrHeader {
+        .profilesHeader {
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
           gap: 25px;
         }
 
-        .sectionHeader h2,
-        .qrHeader h2 {
+        .profilesHeader h2 {
           margin: 7px 0;
-          font-size: 24px;
+          font-size: 25px;
         }
 
-        .adminNotice {
-          margin-top: 20px;
-          padding: 15px;
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          border-radius: 13px;
-          background: #f2f4f7;
-        }
-
-        .adminNotice p {
-          margin: 0;
-          color: #667085;
-          font-size: 12px;
-          line-height: 1.55;
-        }
-
-        .addProfileButton {
-          border: 0;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
-          color: white;
-        }
-
-        .emptyState {
-          margin-top: 24px;
+        .emptyProfiles {
+          margin-top: 22px;
           padding: 55px 25px;
           text-align: center;
           border: 1px dashed #cfd8e8;
-          border-radius: 18px;
+          border-radius: 17px;
           background: #fafbfc;
         }
 
-        .emptyIcon {
+        .bigIcon {
           width: 64px;
           height: 64px;
           margin: auto;
@@ -1153,88 +945,86 @@ export default function AccountPage() {
           font-size: 30px;
         }
 
-        .emptyState h3 {
-          margin: 17px 0 7px;
+        .emptyProfiles h3 {
+          margin: 15px 0 7px;
         }
 
-        .emptyState p {
-          margin: 0 auto 18px;
+        .emptyProfiles p {
+          margin: 0 auto 16px;
           color: #667085;
-          font-size: 13px;
+          font-size: 11px;
         }
 
-        .emptyState a {
+        .emptyProfiles a {
           display: inline-flex;
-          padding: 12px 16px;
-          border-radius: 10px;
+          padding: 11px 14px;
+          border-radius: 9px;
           background: #1465e8;
           color: white;
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 900;
           text-decoration: none;
         }
 
         .profilesGrid {
-          margin-top: 24px;
+          margin-top: 22px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 18px;
+          gap: 17px;
         }
 
         .profileCard {
           overflow: hidden;
           border: 1px solid #e4e7ec;
-          border-radius: 18px;
+          border-radius: 17px;
           background: white;
         }
 
-        .profileVisual {
+        .visual {
           height: 165px;
           position: relative;
           background: #eef4ff;
         }
 
-        .profileVisual img {
+        .visual img,
+        .visualPlaceholder {
           width: 100%;
           height: 100%;
+        }
+
+        .visual img {
           object-fit: cover;
         }
 
-        .profilePlaceholder {
-          width: 100%;
-          height: 100%;
+        .visualPlaceholder {
           display: grid;
           place-items: center;
-          background: linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
-          font-size: 52px;
+          background: linear-gradient(135deg, #eef4ff, #f0edff);
+          font-size: 50px;
         }
 
-        .status {
+        .lostStatus {
           position: absolute;
-          right: 11px;
           top: 11px;
-          padding: 6px 9px;
+          right: 11px;
+          padding: 6px 8px;
           border-radius: 999px;
           font-size: 9px;
           font-weight: 900;
         }
 
-        .status.safe {
+        .lostStatus.safe {
           background: #ecfdf3;
           color: #027a48;
         }
 
-        .status.lost {
+        .lostStatus.lost {
           background: #fff1f0;
           color: #b42318;
         }
 
-        .profileBody {
-          padding: 17px;
+        .profileContent {
+          padding: 16px;
         }
 
         .profileType {
@@ -1244,20 +1034,20 @@ export default function AccountPage() {
           text-transform: uppercase;
         }
 
-        .profileBody h3 {
-          margin: 6px 0 8px;
-          font-size: 20px;
+        .profileContent h3 {
+          margin: 5px 0 7px;
+          font-size: 19px;
         }
 
-        .qrCode {
+        .tagCode {
           margin: 0;
           color: #98a2b3;
-          font-size: 10px;
+          font-size: 9px;
         }
 
         .profileActions {
-          margin-top: 15px;
-          padding-top: 13px;
+          margin-top: 14px;
+          padding-top: 12px;
           display: flex;
           justify-content: space-between;
           gap: 8px;
@@ -1266,93 +1056,58 @@ export default function AccountPage() {
 
         .profileActions a {
           color: #1465e8;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
           text-decoration: none;
         }
 
-        .errorBox,
-        .successBox {
-          margin-bottom: 16px;
-          padding: 13px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 800;
-        }
-
         .errorBox {
+          margin-bottom: 15px;
+          padding: 13px;
           border: 1px solid #fecdca;
+          border-radius: 10px;
           background: #fff1f0;
           color: #b42318;
+          font-size: 11px;
         }
 
-        .successBox {
-          border: 1px solid #abefc6;
-          background: #ecfdf3;
-          color: #027a48;
-        }
+        @media (max-width: 850px) {
+          .topGrid {
+            grid-template-columns: 1fr;
+          }
 
-        .statePage {
-          min-height: 100vh;
-          display: grid;
-          place-items: center;
-          padding: 30px;
-          font-family: Inter, Arial, sans-serif;
-          color: #667085;
-          background: #f7f9fc;
-        }
-
-        @media (max-width: 900px) {
           .profilesGrid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
-        @media (max-width: 700px) {
-          .ownerTop,
-          .sectionHeader,
-          .qrHeader {
+        @media (max-width: 650px) {
+          .welcome,
+          .profilesHeader {
             align-items: stretch;
             flex-direction: column;
           }
 
-          .editOwnerButton,
-          .manageButton,
-          .addProfileButton {
+          .primaryButton {
             width: 100%;
           }
 
-          .ownerInfoGrid,
-          .twoColumns {
-            grid-template-columns: 1fr;
-          }
-
-          .infoBox.full {
-            grid-column: auto;
-          }
-        }
-
-        @media (max-width: 560px) {
-          .container {
-            padding-top: 35px;
-          }
-
-          .ownerCard,
-          .adminCard,
-          .qrSection {
-            padding: 20px;
+          .ownerBody {
+            flex-direction: column;
           }
 
           .profilesGrid {
             grid-template-columns: 1fr;
           }
 
-          .header {
-            min-height: 76px;
+          .panelHeader {
+            align-items: flex-start;
+            flex-direction: column;
           }
 
-          .brand small {
-            display: none;
+          .smallButton {
+            width: 100%;
+            justify-content: center;
           }
         }
       `}</style>
