@@ -2,101 +2,115 @@
 
 import {
   FormEvent,
+  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
-type SenderType = "finder" | "owner";
 
 type Message = {
   id: number;
-  profile_type: string;
-  tag_code: string;
-  sender_type: SenderType;
-  sender_session: string;
-  message: string;
+  sender_role: "finder" | "owner" | "admin";
+  message_text: string;
   created_at: string;
 };
 
 const allowedTypes = [
-  "emergency",
   "dog",
   "cat",
-  "suitcase",
-  "bag",
-  "wallet",
   "key",
+  "wallet",
+  "bag",
+  "suitcase",
 ];
 
 function normalizeTag(value: string) {
   return value.trim().toUpperCase();
 }
 
-function getOrCreateSession() {
-  const key = "qr-return-chat-session";
+function categoryInfo(type: string) {
+  const items: Record<
+    string,
+    {
+      icon: string;
+      ka: string;
+      en: string;
+    }
+  > = {
+    dog: {
+      icon: "🐶",
+      ka: "ძაღლი",
+      en: "Dog",
+    },
 
-  const existing = localStorage.getItem(key);
+    cat: {
+      icon: "🐱",
+      ka: "კატა",
+      en: "Cat",
+    },
 
-  if (existing) {
-    return existing;
-  }
+    key: {
+      icon: "🔑",
+      ka: "გასაღები",
+      en: "Key",
+    },
 
-  const session =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    wallet: {
+      icon: "👛",
+      ka: "საფულე",
+      en: "Wallet",
+    },
 
-  localStorage.setItem(key, session);
+    bag: {
+      icon: "👜",
+      ka: "ჩანთა",
+      en: "Bag",
+    },
 
-  return session;
-}
-
-function categoryName(type: string, lang: Lang) {
-  const names: Record<string, [string, string]> = {
-    emergency: ["Emergency სამაჯური", "Emergency Bracelet"],
-    dog: ["ძაღლი", "Dog"],
-    cat: ["კატა", "Cat"],
-    suitcase: ["ჩემოდანი", "Suitcase"],
-    bag: ["ჩანთა", "Bag"],
-    wallet: ["საფულე", "Wallet"],
-    key: ["გასაღები", "Key"],
+    suitcase: {
+      icon: "🧳",
+      ka: "ჩემოდანი",
+      en: "Suitcase",
+    },
   };
 
-  const item = names[type];
+  return (
+    items[type] ?? {
+      icon: "🏷️",
+      ka: "QR პროფილი",
+      en: "QR Profile",
+    }
+  );
+}
 
-  if (!item) {
-    return lang === "ka" ? "პროფილი" : "Profile";
+function createSessionId() {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
   }
 
-  return lang === "ka" ? item[0] : item[1];
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
 }
 
-function categoryIcon(type: string) {
-  const icons: Record<string, string> = {
-    emergency: "✚",
-    dog: "🐕",
-    cat: "🐈",
-    suitcase: "🧳",
-    bag: "👜",
-    wallet: "👛",
-    key: "🔑",
-  };
-
-  return icons[type] || "QR";
-}
-
-export default function LiveChatPage() {
+export default function FinderLiveChatPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
 
-  const rawType = params?.type;
-  const rawTag = params?.tag;
+  const rawType = Array.isArray(params.type)
+    ? params.type[0]
+    : params.type;
+
+  const rawTag = Array.isArray(params.tag)
+    ? params.tag[0]
+    : params.tag;
 
   const profileType =
     typeof rawType === "string"
@@ -105,40 +119,54 @@ export default function LiveChatPage() {
 
   const tagCode =
     typeof rawTag === "string"
-      ? normalizeTag(decodeURIComponent(rawTag))
+      ? normalizeTag(
+          decodeURIComponent(rawTag)
+        )
       : "";
 
-  const requestedRole = searchParams.get("role");
+  const [lang, setLang] =
+    useState<Lang>("ka");
 
-  const senderType: SenderType =
-    requestedRole === "owner" ? "owner" : "finder";
+  const [sessionId, setSessionId] =
+    useState("");
 
-  const [lang, setLang] = useState<Lang>("ka");
-  const [sessionId, setSessionId] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
+  const [messages, setMessages] =
+    useState<Message[]>([]);
 
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [text, setText] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [sending, setSending] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [chatUnavailable, setChatUnavailable] =
+    useState(false);
+
+  const bottomRef =
+    useRef<HTMLDivElement | null>(null);
 
   const ka = lang === "ka";
 
-  const validChat =
-    allowedTypes.includes(profileType) && Boolean(tagCode);
+  const validRoute =
+    allowedTypes.includes(profileType) &&
+    Boolean(tagCode);
 
-  const title = useMemo(
-    () => categoryName(profileType, lang),
-    [profileType, lang]
-  );
+  const category =
+    categoryInfo(profileType);
+
+  /*
+    თითო QR პროფილს Finder-ისთვის
+    თავისი ანონიმური session აქვს.
+  */
 
   useEffect(() => {
-    setSessionId(getOrCreateSession());
-  }, []);
-
-  useEffect(() => {
-    if (!validChat) {
+    if (!validRoute) {
       setLoading(false);
 
       setError(
@@ -150,93 +178,172 @@ export default function LiveChatPage() {
       return;
     }
 
-    let alive = true;
+    const storageKey =
+      `qr-return-chat-${profileType}-${tagCode}`;
 
-    async function loadMessages() {
-      setLoading(true);
-      setError("");
+    let existing =
+      window.localStorage.getItem(
+        storageKey
+      );
 
-      const { data, error: loadError } = await supabase
-        .from("live_chat_messages")
-        .select(`
-          id,
-          profile_type,
-          tag_code,
-          sender_type,
-          sender_session,
-          message,
-          created_at
-        `)
-        .eq("profile_type", profileType)
-        .eq("tag_code", tagCode)
-        .order("created_at", {
-          ascending: true,
-        })
-        .limit(200);
+    if (!existing) {
+      existing =
+        createSessionId();
 
-      if (!alive) {
-        return;
-      }
-
-      if (loadError) {
-        setError(
-          ka
-            ? `ჩატის გახსნა ვერ მოხერხდა: ${loadError.message}`
-            : `Could not open chat: ${loadError.message}`
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      setMessages((data || []) as Message[]);
-      setLoading(false);
+      window.localStorage.setItem(
+        storageKey,
+        existing
+      );
     }
 
-    void loadMessages();
+    setSessionId(existing);
+  }, [
+    profileType,
+    tagCode,
+    validRoute,
+    ka,
+  ]);
 
-    const channel = supabase
-      .channel(`chat-${profileType}-${tagCode}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "live_chat_messages",
-          filter: `tag_code=eq.${tagCode}`,
-        },
-        (payload) => {
-          const next = payload.new as Message;
+  /*
+    შეტყობინებების მიღება მხოლოდ RPC-ით.
+    Finder სხვა Finder-ის session-ს ვერ ხედავს.
+  */
 
-          if (next.profile_type !== profileType) {
-            return;
-          }
+  const loadMessages =
+    useCallback(
+      async (
+        currentSession: string,
+        silent = false
+      ) => {
+        if (
+          !tagCode ||
+          !currentSession
+        ) {
+          return;
+        }
 
-          setMessages((current) => {
-            const exists = current.some(
-              (message) => message.id === next.id
+        if (!silent) {
+          setLoading(true);
+        }
+
+        try {
+          const {
+            data,
+            error: loadError,
+          } =
+            await supabase.rpc(
+              "finder_get_chat_messages",
+              {
+                p_tag_code:
+                  tagCode,
+
+                p_finder_session:
+                  currentSession,
+              }
             );
 
-            if (exists) {
-              return current;
-            }
+          if (loadError) {
+            throw loadError;
+          }
 
-            return [...current, next];
-          });
+          setMessages(
+            (data ?? []) as Message[]
+          );
+
+          setChatUnavailable(
+            false
+          );
+        } catch (err) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "";
+
+          if (!silent) {
+            setError(
+              message ||
+                (ka
+                  ? "Live Chat-ის ჩატვირთვა ვერ მოხერხდა."
+                  : "Could not load Live Chat.")
+            );
+          }
+        } finally {
+          if (!silent) {
+            setLoading(false);
+          }
         }
-      )
-      .subscribe();
+      },
+      [tagCode, ka]
+    );
 
-    return () => {
-      alive = false;
-      void supabase.removeChannel(channel);
-    };
-  }, [profileType, tagCode, validChat, ka]);
+  /*
+    პირველი ჩატვირთვა.
+  */
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    if (
+      !validRoute ||
+      !sessionId
+    ) {
+      return;
+    }
+
+    void loadMessages(
+      sessionId
+    );
+  }, [
+    validRoute,
+    sessionId,
+    loadMessages,
+  ]);
+
+  /*
+    პასუხების ავტომატური განახლება.
+    ყოველ 4 წამში.
+  */
+
+  useEffect(() => {
+    if (
+      !validRoute ||
+      !sessionId ||
+      chatUnavailable
+    ) {
+      return;
+    }
+
+    const interval =
+      window.setInterval(
+        () => {
+          void loadMessages(
+            sessionId,
+            true
+          );
+        },
+        4000
+      );
+
+    return () => {
+      window.clearInterval(
+        interval
+      );
+    };
+  }, [
+    validRoute,
+    sessionId,
+    chatUnavailable,
+    loadMessages,
+  ]);
+
+  /*
+    ახალი შეტყობინებისას ქვემოთ ჩასვლა.
+  */
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView(
+      {
+        behavior: "smooth",
+      }
+    );
   }, [messages]);
 
   async function sendMessage(
@@ -244,13 +351,21 @@ export default function LiveChatPage() {
   ) {
     event.preventDefault();
 
-    const message = text.trim();
+    const cleanText =
+      text.trim();
 
-    if (!message || !sessionId || !validChat || sending) {
+    if (
+      !cleanText ||
+      !sessionId ||
+      !tagCode ||
+      sending
+    ) {
       return;
     }
 
-    if (message.length > 2000) {
+    if (
+      cleanText.length > 2000
+    ) {
       setError(
         ka
           ? "შეტყობინება მაქსიმუმ 2000 სიმბოლო შეიძლება იყოს."
@@ -264,48 +379,113 @@ export default function LiveChatPage() {
     setError("");
 
     try {
-      const { error: sendError } = await supabase
-        .from("live_chat_messages")
-        .insert({
-          profile_type: profileType,
-          tag_code: tagCode,
-          sender_type: senderType,
-          sender_session: sessionId,
-          message,
-        });
+      const {
+        error: sendError,
+      } =
+        await supabase.rpc(
+          "finder_send_chat_message",
+          {
+            p_tag_code:
+              tagCode,
 
-      if (sendError) {
-        setError(
-          ka
-            ? `შეტყობინება ვერ გაიგზავნა: ${sendError.message}`
-            : `Could not send message: ${sendError.message}`
+            p_finder_session:
+              sessionId,
+
+            p_message:
+              cleanText,
+          }
         );
 
-        return;
+      if (sendError) {
+        throw sendError;
       }
 
       setText("");
+
+      await loadMessages(
+        sessionId,
+        true
+      );
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "";
+
+      const lower =
+        message.toLowerCase();
+
+      if (
+        lower.includes(
+          "lost mode"
+        ) ||
+        lower.includes(
+          "live chat is disabled"
+        )
+      ) {
+        setChatUnavailable(
+          true
+        );
+      }
+
+      setError(
+        message ||
+          (ka
+            ? "შეტყობინების გაგზავნა ვერ მოხერხდა."
+            : "Could not send message.")
+      );
     } finally {
       setSending(false);
     }
   }
 
-  if (!validChat) {
+  function formatTime(
+    value: string
+  ) {
+    try {
+      return new Intl.DateTimeFormat(
+        ka
+          ? "ka-GE"
+          : "en-US",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ).format(
+        new Date(value)
+      );
+    } catch {
+      return "";
+    }
+  }
+
+  if (!validRoute) {
     return (
-      <main className="page">
-        <Header lang={lang} setLang={setLang} />
+      <main className="statePage">
+        <div className="stateLogo">
+          QR
+        </div>
 
-        <section className="statePage">
-          <div className="errorIcon">!</div>
+        <h1>
+          QR RETURN
+        </h1>
 
-          <h1>
-            {ka
-              ? "ჩატი ვერ გაიხსნა"
-              : "Chat unavailable"}
-          </h1>
+        <div className="errorBox">
+          {error ||
+            (ka
+              ? "ჩატის მისამართი არასწორია."
+              : "Invalid chat address.")}
+        </div>
 
-          <p>{error}</p>
-        </section>
+        <a
+          href="/"
+          className="stateLink"
+        >
+          ←{" "}
+          {ka
+            ? "მთავარ გვერდზე დაბრუნება"
+            : "Back to home"}
+        </a>
 
         <Styles />
       </main>
@@ -314,247 +494,367 @@ export default function LiveChatPage() {
 
   return (
     <main className="page">
-      <Header lang={lang} setLang={setLang} />
-
-      <section className="chatPage">
-        <header className="chatHeader">
-          <div className="categoryIcon">
-            {categoryIcon(profileType)}
+      <header className="topHeader">
+        <a
+          href={`/profile/${encodeURIComponent(
+            tagCode
+          )}`}
+          className="brand"
+        >
+          <div className="logo">
+            QR
           </div>
 
           <div>
-            <div className="eyebrow">
-              QR RETURN • LIVE CHAT
-            </div>
+            <strong>
+              QR RETURN
+            </strong>
 
-            <h1>{title}</h1>
-
-            <p>
-              QR: <strong>{tagCode}</strong>
-            </p>
+            <small>
+              LIVE CHAT
+            </small>
           </div>
+        </a>
 
-          <div className="online">
-            <span />
-            Live
-          </div>
-        </header>
+        <div className="languages">
+          <button
+            type="button"
+            className={
+              ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("ka")
+            }
+          >
+            GEO
+          </button>
 
-        <div className="chatNotice">
-          <strong>
-            💬{" "}
-            {senderType === "owner"
-              ? ka
-                ? "თქვენ პასუხობთ როგორც პროფილის მმართველი"
-                : "You are replying as the profile manager"
-              : ka
-              ? "დაუკავშირდით QR პროფილის მმართველს"
-              : "Contact the QR profile manager"}
-          </strong>
-
-          <p>
-            {ka
-              ? "ჩატი განკუთვნილია QR პროფილის მმართველსა და მპოვნელს შორის კომუნიკაციისთვის."
-              : "This chat is for communication between the QR profile manager and finder."}
-          </p>
+          <button
+            type="button"
+            className={
+              !ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("en")
+            }
+          >
+            ENG
+          </button>
         </div>
+      </header>
 
-        <section className="messages">
-          {loading && (
-            <div className="loading">
-              <div className="loader" />
+      <section className="chatPage">
+        <a
+          href={`/profile/${encodeURIComponent(
+            tagCode
+          )}`}
+          className="back"
+        >
+          ←{" "}
+          {ka
+            ? "QR პროფილზე დაბრუნება"
+            : "Back to QR profile"}
+        </a>
 
-              <span>
-                {ka
-                  ? "ჩატი იტვირთება..."
-                  : "Loading chat..."}
-              </span>
+        <div className="chatCard">
+          <header className="chatHeader">
+            <div className="categoryIcon">
+              {category.icon}
             </div>
-          )}
 
-          {!loading && messages.length === 0 && (
-            <div className="empty">
-              <div className="emptyIcon">💬</div>
+            <div className="chatIdentity">
+              <div className="eyebrow">
+                QR RETURN • LIVE CHAT
+              </div>
 
+              <h1>
+                {ka
+                  ? category.ka
+                  : category.en}
+              </h1>
+
+              <p>
+                QR:{" "}
+                <strong>
+                  {tagCode}
+                </strong>
+              </p>
+            </div>
+
+            {!chatUnavailable && (
+              <div className="online">
+                <span />
+                Live
+              </div>
+            )}
+          </header>
+
+          <div className="privacyNotice">
+            <div className="privacyIcon">
+              🔒
+            </div>
+
+            <div>
               <strong>
                 {ka
-                  ? "ჩატი ჯერ ცარიელია"
-                  : "No messages yet"}
+                  ? "ანგარიში არ გჭირდებათ"
+                  : "No account required"}
               </strong>
 
               <p>
                 {ka
-                  ? "დაწერეთ პირველი შეტყობინება."
-                  : "Send the first message."}
+                  ? "თქვენი საუბარი დაკავშირებულია ამ QR კოდთან და მხოლოდ ამ მოწყობილობაზე შექმნილ ანონიმურ სესიასთან."
+                  : "Your conversation is linked to this QR code and an anonymous session stored on this device."}
               </p>
             </div>
-          )}
+          </div>
 
-          {messages.map((message) => {
-            const mine =
-              message.sender_session === sessionId;
+          {chatUnavailable ? (
+            <section className="unavailable">
+              <div className="unavailableIcon">
+                🔒
+              </div>
 
-            return (
-              <div
-                key={message.id}
-                className={
-                  mine
-                    ? "messageRow mine"
-                    : "messageRow"
+              <h2>
+                {ka
+                  ? "Live Chat ამჟამად მიუწვდომელია"
+                  : "Live Chat is currently unavailable"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "მფლობელმა შესაძლოა გამორთო Live Chat ან Lost Mode."
+                  : "The Owner may have disabled Live Chat or Lost Mode."}
+              </p>
+
+              <a
+                href={`/profile/${encodeURIComponent(
+                  tagCode
+                )}`}
+              >
+                {ka
+                  ? "QR პროფილზე დაბრუნება"
+                  : "Back to QR profile"}{" "}
+                →
+              </a>
+            </section>
+          ) : (
+            <>
+              <section className="messages">
+                {loading && (
+                  <div className="loading">
+                    <div className="loader" />
+
+                    <span>
+                      {ka
+                        ? "ჩატი იტვირთება..."
+                        : "Loading chat..."}
+                    </span>
+                  </div>
+                )}
+
+                {!loading &&
+                  messages.length ===
+                    0 && (
+                    <div className="empty">
+                      <div className="emptyIcon">
+                        💬
+                      </div>
+
+                      <strong>
+                        {ka
+                          ? "მიწერეთ მფლობელს"
+                          : "Message the Owner"}
+                      </strong>
+
+                      <p>
+                        {ka
+                          ? "უთხარით სად იპოვეთ ნივთი ან ცხოველი, ან დაუსვით კითხვა."
+                          : "Tell the Owner where you found the item or pet, or ask a question."}
+                      </p>
+                    </div>
+                  )}
+
+                {!loading &&
+                  messages.map(
+                    (message) => {
+                      const mine =
+                        message.sender_role ===
+                        "finder";
+
+                      return (
+                        <div
+                          key={
+                            message.id
+                          }
+                          className={`messageRow ${
+                            mine
+                              ? "mine"
+                              : "theirs"
+                          }`}
+                        >
+                          {!mine && (
+                            <div className="senderLabel">
+                              {message.sender_role ===
+                              "admin"
+                                ? ka
+                                  ? "Admin"
+                                  : "Admin"
+                                : ka
+                                ? "მფლობელი"
+                                : "Owner"}
+                            </div>
+                          )}
+
+                          <div className="bubble">
+                            <div className="messageText">
+                              {
+                                message.message_text
+                              }
+                            </div>
+
+                            <time>
+                              {formatTime(
+                                message.created_at
+                              )}
+                            </time>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+
+                <div
+                  ref={
+                    bottomRef
+                  }
+                />
+              </section>
+
+              {error && (
+                <div className="inlineError">
+                  ⚠ {error}
+                </div>
+              )}
+
+              <form
+                className="composer"
+                onSubmit={
+                  sendMessage
                 }
               >
-                <div
-                  className={
-                    mine
-                      ? "bubble mine"
-                      : "bubble"
+                <textarea
+                  value={
+                    text
                   }
-                >
-                  <div className="sender">
-                    {message.sender_type === "owner"
-                      ? ka
-                        ? "პროფილის მმართველი"
-                        : "Profile manager"
-                      : ka
-                      ? "მპოვნელი"
-                      : "Finder"}
-                  </div>
+                  maxLength={
+                    2000
+                  }
+                  placeholder={
+                    ka
+                      ? "დაწერეთ შეტყობინება..."
+                      : "Write a message..."
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setText(
+                      event.target
+                        .value
+                    )
+                  }
+                  onKeyDown={(
+                    event
+                  ) => {
+                    if (
+                      event.key ===
+                        "Enter" &&
+                      !event.shiftKey &&
+                      !event
+                        .nativeEvent
+                        .isComposing
+                    ) {
+                      event.preventDefault();
 
-                  <div className="messageText">
-                    {message.message}
-                  </div>
-
-                  <time>
-                    {new Date(
-                      message.created_at
-                    ).toLocaleTimeString(
-                      ka ? "ka-GE" : "en-US",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
+                      if (
+                        !sending &&
+                        text.trim()
+                      ) {
+                        event.currentTarget.form?.requestSubmit();
                       }
-                    )}
-                  </time>
+                    }
+                  }
+                  disabled={
+                    sending
+                  }
+                />
+
+                <div className="composerBottom">
+                  <div className="composerMeta">
+                    <span>
+                      {ka
+                        ? "Enter — გაგზავნა • Shift + Enter — ახალი ხაზი"
+                        : "Enter — send • Shift + Enter — new line"}
+                    </span>
+
+                    <small>
+                      {text.length}
+                      /2000
+                    </small>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={
+                      sending ||
+                      !text.trim()
+                    }
+                  >
+                    {sending
+                      ? ka
+                        ? "იგზავნება..."
+                        : "Sending..."
+                      : ka
+                      ? "გაგზავნა ➜"
+                      : "Send ➜"}
+                  </button>
                 </div>
+              </form>
+
+              <div className="refreshNote">
+                {ka
+                  ? "პასუხები ავტომატურად განახლდება."
+                  : "Replies refresh automatically."}
               </div>
-            );
-          })}
+            </>
+          )}
 
-          <div ref={bottomRef} />
-        </section>
+          <footer className="footer">
+            <div>
+              <strong>
+                QR RETURN
+              </strong>
 
-        {error && (
-          <div className="errorBox">
-            ⚠ {error}
-          </div>
-        )}
-
-        <form
-          className="composer"
-          onSubmit={sendMessage}
-        >
-          <textarea
-            value={text}
-            maxLength={2000}
-            placeholder={
-              ka
-                ? "დაწერეთ შეტყობინება..."
-                : "Write a message..."
-            }
-            onChange={(event) =>
-              setText(event.target.value)
-            }
-            onKeyDown={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !event.nativeEvent.isComposing
-              ) {
-                event.preventDefault();
-
-                if (!sending && text.trim()) {
-                  event.currentTarget.form?.requestSubmit();
-                }
-              }
-            }}
-          />
-
-          <div className="composerBottom">
-            <div className="keyboardHint">
-              {ka
-                ? "Enter — გაგზავნა • Shift + Enter — ახალი ხაზი"
-                : "Enter — send • Shift + Enter — new line"}
+              <span>
+                {ka
+                  ? "დაკარგვა არ ნიშნავს დამშვიდობებას."
+                  : "Never lose what matters."}
+              </span>
             </div>
 
-            <button
-              type="submit"
-              disabled={sending || !text.trim()}
-            >
-              {sending
-                ? ka
-                  ? "იგზავნება..."
-                  : "Sending..."
-                : ka
-                ? "გაგზავნა ➜"
-                : "Send ➜"}
-            </button>
-          </div>
-        </form>
-
-        <div className="privacyNote">
-          🔒{" "}
-          {ka
-            ? "არ გააზიაროთ პაროლები ან საბანკო ინფორმაცია."
-            : "Do not share passwords or banking information."}
+            <span>
+              🔒 Live Chat
+            </span>
+          </footer>
         </div>
-
-        <footer className="footer">
-          <strong>QR RETURN</strong>
-          <span>Live Chat</span>
-        </footer>
       </section>
 
       <Styles />
     </main>
-  );
-}
-
-function Header({
-  lang,
-  setLang,
-}: {
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-}) {
-  return (
-    <header className="topHeader">
-      <a href="/" className="brand">
-        <div className="logo">QR</div>
-
-        <div>
-          <strong>QR RETURN</strong>
-          <small>LIVE CHAT</small>
-        </div>
-      </a>
-
-      <div className="languages">
-        <button
-          type="button"
-          className={lang === "ka" ? "active" : ""}
-          onClick={() => setLang("ka")}
-        >
-          GEO
-        </button>
-
-        <button
-          type="button"
-          className={lang === "en" ? "active" : ""}
-          onClick={() => setLang("en")}
-        >
-          ENG
-        </button>
-      </div>
-    </header>
   );
 }
 
@@ -572,11 +872,13 @@ function Styles() {
       }
 
       body {
-        background: #f5f7fa;
+        background: #f7f9fc;
+        color: #101828;
+        font-family: Inter, Arial, sans-serif;
       }
 
-      button,
-      textarea {
+      textarea,
+      button {
         font: inherit;
       }
 
@@ -584,19 +886,62 @@ function Styles() {
         min-height: 100vh;
         background:
           radial-gradient(
-            circle at top right,
-            rgba(21, 94, 239, 0.08),
-            transparent 27%
+            circle at 8% 10%,
+            rgba(20, 101, 232, 0.08),
+            transparent 28%
           ),
-          #f5f7fa;
-        color: #101828;
-        font-family: Arial, Helvetica, sans-serif;
+          radial-gradient(
+            circle at 94% 8%,
+            rgba(118, 85, 247, 0.08),
+            transparent 28%
+          ),
+          #f7f9fc;
+      }
+
+      .statePage {
+        min-height: 100vh;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: #f7f9fc;
+      }
+
+      .stateLogo {
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 10px;
+        border-radius: 15px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
+        color: white;
+        font-weight: 900;
+      }
+
+      .statePage h1 {
+        margin: 0 0 15px;
+        color: #1465e8;
+      }
+
+      .stateLink {
+        margin-top: 15px;
+        color: #1465e8;
+        font-size: 11px;
+        font-weight: 900;
+        text-decoration: none;
       }
 
       .topHeader {
         width: calc(100% - 28px);
         max-width: 760px;
-        min-height: 74px;
+        min-height: 78px;
         margin: auto;
         display: flex;
         align-items: center;
@@ -612,31 +957,38 @@ function Styles() {
       }
 
       .logo {
-        width: 42px;
-        height: 42px;
+        width: 45px;
+        height: 45px;
         display: grid;
         place-items: center;
-        border-radius: 12px;
-        background: #155eef;
+        border-radius: 13px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
         font-size: 11px;
         font-weight: 900;
       }
 
-      .brand strong {
+      .brand strong,
+      .brand small {
         display: block;
-        color: #155eef;
-        font-size: 18px;
+      }
+
+      .brand strong {
+        color: #1465e8;
+        font-size: 19px;
         font-weight: 900;
       }
 
       .brand small {
-        display: block;
         margin-top: 2px;
-        color: #d92d20;
+        color: #7655f7;
         font-size: 8px;
         font-weight: 900;
-        letter-spacing: 2px;
+        letter-spacing: 1.8px;
       }
 
       .languages {
@@ -659,190 +1011,153 @@ function Styles() {
 
       .languages button.active {
         background: white;
-        color: #155eef;
+        color: #1465e8;
       }
 
       .chatPage {
         width: calc(100% - 24px);
-        max-width: 680px;
+        max-width: 700px;
         margin: auto;
         padding: 30px 0 60px;
       }
 
+      .back {
+        display: inline-block;
+        margin-bottom: 15px;
+        color: #667085;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .chatCard {
+        overflow: hidden;
+        border: 1px solid #e4e7ec;
+        border-radius: 22px;
+        background: white;
+        box-shadow: 0 20px 55px rgba(16, 24, 40, 0.08);
+      }
+
       .chatHeader {
-        padding: 18px;
+        padding: 19px;
         display: flex;
         align-items: center;
         gap: 13px;
-        border: 1px solid #e4e7ec;
-        border-radius: 17px;
-        background: white;
+        border-bottom: 1px solid #e4e7ec;
       }
 
       .categoryIcon {
-        width: 52px;
-        height: 52px;
-        flex: 0 0 52px;
+        width: 55px;
+        height: 55px;
+        flex: 0 0 55px;
         display: grid;
         place-items: center;
-        border-radius: 14px;
-        background: #f2f7ff;
-        font-size: 25px;
+        border-radius: 15px;
+        background: linear-gradient(
+          135deg,
+          #eef4ff,
+          #f0edff
+        );
+        font-size: 27px;
+      }
+
+      .chatIdentity {
+        flex: 1;
       }
 
       .eyebrow {
-        color: #d92d20;
-        font-size: 9px;
+        color: #7655f7;
+        font-size: 8px;
         font-weight: 900;
         letter-spacing: 1.5px;
       }
 
-      .chatHeader h1 {
-        margin: 5px 0 2px;
-        font-size: 19px;
+      .chatIdentity h1 {
+        margin: 4px 0 2px;
+        font-size: 20px;
       }
 
-      .chatHeader p {
+      .chatIdentity p {
         margin: 0;
         color: #667085;
-        font-size: 11px;
+        font-size: 10px;
       }
 
       .online {
-        margin-left: auto;
         display: flex;
         align-items: center;
         gap: 6px;
-        color: #067647;
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .online span {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #12b76a;
-      }
-
-      .chatNotice {
-        margin-top: 12px;
-        padding: 14px;
-        border: 1px solid #d6e4ff;
-        border-radius: 13px;
-        background: #f2f7ff;
-      }
-
-      .chatNotice strong {
-        color: #344054;
-        font-size: 12px;
-      }
-
-      .chatNotice p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 11px;
-        line-height: 1.5;
-      }
-
-      .messages {
-        min-height: 420px;
-        max-height: 58vh;
-        margin-top: 12px;
-        padding: 18px 13px;
-        overflow-y: auto;
-        border: 1px solid #e4e7ec;
-        border-radius: 17px;
-        background: white;
-      }
-
-      .messageRow {
-        margin-bottom: 11px;
-        display: flex;
-      }
-
-      .messageRow.mine {
-        justify-content: flex-end;
-      }
-
-      .bubble {
-        max-width: 78%;
-        padding: 10px 12px;
-        border: 1px solid #e4e7ec;
-        border-radius: 5px 15px 15px 15px;
-        background: #f7f8fa;
-      }
-
-      .bubble.mine {
-        border-color: #155eef;
-        border-radius: 15px 5px 15px 15px;
-        background: #155eef;
-        color: white;
-      }
-
-      .sender {
-        margin-bottom: 5px;
-        color: #667085;
+        padding: 7px 9px;
+        border-radius: 999px;
+        background: #ecfdf3;
+        color: #027a48;
         font-size: 9px;
         font-weight: 900;
       }
 
-      .bubble.mine .sender {
-        color: rgba(255, 255, 255, 0.75);
+      .online span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #12b76a;
       }
 
-      .messageText {
-        font-size: 13px;
-        line-height: 1.5;
-        white-space: pre-wrap;
-        word-break: break-word;
+      .privacyNotice {
+        margin: 16px 18px 0;
+        padding: 12px;
+        display: flex;
+        gap: 10px;
+        border: 1px solid #dbe7ff;
+        border-radius: 12px;
+        background: #f5f9ff;
       }
 
-      .bubble time {
-        margin-top: 6px;
-        display: block;
-        color: #98a2b3;
+      .privacyIcon {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: white;
+      }
+
+      .privacyNotice strong {
+        font-size: 10px;
+      }
+
+      .privacyNotice p {
+        margin: 3px 0 0;
+        color: #667085;
         font-size: 9px;
-        text-align: right;
+        line-height: 1.5;
       }
 
-      .bubble.mine time {
-        color: rgba(255, 255, 255, 0.7);
+      .messages {
+        height: min(54vh, 500px);
+        min-height: 350px;
+        padding: 20px 18px;
+        overflow-y: auto;
+        background: #fafbfc;
       }
 
-      .empty,
-      .loading {
-        min-height: 340px;
+      .loading,
+      .empty {
+        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
-      }
-
-      .emptyIcon {
-        margin-bottom: 10px;
-        font-size: 36px;
-      }
-
-      .empty strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .empty p,
-      .loading span {
-        margin: 5px 0 0;
-        color: #98a2b3;
-        font-size: 11px;
+        color: #667085;
       }
 
       .loader {
-        width: 33px;
-        height: 33px;
-        margin-bottom: 10px;
+        width: 25px;
+        height: 25px;
+        margin-bottom: 9px;
         border: 3px solid #e4e7ec;
-        border-top-color: #155eef;
+        border-top-color: #1465e8;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
@@ -853,79 +1168,208 @@ function Styles() {
         }
       }
 
-      .composer {
-        margin-top: 12px;
-        padding: 12px;
+      .emptyIcon {
+        width: 55px;
+        height: 55px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 11px;
+        border-radius: 15px;
+        background: #eef4ff;
+        font-size: 25px;
+      }
+
+      .empty strong {
+        font-size: 13px;
+      }
+
+      .empty p {
+        max-width: 340px;
+        margin: 5px 0 0;
+        font-size: 10px;
+        line-height: 1.55;
+      }
+
+      .messageRow {
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .messageRow.mine {
+        align-items: flex-end;
+      }
+
+      .senderLabel {
+        margin: 0 0 4px 5px;
+        color: #98a2b3;
+        font-size: 8px;
+        font-weight: 800;
+      }
+
+      .bubble {
+        max-width: min(80%, 430px);
+        padding: 11px 12px 7px;
         border: 1px solid #e4e7ec;
-        border-radius: 16px;
+        border-radius: 15px 15px 15px 5px;
+        background: white;
+        color: #344054;
+      }
+
+      .mine .bubble {
+        border: 0;
+        border-radius: 15px 15px 5px 15px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
+        color: white;
+      }
+
+      .messageText {
+        font-size: 11px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .bubble time {
+        display: block;
+        margin-top: 5px;
+        font-size: 7px;
+        text-align: right;
+        opacity: 0.65;
+      }
+
+      .inlineError {
+        margin: 0 18px 10px;
+        padding: 9px 11px;
+        border-radius: 9px;
+        background: #fff1f0;
+        color: #b42318;
+        font-size: 9px;
+      }
+
+      .composer {
+        padding: 14px 18px 8px;
+        border-top: 1px solid #e4e7ec;
         background: white;
       }
 
       .composer textarea {
         width: 100%;
-        min-height: 80px;
-        padding: 11px;
-        border: 0;
+        min-height: 70px;
+        max-height: 150px;
+        padding: 12px;
+        border: 1px solid #d0d5dd;
+        border-radius: 11px;
         outline: none;
-        resize: none;
-        color: #101828;
-        font-size: 14px;
+        resize: vertical;
+      }
+
+      .composer textarea:focus {
+        border-color: #84adff;
+        box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
       }
 
       .composerBottom {
-        padding-top: 8px;
+        margin-top: 9px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        border-top: 1px solid #f2f4f7;
       }
 
-      .keyboardHint {
+      .composerMeta {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
         color: #98a2b3;
-        font-size: 9px;
-        line-height: 1.4;
+        font-size: 8px;
       }
 
-      .composerBottom button {
-        min-height: 41px;
-        flex-shrink: 0;
-        padding: 0 17px;
+      .composerMeta small {
+        font-size: 8px;
+      }
+
+      .composer button {
+        min-height: 42px;
+        padding: 0 14px;
         border: 0;
-        border-radius: 10px;
-        background: #155eef;
+        border-radius: 9px;
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
-        font-size: 12px;
+        font-size: 10px;
         font-weight: 900;
         cursor: pointer;
       }
 
-      .composerBottom button:disabled {
+      .composer button:disabled {
         opacity: 0.5;
-        cursor: not-allowed;
+        cursor: default;
       }
 
-      .errorBox {
-        margin-top: 11px;
-        padding: 12px;
-        border: 1px solid #fecdca;
-        border-radius: 11px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 11px;
+      .refreshNote {
+        padding: 0 18px 13px;
+        color: #98a2b3;
+        font-size: 8px;
+        text-align: right;
       }
 
-      .privacyNote {
-        margin-top: 12px;
+      .unavailable {
+        padding: 65px 25px;
+        text-align: center;
+      }
+
+      .unavailableIcon {
+        width: 62px;
+        height: 62px;
+        margin: auto;
+        display: grid;
+        place-items: center;
+        border-radius: 17px;
+        background: #f2f4f7;
+        font-size: 28px;
+      }
+
+      .unavailable h2 {
+        margin: 14px 0 7px;
+        font-size: 19px;
+      }
+
+      .unavailable p {
+        margin: auto;
+        max-width: 380px;
         color: #667085;
         font-size: 10px;
-        line-height: 1.5;
-        text-align: center;
+        line-height: 1.6;
+      }
+
+      .unavailable a {
+        margin-top: 17px;
+        display: inline-flex;
+        padding: 10px 13px;
+        border-radius: 9px;
+        background: #1465e8;
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
       }
 
       .footer {
-        padding-top: 25px;
-        text-align: center;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #eaecf0;
+        background: white;
       }
 
       .footer strong,
@@ -934,45 +1378,39 @@ function Styles() {
       }
 
       .footer strong {
-        color: #155eef;
-        font-size: 12px;
+        color: #1465e8;
+        font-size: 11px;
       }
 
-      .footer span {
-        margin-top: 3px;
+      .footer div span,
+      .footer > span {
+        margin-top: 2px;
         color: #98a2b3;
-        font-size: 9px;
+        font-size: 8px;
       }
 
-      .statePage {
-        width: calc(100% - 24px);
-        max-width: 500px;
-        margin: auto;
-        padding: 120px 0;
-        text-align: center;
-      }
-
-      .errorIcon {
-        width: 58px;
-        height: 58px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
+      .errorBox {
+        padding: 12px;
+        border: 1px solid #fecdca;
+        border-radius: 10px;
         background: #fff1f0;
-        color: #d92d20;
-        font-size: 25px;
-        font-weight: 900;
+        color: #b42318;
+        font-size: 10px;
       }
 
-      @media (max-width: 560px) {
-        .chatPage {
-          padding-top: 20px;
+      @media (max-width: 600px) {
+        .chatHeader {
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+
+        .online {
+          margin-left: 68px;
         }
 
         .messages {
-          min-height: 380px;
-          max-height: 55vh;
+          height: 52vh;
+          min-height: 320px;
         }
 
         .bubble {
@@ -980,11 +1418,12 @@ function Styles() {
         }
 
         .composerBottom {
-          align-items: flex-end;
+          align-items: stretch;
+          flex-direction: column;
         }
 
-        .keyboardHint {
-          max-width: 180px;
+        .composer button {
+          width: 100%;
         }
       }
     `}</style>
