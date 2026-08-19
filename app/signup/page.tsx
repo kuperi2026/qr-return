@@ -5,45 +5,64 @@ import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
 
+async function sha256(value: string) {
+  const data = new TextEncoder().encode(value);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export default function SignupPage() {
   const [lang, setLang] = useState<Lang>("ka");
+  const ka = lang === "ka";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  const [personalId, setPersonalId] = useState("");
+  const [codeWord, setCodeWord] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [verificationCode, setVerificationCode] = useState("");
-
-  const [step, setStep] = useState<"signup" | "verify">("signup");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const ka = lang === "ka";
+  const [success, setSuccess] = useState("");
 
   async function handleSignup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
+    setSuccess("");
 
     const cleanFirstName = firstName.trim();
     const cleanLastName = lastName.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
+    const cleanPersonalId = personalId.trim();
+    const cleanCodeWord = codeWord.trim();
 
     if (
       !cleanFirstName ||
       !cleanLastName ||
       !cleanEmail ||
-      !cleanPhone
+      !cleanPhone ||
+      !cleanPersonalId ||
+      !cleanCodeWord ||
+      !password ||
+      !confirmPassword
     ) {
       setError(
         ka
-          ? "სახელი, გვარი, ელფოსტა და ტელეფონის ნომერი სავალდებულოა."
-          : "First name, last name, email and phone number are required."
+          ? "გთხოვთ შეავსოთ ყველა სავალდებულო ველი."
+          : "Please complete all required fields."
       );
       return;
     }
@@ -66,9 +85,26 @@ export default function SignupPage() {
       return;
     }
 
+    if (cleanCodeWord.length < 4) {
+      setError(
+        ka
+          ? "კოდური სიტყვა უნდა შეიცავდეს მინიმუმ 4 სიმბოლოს."
+          : "Code word must contain at least 4 characters."
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const personalIdHash = await sha256(
+        cleanPersonalId.toLowerCase()
+      );
+
+      const codeWordHash = await sha256(
+        cleanCodeWord.toLowerCase()
+      );
+
       const { data, error: signupError } =
         await supabase.auth.signUp({
           email: cleanEmail,
@@ -77,222 +113,101 @@ export default function SignupPage() {
             data: {
               first_name: cleanFirstName,
               last_name: cleanLastName,
-              full_name: `${cleanFirstName} ${cleanLastName}`,
               phone: cleanPhone,
             },
           },
         });
 
       if (signupError) {
-        setError(signupError.message);
-        return;
+        throw signupError;
       }
 
-      if (!data.user) {
-        setError(
+      const user = data.user;
+
+      if (!user) {
+        throw new Error(
           ka
-            ? "ანგარიშის შექმნა ვერ მოხერხდა."
-            : "Could not create your account."
+            ? "მომხმარებლის შექმნა ვერ მოხერხდა."
+            : "Could not create user."
         );
-        return;
       }
 
       /*
-        თუ Confirm Email ჩართულია,
-        მომხმარებელს ელფოსტაზე მიუვა OTP კოდი.
+        თუ Supabase Email Confirmation გამორთულია,
+        signUp-ის შემდეგ session ჩვეულებრივ უკვე არსებობს
+        და owner_accounts-ში პირდაპირ შეგვიძლია ჩაწერა.
+
+        თუ მომავალში Email Confirmation ჩავრთეთ,
+        owner account-ის შექმნას confirmation-ის შემდეგ
+        გადავიტანთ server-side flow-ში.
       */
-      if (!data.session) {
-        setStep("verify");
-        return;
+
+      const { error: ownerError } = await supabase
+        .from("owner_accounts")
+        .upsert(
+          {
+            user_id: user.id,
+
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
+
+            email: cleanEmail,
+            phone: cleanPhone,
+
+            address: null,
+            photo: null,
+
+            personal_id_hash: personalIdHash,
+            code_word_hash: codeWordHash,
+
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: "user_id",
+          }
+        );
+
+      if (ownerError) {
+        /*
+          Auth user უკვე შეიქმნა, ამიტომ მომხმარებელს
+          არ ვეუბნებით უბრალოდ "Signup failed".
+          ვაძლევთ ზუსტ შეტყობინებას.
+        */
+        throw new Error(
+          ka
+            ? `ანგარიში შეიქმნა, მაგრამ მფლობელის პროფილის შენახვა ვერ მოხერხდა: ${ownerError.message}`
+            : `Account was created, but the owner profile could not be saved: ${ownerError.message}`
+        );
       }
 
-      /*
-        თუ email confirmation გამორთულია
-      */
-      window.location.href = "/my-profiles";
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "დაფიქსირდა შეცდომა."
-          : "Something went wrong."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function verifyEmail(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError("");
-
-    const token = verificationCode.trim();
-
-    if (!token) {
-      setError(
+      setSuccess(
         ka
-          ? "შეიყვანეთ ელფოსტაზე მიღებული კოდი."
-          : "Enter the code sent to your email."
+          ? "ანგარიში წარმატებით შეიქმნა."
+          : "Account created successfully."
       );
-      return;
-    }
 
-    setLoading(true);
+      /*
+        თუ session გვაქვს, პირდაპირ Account-ზე გადავდივართ.
+        თუ მომავალში email confirmation ჩაირთვება და session არ იქნება,
+        Login გვერდზე გადავიყვანთ.
+      */
 
-    try {
-      const { data, error: verifyError } =
-        await supabase.auth.verifyOtp({
-          email: email.trim().toLowerCase(),
-          token,
-          type: "email",
-        });
-
-      if (verifyError) {
-        setError(
-          ka
-            ? "კოდი არასწორია ან ვადა გაუვიდა."
-            : "The code is incorrect or has expired."
-        );
-        return;
+      if (data.session) {
+        window.location.href = "/account";
+      } else {
+        window.location.href = "/login";
       }
-
-      if (!data.session) {
-        setError(
-          ka
-            ? "ელფოსტის დადასტურება ვერ მოხერხდა."
-            : "Email verification failed."
-        );
-        return;
-      }
-
-      window.location.href = "/my-profiles";
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : ka
-          ? "დადასტურება ვერ მოხერხდა."
-          : "Verification failed."
+          ? "რეგისტრაცია ვერ მოხერხდა."
+          : "Could not create account."
       );
     } finally {
       setLoading(false);
     }
-  }
-
-  if (step === "verify") {
-    return (
-      <main className="page">
-        <header className="header">
-          <a href="/" className="brand">
-            <div className="logo">QR</div>
-
-            <div>
-              <strong>QR RETURN</strong>
-              <small>EMAIL VERIFICATION</small>
-            </div>
-          </a>
-
-          <div className="languages">
-            <button
-              type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
-            >
-              GEO
-            </button>
-
-            <button
-              type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
-            >
-              ENG
-            </button>
-          </div>
-        </header>
-
-        <section className="verifyWrapper">
-          <div className="verifyCard">
-            <div className="mailIcon">✉️</div>
-
-            <div className="eyebrow">QR RETURN</div>
-
-            <h1>
-              {ka
-                ? "შეიყვანეთ ელფოსტაზე მიღებული კოდი"
-                : "Enter the code sent to your email"}
-            </h1>
-
-            <p>
-              {ka
-                ? `დადასტურების კოდი გავაგზავნეთ მისამართზე ${email}.`
-                : `We sent a verification code to ${email}.`}
-            </p>
-
-            <form onSubmit={verifyEmail}>
-              <label>
-                <span>
-                  {ka
-                    ? "დადასტურების კოდი"
-                    : "Verification code"}
-                </span>
-
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  value={verificationCode}
-                  onChange={(event) =>
-                    setVerificationCode(event.target.value)
-                  }
-                  placeholder="000000"
-                  maxLength={8}
-                  className="otpInput"
-                  required
-                />
-              </label>
-
-              {error && (
-                <div className="error">
-                  <strong>!</strong>
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="submitButton"
-                disabled={loading}
-              >
-                {loading
-                  ? ka
-                    ? "მოწმდება..."
-                    : "Verifying..."
-                  : ka
-                  ? "დადასტურება"
-                  : "Verify"}
-              </button>
-            </form>
-
-            <button
-              type="button"
-              className="backButton"
-              onClick={() => {
-                setError("");
-                setVerificationCode("");
-                setStep("signup");
-              }}
-            >
-              ← {ka ? "უკან დაბრუნება" : "Go back"}
-            </button>
-          </div>
-        </section>
-
-        <Styles />
-      </main>
-    );
   }
 
   return (
@@ -326,685 +241,756 @@ export default function SignupPage() {
         </div>
       </header>
 
-      <section className="wrapper">
+      <section className="container">
         <div className="intro">
           <div className="eyebrow">
-            {ka ? "QR RETURN ანგარიში" : "QR RETURN ACCOUNT"}
+            {ka
+              ? "QR RETURN ანგარიში"
+              : "QR RETURN ACCOUNT"}
           </div>
 
           <h1>
-            {ka ? "შექმენით თქვენი ანგარიში" : "Create your account"}
+            {ka
+              ? "შექმენით მფლობელის ანგარიში"
+              : "Create your Owner Account"}
           </h1>
 
           <p>
             {ka
-              ? "ერთჯერადი რეგისტრაცია. ანგარიშის შექმნის შემდეგ შეძლებთ თქვენი QR პროფილების დამატებას და მართვას."
-              : "Register once. After creating your account, you can add and manage your QR profiles."}
+              ? "ერთი ანგარიშიდან მართეთ თქვენი ყველა QR პროფილი — ძაღლი, კატა, გასაღები, საფულე, ჩანთა და ჩემოდანი."
+              : "Manage all your QR profiles from one account — dog, cat, keys, wallet, bag and suitcase."}
           </p>
+        </div>
 
-          <div className="note">
-            <span>🔐</span>
+        <div className="layout">
+          <div className="infoPanel">
+            <div className="infoCard">
+              <div className="number">01</div>
 
-            <div>
-              <strong>
-                {ka
-                  ? "უსაფრთხო რეგისტრაცია"
-                  : "Secure registration"}
-              </strong>
+              <div>
+                <strong>
+                  {ka ? "ერთი Owner Account" : "One Owner Account"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "ერთ ანგარიშზე შეგიძლიათ შექმნათ რამდენიც გსურთ იმდენი QR პროფილი."
+                    : "Create as many QR profiles as you need under one account."}
+                </p>
+              </div>
+            </div>
+
+            <div className="infoCard">
+              <div className="number">02</div>
+
+              <div>
+                <strong>
+                  {ka ? "დაცული მონაცემები" : "Protected information"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "პირადი ნომერი და კოდური სიტყვა ბაზაში ღია ტექსტით არ ინახება."
+                    : "Your personal ID and code word are not stored as readable plain text."}
+                </p>
+              </div>
+            </div>
+
+            <div className="infoCard">
+              <div className="number">03</div>
+
+              <div>
+                <strong>
+                  {ka ? "საიტზე შესვლა" : "Sign in"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "ანგარიშზე შეხვალთ თქვენი ელფოსტით და პაროლით."
+                    : "Sign in using your email and password."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="cardTitle">
+              <span>
+                {ka ? "ახალი ანგარიში" : "NEW ACCOUNT"}
+              </span>
+
+              <h2>
+                {ka ? "რეგისტრაცია" : "Create account"}
+              </h2>
 
               <p>
                 {ka
-                  ? "ელფოსტის მისამართს დაადასტურებთ ერთჯერადი კოდით."
-                  : "You will verify your email using a one-time code."}
+                  ? "შეავსეთ მფლობელის ძირითადი ინფორმაცია."
+                  : "Enter the owner's account information."}
               </p>
             </div>
-          </div>
-        </div>
 
-        <div className="card">
-          <div className="cardHeader">
-            <div className="cardIcon">👤</div>
+            <form onSubmit={handleSignup}>
+              <div className="twoColumns">
+                <label>
+                  <span>
+                    {ka ? "სახელი" : "First name"} *
+                  </span>
 
-            <div>
-              <span>QR RETURN</span>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) =>
+                      setFirstName(e.target.value)
+                    }
+                    autoComplete="given-name"
+                    required
+                  />
+                </label>
 
-              <h2>
-                {ka ? "ანგარიშის შექმნა" : "Create Account"}
-              </h2>
-            </div>
-          </div>
+                <label>
+                  <span>
+                    {ka ? "გვარი" : "Last name"} *
+                  </span>
 
-          <p className="cardDescription">
-            {ka
-              ? "შეავსეთ თქვენი ძირითადი საკონტაქტო ინფორმაცია."
-              : "Enter your basic contact information."}
-          </p>
-
-          <form onSubmit={handleSignup}>
-            <div className="nameGrid">
-              <label>
-                <span>{ka ? "სახელი" : "First name"} *</span>
-
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(event) =>
-                    setFirstName(event.target.value)
-                  }
-                  placeholder={ka ? "სახელი" : "First name"}
-                  autoComplete="given-name"
-                  required
-                />
-              </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) =>
+                      setLastName(e.target.value)
+                    }
+                    autoComplete="family-name"
+                    required
+                  />
+                </label>
+              </div>
 
               <label>
-                <span>{ka ? "გვარი" : "Last name"} *</span>
-
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(event) =>
-                    setLastName(event.target.value)
-                  }
-                  placeholder={ka ? "გვარი" : "Last name"}
-                  autoComplete="family-name"
-                  required
-                />
-              </label>
-            </div>
-
-            <label>
-              <span>{ka ? "ელფოსტა" : "Email"} *</span>
-
-              <div className="inputWithIcon">
-                <b>✉</b>
+                <span>{ka ? "ელფოსტა" : "Email"} *</span>
 
                 <input
                   type="email"
                   value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
+                  onChange={(e) =>
+                    setEmail(e.target.value)
                   }
                   placeholder="name@example.com"
                   autoComplete="email"
                   required
                 />
-              </div>
-            </label>
 
-            <label>
-              <span>
-                {ka ? "ტელეფონის ნომერი" : "Phone number"} *
-              </span>
+                <small>
+                  {ka
+                    ? "ეს ელფოსტა გამოიყენება ანგარიშზე შესასვლელად."
+                    : "This email will be used to sign in."}
+                </small>
+              </label>
 
-              <div className="inputWithIcon">
-                <b>☎</b>
+              <label>
+                <span>{ka ? "ტელეფონი" : "Mobile phone"} *</span>
 
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(event) =>
-                    setPhone(event.target.value)
+                  onChange={(e) =>
+                    setPhone(e.target.value)
                   }
-                  placeholder="+1 000 000 0000"
+                  placeholder="+1 555 000 0000"
                   autoComplete="tel"
                   required
                 />
+              </label>
+
+              <div className="securitySection">
+                <div className="securityTitle">
+                  <div className="securityIcon">🔐</div>
+
+                  <div>
+                    <strong>
+                      {ka
+                        ? "იდენტიფიკაციის ინფორმაცია"
+                        : "Identity verification"}
+                    </strong>
+
+                    <p>
+                      {ka
+                        ? "ეს მონაცემები მომავალში შეიძლება გამოყენებულ იქნეს თქვენი ვინაობის დასადასტურებლად."
+                        : "These details may later be used to help verify your identity."}
+                    </p>
+                  </div>
+                </div>
+
+                <label>
+                  <span>
+                    {ka ? "პირადი ნომერი" : "Personal ID"} *
+                  </span>
+
+                  <input
+                    type="text"
+                    value={personalId}
+                    onChange={(e) =>
+                      setPersonalId(e.target.value)
+                    }
+                    autoComplete="off"
+                    required
+                  />
+
+                  <small>
+                    {ka
+                      ? "ეს ინფორმაცია მპოვნელისთვის არასდროს გამოჩნდება."
+                      : "This information is never shown to a finder."}
+                  </small>
+                </label>
+
+                <label>
+                  <span>
+                    {ka ? "კოდური სიტყვა" : "Code word"} *
+                  </span>
+
+                  <input
+                    type="password"
+                    value={codeWord}
+                    onChange={(e) =>
+                      setCodeWord(e.target.value)
+                    }
+                    autoComplete="off"
+                    required
+                  />
+
+                  <small>
+                    {ka
+                      ? "დაიმახსოვრეთ ეს სიტყვა. მომავალში გამოიყენება დამატებითი იდენტიფიკაციისთვის."
+                      : "Remember this word. It may be used for additional identity verification."}
+                  </small>
+                </label>
               </div>
-            </label>
 
-            <label>
-              <span>{ka ? "პაროლი" : "Password"} *</span>
+              <div className="twoColumns">
+                <label>
+                  <span>{ka ? "პაროლი" : "Password"} *</span>
 
-              <div className="inputWithIcon">
-                <b>●</b>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) =>
+                      setPassword(e.target.value)
+                    }
+                    autoComplete="new-password"
+                    required
+                  />
+                </label>
 
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  minLength={8}
-                  required
-                />
+                <label>
+                  <span>
+                    {ka
+                      ? "გაიმეორეთ პაროლი"
+                      : "Confirm password"}{" "}
+                    *
+                  </span>
+
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) =>
+                      setConfirmPassword(e.target.value)
+                    }
+                    autoComplete="new-password"
+                    required
+                  />
+                </label>
               </div>
 
-              <small>
+              <button
+                type="button"
+                className="showPassword"
+                onClick={() =>
+                  setShowPassword((current) => !current)
+                }
+              >
+                {showPassword
+                  ? ka
+                    ? "🙈 პაროლების დამალვა"
+                    : "🙈 Hide passwords"
+                  : ka
+                  ? "👁 პაროლების ჩვენება"
+                  : "👁 Show passwords"}
+              </button>
+
+              <div className="passwordNote">
                 {ka
-                  ? "მინიმუმ 8 სიმბოლო"
-                  : "At least 8 characters"}
-              </small>
-            </label>
+                  ? "პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს."
+                  : "Password must contain at least 8 characters."}
+              </div>
 
-            <label>
+              {error && (
+                <div className="errorBox">
+                  <strong>!</strong>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="successBox">
+                  ✓ {success}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="submitButton"
+                disabled={loading}
+              >
+                {loading
+                  ? ka
+                    ? "ანგარიში იქმნება..."
+                    : "Creating account..."
+                  : ka
+                  ? "ანგარიშის შექმნა"
+                  : "Create Owner Account"}
+
+                {!loading && <span>→</span>}
+              </button>
+            </form>
+
+            <div className="loginLink">
               <span>
                 {ka
-                  ? "გაიმეორეთ პაროლი"
-                  : "Confirm password"}{" "}
-                *
+                  ? "უკვე გაქვთ ანგარიში?"
+                  : "Already have an account?"}
               </span>
 
-              <div className="inputWithIcon">
-                <b>✓</b>
-
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(event) =>
-                    setConfirmPassword(event.target.value)
-                  }
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  minLength={8}
-                  required
-                />
-              </div>
-            </label>
-
-            {error && (
-              <div className="error">
-                <strong>!</strong>
-                <span>{error}</span>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="submitButton"
-              disabled={loading}
-            >
-              {loading
-                ? ka
-                  ? "იქმნება..."
-                  : "Creating..."
-                : ka
-                ? "ანგარიშის შექმნა"
-                : "Create Account"}
-
-              {!loading && <span>→</span>}
-            </button>
-          </form>
-
-          <div className="login">
-            <span>
-              {ka
-                ? "უკვე გაქვთ ანგარიში?"
-                : "Already have an account?"}
-            </span>
-
-            <a href="/login">
-              {ka ? "შესვლა" : "Sign in"} →
-            </a>
+              <a href="/login">
+                {ka ? "შესვლა" : "Sign in"} →
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <Styles />
-    </main>
-  );
-}
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
+        }
 
-function Styles() {
-  return (
-    <style jsx global>{`
-      * {
-        box-sizing: border-box;
-      }
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
+        body {
+          background: #f7f9fc;
+          color: #101828;
+          font-family: Inter, Arial, sans-serif;
+        }
 
-      body {
-        background: #f7f9fc;
-      }
+        input,
+        button {
+          font: inherit;
+        }
 
-      button,
-      input {
-        font: inherit;
-      }
+        .page {
+          min-height: 100vh;
+          background:
+            radial-gradient(
+              circle at 8% 10%,
+              rgba(20, 101, 232, 0.08),
+              transparent 28%
+            ),
+            radial-gradient(
+              circle at 94% 8%,
+              rgba(118, 85, 247, 0.08),
+              transparent 28%
+            ),
+            #f7f9fc;
+        }
 
-      .page {
-        min-height: 100vh;
-        color: #101828;
-        font-family: Inter, Arial, sans-serif;
-        background:
-          radial-gradient(
-            circle at 8% 15%,
-            rgba(20, 101, 232, 0.1),
-            transparent 27%
-          ),
-          radial-gradient(
-            circle at 93% 10%,
-            rgba(118, 85, 247, 0.11),
-            transparent 28%
-          ),
-          #f7f9fc;
-      }
+        .header {
+          width: calc(100% - 36px);
+          max-width: 1100px;
+          min-height: 86px;
+          margin: auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #e4e7ec;
+        }
 
-      .header {
-        width: calc(100% - 36px);
-        max-width: 1180px;
-        min-height: 86px;
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
-      }
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          text-decoration: none;
+        }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-      }
+        .logo {
+          width: 50px;
+          height: 50px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          color: white;
+          font-weight: 900;
+        }
 
-      .logo {
-        width: 50px;
-        height: 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
-        color: white;
-        font-size: 14px;
-        font-weight: 900;
-      }
+        .brand strong,
+        .brand small {
+          display: block;
+        }
 
-      .brand strong,
-      .brand small {
-        display: block;
-      }
+        .brand strong {
+          color: #1465e8;
+          font-size: 21px;
+          font-weight: 900;
+        }
 
-      .brand strong {
-        color: #1465e8;
-        font-size: 21px;
-        font-weight: 900;
-      }
+        .brand small {
+          margin-top: 3px;
+          color: #7655f7;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
+        }
 
-      .brand small {
-        margin-top: 3px;
-        color: #7655f7;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 1.7px;
-      }
+        .languages {
+          padding: 4px;
+          display: flex;
+          border-radius: 10px;
+          background: #eaecf0;
+        }
 
-      .languages {
-        padding: 4px;
-        display: flex;
-        border-radius: 10px;
-        background: #eaecf0;
-      }
+        .languages button {
+          padding: 8px 10px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #667085;
+          font-size: 11px;
+          font-weight: 900;
+          cursor: pointer;
+        }
 
-      .languages button {
-        padding: 8px 11px;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        color: #667085;
-        font-size: 11px;
-        font-weight: 900;
-        cursor: pointer;
-      }
+        .languages button.active {
+          background: white;
+          color: #1465e8;
+        }
 
-      .languages button.active {
-        background: white;
-        color: #1465e8;
-      }
-
-      .wrapper {
-        width: calc(100% - 36px);
-        max-width: 1000px;
-        margin: auto;
-        padding: 70px 0 80px;
-        display: grid;
-        grid-template-columns: 1fr 470px;
-        align-items: center;
-        gap: 75px;
-      }
-
-      .intro {
-        max-width: 470px;
-      }
-
-      .eyebrow {
-        color: #7655f7;
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 1.7px;
-      }
-
-      .intro h1 {
-        margin: 13px 0 17px;
-        color: #101828;
-        font-size: clamp(42px, 5vw, 58px);
-        line-height: 1.05;
-        letter-spacing: -2.5px;
-      }
-
-      .intro > p {
-        margin: 0;
-        color: #667085;
-        font-size: 17px;
-        line-height: 1.7;
-      }
-
-      .note {
-        margin-top: 32px;
-        padding: 17px;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        border: 1px solid #dbe7ff;
-        border-radius: 15px;
-        background: rgba(255, 255, 255, 0.75);
-      }
-
-      .note > span {
-        font-size: 24px;
-      }
-
-      .note strong {
-        color: #344054;
-        font-size: 14px;
-      }
-
-      .note p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.5;
-      }
-
-      .card {
-        padding: 32px;
-        border: 1px solid #e4e7ec;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.97);
-        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
-      }
-
-      .cardHeader {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-      }
-
-      .cardIcon {
-        width: 54px;
-        height: 54px;
-        display: grid;
-        place-items: center;
-        border-radius: 15px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
-        font-size: 27px;
-      }
-
-      .cardHeader span {
-        color: #7655f7;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 1.5px;
-      }
-
-      .cardHeader h2 {
-        margin: 4px 0 0;
-        color: #344054;
-        font-size: 25px;
-      }
-
-      .cardDescription {
-        margin: 17px 0 25px;
-        color: #667085;
-        font-size: 14px;
-        line-height: 1.55;
-      }
-
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 17px;
-      }
-
-      .nameGrid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 11px;
-      }
-
-      label > span {
-        display: block;
-        margin-bottom: 7px;
-        color: #475467;
-        font-size: 14px;
-        font-weight: 800;
-      }
-
-      label > small {
-        display: block;
-        margin-top: 5px;
-        color: #98a2b3;
-        font-size: 11px;
-      }
-
-      input {
-        width: 100%;
-        height: 52px;
-        padding: 0 14px;
-        outline: none;
-        border: 1px solid #d0d5dd;
-        border-radius: 11px;
-        background: #fff;
-        color: #344054;
-        font-size: 16px;
-      }
-
-      input:focus {
-        border-color: #84adff;
-        box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
-      }
-
-      input::placeholder {
-        color: #98a2b3;
-      }
-
-      .inputWithIcon {
-        position: relative;
-      }
-
-      .inputWithIcon b {
-        width: 43px;
-        height: 52px;
-        position: absolute;
-        left: 0;
-        top: 0;
-        display: grid;
-        place-items: center;
-        color: #98a2b3;
-        font-size: 13px;
-        pointer-events: none;
-      }
-
-      .inputWithIcon input {
-        padding-left: 42px;
-      }
-
-      .submitButton {
-        width: 100%;
-        min-height: 53px;
-        margin-top: 4px;
-        padding: 0 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        border: 0;
-        border-radius: 11px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
-        color: white;
-        font-size: 15px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .submitButton:disabled {
-        opacity: 0.65;
-      }
-
-      .submitButton > span {
-        font-size: 20px;
-      }
-
-      .login {
-        margin-top: 22px;
-        padding-top: 19px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        border-top: 1px solid #eaecf0;
-        font-size: 13px;
-      }
-
-      .login span {
-        color: #667085;
-      }
-
-      .login a {
-        color: #1465e8;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .error {
-        padding: 12px;
-        display: flex;
-        align-items: flex-start;
-        gap: 9px;
-        border: 1px solid #fecdca;
-        border-radius: 10px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 13px;
-      }
-
-      .error strong {
-        width: 20px;
-        height: 20px;
-        flex: 0 0 20px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: #d92d20;
-        color: white;
-        font-size: 10px;
-      }
-
-      .verifyWrapper {
-        width: calc(100% - 36px);
-        min-height: calc(100vh - 86px);
-        margin: auto;
-        display: grid;
-        place-items: center;
-        padding: 40px 0;
-      }
-
-      .verifyCard {
-        width: 100%;
-        max-width: 500px;
-        padding: 40px;
-        border: 1px solid #e4e7ec;
-        border-radius: 24px;
-        background: white;
-        box-shadow: 0 24px 60px rgba(16, 24, 40, 0.1);
-        text-align: center;
-      }
-
-      .mailIcon {
-        font-size: 45px;
-      }
-
-      .verifyCard h1 {
-        margin: 12px 0 12px;
-        color: #344054;
-        font-size: 28px;
-        line-height: 1.25;
-      }
-
-      .verifyCard > p {
-        margin: 0 0 25px;
-        color: #667085;
-        font-size: 15px;
-        line-height: 1.6;
-      }
-
-      .verifyCard label {
-        text-align: left;
-      }
-
-      .otpInput {
-        height: 62px;
-        text-align: center;
-        font-size: 25px;
-        font-weight: 900;
-        letter-spacing: 8px;
-      }
-
-      .backButton {
-        margin-top: 18px;
-        border: 0;
-        background: transparent;
-        color: #667085;
-        font-size: 13px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      @media (max-width: 850px) {
-        .wrapper {
-          max-width: 600px;
-          grid-template-columns: 1fr;
-          gap: 35px;
+        .container {
+          width: calc(100% - 36px);
+          max-width: 1050px;
+          margin: auto;
+          padding: 55px 0 90px;
         }
 
         .intro {
-          max-width: none;
-          text-align: center;
+          max-width: 760px;
+          margin-bottom: 35px;
         }
 
-        .note {
-          text-align: left;
-        }
-      }
-
-      @media (max-width: 550px) {
-        .wrapper {
-          padding-top: 40px;
+        .eyebrow {
+          color: #7655f7;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
         }
 
         .intro h1 {
-          font-size: 40px;
+          margin: 9px 0 13px;
+          font-size: clamp(40px, 5vw, 54px);
+          line-height: 1.05;
+          letter-spacing: -2px;
+        }
+
+        .intro p {
+          margin: 0;
+          color: #667085;
+          font-size: 15px;
+          line-height: 1.7;
+        }
+
+        .layout {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 28px;
+          align-items: start;
+        }
+
+        .infoPanel {
+          display: flex;
+          flex-direction: column;
+          gap: 13px;
+          position: sticky;
+          top: 20px;
+        }
+
+        .infoCard {
+          padding: 17px;
+          display: flex;
+          gap: 12px;
+          border: 1px solid #e4e7ec;
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.9);
+        }
+
+        .number {
+          width: 31px;
+          height: 31px;
+          flex: 0 0 31px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          background: #eef4ff;
+          color: #1465e8;
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .infoCard strong {
+          font-size: 12px;
+        }
+
+        .infoCard p {
+          margin: 5px 0 0;
+          color: #667085;
+          font-size: 10px;
+          line-height: 1.55;
         }
 
         .card {
-          padding: 23px;
+          padding: 31px;
+          border: 1px solid #e4e7ec;
+          border-radius: 23px;
+          background: white;
+          box-shadow: 0 18px 50px rgba(16, 24, 40, 0.07);
         }
 
-        .nameGrid {
-          grid-template-columns: 1fr;
+        .cardTitle span {
+          color: #7655f7;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.5px;
         }
 
-        .verifyCard {
-          padding: 28px 20px;
+        .cardTitle h2 {
+          margin: 5px 0 7px;
+          font-size: 27px;
         }
-      }
-    `}</style>
+
+        .cardTitle p {
+          margin: 0 0 25px;
+          color: #667085;
+          font-size: 12px;
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 17px;
+        }
+
+        .twoColumns {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 13px;
+        }
+
+        label > span {
+          display: block;
+          margin-bottom: 7px;
+          color: #475467;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        label small {
+          display: block;
+          margin-top: 5px;
+          color: #98a2b3;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+
+        input {
+          width: 100%;
+          height: 50px;
+          padding: 0 13px;
+          border: 1px solid #d0d5dd;
+          border-radius: 10px;
+          outline: none;
+          background: white;
+        }
+
+        input:focus {
+          border-color: #84adff;
+          box-shadow:
+            0 0 0 3px rgba(20, 101, 232, 0.08);
+        }
+
+        .securitySection {
+          margin: 5px 0;
+          padding: 18px;
+          border: 1px solid #dbe7ff;
+          border-radius: 15px;
+          background: #f7faff;
+        }
+
+        .securityTitle {
+          margin-bottom: 15px;
+          display: flex;
+          gap: 11px;
+          align-items: flex-start;
+        }
+
+        .securityIcon {
+          width: 36px;
+          height: 36px;
+          flex: 0 0 36px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          background: white;
+        }
+
+        .securityTitle strong {
+          font-size: 12px;
+        }
+
+        .securityTitle p {
+          margin: 4px 0 0;
+          color: #667085;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+
+        .securitySection label {
+          display: block;
+          margin-top: 14px;
+        }
+
+        .showPassword {
+          width: fit-content;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #1465e8;
+          font-size: 11px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .passwordNote {
+          margin-top: -7px;
+          color: #98a2b3;
+          font-size: 10px;
+        }
+
+        .errorBox {
+          padding: 12px;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          border: 1px solid #fecdca;
+          border-radius: 10px;
+          background: #fff1f0;
+          color: #b42318;
+          font-size: 11px;
+        }
+
+        .errorBox strong {
+          width: 20px;
+          height: 20px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          background: #d92d20;
+          color: white;
+          font-size: 10px;
+        }
+
+        .successBox {
+          padding: 12px;
+          border: 1px solid #abefc6;
+          border-radius: 10px;
+          background: #ecfdf3;
+          color: #027a48;
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .submitButton {
+          width: 100%;
+          min-height: 52px;
+          margin-top: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          border: 0;
+          border-radius: 11px;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          color: white;
+          font-size: 13px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .submitButton:disabled {
+          opacity: 0.65;
+        }
+
+        .loginLink {
+          margin-top: 22px;
+          padding-top: 18px;
+          display: flex;
+          justify-content: center;
+          gap: 7px;
+          border-top: 1px solid #eaecf0;
+          color: #667085;
+          font-size: 11px;
+        }
+
+        .loginLink a {
+          color: #1465e8;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        @media (max-width: 850px) {
+          .layout {
+            grid-template-columns: 1fr;
+          }
+
+          .infoPanel {
+            position: static;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 650px) {
+          .infoPanel,
+          .twoColumns {
+            grid-template-columns: 1fr;
+          }
+
+          .card {
+            padding: 22px;
+          }
+
+          .intro h1 {
+            font-size: 37px;
+          }
+        }
+      `}</style>
+    </main>
   );
 }
