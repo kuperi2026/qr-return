@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
-type ProductStory = {
+type Product = {
   id: string;
   ka: string;
   en: string;
@@ -17,72 +17,87 @@ type ProductStory = {
   image: string;
 };
 
-const products: ProductStory[] = [
+const topProducts: Product[] = [
   {
     id: "dog",
     ka: "ძაღლი",
     en: "Dog",
-    kaText: "მპოვნელი ასკანერებს საყელოზე მიმაგრებულ QR RETURN კოდს.",
-    enText: "The finder scans the QR RETURN tag attached to the collar.",
-    kaResult: "დაუკავშირდი პატრონს",
+    kaText:
+      "მპოვნელი ასკანერებს საყელოზე მიმაგრებულ QR RETURN კოდს და მარტივად გიკავშირდებათ.",
+    enText:
+      "The finder scans the QR RETURN tag on the collar and can contact you.",
+    kaResult: "პატრონთან დაკავშირება",
     enResult: "Contact owner",
     image:
-      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=88",
   },
   {
     id: "cat",
     ka: "კატა",
     en: "Cat",
-    kaText: "QR პროფილი აჩვენებს მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც გსურთ.",
-    enText: "The QR profile shows only the information you choose to share.",
+    kaText:
+      "QR პროფილი აჩვენებს მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც თავად გსურთ.",
+    enText:
+      "The QR profile shows only the information you choose to share.",
     kaResult: "Finder Profile",
     enResult: "Finder Profile",
     image:
-      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=1200&q=88",
   },
   {
     id: "keys",
     ka: "გასაღები",
     en: "Keys",
-    kaText: "QR tag ეხმარება მპოვნელს სწრაფად დაგიკავშირდეთ.",
-    enText: "The QR tag gives the finder a simple way to reach you.",
+    kaText:
+      "ნაპოვნ გასაღებზე QR tag მპოვნელს გაძლევთ თქვენთან დაკავშირების მარტივ გზას.",
+    enText:
+      "A QR tag on found keys gives the finder a simple way to reach you.",
     kaResult: "Live Chat",
     enResult: "Live Chat",
     image:
-      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=88",
   },
+];
+
+const bottomProducts: Product[] = [
   {
     id: "wallet",
     ka: "საფულე",
     en: "Wallet",
-    kaText: "საფულეზე QR კოდი ქმნის უსაფრთხო კავშირს მფლობელთან.",
-    enText: "A QR code on the wallet creates a secure path back to the owner.",
+    kaText:
+      "საფულეზე QR RETURN ქმნის უსაფრთხო კავშირს მპოვნელთან პირადი მონაცემების ზედმეტად გამოჩენის გარეშე.",
+    enText:
+      "QR RETURN creates a secure path from a found wallet back to you.",
     kaResult: "უსაფრთხო დაბრუნება",
     enResult: "Return securely",
     image:
-      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=1200&q=88",
   },
   {
     id: "luggage",
     ka: "ჩემოდანი",
     en: "Luggage",
-    kaText: "აეროპორტში ნაპოვნი ჩემოდნის მპოვნელმა შეიძლება ლოკაციაც გაგიზიაროთ.",
-    enText: "A finder at the airport can scan your luggage QR and share its location.",
-    kaResult: "Location shared",
-    enResult: "Location shared",
+    kaText:
+      "აეროპორტში დარჩენილი ან ნაპოვნი ჩემოდნიდან მპოვნელმა შეიძლება ლოკაციაც გაგიზიაროთ.",
+    enText:
+      "A finder at the airport can scan your luggage QR and share its location.",
     image:
-      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1553531384-cc64ac80f931?auto=format&fit=crop&w=1200&q=88",
+    kaResult: "ლოკაცია გაზიარებულია",
+    enResult: "Location shared",
   },
   {
     id: "bag",
     ka: "ჩანთა",
     en: "Bag",
-    kaText: "ნაპოვნი ჩანთიდან ერთი სკანი საკმარისია კავშირის დასაწყებად.",
-    enText: "One scan from a found bag is enough to start the return process.",
+    kaText:
+      "ნაპოვნი ჩანთიდან ერთი სკანი საკმარისია მფლობელთან უსაფრთხო კავშირის დასაწყებად.",
+    enText:
+      "One scan from a found bag is enough to start a secure connection.",
     kaResult: "Owner notified",
     enResult: "Owner notified",
     image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=88",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=88",
   },
 ];
 
@@ -92,32 +107,40 @@ const benefits = [
     type: "chat",
     ka: "Live Chat",
     en: "Live Chat",
-    kaText: "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე.",
-    enText: "Talk directly with the finder without exposing your private number.",
+    kaText:
+      "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე.",
+    enText:
+      "Direct finder contact without exposing your private phone number.",
   },
   {
     number: "02",
     type: "location",
     ka: "ლოკაციის გაზიარება",
     en: "Location Sharing",
-    kaText: "მპოვნელმა ერთი ღილაკით შეიძლება გაგიზიაროთ ნივთის მდებარეობა.",
-    enText: "The finder can share the current location in one tap.",
+    kaText:
+      "მპოვნელმა ერთი ღილაკით შეიძლება გაგიზიაროთ მიმდინარე მდებარეობა.",
+    enText:
+      "The finder can share the current location in one tap.",
   },
   {
     number: "03",
     type: "reward",
     ka: "მპოვნელის ჯილდო",
     en: "Finder Reward",
-    kaText: "სურვილის შემთხვევაში მიუთითეთ ჯილდო უსაფრთხო დაბრუნებისთვის.",
-    enText: "Optionally offer a reward for a safe return.",
+    kaText:
+      "სურვილის შემთხვევაში მიუთითეთ ჯილდო უსაფრთხო დაბრუნებისთვის.",
+    enText:
+      "Optionally offer a reward for a safe return.",
   },
   {
     number: "04",
-    type: "shield",
+    type: "privacy",
     ka: "Privacy Control",
     en: "Privacy Control",
-    kaText: "თქვენ აკონტროლებთ რა ინფორმაცია გამოჩნდება მპოვნელისთვის.",
-    enText: "You control exactly what information the finder can see.",
+    kaText:
+      "თქვენ თავად აკონტროლებთ რა ინფორმაცია გამოჩნდება მპოვნელისთვის.",
+    enText:
+      "You decide exactly what information a finder can see.",
   },
 ];
 
@@ -142,11 +165,6 @@ export default function HomePage() {
 
       setIsLoggedIn(true);
 
-      /*
-        ADMIN BUTTON IS PRIVATE:
-        only users stored inside admin_users will see it.
-        Ordinary visitors never see the Admin link.
-      */
       const { data: adminData } = await supabase
         .from("admin_users")
         .select("user_id")
@@ -169,9 +187,7 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
+      {/* HEADER */}
 
       <header className="header">
         <a href="/" className="brand">
@@ -179,7 +195,7 @@ export default function HomePage() {
             <QrIcon />
           </div>
 
-          <div className="brandText">
+          <div className="brandCopy">
             <strong>QR RETURN</strong>
             <span>SMART LOST &amp; FOUND</span>
           </div>
@@ -234,9 +250,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ======================================================
-          HERO
-      ====================================================== */}
+      {/* HERO */}
 
       <section className="hero">
         <div className="heroGlow glowOne" />
@@ -244,9 +258,7 @@ export default function HomePage() {
 
         <div className="heroInner">
           <div className="heroCopy">
-            <div className="heroLabel">
-              SMART LOST &amp; FOUND
-            </div>
+            <div className="heroLabel">SMART LOST &amp; FOUND</div>
 
             <h1>
               {ka ? (
@@ -284,18 +296,16 @@ export default function HomePage() {
                     ? "ჩემს ანგარიშში გადასვლა"
                     : "Go to My Account"
                   : ka
-                    ? "ანგარიშის შექმნა"
-                    : "Create Account"}
+                  ? "ანგარიშის შექმნა"
+                  : "Create Account"}
 
                 <ArrowIcon />
               </a>
 
-              <a href="#real-life" className="secondaryCta">
+              <a href="#products" className="secondaryCta">
                 {ka ? "ნახე როგორ მუშაობს" : "See how it works"}
               </a>
             </div>
-
-            {/* EMERGENCY SIGNAL */}
 
             <a href="#emergency" className="emergencySignal">
               <div className="signalCross">+</div>
@@ -318,7 +328,7 @@ export default function HomePage() {
             </a>
           </div>
 
-          {/* PHONE — QR, NOT DOG */}
+          {/* PHONE WITH QR */}
 
           <div className="phoneStage">
             <div className="phoneHalo" />
@@ -348,7 +358,6 @@ export default function HomePage() {
                   <div className="scanCorner topRight" />
                   <div className="scanCorner bottomLeft" />
                   <div className="scanCorner bottomRight" />
-
                   <QrCode />
                 </div>
 
@@ -361,44 +370,36 @@ export default function HomePage() {
                       : "Connect with the owner"}
                   </strong>
 
-                  <p>
-                    {ka
-                      ? "Live Chat • Location • Contact options"
-                      : "Live Chat • Location • Contact options"}
-                  </p>
+                  <p>Live Chat • Location • Contact options</p>
                 </div>
 
                 <div className="phoneBottom">
                   <div>
                     <ShieldIcon />
-                    <span>
-                      {ka ? "დაცული ინფორმაცია" : "Protected"}
-                    </span>
+                    <span>{ka ? "დაცული ინფორმაცია" : "Protected"}</span>
                   </div>
 
                   <div>
                     <ScanIcon />
-                    <span>
-                      {ka ? "აპის გარეშე" : "No App"}
-                    </span>
+                    <span>{ka ? "აპის გარეშე" : "No App"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="floatingChat">
-              <div className="floatingIcon">
+              <div className="floatingChatIcon">
                 <ChatIcon />
               </div>
 
-              <section>
+              <div>
                 <span>LIVE CHAT</span>
                 <strong>
                   {ka
                     ? "მპოვნელთან პირდაპირი კავშირი"
                     : "Direct finder contact"}
                 </strong>
-              </section>
+              </div>
 
               <i />
             </div>
@@ -415,115 +416,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
-          6 REAL-LIFE SCENARIOS — ONE ROW
-      ====================================================== */}
+      {/* =====================================================
+          TOP 3
+      ===================================================== */}
 
-      <section id="real-life" className="realLifeSection">
+      <section id="products" className="storySection">
         <div className="shell">
-          <div className="sectionHeading">
-            <div>
-              <span className="eyebrow">QR RETURN IN REAL LIFE</span>
-
-              <h2>
-                {ka
-                  ? "ნაპოვნიდან დაბრუნებამდე."
-                  : "From found to returned."}
-              </h2>
-            </div>
+          <div className="sectionIntro">
+            <span className="eyebrow">QR RETURN IN REAL LIFE</span>
 
             <p>
               {ka
-                ? "QR RETURN-ის თითოეული გამოყენება იწყება ერთი მარტივი მოქმედებით — მპოვნელი ხედავს QR-ს და ასკანერებს."
-                : "Every QR RETURN story begins with one simple action — the finder sees the QR and scans it."}
+                ? "ერთი QR კოდი. რეალური სიტუაციები, სადაც მპოვნელთან დაკავშირება რამდენიმე წამში შეიძლება დაიწყოს."
+                : "One QR code. Real situations where a finder can start connecting with you in seconds."}
             </p>
           </div>
 
-          <div className="productRow">
-            {products.map((product) => (
-              <article className="scenarioCard" key={product.id}>
-                <div className="scenarioPhoto">
-                  <img
-                    src={product.image}
-                    alt={ka ? product.ka : product.en}
-                  />
-
-                  <div className="photoShade" />
-
-                  {/* QR attached to item */}
-
-                  <div className="attachedQr">
-                    <MiniQr />
-                  </div>
-
-                  {/* phone-scanning visual */}
-
-                  <div className="scannerPhone">
-                    <div className="scannerNotch" />
-
-                    <div className="scannerWindow">
-                      <span className="cornerA" />
-                      <span className="cornerB" />
-                      <span className="cornerC" />
-                      <span className="cornerD" />
-
-                      <MiniQr />
-                    </div>
-                  </div>
-
-                  <div className="scenarioTitle">
-                    <span>QR RETURN</span>
-                    <strong>{ka ? product.ka : product.en}</strong>
-                  </div>
-                </div>
-
-                <div className="scenarioCopy">
-                  <p>{ka ? product.kaText : product.enText}</p>
-
-                  <div className="result">
-                    <i />
-                    <span>
-                      {ka ? product.kaResult : product.enResult}
-                    </span>
-                  </div>
-                </div>
-              </article>
+          <div className="threeGrid">
+            {topProducts.map((product) => (
+              <ProductStoryCard
+                key={product.id}
+                product={product}
+                ka={ka}
+              />
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ======================================================
-          EMERGENCY — SEPARATE, BUT SAME PRODUCT FAMILY
-      ====================================================== */}
+          {/* =================================================
+              EMERGENCY BETWEEN 3 + 3
+          ================================================= */}
 
-      <section id="emergency" className="emergencySection">
-        <div className="shell">
-          <div className="emergencyCard">
-            {/* LEFT VISUAL */}
-
+          <section id="emergency" className="emergencyBlock">
             <div className="emergencyVisual">
-              <div className="emergencyBackdrop" />
+              <div className="emergencyGlow" />
 
               <div className="bracelet">
-                <div className="braceletStrap left" />
+                <div className="strap left" />
 
-                <div className="braceletPlate">
-                  <div className="braceletCross">+</div>
+                <div className="braceletCenter">
+                  <span className="braceletCross">+</span>
                   <MiniQr />
                   <small>EMERGENCY ID</small>
                 </div>
 
-                <div className="braceletStrap right" />
+                <div className="strap right" />
               </div>
 
               <div className="emergencyPhone">
-                <div className="emergencyPhoneNotch" />
+                <div className="emergencyNotch" />
 
-                <div className="emergencyPhoneScreen">
-                  <span className="sosBadge">SOS READY</span>
+                <div className="emergencyScreen">
+                  <span className="sos">SOS READY</span>
 
-                  <div className="emergencyPhoneTitle">
+                  <div className="emergencyScreenTitle">
                     <span>QR RETURN</span>
                     <strong>EMERGENCY ID</strong>
                   </div>
@@ -552,7 +497,7 @@ export default function HomePage() {
 
                       <section>
                         <span>PRIVACY</span>
-                        <strong>Controlled by owner</strong>
+                        <strong>Owner controlled</strong>
                       </section>
                     </div>
                   </div>
@@ -563,8 +508,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
-            {/* RIGHT COPY */}
 
             <div className="emergencyCopy">
               <div className="emergencyBrand">
@@ -605,19 +548,31 @@ export default function HomePage() {
                     ? "Emergency ID-ის მართვა"
                     : "Manage Emergency ID"
                   : ka
-                    ? "ანგარიშის შექმნა"
-                    : "Create Account"}
+                  ? "ანგარიშის შექმნა"
+                  : "Create Account"}
 
                 <ArrowIcon />
               </a>
             </div>
+          </section>
+
+          {/* =================================================
+              BOTTOM 3
+          ================================================= */}
+
+          <div className="threeGrid bottomGrid">
+            {bottomProducts.map((product) => (
+              <ProductStoryCard
+                key={product.id}
+                product={product}
+                ka={ka}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ======================================================
-          FIND → SCAN → CONNECT → RETURN
-      ====================================================== */}
+      {/* FIND SCAN CONNECT RETURN */}
 
       <section className="flowSection">
         <div className="shell">
@@ -707,9 +662,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
-          BENEFITS
-      ====================================================== */}
+      {/* BENEFITS */}
 
       <section className="benefitsSection">
         <div className="shell">
@@ -733,12 +686,11 @@ export default function HomePage() {
                     {benefit.type === "chat" && <ChatIcon />}
                     {benefit.type === "location" && <LocationIcon />}
                     {benefit.type === "reward" && <RewardIcon />}
-                    {benefit.type === "shield" && <ShieldIcon />}
+                    {benefit.type === "privacy" && <ShieldIcon />}
                   </div>
                 </div>
 
                 <h3>{ka ? benefit.ka : benefit.en}</h3>
-
                 <p>{ka ? benefit.kaText : benefit.enText}</p>
               </article>
             ))}
@@ -746,9 +698,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
-          ACCOUNT
-      ====================================================== */}
+      {/* ACCOUNT */}
 
       <section className="accountSection">
         <div className="shell">
@@ -757,7 +707,7 @@ export default function HomePage() {
               <UserIcon />
             </div>
 
-            <div className="accountCopy">
+            <div>
               <span>ONE OWNER ACCOUNT</span>
 
               <h2>
@@ -779,8 +729,8 @@ export default function HomePage() {
                   ? "ჩემი ანგარიში"
                   : "My Account"
                 : ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create Account"}
+                ? "ანგარიშის შექმნა"
+                : "Create Account"}
 
               <ArrowIcon />
             </a>
@@ -788,9 +738,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
-          CONTACT
-      ====================================================== */}
+      {/* CONTACT */}
 
       <section className="contact">
         <div className="shell contactInner">
@@ -813,13 +761,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* REAL LIVE CHAT COMPONENT */}
-
+      {/* LIVE CHAT */}
       <SupportLauncher language={language} />
 
-      {/* ======================================================
-          FOOTER
-      ====================================================== */}
+      {/* FOOTER */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -835,12 +780,8 @@ export default function HomePage() {
           </div>
 
           <div className="footerLinks">
-            <a href="#real-life">
-              {ka ? "გამოყენება" : "Use cases"}
-            </a>
-
+            <a href="#products">{ka ? "გამოყენება" : "Use Cases"}</a>
             <a href="#emergency">Emergency ID</a>
-
             <span>{ka ? "კონფიდენციალურობა" : "Privacy"}</span>
             <span>{ka ? "პირობები" : "Terms"}</span>
           </div>
@@ -848,10 +789,6 @@ export default function HomePage() {
           <span className="copyright">© 2026 QR RETURN</span>
         </div>
       </footer>
-
-      {/* ======================================================
-          STYLES
-      ====================================================== */}
 
       <style jsx>{`
         :global(*) {
@@ -870,7 +807,7 @@ export default function HomePage() {
         .page {
           overflow: hidden;
           background: #f7f7f5;
-          color: #151922;
+          color: #171c24;
           font-family:
             Inter,
             -apple-system,
@@ -934,18 +871,18 @@ export default function HomePage() {
           width: 22px;
         }
 
-        .brandText strong,
-        .brandText span {
+        .brandCopy strong,
+        .brandCopy span {
           display: block;
         }
 
-        .brandText strong {
+        .brandCopy strong {
           color: #18202b;
           font-size: 18px;
           font-weight: 850;
         }
 
-        .brandText span {
+        .brandCopy span {
           margin-top: 3px;
           color: #979da6;
           font-size: 6px;
@@ -1052,7 +989,6 @@ export default function HomePage() {
         .heroGlow {
           position: absolute;
           border-radius: 50%;
-          pointer-events: none;
         }
 
         .glowOne {
@@ -1158,7 +1094,6 @@ export default function HomePage() {
           color: inherit;
           background: rgba(255, 250, 250, 0.82);
           text-decoration: none;
-          box-shadow: 0 10px 30px rgba(74, 42, 45, 0.04);
         }
 
         .signalCross {
@@ -1341,7 +1276,6 @@ export default function HomePage() {
           left: 0;
           border-top: 3px solid #df5156;
           border-left: 3px solid #df5156;
-          border-radius: 11px 0 0;
         }
 
         .topRight {
@@ -1352,8 +1286,8 @@ export default function HomePage() {
         }
 
         .bottomLeft {
-          left: 0;
           bottom: 0;
+          left: 0;
           border-left: 3px solid #df5156;
           border-bottom: 3px solid #df5156;
         }
@@ -1432,7 +1366,7 @@ export default function HomePage() {
           border-radius: 15px;
         }
 
-        .floatingIcon {
+        .floatingChatIcon {
           width: 37px;
           height: 37px;
           flex: 0 0 37px;
@@ -1443,11 +1377,11 @@ export default function HomePage() {
           background: #fff0f0;
         }
 
-        .floatingIcon :global(svg) {
+        .floatingChatIcon :global(svg) {
           width: 16px;
         }
 
-        .floatingChat section {
+        .floatingChat > div:nth-child(2) {
           flex: 1;
         }
 
@@ -1493,364 +1427,171 @@ export default function HomePage() {
           color: #18202b;
         }
 
-        /* 6 SCENARIOS */
+        /* PRODUCT STORY */
 
-        .realLifeSection {
-          padding: 96px 0 88px;
+        .storySection {
+          padding: 92px 0;
           background: #fbfbf9;
         }
 
-        .sectionHeading {
-          display: grid;
-          grid-template-columns: 1fr 0.55fr;
-          align-items: end;
-          gap: 70px;
+        .sectionIntro {
+          max-width: 650px;
         }
 
-        .sectionHeading h2,
-        .flowIntro h2,
-        .accountCopy h2 {
-          margin: 10px 0 0;
-          color: #171d26;
-          font-size: clamp(33px, 4vw, 46px);
-          line-height: 1.05;
-          letter-spacing: -2.3px;
-          font-weight: 680;
-        }
-
-        .sectionHeading > p {
-          margin: 0;
+        .sectionIntro p {
+          margin: 11px 0 0;
           color: #717985;
           font-size: 11px;
           line-height: 1.7;
         }
 
-        .productRow {
-          margin-top: 40px;
+        .threeGrid {
+          margin-top: 35px;
           display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          gap: 10px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
         }
 
-        .scenarioCard {
-          overflow: hidden;
-          border: 1px solid #e1e3e6;
-          border-radius: 18px;
-          background: white;
-          box-shadow: 0 9px 26px rgba(26, 36, 50, 0.035);
+        .bottomGrid {
+          margin-top: 42px;
         }
 
-        .scenarioPhoto {
-          height: 205px;
-          position: relative;
-          overflow: hidden;
-          background: #dfe3e7;
-        }
+        /* EMERGENCY */
 
-        .scenarioPhoto > img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.45s ease;
-        }
-
-        .scenarioCard:hover .scenarioPhoto > img {
-          transform: scale(1.035);
-        }
-
-        .photoShade {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(
-              180deg,
-              rgba(10, 14, 19, 0.02) 30%,
-              rgba(10, 14, 19, 0.12) 65%,
-              rgba(7, 10, 14, 0.68) 100%
-            );
-        }
-
-        .attachedQr {
-          width: 38px;
-          height: 38px;
-          position: absolute;
-          top: 12px;
-          left: 12px;
+        .emergencyBlock {
+          min-height: 470px;
+          margin-top: 54px;
+          padding: 34px 40px;
           display: grid;
-          place-items: center;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.93);
-          box-shadow: 0 7px 17px rgba(0, 0, 0, 0.11);
-        }
-
-        .scannerPhone {
-          width: 49px;
-          height: 82px;
-          padding: 5px;
-          position: absolute;
-          top: 13px;
-          right: 11px;
-          border-radius: 11px;
-          background: #161c26;
-          transform: rotate(6deg);
-          box-shadow: 0 9px 22px rgba(0, 0, 0, 0.19);
-        }
-
-        .scannerNotch {
-          width: 15px;
-          height: 3px;
-          margin: 0 auto 7px;
-          border-radius: 99px;
-          background: #3c444e;
-        }
-
-        .scannerWindow {
-          height: 57px;
-          position: relative;
-          display: grid;
-          place-items: center;
-          border-radius: 6px;
-          background: #f7f7f7;
-        }
-
-        .scannerWindow > span {
-          width: 8px;
-          height: 8px;
-          position: absolute;
-        }
-
-        .cornerA {
-          top: 4px;
-          left: 4px;
-          border-top: 1px solid #df5156;
-          border-left: 1px solid #df5156;
-        }
-
-        .cornerB {
-          top: 4px;
-          right: 4px;
-          border-top: 1px solid #df5156;
-          border-right: 1px solid #df5156;
-        }
-
-        .cornerC {
-          bottom: 4px;
-          left: 4px;
-          border-left: 1px solid #df5156;
-          border-bottom: 1px solid #df5156;
-        }
-
-        .cornerD {
-          right: 4px;
-          bottom: 4px;
-          border-right: 1px solid #df5156;
-          border-bottom: 1px solid #df5156;
-        }
-
-        .scenarioTitle {
-          position: absolute;
-          left: 14px;
-          right: 14px;
-          bottom: 13px;
-        }
-
-        .scenarioTitle span,
-        .scenarioTitle strong {
-          display: block;
-        }
-
-        .scenarioTitle span {
-          color: #d8dde2;
-          font-size: 4.5px;
-          font-weight: 900;
-          letter-spacing: 1.2px;
-        }
-
-        .scenarioTitle strong {
-          margin-top: 3px;
-          color: white;
-          font-size: 14px;
-        }
-
-        .scenarioCopy {
-          min-height: 122px;
-          padding: 14px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .scenarioCopy p {
-          margin: 0;
-          flex: 1;
-          color: #707985;
-          font-size: 8px;
-          line-height: 1.58;
-        }
-
-        .result {
-          width: fit-content;
-          margin-top: 10px;
-          padding: 6px 8px;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          border-radius: 999px;
-          color: #45505d;
-          background: #f0f2f4;
-          font-size: 6.5px;
-          font-weight: 800;
-        }
-
-        .result i {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: #28a86d;
-        }
-
-        /* EMERGENCY SECTION */
-
-        .emergencySection {
-          padding: 92px 0;
-          background: #f1f1ef;
-        }
-
-        .emergencyCard {
-          min-height: 510px;
-          padding: 34px;
-          display: grid;
-          grid-template-columns: 0.92fr 1.08fr;
+          grid-template-columns: 0.9fr 1.1fr;
           align-items: center;
           gap: 55px;
           overflow: hidden;
-          border: 1px solid #ead9da;
+          border: 1px solid #ead8da;
           border-radius: 26px;
           background:
             linear-gradient(
-              120deg,
+              115deg,
               #fff9f9,
-              #ffffff 60%,
-              #f7f3f3
+              #ffffff 58%,
+              #f8f4f4
             );
-          box-shadow: 0 20px 55px rgba(56, 37, 40, 0.055);
+          box-shadow: 0 18px 50px rgba(56, 37, 40, 0.05);
         }
 
         .emergencyVisual {
-          min-height: 430px;
+          min-height: 390px;
           position: relative;
           display: grid;
           place-items: center;
         }
 
-        .emergencyBackdrop {
-          width: 360px;
-          height: 360px;
+        .emergencyGlow {
+          width: 340px;
+          height: 340px;
           position: absolute;
           border-radius: 50%;
           background: radial-gradient(
             circle,
-            rgba(223, 81, 86, 0.13),
-            rgba(223, 81, 86, 0.025) 52%,
-            transparent 72%
+            rgba(223, 81, 86, 0.14),
+            transparent 69%
           );
         }
 
         .bracelet {
-          width: 310px;
-          height: 115px;
+          width: 285px;
           position: absolute;
           z-index: 2;
-          left: -18px;
-          bottom: 75px;
+          left: -20px;
+          bottom: 63px;
           display: flex;
           align-items: center;
           transform: rotate(-8deg);
-          filter: drop-shadow(0 17px 18px rgba(37, 42, 50, 0.16));
         }
 
-        .braceletStrap {
+        .strap {
+          height: 46px;
           flex: 1;
-          height: 48px;
-          background: #d6dbe1;
+          background: #d8dde3;
         }
 
-        .braceletStrap.left {
-          border-radius: 24px 0 0 24px;
+        .strap.left {
+          border-radius: 23px 0 0 23px;
         }
 
-        .braceletStrap.right {
-          border-radius: 0 24px 24px 0;
+        .strap.right {
+          border-radius: 0 23px 23px 0;
         }
 
-        .braceletPlate {
-          width: 128px;
-          height: 100px;
-          flex: 0 0 128px;
+        .braceletCenter {
+          width: 120px;
+          height: 94px;
+          flex: 0 0 120px;
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          border: 4px solid #bfc5cc;
-          border-radius: 23px;
+          border: 4px solid #bfc6cd;
+          border-radius: 22px;
           background: white;
         }
 
         .braceletCross {
-          width: 19px;
-          height: 19px;
+          width: 18px;
+          height: 18px;
           position: absolute;
-          top: 8px;
-          right: 9px;
+          top: 7px;
+          right: 8px;
           display: grid;
           place-items: center;
           border-radius: 5px;
           color: white;
           background: #df5156;
-          font-size: 14px;
+          font-size: 13px;
         }
 
-        .braceletPlate small {
+        .braceletCenter small {
           margin-top: 5px;
-          color: #a64045;
-          font-size: 5px;
+          color: #a43e43;
+          font-size: 4.8px;
           font-weight: 900;
-          letter-spacing: 0.8px;
+          letter-spacing: 0.7px;
         }
 
         .emergencyPhone {
-          width: 205px;
-          height: 370px;
+          width: 190px;
+          height: 345px;
           padding: 7px;
           position: relative;
           z-index: 3;
           margin-left: 120px;
-          border-radius: 29px;
+          border-radius: 28px;
           background: #151c26;
-          box-shadow: 0 24px 55px rgba(24, 32, 43, 0.22);
+          box-shadow: 0 24px 55px rgba(24, 32, 43, 0.2);
           transform: rotate(4deg);
         }
 
-        .emergencyPhoneNotch {
-          width: 50px;
-          height: 9px;
+        .emergencyNotch {
+          width: 48px;
+          height: 8px;
           position: absolute;
           top: 10px;
           left: 50%;
           z-index: 3;
           border-radius: 99px;
-          background: #080c11;
+          background: #090d12;
           transform: translateX(-50%);
         }
 
-        .emergencyPhoneScreen {
+        .emergencyScreen {
           height: 100%;
-          padding: 29px 14px 13px;
-          border-radius: 23px;
+          padding: 27px 13px 12px;
+          border-radius: 22px;
           background: #f9fafb;
         }
 
-        .sosBadge {
+        .sos {
           display: inline-flex;
           padding: 5px 7px;
           border-radius: 999px;
@@ -1858,37 +1599,36 @@ export default function HomePage() {
           background: #df5156;
           font-size: 5px;
           font-weight: 900;
-          letter-spacing: 0.8px;
         }
 
-        .emergencyPhoneTitle {
-          margin-top: 16px;
+        .emergencyScreenTitle {
+          margin-top: 15px;
         }
 
-        .emergencyPhoneTitle span,
-        .emergencyPhoneTitle strong {
+        .emergencyScreenTitle span,
+        .emergencyScreenTitle strong {
           display: block;
         }
 
-        .emergencyPhoneTitle span {
+        .emergencyScreenTitle span {
           color: #df5156;
           font-size: 5px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .emergencyPhoneTitle strong {
+        .emergencyScreenTitle strong {
           margin-top: 3px;
           color: #27313e;
-          font-size: 11px;
+          font-size: 10px;
         }
 
         .emergencyData {
-          margin-top: 15px;
+          margin-top: 14px;
         }
 
         .emergencyData > div {
-          min-height: 51px;
+          min-height: 48px;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -1907,29 +1647,28 @@ export default function HomePage() {
 
         .emergencyData section span {
           color: #9ca3ac;
-          font-size: 4.5px;
+          font-size: 4.3px;
           font-weight: 900;
-          letter-spacing: 0.7px;
         }
 
         .emergencyData section strong {
           margin-top: 2px;
           color: #4a5563;
-          font-size: 6px;
+          font-size: 5.8px;
         }
 
         .emergencyQr {
-          width: 60px;
-          height: 60px;
-          margin: 16px auto 0;
+          width: 57px;
+          height: 57px;
+          margin: 15px auto 0;
           display: grid;
           place-items: center;
-          border-radius: 11px;
+          border-radius: 10px;
           background: #eef0f2;
         }
 
         .emergencyCopy {
-          max-width: 520px;
+          max-width: 530px;
         }
 
         .emergencyBrand {
@@ -1949,42 +1688,42 @@ export default function HomePage() {
           font-size: 27px;
         }
 
-        .emergencyBrand section span,
-        .emergencyBrand section strong {
+        .emergencyBrand span,
+        .emergencyBrand strong {
           display: block;
         }
 
-        .emergencyBrand section span {
+        .emergencyBrand span {
           color: #df5156;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.3px;
         }
 
-        .emergencyBrand section strong {
+        .emergencyBrand strong {
           margin-top: 3px;
           color: #2c3541;
           font-size: 13px;
         }
 
         .emergencyCopy h2 {
-          margin: 23px 0 0;
+          margin: 22px 0 0;
           color: #181e27;
-          font-size: clamp(30px, 3.5vw, 41px);
+          font-size: clamp(29px, 3.4vw, 40px);
           line-height: 1.08;
-          letter-spacing: -2px;
+          letter-spacing: -1.9px;
           font-weight: 680;
         }
 
         .emergencyCopy > p {
-          margin: 16px 0 0;
+          margin: 15px 0 0;
           color: #6d7580;
-          font-size: 11px;
+          font-size: 10.5px;
           line-height: 1.72;
         }
 
         .signalTags {
-          margin-top: 22px;
+          margin-top: 21px;
           display: flex;
           flex-wrap: wrap;
           gap: 7px;
@@ -1998,13 +1737,12 @@ export default function HomePage() {
           background: #fff7f7;
           font-size: 5.5px;
           font-weight: 900;
-          letter-spacing: 0.6px;
         }
 
         .emergencyCta {
           width: fit-content;
           min-height: 42px;
-          margin-top: 24px;
+          margin-top: 23px;
           padding: 0 14px;
           display: inline-flex;
           align-items: center;
@@ -2025,11 +1763,17 @@ export default function HomePage() {
 
         .flowSection {
           padding: 92px 0;
-          background: #fbfbf9;
+          background: #f1f1ef;
         }
 
         .flowIntro {
           max-width: 680px;
+        }
+
+        .flowIntro h2 {
+          margin: 10px 0 0;
+          font-size: clamp(32px, 4vw, 45px);
+          letter-spacing: -2.2px;
         }
 
         .flow {
@@ -2054,7 +1798,7 @@ export default function HomePage() {
           border: 1px solid #dfe2e5;
           border-radius: 13px;
           color: #18202b;
-          background: #ffffff;
+          background: white;
         }
 
         .flowIcon :global(svg) {
@@ -2079,15 +1823,15 @@ export default function HomePage() {
           width: 55px;
           height: 1px;
           margin: 36px 17px 0;
-          background: #dadee2;
+          background: #d8dce0;
         }
 
         /* BENEFITS */
 
         .benefitsSection {
           padding: 92px 0;
-          color: white;
           background: #18202b;
+          color: white;
         }
 
         .benefitsHeader > span {
@@ -2172,7 +1916,6 @@ export default function HomePage() {
         }
 
         .accountPanel {
-          min-height: 175px;
           padding: 29px;
           display: grid;
           grid-template-columns: auto 1fr auto;
@@ -2197,19 +1940,20 @@ export default function HomePage() {
           width: 24px;
         }
 
-        .accountCopy span {
+        .accountPanel > div:nth-child(2) > span {
           color: #df5156;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.4px;
         }
 
-        .accountCopy h2 {
-          font-size: clamp(27px, 3.2vw, 38px);
+        .accountPanel h2 {
+          margin: 8px 0 0;
+          font-size: clamp(27px, 3vw, 37px);
+          letter-spacing: -1.8px;
         }
 
-        .accountCopy p {
-          max-width: 660px;
+        .accountPanel p {
           margin: 9px 0 0;
           color: #747c87;
           font-size: 10px;
@@ -2250,7 +1994,6 @@ export default function HomePage() {
 
         .contactInner h2 {
           margin: 9px 0 8px;
-          color: #171d26;
           font-size: 35px;
           letter-spacing: -1.7px;
         }
@@ -2284,8 +2027,8 @@ export default function HomePage() {
         /* FOOTER */
 
         .footer {
-          color: white;
           background: #11171f;
+          color: white;
         }
 
         .footerInner {
@@ -2319,16 +2062,16 @@ export default function HomePage() {
           width: 19px;
         }
 
-        .footerBrand section strong,
-        .footerBrand section span {
+        .footerBrand strong,
+        .footerBrand span {
           display: block;
         }
 
-        .footerBrand section strong {
+        .footerBrand strong {
           font-size: 12px;
         }
 
-        .footerBrand section span {
+        .footerBrand span {
           margin-top: 3px;
           color: #707a87;
           font-size: 5px;
@@ -2354,29 +2097,22 @@ export default function HomePage() {
           font-size: 7px;
         }
 
-        @media (max-width: 1100px) {
-          .productRow {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
         @media (max-width: 980px) {
           .heroInner {
             grid-template-columns: 1fr;
             padding: 65px 0 80px;
           }
 
-          .sectionHeading {
-            grid-template-columns: 1fr;
-            gap: 18px;
+          .threeGrid {
+            grid-template-columns: 1fr 1fr;
           }
 
-          .emergencyCard {
+          .emergencyBlock {
             grid-template-columns: 1fr;
           }
 
           .flow {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 28px;
           }
 
@@ -2385,15 +2121,7 @@ export default function HomePage() {
           }
 
           .benefitsGrid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .benefitsGrid article:nth-child(2) {
-            border-right: 0;
-          }
-
-          .benefitsGrid article:nth-child(-n + 2) {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            grid-template-columns: 1fr 1fr;
           }
 
           .accountPanel {
@@ -2418,7 +2146,7 @@ export default function HomePage() {
             min-height: 70px;
           }
 
-          .brandText span,
+          .brandCopy span,
           .language {
             display: none;
           }
@@ -2428,18 +2156,15 @@ export default function HomePage() {
             height: 38px;
           }
 
-          .brandText strong {
+          .brandCopy strong {
             font-size: 15px;
-          }
-
-          .adminButton {
-            padding: 0 8px;
           }
 
           .adminButton span {
             display: none;
           }
 
+          .adminButton,
           .accountButton,
           .loginButton {
             min-height: 35px;
@@ -2468,7 +2193,6 @@ export default function HomePage() {
 
           .heroActions {
             flex-direction: column;
-            align-items: stretch;
           }
 
           .primaryCta,
@@ -2499,7 +2223,7 @@ export default function HomePage() {
           }
 
           .floatingChat {
-            width: 190px;
+            width: 188px;
             left: -4px;
             bottom: 45px;
           }
@@ -2509,49 +2233,33 @@ export default function HomePage() {
             top: 67px;
           }
 
-          .realLifeSection,
-          .emergencySection,
+          .storySection,
           .flowSection,
           .benefitsSection {
-            padding: 74px 0;
+            padding: 70px 0;
           }
 
-          .sectionHeading h2,
-          .flowIntro h2,
-          .accountCopy h2 {
-            font-size: 33px;
-            letter-spacing: -1.9px;
+          .threeGrid {
+            grid-template-columns: 1fr;
           }
 
-          .productRow {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .scenarioPhoto {
-            height: 190px;
-          }
-
-          .emergencyCard {
+          .emergencyBlock {
             padding: 24px 18px;
           }
 
           .emergencyVisual {
-            min-height: 430px;
+            min-height: 400px;
           }
 
           .emergencyPhone {
-            width: 180px;
-            height: 340px;
-            margin-left: 80px;
+            width: 175px;
+            height: 330px;
+            margin-left: 75px;
           }
 
           .bracelet {
-            width: 270px;
+            width: 260px;
             left: -35px;
-          }
-
-          .emergencyCopy h2 {
-            font-size: 32px;
           }
 
           .flow,
@@ -2559,18 +2267,13 @@ export default function HomePage() {
             grid-template-columns: 1fr;
           }
 
-          .benefitsGrid article,
-          .benefitsGrid article:nth-child(2) {
+          .benefitsGrid article {
             border-right: 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           }
 
           .benefitsGrid article:last-child {
             border-bottom: 0;
-          }
-
-          .accountPanel {
-            padding: 23px 19px;
           }
 
           .contact {
@@ -2587,18 +2290,200 @@ export default function HomePage() {
   );
 }
 
-/* ============================================================
-   ICONS
-============================================================ */
+/* PRODUCT STORY CARD */
+
+function ProductStoryCard({
+  product,
+  ka,
+}: {
+  product: Product;
+  ka: boolean;
+}) {
+  return (
+    <article className="productStoryCard">
+      <div className="productImage">
+        <img src={product.image} alt={ka ? product.ka : product.en} />
+
+        <div className="imageShade" />
+
+        <div className="qrTag">
+          <MiniQr />
+        </div>
+
+        <div className="scanMiniPhone">
+          <div className="scanMiniNotch" />
+
+          <div className="scanMiniScreen">
+            <MiniQr />
+          </div>
+        </div>
+
+        <div className="productTitle">
+          <span>QR RETURN</span>
+          <strong>{ka ? product.ka : product.en}</strong>
+        </div>
+      </div>
+
+      <div className="productStoryCopy">
+        <p>{ka ? product.kaText : product.enText}</p>
+
+        <div className="resultPill">
+          <i />
+          <span>{ka ? product.kaResult : product.enResult}</span>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .productStoryCard {
+          overflow: hidden;
+          border: 1px solid #e1e4e7;
+          border-radius: 20px;
+          background: white;
+          box-shadow: 0 10px 28px rgba(26, 36, 50, 0.035);
+        }
+
+        .productImage {
+          height: 255px;
+          position: relative;
+          overflow: hidden;
+          background: #e1e4e7;
+        }
+
+        .productImage > img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.45s ease;
+        }
+
+        .productStoryCard:hover .productImage > img {
+          transform: scale(1.025);
+        }
+
+        .imageShade {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            180deg,
+            rgba(10, 14, 19, 0.01) 25%,
+            rgba(10, 14, 19, 0.07) 55%,
+            rgba(8, 11, 15, 0.7) 100%
+          );
+        }
+
+        .qrTag {
+          width: 43px;
+          height: 43px;
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.94);
+          box-shadow: 0 7px 20px rgba(0, 0, 0, 0.11);
+        }
+
+        .scanMiniPhone {
+          width: 57px;
+          height: 96px;
+          padding: 6px;
+          position: absolute;
+          top: 15px;
+          right: 14px;
+          border-radius: 13px;
+          background: #171e28;
+          transform: rotate(5deg);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.19);
+        }
+
+        .scanMiniNotch {
+          width: 17px;
+          height: 3px;
+          margin: 0 auto 8px;
+          border-radius: 10px;
+          background: #434b55;
+        }
+
+        .scanMiniScreen {
+          height: 70px;
+          display: grid;
+          place-items: center;
+          border-radius: 7px;
+          background: #f7f7f7;
+        }
+
+        .productTitle {
+          position: absolute;
+          left: 17px;
+          right: 17px;
+          bottom: 16px;
+        }
+
+        .productTitle span,
+        .productTitle strong {
+          display: block;
+        }
+
+        .productTitle span {
+          color: #d5dae0;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 1.4px;
+        }
+
+        .productTitle strong {
+          margin-top: 3px;
+          color: white;
+          font-size: 20px;
+          letter-spacing: -0.4px;
+        }
+
+        .productStoryCopy {
+          min-height: 130px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .productStoryCopy p {
+          margin: 0;
+          flex: 1;
+          color: #707985;
+          font-size: 9px;
+          line-height: 1.65;
+        }
+
+        .resultPill {
+          width: fit-content;
+          margin-top: 11px;
+          padding: 6px 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          border-radius: 999px;
+          color: #45505d;
+          background: #f0f2f4;
+          font-size: 7px;
+          font-weight: 800;
+        }
+
+        .resultPill i {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #28a86d;
+        }
+      `}</style>
+    </article>
+  );
+}
+
+/* ICONS */
 
 function QrIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="3" y="3" width="6" height="6" rx="1" />
       <rect x="15" y="3" width="6" height="6" rx="1" />
       <rect x="3" y="15" width="6" height="6" rx="1" />
@@ -2610,12 +2495,7 @@ function QrIcon() {
 
 function UserIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <circle cx="12" cy="8" r="4" />
       <path d="M4.5 21c.8-4.1 3.3-6.3 7.5-6.3s6.7 2.2 7.5 6.3" />
     </svg>
@@ -2624,12 +2504,7 @@ function UserIcon() {
 
 function AdminIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M12 2.8 19 6v5.3c0 4.6-2.4 7.7-7 9.9-4.6-2.2-7-5.3-7-9.9V6z" />
       <circle cx="12" cy="10" r="2.2" />
       <path d="M8.7 16c.6-1.8 1.7-2.7 3.3-2.7s2.7.9 3.3 2.7" />
@@ -2655,12 +2530,7 @@ function ArrowIcon() {
 
 function ShieldIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M12 2.5 19 6v5.3c0 4.7-2.4 7.8-7 10.2-4.6-2.4-7-5.5-7-10.2V6z" />
       <path d="m8.8 12 2.1 2.1 4.5-4.5" />
     </svg>
@@ -2669,12 +2539,7 @@ function ShieldIcon() {
 
 function ScanIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" />
       <path d="M7 12h10" />
     </svg>
@@ -2683,12 +2548,7 @@ function ScanIcon() {
 
 function ChatIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M4 5.5h16v11H9l-5 4z" />
       <path d="M8 10h8M8 13h5" />
     </svg>
@@ -2697,12 +2557,7 @@ function ChatIcon() {
 
 function LocationIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
       <circle cx="12" cy="10" r="2.2" />
     </svg>
@@ -2711,12 +2566,7 @@ function LocationIcon() {
 
 function RewardIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M6 9h12v11H6z" />
       <path d="M4 6h16v3H4z" />
       <path d="M12 6v14" />
@@ -2727,12 +2577,7 @@ function RewardIcon() {
 
 function HeartIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />
       <path d="M7.5 12h2.1l1-2.1 2.1 4.2 1.2-2.1h2.4" />
     </svg>
@@ -2741,12 +2586,7 @@ function HeartIcon() {
 
 function SearchIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <circle cx="10.5" cy="10.5" r="6" />
       <path d="m15 15 5 5" />
     </svg>
@@ -2755,12 +2595,7 @@ function SearchIcon() {
 
 function ReturnIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M9 7 4 12l5 5" />
       <path d="M5 12h9a5 5 0 0 1 5 5v2" />
     </svg>
@@ -2769,14 +2604,8 @@ function ReturnIcon() {
 
 function QrCode() {
   const dark = [
-    0, 1, 2, 5, 6,
-    7, 9, 11, 13,
-    14, 16, 18, 20,
-    21, 22, 24, 26,
-    27, 28, 30, 32,
-    34, 35, 36, 38,
-    40, 42, 43, 44,
-    46, 47, 48,
+    0, 1, 2, 5, 6, 7, 9, 11, 13, 14, 16, 18, 20, 21, 22, 24, 26, 27, 28,
+    30, 32, 34, 35, 36, 38, 40, 42, 43, 44, 46, 47, 48,
   ];
 
   return (
@@ -2785,7 +2614,7 @@ function QrCode() {
         width: 145,
         height: 145,
         display: "grid",
-        gridTemplateColumns: "repeat(7, 1fr)",
+        gridTemplateColumns: "repeat(7,1fr)",
         gap: 4,
       }}
     >
@@ -2793,11 +2622,8 @@ function QrCode() {
         <i
           key={index}
           style={{
-            display: "block",
+            background: dark.includes(index) ? "#18202b" : "#e2e5e8",
             borderRadius: 1,
-            background: dark.includes(index)
-              ? "#18202b"
-              : "#e2e5e8",
           }}
         />
       ))}
@@ -2807,10 +2633,7 @@ function QrCode() {
 
 function MiniQr() {
   const dark = [
-    0, 1, 2, 4, 6,
-    7, 8, 10, 12,
-    14, 15, 17, 18,
-    20, 21, 22, 24,
+    0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 15, 17, 18, 20, 21, 22, 24,
   ];
 
   return (
@@ -2819,7 +2642,7 @@ function MiniQr() {
         width: 25,
         height: 25,
         display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
+        gridTemplateColumns: "repeat(5,1fr)",
         gap: 1.4,
       }}
     >
@@ -2827,10 +2650,7 @@ function MiniQr() {
         <i
           key={index}
           style={{
-            display: "block",
-            background: dark.includes(index)
-              ? "#18202b"
-              : "#dfe3e7",
+            background: dark.includes(index) ? "#18202b" : "#dfe3e7",
           }}
         />
       ))}
