@@ -5,48 +5,76 @@ import SupportLauncher from "./components/SupportLauncher";
 import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
-type ProtectType =
-  | "dog"
-  | "cat"
-  | "keys"
-  | "wallet"
-  | "luggage"
-  | "bag";
 
-const protectionItems: {
-  type: ProtectType;
-  ka: string;
-  en: string;
-}[] = [
-  { type: "dog", ka: "ძაღლი", en: "Dog" },
-  { type: "cat", ka: "კატა", en: "Cat" },
-  { type: "keys", ka: "გასაღები", en: "Keys" },
-  { type: "wallet", ka: "საფულე", en: "Wallet" },
-  { type: "luggage", ka: "ჩემოდანი", en: "Luggage" },
-  { type: "bag", ka: "ჩანთა", en: "Bag" },
+const products = [
+  {
+    id: "dog",
+    ka: "ძაღლი",
+    en: "Dog",
+    image:
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=90",
+  },
+  {
+    id: "cat",
+    ka: "კატა",
+    en: "Cat",
+    image:
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=90",
+  },
+  {
+    id: "keys",
+    ka: "გასაღები",
+    en: "Keys",
+    image:
+      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=900&q=90",
+  },
+  {
+    id: "wallet",
+    ka: "საფულე",
+    en: "Wallet",
+    image:
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=90",
+  },
+  {
+    id: "luggage",
+    ka: "ჩემოდანი",
+    en: "Luggage",
+    image:
+      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=900&q=90",
+  },
+  {
+    id: "bag",
+    ka: "ჩანთა",
+    en: "Bag",
+    image:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=90",
+  },
 ];
 
 const features = [
   {
     number: "01",
+    icon: "chat",
     ka: "Live Chat",
     en: "Live Chat",
     kaText:
-      "მპოვნელმა პირდაპირ QR RETURN-ის საშუალებით შეიძლება მოგწეროთ.",
+      "მპოვნელს შეუძლია პირდაპირ QR RETURN-ის საშუალებით დაგიკავშირდეთ.",
     enText:
-      "A finder can message you directly through QR RETURN.",
+      "A finder can contact you directly through QR RETURN.",
   },
   {
     number: "02",
+    icon: "location",
     ka: "ლოკაციის გაზიარება",
     en: "Location Sharing",
     kaText:
-      "მპოვნელმა ერთი მოქმედებით შეიძლება გაგიზიაროთ ნივთის ან ცხოველის მდებარეობა.",
+      "მპოვნელმა ერთი ღილაკით შეიძლება გაგიზიაროთ ნივთის ან ცხოველის მდებარეობა.",
     enText:
-      "A finder can share the location of your pet or item in one step.",
+      "A finder can share the location of your pet or item in one tap.",
   },
   {
     number: "03",
+    icon: "reward",
     ka: "მპოვნელის ჯილდო",
     en: "Finder Reward",
     kaText:
@@ -56,12 +84,13 @@ const features = [
   },
   {
     number: "04",
-    ka: "Privacy Control",
-    en: "Privacy Control",
+    icon: "privacy",
+    ka: "Privacy First",
+    en: "Privacy First",
     kaText:
       "თქვენ თავად აკონტროლებთ რა ინფორმაცია გამოჩნდება მპოვნელისთვის.",
     enText:
-      "You control exactly what information a finder can see.",
+      "You control exactly what information is visible to the finder.",
   },
 ];
 
@@ -72,7 +101,7 @@ export default function HomePage() {
   const ka = language === "ka";
 
   useEffect(() => {
-    async function checkSession() {
+    async function loadSession() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -80,29 +109,30 @@ export default function HomePage() {
       setIsLoggedIn(Boolean(user));
     }
 
-    void checkSession();
+    void loadSession();
 
-    const { data: listener } =
-      supabase.auth.onAuthStateChange(() => {
-        void checkSession();
-      });
+    const { data } = supabase.auth.onAuthStateChange(() => {
+      void loadSession();
+    });
 
     return () => {
-      listener.subscription.unsubscribe();
+      data.subscription.unsubscribe();
     };
   }, []);
 
   return (
     <main className="page">
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
       <header className="header">
         <a href="/" className="brand">
-          <div className="brandLogo">
+          <div className="brandIcon">
             <QrLogo />
           </div>
 
-          <div className="brandText">
+          <div className="brandCopy">
             <strong>QR RETURN</strong>
             <span>SMART LOST &amp; FOUND</span>
           </div>
@@ -133,14 +163,14 @@ export default function HomePage() {
                     : "Create Account"}
                 </a>
 
-                <a href="/login" className="loginButton">
+                <a href="/login" className="loginLink">
                   {ka ? "შესვლა" : "Sign In"}
                 </a>
               </>
             )}
           </nav>
 
-          <div className="languageSwitch">
+          <div className="language">
             <button
               type="button"
               className={ka ? "active" : ""}
@@ -148,6 +178,8 @@ export default function HomePage() {
             >
               GEO
             </button>
+
+            <span />
 
             <button
               type="button"
@@ -160,67 +192,110 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* HERO */}
+      {/* =====================================================
+          HERO — EMERGENCY + PHONE
+      ====================================================== */}
 
       <section className="hero">
-        <div className="heroBackground heroBgOne" />
-        <div className="heroBackground heroBgTwo" />
+        <div className="heroGlow glowOne" />
+        <div className="heroGlow glowTwo" />
 
         <div className="heroInner">
-          <div className="heroContent">
-            {/* EMERGENCY MINI CARD */}
+          {/* LEFT: EMERGENCY */}
 
-            <div className="emergencyMiniCard">
-              <div className="emergencyMiniIcon">+</div>
+          <section className="emergencyHero">
+            <div className="emergencyTop">
+              <div className="medicalLogo">+</div>
 
-              <div className="emergencyMiniCopy">
-                <span>QR RETURN EMERGENCY ID</span>
-
-                <strong>
-                  {ka
-                    ? "საგანგებო ინფორმაცია — ერთი სკანით"
-                    : "Essential information — one scan away"}
-                </strong>
-
-                <small>
-                  {ka
-                    ? "Emergency Contact • Medical Info • No App"
-                    : "Emergency Contact • Medical Info • No App"}
-                </small>
+              <div>
+                <span>QR RETURN</span>
+                <strong>EMERGENCY ID</strong>
               </div>
-
-              <ArrowIcon />
-            </div>
-
-            <div className="eyebrow">
-              SMART LOST &amp; FOUND
             </div>
 
             <h1>
-              {ka ? (
-                <>
-                  დაკარგულ ნივთსა თუ
-                  <br />
-                  ცხოველს ჰქონდეს
-                  <br />
-                  <span>შენამდე დაბრუნების გზა.</span>
-                </>
-              ) : (
-                <>
-                  Give lost pets and
-                  <br />
-                  personal items
-                  <br />
-                  <span>a clear way back to you.</span>
-                </>
-              )}
+              {ka
+                ? "მნიშვნელოვანი ინფორმაცია მაშინ, როცა ყველაზე მეტად გჭირდება."
+                : "Essential information when it matters most."}
             </h1>
 
-            <p className="heroDescription">
+            <p className="emergencyLead">
               {ka
-                ? "QR RETURN აკავშირებს მპოვნელს და მფლობელს სწრაფად, უსაფრთხოდ და დამატებითი აპლიკაციის გარეშე."
-                : "QR RETURN connects finders and owners quickly, securely and without requiring another app."}
+                ? "Emergency ID ადამიანებისთვის. ერთი QR სკანი საკმარისია თქვენ მიერ ნებადართული საგანგებო და სამედიცინო ინფორმაციის სანახავად."
+                : "Emergency ID for people. One QR scan gives access to the emergency and medical information you choose to share."}
             </p>
+
+            <div className="emergencyFeatures">
+              <div>
+                <span className="emergencyFeatureIcon">
+                  <UserIcon />
+                </span>
+
+                <div>
+                  <strong>
+                    {ka
+                      ? "საგანგებო კონტაქტი"
+                      : "Emergency Contact"}
+                  </strong>
+                  <small>
+                    {ka
+                      ? "თქვენ მიერ არჩეული პირი"
+                      : "Your trusted contact"}
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <span className="emergencyFeatureIcon">
+                  <HeartIcon />
+                </span>
+
+                <div>
+                  <strong>
+                    {ka
+                      ? "სამედიცინო ინფორმაცია"
+                      : "Medical Information"}
+                  </strong>
+                  <small>
+                    {ka
+                      ? "მხოლოდ საჭირო ინფორმაცია"
+                      : "Only what you choose"}
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <span className="emergencyFeatureIcon">
+                  <ScanIcon />
+                </span>
+
+                <div>
+                  <strong>
+                    {ka ? "აპის გარეშე" : "No App Required"}
+                  </strong>
+                  <small>
+                    {ka
+                      ? "უბრალოდ დაასკანერე QR"
+                      : "Simply scan the QR"}
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <span className="emergencyFeatureIcon">
+                  <ShieldIcon />
+                </span>
+
+                <div>
+                  <strong>Privacy Control</strong>
+                  <small>
+                    {ka
+                      ? "თქვენ აკონტროლებთ მონაცემებს"
+                      : "You control your information"}
+                  </small>
+                </div>
+              </div>
+            </div>
 
             <div className="heroActions">
               <a
@@ -229,7 +304,7 @@ export default function HomePage() {
                     ? "/account"
                     : "/account/register"
                 }
-                className="primaryButton"
+                className="primaryCta"
               >
                 <span>
                   {isLoggedIn
@@ -244,217 +319,188 @@ export default function HomePage() {
                 <ArrowIcon />
               </a>
 
-              <a href="#how" className="secondaryButton">
+              <a href="#how" className="secondaryCta">
                 {ka ? "როგორ მუშაობს" : "How it works"}
               </a>
             </div>
 
-            <div className="heroProof">
-              <div>
-                <ShieldIcon />
-                <span>
-                  {ka
-                    ? "პირადი მონაცემების კონტროლი"
-                    : "Privacy control"}
-                </span>
-              </div>
+            <div className="emergencyHint">
+              <span className="pulse" />
 
-              <div>
-                <ScanIcon />
-                <span>
-                  {ka ? "აპის გარეშე" : "No app required"}
-                </span>
-              </div>
-
-              <div>
-                <ChatIcon />
-                <span>Live Chat</span>
-              </div>
+              {ka
+                ? "QR Emergency ID • ადამიანებისთვის"
+                : "QR Emergency ID • For people"}
             </div>
-          </div>
+          </section>
 
-          {/* PHONE PRODUCT VISUAL */}
+          {/* RIGHT: PHONE */}
 
-          <div className="phoneStage">
-            <div className="phoneGlow" />
+          <section className="phoneVisual">
+            <div className="phoneLight" />
 
             <div className="phone">
-              <div className="phoneNotch" />
+              <div className="phoneOuter">
+                <div className="phoneNotch" />
 
-              <div className="phoneScreen">
-                <div className="phoneHeader">
-                  <div className="phoneBrand">
-                    <div className="phoneBrandLogo">
+                <div className="phoneScreen">
+                  <div className="screenBrand">
+                    <div className="screenLogo">
                       <QrLogo />
                     </div>
 
                     <div>
                       <span>QR RETURN</span>
                       <strong>
-                        {ka ? "დაცული პროფილი" : "Protected profile"}
+                        {ka
+                          ? "დაცული პროფილი"
+                          : "Protected Profile"}
                       </strong>
                     </div>
                   </div>
 
-                  <div className="activeBadge">
-                    <i />
-                    ACTIVE
-                  </div>
-                </div>
-
-                <div className="finderProfile">
-                  <div className="profileAvatar">
-                    <DogIcon />
+                  <div className="screenQr">
+                    <QrCode />
                   </div>
 
-                  <div className="profileCopy">
-                    <span>
-                      {ka ? "დაკარგული ძაღლი" : "LOST DOG"}
-                    </span>
-
-                    <strong>Toby</strong>
-
-                    <p>
-                      {ka
-                        ? "მე დავიკარგე. გთხოვთ დაუკავშირდეთ ჩემს პატრონს."
-                        : "I am lost. Please contact my owner."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="phoneActions">
-                  <div className="phoneAction primary">
-                    <ChatIcon />
-                    <span>Live Chat</span>
+                  <div className="screenTitle">
+                    {ka
+                      ? "დაასკანერე დასაბრუნებლად"
+                      : "SCAN TO RETURN"}
                   </div>
 
-                  <div className="phoneAction">
-                    <LocationIcon />
-                    <span>
-                      {ka ? "ლოკაცია" : "Location"}
-                    </span>
+                  <div className="screenSubtitle">
+                    {ka
+                      ? "აპის გარეშე"
+                      : "No app required"}
                   </div>
-                </div>
 
-                <div className="phonePrivacy">
-                  <ShieldIcon />
+                  <div className="screenBottom">
+                    <div>
+                      <ShieldIcon />
 
-                  <div>
-                    <span>
-                      {ka
-                        ? "მფლობელის მონაცემები დაცულია"
-                        : "Owner information protected"}
-                    </span>
+                      <span>
+                        {ka
+                          ? "დაცული ინფორმაცია"
+                          : "Protected"}
+                      </span>
+                    </div>
 
-                    <small>
-                      {ka
-                        ? "ნაჩვენებია მხოლოდ ნებადართული ინფორმაცია"
-                        : "Only approved information is visible"}
-                    </small>
+                    <div>
+                      <ChatIcon />
+
+                      <span>Live Chat</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="floatingFinder">
-              <div className="floatingIcon">
+            <div className="liveFloating">
+              <div className="floatingCircle">
                 <ChatIcon />
               </div>
 
               <div>
                 <span>LIVE CHAT</span>
-
                 <strong>
                   {ka
-                    ? "მპოვნელმა მოგწერათ"
-                    : "Finder sent a message"}
+                    ? "მპოვნელთან პირდაპირი კავშირი"
+                    : "Direct finder contact"}
                 </strong>
               </div>
 
               <i />
             </div>
 
-            <div className="floatingMap">
-              <LocationIcon />
+            <div className="locationFloating">
+              <div className="floatingCircle locationCircle">
+                <LocationIcon />
+              </div>
 
               <div>
                 <span>LOCATION</span>
                 <strong>
-                  {ka ? "გაზიარებულია" : "Shared"}
+                  {ka ? "ერთი ღილაკით" : "One tap"}
                 </strong>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </section>
 
-      {/* USE CASES */}
+      {/* =====================================================
+          6 PRODUCT PHOTO SHOWCASE
+      ====================================================== */}
 
-      <section className="useCases">
+      <section className="productsSection">
         <div className="sectionShell">
-          <div className="useCasesHeader">
+          <div className="productsHeader">
             <div>
-              <div className="sectionLabel">
-                PROTECT WHAT MATTERS
-              </div>
+              <span className="sectionEyebrow">
+                QR RETURN
+              </span>
 
               <h2>
                 {ka
-                  ? "ერთი ანგარიში. ბევრი შესაძლებლობა."
-                  : "One account. Many possibilities."}
+                  ? "დაიცავით ის, რაც მნიშვნელოვანია."
+                  : "Protect what matters."}
               </h2>
             </div>
 
             <p>
               {ka
-                ? "QR RETURN შეგიძლიათ გამოიყენოთ ცხოველებისთვის და ყოველდღიური ნივთებისთვის. რეალური პროფილის შექმნა ხდება მხოლოდ თქვენი ანგარიშის შიგნით."
-                : "Use QR RETURN for pets and everyday items. Actual profiles are created only inside your account."}
+                ? "ერთი QR RETURN ანგარიში თქვენი ცხოველებისა და ყოველდღიური ნივთებისთვის."
+                : "One QR RETURN account for your pets and everyday belongings."}
             </p>
           </div>
 
-          <div className="useCaseRail">
-            {protectionItems.map((item, index) => (
-              <div className="useCaseItem" key={item.type}>
-                <div className="useCaseTop">
-                  <span>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
+          <div className="productGrid">
+            {products.map((product) => (
+              <article
+                className="productCard"
+                key={product.id}
+              >
+                <img
+                  src={product.image}
+                  alt={ka ? product.ka : product.en}
+                />
 
-                  <div className="useCaseIcon">
-                    <ProtectionIcon type={item.type} />
-                  </div>
+                <div className="productShade" />
+
+                <div className="productQrTag">
+                  <MiniQr />
                 </div>
 
-                <strong>
-                  {ka ? item.ka : item.en}
-                </strong>
-              </div>
+                <div className="productLabel">
+                  <strong>
+                    {ka ? product.ka : product.en}
+                  </strong>
+
+                  <span>QR RETURN</span>
+                </div>
+              </article>
             ))}
           </div>
 
-          <div className="accountBar">
-            <div className="accountBarIcon">
+          <div className="profilesNotice">
+            <div className="noticeIcon">
               <UserIcon />
             </div>
 
-            <div className="accountBarCopy">
-              <span>
-                {ka
-                  ? "OWNER ACCOUNT"
-                  : "OWNER ACCOUNT"}
-              </span>
+            <div>
+              <span>OWNER ACCOUNT</span>
 
               <strong>
                 {ka
-                  ? "ყველა პროფილი ერთ სივრცეში"
-                  : "All profiles in one place"}
+                  ? "პროფილების შექმნა და მართვა ხდება თქვენი ანგარიშიდან."
+                  : "Create and manage profiles from your account."}
               </strong>
             </div>
 
             <p>
               {ka
-                ? "შექმენით, მართეთ და განაახლეთ თქვენი QR პროფილები ერთი ანგარიშიდან."
-                : "Create, manage and update all your QR profiles from one account."}
+                ? "ძაღლი, კატა, გასაღები, საფულე, ჩემოდანი და ჩანთა — ყველაფერი ერთ სივრცეში."
+                : "Dog, cat, keys, wallet, luggage and bag — all in one place."}
             </p>
 
             <a
@@ -464,15 +510,13 @@ export default function HomePage() {
                   : "/account/register"
               }
             >
-              <span>
-                {isLoggedIn
-                  ? ka
-                    ? "ჩემი ანგარიში"
-                    : "My Account"
-                  : ka
-                    ? "ანგარიშის შექმნა"
-                    : "Create Account"}
-              </span>
+              {isLoggedIn
+                ? ka
+                  ? "ჩემი ანგარიში"
+                  : "My Account"
+                : ka
+                  ? "ანგარიშის შექმნა"
+                  : "Create Account"}
 
               <ArrowIcon />
             </a>
@@ -480,31 +524,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* =====================================================
+          HOW IT WORKS
+      ====================================================== */}
 
       <section id="how" className="howSection">
         <div className="sectionShell">
-          <div className="howHeader">
-            <div className="sectionLabel">
-              SIMPLE BY DESIGN
-            </div>
+          <div className="simpleHeader">
+            <span className="sectionEyebrow">
+              HOW IT WORKS
+            </span>
 
             <h2>
               {ka
-                ? "მარტივი გზა დაკარგულიდან დაბრუნებამდე."
-                : "A simple path from lost to returned."}
+                ? "მარტივი მფლობელისთვის. მარტივი მპოვნელისთვის."
+                : "Simple for the owner. Simple for the finder."}
             </h2>
-
-            <p>
-              {ka
-                ? "QR RETURN შექმნილია იმისთვის, რომ მფლობელმაც და მპოვნელმაც ზედმეტი ნაბიჯების გარეშე შეძლონ დაკავშირება."
-                : "QR RETURN is designed to help owners and finders connect without unnecessary steps."}
-            </p>
           </div>
 
           <div className="steps">
             <div className="step">
-              <span>01</span>
+              <span className="stepNumber">01</span>
 
               <div className="stepIcon">
                 <UserIcon />
@@ -513,20 +553,22 @@ export default function HomePage() {
               <strong>
                 {ka
                   ? "შექმენით ანგარიში"
-                  : "Create account"}
+                  : "Create Account"}
               </strong>
 
               <p>
                 {ka
-                  ? "ერთი Owner Account თქვენი ყველა QR პროფილისთვის."
-                  : "One Owner Account for all QR profiles."}
+                  ? "ერთი უსაფრთხო Owner Account თქვენი ყველა QR პროფილისთვის."
+                  : "One secure Owner Account for all of your QR profiles."}
               </p>
             </div>
 
-            <div className="stepLine" />
+            <div className="stepArrow">
+              <ArrowIcon />
+            </div>
 
             <div className="step">
-              <span>02</span>
+              <span className="stepNumber">02</span>
 
               <div className="stepIcon">
                 <PlusIcon />
@@ -535,42 +577,44 @@ export default function HomePage() {
               <strong>
                 {ka
                   ? "დაამატეთ პროფილი"
-                  : "Add profile"}
+                  : "Add Profile"}
               </strong>
 
               <p>
                 {ka
-                  ? "აირჩიეთ ცხოველი, ნივთი ან Emergency ID."
-                  : "Choose a pet, item or Emergency ID."}
+                  ? "ანგარიშის შიგნით აირჩიეთ შესაბამისი ცხოველი, ნივთი ან Emergency ID."
+                  : "Choose a pet, item or Emergency ID inside your account."}
               </p>
             </div>
 
-            <div className="stepLine" />
+            <div className="stepArrow">
+              <ArrowIcon />
+            </div>
 
             <div className="step">
-              <span>03</span>
+              <span className="stepNumber">03</span>
 
-              <div className="stepIcon qrIcon">
+              <div className="stepIcon qrLetters">
                 QR
               </div>
 
               <strong>
-                {ka
-                  ? "მიამაგრეთ QR"
-                  : "Attach QR"}
+                {ka ? "მიამაგრეთ QR" : "Attach QR"}
               </strong>
 
               <p>
                 {ka
-                  ? "უნიკალური QR უკავშირდება კონკრეტულ პროფილს."
-                  : "A unique QR connects to one specific profile."}
+                  ? "უნიკალური QR კოდი უკავშირდება კონკრეტულ პროფილს."
+                  : "A unique QR connects directly to the selected profile."}
               </p>
             </div>
 
-            <div className="stepLine" />
+            <div className="stepArrow">
+              <ArrowIcon />
+            </div>
 
             <div className="step">
-              <span>04</span>
+              <span className="stepNumber">04</span>
 
               <div className="stepIcon">
                 <ChatIcon />
@@ -579,49 +623,57 @@ export default function HomePage() {
               <strong>
                 {ka
                   ? "მპოვნელი გიკავშირდებათ"
-                  : "Finder contacts you"}
+                  : "Finder Contacts You"}
               </strong>
 
               <p>
                 {ka
-                  ? "Live Chat, ლოკაციის გაზიარება და თქვენ მიერ არჩეული საკონტაქტო გზა."
-                  : "Live Chat, location sharing and your chosen contact options."}
+                  ? "Live Chat, ლოკაცია და თქვენ მიერ არჩეული სხვა საკონტაქტო მეთოდები."
+                  : "Live Chat, location and the contact options you enable."}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* =====================================================
+          FEATURES
+      ====================================================== */}
 
       <section className="featuresSection">
         <div className="sectionShell">
           <div className="featureHeader">
-            <div className="sectionLabel lightLabel">
-              BUILT AROUND CONTROL
-            </div>
+            <span className="sectionEyebrow">
+              QR RETURN TECHNOLOGY
+            </span>
 
             <h2>
               {ka
-                ? "მარტივი მპოვნელისთვის. კონტროლირებადი თქვენთვის."
-                : "Simple for the finder. Controlled by you."}
+                ? "დაკავშირება ზედმეტი სირთულის გარეშე."
+                : "Connection without unnecessary friction."}
             </h2>
           </div>
 
           <div className="featureGrid">
             {features.map((feature) => (
               <article
-                className="featureItem"
+                className="featureCard"
                 key={feature.number}
               >
-                <div className="featureTop">
+                <div className="featureCardTop">
                   <span>{feature.number}</span>
 
                   <div className="featureIcon">
-                    {feature.number === "01" && <ChatIcon />}
-                    {feature.number === "02" && <LocationIcon />}
-                    {feature.number === "03" && <RewardIcon />}
-                    {feature.number === "04" && <ShieldIcon />}
+                    {feature.icon === "chat" && <ChatIcon />}
+                    {feature.icon === "location" && (
+                      <LocationIcon />
+                    )}
+                    {feature.icon === "reward" && (
+                      <RewardIcon />
+                    )}
+                    {feature.icon === "privacy" && (
+                      <ShieldIcon />
+                    )}
                   </div>
                 </div>
 
@@ -640,28 +692,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* EMERGENCY INFO STRIP */}
+      {/* =====================================================
+          EMERGENCY INFORMATION STRIP
+      ====================================================== */}
 
-      <section className="emergencyInfo">
+      <section className="emergencyStripSection">
         <div className="sectionShell">
-          <div className="emergencyInfoCard">
-            <div className="emergencyInfoMark">
-              +
-            </div>
+          <div className="emergencyStrip">
+            <div className="stripSymbol">+</div>
 
-            <div className="emergencyInfoCopy">
+            <div className="stripCopy">
               <span>QR RETURN EMERGENCY ID</span>
 
               <strong>
                 {ka
-                  ? "საგანგებო ინფორმაცია მაშინ, როცა წამებიც მნიშვნელოვანია."
-                  : "Essential information when every second matters."}
+                  ? "საგანგებო სიტუაციაში მნიშვნელოვანი ინფორმაცია ერთი სკანით."
+                  : "Essential information in an emergency — one scan away."}
               </strong>
 
               <p>
                 {ka
-                  ? "Emergency Contact, Medical Information და Privacy Control ერთ QR პროფილში."
-                  : "Emergency Contact, Medical Information and Privacy Control in one QR profile."}
+                  ? "Emergency Contact • Medical Information • Privacy Control • No App Required"
+                  : "Emergency Contact • Medical Information • Privacy Control • No App Required"}
               </p>
             </div>
 
@@ -672,23 +724,23 @@ export default function HomePage() {
                   : "/account/register"
               }
             >
-              {ka
-                ? "იხილე ანგარიშში"
-                : "View in account"}{" "}
+              {ka ? "იხილეთ მეტი" : "Learn more"}
               <ArrowIcon />
             </a>
           </div>
         </div>
       </section>
 
-      {/* CONTACT */}
+      {/* =====================================================
+          CONTACT
+      ====================================================== */}
 
-      <section id="contact" className="contact">
-        <div className="contactInner">
+      <section id="contact" className="contactSection">
+        <div className="sectionShell contactInner">
           <div>
-            <div className="sectionLabel">
+            <span className="sectionEyebrow">
               CONTACT
-            </div>
+            </span>
 
             <h2>
               {ka ? "დაგვიკავშირდით" : "Contact us"}
@@ -696,44 +748,57 @@ export default function HomePage() {
 
             <p>
               {ka
-                ? "კითხვა გაქვთ QR RETURN-ის, ანგარიშის ან Emergency ID-ის შესახებ? მოგვწერეთ."
-                : "Questions about QR RETURN, accounts or Emergency ID? Send us a message."}
+                ? "კითხვა გაქვთ QR RETURN-ის, ანგარიშის, QR პროფილის ან Emergency ID-ის შესახებ? მოგვწერეთ."
+                : "Questions about QR RETURN, accounts, QR profiles or Emergency ID? Send us a message."}
             </p>
           </div>
 
           <a
-            href="mailto:hello@qrreturn.com"
             className="contactButton"
+            href="mailto:hello@qrreturn.com"
           >
-            <span>
-              {ka ? "მოგვწერეთ" : "Email us"}
-            </span>
-
+            {ka ? "მოგვწერეთ" : "Email us"}
             <ArrowIcon />
           </a>
         </div>
       </section>
 
-      {/* LIVE CHAT */}
+      {/* =====================================================
+          LIVE SUPPORT
+      ====================================================== */}
 
       <SupportLauncher language={language} />
 
-      {/* FOOTER */}
+      {/* =====================================================
+          FOOTER
+      ====================================================== */}
 
       <footer className="footer">
         <div className="footerInner">
-          <div className="footerBrand">
-            <div className="footerLogo">
-              <QrLogo />
+          <div className="footerColumn footerMain">
+            <div className="footerBrand">
+              <div className="footerBrandIcon">
+                <QrLogo />
+              </div>
+
+              <div>
+                <strong>QR RETURN</strong>
+                <span>SMART LOST &amp; FOUND</span>
+              </div>
             </div>
 
-            <div>
-              <strong>QR RETURN</strong>
-              <span>SMART LOST &amp; FOUND</span>
-            </div>
+            <p>
+              {ka
+                ? "მარტივი და უსაფრთხო გზა დაკარგული ნივთებისა და ცხოველების დასაბრუნებლად."
+                : "A simple and secure way to help lost pets and belongings find their way home."}
+            </p>
           </div>
 
-          <div className="footerLinks">
+          <div className="footerColumn">
+            <span className="footerHeading">
+              {ka ? "ნავიგაცია" : "Explore"}
+            </span>
+
             <a href="#how">
               {ka ? "როგორ მუშაობს" : "How it works"}
             </a>
@@ -742,20 +807,37 @@ export default function HomePage() {
               {ka ? "კონტაქტი" : "Contact"}
             </a>
 
+            <a href="/login">
+              {ka ? "შესვლა" : "Sign In"}
+            </a>
+          </div>
+
+          <div className="footerColumn">
+            <span className="footerHeading">
+              {ka ? "ინფორმაცია" : "Information"}
+            </span>
+
             <span>
               {ka ? "კონფიდენციალურობა" : "Privacy"}
             </span>
 
             <span>
-              {ka ? "პირობები" : "Terms"}
+              {ka ? "წესები და პირობები" : "Terms"}
             </span>
+
+            <span>Emergency ID</span>
           </div>
 
-          <div className="copyright">
-            © 2026 QR RETURN
+          <div className="footerColumn footerRight">
+            <strong>QR RETURN</strong>
+            <span>© 2026</span>
           </div>
         </div>
       </footer>
+
+      {/* =====================================================
+          STYLES
+      ====================================================== */}
 
       <style jsx>{`
         :global(*) {
@@ -768,14 +850,14 @@ export default function HomePage() {
 
         :global(body) {
           margin: 0;
-          background: #ffffff;
+          background: #f7f7f5;
         }
 
         .page {
           min-height: 100vh;
           overflow: hidden;
-          background: #ffffff;
-          color: #0b1220;
+          background: #f7f7f5;
+          color: #111827;
           font-family:
             Inter,
             -apple-system,
@@ -785,20 +867,20 @@ export default function HomePage() {
             sans-serif;
         }
 
-        /* HEADER */
+        /* ================= HEADER ================= */
 
         .header {
-          width: calc(100% - 48px);
-          max-width: 1240px;
-          min-height: 84px;
+          width: calc(100% - 52px);
+          max-width: 1320px;
+          min-height: 82px;
           margin: auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 24px;
           position: relative;
-          z-index: 30;
-          border-bottom: 1px solid #edf0f4;
+          z-index: 20;
+          border-bottom: 1px solid rgba(17, 24, 39, 0.08);
         }
 
         .brand {
@@ -808,62 +890,59 @@ export default function HomePage() {
           text-decoration: none;
         }
 
-        .brandLogo {
+        .brandIcon {
           width: 42px;
           height: 42px;
           display: grid;
           place-items: center;
           border-radius: 12px;
-          background: #0b5fff;
+          background: #111827;
           color: white;
-          box-shadow:
-            0 8px 22px
-            rgba(11, 95, 255, 0.18);
         }
 
-        .brandLogo :global(svg) {
-          width: 23px;
-          height: 23px;
+        .brandIcon :global(svg) {
+          width: 22px;
+          height: 22px;
         }
 
-        .brandText strong,
-        .brandText span {
+        .brandCopy strong,
+        .brandCopy span {
           display: block;
         }
 
-        .brandText strong {
-          color: #0b5fff;
+        .brandCopy strong {
+          color: #111827;
           font-size: 18px;
           font-weight: 850;
-          letter-spacing: -0.6px;
+          letter-spacing: -0.5px;
         }
 
-        .brandText span {
+        .brandCopy span {
           margin-top: 3px;
-          color: #98a2b3;
-          font-size: 6.5px;
-          font-weight: 900;
+          color: #8b93a1;
+          font-size: 6px;
+          font-weight: 850;
           letter-spacing: 2px;
         }
 
         .headerRight,
         .nav,
-        .languageSwitch {
+        .language {
           display: flex;
           align-items: center;
         }
 
         .headerRight {
-          gap: 12px;
+          gap: 15px;
         }
 
         .nav {
-          gap: 7px;
+          gap: 8px;
         }
 
         .adminLink,
         .accountButton,
-        .loginButton {
+        .loginLink {
           min-height: 38px;
           padding: 0 13px;
           display: inline-flex;
@@ -873,846 +952,764 @@ export default function HomePage() {
           border-radius: 10px;
           text-decoration: none;
           font-size: 10px;
-          font-weight: 850;
+          font-weight: 800;
           white-space: nowrap;
         }
 
         .adminLink {
-          color: #5946c6;
-          background: #f6f4ff;
-          border: 1px solid #e3defe;
+          color: #454f5f;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(17, 24, 39, 0.1);
         }
 
-        .adminLink :global(svg) {
+        .adminLink :global(svg),
+        .accountButton :global(svg) {
           width: 13px;
           height: 13px;
         }
 
         .accountButton {
           color: white;
-          background: #0b5fff;
-          border: 1px solid #0b5fff;
+          background: #111827;
+          border: 1px solid #111827;
           box-shadow:
-            0 6px 17px
-            rgba(11, 95, 255, 0.14);
+            0 7px 18px rgba(17, 24, 39, 0.11);
         }
 
-        .accountButton :global(svg) {
-          width: 13px;
-          height: 13px;
-        }
-
-        .loginButton {
-          color: #344054;
-          background: white;
-          border: 1px solid #e4e7ec;
-        }
-
-        .languageSwitch {
-          padding: 3px;
-          border-radius: 9px;
-          background: #f2f4f7;
-        }
-
-        .languageSwitch button {
-          width: 40px;
-          height: 30px;
-          border: 0;
-          border-radius: 7px;
+        .loginLink {
+          color: #374151;
           background: transparent;
-          color: #98a2b3;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 0.6px;
+          border: 1px solid rgba(17, 24, 39, 0.11);
+        }
+
+        .language {
+          gap: 7px;
+        }
+
+        .language span {
+          width: 1px;
+          height: 12px;
+          background: #d6d9df;
+        }
+
+        .language button {
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #9ba1ab;
+          font-size: 8px;
+          font-weight: 850;
           cursor: pointer;
         }
 
-        .languageSwitch button.active {
-          color: #0b5fff;
-          background: white;
-          box-shadow:
-            0 2px 7px
-            rgba(16, 24, 40, 0.07);
+        .language button.active {
+          color: #e5484d;
         }
 
-        /* COMMON */
+        /* ================= COMMON ================= */
 
         .sectionShell {
-          width: calc(100% - 48px);
-          max-width: 1160px;
+          width: calc(100% - 52px);
+          max-width: 1220px;
           margin: auto;
         }
 
-        .sectionLabel,
-        .eyebrow {
-          color: #0b5fff;
-          font-size: 8px;
+        .sectionEyebrow {
+          color: #e5484d;
+          font-size: 7px;
           font-weight: 900;
-          letter-spacing: 2.3px;
+          letter-spacing: 2px;
         }
 
-        /* HERO */
+        /* ================= HERO ================= */
 
         .hero {
           min-height: 650px;
           position: relative;
           overflow: hidden;
-          border-bottom: 1px solid #edf0f4;
+          background:
+            linear-gradient(
+              120deg,
+              #f8f7f4 0%,
+              #f1f2f2 52%,
+              #e9eaeb 100%
+            );
+          border-bottom: 1px solid rgba(17, 24, 39, 0.07);
         }
 
         .heroInner {
-          width: calc(100% - 48px);
+          width: calc(100% - 52px);
           max-width: 1240px;
           min-height: 650px;
           margin: auto;
           display: grid;
-          grid-template-columns: 1fr 0.92fr;
+          grid-template-columns: 0.93fr 1.07fr;
           align-items: center;
-          gap: 70px;
+          gap: 65px;
           position: relative;
           z-index: 2;
         }
 
-        .heroBackground {
+        .heroGlow {
           position: absolute;
-          border-radius: 50%;
           pointer-events: none;
+          border-radius: 50%;
         }
 
-        .heroBgOne {
-          width: 520px;
-          height: 520px;
+        .glowOne {
+          width: 540px;
+          height: 540px;
           right: -180px;
-          top: -230px;
+          top: -170px;
           background:
             radial-gradient(
               circle,
-              rgba(11, 95, 255, 0.1),
-              rgba(11, 95, 255, 0)
+              rgba(70, 92, 122, 0.13),
+              transparent 68%
             );
         }
 
-        .heroBgTwo {
-          width: 380px;
-          height: 380px;
-          left: -190px;
-          bottom: -220px;
+        .glowTwo {
+          width: 360px;
+          height: 360px;
+          left: -200px;
+          bottom: -170px;
           background:
             radial-gradient(
               circle,
-              rgba(81, 69, 205, 0.06),
-              rgba(81, 69, 205, 0)
+              rgba(229, 72, 77, 0.08),
+              transparent 70%
             );
         }
 
-        .heroContent {
-          max-width: 650px;
-        }
+        /* EMERGENCY HERO */
 
-        .emergencyMiniCard {
-          width: min(100%, 425px);
-          min-height: 76px;
-          margin-bottom: 28px;
-          padding: 12px 14px;
-          display: grid;
-          grid-template-columns: auto 1fr auto;
-          align-items: center;
-          gap: 11px;
-          border: 1px solid #f1d8db;
-          border-radius: 16px;
+        .emergencyHero {
+          max-width: 500px;
+          padding: 34px;
+          border: 1px solid rgba(229, 72, 77, 0.25);
+          border-radius: 27px;
           background:
-            linear-gradient(
-              110deg,
-              #fffafa,
-              #ffffff
-            );
+            rgba(255, 255, 255, 0.74);
           box-shadow:
-            0 10px 30px
-            rgba(60, 33, 38, 0.035);
+            0 22px 60px rgba(67, 51, 53, 0.08);
+          backdrop-filter: blur(18px);
         }
 
-        .emergencyMiniIcon {
-          width: 42px;
-          height: 42px;
+        .emergencyTop {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .medicalLogo {
+          width: 49px;
+          height: 49px;
           display: grid;
           place-items: center;
-          border-radius: 12px;
+          border-radius: 14px;
           background: #e5484d;
           color: white;
-          font-size: 25px;
+          font-size: 31px;
           line-height: 1;
+          box-shadow:
+            0 10px 28px rgba(229, 72, 77, 0.24);
         }
 
-        .emergencyMiniCopy span,
-        .emergencyMiniCopy strong,
-        .emergencyMiniCopy small {
+        .emergencyTop span,
+        .emergencyTop strong {
           display: block;
         }
 
-        .emergencyMiniCopy span {
-          color: #b4232d;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1.3px;
-        }
-
-        .emergencyMiniCopy strong {
-          margin-top: 3px;
-          color: #344054;
-          font-size: 10px;
-          line-height: 1.35;
-        }
-
-        .emergencyMiniCopy small {
-          margin-top: 3px;
-          color: #98a2b3;
-          font-size: 7px;
-        }
-
-        .emergencyMiniCard :global(svg) {
-          width: 13px;
-          height: 13px;
+        .emergencyTop span {
           color: #e5484d;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
         }
 
-        .hero h1 {
-          margin: 18px 0 0;
-          color: #0a1220;
+        .emergencyTop strong {
+          margin-top: 4px;
+          color: #111827;
+          font-size: 16px;
+          letter-spacing: -0.3px;
+        }
+
+        .emergencyHero h1 {
+          margin: 27px 0 0;
+          max-width: 430px;
+          color: #111827;
           font-size:
-            clamp(42px, 5vw, 61px);
-          line-height: 1.04;
-          letter-spacing: -3.2px;
-          font-weight: 760;
+            clamp(30px, 3.8vw, 43px);
+          line-height: 1.08;
+          letter-spacing: -2px;
+          font-weight: 720;
         }
 
-        .hero h1 span {
-          color: #0b5fff;
-        }
-
-        .heroDescription {
-          max-width: 580px;
-          margin: 22px 0 0;
-          color: #667085;
-          font-size: 14px;
+        .emergencyLead {
+          max-width: 440px;
+          margin: 17px 0 0;
+          color: #656d79;
+          font-size: 12px;
           line-height: 1.72;
         }
 
-        .heroActions {
-          margin-top: 28px;
+        .emergencyFeatures {
+          margin-top: 25px;
+          border-top: 1px solid #ebe6e6;
+        }
+
+        .emergencyFeatures > div {
+          min-height: 59px;
           display: flex;
           align-items: center;
+          gap: 12px;
+          border-bottom: 1px solid #ebe6e6;
+        }
+
+        .emergencyFeatureIcon {
+          width: 31px;
+          height: 31px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          background: #fff0f0;
+          color: #e5484d;
+        }
+
+        .emergencyFeatureIcon :global(svg) {
+          width: 15px;
+          height: 15px;
+        }
+
+        .emergencyFeatures strong,
+        .emergencyFeatures small {
+          display: block;
+        }
+
+        .emergencyFeatures strong {
+          color: #293241;
+          font-size: 10px;
+        }
+
+        .emergencyFeatures small {
+          margin-top: 2px;
+          color: #969da8;
+          font-size: 7px;
+        }
+
+        .heroActions {
+          margin-top: 26px;
+          display: flex;
           gap: 9px;
         }
 
-        .primaryButton,
-        .secondaryButton {
-          min-height: 48px;
-          padding: 0 18px;
+        .primaryCta,
+        .secondaryCta {
+          min-height: 44px;
+          padding: 0 15px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 9px;
-          border-radius: 11px;
-          font-size: 10px;
+          gap: 8px;
+          border-radius: 10px;
+          font-size: 9px;
           font-weight: 850;
           text-decoration: none;
         }
 
-        .primaryButton {
+        .primaryCta {
           color: white;
-          background: #0b5fff;
-          box-shadow:
-            0 8px 22px
-            rgba(11, 95, 255, 0.16);
+          background: #111827;
         }
 
-        .primaryButton :global(svg) {
-          width: 13px;
-          height: 13px;
+        .primaryCta :global(svg) {
+          width: 12px;
+          height: 12px;
         }
 
-        .secondaryButton {
-          color: #344054;
-          background: white;
-          border: 1px solid #e4e7ec;
+        .secondaryCta {
+          color: #4b5563;
+          border: 1px solid #dde0e5;
+          background: rgba(255, 255, 255, 0.72);
         }
 
-        .heroProof {
-          margin-top: 27px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 17px;
-        }
-
-        .heroProof > div {
+        .emergencyHint {
+          margin-top: 17px;
           display: flex;
           align-items: center;
-          gap: 6px;
-          color: #7b8797;
-          font-size: 8px;
-          font-weight: 720;
+          gap: 8px;
+          color: #858d99;
+          font-size: 7px;
+          font-weight: 750;
         }
 
-        .heroProof :global(svg) {
-          width: 13px;
-          height: 13px;
-          color: #0b5fff;
+        .pulse {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #e5484d;
+          box-shadow:
+            0 0 0 5px rgba(229, 72, 77, 0.08);
         }
 
         /* PHONE */
 
-        .phoneStage {
-          min-height: 540px;
+        .phoneVisual {
+          min-height: 570px;
           position: relative;
           display: grid;
           place-items: center;
         }
 
-        .phoneGlow {
-          width: 455px;
-          height: 455px;
+        .phoneLight {
+          width: 520px;
+          height: 500px;
           position: absolute;
           border-radius: 50%;
           background:
             radial-gradient(
               circle,
-              rgba(11, 95, 255, 0.11),
-              rgba(11, 95, 255, 0.02) 50%,
-              transparent 72%
+              rgba(60, 76, 98, 0.22),
+              rgba(80, 92, 110, 0.05) 45%,
+              transparent 70%
             );
         }
 
         .phone {
-          width: 272px;
-          height: 525px;
-          padding: 9px;
           position: relative;
           z-index: 3;
-          border-radius: 43px;
-          background: #0a111e;
-          box-shadow:
-            0 42px 95px
-              rgba(17, 39, 70, 0.18),
-            0 3px 10px
-              rgba(16, 24, 40, 0.08);
           transform:
             perspective(1300px)
-            rotateY(-4deg)
-            rotateX(1deg);
+            rotateY(-10deg)
+            rotateX(1deg)
+            rotateZ(3deg);
+        }
+
+        .phoneOuter {
+          width: 280px;
+          height: 535px;
+          padding: 9px;
+          position: relative;
+          border: 1px solid #38404b;
+          border-radius: 44px;
+          background:
+            linear-gradient(
+              145deg,
+              #111821,
+              #02070c
+            );
+          box-shadow:
+            0 42px 90px rgba(20, 26, 34, 0.28);
         }
 
         .phoneNotch {
           width: 75px;
           height: 18px;
           position: absolute;
-          top: 15px;
+          z-index: 4;
+          top: 14px;
           left: 50%;
-          z-index: 5;
           border-radius: 999px;
-          background: #0a111e;
+          background: #05090e;
           transform: translateX(-50%);
         }
 
         .phoneScreen {
           height: 100%;
-          padding: 32px 17px 18px;
+          padding: 34px 19px 19px;
           border-radius: 35px;
           background:
             linear-gradient(
               180deg,
-              #ffffff 0%,
-              #f7faff 100%
+              #0f151e,
+              #080c12
             );
         }
 
-        .phoneHeader {
+        .screenBrand {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 8px;
+          gap: 9px;
         }
 
-        .phoneBrand {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-        }
-
-        .phoneBrandLogo {
-          width: 30px;
-          height: 30px;
+        .screenLogo {
+          width: 33px;
+          height: 33px;
           display: grid;
           place-items: center;
           border-radius: 9px;
-          background: #0b5fff;
+          background: #e5484d;
           color: white;
         }
 
-        .phoneBrandLogo :global(svg) {
-          width: 16px;
-          height: 16px;
-        }
-
-        .phoneBrand span,
-        .phoneBrand strong {
-          display: block;
-        }
-
-        .phoneBrand span {
-          color: #0b5fff;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .phoneBrand strong {
-          margin-top: 2px;
-          color: #344054;
-          font-size: 8px;
-        }
-
-        .activeBadge {
-          padding: 5px 6px;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          border-radius: 999px;
-          background: #ecfdf3;
-          color: #027a48;
-          font-size: 5.5px;
-          font-weight: 900;
-          letter-spacing: 0.6px;
-        }
-
-        .activeBadge i {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: #12b76a;
-        }
-
-        .finderProfile {
-          margin-top: 28px;
-          padding: 20px 15px;
-          display: flex;
-          gap: 12px;
-          border: 1px solid #e8edf3;
-          border-radius: 17px;
-          background: white;
-          box-shadow:
-            0 8px 22px
-            rgba(20, 40, 70, 0.04);
-        }
-
-        .profileAvatar {
-          width: 58px;
-          height: 58px;
-          flex: 0 0 58px;
-          display: grid;
-          place-items: center;
-          border-radius: 16px;
-          background: #eef4ff;
-          color: #26364c;
-        }
-
-        .profileAvatar :global(svg) {
-          width: 31px;
-          height: 31px;
-        }
-
-        .profileCopy span {
-          color: #e5484d;
-          font-size: 5.5px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .profileCopy strong {
-          display: block;
-          margin-top: 3px;
-          color: #101828;
-          font-size: 16px;
-        }
-
-        .profileCopy p {
-          margin: 5px 0 0;
-          color: #7b8797;
-          font-size: 7px;
-          line-height: 1.5;
-        }
-
-        .phoneActions {
-          margin-top: 12px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-        }
-
-        .phoneAction {
-          min-height: 62px;
-          padding: 10px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: space-between;
-          border: 1px solid #e5eaf0;
-          border-radius: 14px;
-          background: white;
-          color: #667085;
-          font-size: 7px;
-          font-weight: 800;
-        }
-
-        .phoneAction.primary {
-          color: white;
-          background: #0b5fff;
-          border-color: #0b5fff;
-        }
-
-        .phoneAction :global(svg) {
+        .screenLogo :global(svg) {
           width: 17px;
           height: 17px;
         }
 
-        .phonePrivacy {
-          margin-top: 12px;
+        .screenBrand span,
+        .screenBrand strong {
+          display: block;
+        }
+
+        .screenBrand span {
+          color: #e5484d;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .screenBrand strong {
+          margin-top: 2px;
+          color: white;
+          font-size: 9px;
+          font-weight: 650;
+        }
+
+        .screenQr {
+          width: 190px;
+          height: 190px;
+          margin: 52px auto 0;
+          display: grid;
+          place-items: center;
+          border-radius: 17px;
+          background: white;
+          box-shadow:
+            0 20px 48px rgba(0, 0, 0, 0.28);
+        }
+
+        .screenTitle {
+          margin-top: 27px;
+          color: white;
+          text-align: center;
+          font-size: 12px;
+          font-weight: 850;
+          letter-spacing: 0.8px;
+        }
+
+        .screenSubtitle {
+          margin-top: 5px;
+          color: #7d8794;
+          text-align: center;
+          font-size: 7px;
+        }
+
+        .screenBottom {
+          margin-top: 31px;
+          padding-top: 15px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          border-top: 1px solid #212833;
+        }
+
+        .screenBottom > div {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #818b98;
+          font-size: 6px;
+        }
+
+        .screenBottom :global(svg) {
+          width: 12px;
+          height: 12px;
+          color: #e5484d;
+        }
+
+        .liveFloating,
+        .locationFloating {
+          position: absolute;
+          z-index: 5;
           padding: 11px;
           display: flex;
           align-items: center;
           gap: 9px;
-          border-radius: 13px;
-          background: #f2f5f9;
-        }
-
-        .phonePrivacy :global(svg) {
-          width: 17px;
-          height: 17px;
-          color: #0b5fff;
-        }
-
-        .phonePrivacy span,
-        .phonePrivacy small {
-          display: block;
-        }
-
-        .phonePrivacy span {
-          color: #344054;
-          font-size: 7px;
-          font-weight: 800;
-        }
-
-        .phonePrivacy small {
-          margin-top: 2px;
-          color: #98a2b3;
-          font-size: 5.5px;
-        }
-
-        .floatingFinder,
-        .floatingMap {
-          position: absolute;
-          z-index: 5;
-          border: 1px solid rgba(226, 231, 238, 0.95);
-          background: rgba(255, 255, 255, 0.96);
-          backdrop-filter: blur(18px);
-          box-shadow:
-            0 18px 45px
-            rgba(29, 52, 85, 0.11);
-        }
-
-        .floatingFinder {
-          width: 220px;
-          min-height: 68px;
-          left: -35px;
-          bottom: 70px;
-          padding: 11px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.7);
           border-radius: 15px;
+          background:
+            rgba(255, 255, 255, 0.88);
+          box-shadow:
+            0 18px 42px rgba(38, 46, 57, 0.13);
+          backdrop-filter: blur(18px);
         }
 
-        .floatingIcon {
-          width: 38px;
-          height: 38px;
-          flex: 0 0 38px;
+        .liveFloating {
+          width: 205px;
+          right: -10px;
+          top: 94px;
+        }
+
+        .locationFloating {
+          width: 160px;
+          right: 4px;
+          bottom: 90px;
+        }
+
+        .floatingCircle {
+          width: 37px;
+          height: 37px;
+          flex: 0 0 37px;
           display: grid;
           place-items: center;
           border-radius: 11px;
-          background: #edf4ff;
-          color: #0b5fff;
+          background: #fff0f0;
+          color: #e5484d;
         }
 
-        .floatingIcon :global(svg) {
+        .floatingCircle :global(svg) {
           width: 16px;
           height: 16px;
         }
 
-        .floatingFinder span,
-        .floatingFinder strong {
+        .locationCircle {
+          background: #eef2f7;
+          color: #111827;
+        }
+
+        .liveFloating span,
+        .liveFloating strong,
+        .locationFloating span,
+        .locationFloating strong {
           display: block;
         }
 
-        .floatingFinder span {
-          color: #98a2b3;
+        .liveFloating span,
+        .locationFloating span {
+          color: #9ba2ac;
           font-size: 5.5px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .floatingFinder strong {
+        .liveFloating strong,
+        .locationFloating strong {
           margin-top: 3px;
-          color: #344054;
-          font-size: 9px;
+          color: #323b48;
+          font-size: 8px;
         }
 
-        .floatingFinder > i {
+        .liveFloating > i {
           width: 7px;
           height: 7px;
           margin-left: auto;
           border-radius: 50%;
-          background: #12b76a;
+          background: #22a06b;
         }
 
-        .floatingMap {
-          min-width: 138px;
-          top: 86px;
-          right: -18px;
-          padding: 11px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          border-radius: 13px;
+        /* ================= PRODUCTS ================= */
+
+        .productsSection {
+          padding: 95px 0;
+          background: #fbfbfa;
         }
 
-        .floatingMap :global(svg) {
-          width: 20px;
-          height: 20px;
-          color: #0b5fff;
+        .productsHeader {
+          display: grid;
+          grid-template-columns: 1fr 0.55fr;
+          align-items: end;
+          gap: 80px;
         }
 
-        .floatingMap span,
-        .floatingMap strong {
+        .productsHeader h2,
+        .simpleHeader h2,
+        .featureHeader h2 {
+          margin: 12px 0 0;
+          color: #111827;
+          font-size:
+            clamp(34px, 4.5vw, 49px);
+          line-height: 1.05;
+          letter-spacing: -2.6px;
+          font-weight: 700;
+        }
+
+        .productsHeader > p {
+          margin: 0;
+          color: #6f7783;
+          font-size: 12px;
+          line-height: 1.7;
+        }
+
+        .productGrid {
+          margin-top: 42px;
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 9px;
+        }
+
+        .productCard {
+          min-height: 315px;
+          position: relative;
+          overflow: hidden;
+          border-radius: 19px;
+          background: #20242a;
+          box-shadow:
+            0 12px 35px rgba(17, 24, 39, 0.07);
+        }
+
+        .productCard img {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          inset: 0;
+          object-fit: cover;
+          transition: transform 0.45s ease;
+        }
+
+        .productCard:hover img {
+          transform: scale(1.045);
+        }
+
+        .productShade {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(10, 14, 20, 0.02) 20%,
+              rgba(10, 14, 20, 0.12) 50%,
+              rgba(8, 11, 16, 0.82) 100%
+            );
+        }
+
+        .productQrTag {
+          width: 43px;
+          height: 43px;
+          position: absolute;
+          top: 13px;
+          right: 13px;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.92);
+          box-shadow:
+            0 7px 18px rgba(0, 0, 0, 0.12);
+          backdrop-filter: blur(10px);
+        }
+
+        .productLabel {
+          position: absolute;
+          left: 17px;
+          right: 17px;
+          bottom: 17px;
+        }
+
+        .productLabel strong,
+        .productLabel span {
           display: block;
         }
 
-        .floatingMap span {
-          color: #98a2b3;
-          font-size: 5px;
+        .productLabel strong {
+          color: white;
+          font-size: 14px;
+          letter-spacing: -0.2px;
+        }
+
+        .productLabel span {
+          margin-top: 5px;
+          color: #d2d7de;
+          font-size: 5.5px;
           font-weight: 900;
-          letter-spacing: 0.8px;
+          letter-spacing: 1.5px;
         }
 
-        .floatingMap strong {
-          margin-top: 2px;
-          color: #344054;
-          font-size: 8px;
-        }
-
-        /* USE CASES */
-
-        .useCases {
-          padding: 100px 0;
-          background: #f7f9fc;
-        }
-
-        .useCasesHeader {
-          display: grid;
-          grid-template-columns: 1fr 0.65fr;
-          align-items: end;
-          gap: 70px;
-        }
-
-        .useCasesHeader h2 {
-          margin: 13px 0 0;
-          color: #101828;
-          font-size:
-            clamp(36px, 4.7vw, 53px);
-          line-height: 1.05;
-          letter-spacing: -2.8px;
-          font-weight: 740;
-        }
-
-        .useCasesHeader > p {
-          margin: 0;
-          color: #667085;
-          font-size: 13px;
-          line-height: 1.72;
-        }
-
-        .useCaseRail {
-          margin-top: 48px;
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          overflow: hidden;
-          border: 1px solid #e1e6ed;
-          border-radius: 22px;
-          background: white;
-          box-shadow:
-            0 12px 35px
-            rgba(20, 45, 80, 0.035);
-        }
-
-        .useCaseItem {
-          min-height: 175px;
-          padding: 19px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          border-right: 1px solid #edf0f4;
-        }
-
-        .useCaseItem:last-child {
-          border-right: 0;
-        }
-
-        .useCaseTop {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-        }
-
-        .useCaseTop > span {
-          color: #c1c7d0;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .useCaseIcon {
-          width: 56px;
-          height: 56px;
-          display: grid;
-          place-items: center;
-          border-radius: 15px;
-          background: #f2f5f9;
-          color: #233247;
-        }
-
-        .useCaseIcon :global(svg) {
-          width: 28px;
-          height: 28px;
-        }
-
-        .useCaseItem strong {
-          color: #26364c;
-          font-size: 11px;
-          font-weight: 780;
-        }
-
-        .accountBar {
-          margin-top: 16px;
+        .profilesNotice {
+          margin-top: 14px;
           padding: 17px 19px;
           display: grid;
           grid-template-columns:
             auto auto 1fr auto;
           align-items: center;
           gap: 13px;
-          border: 1px solid #e1e6ed;
+          border: 1px solid #e3e5e8;
           border-radius: 15px;
           background: white;
         }
 
-        .accountBarIcon {
+        .noticeIcon {
           width: 40px;
           height: 40px;
           display: grid;
           place-items: center;
           border-radius: 11px;
-          background: #edf4ff;
-          color: #0b5fff;
+          background: #f0f2f5;
+          color: #111827;
         }
 
-        .accountBarIcon :global(svg) {
+        .noticeIcon :global(svg) {
           width: 17px;
           height: 17px;
         }
 
-        .accountBarCopy span,
-        .accountBarCopy strong {
+        .profilesNotice > div:nth-child(2) span,
+        .profilesNotice > div:nth-child(2) strong {
           display: block;
         }
 
-        .accountBarCopy span {
-          color: #98a2b3;
+        .profilesNotice > div:nth-child(2) span {
+          color: #9aa1ab;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.1px;
         }
 
-        .accountBarCopy strong {
+        .profilesNotice > div:nth-child(2) strong {
           margin-top: 3px;
-          color: #344054;
+          color: #343d4a;
           font-size: 10px;
         }
 
-        .accountBar > p {
+        .profilesNotice > p {
           margin: 0;
-          color: #7b8797;
+          color: #7a828e;
           font-size: 9px;
           line-height: 1.5;
         }
 
-        .accountBar > a {
+        .profilesNotice > a {
           min-height: 38px;
           padding: 0 13px;
           display: inline-flex;
           align-items: center;
           gap: 7px;
           border-radius: 9px;
-          background: #101828;
+          background: #111827;
           color: white;
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 800;
           text-decoration: none;
         }
 
-        .accountBar > a :global(svg) {
-          width: 12px;
-          height: 12px;
+        .profilesNotice > a :global(svg) {
+          width: 11px;
+          height: 11px;
         }
 
-        /* HOW */
+        /* ================= HOW ================= */
 
         .howSection {
           padding: 100px 0;
-          background: white;
+          background: #f1f1ef;
         }
 
-        .howHeader {
-          max-width: 720px;
-        }
-
-        .howHeader h2 {
-          margin: 13px 0 0;
-          color: #101828;
-          font-size:
-            clamp(36px, 4.7vw, 53px);
-          line-height: 1.05;
-          letter-spacing: -2.8px;
-          font-weight: 740;
-        }
-
-        .howHeader > p {
-          margin: 15px 0 0;
-          color: #667085;
-          font-size: 12px;
-          line-height: 1.7;
+        .simpleHeader {
+          max-width: 730px;
         }
 
         .steps {
-          margin-top: 52px;
+          margin-top: 50px;
           display: grid;
           grid-template-columns:
             1fr auto 1fr auto 1fr auto 1fr;
-          align-items: start;
+          align-items: center;
         }
 
         .step {
           min-width: 0;
         }
 
-        .step > span {
-          color: #b8c0cb;
+        .stepNumber {
+          color: #a9afb8;
           font-size: 7px;
           font-weight: 900;
         }
@@ -1723,13 +1720,10 @@ export default function HomePage() {
           margin-top: 14px;
           display: grid;
           place-items: center;
-          border: 1px solid #e2e7ee;
+          border: 1px solid #dce0e4;
           border-radius: 13px;
-          background: #ffffff;
-          color: #0b5fff;
-          box-shadow:
-            0 6px 18px
-            rgba(20, 40, 70, 0.035);
+          background: #fbfbfa;
+          color: #111827;
         }
 
         .stepIcon :global(svg) {
@@ -1737,262 +1731,250 @@ export default function HomePage() {
           height: 18px;
         }
 
-        .qrIcon {
+        .qrLetters {
           font-size: 9px;
           font-weight: 900;
         }
 
         .step > strong {
           display: block;
-          margin-top: 18px;
-          color: #26364c;
+          margin-top: 17px;
+          color: #28313d;
           font-size: 11px;
-          font-weight: 800;
         }
 
         .step > p {
           margin: 6px 0 0;
-          color: #7b8797;
-          font-size: 9px;
+          color: #7b838f;
+          font-size: 8.5px;
           line-height: 1.6;
         }
 
-        .stepLine {
-          width: 55px;
-          height: 1px;
-          margin: 36px 16px 0;
-          background: #e1e6ed;
+        .stepArrow {
+          width: 50px;
+          margin: 0 16px;
+          color: #c4c8ce;
         }
 
-        /* FEATURES */
+        .stepArrow :global(svg) {
+          width: 17px;
+          height: 17px;
+        }
+
+        /* ================= FEATURES ================= */
 
         .featuresSection {
-          padding: 100px 0;
-          background: #0d1523;
+          padding: 95px 0;
+          background: #ffffff;
         }
 
-        .lightLabel {
-          color: #8cb3ff;
-        }
-
-        .featureHeader h2 {
-          max-width: 760px;
-          margin: 13px 0 0;
-          color: white;
-          font-size:
-            clamp(36px, 4.7vw, 52px);
-          line-height: 1.05;
-          letter-spacing: -2.8px;
-          font-weight: 730;
+        .featureHeader {
+          max-width: 720px;
         }
 
         .featureGrid {
-          margin-top: 46px;
+          margin-top: 43px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          border-top:
-            1px solid rgba(255, 255, 255, 0.1);
-          border-bottom:
-            1px solid rgba(255, 255, 255, 0.1);
+          overflow: hidden;
+          border-top: 1px solid #e2e5e8;
+          border-bottom: 1px solid #e2e5e8;
         }
 
-        .featureItem {
-          min-height: 210px;
-          padding: 24px 21px;
-          border-right:
-            1px solid rgba(255, 255, 255, 0.1);
+        .featureCard {
+          min-height: 205px;
+          padding: 23px 20px;
+          border-right: 1px solid #e2e5e8;
         }
 
-        .featureItem:last-child {
+        .featureCard:last-child {
           border-right: 0;
         }
 
-        .featureTop {
+        .featureCardTop {
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        .featureTop > span {
-          color: #657184;
+        .featureCardTop > span {
+          color: #aeb4bc;
           font-size: 7px;
           font-weight: 900;
         }
 
         .featureIcon {
-          width: 36px;
-          height: 36px;
+          width: 37px;
+          height: 37px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.06);
-          color: #8cb3ff;
+          border-radius: 11px;
+          background: #f3f4f5;
+          color: #111827;
         }
 
         .featureIcon :global(svg) {
-          width: 15px;
-          height: 15px;
+          width: 16px;
+          height: 16px;
         }
 
-        .featureItem h3 {
-          margin: 36px 0 0;
-          color: white;
+        .featureCard h3 {
+          margin: 38px 0 0;
+          color: #222b36;
           font-size: 12px;
-          font-weight: 740;
         }
 
-        .featureItem p {
+        .featureCard p {
           margin: 8px 0 0;
-          color: #8b97a7;
+          color: #7b838e;
           font-size: 9px;
           line-height: 1.65;
         }
 
-        /* EMERGENCY INFO */
+        /* ================= EMERGENCY STRIP ================= */
 
-        .emergencyInfo {
-          padding: 72px 0;
-          background: white;
+        .emergencyStripSection {
+          padding: 70px 0;
+          background: #f7f7f5;
         }
 
-        .emergencyInfoCard {
-          min-height: 125px;
+        .emergencyStrip {
+          min-height: 130px;
           padding: 20px 22px;
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
           gap: 16px;
-          border: 1px solid #eedbde;
-          border-radius: 18px;
+          border: 1px solid #efd6d8;
+          border-radius: 20px;
           background:
             linear-gradient(
-              115deg,
-              #fffafa,
+              110deg,
+              #fff6f6,
               #ffffff
             );
         }
 
-        .emergencyInfoMark {
-          width: 48px;
-          height: 48px;
+        .stripSymbol {
+          width: 52px;
+          height: 52px;
           display: grid;
           place-items: center;
-          border-radius: 13px;
+          border-radius: 14px;
           background: #e5484d;
           color: white;
-          font-size: 29px;
+          font-size: 31px;
+          line-height: 1;
         }
 
-        .emergencyInfoCopy span,
-        .emergencyInfoCopy strong,
-        .emergencyInfoCopy p {
+        .stripCopy span,
+        .stripCopy strong,
+        .stripCopy p {
           display: block;
         }
 
-        .emergencyInfoCopy span {
-          color: #b4232d;
+        .stripCopy span {
+          color: #e5484d;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.3px;
         }
 
-        .emergencyInfoCopy strong {
-          margin-top: 4px;
-          color: #344054;
+        .stripCopy strong {
+          margin-top: 5px;
+          color: #313a46;
           font-size: 12px;
         }
 
-        .emergencyInfoCopy p {
-          margin: 4px 0 0;
-          color: #7b8797;
-          font-size: 9px;
+        .stripCopy p {
+          margin: 5px 0 0;
+          color: #7f8792;
+          font-size: 8px;
         }
 
-        .emergencyInfoCard > a {
-          min-height: 38px;
+        .emergencyStrip > a {
+          min-height: 39px;
           padding: 0 13px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          border: 1px solid #e5484d;
           border-radius: 9px;
-          background: #e5484d;
-          color: white;
+          color: #e5484d;
           font-size: 8px;
-          font-weight: 800;
+          font-weight: 850;
           text-decoration: none;
         }
 
-        .emergencyInfoCard > a :global(svg) {
+        .emergencyStrip > a :global(svg) {
           width: 11px;
           height: 11px;
         }
 
-        /* CONTACT */
+        /* ================= CONTACT ================= */
 
-        .contact {
-          padding: 80px 24px;
-          background: #f7f9fc;
+        .contactSection {
+          padding: 76px 0;
+          background: #ececea;
         }
 
         .contactInner {
-          max-width: 1120px;
-          margin: auto;
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
           gap: 55px;
         }
 
-        .contact h2 {
-          margin: 11px 0 10px;
-          color: #101828;
-          font-size: 38px;
+        .contactInner h2 {
+          margin: 11px 0 9px;
+          color: #111827;
+          font-size: 36px;
           letter-spacing: -1.8px;
         }
 
-        .contact p {
+        .contactInner p {
           max-width: 620px;
           margin: 0;
-          color: #667085;
+          color: #6f7782;
           font-size: 11px;
           line-height: 1.7;
         }
 
         .contactButton {
-          min-height: 44px;
-          padding: 0 16px;
+          min-height: 43px;
+          padding: 0 15px;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
           border-radius: 10px;
-          background: #101828;
+          background: #111827;
           color: white;
           font-size: 9px;
-          font-weight: 800;
+          font-weight: 850;
           text-decoration: none;
         }
 
         .contactButton :global(svg) {
-          width: 12px;
-          height: 12px;
+          width: 11px;
+          height: 11px;
         }
 
-        /* FOOTER */
+        /* ================= FOOTER ================= */
 
         .footer {
-          background: #09111d;
+          background: #11151b;
           color: white;
         }
 
         .footerInner {
-          max-width: 1120px;
-          min-height: 135px;
+          max-width: 1220px;
+          min-height: 220px;
           margin: auto;
-          padding: 35px 24px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 30px;
+          padding: 47px 26px;
+          display: grid;
+          grid-template-columns:
+            1.5fr 0.7fr 0.7fr 0.7fr;
+          gap: 50px;
         }
 
         .footerBrand {
@@ -2001,19 +1983,19 @@ export default function HomePage() {
           gap: 10px;
         }
 
-        .footerLogo {
-          width: 35px;
-          height: 35px;
+        .footerBrandIcon {
+          width: 38px;
+          height: 38px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
-          background: #0b5fff;
+          border-radius: 11px;
+          background: #e5484d;
           color: white;
         }
 
-        .footerLogo :global(svg) {
-          width: 19px;
-          height: 19px;
+        .footerBrandIcon :global(svg) {
+          width: 20px;
+          height: 20px;
         }
 
         .footerBrand strong,
@@ -2022,79 +2004,100 @@ export default function HomePage() {
         }
 
         .footerBrand strong {
-          font-size: 12px;
+          color: white;
+          font-size: 14px;
         }
 
         .footerBrand span {
           margin-top: 3px;
-          color: #667386;
-          font-size: 5.5px;
-          font-weight: 800;
-          letter-spacing: 1.5px;
+          color: #737e8d;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
         }
 
-        .footerLinks {
+        .footerMain > p {
+          max-width: 320px;
+          margin: 17px 0 0;
+          color: #7d8795;
+          font-size: 9px;
+          line-height: 1.7;
+        }
+
+        .footerColumn {
           display: flex;
-          flex-wrap: wrap;
-          gap: 22px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 11px;
         }
 
-        .footerLinks a,
-        .footerLinks span {
-          color: #7c8797;
+        .footerHeading {
+          margin-bottom: 4px;
+          color: #e5484d !important;
+          font-size: 6px !important;
+          font-weight: 900 !important;
+          letter-spacing: 1.2px;
+        }
+
+        .footerColumn a,
+        .footerColumn > span {
+          color: #8f98a5;
           font-size: 8px;
-          font-weight: 700;
           text-decoration: none;
         }
 
-        .copyright {
-          color: #586475;
-          font-size: 7px;
+        .footerRight strong {
+          color: white;
+          font-size: 15px;
         }
 
-        /* TABLET */
+        .footerRight span {
+          color: #65707f;
+        }
 
-        @media (max-width: 960px) {
+        /* ================= TABLET ================= */
+
+        @media (max-width: 980px) {
           .heroInner {
             grid-template-columns: 1fr;
-            padding: 70px 0;
+            padding: 60px 0 75px;
           }
 
-          .phoneStage {
+          .emergencyHero {
+            max-width: 620px;
+          }
+
+          .phoneVisual {
             margin-top: 20px;
           }
 
-          .useCasesHeader {
+          .productsHeader {
             grid-template-columns: 1fr;
-            gap: 18px;
+            gap: 16px;
           }
 
-          .useCaseRail {
+          .productGrid {
             grid-template-columns: repeat(3, 1fr);
           }
 
-          .useCaseItem:nth-child(3n) {
-            border-right: 0;
+          .productCard {
+            min-height: 360px;
           }
 
-          .useCaseItem:nth-child(-n + 3) {
-            border-bottom: 1px solid #edf0f4;
-          }
-
-          .accountBar {
+          .profilesNotice {
             grid-template-columns: auto 1fr auto;
           }
 
-          .accountBar > p {
+          .profilesNotice > p {
             grid-column: 2 / -1;
           }
 
           .steps {
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            gap: 28px;
           }
 
-          .stepLine {
+          .stepArrow {
             display: none;
           }
 
@@ -2102,45 +2105,44 @@ export default function HomePage() {
             grid-template-columns: repeat(2, 1fr);
           }
 
-          .featureItem:nth-child(2) {
+          .featureCard:nth-child(2) {
             border-right: 0;
           }
 
-          .featureItem:nth-child(-n + 2) {
-            border-bottom:
-              1px solid rgba(255, 255, 255, 0.1);
+          .featureCard:nth-child(-n + 2) {
+            border-bottom: 1px solid #e2e5e8;
           }
 
-          .contactInner,
-          .footerInner {
-            flex-direction: column;
+          .contactInner {
             align-items: flex-start;
+            flex-direction: column;
+          }
+
+          .footerInner {
+            grid-template-columns: 1fr 1fr;
           }
         }
 
-        /* MOBILE */
+        /* ================= MOBILE ================= */
 
         @media (max-width: 650px) {
           .header {
             width: calc(100% - 18px);
-            min-height: 72px;
+            min-height: 70px;
           }
 
-          .brandText span {
+          .brandCopy span,
+          .language {
             display: none;
           }
 
-          .brandLogo {
-            width: 39px;
-            height: 39px;
+          .brandIcon {
+            width: 38px;
+            height: 38px;
           }
 
-          .brandText strong {
+          .brandCopy strong {
             font-size: 15px;
-          }
-
-          .languageSwitch {
-            display: none;
           }
 
           .adminLink {
@@ -2152,14 +2154,10 @@ export default function HomePage() {
           }
 
           .accountButton,
-          .loginButton {
-            padding: 0 9px;
+          .loginLink {
             min-height: 35px;
-            font-size: 8.5px;
-          }
-
-          .hero {
-            min-height: unset;
+            padding: 0 9px;
+            font-size: 8px;
           }
 
           .heroInner,
@@ -2167,93 +2165,89 @@ export default function HomePage() {
             width: calc(100% - 28px);
           }
 
+          .hero {
+            min-height: unset;
+          }
+
           .heroInner {
             min-height: unset;
-            padding: 55px 0 70px;
+            padding: 45px 0 65px;
           }
 
-          .emergencyMiniCard {
-            margin-bottom: 24px;
+          .emergencyHero {
+            padding: 25px 20px;
           }
 
-          .hero h1 {
-            font-size: 39px;
-            letter-spacing: -2.5px;
-          }
-
-          .heroDescription {
-            font-size: 13px;
+          .emergencyHero h1 {
+            font-size: 30px;
+            letter-spacing: -1.6px;
           }
 
           .heroActions {
-            align-items: stretch;
             flex-direction: column;
+            align-items: stretch;
           }
 
-          .primaryButton,
-          .secondaryButton {
+          .primaryCta,
+          .secondaryCta {
             width: 100%;
           }
 
-          .phoneStage {
-            min-height: 500px;
+          .phoneVisual {
+            min-height: 520px;
           }
 
-          .phone {
+          .phoneOuter {
             width: 245px;
-            height: 485px;
+            height: 490px;
           }
 
-          .floatingFinder {
-            width: 198px;
-            left: -5px;
-            bottom: 45px;
+          .screenQr {
+            width: 165px;
+            height: 165px;
           }
 
-          .floatingMap {
+          .liveFloating {
+            width: 190px;
             right: -5px;
-            top: 58px;
+            top: 70px;
           }
 
-          .useCases,
+          .locationFloating {
+            right: -4px;
+            bottom: 65px;
+          }
+
+          .productsSection,
           .howSection,
           .featuresSection {
-            padding: 78px 0;
+            padding: 74px 0;
           }
 
-          .useCasesHeader h2,
-          .howHeader h2,
+          .productsHeader h2,
+          .simpleHeader h2,
           .featureHeader h2 {
-            font-size: 35px;
-            letter-spacing: -2.1px;
+            font-size: 34px;
+            letter-spacing: -2px;
           }
 
-          .useCaseRail {
+          .productGrid {
             grid-template-columns: repeat(2, 1fr);
           }
 
-          .useCaseItem {
-            border-right: 1px solid #edf0f4;
-            border-bottom: 1px solid #edf0f4;
+          .productCard {
+            min-height: 270px;
           }
 
-          .useCaseItem:nth-child(even) {
-            border-right: 0;
-          }
-
-          .useCaseItem:nth-last-child(-n + 2) {
-            border-bottom: 0;
-          }
-
-          .accountBar {
+          .profilesNotice {
             grid-template-columns: auto 1fr;
           }
 
-          .accountBar > p {
+          .profilesNotice > p {
             grid-column: 1 / -1;
           }
 
-          .accountBar > a {
+          .profilesNotice > a {
             grid-column: 1 / -1;
             justify-content: center;
           }
@@ -2263,37 +2257,40 @@ export default function HomePage() {
             grid-template-columns: 1fr;
           }
 
-          .featureItem,
-          .featureItem:nth-child(2) {
+          .featureCard,
+          .featureCard:nth-child(2) {
             border-right: 0;
-            border-bottom:
-              1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #e2e5e8;
           }
 
-          .featureItem:last-child {
+          .featureCard:last-child {
             border-bottom: 0;
           }
 
-          .emergencyInfo {
-            padding: 55px 0;
+          .emergencyStripSection {
+            padding: 52px 0;
           }
 
-          .emergencyInfoCard {
+          .emergencyStrip {
             grid-template-columns: auto 1fr;
           }
 
-          .emergencyInfoCard > a {
+          .emergencyStrip > a {
             grid-column: 1 / -1;
             justify-content: center;
           }
 
-          .contact {
-            padding: 65px 18px;
+          .contactSection {
+            padding: 60px 0;
           }
 
           .contactButton {
             width: 100%;
             justify-content: center;
+          }
+
+          .footerInner {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -2301,7 +2298,9 @@ export default function HomePage() {
   );
 }
 
-/* ICONS */
+/* ==========================================================
+   ICONS
+========================================================== */
 
 function QrLogo() {
   return (
@@ -2314,7 +2313,7 @@ function QrLogo() {
       <rect x="3" y="3" width="6" height="6" rx="1" />
       <rect x="15" y="3" width="6" height="6" rx="1" />
       <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M14.5 14.5h3v3h3v3h-6z" />
+      <path d="M14 14h3v3h3v4h-6z" />
       <path d="M12 4v4M12 12v2M11 18h2M18 12h3" />
     </svg>
   );
@@ -2421,6 +2420,20 @@ function LocationIcon() {
   );
 }
 
+function HeartIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />
+      <path d="M7.8 12h2l1-2.2 2.1 4.4 1.2-2.2h2" />
+    </svg>
+  );
+}
+
 function RewardIcon() {
   return (
     <svg
@@ -2451,97 +2464,79 @@ function PlusIcon() {
   );
 }
 
-function DogIcon() {
+function QrCode() {
+  const dark = [
+    0, 1, 2, 5, 6,
+    7, 9, 11, 13,
+    14, 16, 18, 20,
+    21, 22, 24, 26,
+    27, 28, 30, 32,
+    34, 35, 36, 38,
+    40, 42, 43, 44,
+    46, 47, 48,
+  ];
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
+    <div
+      style={{
+        width: 145,
+        height: 145,
+        padding: 8,
+        display: "grid",
+        gridTemplateColumns: "repeat(7, 1fr)",
+        gap: 4,
+        background: "#ffffff",
+      }}
     >
-      <circle cx="12" cy="13" r="6" />
-      <path d="M7.5 9 5 5.5v6M16.5 9 19 5.5v6" />
-      <path d="M9.5 14h.01M14.5 14h.01M10 17c1.3 1 2.7 1 4 0" />
-    </svg>
+      {Array.from({ length: 49 }).map((_, index) => (
+        <i
+          key={index}
+          style={{
+            display: "block",
+            borderRadius: 1,
+            background: dark.includes(index)
+              ? "#111827"
+              : "#e4e7ec",
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
-function ProtectionIcon({
-  type,
-}: {
-  type: ProtectType;
-}) {
-  if (type === "dog") {
-    return <DogIcon />;
-  }
-
-  if (type === "cat") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <circle cx="12" cy="13" r="6" />
-        <path d="m7 9 1-5 3 3M17 9l-1-5-3 3" />
-        <path d="M9.5 14h.01M14.5 14h.01M12 15v2" />
-      </svg>
-    );
-  }
-
-  if (type === "keys") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      >
-        <circle cx="8" cy="10" r="4" />
-        <path d="m11 13 8 8M15 17l2-2M18 20l2-2" />
-      </svg>
-    );
-  }
-
-  if (type === "wallet") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      >
-        <path d="M4 6h14a2 2 0 0 1 2 2v10H4z" />
-        <path d="M4 6 16 3v3" />
-        <path d="M15 11h5v4h-5a2 2 0 0 1 0-4Z" />
-      </svg>
-    );
-  }
-
-  if (type === "luggage") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      >
-        <rect x="5" y="6" width="14" height="14" rx="2" />
-        <path d="M9 6V4h6v2M9 10v6M15 10v6M8 22h.01M16 22h.01" />
-      </svg>
-    );
-  }
+function MiniQr() {
+  const dark = [
+    0, 1, 2,
+    4, 6,
+    7, 8,
+    10, 12,
+    14, 15,
+    17, 18,
+    20, 21,
+    22, 24,
+  ];
 
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
+    <div
+      style={{
+        width: 27,
+        height: 27,
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)",
+        gap: 1.5,
+      }}
     >
-      <path d="M5 8h14l1 12H4z" />
-      <path d="M8 8a4 4 0 0 1 8 0" />
-    </svg>
+      {Array.from({ length: 25 }).map((_, index) => (
+        <i
+          key={index}
+          style={{
+            display: "block",
+            background: dark.includes(index)
+              ? "#111827"
+              : "#e0e3e7",
+          }}
+        />
+      ))}
+    </div>
   );
 }
