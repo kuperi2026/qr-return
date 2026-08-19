@@ -109,7 +109,7 @@ export default function PublicProfilePage() {
   }, [profile]);
 
   useEffect(() => {
-    loadProfile();
+    void loadProfile();
   }, [tagCode]);
 
   async function loadProfile() {
@@ -119,6 +119,7 @@ export default function PublicProfilePage() {
           ? "QR კოდი ვერ მოიძებნა."
           : "QR code not found."
       );
+
       setLoading(false);
       return;
     }
@@ -127,13 +128,15 @@ export default function PublicProfilePage() {
     setError("");
 
     try {
-      const { data, error } = await supabase
+      const { data, error: loadError } = await supabase
         .from("item")
         .select("*")
         .eq("tag_code", tagCode)
         .maybeSingle();
 
-      if (error) throw error;
+      if (loadError) {
+        throw loadError;
+      }
 
       if (!data) {
         setError(
@@ -141,6 +144,7 @@ export default function PublicProfilePage() {
             ? "ამ QR კოდზე პროფილი ვერ მოიძებნა."
             : "No profile was found for this QR code."
         );
+
         return;
       }
 
@@ -159,7 +163,9 @@ export default function PublicProfilePage() {
   }
 
   async function shareLocation() {
-    if (!profile || !profile.location_sharing_enabled) return;
+    if (!profile || !profile.location_sharing_enabled) {
+      return;
+    }
 
     if (!navigator.geolocation) {
       setLocationMessage(
@@ -167,6 +173,7 @@ export default function PublicProfilePage() {
           ? "თქვენი მოწყობილობა ლოკაციის გაზიარებას არ უჭერს მხარს."
           : "Your device does not support location sharing."
       );
+
       return;
     }
 
@@ -176,9 +183,13 @@ export default function PublicProfilePage() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const { latitude, longitude, accuracy } = position.coords;
+          const {
+            latitude,
+            longitude,
+            accuracy,
+          } = position.coords;
 
-          const { error } = await supabase
+          const { error: updateError } = await supabase
             .from("item")
             .update({
               last_scan_latitude: latitude,
@@ -189,7 +200,9 @@ export default function PublicProfilePage() {
             .eq("id", profile.id)
             .eq("tag_code", profile.tag_code);
 
-          if (error) throw error;
+          if (updateError) {
+            throw updateError;
+          }
 
           setLocationMessage(
             ka
@@ -210,6 +223,7 @@ export default function PublicProfilePage() {
       },
       () => {
         setLocationLoading(false);
+
         setLocationMessage(
           ka
             ? "ლოკაციაზე წვდომა არ მოგიციათ."
@@ -300,8 +314,16 @@ export default function PublicProfilePage() {
     return (
       <main className="statePage">
         <div className="logo">QR</div>
+
         <h1>QR RETURN</h1>
-        <p>{ka ? "იტვირთება..." : "Loading..."}</p>
+
+        <p>
+          {ka
+            ? "იტვირთება..."
+            : "Loading..."}
+        </p>
+
+        <Styles />
       </main>
     );
   }
@@ -310,6 +332,7 @@ export default function PublicProfilePage() {
     return (
       <main className="statePage">
         <div className="logo">QR</div>
+
         <h1>QR RETURN</h1>
 
         <div className="errorBox">
@@ -319,50 +342,96 @@ export default function PublicProfilePage() {
               : "Profile not found.")}
         </div>
 
-        <a href="/" className="homeButton">
-          {ka ? "მთავარ გვერდზე დაბრუნება" : "Back to home"}
+        <a
+          href="/"
+          className="homeButton"
+        >
+          {ka
+            ? "მთავარ გვერდზე დაბრუნება"
+            : "Back to home"}
         </a>
+
+        <Styles />
       </main>
     );
   }
 
   const type = typeInfo();
-  const lost = Boolean(profile.active);
+
+  const lost = Boolean(
+    profile.active
+  );
 
   const cleanPhone =
-    profile.owner_phone?.replace(/[^\d+]/g, "") ?? "";
+    profile.owner_phone?.replace(
+      /[^\d+]/g,
+      ""
+    ) ?? "";
 
   const whatsappPhone =
-    profile.owner_phone?.replace(/\D/g, "") ?? "";
+    profile.owner_phone?.replace(
+      /\D/g,
+      ""
+    ) ?? "";
 
   const additionalCleanPhone =
-    profile.additional_contact_phone?.replace(/[^\d+]/g, "") ?? "";
+    profile.additional_contact_phone?.replace(
+      /[^\d+]/g,
+      ""
+    ) ?? "";
+
+  const finderChatUrl =
+    `/chat/${type.chatType}/${encodeURIComponent(
+      profile.tag_code
+    )}`;
 
   return (
     <main className="page">
       <header className="header">
-        <a href="/" className="brand">
-          <div className="logo">QR</div>
+        <a
+          href="/"
+          className="brand"
+        >
+          <div className="logo">
+            QR
+          </div>
 
           <div>
-            <strong>QR RETURN</strong>
-            <small>FINDER VIEW</small>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <small>
+              FINDER VIEW
+            </small>
           </div>
         </a>
 
         <div className="languages">
           <button
             type="button"
-            className={ka ? "active" : ""}
-            onClick={() => setLang("ka")}
+            className={
+              ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("ka")
+            }
           >
             GEO
           </button>
 
           <button
             type="button"
-            className={!ka ? "active" : ""}
-            onClick={() => setLang("en")}
+            className={
+              !ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("en")
+            }
           >
             ENG
           </button>
@@ -373,10 +442,14 @@ export default function PublicProfilePage() {
         <div className="profileCard">
           <section className="hero">
             <div className="mainPhotoWrap">
-              {profile.photo && profile.show_photo !== false ? (
+              {profile.photo &&
+              profile.show_photo !== false ? (
                 <img
                   src={profile.photo}
-                  alt={profile.item_name ?? ""}
+                  alt={
+                    profile.item_name ??
+                    ""
+                  }
                   className="mainPhoto"
                 />
               ) : (
@@ -387,7 +460,9 @@ export default function PublicProfilePage() {
 
               <div
                 className={`status ${
-                  lost ? "lost" : "safe"
+                  lost
+                    ? "lost"
+                    : "safe"
                 }`}
               >
                 {lost
@@ -407,22 +482,30 @@ export default function PublicProfilePage() {
 
               <h1>
                 {profile.item_name ||
-                  (ka ? type.ka : type.en)}
+                  (ka
+                    ? type.ka
+                    : type.en)}
               </h1>
 
               <div className="category">
-                {type.icon} {ka ? type.ka : type.en}
+                {type.icon}{" "}
+                {ka
+                  ? type.ka
+                  : type.en}
               </div>
 
               <div className="tagCode">
-                QR · {profile.tag_code}
+                QR ·{" "}
+                {profile.tag_code}
               </div>
             </div>
           </section>
 
           {!lost && (
             <section className="safeNotice">
-              <div className="safeIcon">✓</div>
+              <div className="safeIcon">
+                ✓
+              </div>
 
               <div>
                 <strong>
@@ -443,39 +526,58 @@ export default function PublicProfilePage() {
           <section className="section">
             <SectionTitle
               number="01"
-              title={ka ? "მფლობელი" : "Owner"}
+              title={
+                ka
+                  ? "მფლობელი"
+                  : "Owner"
+              }
             />
 
             <div className="ownerCard">
               {profile.show_owner_photo &&
               profile.owner_photo ? (
                 <img
-                  src={profile.owner_photo}
+                  src={
+                    profile.owner_photo
+                  }
                   alt=""
                   className="ownerPhoto"
                 />
               ) : (
-                <div className="ownerPlaceholder">👤</div>
+                <div className="ownerPlaceholder">
+                  👤
+                </div>
               )}
 
               <div className="ownerInfo">
                 <strong>
                   {profile.owner_name ||
-                    (ka ? "მფლობელი" : "Owner")}
+                    (ka
+                      ? "მფლობელი"
+                      : "Owner")}
                 </strong>
 
                 {profile.owner_phone && (
-                  <p>📞 {profile.owner_phone}</p>
+                  <p>
+                    📞{" "}
+                    {profile.owner_phone}
+                  </p>
                 )}
 
                 {profile.show_owner_email &&
                   profile.owner_email && (
-                    <p>✉️ {profile.owner_email}</p>
+                    <p>
+                      ✉️{" "}
+                      {profile.owner_email}
+                    </p>
                   )}
 
                 {profile.show_owner_address &&
                   profile.owner_address && (
-                    <p>📍 {profile.owner_address}</p>
+                    <p>
+                      📍{" "}
+                      {profile.owner_address}
+                    </p>
                   )}
               </div>
             </div>
@@ -499,8 +601,14 @@ export default function PublicProfilePage() {
               {profile.show_colour !== false &&
                 profile.colour && (
                   <Info
-                    label={ka ? "ფერი" : "Color"}
-                    value={profile.colour}
+                    label={
+                      ka
+                        ? "ფერი"
+                        : "Color"
+                    }
+                    value={
+                      profile.colour
+                    }
                   />
                 )}
 
@@ -508,13 +616,19 @@ export default function PublicProfilePage() {
                 profile.show_sex !== false &&
                 profile.sex && (
                   <Info
-                    label={ka ? "სქესი" : "Sex"}
+                    label={
+                      ka
+                        ? "სქესი"
+                        : "Sex"
+                    }
                     value={
-                      profile.sex === "male"
+                      profile.sex ===
+                      "male"
                         ? ka
                           ? "მამრობითი"
                           : "Male"
-                        : profile.sex === "female"
+                        : profile.sex ===
+                          "female"
                         ? ka
                           ? "მდედრობითი"
                           : "Female"
@@ -524,7 +638,8 @@ export default function PublicProfilePage() {
                 )}
 
               {isPet &&
-                profile.show_date_of_birth !== false &&
+                profile.show_date_of_birth !==
+                  false &&
                 profile.date_of_birth && (
                   <Info
                     label={
@@ -532,58 +647,96 @@ export default function PublicProfilePage() {
                         ? "დაბადების თარიღი"
                         : "Date of birth"
                     }
-                    value={profile.date_of_birth}
+                    value={
+                      profile.date_of_birth
+                    }
                   />
                 )}
 
               {isPet &&
-                profile.show_weight !== false &&
+                profile.show_weight !==
+                  false &&
                 profile.weight && (
                   <Info
-                    label={ka ? "წონა" : "Weight"}
-                    value={profile.weight}
+                    label={
+                      ka
+                        ? "წონა"
+                        : "Weight"
+                    }
+                    value={
+                      profile.weight
+                    }
                   />
                 )}
 
               {!isPet &&
-                profile.show_brand !== false &&
+                profile.show_brand !==
+                  false &&
                 profile.brand && (
                   <Info
-                    label={ka ? "ბრენდი" : "Brand"}
-                    value={profile.brand}
+                    label={
+                      ka
+                        ? "ბრენდი"
+                        : "Brand"
+                    }
+                    value={
+                      profile.brand
+                    }
                   />
                 )}
 
               {!isPet &&
-                profile.show_model !== false &&
+                profile.show_model !==
+                  false &&
                 profile.model && (
                   <Info
-                    label={ka ? "მოდელი" : "Model"}
-                    value={profile.model}
+                    label={
+                      ka
+                        ? "მოდელი"
+                        : "Model"
+                    }
+                    value={
+                      profile.model
+                    }
                   />
                 )}
 
               {!isPet &&
-                profile.show_size !== false &&
+                profile.show_size !==
+                  false &&
                 profile.size && (
                   <Info
-                    label={ka ? "ზომა" : "Size"}
-                    value={profile.size}
+                    label={
+                      ka
+                        ? "ზომა"
+                        : "Size"
+                    }
+                    value={
+                      profile.size
+                    }
                   />
                 )}
 
               {!isPet &&
-                profile.show_material !== false &&
+                profile.show_material !==
+                  false &&
                 profile.material && (
                   <Info
-                    label={ka ? "მასალა" : "Material"}
-                    value={profile.material}
+                    label={
+                      ka
+                        ? "მასალა"
+                        : "Material"
+                    }
+                    value={
+                      profile.material
+                    }
                   />
                 )}
             </div>
 
             {isPet &&
-              profile.show_medical_info !== false &&
+              profile.show_medical_info !==
+                false &&
               profile.medical_info && (
                 <LongInfo
                   label={
@@ -591,12 +744,15 @@ export default function PublicProfilePage() {
                       ? "სამედიცინო ინფორმაცია"
                       : "Medical information"
                   }
-                  value={profile.medical_info}
+                  value={
+                    profile.medical_info
+                  }
                 />
               )}
 
             {isPet &&
-              profile.show_behaviour_note !== false &&
+              profile.show_behaviour_note !==
+                false &&
               profile.behaviour_note && (
                 <LongInfo
                   label={
@@ -604,12 +760,15 @@ export default function PublicProfilePage() {
                       ? "ქცევის შესახებ ინფორმაცია"
                       : "Behaviour information"
                   }
-                  value={profile.behaviour_note}
+                  value={
+                    profile.behaviour_note
+                  }
                 />
               )}
 
             {!isPet &&
-              profile.show_distinctive_features !== false &&
+              profile.show_distinctive_features !==
+                false &&
               profile.distinctive_features && (
                 <LongInfo
                   label={
@@ -617,20 +776,30 @@ export default function PublicProfilePage() {
                       ? "განსაკუთრებული ნიშნები"
                       : "Distinctive features"
                   }
-                  value={profile.distinctive_features}
+                  value={
+                    profile.distinctive_features
+                  }
                 />
               )}
 
-            {profile.show_description !== false &&
+            {profile.show_description !==
+              false &&
               profile.description && (
                 <LongInfo
-                  label={ka ? "აღწერა" : "Description"}
-                  value={profile.description}
+                  label={
+                    ka
+                      ? "აღწერა"
+                      : "Description"
+                  }
+                  value={
+                    profile.description
+                  }
                 />
               )}
           </section>
 
-          {profile.show_finder_message !== false &&
+          {profile.show_finder_message !==
+            false &&
             profile.finder_message && (
               <section className="section">
                 <SectionTitle
@@ -643,7 +812,11 @@ export default function PublicProfilePage() {
                 />
 
                 <div className="finderMessage">
-                  “{profile.finder_message}”
+                  “
+                  {
+                    profile.finder_message
+                  }
+                  ”
                 </div>
               </section>
             )}
@@ -665,19 +838,28 @@ export default function PublicProfilePage() {
                 <div className="additionalCard">
                   {profile.additional_contact_name && (
                     <p>
-                      👤 {profile.additional_contact_name}
+                      👤{" "}
+                      {
+                        profile.additional_contact_name
+                      }
                     </p>
                   )}
 
                   {profile.additional_contact_phone && (
                     <p>
-                      📞 {profile.additional_contact_phone}
+                      📞{" "}
+                      {
+                        profile.additional_contact_phone
+                      }
                     </p>
                   )}
 
                   {profile.additional_contact_email && (
                     <p>
-                      ✉️ {profile.additional_contact_email}
+                      ✉️{" "}
+                      {
+                        profile.additional_contact_email
+                      }
                     </p>
                   )}
 
@@ -713,13 +895,21 @@ export default function PublicProfilePage() {
                       href={`tel:${cleanPhone}`}
                       className="contactButton phone"
                     >
-                      <span>📞</span>
+                      <span>
+                        📞
+                      </span>
+
                       <div>
                         <small>
-                          {ka ? "მობილური" : "Mobile"}
+                          {ka
+                            ? "მობილური"
+                            : "Mobile"}
                         </small>
+
                         <strong>
-                          {ka ? "დარეკვა" : "Call"}
+                          {ka
+                            ? "დარეკვა"
+                            : "Call"}
                         </strong>
                       </div>
                     </a>
@@ -733,11 +923,19 @@ export default function PublicProfilePage() {
                       rel="noopener noreferrer"
                       className="contactButton whatsapp"
                     >
-                      <span>💬</span>
+                      <span>
+                        💬
+                      </span>
+
                       <div>
-                        <small>WhatsApp</small>
+                        <small>
+                          WhatsApp
+                        </small>
+
                         <strong>
-                          {ka ? "დაკავშირება" : "Open"}
+                          {ka
+                            ? "დაკავშირება"
+                            : "Open"}
                         </strong>
                       </div>
                     </a>
@@ -745,15 +943,23 @@ export default function PublicProfilePage() {
 
                 {profile.live_chat_enabled && (
                   <a
-                    href={`/chat/${type.chatType}/${encodeURIComponent(
-                      profile.tag_code
-                    )}`}
+                    href={
+                      finderChatUrl
+                    }
                     className="contactButton chat"
                   >
-                    <span>💬</span>
+                    <span>
+                      💬
+                    </span>
+
                     <div>
-                      <small>QR RETURN</small>
-                      <strong>Live Chat</strong>
+                      <small>
+                        QR RETURN
+                      </small>
+
+                      <strong>
+                        Live Chat
+                      </strong>
                     </div>
                   </a>
                 )}
@@ -761,65 +967,78 @@ export default function PublicProfilePage() {
             </section>
           )}
 
-          {lost && profile.location_sharing_enabled && (
-            <section className="section">
-              <SectionTitle
-                number="06"
-                title={
-                  ka
-                    ? "ლოკაციის გაზიარება"
-                    : "Share location"
-                }
-              />
+          {lost &&
+            profile.location_sharing_enabled && (
+              <section className="section">
+                <SectionTitle
+                  number="06"
+                  title={
+                    ka
+                      ? "ლოკაციის გაზიარება"
+                      : "Share location"
+                  }
+                />
 
-              <div className="locationCard">
-                <div className="locationIcon">📍</div>
+                <div className="locationCard">
+                  <div className="locationIcon">
+                    📍
+                  </div>
 
-                <div className="locationText">
-                  <strong>
-                    {ka
-                      ? "გაუზიარეთ თქვენი ლოკაცია მფლობელს"
-                      : "Share your location with the owner"}
-                  </strong>
+                  <div className="locationText">
+                    <strong>
+                      {ka
+                        ? "გაუზიარეთ თქვენი ლოკაცია მფლობელს"
+                        : "Share your location with the owner"}
+                    </strong>
 
-                  <p>
-                    {ka
-                      ? "ერთი ღილაკით გაუგზავნეთ მფლობელს ადგილი, სადაც QR კოდი დაასკანერეთ."
-                      : "Send the location where you scanned this QR code."}
-                  </p>
+                    <p>
+                      {ka
+                        ? "ერთი ღილაკით გაუგზავნეთ მფლობელს ადგილი, სადაც QR კოდი დაასკანერეთ."
+                        : "Send the location where you scanned this QR code."}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={
+                      shareLocation
+                    }
+                    disabled={
+                      locationLoading
+                    }
+                  >
+                    {locationLoading
+                      ? ka
+                        ? "იგზავნება..."
+                        : "Sharing..."
+                      : ka
+                      ? "გაზიარება"
+                      : "Share"}
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={shareLocation}
-                  disabled={locationLoading}
-                >
-                  {locationLoading
-                    ? ka
-                      ? "იგზავნება..."
-                      : "Sharing..."
-                    : ka
-                    ? "გაზიარება"
-                    : "Share"}
-                </button>
-              </div>
-
-              {locationMessage && (
-                <div
-                  className={`locationMessage ${
-                    locationMessage.startsWith("✓")
-                      ? "success"
-                      : ""
-                  }`}
-                >
-                  {locationMessage}
-                </div>
-              )}
-            </section>
-          )}
+                {locationMessage && (
+                  <div
+                    className={`locationMessage ${
+                      locationMessage.startsWith(
+                        "✓"
+                      )
+                        ? "success"
+                        : ""
+                    }`}
+                  >
+                    {
+                      locationMessage
+                    }
+                  </div>
+                )}
+              </section>
+            )}
 
           <div className="privacyBox">
-            <span>🔒</span>
+            <span>
+              🔒
+            </span>
 
             <div>
               <strong>
@@ -838,7 +1057,10 @@ export default function PublicProfilePage() {
 
           <footer>
             <div>
-              <strong>QR RETURN</strong>
+              <strong>
+                QR RETURN
+              </strong>
+
               <span>
                 {ka
                   ? "დაკარგვა არ ნიშნავს დამშვიდობებას."
@@ -847,7 +1069,10 @@ export default function PublicProfilePage() {
             </div>
 
             <a href="/">
-              {ka ? "მთავარი გვერდი" : "Home"} →
+              {ka
+                ? "მთავარი გვერდი"
+                : "Home"}{" "}
+              →
             </a>
           </footer>
         </div>
@@ -867,8 +1092,13 @@ function SectionTitle({
 }) {
   return (
     <div className="sectionTitle">
-      <span>{number}</span>
-      <h2>{title}</h2>
+      <span>
+        {number}
+      </span>
+
+      <h2>
+        {title}
+      </h2>
     </div>
   );
 }
@@ -882,8 +1112,13 @@ function Info({
 }) {
   return (
     <div className="infoBox">
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
     </div>
   );
 }
@@ -897,8 +1132,13 @@ function LongInfo({
 }) {
   return (
     <div className="longInfo">
-      <span>{label}</span>
-      <p>{value}</p>
+      <span>
+        {label}
+      </span>
+
+      <p>
+        {value}
+      </p>
     </div>
   );
 }
@@ -989,7 +1229,11 @@ function Styles() {
         display: grid;
         place-items: center;
         border-radius: 14px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
         font-weight: 900;
       }
@@ -1078,7 +1322,11 @@ function Styles() {
       .photoPlaceholder {
         display: grid;
         place-items: center;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        background: linear-gradient(
+          135deg,
+          #eef4ff,
+          #f0edff
+        );
         font-size: 60px;
       }
 
@@ -1278,7 +1526,11 @@ function Styles() {
       .finderMessage {
         padding: 17px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        background: linear-gradient(
+          135deg,
+          #eef4ff,
+          #f0edff
+        );
         color: #344054;
         font-size: 13px;
         line-height: 1.7;
@@ -1353,7 +1605,11 @@ function Styles() {
       }
 
       .chat {
-        background: linear-gradient(135deg, #7655f7, #5635da);
+        background: linear-gradient(
+          135deg,
+          #7655f7,
+          #5635da
+        );
       }
 
       .locationCard {
