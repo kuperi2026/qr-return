@@ -44,7 +44,7 @@ export default function AccountPage() {
   const ka = lang === "ka";
 
   useEffect(() => {
-    loadAccount();
+    void loadAccount();
   }, []);
 
   async function loadAccount() {
@@ -267,14 +267,28 @@ export default function AccountPage() {
 
             <p>
               {ka
-                ? "აქედან მართავთ თქვენს პროფილს, უსაფრთხოებას, ადმინისტრატორს და ყველა QR პროფილს."
-                : "Manage your profile, security, administrator and all QR profiles from here."}
+                ? "აქედან მართავთ თქვენს პროფილს, უსაფრთხოებას, ადმინისტრატორს, Live Chat-ს და ყველა QR პროფილს."
+                : "Manage your profile, security, administrator, Live Chat and all QR profiles from here."}
             </p>
           </div>
 
-          <a href="/add-profile" className="primaryButton">
-            + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
-          </a>
+          <div className="welcomeActions">
+            <a href="/account/chat" className="messagesButton">
+              <span className="messagesIcon">💬</span>
+
+              <div>
+                <small>LIVE CHAT</small>
+
+                <strong>
+                  {ka ? "შეტყობინებები" : "Messages"}
+                </strong>
+              </div>
+            </a>
+
+            <a href="/add-profile" className="primaryButton">
+              + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
+            </a>
+          </div>
         </div>
 
         {error && <div className="errorBox">{error}</div>}
@@ -287,6 +301,7 @@ export default function AccountPage() {
 
                 <div>
                   <span>{ka ? "მფლობელი" : "OWNER"}</span>
+
                   <h2>
                     {owner.first_name} {owner.last_name}
                   </h2>
@@ -320,6 +335,7 @@ export default function AccountPage() {
 
                 <div>
                   <span>{ka ? "მისამართი" : "Address"}</span>
+
                   <strong>
                     {owner.address ||
                       (ka ? "არ არის მითითებული" : "Not provided")}
@@ -336,6 +352,7 @@ export default function AccountPage() {
 
                 <div>
                   <span>{ka ? "უსაფრთხოება" : "SECURITY"}</span>
+
                   <h2>
                     {ka
                       ? "ანგარიშის უსაფრთხოება"
@@ -359,13 +376,57 @@ export default function AccountPage() {
           </section>
         </div>
 
+        <section className="panel chatPanel">
+          <div className="panelHeader">
+            <div className="panelTitle">
+              <div className="panelIcon chatPanelIcon">💬</div>
+
+              <div>
+                <span>LIVE CHAT</span>
+
+                <h2>
+                  {ka
+                    ? "მპოვნელების შეტყობინებები"
+                    : "Finder messages"}
+                </h2>
+              </div>
+            </div>
+
+            <a href="/account/chat" className="smallButton">
+              {ka ? "Inbox-ის გახსნა" : "Open Inbox"} →
+            </a>
+          </div>
+
+          <div className="chatPanelBody">
+            <div>
+              <strong>
+                {ka
+                  ? "QR RETURN Live Chat"
+                  : "QR RETURN Live Chat"}
+              </strong>
+
+              <p>
+                {ka
+                  ? "როდესაც მპოვნელი თქვენი QR კოდიდან Live Chat-ს გამოიყენებს, საუბარი თქვენს Inbox-ში გამოჩნდება."
+                  : "When a finder uses Live Chat from your QR code, the conversation will appear in your Inbox."}
+              </p>
+            </div>
+
+            <a href="/account/chat" className="openChatButton">
+              💬 {ka ? "შეტყობინებები" : "Messages"}
+            </a>
+          </div>
+        </section>
+
         <section className="panel adminPanel">
           <div className="panelHeader">
             <div className="panelTitle">
               <div className="panelIcon">👥</div>
 
               <div>
-                <span>{ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}</span>
+                <span>
+                  {ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}
+                </span>
 
                 <h2>
                   {admin
@@ -465,7 +526,10 @@ export default function AccountPage() {
               </p>
 
               <a href="/add-profile">
-                + {ka ? "პირველი პროფილის შექმნა" : "Create first profile"}
+                +{" "}
+                {ka
+                  ? "პირველი პროფილის შექმნა"
+                  : "Create first profile"}
               </a>
             </div>
           ) : (
@@ -506,7 +570,9 @@ export default function AccountPage() {
 
                       <h3>
                         {profile.item_name ||
-                          (ka ? "უსახელო პროფილი" : "Unnamed profile")}
+                          (ka
+                            ? "უსახელო პროფილი"
+                            : "Unnamed profile")}
                       </h3>
 
                       {profile.tag_code && (
@@ -526,7 +592,10 @@ export default function AccountPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            👁 {ka ? "მპოვნელის ხედვა" : "Finder view"}
+                            👁{" "}
+                            {ka
+                              ? "მპოვნელის ხედვა"
+                              : "Finder view"}
                           </a>
                         )}
                       </div>
@@ -710,6 +779,60 @@ export default function AccountPage() {
           line-height: 1.6;
         }
 
+        .welcomeActions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .messagesButton {
+          min-height: 48px;
+          padding: 0 16px;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          border: 1px solid #dbe7ff;
+          border-radius: 10px;
+          background: white;
+          color: #1465e8;
+          text-decoration: none;
+          box-shadow: 0 5px 15px rgba(20, 101, 232, 0.06);
+          white-space: nowrap;
+        }
+
+        .messagesIcon {
+          width: 31px;
+          height: 31px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          background: #eef4ff;
+          font-size: 16px;
+        }
+
+        .messagesButton small,
+        .messagesButton strong {
+          display: block;
+        }
+
+        .messagesButton small {
+          margin-bottom: 2px;
+          color: #7655f7;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .messagesButton strong {
+          color: #1465e8;
+          font-size: 10px;
+          font-weight: 900;
+        }
+
+        .messagesButton:hover {
+          background: #f5f9ff;
+        }
+
         .primaryButton {
           min-height: 48px;
           padding: 0 17px;
@@ -762,6 +885,10 @@ export default function AccountPage() {
           border-radius: 13px;
           background: linear-gradient(135deg, #eef4ff, #f0edff);
           font-size: 23px;
+        }
+
+        .chatPanelIcon {
+          background: linear-gradient(135deg, #eef4ff, #eeeaff);
         }
 
         .panelTitle span {
@@ -853,6 +980,47 @@ export default function AccountPage() {
           color: #667085;
           font-size: 11px;
           line-height: 1.6;
+        }
+
+        .chatPanelBody {
+          margin-top: 20px;
+          padding: 17px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border: 1px solid #dbe7ff;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #f5f9ff, #faf8ff);
+        }
+
+        .chatPanelBody strong {
+          color: #344054;
+          font-size: 13px;
+        }
+
+        .chatPanelBody p {
+          margin: 5px 0 0;
+          max-width: 650px;
+          color: #667085;
+          font-size: 10px;
+          line-height: 1.6;
+        }
+
+        .openChatButton {
+          min-height: 42px;
+          padding: 0 15px;
+          flex: 0 0 auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #1465e8, #7655f7);
+          color: white;
+          font-size: 10px;
+          font-weight: 900;
+          text-decoration: none;
+          white-space: nowrap;
         }
 
         .adminStatus {
@@ -1088,8 +1256,16 @@ export default function AccountPage() {
             flex-direction: column;
           }
 
+          .welcomeActions {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .messagesButton,
           .primaryButton {
             width: 100%;
+            justify-content: center;
           }
 
           .ownerBody {
@@ -1108,6 +1284,15 @@ export default function AccountPage() {
           .smallButton {
             width: 100%;
             justify-content: center;
+          }
+
+          .chatPanelBody {
+            align-items: stretch;
+            flex-direction: column;
+          }
+
+          .openChatButton {
+            width: 100%;
           }
         }
       `}</style>
