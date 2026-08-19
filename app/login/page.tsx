@@ -11,11 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
-
   const [resetLoading, setResetLoading] = useState(false);
 
   const [error, setError] = useState("");
@@ -24,72 +20,18 @@ export default function LoginPage() {
   const ka = lang === "ka";
 
   useEffect(() => {
-    void checkExistingSession();
-  }, []);
-
-  async function routeUser() {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return false;
-    }
-
-    const { data: ownerData, error: ownerError } = await supabase
-      .from("owner_accounts")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (ownerError) {
-      throw ownerError;
-    }
-
-    if (ownerData) {
-      window.location.href = "/account";
-      return true;
-    }
-
-    const { data: adminData, error: adminError } =
-      await supabase.rpc("claim_admin_access");
-
-    if (adminError) {
-      throw adminError;
-    }
-
-    if (adminData && adminData.length > 0) {
-      window.location.href = "/admin-dashboard";
-      return true;
-    }
-
-    setError(
-      ka
-        ? "ამ ანგარიშთან Owner ან Admin პროფილი დაკავშირებული არ არის."
-        : "No Owner or Admin profile is connected to this account."
-    );
-
-    return false;
-  }
-
-  async function checkExistingSession() {
-    try {
+    async function checkSession() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
-        setChecking(false);
-        return;
+      if (user) {
+        window.location.href = "/account";
       }
-
-      await routeUser();
-    } catch (err) {
-      console.error(err);
-      setChecking(false);
     }
-  }
+
+    void checkSession();
+  }, []);
 
   async function handleLogin(
     event: FormEvent<HTMLFormElement>
@@ -113,7 +55,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { data, error: loginError } =
+      const { error: loginError } =
         await supabase.auth.signInWithPassword({
           email: cleanEmail,
           password,
@@ -123,36 +65,15 @@ export default function LoginPage() {
         throw loginError;
       }
 
-      if (!data.user) {
-        throw new Error(
-          ka
-            ? "ანგარიშზე შესვლა ვერ მოხერხდა."
-            : "Could not sign in."
-        );
-      }
-
-      await routeUser();
+      window.location.href = "/account";
     } catch (err) {
-      const text =
-        err instanceof Error ? err.message : "";
-
-      if (
-        text.toLowerCase().includes("invalid login") ||
-        text.toLowerCase().includes("invalid credentials")
-      ) {
-        setError(
-          ka
-            ? "ელფოსტა ან პაროლი არასწორია."
-            : "Incorrect email or password."
-        );
-      } else {
-        setError(
-          text ||
-            (ka
-              ? "ანგარიშზე შესვლა ვერ მოხერხდა."
-              : "Could not sign in.")
-        );
-      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : ka
+          ? "შესვლა ვერ მოხერხდა."
+          : "Could not sign in."
+      );
     } finally {
       setLoading(false);
     }
@@ -167,8 +88,8 @@ export default function LoginPage() {
     if (!cleanEmail) {
       setError(
         ka
-          ? "ჯერ შეიყვანეთ თქვენი ელფოსტა."
-          : "Enter your email first."
+          ? "პაროლის აღსადგენად ჯერ შეიყვანეთ თქვენი ელფოსტა."
+          : "Enter your email first to reset your password."
       );
       return;
     }
@@ -193,54 +114,20 @@ export default function LoginPage() {
 
       setMessage(
         ka
-          ? "პაროლის აღდგენის ბმული გამოგზავნილია თქვენს ელფოსტაზე. შეამოწმეთ Inbox და Spam."
-          : "A password reset link has been sent to your email. Check your Inbox and Spam folder."
+          ? "✓ პაროლის აღდგენის წერილი გამოგზავნილია. შეამოწმეთ Inbox და Spam."
+          : "✓ Password recovery email sent. Check your Inbox and Spam folder."
       );
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : ka
-          ? "პაროლის აღდგენის წერილის გაგზავნა ვერ მოხერხდა."
-          : "Could not send the password reset email."
+          ? "Recovery email-ის გაგზავნა ვერ მოხერხდა."
+          : "Could not send recovery email."
       );
     } finally {
       setResetLoading(false);
     }
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    setError("");
-    setMessage("");
-    setChecking(false);
-  }
-
-  if (checking) {
-    return (
-      <main className="statePage">
-        <div className="stateLogo">QR</div>
-
-        <strong>QR RETURN</strong>
-
-        <p>
-          {ka
-            ? "ანგარიშის ტიპი მოწმდება..."
-            : "Checking account type..."}
-        </p>
-
-        <button
-          type="button"
-          onClick={handleLogout}
-        >
-          {ka
-            ? "სხვა ანგარიშით შესვლა"
-            : "Use another account"}
-        </button>
-
-        <Styles />
-      </main>
-    );
   }
 
   return (
@@ -251,7 +138,7 @@ export default function LoginPage() {
 
           <div>
             <strong>QR RETURN</strong>
-            <small>OWNER & ADMIN ACCESS</small>
+            <small>MY ACCOUNT</small>
           </div>
         </a>
 
@@ -274,7 +161,7 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <section className="container">
+      <section className="wrapper">
         <div className="intro">
           <div className="eyebrow">
             {ka
@@ -290,34 +177,38 @@ export default function LoginPage() {
 
           <p>
             {ka
-              ? "ერთი უსაფრთხო შესვლა Owner-ისა და დამატებული Admin-ისთვის."
-              : "One secure sign-in for Owners and authorized Admins."}
+              ? "ერთი ანგარიშიდან მართეთ თქვენი ყველა ცხოველისა და ნივთის QR პროფილი."
+              : "Manage all your pet and item QR profiles from one account."}
           </p>
 
-          <div className="roleCard">
-            <div className="roleIcon">👤</div>
+          <div className="infoBox">
+            <div className="infoIcon">✓</div>
 
             <div>
-              <strong>Owner</strong>
+              <strong>
+                {ka
+                  ? "ერთი ანგარიში"
+                  : "One account"}
+              </strong>
 
               <p>
                 {ka
-                  ? "მართავს საკუთარ პროფილს, QR პროფილებს, Admin-ს და ყველა პარამეტრს."
-                  : "Manages the Owner profile, QR profiles, Admin and all settings."}
+                  ? "შექმენით და მართეთ იმდენი QR პროფილი, რამდენიც გჭირდებათ."
+                  : "Create and manage as many QR profiles as you need."}
               </p>
             </div>
           </div>
 
-          <div className="roleCard">
-            <div className="roleIcon">👥</div>
+          <div className="infoBox">
+            <div className="infoIcon">💬</div>
 
             <div>
-              <strong>Admin</strong>
+              <strong>Live Chat</strong>
 
               <p>
                 {ka
-                  ? "ხედავს და მართავს მხოლოდ იმას, რისი უფლებაც Owner-მა მისცა."
-                  : "Can only access features specifically authorized by the Owner."}
+                  ? "მიიღეთ მპოვნელის შეტყობინებები პირდაპირ თქვენს Owner Account-ში."
+                  : "Receive finder messages directly in your Owner Account."}
               </p>
             </div>
           </div>
@@ -325,24 +216,32 @@ export default function LoginPage() {
 
         <div className="card">
           <div className="cardHeader">
-            <div className="loginIcon">🔐</div>
+            <div className="userIcon">👤</div>
 
             <div>
               <span>QR RETURN</span>
-              <h2>{ka ? "შესვლა" : "Sign in"}</h2>
+
+              <h2>
+                {ka
+                  ? "შესვლა"
+                  : "Sign in"}
+              </h2>
             </div>
           </div>
 
           <p className="description">
             {ka
-              ? "შეიყვანეთ რეგისტრირებული ელფოსტა და პაროლი."
-              : "Enter your registered email and password."}
+              ? "გამოიყენეთ თქვენი ელფოსტა და პაროლი."
+              : "Use your email and password."}
           </p>
 
           <form onSubmit={handleLogin}>
             <label>
               <span>
-                {ka ? "ელფოსტა" : "Email"} *
+                {ka
+                  ? "ელფოსტა"
+                  : "Email"}{" "}
+                *
               </span>
 
               <input
@@ -358,66 +257,51 @@ export default function LoginPage() {
             </label>
 
             <label>
-              <span>
-                {ka ? "პაროლი" : "Password"} *
-              </span>
-
-              <div className="passwordField">
-                <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  required
-                />
+              <div className="passwordLabel">
+                <span>
+                  {ka
+                    ? "პაროლი"
+                    : "Password"}{" "}
+                  *
+                </span>
 
                 <button
                   type="button"
-                  className="passwordToggle"
-                  onClick={() =>
-                    setShowPassword(
-                      (current) => !current
-                    )
-                  }
+                  className="forgotButton"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
                 >
-                  {showPassword ? "🙈" : "👁"}
+                  {resetLoading
+                    ? ka
+                      ? "იგზავნება..."
+                      : "Sending..."
+                    : ka
+                    ? "დაგავიწყდათ პაროლი?"
+                    : "Forgot password?"}
                 </button>
               </div>
+
+              <input
+                type="password"
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
             </label>
 
-            <div className="forgotRow">
-              <button
-                type="button"
-                className="forgotButton"
-                onClick={handleForgotPassword}
-                disabled={resetLoading}
-              >
-                {resetLoading
-                  ? ka
-                    ? "იგზავნება..."
-                    : "Sending..."
-                  : ka
-                  ? "დაგავიწყდათ პაროლი?"
-                  : "Forgot password?"}
-              </button>
-            </div>
-
             {error && (
-              <div className="errorBox">
+              <div className="error">
                 <strong>!</strong>
                 <span>{error}</span>
               </div>
             )}
 
             {message && (
-              <div className="successBox">
+              <div className="success">
                 <strong>✓</strong>
                 <span>{message}</span>
               </div>
@@ -430,8 +314,8 @@ export default function LoginPage() {
             >
               {loading
                 ? ka
-                  ? "მოწმდება..."
-                  : "Checking..."
+                  ? "შესვლა..."
+                  : "Signing in..."
                 : ka
                 ? "შესვლა"
                 : "Sign in"}
@@ -440,11 +324,11 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="signupBox">
+          <div className="signup">
             <span>
               {ka
-                ? "ჯერ არ გაქვთ QR RETURN ანგარიში?"
-                : "Don't have a QR RETURN account?"}
+                ? "ჯერ არ გაქვთ ანგარიში?"
+                : "Don't have an account?"}
             </span>
 
             <a href="/account/register">
@@ -457,459 +341,384 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <Styles />
-    </main>
-  );
-}
-
-function Styles() {
-  return (
-    <style jsx global>{`
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        background: #f7f9fc;
-        color: #101828;
-        font-family: Inter, Arial, sans-serif;
-      }
-
-      input,
-      button {
-        font: inherit;
-      }
-
-      .page {
-        min-height: 100vh;
-        background:
-          radial-gradient(
-            circle at 8% 15%,
-            rgba(20, 101, 232, 0.09),
-            transparent 27%
-          ),
-          radial-gradient(
-            circle at 93% 10%,
-            rgba(118, 85, 247, 0.1),
-            transparent 28%
-          ),
-          #f7f9fc;
-      }
-
-      .statePage {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: #f7f9fc;
-        color: #667085;
-      }
-
-      .stateLogo {
-        width: 55px;
-        height: 55px;
-        display: grid;
-        place-items: center;
-        margin-bottom: 12px;
-        border-radius: 15px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
-        color: white;
-        font-weight: 900;
-      }
-
-      .statePage > strong {
-        color: #1465e8;
-        font-size: 21px;
-      }
-
-      .statePage p {
-        font-size: 12px;
-      }
-
-      .statePage button {
-        margin-top: 10px;
-        padding: 10px 14px;
-        border: 1px solid #d0d5dd;
-        border-radius: 9px;
-        background: white;
-        color: #475467;
-        font-size: 11px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      .header {
-        width: calc(100% - 36px);
-        max-width: 1100px;
-        min-height: 86px;
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-      }
-
-      .logo {
-        width: 50px;
-        height: 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
-        color: white;
-        font-weight: 900;
-      }
-
-      .brand strong,
-      .brand small {
-        display: block;
-      }
-
-      .brand strong {
-        color: #1465e8;
-        font-size: 21px;
-        font-weight: 900;
-      }
-
-      .brand small {
-        margin-top: 3px;
-        color: #7655f7;
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1.6px;
-      }
-
-      .languages {
-        padding: 4px;
-        display: flex;
-        border-radius: 10px;
-        background: #eaecf0;
-      }
-
-      .languages button {
-        padding: 8px 10px;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        color: #667085;
-        font-size: 11px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .languages button.active {
-        background: white;
-        color: #1465e8;
-      }
-
-      .container {
-        width: calc(100% - 36px);
-        max-width: 1000px;
-        min-height: calc(100vh - 86px);
-        margin: auto;
-        padding: 65px 0;
-        display: grid;
-        grid-template-columns: 1fr 445px;
-        align-items: center;
-        gap: 70px;
-      }
-
-      .intro {
-        max-width: 480px;
-      }
-
-      .eyebrow {
-        color: #7655f7;
-        font-size: 11px;
-        font-weight: 900;
-        letter-spacing: 1.6px;
-      }
-
-      .intro h1 {
-        margin: 12px 0 15px;
-        font-size: clamp(42px, 5vw, 57px);
-        line-height: 1.04;
-        letter-spacing: -2.4px;
-      }
-
-      .intro > p {
-        margin: 0 0 28px;
-        color: #667085;
-        font-size: 15px;
-        line-height: 1.7;
-      }
-
-      .roleCard {
-        margin-top: 11px;
-        padding: 15px;
-        display: flex;
-        gap: 12px;
-        border: 1px solid #e4e7ec;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.75);
-      }
-
-      .roleIcon {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
-        display: grid;
-        place-items: center;
-        border-radius: 10px;
-        background: #eef4ff;
-      }
-
-      .roleCard strong {
-        font-size: 12px;
-      }
-
-      .roleCard p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 10px;
-        line-height: 1.5;
-      }
-
-      .card {
-        padding: 32px;
-        border: 1px solid #e4e7ec;
-        border-radius: 24px;
-        background: white;
-        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
-      }
-
-      .cardHeader {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-      }
-
-      .loginIcon {
-        width: 54px;
-        height: 54px;
-        display: grid;
-        place-items: center;
-        border-radius: 15px;
-        background: linear-gradient(
-          135deg,
-          #eef4ff,
-          #f0edff
-        );
-        font-size: 26px;
-      }
-
-      .cardHeader span {
-        color: #7655f7;
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1.5px;
-      }
-
-      .cardHeader h2 {
-        margin: 4px 0 0;
-        font-size: 25px;
-      }
-
-      .description {
-        margin: 17px 0 24px;
-        color: #667085;
-        font-size: 12px;
-      }
-
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 17px;
-      }
-
-      label > span {
-        display: block;
-        margin-bottom: 7px;
-        color: #475467;
-        font-size: 13px;
-        font-weight: 800;
-      }
-
-      input {
-        width: 100%;
-        height: 52px;
-        padding: 0 13px;
-        border: 1px solid #d0d5dd;
-        border-radius: 11px;
-        background: white;
-        outline: none;
-      }
-
-      input:focus {
-        border-color: #84adff;
-        box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
-      }
-
-      .passwordField {
-        position: relative;
-      }
-
-      .passwordField input {
-        padding-right: 50px;
-      }
-
-      .passwordToggle {
-        position: absolute;
-        top: 0;
-        right: 4px;
-        width: 44px;
-        height: 52px;
-        border: 0;
-        background: transparent;
-        cursor: pointer;
-      }
-
-      .forgotRow {
-        margin-top: -6px;
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      .forgotButton {
-        padding: 0;
-        border: 0;
-        background: transparent;
-        color: #1465e8;
-        font-size: 10px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .forgotButton:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .errorBox,
-      .successBox {
-        padding: 12px;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        border-radius: 10px;
-        font-size: 11px;
-      }
-
-      .errorBox {
-        border: 1px solid #fecdca;
-        background: #fff1f0;
-        color: #b42318;
-      }
-
-      .successBox {
-        border: 1px solid #abefc6;
-        background: #ecfdf3;
-        color: #027a48;
-      }
-
-      .errorBox strong,
-      .successBox strong {
-        width: 20px;
-        height: 20px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        color: white;
-        font-size: 10px;
-      }
-
-      .errorBox strong {
-        background: #d92d20;
-      }
-
-      .successBox strong {
-        background: #12b76a;
-      }
-
-      .submitButton {
-        width: 100%;
-        min-height: 53px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 9px;
-        border: 0;
-        border-radius: 11px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
-        color: white;
-        font-size: 13px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .submitButton:disabled {
-        opacity: 0.65;
-      }
-
-      .signupBox {
-        margin-top: 22px;
-        padding-top: 18px;
-        display: flex;
-        justify-content: center;
-        gap: 7px;
-        border-top: 1px solid #eaecf0;
-        color: #667085;
-        font-size: 10px;
-      }
-
-      .signupBox a {
-        color: #1465e8;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      @media (max-width: 850px) {
-        .container {
-          max-width: 600px;
-          grid-template-columns: 1fr;
-          gap: 35px;
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
         }
-      }
 
-      @media (max-width: 550px) {
-        .container {
-          padding-top: 40px;
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          background: #f7f9fc;
+        }
+
+        button,
+        input {
+          font: inherit;
+        }
+
+        .page {
+          min-height: 100vh;
+          color: #101828;
+          font-family: Inter, Arial, sans-serif;
+          background:
+            radial-gradient(
+              circle at 8% 15%,
+              rgba(20, 101, 232, 0.1),
+              transparent 27%
+            ),
+            radial-gradient(
+              circle at 93% 10%,
+              rgba(118, 85, 247, 0.11),
+              transparent 28%
+            ),
+            #f7f9fc;
+        }
+
+        .header {
+          width: calc(100% - 36px);
+          max-width: 1180px;
+          min-height: 86px;
+          margin: auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid #e4e7ec;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          text-decoration: none;
+        }
+
+        .logo {
+          width: 50px;
+          height: 50px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          color: white;
+          font-size: 14px;
+          font-weight: 900;
+        }
+
+        .brand strong,
+        .brand small {
+          display: block;
+        }
+
+        .brand strong {
+          color: #1465e8;
+          font-size: 21px;
+          font-weight: 900;
+        }
+
+        .brand small {
+          margin-top: 3px;
+          color: #7655f7;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
+        }
+
+        .languages {
+          padding: 4px;
+          display: flex;
+          border-radius: 10px;
+          background: #eaecf0;
+        }
+
+        .languages button {
+          padding: 8px 10px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #667085;
+          font-size: 10px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .languages button.active {
+          background: white;
+          color: #1465e8;
+        }
+
+        .wrapper {
+          width: calc(100% - 36px);
+          max-width: 1000px;
+          min-height: calc(100vh - 86px);
+          margin: auto;
+          padding: 60px 0;
+          display: grid;
+          grid-template-columns: 1fr 430px;
+          align-items: center;
+          gap: 70px;
+        }
+
+        .intro {
+          max-width: 480px;
+        }
+
+        .eyebrow {
+          color: #7655f7;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.6px;
         }
 
         .intro h1 {
-          font-size: 38px;
+          margin: 12px 0 15px;
+          font-size: clamp(40px, 5vw, 55px);
+          line-height: 1.04;
+          letter-spacing: -2px;
+        }
+
+        .intro > p {
+          margin: 0 0 24px;
+          color: #667085;
+          font-size: 14px;
+          line-height: 1.7;
+        }
+
+        .infoBox {
+          margin-top: 10px;
+          padding: 14px;
+          display: flex;
+          gap: 11px;
+          border: 1px solid #dbe7ff;
+          border-radius: 13px;
+          background: rgba(255, 255, 255, 0.8);
+        }
+
+        .infoIcon {
+          width: 36px;
+          height: 36px;
+          flex: 0 0 36px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          background: #eef4ff;
+          color: #1465e8;
+          font-weight: 900;
+        }
+
+        .infoBox strong {
+          font-size: 11px;
+        }
+
+        .infoBox p {
+          margin: 4px 0 0;
+          color: #667085;
+          font-size: 9px;
+          line-height: 1.5;
         }
 
         .card {
-          padding: 23px;
+          padding: 31px;
+          border: 1px solid #e4e7ec;
+          border-radius: 24px;
+          background: white;
+          box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
         }
-      }
-    `}</style>
+
+        .cardHeader {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+        }
+
+        .userIcon {
+          width: 53px;
+          height: 53px;
+          display: grid;
+          place-items: center;
+          border-radius: 15px;
+          background: linear-gradient(
+            135deg,
+            #eef4ff,
+            #f0edff
+          );
+          font-size: 25px;
+        }
+
+        .cardHeader span {
+          color: #7655f7;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.5px;
+        }
+
+        .cardHeader h2 {
+          margin: 4px 0 0;
+          font-size: 24px;
+        }
+
+        .description {
+          margin: 15px 0 21px;
+          color: #667085;
+          font-size: 11px;
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        label > span,
+        .passwordLabel > span {
+          display: block;
+          margin-bottom: 7px;
+          color: #475467;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        input {
+          width: 100%;
+          height: 51px;
+          padding: 0 13px;
+          border: 1px solid #d0d5dd;
+          border-radius: 11px;
+          background: white;
+          outline: none;
+        }
+
+        input:focus {
+          border-color: #84adff;
+          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
+        }
+
+        .passwordLabel {
+          margin-bottom: 7px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .passwordLabel > span {
+          margin: 0;
+        }
+
+        .forgotButton {
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #1465e8;
+          font-size: 9px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .forgotButton:disabled {
+          opacity: 0.6;
+          cursor: default;
+        }
+
+        .error,
+        .success {
+          padding: 11px 12px;
+          display: flex;
+          gap: 8px;
+          border-radius: 10px;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+
+        .error {
+          border: 1px solid #fecdca;
+          background: #fff1f0;
+          color: #b42318;
+        }
+
+        .success {
+          border: 1px solid #abefc6;
+          background: #ecfdf3;
+          color: #027a48;
+        }
+
+        .submitButton {
+          width: 100%;
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border: 0;
+          border-radius: 11px;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          color: white;
+          font-size: 12px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .submitButton:disabled {
+          opacity: 0.6;
+          cursor: default;
+        }
+
+        .signup {
+          margin-top: 21px;
+          padding-top: 17px;
+          display: flex;
+          justify-content: center;
+          gap: 7px;
+          border-top: 1px solid #eaecf0;
+          color: #667085;
+          font-size: 9px;
+        }
+
+        .signup a {
+          color: #1465e8;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        @media (max-width: 820px) {
+          .wrapper {
+            max-width: 600px;
+            grid-template-columns: 1fr;
+            gap: 35px;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .wrapper {
+            padding-top: 38px;
+          }
+
+          .intro h1 {
+            font-size: 37px;
+          }
+
+          .card {
+            padding: 23px;
+          }
+
+          .passwordLabel {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+        }
+      `}</style>
+    </main>
   );
 }
