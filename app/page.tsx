@@ -6,143 +6,160 @@ import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
-type Story = {
+type ProductStory = {
   id: string;
   ka: string;
   en: string;
-  kaAction: string;
-  enAction: string;
+  kaText: string;
+  enText: string;
   kaResult: string;
   enResult: string;
   image: string;
-  large?: boolean;
 };
 
-const stories: Story[] = [
+const products: ProductStory[] = [
   {
     id: "dog",
     ka: "ძაღლი",
     en: "Dog",
-    kaAction: "მპოვნელი ასკანერებს საყელოზე მიმაგრებულ QR-ს.",
-    enAction: "The finder scans the QR tag on the collar.",
-    kaResult: "პატრონთან დაკავშირება",
+    kaText: "მპოვნელი ასკანერებს საყელოზე მიმაგრებულ QR RETURN კოდს.",
+    enText: "The finder scans the QR RETURN tag attached to the collar.",
+    kaResult: "დაუკავშირდი პატრონს",
     enResult: "Contact owner",
     image:
-      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1400&q=88",
-    large: true,
+      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=88",
   },
   {
     id: "cat",
     ka: "კატა",
     en: "Cat",
-    kaAction: "QR პროფილი აჩვენებს მხოლოდ საჭირო ინფორმაციას.",
-    enAction: "The QR profile reveals only approved information.",
+    kaText: "QR პროფილი აჩვენებს მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც გსურთ.",
+    enText: "The QR profile shows only the information you choose to share.",
     kaResult: "Finder Profile",
     enResult: "Finder Profile",
     image:
-      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=1100&q=88",
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=88",
   },
   {
     id: "keys",
     ka: "გასაღები",
     en: "Keys",
-    kaAction: "ერთი სკანი — რეგისტრაციისა და აპის გარეშე.",
-    enAction: "One scan — no registration or app required.",
+    kaText: "QR tag ეხმარება მპოვნელს სწრაფად დაგიკავშირდეთ.",
+    enText: "The QR tag gives the finder a simple way to reach you.",
     kaResult: "Live Chat",
     enResult: "Live Chat",
     image:
-      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=1100&q=88",
+      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=900&q=88",
   },
   {
     id: "wallet",
     ka: "საფულე",
     en: "Wallet",
-    kaAction: "მპოვნელი საფულეზე QR კოდს ასკანერებს.",
-    enAction: "The finder scans the QR on the wallet.",
+    kaText: "საფულეზე QR კოდი ქმნის უსაფრთხო კავშირს მფლობელთან.",
+    enText: "A QR code on the wallet creates a secure path back to the owner.",
     kaResult: "უსაფრთხო დაბრუნება",
     enResult: "Return securely",
     image:
-      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=1100&q=88",
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=88",
   },
   {
     id: "luggage",
     ka: "ჩემოდანი",
     en: "Luggage",
-    kaAction: "ბარგის პოვნისას მპოვნელმა შეიძლება ლოკაცია გაგიზიაროთ.",
-    enAction: "A finder can share your luggage location.",
+    kaText: "აეროპორტში ნაპოვნი ჩემოდნის მპოვნელმა შეიძლება ლოკაციაც გაგიზიაროთ.",
+    enText: "A finder at the airport can scan your luggage QR and share its location.",
     kaResult: "Location shared",
     enResult: "Location shared",
     image:
-      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=1400&q=88",
-    large: true,
+      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=88",
   },
   {
     id: "bag",
     ka: "ჩანთა",
     en: "Bag",
-    kaAction: "QR RETURN პირდაპირ გაკავშირებთ მპოვნელთან.",
-    enAction: "QR RETURN connects you directly with the finder.",
+    kaText: "ნაპოვნი ჩანთიდან ერთი სკანი საკმარისია კავშირის დასაწყებად.",
+    enText: "One scan from a found bag is enough to start the return process.",
     kaResult: "Owner notified",
     enResult: "Owner notified",
     image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1100&q=88",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=88",
   },
 ];
 
 const benefits = [
   {
     number: "01",
-    icon: "chat",
+    type: "chat",
     ka: "Live Chat",
     en: "Live Chat",
     kaText: "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე.",
-    enText: "Direct finder contact without revealing your private number.",
+    enText: "Talk directly with the finder without exposing your private number.",
   },
   {
     number: "02",
-    icon: "location",
+    type: "location",
     ka: "ლოკაციის გაზიარება",
     en: "Location Sharing",
-    kaText: "მპოვნელმა ერთი ღილაკით შეიძლება გაგიზიაროთ მიმდინარე მდებარეობა.",
+    kaText: "მპოვნელმა ერთი ღილაკით შეიძლება გაგიზიაროთ ნივთის მდებარეობა.",
     enText: "The finder can share the current location in one tap.",
   },
   {
     number: "03",
-    icon: "reward",
+    type: "reward",
     ka: "მპოვნელის ჯილდო",
     en: "Finder Reward",
-    kaText: "სურვილის შემთხვევაში შესთავაზეთ ჯილდო უსაფრთხო დაბრუნებისთვის.",
+    kaText: "სურვილის შემთხვევაში მიუთითეთ ჯილდო უსაფრთხო დაბრუნებისთვის.",
     enText: "Optionally offer a reward for a safe return.",
   },
   {
     number: "04",
-    icon: "shield",
+    type: "shield",
     ka: "Privacy Control",
     en: "Privacy Control",
-    kaText: "თქვენ განსაზღვრავთ ზუსტად რა ინფორმაცია გამოჩნდება.",
-    enText: "You decide exactly what information becomes visible.",
+    kaText: "თქვენ აკონტროლებთ რა ინფორმაცია გამოჩნდება მპოვნელისთვის.",
+    enText: "You control exactly what information the finder can see.",
   },
 ];
 
 export default function HomePage() {
   const [language, setLanguage] = useState<Language>("ka");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const ka = language === "ka";
 
   useEffect(() => {
-    async function checkSession() {
+    async function loadSession() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      setIsLoggedIn(Boolean(user));
+      if (!user) {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsLoggedIn(true);
+
+      /*
+        ADMIN BUTTON IS PRIVATE:
+        only users stored inside admin_users will see it.
+        Ordinary visitors never see the Admin link.
+      */
+      const { data: adminData } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setIsAdmin(Boolean(adminData));
     }
 
-    void checkSession();
+    void loadSession();
 
     const { data } = supabase.auth.onAuthStateChange(() => {
-      void checkSession();
+      void loadSession();
     });
 
     return () => {
@@ -152,7 +169,9 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* ========================= HEADER ========================= */}
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
 
       <header className="header">
         <a href="/" className="brand">
@@ -160,7 +179,7 @@ export default function HomePage() {
             <QrIcon />
           </div>
 
-          <div className="brandCopy">
+          <div className="brandText">
             <strong>QR RETURN</strong>
             <span>SMART LOST &amp; FOUND</span>
           </div>
@@ -168,10 +187,12 @@ export default function HomePage() {
 
         <div className="headerRight">
           <nav className="nav">
-            <a href="/admin" className="adminLink">
-              <AdminIcon />
-              <span>Admin</span>
-            </a>
+            {isAdmin && (
+              <a href="/admin" className="adminButton">
+                <AdminIcon />
+                <span>Admin Panel</span>
+              </a>
+            )}
 
             {isLoggedIn ? (
               <a href="/account" className="accountButton">
@@ -184,7 +205,7 @@ export default function HomePage() {
                   {ka ? "ანგარიშის შექმნა" : "Create Account"}
                 </a>
 
-                <a href="/login" className="loginLink">
+                <a href="/login" className="loginButton">
                   {ka ? "შესვლა" : "Sign In"}
                 </a>
               </>
@@ -213,7 +234,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ========================= HERO ========================= */}
+      {/* ======================================================
+          HERO
+      ====================================================== */}
 
       <section className="hero">
         <div className="heroGlow glowOne" />
@@ -221,8 +244,7 @@ export default function HomePage() {
 
         <div className="heroInner">
           <div className="heroCopy">
-            <div className="heroEyebrow">
-              <span />
+            <div className="heroLabel">
               SMART LOST &amp; FOUND
             </div>
 
@@ -233,7 +255,7 @@ export default function HomePage() {
                   <br />
                   დაასკანერეს.
                   <br />
-                  <em>დაგიკავშირდნენ.</em>
+                  <span>დაგიკავშირდნენ.</span>
                 </>
               ) : (
                 <>
@@ -241,21 +263,21 @@ export default function HomePage() {
                   <br />
                   Scanned.
                   <br />
-                  <em>Connected.</em>
+                  <span>Connected.</span>
                 </>
               )}
             </h1>
 
-            <p>
+            <p className="heroDescription">
               {ka
-                ? "QR RETURN ქმნის სწრაფ და უსაფრთხო გზას მპოვნელსა და მფლობელს შორის — აპის ჩამოტვირთვის გარეშე."
-                : "QR RETURN creates a fast, secure connection between finder and owner — with no app required."}
+                ? "QR RETURN ქმნის მარტივ და უსაფრთხო კავშირს მპოვნელსა და მფლობელს შორის — აპის ჩამოტვირთვის გარეშე."
+                : "QR RETURN creates a simple and secure connection between finder and owner — no app required."}
             </p>
 
             <div className="heroActions">
               <a
-                className="primaryCta"
                 href={isLoggedIn ? "/account" : "/account/register"}
+                className="primaryCta"
               >
                 {isLoggedIn
                   ? ka
@@ -268,17 +290,17 @@ export default function HomePage() {
                 <ArrowIcon />
               </a>
 
-              <a href="#stories" className="secondaryCta">
-                {ka ? "ნახე როგორ მუშაობს" : "See it in action"}
+              <a href="#real-life" className="secondaryCta">
+                {ka ? "ნახე როგორ მუშაობს" : "See how it works"}
               </a>
             </div>
 
             {/* EMERGENCY SIGNAL */}
 
-            <div className="emergencySignal">
+            <a href="#emergency" className="emergencySignal">
               <div className="signalCross">+</div>
 
-              <div className="signalCopy">
+              <div>
                 <span>QR RETURN • EMERGENCY ID</span>
 
                 <strong>
@@ -288,17 +310,15 @@ export default function HomePage() {
                 </strong>
 
                 <small>
-                  SOS READY · MEDICAL INFO · EMERGENCY CONTACT · NO APP
+                  SOS READY · EMERGENCY CONTACT · MEDICAL INFO
                 </small>
               </div>
 
-              <a href="#emergency">
-                <ArrowIcon />
-              </a>
-            </div>
+              <ArrowIcon />
+            </a>
           </div>
 
-          {/* PHONE */}
+          {/* PHONE — QR, NOT DOG */}
 
           <div className="phoneStage">
             <div className="phoneHalo" />
@@ -307,70 +327,59 @@ export default function HomePage() {
               <div className="phoneNotch" />
 
               <div className="phoneScreen">
-                <div className="phoneBrand">
-                  <div className="miniBrand">
+                <div className="phoneHeader">
+                  <div className="miniLogo">
                     <QrIcon />
                   </div>
 
                   <div>
                     <span>QR RETURN</span>
-                    <strong>FINDER PROFILE</strong>
+                    <strong>SCAN TO CONNECT</strong>
                   </div>
 
-                  <b>
+                  <div className="activePill">
                     <i />
-                    LIVE
-                  </b>
+                    ACTIVE
+                  </div>
                 </div>
 
-                <div className="petProfile">
-                  <div className="petPhoto">
-                    <img
-                      src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=500&q=90"
-                      alt="Dog"
-                    />
+                <div className="mainQrArea">
+                  <div className="scanCorner topLeft" />
+                  <div className="scanCorner topRight" />
+                  <div className="scanCorner bottomLeft" />
+                  <div className="scanCorner bottomRight" />
 
-                    <div className="lostBadge">
-                      {ka ? "დაკარგულია" : "LOST"}
-                    </div>
-                  </div>
+                  <QrCode />
+                </div>
 
-                  <span>{ka ? "გამარჯობა, მე ვარ" : "HELLO, I AM"}</span>
-                  <strong>Toby</strong>
+                <div className="phoneMessage">
+                  <span>ONE SCAN</span>
+
+                  <strong>
+                    {ka
+                      ? "დაუკავშირდი მფლობელს"
+                      : "Connect with the owner"}
+                  </strong>
 
                   <p>
                     {ka
-                      ? "დავიკარგე. გთხოვთ დაუკავშირდეთ ჩემს პატრონს."
-                      : "I am lost. Please contact my owner."}
+                      ? "Live Chat • Location • Contact options"
+                      : "Live Chat • Location • Contact options"}
                   </p>
                 </div>
 
-                <div className="finderActions">
-                  <button type="button">
-                    <ChatIcon />
-                    <span>Live Chat</span>
-                  </button>
-
-                  <button type="button">
-                    <LocationIcon />
-                    <span>{ka ? "ლოკაცია" : "Location"}</span>
-                  </button>
-                </div>
-
-                <div className="privacyRow">
-                  <ShieldIcon />
+                <div className="phoneBottom">
+                  <div>
+                    <ShieldIcon />
+                    <span>
+                      {ka ? "დაცული ინფორმაცია" : "Protected"}
+                    </span>
+                  </div>
 
                   <div>
-                    <strong>
-                      {ka
-                        ? "პირადი მონაცემები დაცულია"
-                        : "Personal information protected"}
-                    </strong>
-
+                    <ScanIcon />
                     <span>
-                      {ka
-                        ? "მხოლოდ ნებადართული ინფორმაცია ჩანს"
-                        : "Only approved information is shown"}
+                      {ka ? "აპის გარეშე" : "No App"}
                     </span>
                   </div>
                 </div>
@@ -378,7 +387,7 @@ export default function HomePage() {
             </div>
 
             <div className="floatingChat">
-              <div>
+              <div className="floatingIcon">
                 <ChatIcon />
               </div>
 
@@ -386,8 +395,8 @@ export default function HomePage() {
                 <span>LIVE CHAT</span>
                 <strong>
                   {ka
-                    ? "მპოვნელმა მოგწერათ"
-                    : "Finder sent a message"}
+                    ? "მპოვნელთან პირდაპირი კავშირი"
+                    : "Direct finder contact"}
                 </strong>
               </section>
 
@@ -406,178 +415,216 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================= STORIES ========================= */}
+      {/* ======================================================
+          6 REAL-LIFE SCENARIOS — ONE ROW
+      ====================================================== */}
 
-      <section id="stories" className="storiesSection">
+      <section id="real-life" className="realLifeSection">
         <div className="shell">
-          <div className="storyHeader">
+          <div className="sectionHeading">
             <div>
               <span className="eyebrow">QR RETURN IN REAL LIFE</span>
 
               <h2>
                 {ka
-                  ? "ერთი პატარა QR. ექვსი ყოველდღიური სცენარი."
-                  : "One small QR. Six everyday situations."}
+                  ? "ნაპოვნიდან დაბრუნებამდე."
+                  : "From found to returned."}
               </h2>
             </div>
 
             <p>
               {ka
-                ? "QR RETURN მხოლოდ ნივთზე მიმაგრებული კოდი არ არის. ის არის გზა — პოვნიდან თქვენთან დაკავშირებამდე."
-                : "QR RETURN is more than a code attached to something. It creates a path from finding it to reaching you."}
+                ? "QR RETURN-ის თითოეული გამოყენება იწყება ერთი მარტივი მოქმედებით — მპოვნელი ხედავს QR-ს და ასკანერებს."
+                : "Every QR RETURN story begins with one simple action — the finder sees the QR and scans it."}
             </p>
           </div>
 
-          <div className="storyGrid">
-            {stories.map((story) => (
-              <article
-                key={story.id}
-                className={`storyCard ${story.large ? "storyLarge" : ""}`}
-              >
-                <img
-                  src={story.image}
-                  alt={ka ? story.ka : story.en}
-                />
+          <div className="productRow">
+            {products.map((product) => (
+              <article className="scenarioCard" key={product.id}>
+                <div className="scenarioPhoto">
+                  <img
+                    src={product.image}
+                    alt={ka ? product.ka : product.en}
+                  />
 
-                <div className="storyGradient" />
+                  <div className="photoShade" />
 
-                {/* scan phone overlay */}
-                <div className="scanPhone">
-                  <div className="scanPhoneTop" />
+                  {/* QR attached to item */}
 
-                  <div className="scanTarget">
-                    <span className="sc1" />
-                    <span className="sc2" />
-                    <span className="sc3" />
-                    <span className="sc4" />
-
+                  <div className="attachedQr">
                     <MiniQr />
                   </div>
 
-                  <small>SCAN</small>
-                </div>
+                  {/* phone-scanning visual */}
 
-                <div className="tagOnProduct">
-                  <MiniQr />
-                </div>
+                  <div className="scannerPhone">
+                    <div className="scannerNotch" />
 
-                <div className="storyContent">
-                  <div className="storyType">
-                    <span>QR RETURN</span>
-                    <strong>{ka ? story.ka : story.en}</strong>
+                    <div className="scannerWindow">
+                      <span className="cornerA" />
+                      <span className="cornerB" />
+                      <span className="cornerC" />
+                      <span className="cornerD" />
+
+                      <MiniQr />
+                    </div>
                   </div>
 
-                  <p>{ka ? story.kaAction : story.enAction}</p>
+                  <div className="scenarioTitle">
+                    <span>QR RETURN</span>
+                    <strong>{ka ? product.ka : product.en}</strong>
+                  </div>
+                </div>
 
-                  <div className="storyResult">
+                <div className="scenarioCopy">
+                  <p>{ka ? product.kaText : product.enText}</p>
+
+                  <div className="result">
                     <i />
-
                     <span>
-                      {ka ? story.kaResult : story.enResult}
+                      {ka ? product.kaResult : product.enResult}
                     </span>
                   </div>
                 </div>
               </article>
             ))}
-
-            {/* EMERGENCY STORY */}
-
-            <article id="emergency" className="emergencyStory">
-              <div className="emergencyPhoto">
-                <img
-                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1500&q=88"
-                  alt="Emergency medical support"
-                />
-
-                <div className="emergencyPhotoShade" />
-
-                <div className="emergencyWristTag">
-                  <span>+</span>
-                  <MiniQr />
-                </div>
-
-                <div className="emergencyScanner">
-                  <div className="scannerTop" />
-
-                  <div className="scannerUi">
-                    <span className="sos">SOS READY</span>
-
-                    <strong>EMERGENCY ID</strong>
-
-                    <div className="scannerLine">
-                      <HeartIcon />
-                      <span>Medical Info</span>
-                    </div>
-
-                    <div className="scannerLine">
-                      <UserIcon />
-                      <span>Emergency Contact</span>
-                    </div>
-
-                    <div className="scannerLine">
-                      <ShieldIcon />
-                      <span>Privacy Controlled</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="emergencyStoryCopy">
-                <div className="emergencyHeading">
-                  <div className="bigCross">+</div>
-
-                  <div>
-                    <span>QR RETURN</span>
-                    <strong>EMERGENCY ID</strong>
-                  </div>
-                </div>
-
-                <h2>
-                  {ka
-                    ? "როცა დახმარება გჭირდება, მნიშვნელოვანი ინფორმაცია არ უნდა დაიკარგოს."
-                    : "When help is needed, essential information should not be lost."}
-                </h2>
-
-                <p>
-                  {ka
-                    ? "ერთი სკანი შეიძლება საკმარისი იყოს, რომ დამხმარემ ნახოს თქვენ მიერ ნებადართული საგანგებო ინფორმაცია — ვის დაუკავშირდეს, რა უნდა იცოდეს და როგორ დაგეხმაროთ."
-                    : "One scan can give a helper access to the emergency information you choose to share — who to contact, what they need to know and how they can help."}
-                </p>
-
-                <div className="emergencySignals">
-                  <span>SOS READY</span>
-                  <span>EMERGENCY CONTACT</span>
-                  <span>MEDICAL INFO</span>
-                  <span>NO APP</span>
-                  <span>PRIVACY CONTROL</span>
-                </div>
-
-                <a
-                  href={isLoggedIn ? "/account" : "/account/register"}
-                  className="emergencyButton"
-                >
-                  {isLoggedIn
-                    ? ka
-                      ? "Emergency ID-ის მართვა"
-                      : "Manage Emergency ID"
-                    : ka
-                      ? "ანგარიშის შექმნა"
-                      : "Create Account"}
-
-                  <ArrowIcon />
-                </a>
-              </div>
-            </article>
           </div>
         </div>
       </section>
 
-      {/* ========================= FLOW ========================= */}
+      {/* ======================================================
+          EMERGENCY — SEPARATE, BUT SAME PRODUCT FAMILY
+      ====================================================== */}
+
+      <section id="emergency" className="emergencySection">
+        <div className="shell">
+          <div className="emergencyCard">
+            {/* LEFT VISUAL */}
+
+            <div className="emergencyVisual">
+              <div className="emergencyBackdrop" />
+
+              <div className="bracelet">
+                <div className="braceletStrap left" />
+
+                <div className="braceletPlate">
+                  <div className="braceletCross">+</div>
+                  <MiniQr />
+                  <small>EMERGENCY ID</small>
+                </div>
+
+                <div className="braceletStrap right" />
+              </div>
+
+              <div className="emergencyPhone">
+                <div className="emergencyPhoneNotch" />
+
+                <div className="emergencyPhoneScreen">
+                  <span className="sosBadge">SOS READY</span>
+
+                  <div className="emergencyPhoneTitle">
+                    <span>QR RETURN</span>
+                    <strong>EMERGENCY ID</strong>
+                  </div>
+
+                  <div className="emergencyData">
+                    <div>
+                      <HeartIcon />
+
+                      <section>
+                        <span>MEDICAL INFO</span>
+                        <strong>Available</strong>
+                      </section>
+                    </div>
+
+                    <div>
+                      <UserIcon />
+
+                      <section>
+                        <span>EMERGENCY CONTACT</span>
+                        <strong>Available</strong>
+                      </section>
+                    </div>
+
+                    <div>
+                      <ShieldIcon />
+
+                      <section>
+                        <span>PRIVACY</span>
+                        <strong>Controlled by owner</strong>
+                      </section>
+                    </div>
+                  </div>
+
+                  <div className="emergencyQr">
+                    <MiniQr />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COPY */}
+
+            <div className="emergencyCopy">
+              <div className="emergencyBrand">
+                <div>+</div>
+
+                <section>
+                  <span>QR RETURN</span>
+                  <strong>EMERGENCY ID</strong>
+                </section>
+              </div>
+
+              <h2>
+                {ka
+                  ? "როცა დახმარება გჭირდება, მნიშვნელოვანი ინფორმაცია არ უნდა დაიკარგოს."
+                  : "When help is needed, essential information should not be lost."}
+              </h2>
+
+              <p>
+                {ka
+                  ? "ერთი სკანი შეიძლება საკმარისი იყოს, რომ დამხმარემ ნახოს თქვენ მიერ ნებადართული საგანგებო ინფორმაცია — ვის დაუკავშირდეს, რა უნდა იცოდეს და როგორ დაგეხმაროთ."
+                  : "One scan can give a helper access to the emergency information you choose to share — who to contact, what they should know and how they can help."}
+              </p>
+
+              <div className="signalTags">
+                <span>SOS READY</span>
+                <span>EMERGENCY CONTACT</span>
+                <span>MEDICAL INFO</span>
+                <span>NO APP</span>
+                <span>PRIVACY CONTROL</span>
+              </div>
+
+              <a
+                href={isLoggedIn ? "/account" : "/account/register"}
+                className="emergencyCta"
+              >
+                {isLoggedIn
+                  ? ka
+                    ? "Emergency ID-ის მართვა"
+                    : "Manage Emergency ID"
+                  : ka
+                    ? "ანგარიშის შექმნა"
+                    : "Create Account"}
+
+                <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ======================================================
+          FIND → SCAN → CONNECT → RETURN
+      ====================================================== */}
 
       <section className="flowSection">
         <div className="shell">
           <div className="flowIntro">
-            <span className="eyebrow">FIND → SCAN → CONNECT → RETURN</span>
+            <span className="eyebrow">
+              FIND → SCAN → CONNECT → RETURN
+            </span>
 
             <h2>
               {ka
@@ -590,15 +637,16 @@ export default function HomePage() {
             <div className="flowStep">
               <span>01</span>
 
-              <div>
+              <div className="flowIcon">
                 <SearchIcon />
               </div>
 
               <strong>{ka ? "იპოვეს" : "Found"}</strong>
+
               <p>
                 {ka
                   ? "მპოვნელი ხედავს QR RETURN კოდს."
-                  : "The finder notices the QR RETURN tag."}
+                  : "The finder notices the QR RETURN code."}
               </p>
             </div>
 
@@ -607,11 +655,12 @@ export default function HomePage() {
             <div className="flowStep">
               <span>02</span>
 
-              <div>
+              <div className="flowIcon">
                 <ScanIcon />
               </div>
 
               <strong>{ka ? "დაასკანერეს" : "Scanned"}</strong>
+
               <p>
                 {ka
                   ? "აპის ჩამოტვირთვა საჭირო არ არის."
@@ -624,15 +673,16 @@ export default function HomePage() {
             <div className="flowStep">
               <span>03</span>
 
-              <div>
+              <div className="flowIcon">
                 <ChatIcon />
               </div>
 
               <strong>{ka ? "დაგიკავშირდნენ" : "Connected"}</strong>
+
               <p>
                 {ka
                   ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
-                  : "Live Chat, call or another option you enable."}
+                  : "Live Chat, call or another method you enable."}
               </p>
             </div>
 
@@ -641,11 +691,12 @@ export default function HomePage() {
             <div className="flowStep">
               <span>04</span>
 
-              <div>
+              <div className="flowIcon">
                 <ReturnIcon />
               </div>
 
               <strong>{ka ? "დაბრუნდა" : "Returned"}</strong>
+
               <p>
                 {ka
                   ? "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება."
@@ -656,7 +707,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================= BENEFITS ========================= */}
+      {/* ======================================================
+          BENEFITS
+      ====================================================== */}
 
       <section className="benefitsSection">
         <div className="shell">
@@ -677,10 +730,10 @@ export default function HomePage() {
                   <span>{benefit.number}</span>
 
                   <div>
-                    {benefit.icon === "chat" && <ChatIcon />}
-                    {benefit.icon === "location" && <LocationIcon />}
-                    {benefit.icon === "reward" && <RewardIcon />}
-                    {benefit.icon === "shield" && <ShieldIcon />}
+                    {benefit.type === "chat" && <ChatIcon />}
+                    {benefit.type === "location" && <LocationIcon />}
+                    {benefit.type === "reward" && <RewardIcon />}
+                    {benefit.type === "shield" && <ShieldIcon />}
                   </div>
                 </div>
 
@@ -693,7 +746,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================= ACCOUNT CTA ========================= */}
+      {/* ======================================================
+          ACCOUNT
+      ====================================================== */}
 
       <section className="accountSection">
         <div className="shell">
@@ -714,13 +769,11 @@ export default function HomePage() {
               <p>
                 {ka
                   ? "ძაღლი, კატა, გასაღები, საფულე, ჩემოდანი, ჩანთა და Emergency ID — შექმენით და მართეთ ერთი ანგარიშიდან."
-                  : "Dog, cat, keys, wallet, luggage, bag and Emergency ID — create and manage them from one account."}
+                  : "Dog, cat, keys, wallet, luggage, bag and Emergency ID — create and manage everything from one account."}
               </p>
             </div>
 
-            <a
-              href={isLoggedIn ? "/account" : "/account/register"}
-            >
+            <a href={isLoggedIn ? "/account" : "/account/register"}>
               {isLoggedIn
                 ? ka
                   ? "ჩემი ანგარიში"
@@ -735,9 +788,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================= CONTACT ========================= */}
+      {/* ======================================================
+          CONTACT
+      ====================================================== */}
 
-      <section className="contactSection">
+      <section className="contact">
         <div className="shell contactInner">
           <div>
             <span className="eyebrow">CONTACT</span>
@@ -758,11 +813,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================= LIVE CHAT ========================= */}
+      {/* REAL LIVE CHAT COMPONENT */}
 
       <SupportLauncher language={language} />
 
-      {/* ========================= FOOTER ========================= */}
+      {/* ======================================================
+          FOOTER
+      ====================================================== */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -778,7 +835,7 @@ export default function HomePage() {
           </div>
 
           <div className="footerLinks">
-            <a href="#stories">
+            <a href="#real-life">
               {ka ? "გამოყენება" : "Use cases"}
             </a>
 
@@ -792,6 +849,10 @@ export default function HomePage() {
         </div>
       </footer>
 
+      {/* ======================================================
+          STYLES
+      ====================================================== */}
+
       <style jsx>{`
         :global(*) {
           box-sizing: border-box;
@@ -803,13 +864,13 @@ export default function HomePage() {
 
         :global(body) {
           margin: 0;
-          background: #f6f6f3;
+          background: #f7f7f5;
         }
 
         .page {
           overflow: hidden;
-          color: #13171f;
-          background: #f6f6f3;
+          background: #f7f7f5;
+          color: #151922;
           font-family:
             Inter,
             -apple-system,
@@ -817,6 +878,19 @@ export default function HomePage() {
             "Segoe UI",
             Arial,
             sans-serif;
+        }
+
+        .shell {
+          width: calc(100% - 52px);
+          max-width: 1220px;
+          margin: auto;
+        }
+
+        .eyebrow {
+          color: #df5156;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 2px;
         }
 
         /* HEADER */
@@ -830,7 +904,7 @@ export default function HomePage() {
           align-items: center;
           justify-content: space-between;
           gap: 24px;
-          border-bottom: 1px solid rgba(24, 29, 38, 0.09);
+          border-bottom: 1px solid rgba(20, 25, 34, 0.08);
         }
 
         .brand,
@@ -852,26 +926,26 @@ export default function HomePage() {
           display: grid;
           place-items: center;
           border-radius: 12px;
-          background: #161c26;
-          color: #fff;
+          background: #18202b;
+          color: white;
         }
 
         .brandMark :global(svg) {
           width: 22px;
         }
 
-        .brandCopy strong,
-        .brandCopy span {
+        .brandText strong,
+        .brandText span {
           display: block;
         }
 
-        .brandCopy strong {
-          color: #161c26;
+        .brandText strong {
+          color: #18202b;
           font-size: 18px;
           font-weight: 850;
         }
 
-        .brandCopy span {
+        .brandText span {
           margin-top: 3px;
           color: #979da6;
           font-size: 6px;
@@ -887,9 +961,9 @@ export default function HomePage() {
           gap: 7px;
         }
 
-        .adminLink,
+        .adminButton,
         .accountButton,
-        .loginLink {
+        .loginButton {
           min-height: 38px;
           padding: 0 13px;
           display: inline-flex;
@@ -903,25 +977,25 @@ export default function HomePage() {
           white-space: nowrap;
         }
 
-        .adminLink {
-          color: #4c5564;
-          border: 1px solid #dcdfe4;
-          background: rgba(255, 255, 255, 0.55);
+        .adminButton {
+          color: #a7383d;
+          border: 1px solid #efd9da;
+          background: #fff7f7;
         }
 
-        .adminLink :global(svg),
+        .adminButton :global(svg),
         .accountButton :global(svg) {
           width: 13px;
         }
 
         .accountButton {
           color: white;
-          background: #161c26;
+          background: #18202b;
         }
 
-        .loginLink {
-          color: #4d5663;
-          border: 1px solid #dcdfe4;
+        .loginButton {
+          color: #4e5662;
+          border: 1px solid #dde0e4;
         }
 
         .language {
@@ -931,63 +1005,48 @@ export default function HomePage() {
         .language span {
           width: 1px;
           height: 12px;
-          background: #d3d6db;
+          background: #d5d8dc;
         }
 
         .language button {
           padding: 0;
           border: 0;
           background: transparent;
-          color: #9ca2ab;
+          color: #9ca2aa;
           font-size: 8px;
           font-weight: 900;
           cursor: pointer;
         }
 
         .language button.active {
-          color: #e5484d;
-        }
-
-        /* COMMON */
-
-        .shell {
-          width: calc(100% - 52px);
-          max-width: 1180px;
-          margin: auto;
-        }
-
-        .eyebrow {
-          color: #e5484d;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 2px;
+          color: #df5156;
         }
 
         /* HERO */
 
         .hero {
-          min-height: 670px;
+          min-height: 660px;
           position: relative;
           background:
             linear-gradient(
-              118deg,
-              #f7f6f2 0%,
-              #f1f2f0 50%,
-              #e9ebed 100%
+              120deg,
+              #f8f7f4,
+              #f1f2f1 52%,
+              #e9ebed
             );
         }
 
         .heroInner {
           width: calc(100% - 52px);
           max-width: 1240px;
-          min-height: 670px;
+          min-height: 660px;
           margin: auto;
           position: relative;
           z-index: 2;
           display: grid;
           grid-template-columns: 0.92fr 1.08fr;
           align-items: center;
-          gap: 75px;
+          gap: 80px;
         }
 
         .heroGlow {
@@ -999,23 +1058,23 @@ export default function HomePage() {
         .glowOne {
           width: 520px;
           height: 520px;
-          right: -170px;
-          top: -200px;
+          right: -180px;
+          top: -190px;
           background: radial-gradient(
             circle,
-            rgba(50, 66, 91, 0.16),
-            transparent 69%
+            rgba(59, 76, 101, 0.15),
+            transparent 70%
           );
         }
 
         .glowTwo {
-          width: 350px;
-          height: 350px;
-          left: -200px;
+          width: 340px;
+          height: 340px;
+          left: -190px;
           bottom: -180px;
           background: radial-gradient(
             circle,
-            rgba(229, 72, 77, 0.08),
+            rgba(223, 81, 86, 0.07),
             transparent 70%
           );
         }
@@ -1024,55 +1083,44 @@ export default function HomePage() {
           max-width: 540px;
         }
 
-        .heroEyebrow {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #727b87;
+        .heroLabel {
+          color: #747d88;
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 2px;
         }
 
-        .heroEyebrow > span {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #e5484d;
-        }
-
         .heroCopy h1 {
-          margin: 20px 0 0;
-          color: #141922;
-          font-size: clamp(39px, 4.5vw, 55px);
+          margin: 19px 0 0;
+          color: #161c25;
+          font-size: clamp(38px, 4.5vw, 54px);
           line-height: 1.04;
-          letter-spacing: -2.8px;
-          font-weight: 700;
+          letter-spacing: -2.7px;
+          font-weight: 690;
         }
 
-        .heroCopy h1 em {
-          color: #e5484d;
-          font-style: normal;
+        .heroCopy h1 span {
+          color: #df5156;
         }
 
-        .heroCopy > p {
-          max-width: 490px;
-          margin: 20px 0 0;
-          color: #69717c;
-          font-size: 13px;
-          line-height: 1.75;
+        .heroDescription {
+          max-width: 480px;
+          margin: 19px 0 0;
+          color: #68717c;
+          font-size: 12px;
+          line-height: 1.72;
         }
 
         .heroActions {
-          margin-top: 27px;
+          margin-top: 26px;
           display: flex;
           gap: 9px;
         }
 
         .primaryCta,
         .secondaryCta {
-          min-height: 45px;
-          padding: 0 16px;
+          min-height: 44px;
+          padding: 0 15px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -1085,7 +1133,7 @@ export default function HomePage() {
 
         .primaryCta {
           color: white;
-          background: #161c26;
+          background: #18202b;
         }
 
         .primaryCta :global(svg) {
@@ -1093,24 +1141,24 @@ export default function HomePage() {
         }
 
         .secondaryCta {
-          color: #4e5764;
-          border: 1px solid #dadee3;
-          background: rgba(255, 255, 255, 0.55);
+          color: #505966;
+          border: 1px solid #dadee2;
+          background: rgba(255, 255, 255, 0.5);
         }
 
-        /* emergency signal in hero */
-
         .emergencySignal {
-          margin-top: 34px;
+          margin-top: 32px;
           padding: 13px;
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
           gap: 11px;
-          border: 1px solid #edd7d9;
+          border: 1px solid #edd7d8;
           border-radius: 15px;
-          background: rgba(255, 250, 250, 0.83);
-          box-shadow: 0 10px 30px rgba(78, 41, 45, 0.045);
+          color: inherit;
+          background: rgba(255, 250, 250, 0.82);
+          text-decoration: none;
+          box-shadow: 0 10px 30px rgba(74, 42, 45, 0.04);
         }
 
         .signalCross {
@@ -1120,55 +1168,46 @@ export default function HomePage() {
           place-items: center;
           border-radius: 11px;
           color: white;
-          background: #e5484d;
+          background: #df5156;
           font-size: 26px;
         }
 
-        .signalCopy span,
-        .signalCopy strong,
-        .signalCopy small {
+        .emergencySignal span,
+        .emergencySignal strong,
+        .emergencySignal small {
           display: block;
         }
 
-        .signalCopy span {
-          color: #e5484d;
+        .emergencySignal span {
+          color: #c43f44;
           font-size: 5.5px;
           font-weight: 900;
           letter-spacing: 1.2px;
         }
 
-        .signalCopy strong {
+        .emergencySignal strong {
           margin-top: 4px;
-          color: #313a46;
-          font-size: 9.5px;
+          color: #313944;
+          font-size: 9px;
           line-height: 1.4;
         }
 
-        .signalCopy small {
+        .emergencySignal small {
           margin-top: 4px;
-          color: #969ca5;
-          font-size: 5.5px;
-          letter-spacing: 0.5px;
+          color: #959ba4;
+          font-size: 5px;
+          letter-spacing: 0.6px;
         }
 
-        .emergencySignal > a {
-          width: 30px;
-          height: 30px;
-          display: grid;
-          place-items: center;
-          border-radius: 9px;
-          color: #e5484d;
-          background: #fff;
-        }
-
-        .emergencySignal > a :global(svg) {
-          width: 12px;
+        .emergencySignal > :global(svg) {
+          width: 13px;
+          color: #df5156;
         }
 
         /* PHONE */
 
         .phoneStage {
-          min-height: 570px;
+          min-height: 560px;
           position: relative;
           display: grid;
           place-items: center;
@@ -1181,8 +1220,8 @@ export default function HomePage() {
           border-radius: 50%;
           background: radial-gradient(
             circle,
-            rgba(67, 82, 105, 0.18),
-            rgba(67, 82, 105, 0.035) 48%,
+            rgba(62, 78, 101, 0.18),
+            rgba(62, 78, 101, 0.03) 49%,
             transparent 70%
           );
         }
@@ -1194,8 +1233,8 @@ export default function HomePage() {
           position: relative;
           z-index: 3;
           border-radius: 44px;
-          background: linear-gradient(140deg, #111721, #05080c);
-          box-shadow: 0 40px 90px rgba(18, 26, 37, 0.24);
+          background: linear-gradient(140deg, #121923, #05090d);
+          box-shadow: 0 40px 90px rgba(18, 26, 37, 0.23);
           transform:
             perspective(1300px)
             rotateY(-7deg)
@@ -1210,194 +1249,166 @@ export default function HomePage() {
           left: 50%;
           z-index: 5;
           border-radius: 999px;
-          background: #060a0f;
+          background: #070b10;
           transform: translateX(-50%);
         }
 
         .phoneScreen {
           height: 100%;
-          padding: 34px 17px 18px;
+          padding: 34px 18px 18px;
           border-radius: 35px;
-          background: linear-gradient(180deg, #ffffff, #f5f7fa);
+          background: linear-gradient(180deg, #ffffff, #f5f7f9);
         }
 
-        .phoneBrand {
+        .phoneHeader {
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
           gap: 8px;
         }
 
-        .miniBrand {
+        .miniLogo {
           width: 31px;
           height: 31px;
           display: grid;
           place-items: center;
           border-radius: 9px;
           color: white;
-          background: #161c26;
+          background: #18202b;
         }
 
-        .miniBrand :global(svg) {
+        .miniLogo :global(svg) {
           width: 16px;
         }
 
-        .phoneBrand span,
-        .phoneBrand strong {
+        .phoneHeader span,
+        .phoneHeader strong {
           display: block;
         }
 
-        .phoneBrand span {
-          color: #e5484d;
-          font-size: 5.5px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .phoneBrand strong {
-          margin-top: 2px;
-          color: #3c4654;
-          font-size: 7px;
-        }
-
-        .phoneBrand > b {
-          padding: 5px 6px;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          border-radius: 999px;
-          color: #157347;
-          background: #eaf9ef;
-          font-size: 5px;
-          letter-spacing: 0.6px;
-        }
-
-        .phoneBrand > b i {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: #24a56a;
-        }
-
-        .petProfile {
-          margin-top: 24px;
-          padding: 13px;
-          text-align: center;
-          border: 1px solid #e5e9ee;
-          border-radius: 17px;
-          background: white;
-        }
-
-        .petPhoto {
-          height: 150px;
-          position: relative;
-          overflow: hidden;
-          border-radius: 13px;
-        }
-
-        .petPhoto img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .lostBadge {
-          position: absolute;
-          top: 9px;
-          right: 9px;
-          padding: 5px 7px;
-          border-radius: 999px;
-          color: white;
-          background: #e5484d;
-          font-size: 5px;
-          font-weight: 900;
-        }
-
-        .petProfile > span {
-          display: block;
-          margin-top: 12px;
-          color: #9aa1aa;
+        .phoneHeader span {
+          color: #df5156;
           font-size: 5.5px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .petProfile > strong {
-          display: block;
-          margin-top: 3px;
-          color: #18202b;
-          font-size: 18px;
+        .phoneHeader strong {
+          margin-top: 2px;
+          color: #46505e;
+          font-size: 7px;
         }
 
-        .petProfile > p {
-          margin: 5px auto 0;
-          max-width: 190px;
-          color: #767f8b;
-          font-size: 6.5px;
-          line-height: 1.5;
-        }
-
-        .finderActions {
-          margin-top: 10px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 7px;
-        }
-
-        .finderActions button {
-          min-height: 49px;
-          padding: 8px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: space-between;
-          border: 1px solid #e1e5ea;
-          border-radius: 12px;
-          color: #535e6c;
-          background: white;
-          font-size: 6px;
-          font-weight: 800;
-        }
-
-        .finderActions button:first-child {
-          color: white;
-          background: #161c26;
-          border-color: #161c26;
-        }
-
-        .finderActions :global(svg) {
-          width: 14px;
-        }
-
-        .privacyRow {
-          margin-top: 9px;
-          padding: 10px;
+        .activePill {
+          padding: 5px 6px;
           display: flex;
           align-items: center;
-          gap: 8px;
-          border-radius: 11px;
-          background: #eef1f4;
-        }
-
-        .privacyRow :global(svg) {
-          width: 15px;
-          color: #e5484d;
-        }
-
-        .privacyRow strong,
-        .privacyRow span {
-          display: block;
-        }
-
-        .privacyRow strong {
-          color: #424d5a;
-          font-size: 6.5px;
-        }
-
-        .privacyRow span {
-          margin-top: 2px;
-          color: #9097a1;
+          gap: 4px;
+          border-radius: 999px;
+          color: #18784b;
+          background: #eaf9ef;
           font-size: 5px;
+          font-weight: 900;
+        }
+
+        .activePill i {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #28a86d;
+        }
+
+        .mainQrArea {
+          width: 195px;
+          height: 195px;
+          margin: 63px auto 0;
+          position: relative;
+          display: grid;
+          place-items: center;
+          border-radius: 23px;
+          background: white;
+          box-shadow: 0 18px 42px rgba(32, 42, 56, 0.08);
+        }
+
+        .scanCorner {
+          width: 31px;
+          height: 31px;
+          position: absolute;
+        }
+
+        .topLeft {
+          top: 0;
+          left: 0;
+          border-top: 3px solid #df5156;
+          border-left: 3px solid #df5156;
+          border-radius: 11px 0 0;
+        }
+
+        .topRight {
+          top: 0;
+          right: 0;
+          border-top: 3px solid #df5156;
+          border-right: 3px solid #df5156;
+        }
+
+        .bottomLeft {
+          left: 0;
+          bottom: 0;
+          border-left: 3px solid #df5156;
+          border-bottom: 3px solid #df5156;
+        }
+
+        .bottomRight {
+          right: 0;
+          bottom: 0;
+          border-right: 3px solid #df5156;
+          border-bottom: 3px solid #df5156;
+        }
+
+        .phoneMessage {
+          margin-top: 28px;
+          text-align: center;
+        }
+
+        .phoneMessage span {
+          color: #a0a6ae;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 1.4px;
+        }
+
+        .phoneMessage strong {
+          display: block;
+          margin-top: 5px;
+          color: #202934;
+          font-size: 11px;
+        }
+
+        .phoneMessage p {
+          margin: 5px 0 0;
+          color: #8b929b;
+          font-size: 6px;
+        }
+
+        .phoneBottom {
+          margin-top: 31px;
+          padding-top: 14px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          border-top: 1px solid #e3e7eb;
+        }
+
+        .phoneBottom > div {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #808894;
+          font-size: 6px;
+        }
+
+        .phoneBottom :global(svg) {
+          width: 12px;
+          color: #df5156;
         }
 
         .floatingChat,
@@ -1406,33 +1417,33 @@ export default function HomePage() {
           z-index: 5;
           display: flex;
           align-items: center;
-          border: 1px solid rgba(255, 255, 255, 0.75);
-          background: rgba(255, 255, 255, 0.91);
-          box-shadow: 0 18px 45px rgba(33, 42, 55, 0.13);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.92);
+          box-shadow: 0 18px 45px rgba(34, 43, 56, 0.13);
           backdrop-filter: blur(18px);
         }
 
         .floatingChat {
           width: 205px;
-          left: -28px;
-          bottom: 76px;
+          left: -26px;
+          bottom: 78px;
           padding: 11px;
           gap: 9px;
           border-radius: 15px;
         }
 
-        .floatingChat > div {
+        .floatingIcon {
           width: 37px;
           height: 37px;
           flex: 0 0 37px;
           display: grid;
           place-items: center;
           border-radius: 10px;
-          color: #e5484d;
+          color: #df5156;
           background: #fff0f0;
         }
 
-        .floatingChat :global(svg) {
+        .floatingIcon :global(svg) {
           width: 16px;
         }
 
@@ -1449,7 +1460,7 @@ export default function HomePage() {
 
         .floatingChat span,
         .floatingLocation span {
-          color: #989fa9;
+          color: #979ea7;
           font-size: 5px;
           font-weight: 900;
           letter-spacing: 1px;
@@ -1458,7 +1469,7 @@ export default function HomePage() {
         .floatingChat strong,
         .floatingLocation strong {
           margin-top: 3px;
-          color: #37414e;
+          color: #39434f;
           font-size: 8px;
         }
 
@@ -1466,501 +1477,587 @@ export default function HomePage() {
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: #24a56a;
+          background: #28a86d;
         }
 
         .floatingLocation {
-          right: -7px;
-          top: 86px;
+          right: -4px;
+          top: 93px;
           padding: 11px;
           gap: 8px;
           border-radius: 13px;
         }
 
         .floatingLocation :global(svg) {
-          width: 20px;
-          color: #161c26;
+          width: 19px;
+          color: #18202b;
         }
 
-        /* STORY SECTION */
+        /* 6 SCENARIOS */
 
-        .storiesSection {
-          padding: 100px 0;
-          background: #fafaf8;
+        .realLifeSection {
+          padding: 96px 0 88px;
+          background: #fbfbf9;
         }
 
-        .storyHeader {
+        .sectionHeading {
           display: grid;
           grid-template-columns: 1fr 0.55fr;
           align-items: end;
-          gap: 75px;
+          gap: 70px;
         }
 
-        .storyHeader h2,
+        .sectionHeading h2,
         .flowIntro h2,
         .accountCopy h2 {
-          margin: 11px 0 0;
-          color: #151b24;
-          font-size: clamp(34px, 4.4vw, 49px);
+          margin: 10px 0 0;
+          color: #171d26;
+          font-size: clamp(33px, 4vw, 46px);
           line-height: 1.05;
-          letter-spacing: -2.5px;
-          font-weight: 700;
+          letter-spacing: -2.3px;
+          font-weight: 680;
         }
 
-        .storyHeader > p {
+        .sectionHeading > p {
           margin: 0;
-          color: #707984;
-          font-size: 12px;
-          line-height: 1.72;
+          color: #717985;
+          font-size: 11px;
+          line-height: 1.7;
         }
 
-        .storyGrid {
-          margin-top: 45px;
+        .productRow {
+          margin-top: 40px;
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          grid-auto-rows: 360px;
-          gap: 12px;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 10px;
         }
 
-        .storyCard {
+        .scenarioCard {
+          overflow: hidden;
+          border: 1px solid #e1e3e6;
+          border-radius: 18px;
+          background: white;
+          box-shadow: 0 9px 26px rgba(26, 36, 50, 0.035);
+        }
+
+        .scenarioPhoto {
+          height: 205px;
           position: relative;
           overflow: hidden;
-          border-radius: 22px;
-          background: #222831;
+          background: #dfe3e7;
         }
 
-        .storyLarge {
-          grid-column: span 2;
-        }
-
-        .storyCard > img {
+        .scenarioPhoto > img {
           width: 100%;
           height: 100%;
-          position: absolute;
-          inset: 0;
           object-fit: cover;
-          transition: transform 0.5s ease;
+          transition: transform 0.45s ease;
         }
 
-        .storyCard:hover > img {
+        .scenarioCard:hover .scenarioPhoto > img {
           transform: scale(1.035);
         }
 
-        .storyGradient {
+        .photoShade {
           position: absolute;
           inset: 0;
           background:
             linear-gradient(
               180deg,
-              rgba(10, 14, 20, 0.03) 20%,
-              rgba(10, 14, 20, 0.12) 47%,
-              rgba(7, 10, 15, 0.87) 100%
+              rgba(10, 14, 19, 0.02) 30%,
+              rgba(10, 14, 19, 0.12) 65%,
+              rgba(7, 10, 14, 0.68) 100%
             );
         }
 
-        .tagOnProduct {
-          width: 48px;
-          height: 48px;
+        .attachedQr {
+          width: 38px;
+          height: 38px;
           position: absolute;
-          top: 20px;
-          left: 20px;
+          top: 12px;
+          left: 12px;
           display: grid;
           place-items: center;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.94);
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.93);
+          box-shadow: 0 7px 17px rgba(0, 0, 0, 0.11);
         }
 
-        /* faux finder phone scanning product */
-
-        .scanPhone {
-          width: 69px;
-          height: 116px;
-          padding: 7px;
+        .scannerPhone {
+          width: 49px;
+          height: 82px;
+          padding: 5px;
           position: absolute;
-          top: 24px;
-          right: 22px;
-          border-radius: 15px;
-          background: #131820;
-          transform: rotate(7deg);
-          box-shadow: 0 13px 30px rgba(0, 0, 0, 0.25);
+          top: 13px;
+          right: 11px;
+          border-radius: 11px;
+          background: #161c26;
+          transform: rotate(6deg);
+          box-shadow: 0 9px 22px rgba(0, 0, 0, 0.19);
         }
 
-        .scanPhoneTop {
-          width: 20px;
-          height: 4px;
-          margin: 0 auto 12px;
+        .scannerNotch {
+          width: 15px;
+          height: 3px;
+          margin: 0 auto 7px;
           border-radius: 99px;
-          background: #343b45;
+          background: #3c444e;
         }
 
-        .scanTarget {
-          height: 70px;
+        .scannerWindow {
+          height: 57px;
           position: relative;
           display: grid;
           place-items: center;
-          border-radius: 8px;
+          border-radius: 6px;
           background: #f7f7f7;
         }
 
-        .scanTarget > span {
-          width: 10px;
-          height: 10px;
+        .scannerWindow > span {
+          width: 8px;
+          height: 8px;
           position: absolute;
         }
 
-        .sc1 {
-          top: 5px;
-          left: 5px;
-          border-top: 1.5px solid #e5484d;
-          border-left: 1.5px solid #e5484d;
+        .cornerA {
+          top: 4px;
+          left: 4px;
+          border-top: 1px solid #df5156;
+          border-left: 1px solid #df5156;
         }
 
-        .sc2 {
-          top: 5px;
-          right: 5px;
-          border-top: 1.5px solid #e5484d;
-          border-right: 1.5px solid #e5484d;
+        .cornerB {
+          top: 4px;
+          right: 4px;
+          border-top: 1px solid #df5156;
+          border-right: 1px solid #df5156;
         }
 
-        .sc3 {
-          left: 5px;
-          bottom: 5px;
-          border-left: 1.5px solid #e5484d;
-          border-bottom: 1.5px solid #e5484d;
+        .cornerC {
+          bottom: 4px;
+          left: 4px;
+          border-left: 1px solid #df5156;
+          border-bottom: 1px solid #df5156;
         }
 
-        .sc4 {
-          right: 5px;
-          bottom: 5px;
-          border-right: 1.5px solid #e5484d;
-          border-bottom: 1.5px solid #e5484d;
+        .cornerD {
+          right: 4px;
+          bottom: 4px;
+          border-right: 1px solid #df5156;
+          border-bottom: 1px solid #df5156;
         }
 
-        .scanPhone small {
+        .scenarioTitle {
+          position: absolute;
+          left: 14px;
+          right: 14px;
+          bottom: 13px;
+        }
+
+        .scenarioTitle span,
+        .scenarioTitle strong {
           display: block;
-          margin-top: 7px;
-          color: #aeb4bc;
-          text-align: center;
+        }
+
+        .scenarioTitle span {
+          color: #d8dde2;
           font-size: 4.5px;
           font-weight: 900;
-          letter-spacing: 1px;
+          letter-spacing: 1.2px;
         }
 
-        .storyContent {
-          position: absolute;
-          left: 22px;
-          right: 22px;
-          bottom: 22px;
-        }
-
-        .storyType span,
-        .storyType strong {
-          display: block;
-        }
-
-        .storyType span {
-          color: #e1e4e8;
-          font-size: 5px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-        }
-
-        .storyType strong {
+        .scenarioTitle strong {
           margin-top: 3px;
           color: white;
-          font-size: 21px;
-          letter-spacing: -0.6px;
+          font-size: 14px;
         }
 
-        .storyContent > p {
-          max-width: 420px;
-          margin: 8px 0 0;
-          color: #d3d7dc;
-          font-size: 9px;
-          line-height: 1.55;
+        .scenarioCopy {
+          min-height: 122px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
         }
 
-        .storyResult {
+        .scenarioCopy p {
+          margin: 0;
+          flex: 1;
+          color: #707985;
+          font-size: 8px;
+          line-height: 1.58;
+        }
+
+        .result {
           width: fit-content;
-          margin-top: 12px;
-          padding: 7px 9px;
+          margin-top: 10px;
+          padding: 6px 8px;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
           border-radius: 999px;
-          color: white;
-          background: rgba(255, 255, 255, 0.13);
-          backdrop-filter: blur(10px);
-          font-size: 7px;
+          color: #45505d;
+          background: #f0f2f4;
+          font-size: 6.5px;
           font-weight: 800;
         }
 
-        .storyResult i {
-          width: 6px;
-          height: 6px;
+        .result i {
+          width: 5px;
+          height: 5px;
           border-radius: 50%;
-          background: #41cf8b;
+          background: #28a86d;
         }
 
-        /* EMERGENCY STORY */
+        /* EMERGENCY SECTION */
 
-        .emergencyStory {
-          min-height: 500px;
-          grid-column: 1 / -1;
+        .emergencySection {
+          padding: 92px 0;
+          background: #f1f1ef;
+        }
+
+        .emergencyCard {
+          min-height: 510px;
+          padding: 34px;
           display: grid;
-          grid-template-columns: 1.06fr 0.94fr;
+          grid-template-columns: 0.92fr 1.08fr;
+          align-items: center;
+          gap: 55px;
           overflow: hidden;
-          border: 1px solid #ead5d7;
+          border: 1px solid #ead9da;
           border-radius: 26px;
-          background: #fff;
-        }
-
-        .emergencyPhoto {
-          min-height: 500px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .emergencyPhoto > img {
-          width: 100%;
-          height: 100%;
-          position: absolute;
-          object-fit: cover;
-        }
-
-        .emergencyPhotoShade {
-          position: absolute;
-          inset: 0;
           background:
             linear-gradient(
               120deg,
-              rgba(14, 18, 25, 0.06),
-              rgba(14, 18, 25, 0.16)
+              #fff9f9,
+              #ffffff 60%,
+              #f7f3f3
             );
+          box-shadow: 0 20px 55px rgba(56, 37, 40, 0.055);
         }
 
-        .emergencyWristTag {
-          width: 115px;
-          min-height: 48px;
-          position: absolute;
-          left: 28px;
-          top: 29px;
-          padding: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-radius: 13px;
-          background: rgba(255, 255, 255, 0.94);
-          box-shadow: 0 13px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .emergencyWristTag > span {
-          width: 30px;
-          height: 30px;
+        .emergencyVisual {
+          min-height: 430px;
+          position: relative;
           display: grid;
           place-items: center;
-          border-radius: 8px;
-          color: white;
-          background: #e5484d;
-          font-size: 20px;
         }
 
-        .emergencyScanner {
-          width: 180px;
-          min-height: 285px;
-          padding: 8px;
+        .emergencyBackdrop {
+          width: 360px;
+          height: 360px;
           position: absolute;
-          right: 30px;
-          bottom: 28px;
-          border-radius: 25px;
-          background: #10151d;
-          transform: rotate(4deg);
-          box-shadow: 0 24px 55px rgba(0, 0, 0, 0.26);
+          border-radius: 50%;
+          background: radial-gradient(
+            circle,
+            rgba(223, 81, 86, 0.13),
+            rgba(223, 81, 86, 0.025) 52%,
+            transparent 72%
+          );
         }
 
-        .scannerTop {
-          width: 45px;
-          height: 8px;
-          margin: 3px auto 14px;
-          border-radius: 99px;
-          background: #303741;
+        .bracelet {
+          width: 310px;
+          height: 115px;
+          position: absolute;
+          z-index: 2;
+          left: -18px;
+          bottom: 75px;
+          display: flex;
+          align-items: center;
+          transform: rotate(-8deg);
+          filter: drop-shadow(0 17px 18px rgba(37, 42, 50, 0.16));
         }
 
-        .scannerUi {
-          height: 245px;
-          padding: 19px 14px;
-          border-radius: 19px;
-          background: #f9fafb;
+        .braceletStrap {
+          flex: 1;
+          height: 48px;
+          background: #d6dbe1;
         }
 
-        .scannerUi .sos {
-          display: inline-flex;
-          padding: 5px 7px;
-          border-radius: 999px;
+        .braceletStrap.left {
+          border-radius: 24px 0 0 24px;
+        }
+
+        .braceletStrap.right {
+          border-radius: 0 24px 24px 0;
+        }
+
+        .braceletPlate {
+          width: 128px;
+          height: 100px;
+          flex: 0 0 128px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          border: 4px solid #bfc5cc;
+          border-radius: 23px;
+          background: white;
+        }
+
+        .braceletCross {
+          width: 19px;
+          height: 19px;
+          position: absolute;
+          top: 8px;
+          right: 9px;
+          display: grid;
+          place-items: center;
+          border-radius: 5px;
           color: white;
-          background: #e5484d;
+          background: #df5156;
+          font-size: 14px;
+        }
+
+        .braceletPlate small {
+          margin-top: 5px;
+          color: #a64045;
           font-size: 5px;
           font-weight: 900;
           letter-spacing: 0.8px;
         }
 
-        .scannerUi > strong {
-          display: block;
-          margin: 14px 0 15px;
-          color: #1d2632;
-          font-size: 12px;
+        .emergencyPhone {
+          width: 205px;
+          height: 370px;
+          padding: 7px;
+          position: relative;
+          z-index: 3;
+          margin-left: 120px;
+          border-radius: 29px;
+          background: #151c26;
+          box-shadow: 0 24px 55px rgba(24, 32, 43, 0.22);
+          transform: rotate(4deg);
         }
 
-        .scannerLine {
-          min-height: 46px;
+        .emergencyPhoneNotch {
+          width: 50px;
+          height: 9px;
+          position: absolute;
+          top: 10px;
+          left: 50%;
+          z-index: 3;
+          border-radius: 99px;
+          background: #080c11;
+          transform: translateX(-50%);
+        }
+
+        .emergencyPhoneScreen {
+          height: 100%;
+          padding: 29px 14px 13px;
+          border-radius: 23px;
+          background: #f9fafb;
+        }
+
+        .sosBadge {
+          display: inline-flex;
+          padding: 5px 7px;
+          border-radius: 999px;
+          color: white;
+          background: #df5156;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 0.8px;
+        }
+
+        .emergencyPhoneTitle {
+          margin-top: 16px;
+        }
+
+        .emergencyPhoneTitle span,
+        .emergencyPhoneTitle strong {
+          display: block;
+        }
+
+        .emergencyPhoneTitle span {
+          color: #df5156;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .emergencyPhoneTitle strong {
+          margin-top: 3px;
+          color: #27313e;
+          font-size: 11px;
+        }
+
+        .emergencyData {
+          margin-top: 15px;
+        }
+
+        .emergencyData > div {
+          min-height: 51px;
           display: flex;
           align-items: center;
           gap: 8px;
-          border-top: 1px solid #e7eaee;
-          color: #505b69;
-          font-size: 7px;
-          font-weight: 750;
+          border-top: 1px solid #e4e7eb;
         }
 
-        .scannerLine :global(svg) {
+        .emergencyData :global(svg) {
           width: 14px;
-          color: #e5484d;
+          color: #df5156;
         }
 
-        .emergencyStoryCopy {
-          padding: 48px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+        .emergencyData section span,
+        .emergencyData section strong {
+          display: block;
         }
 
-        .emergencyHeading {
+        .emergencyData section span {
+          color: #9ca3ac;
+          font-size: 4.5px;
+          font-weight: 900;
+          letter-spacing: 0.7px;
+        }
+
+        .emergencyData section strong {
+          margin-top: 2px;
+          color: #4a5563;
+          font-size: 6px;
+        }
+
+        .emergencyQr {
+          width: 60px;
+          height: 60px;
+          margin: 16px auto 0;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: #eef0f2;
+        }
+
+        .emergencyCopy {
+          max-width: 520px;
+        }
+
+        .emergencyBrand {
           display: flex;
           align-items: center;
-          gap: 11px;
+          gap: 10px;
         }
 
-        .bigCross {
-          width: 45px;
-          height: 45px;
+        .emergencyBrand > div {
+          width: 44px;
+          height: 44px;
           display: grid;
           place-items: center;
           border-radius: 12px;
           color: white;
-          background: #e5484d;
+          background: #df5156;
           font-size: 27px;
         }
 
-        .emergencyHeading span,
-        .emergencyHeading strong {
+        .emergencyBrand section span,
+        .emergencyBrand section strong {
           display: block;
         }
 
-        .emergencyHeading span {
-          color: #e5484d;
+        .emergencyBrand section span {
+          color: #df5156;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.3px;
         }
 
-        .emergencyHeading strong {
+        .emergencyBrand section strong {
           margin-top: 3px;
-          color: #282f39;
+          color: #2c3541;
           font-size: 13px;
         }
 
-        .emergencyStoryCopy h2 {
-          margin: 24px 0 0;
-          color: #161c25;
-          font-size: clamp(30px, 3.5vw, 42px);
+        .emergencyCopy h2 {
+          margin: 23px 0 0;
+          color: #181e27;
+          font-size: clamp(30px, 3.5vw, 41px);
           line-height: 1.08;
           letter-spacing: -2px;
-          font-weight: 700;
+          font-weight: 680;
         }
 
-        .emergencyStoryCopy > p {
-          margin: 17px 0 0;
+        .emergencyCopy > p {
+          margin: 16px 0 0;
           color: #6d7580;
           font-size: 11px;
           line-height: 1.72;
         }
 
-        .emergencySignals {
-          margin-top: 24px;
+        .signalTags {
+          margin-top: 22px;
           display: flex;
           flex-wrap: wrap;
           gap: 7px;
         }
 
-        .emergencySignals span {
+        .signalTags span {
           padding: 7px 9px;
-          border: 1px solid #efd7da;
+          border: 1px solid #efd7d9;
           border-radius: 999px;
-          color: #c7333c;
+          color: #b93e43;
           background: #fff7f7;
           font-size: 5.5px;
           font-weight: 900;
-          letter-spacing: 0.7px;
+          letter-spacing: 0.6px;
         }
 
-        .emergencyButton {
+        .emergencyCta {
           width: fit-content;
-          min-height: 43px;
-          margin-top: 25px;
-          padding: 0 15px;
+          min-height: 42px;
+          margin-top: 24px;
+          padding: 0 14px;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
           border-radius: 10px;
           color: white;
-          background: #e5484d;
+          background: #df5156;
           font-size: 8.5px;
           font-weight: 850;
           text-decoration: none;
         }
 
-        .emergencyButton :global(svg) {
+        .emergencyCta :global(svg) {
           width: 12px;
         }
 
         /* FLOW */
 
         .flowSection {
-          padding: 95px 0;
-          background: #f0f0ed;
+          padding: 92px 0;
+          background: #fbfbf9;
         }
 
         .flowIntro {
-          max-width: 700px;
+          max-width: 680px;
         }
 
         .flow {
-          margin-top: 47px;
+          margin-top: 45px;
           display: grid;
           grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
           align-items: start;
         }
 
         .flowStep > span {
-          color: #afb4bb;
+          color: #acb2ba;
           font-size: 7px;
           font-weight: 900;
         }
 
-        .flowStep > div {
-          width: 47px;
-          height: 47px;
+        .flowIcon {
+          width: 46px;
+          height: 46px;
           margin-top: 14px;
           display: grid;
           place-items: center;
-          border: 1px solid #dcdee1;
+          border: 1px solid #dfe2e5;
           border-radius: 13px;
-          color: #161c26;
-          background: #fafaf8;
+          color: #18202b;
+          background: #ffffff;
         }
 
-        .flowStep :global(svg) {
+        .flowIcon :global(svg) {
           width: 18px;
         }
 
@@ -1973,7 +2070,7 @@ export default function HomePage() {
 
         .flowStep p {
           margin: 6px 0 0;
-          color: #7a828d;
+          color: #79818c;
           font-size: 8.5px;
           line-height: 1.6;
         }
@@ -1982,36 +2079,36 @@ export default function HomePage() {
           width: 55px;
           height: 1px;
           margin: 36px 17px 0;
-          background: #d5d8dc;
+          background: #dadee2;
         }
 
         /* BENEFITS */
 
         .benefitsSection {
-          padding: 95px 0;
+          padding: 92px 0;
           color: white;
-          background: #151b24;
+          background: #18202b;
         }
 
         .benefitsHeader > span {
-          color: #e78a8e;
+          color: #e58c90;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.8px;
         }
 
         .benefitsHeader h2 {
-          max-width: 760px;
-          margin: 11px 0 0;
+          max-width: 740px;
+          margin: 10px 0 0;
           color: white;
-          font-size: clamp(34px, 4.2vw, 47px);
+          font-size: clamp(32px, 4vw, 45px);
           line-height: 1.05;
-          letter-spacing: -2.3px;
-          font-weight: 680;
+          letter-spacing: -2.2px;
+          font-weight: 660;
         }
 
         .benefitsGrid {
-          margin-top: 43px;
+          margin-top: 42px;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -2019,7 +2116,7 @@ export default function HomePage() {
         }
 
         .benefitsGrid article {
-          min-height: 205px;
+          min-height: 200px;
           padding: 22px 20px;
           border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -2035,7 +2132,7 @@ export default function HomePage() {
         }
 
         .benefitTop > span {
-          color: #626c79;
+          color: #68727e;
           font-size: 7px;
           font-weight: 900;
         }
@@ -2046,7 +2143,7 @@ export default function HomePage() {
           display: grid;
           place-items: center;
           border-radius: 10px;
-          color: #e78a8e;
+          color: #e58c90;
           background: rgba(255, 255, 255, 0.06);
         }
 
@@ -2055,14 +2152,14 @@ export default function HomePage() {
         }
 
         .benefitsGrid h3 {
-          margin: 35px 0 0;
+          margin: 34px 0 0;
           color: white;
           font-size: 12px;
         }
 
         .benefitsGrid p {
           margin: 8px 0 0;
-          color: #9099a6;
+          color: #929ba7;
           font-size: 9px;
           line-height: 1.65;
         }
@@ -2070,64 +2167,64 @@ export default function HomePage() {
         /* ACCOUNT */
 
         .accountSection {
-          padding: 75px 0;
-          background: #fafaf8;
+          padding: 72px 0;
+          background: #f7f7f5;
         }
 
         .accountPanel {
-          min-height: 185px;
-          padding: 30px;
+          min-height: 175px;
+          padding: 29px;
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
-          gap: 22px;
+          gap: 21px;
           border: 1px solid #e0e2e5;
-          border-radius: 22px;
-          background: #fff;
+          border-radius: 21px;
+          background: white;
         }
 
         .accountIcon {
-          width: 60px;
-          height: 60px;
+          width: 58px;
+          height: 58px;
           display: grid;
           place-items: center;
-          border-radius: 17px;
-          color: #161c26;
+          border-radius: 16px;
+          color: #18202b;
           background: #eef0f2;
         }
 
         .accountIcon :global(svg) {
-          width: 25px;
+          width: 24px;
         }
 
         .accountCopy span {
-          color: #e5484d;
+          color: #df5156;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.4px;
         }
 
         .accountCopy h2 {
-          font-size: clamp(28px, 3.5vw, 40px);
+          font-size: clamp(27px, 3.2vw, 38px);
         }
 
         .accountCopy p {
-          max-width: 680px;
-          margin: 10px 0 0;
+          max-width: 660px;
+          margin: 9px 0 0;
           color: #747c87;
           font-size: 10px;
           line-height: 1.65;
         }
 
         .accountPanel > a {
-          min-height: 43px;
-          padding: 0 15px;
+          min-height: 42px;
+          padding: 0 14px;
           display: inline-flex;
           align-items: center;
           gap: 7px;
           border-radius: 10px;
           color: white;
-          background: #161c26;
+          background: #18202b;
           font-size: 8.5px;
           font-weight: 850;
           text-decoration: none;
@@ -2139,9 +2236,9 @@ export default function HomePage() {
 
         /* CONTACT */
 
-        .contactSection {
-          padding: 75px 0;
-          background: #eeeeeb;
+        .contact {
+          padding: 72px 0;
+          background: #efefed;
         }
 
         .contactInner {
@@ -2152,29 +2249,29 @@ export default function HomePage() {
         }
 
         .contactInner h2 {
-          margin: 10px 0 8px;
-          color: #161c25;
-          font-size: 36px;
+          margin: 9px 0 8px;
+          color: #171d26;
+          font-size: 35px;
           letter-spacing: -1.7px;
         }
 
         .contactInner p {
-          max-width: 620px;
+          max-width: 610px;
           margin: 0;
-          color: #717984;
+          color: #707984;
           font-size: 10px;
           line-height: 1.7;
         }
 
         .contactInner > a {
-          min-height: 42px;
-          padding: 0 15px;
+          min-height: 41px;
+          padding: 0 14px;
           display: inline-flex;
           align-items: center;
           gap: 7px;
           border-radius: 10px;
           color: white;
-          background: #161c26;
+          background: #18202b;
           font-size: 8.5px;
           font-weight: 850;
           text-decoration: none;
@@ -2187,19 +2284,19 @@ export default function HomePage() {
         /* FOOTER */
 
         .footer {
-          color: #fff;
-          background: #10151c;
+          color: white;
+          background: #11171f;
         }
 
         .footerInner {
           max-width: 1180px;
-          min-height: 135px;
+          min-height: 130px;
           margin: auto;
-          padding: 35px 26px;
+          padding: 34px 26px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 35px;
+          gap: 34px;
         }
 
         .footerBrand {
@@ -2215,7 +2312,7 @@ export default function HomePage() {
           place-items: center;
           border-radius: 10px;
           color: white;
-          background: #e5484d;
+          background: #df5156;
         }
 
         .footerBrand > div :global(svg) {
@@ -2233,7 +2330,7 @@ export default function HomePage() {
 
         .footerBrand section span {
           margin-top: 3px;
-          color: #6f7987;
+          color: #707a87;
           font-size: 5px;
           font-weight: 900;
           letter-spacing: 1.5px;
@@ -2241,23 +2338,27 @@ export default function HomePage() {
 
         .footerLinks {
           display: flex;
-          gap: 23px;
           flex-wrap: wrap;
+          gap: 22px;
         }
 
         .footerLinks a,
         .footerLinks span {
-          color: #838c98;
+          color: #858e9a;
           font-size: 8px;
           text-decoration: none;
         }
 
         .copyright {
-          color: #596471;
+          color: #5d6875;
           font-size: 7px;
         }
 
-        /* TABLET */
+        @media (max-width: 1100px) {
+          .productRow {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
 
         @media (max-width: 980px) {
           .heroInner {
@@ -2265,30 +2366,18 @@ export default function HomePage() {
             padding: 65px 0 80px;
           }
 
-          .heroCopy {
-            max-width: 650px;
-          }
-
-          .storyHeader {
+          .sectionHeading {
             grid-template-columns: 1fr;
             gap: 18px;
           }
 
-          .storyGrid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .storyLarge {
-            grid-column: span 1;
-          }
-
-          .emergencyStory {
+          .emergencyCard {
             grid-template-columns: 1fr;
           }
 
           .flow {
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            gap: 28px;
           }
 
           .flowLine {
@@ -2318,12 +2407,10 @@ export default function HomePage() {
 
           .contactInner,
           .footerInner {
-            align-items: flex-start;
             flex-direction: column;
+            align-items: flex-start;
           }
         }
-
-        /* MOBILE */
 
         @media (max-width: 650px) {
           .header {
@@ -2331,7 +2418,7 @@ export default function HomePage() {
             min-height: 70px;
           }
 
-          .brandCopy span,
+          .brandText span,
           .language {
             display: none;
           }
@@ -2341,20 +2428,20 @@ export default function HomePage() {
             height: 38px;
           }
 
-          .brandCopy strong {
+          .brandText strong {
             font-size: 15px;
           }
 
-          .adminLink {
+          .adminButton {
             padding: 0 8px;
           }
 
-          .adminLink span {
+          .adminButton span {
             display: none;
           }
 
           .accountButton,
-          .loginLink {
+          .loginButton {
             min-height: 35px;
             padding: 0 9px;
             font-size: 8px;
@@ -2371,17 +2458,17 @@ export default function HomePage() {
 
           .heroInner {
             min-height: unset;
-            padding: 50px 0 70px;
+            padding: 48px 0 70px;
           }
 
           .heroCopy h1 {
-            font-size: 39px;
-            letter-spacing: -2.1px;
+            font-size: 38px;
+            letter-spacing: -2px;
           }
 
           .heroActions {
-            align-items: stretch;
             flex-direction: column;
+            align-items: stretch;
           }
 
           .primaryCta,
@@ -2393,17 +2480,22 @@ export default function HomePage() {
             grid-template-columns: auto 1fr;
           }
 
-          .emergencySignal > a {
+          .emergencySignal > :global(svg) {
             display: none;
           }
 
           .phoneStage {
-            min-height: 530px;
+            min-height: 520px;
           }
 
           .phone {
             width: 245px;
             height: 490px;
+          }
+
+          .mainQrArea {
+            width: 170px;
+            height: 170px;
           }
 
           .floatingChat {
@@ -2413,48 +2505,53 @@ export default function HomePage() {
           }
 
           .floatingLocation {
-            right: -5px;
-            top: 64px;
+            right: -4px;
+            top: 67px;
           }
 
-          .storiesSection,
+          .realLifeSection,
+          .emergencySection,
           .flowSection,
           .benefitsSection {
-            padding: 75px 0;
+            padding: 74px 0;
           }
 
-          .storyHeader h2,
+          .sectionHeading h2,
           .flowIntro h2,
           .accountCopy h2 {
-            font-size: 34px;
-            letter-spacing: -2px;
+            font-size: 33px;
+            letter-spacing: -1.9px;
           }
 
-          .storyGrid {
-            grid-template-columns: 1fr;
-            grid-auto-rows: 390px;
+          .productRow {
+            grid-template-columns: repeat(2, 1fr);
           }
 
-          .emergencyStory {
-            min-height: unset;
+          .scenarioPhoto {
+            height: 190px;
           }
 
-          .emergencyPhoto {
+          .emergencyCard {
+            padding: 24px 18px;
+          }
+
+          .emergencyVisual {
             min-height: 430px;
           }
 
-          .emergencyScanner {
-            width: 155px;
-            min-height: 250px;
-            right: 17px;
+          .emergencyPhone {
+            width: 180px;
+            height: 340px;
+            margin-left: 80px;
           }
 
-          .scannerUi {
-            height: 210px;
+          .bracelet {
+            width: 270px;
+            left: -35px;
           }
 
-          .emergencyStoryCopy {
-            padding: 30px 22px;
+          .emergencyCopy h2 {
+            font-size: 32px;
           }
 
           .flow,
@@ -2473,11 +2570,11 @@ export default function HomePage() {
           }
 
           .accountPanel {
-            padding: 24px 20px;
+            padding: 23px 19px;
           }
 
-          .contactSection {
-            padding: 60px 0;
+          .contact {
+            padding: 58px 0;
           }
 
           .contactInner > a {
@@ -2490,7 +2587,9 @@ export default function HomePage() {
   );
 }
 
-/* ========================= ICONS ========================= */
+/* ============================================================
+   ICONS
+============================================================ */
 
 function QrIcon() {
   return (
@@ -2668,19 +2767,60 @@ function ReturnIcon() {
   );
 }
 
-function MiniQr() {
+function QrCode() {
   const dark = [
-    0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 15, 17, 18, 20, 21, 22, 24,
+    0, 1, 2, 5, 6,
+    7, 9, 11, 13,
+    14, 16, 18, 20,
+    21, 22, 24, 26,
+    27, 28, 30, 32,
+    34, 35, 36, 38,
+    40, 42, 43, 44,
+    46, 47, 48,
   ];
 
   return (
     <div
       style={{
-        width: 27,
-        height: 27,
+        width: 145,
+        height: 145,
+        display: "grid",
+        gridTemplateColumns: "repeat(7, 1fr)",
+        gap: 4,
+      }}
+    >
+      {Array.from({ length: 49 }).map((_, index) => (
+        <i
+          key={index}
+          style={{
+            display: "block",
+            borderRadius: 1,
+            background: dark.includes(index)
+              ? "#18202b"
+              : "#e2e5e8",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MiniQr() {
+  const dark = [
+    0, 1, 2, 4, 6,
+    7, 8, 10, 12,
+    14, 15, 17, 18,
+    20, 21, 22, 24,
+  ];
+
+  return (
+    <div
+      style={{
+        width: 25,
+        height: 25,
         display: "grid",
         gridTemplateColumns: "repeat(5, 1fr)",
-        gap: 1.5,
+        gap: 1.4,
       }}
     >
       {Array.from({ length: 25 }).map((_, index) => (
@@ -2688,7 +2828,9 @@ function MiniQr() {
           key={index}
           style={{
             display: "block",
-            background: dark.includes(index) ? "#161c26" : "#dce0e4",
+            background: dark.includes(index)
+              ? "#18202b"
+              : "#dfe3e7",
           }}
         />
       ))}
