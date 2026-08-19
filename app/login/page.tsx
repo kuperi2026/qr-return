@@ -7,29 +7,41 @@ type Lang = "ka" | "en";
 
 export default function LoginPage() {
   const [lang, setLang] = useState<Lang>("ka");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
   const [error, setError] = useState("");
 
   const ka = lang === "ka";
 
   useEffect(() => {
-    async function checkSession() {
+    checkExistingSession();
+  }, []);
+
+  async function checkExistingSession() {
+    try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
       if (user) {
-        window.location.href = "/my-profiles";
+        window.location.href = "/account";
+        return;
       }
+    } finally {
+      setChecking(false);
     }
-
-    checkSession();
-  }, []);
+  }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setError("");
 
     const cleanEmail = email.trim().toLowerCase();
@@ -40,76 +52,137 @@ export default function LoginPage() {
           ? "შეიყვანეთ ელფოსტა და პაროლი."
           : "Enter your email and password."
       );
+
       return;
     }
 
     setLoading(true);
 
     try {
-      const { error: loginError } =
+      const { data, error: loginError } =
         await supabase.auth.signInWithPassword({
           email: cleanEmail,
           password,
         });
 
       if (loginError) {
+        throw loginError;
+      }
+
+      if (!data.user) {
+        throw new Error(
+          ka
+            ? "ანგარიშზე შესვლა ვერ მოხერხდა."
+            : "Could not sign in."
+        );
+      }
+
+      /*
+        ახალი მთავარი Account გვერდი.
+        ძველ /my-profiles გვერდზე აღარ გადავდივართ.
+      */
+
+      window.location.href = "/account";
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "";
+
+      if (
+        message.toLowerCase().includes("invalid login") ||
+        message.toLowerCase().includes("invalid credentials")
+      ) {
         setError(
           ka
             ? "ელფოსტა ან პაროლი არასწორია."
             : "Incorrect email or password."
         );
-        return;
+      } else {
+        setError(
+          message ||
+            (ka
+              ? "ანგარიშზე შესვლა ვერ მოხერხდა."
+              : "Could not sign in.")
+        );
       }
-
-      window.location.href = "/my-profiles";
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "შესვლა ვერ მოხერხდა."
-          : "Could not sign in."
-      );
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checking) {
+    return (
+      <main className="statePage">
+        <div className="stateLogo">QR</div>
+
+        <strong>QR RETURN</strong>
+
+        <p>
+          {ka
+            ? "ანგარიში მოწმდება..."
+            : "Checking account..."}
+        </p>
+      </main>
+    );
   }
 
   return (
     <main className="page">
       <header className="header">
         <a href="/" className="brand">
-          <div className="logo">QR</div>
+          <div className="logo">
+            QR
+          </div>
 
           <div>
-            <strong>QR RETURN</strong>
-            <small>MY ACCOUNT</small>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <small>
+              OWNER ACCOUNT
+            </small>
           </div>
         </a>
 
         <div className="languages">
           <button
             type="button"
-            className={ka ? "active" : ""}
-            onClick={() => setLang("ka")}
+            className={
+              ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("ka")
+            }
           >
             GEO
           </button>
 
           <button
             type="button"
-            className={!ka ? "active" : ""}
-            onClick={() => setLang("en")}
+            className={
+              !ka
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLang("en")
+            }
           >
             ENG
           </button>
         </div>
       </header>
 
-      <section className="wrapper">
+      <section className="container">
         <div className="intro">
           <div className="eyebrow">
-            {ka ? "QR RETURN ანგარიში" : "QR RETURN ACCOUNT"}
+            {ka
+              ? "QR RETURN ანგარიში"
+              : "QR RETURN ACCOUNT"}
           </div>
 
           <h1>
@@ -120,48 +193,115 @@ export default function LoginPage() {
 
           <p>
             {ka
-              ? "ერთი ანგარიშიდან მართეთ თქვენი ყველა ცხოველისა და ნივთის QR პროფილი."
-              : "Manage all your pet and item QR profiles from one account."}
+              ? "ერთი ანგარიშიდან მართეთ თქვენი მფლობელის პროფილი, QR პროფილები, Lost Mode, მპოვნელისთვის ხილვადობა და საკონტაქტო მეთოდები."
+              : "Manage your Owner Profile, QR profiles, Lost Mode, finder visibility and contact methods from one account."}
           </p>
 
-          <div className="infoBox">
-            <div className="infoIcon">✓</div>
+          <div className="featureList">
+            <div className="feature">
+              <span>
+                ✓
+              </span>
 
-            <div>
-              <strong>{ka ? "ერთი ანგარიში" : "One account"}</strong>
-              <p>
-                {ka
-                  ? "შექმენით იმდენი ცალკე პროფილი, რამდენიც გსურთ."
-                  : "Create as many separate profiles as you need."}
-              </p>
+              <div>
+                <strong>
+                  {ka
+                    ? "ერთი Owner Account"
+                    : "One Owner Account"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "რამდენიც გსურთ იმდენი QR პროფილი."
+                    : "Create as many QR profiles as you need."}
+                </p>
+              </div>
+            </div>
+
+            <div className="feature">
+              <span>
+                ✓
+              </span>
+
+              <div>
+                <strong>
+                  {ka
+                    ? "მპოვნელის კონტროლი"
+                    : "Finder controls"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "თავად განსაზღვრეთ რა ინფორმაცია გამოჩნდება."
+                    : "Choose exactly what a finder can see."}
+                </p>
+              </div>
+            </div>
+
+            <div className="feature">
+              <span>
+                ✓
+              </span>
+
+              <div>
+                <strong>
+                  {ka
+                    ? "Lost Mode"
+                    : "Lost Mode"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "დაკარგვისას გააქტიურეთ საკონტაქტო ფუნქციები."
+                    : "Activate finder contact options when needed."}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="card">
           <div className="cardHeader">
-            <div className="userIcon">👤</div>
+            <div className="userIcon">
+              👤
+            </div>
 
             <div>
-              <span>QR RETURN</span>
-              <h2>{ka ? "შესვლა" : "Sign in"}</h2>
+              <span>
+                QR RETURN
+              </span>
+
+              <h2>
+                {ka
+                  ? "შესვლა"
+                  : "Sign in"}
+              </h2>
             </div>
           </div>
 
           <p className="description">
             {ka
-              ? "გამოიყენეთ თქვენი ელფოსტა და პაროლი."
-              : "Use your email and password."}
+              ? "გამოიყენეთ თქვენი რეგისტრირებული ელფოსტა და პაროლი."
+              : "Use your registered email and password."}
           </p>
 
           <form onSubmit={handleLogin}>
             <label>
-              <span>{ka ? "ელფოსტა" : "Email"} *</span>
+              <span>
+                {ka
+                  ? "ელფოსტა"
+                  : "Email"}{" "}
+                *
+              </span>
 
               <input
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
                 placeholder="name@example.com"
                 autoComplete="email"
                 required
@@ -169,22 +309,77 @@ export default function LoginPage() {
             </label>
 
             <label>
-              <span>{ka ? "პაროლი" : "Password"} *</span>
+              <span>
+                {ka
+                  ? "პაროლი"
+                  : "Password"}{" "}
+                *
+              </span>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
+              <div className="passwordField">
+                <input
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(
+                      e.target.value
+                    )
+                  }
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="passwordToggle"
+                  onClick={() =>
+                    setShowPassword(
+                      (value) =>
+                        !value
+                    )
+                  }
+                >
+                  {showPassword
+                    ? "🙈"
+                    : "👁"}
+                </button>
+              </div>
             </label>
 
+            <div className="forgotRow">
+              <span />
+
+              <button
+                type="button"
+                className="forgotButton"
+                onClick={() => {
+                  setError(
+                    ka
+                      ? "პაროლის აღდგენის სისტემა მოგვიანებით გააქტიურდება."
+                      : "Password recovery will be activated later."
+                  );
+                }}
+              >
+                {ka
+                  ? "დაგავიწყდათ პაროლი?"
+                  : "Forgot password?"}
+              </button>
+            </div>
+
             {error && (
-              <div className="error">
-                <strong>!</strong>
-                <span>{error}</span>
+              <div className="errorBox">
+                <strong>
+                  !
+                </strong>
+
+                <span>
+                  {error}
+                </span>
               </div>
             )}
 
@@ -201,19 +396,26 @@ export default function LoginPage() {
                 ? "შესვლა"
                 : "Sign in"}
 
-              {!loading && <span>→</span>}
+              {!loading && (
+                <span>
+                  →
+                </span>
+              )}
             </button>
           </form>
 
-          <div className="signup">
+          <div className="signupBox">
             <span>
               {ka
-                ? "ჯერ არ გაქვთ ანგარიში?"
-                : "Don't have an account?"}
+                ? "ჯერ არ გაქვთ QR RETURN ანგარიში?"
+                : "Don't have a QR RETURN account yet?"}
             </span>
 
             <a href="/signup">
-              {ka ? "ანგარიშის შექმნა" : "Create account"} →
+              {ka
+                ? "ანგარიშის შექმნა"
+                : "Create account"}{" "}
+              →
             </a>
           </div>
         </div>
@@ -232,29 +434,64 @@ export default function LoginPage() {
 
         body {
           background: #f7f9fc;
+          color: #101828;
+          font-family: Inter, Arial, sans-serif;
         }
 
-        button,
-        input {
+        input,
+        button {
           font: inherit;
         }
 
         .page {
           min-height: 100vh;
-          color: #101828;
-          font-family: Inter, Arial, sans-serif;
           background:
             radial-gradient(
               circle at 8% 15%,
-              rgba(20, 101, 232, 0.1),
+              rgba(20, 101, 232, 0.09),
               transparent 27%
             ),
             radial-gradient(
               circle at 93% 10%,
-              rgba(118, 85, 247, 0.11),
+              rgba(118, 85, 247, 0.1),
               transparent 28%
             ),
             #f7f9fc;
+        }
+
+        .statePage {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          color: #667085;
+        }
+
+        .stateLogo {
+          width: 52px;
+          height: 52px;
+          margin-bottom: 10px;
+          display: grid;
+          place-items: center;
+          border-radius: 15px;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          color: white;
+          font-weight: 900;
+        }
+
+        .statePage strong {
+          color: #1465e8;
+          font-size: 20px;
+        }
+
+        .statePage p {
+          font-size: 12px;
         }
 
         .header {
@@ -281,9 +518,12 @@ export default function LoginPage() {
           display: grid;
           place-items: center;
           border-radius: 14px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
           color: white;
-          font-size: 14px;
           font-weight: 900;
         }
 
@@ -301,7 +541,7 @@ export default function LoginPage() {
         .brand small {
           margin-top: 3px;
           color: #7655f7;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.7px;
         }
@@ -314,7 +554,7 @@ export default function LoginPage() {
         }
 
         .languages button {
-          padding: 8px 11px;
+          padding: 8px 10px;
           border: 0;
           border-radius: 8px;
           background: transparent;
@@ -329,84 +569,105 @@ export default function LoginPage() {
           color: #1465e8;
         }
 
-        .wrapper {
+        .container {
           width: calc(100% - 36px);
           max-width: 1000px;
           min-height: calc(100vh - 86px);
           margin: auto;
-          padding: 70px 0;
+          padding: 65px 0;
           display: grid;
-          grid-template-columns: 1fr 450px;
+          grid-template-columns: 1fr 445px;
           align-items: center;
-          gap: 75px;
+          gap: 72px;
         }
 
         .intro {
-          max-width: 470px;
+          max-width: 480px;
         }
 
         .eyebrow {
           color: #7655f7;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 900;
           letter-spacing: 1.7px;
         }
 
         .intro h1 {
-          margin: 13px 0 17px;
-          font-size: clamp(42px, 5vw, 58px);
-          line-height: 1.05;
+          margin: 12px 0 16px;
+          font-size: clamp(
+            43px,
+            5vw,
+            58px
+          );
+          line-height: 1.04;
           letter-spacing: -2.5px;
         }
 
         .intro > p {
           margin: 0;
           color: #667085;
-          font-size: 17px;
+          font-size: 16px;
           line-height: 1.7;
         }
 
-        .infoBox {
-          margin-top: 32px;
-          padding: 17px;
+        .featureList {
+          margin-top: 30px;
           display: flex;
-          gap: 13px;
-          align-items: flex-start;
-          border: 1px solid #dbe7ff;
-          border-radius: 15px;
-          background: rgba(255, 255, 255, 0.75);
+          flex-direction: column;
+          gap: 11px;
         }
 
-        .infoIcon {
-          width: 32px;
-          height: 32px;
-          flex: 0 0 32px;
+        .feature {
+          padding: 14px;
+          display: flex;
+          align-items: flex-start;
+          gap: 11px;
+          border: 1px solid #e4e7ec;
+          border-radius: 13px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.7
+          );
+        }
+
+        .feature > span {
+          width: 28px;
+          height: 28px;
+          flex: 0 0 28px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
+          border-radius: 8px;
           background: #eef4ff;
           color: #1465e8;
           font-weight: 900;
         }
 
-        .infoBox strong {
-          color: #344054;
-          font-size: 14px;
+        .feature strong {
+          font-size: 12px;
         }
 
-        .infoBox p {
-          margin: 5px 0 0;
+        .feature p {
+          margin: 3px 0 0;
           color: #667085;
-          font-size: 13px;
-          line-height: 1.5;
+          font-size: 10px;
+          line-height: 1.45;
         }
 
         .card {
           padding: 32px;
           border: 1px solid #e4e7ec;
           border-radius: 24px;
-          background: rgba(255, 255, 255, 0.97);
-          box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
+          background: white;
+          box-shadow:
+            0 25px 65px
+            rgba(
+              16,
+              24,
+              40,
+              0.1
+            );
         }
 
         .cardHeader {
@@ -421,27 +682,30 @@ export default function LoginPage() {
           display: grid;
           place-items: center;
           border-radius: 15px;
-          background: linear-gradient(135deg, #eef4ff, #f0edff);
+          background: linear-gradient(
+            135deg,
+            #eef4ff,
+            #f0edff
+          );
           font-size: 27px;
         }
 
         .cardHeader span {
           color: #7655f7;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.5px;
         }
 
         .cardHeader h2 {
           margin: 4px 0 0;
-          color: #344054;
           font-size: 25px;
         }
 
         .description {
-          margin: 17px 0 25px;
+          margin: 17px 0 24px;
           color: #667085;
-          font-size: 14px;
+          font-size: 12px;
         }
 
         form {
@@ -454,40 +718,80 @@ export default function LoginPage() {
           display: block;
           margin-bottom: 7px;
           color: #475467;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 800;
         }
 
         input {
           width: 100%;
           height: 52px;
-          padding: 0 14px;
-          outline: none;
+          padding: 0 13px;
           border: 1px solid #d0d5dd;
           border-radius: 11px;
           background: white;
-          color: #344054;
-          font-size: 16px;
+          outline: none;
         }
 
         input:focus {
           border-color: #84adff;
-          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
+          box-shadow:
+            0 0 0 3px
+            rgba(
+              20,
+              101,
+              232,
+              0.08
+            );
         }
 
-        .error {
+        .passwordField {
+          position: relative;
+        }
+
+        .passwordField input {
+          padding-right: 50px;
+        }
+
+        .passwordToggle {
+          position: absolute;
+          top: 0;
+          right: 4px;
+          width: 44px;
+          height: 52px;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .forgotRow {
+          margin-top: -6px;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .forgotButton {
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #1465e8;
+          font-size: 10px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .errorBox {
           padding: 12px;
           display: flex;
           align-items: center;
-          gap: 9px;
+          gap: 8px;
           border: 1px solid #fecdca;
           border-radius: 10px;
           background: #fff1f0;
           color: #b42318;
-          font-size: 13px;
+          font-size: 11px;
         }
 
-        .error strong {
+        .errorBox strong {
           width: 20px;
           height: 20px;
           display: grid;
@@ -501,17 +805,20 @@ export default function LoginPage() {
         .submitButton {
           width: 100%;
           min-height: 53px;
-          margin-top: 4px;
           padding: 0 18px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
+          gap: 9px;
           border: 0;
           border-radius: 11px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
           color: white;
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 900;
           cursor: pointer;
         }
@@ -520,28 +827,25 @@ export default function LoginPage() {
           opacity: 0.65;
         }
 
-        .signup {
+        .signupBox {
           margin-top: 22px;
-          padding-top: 19px;
+          padding-top: 18px;
           display: flex;
           justify-content: center;
           gap: 7px;
           border-top: 1px solid #eaecf0;
-          font-size: 13px;
-        }
-
-        .signup span {
           color: #667085;
+          font-size: 10px;
         }
 
-        .signup a {
+        .signupBox a {
           color: #1465e8;
           font-weight: 900;
           text-decoration: none;
         }
 
         @media (max-width: 850px) {
-          .wrapper {
+          .container {
             max-width: 600px;
             grid-template-columns: 1fr;
             gap: 35px;
@@ -552,18 +856,18 @@ export default function LoginPage() {
             text-align: center;
           }
 
-          .infoBox {
+          .feature {
             text-align: left;
           }
         }
 
         @media (max-width: 550px) {
-          .wrapper {
+          .container {
             padding-top: 40px;
           }
 
           .intro h1 {
-            font-size: 40px;
+            font-size: 38px;
           }
 
           .card {
