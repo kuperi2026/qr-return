@@ -20,7 +20,6 @@ type QrProfile = {
   item_name: string | null;
   item_type: string | null;
   pet_type: string | null;
-  photo: string | null;
   tag_code: string | null;
   active: boolean | null;
 };
@@ -33,14 +32,12 @@ type AdminRecord = {
 
 export default function AccountPage() {
   const [lang, setLang] = useState<Lang>("ka");
-
   const [owner, setOwner] = useState<OwnerAccount | null>(null);
   const [profiles, setProfiles] = useState<QrProfile[]>([]);
   const [admin, setAdmin] = useState<AdminRecord | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [missingOwner, setMissingOwner] = useState(false);
-
   const [error, setError] = useState("");
   const [errorStage, setErrorStage] = useState("");
 
@@ -57,10 +54,7 @@ export default function AccountPage() {
     setMissingOwner(false);
 
     try {
-      // =====================================================
-      // 1. AUTH USER
-      // =====================================================
-
+      // AUTH
       const {
         data: { user },
         error: userError,
@@ -76,14 +70,8 @@ export default function AccountPage() {
         return;
       }
 
-      // =====================================================
-      // 2. OWNER ACCOUNT
-      // =====================================================
-
-      const {
-        data: ownerData,
-        error: ownerError,
-      } = await supabase
+      // OWNER
+      const { data: ownerData, error: ownerError } = await supabase
         .from("owner_accounts")
         .select(
           "user_id, first_name, last_name, email, phone, address, photo"
@@ -103,17 +91,13 @@ export default function AccountPage() {
 
       setOwner(ownerData as OwnerAccount);
 
-      // =====================================================
-      // 3. QR PROFILES
-      // =====================================================
-
-      const {
-        data: profileData,
-        error: profileError,
-      } = await supabase
+      // ITEMS
+      // IMPORTANT: item.photo does NOT exist,
+      // so we do not request it.
+      const { data: profileData, error: profileError } = await supabase
         .from("item")
         .select(
-          "id, item_name, item_type, pet_type, photo, tag_code, active"
+          "id, item_name, item_type, pet_type, tag_code, active"
         )
         .eq("owner_id", user.id);
 
@@ -124,14 +108,8 @@ export default function AccountPage() {
 
       setProfiles((profileData ?? []) as QrProfile[]);
 
-      // =====================================================
-      // 4. SECONDARY ADMIN
-      // =====================================================
-
-      const {
-        data: adminData,
-        error: adminError,
-      } = await supabase
+      // ADMIN
+      const { data: adminData, error: adminError } = await supabase
         .from("owner_admins")
         .select("id, admin_email, active")
         .eq("owner_id", user.id)
@@ -149,9 +127,7 @@ export default function AccountPage() {
       setError(
         err instanceof Error
           ? err.message
-          : ka
-          ? "ანგარიშის ჩატვირთვა ვერ მოხერხდა."
-          : "Could not load account."
+          : "Unknown account loading error"
       );
     } finally {
       setLoading(false);
@@ -215,15 +191,8 @@ export default function AccountPage() {
     return (
       <main className="statePage">
         <div className="stateLogo">QR</div>
-
         <strong>QR RETURN</strong>
-
-        <p>
-          {ka
-            ? "ანგარიში იტვირთება..."
-            : "Loading account..."}
-        </p>
-
+        <p>{ka ? "ანგარიში იტვირთება..." : "Loading account..."}</p>
         <Styles />
       </main>
     );
@@ -235,7 +204,6 @@ export default function AccountPage() {
         <header className="header">
           <a href="/" className="brand">
             <div className="logo">QR</div>
-
             <div>
               <strong>QR RETURN</strong>
               <small>OWNER ACCOUNT</small>
@@ -265,9 +233,7 @@ export default function AccountPage() {
           <div className="diagnosticCard">
             <div className="diagnosticIcon">⚠️</div>
 
-            <div className="eyebrow">
-              QR RETURN DIAGNOSTIC
-            </div>
+            <div className="eyebrow">QR RETURN DIAGNOSTIC</div>
 
             <h1>
               {ka
@@ -276,31 +242,19 @@ export default function AccountPage() {
             </h1>
 
             <div className="errorStageBox">
-              <span>
-                {ka
-                  ? "შეცდომის ეტაპი"
-                  : "Error stage"}
-              </span>
-
-              <strong>
-                {errorStage || "UNKNOWN"}
-              </strong>
+              <span>{ka ? "შეცდომის ეტაპი" : "Error stage"}</span>
+              <strong>{errorStage || "UNKNOWN"}</strong>
             </div>
 
             <div className="realError">
-              <span>
-                {ka
-                  ? "Supabase პასუხი"
-                  : "Supabase response"}
-              </span>
-
+              <span>{ka ? "Supabase პასუხი" : "Supabase response"}</span>
               <code>{error}</code>
             </div>
 
             <p>
               {ka
-                ? "ეს ტექსტი ზუსტად გვაჩვენებს რომელი მოთხოვნა ვერ სრულდება. გამომიგზავნეთ ზუსტად ეს error."
-                : "This message shows exactly which request is failing. Send me this exact error."}
+                ? "თუ შეცდომა ისევ გამოჩნდა, გამომიგზავნეთ Error stage და Supabase პასუხი."
+                : "If an error still appears, send the Error stage and Supabase response."}
             </p>
 
             <div className="diagnosticActions">
@@ -309,10 +263,7 @@ export default function AccountPage() {
                 className="primaryAction"
                 onClick={() => void loadAccount()}
               >
-                ↻{" "}
-                {ka
-                  ? "თავიდან ცდა"
-                  : "Try again"}
+                ↻ {ka ? "თავიდან ცდა" : "Try again"}
               </button>
 
               <button
@@ -337,7 +288,6 @@ export default function AccountPage() {
         <header className="header">
           <a href="/" className="brand">
             <div className="logo">QR</div>
-
             <div>
               <strong>QR RETURN</strong>
               <small>OWNER ACCOUNT</small>
@@ -367,9 +317,7 @@ export default function AccountPage() {
           <div className="missingCard">
             <div className="missingIcon">👤</div>
 
-            <div className="eyebrow">
-              OWNER PROFILE
-            </div>
+            <div className="eyebrow">OWNER PROFILE</div>
 
             <h1>
               {ka
@@ -385,7 +333,6 @@ export default function AccountPage() {
 
             <div className="missingNotice">
               <span>🔒</span>
-
               <div>
                 <strong>
                   {ka
@@ -402,10 +349,7 @@ export default function AccountPage() {
             </div>
 
             <div className="missingActions">
-              <a
-                href="/account/register"
-                className="primaryButton"
-              >
+              <a href="/account/register" className="primaryButton">
                 {ka
                   ? "მფლობელის პროფილის დასრულება"
                   : "Complete Owner Profile"}{" "}
@@ -433,8 +377,11 @@ export default function AccountPage() {
       <main className="statePage">
         <div className="stateLogo">QR</div>
         <strong>QR RETURN</strong>
-        <p>Owner profile not found.</p>
-
+        <p>
+          {ka
+            ? "მფლობელის პროფილი ვერ მოიძებნა."
+            : "Owner profile not found."}
+        </p>
         <Styles />
       </main>
     );
@@ -485,9 +432,7 @@ export default function AccountPage() {
         <div className="welcome">
           <div>
             <div className="eyebrow">
-              {ka
-                ? "მფლობელის ანგარიში"
-                : "OWNER ACCOUNT"}
+              {ka ? "მფლობელის ანგარიში" : "OWNER ACCOUNT"}
             </div>
 
             <h1>
@@ -504,33 +449,17 @@ export default function AccountPage() {
           </div>
 
           <div className="welcomeActions">
-            <a
-              href="/account/chat"
-              className="messagesButton"
-            >
-              <span className="messagesIcon">
-                💬
-              </span>
+            <a href="/account/chat" className="messagesButton">
+              <span className="messagesIcon">💬</span>
 
               <div>
                 <small>LIVE CHAT</small>
-
-                <strong>
-                  {ka
-                    ? "შეტყობინებები"
-                    : "Messages"}
-                </strong>
+                <strong>{ka ? "შეტყობინებები" : "Messages"}</strong>
               </div>
             </a>
 
-            <a
-              href="/add-profile"
-              className="primaryButton"
-            >
-              +{" "}
-              {ka
-                ? "QR პროფილის დამატება"
-                : "Add QR profile"}
+            <a href="/add-profile" className="primaryButton">
+              + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
             </a>
           </div>
         </div>
@@ -539,86 +468,46 @@ export default function AccountPage() {
           <section className="panel">
             <div className="panelHeader">
               <div className="panelTitle">
-                <div className="panelIcon">
-                  👤
-                </div>
+                <div className="panelIcon">👤</div>
 
                 <div>
-                  <span>
-                    {ka
-                      ? "მფლობელი"
-                      : "OWNER"}
-                  </span>
-
+                  <span>{ka ? "მფლობელი" : "OWNER"}</span>
                   <h2>
-                    {owner.first_name}{" "}
-                    {owner.last_name}
+                    {owner.first_name} {owner.last_name}
                   </h2>
                 </div>
               </div>
 
-              <a
-                href="/account/profile"
-                className="smallButton"
-              >
-                ✏️{" "}
-                {ka
-                  ? "რედაქტირება"
-                  : "Edit"}
+              <a href="/account/profile" className="smallButton">
+                ✏️ {ka ? "რედაქტირება" : "Edit"}
               </a>
             </div>
 
             <div className="ownerBody">
               <div className="avatar">
                 {owner.photo ? (
-                  <img
-                    src={owner.photo}
-                    alt=""
-                  />
+                  <img src={owner.photo} alt="" />
                 ) : (
-                  <div className="avatarPlaceholder">
-                    👤
-                  </div>
+                  <div className="avatarPlaceholder">👤</div>
                 )}
               </div>
 
               <div className="ownerData">
                 <div>
-                  <span>
-                    {ka
-                      ? "ელფოსტა"
-                      : "Email"}
-                  </span>
-
-                  <strong>
-                    {owner.email}
-                  </strong>
+                  <span>{ka ? "ელფოსტა" : "Email"}</span>
+                  <strong>{owner.email}</strong>
                 </div>
 
                 <div>
-                  <span>
-                    {ka
-                      ? "ტელეფონი"
-                      : "Phone"}
-                  </span>
-
-                  <strong>
-                    {owner.phone}
-                  </strong>
+                  <span>{ka ? "ტელეფონი" : "Phone"}</span>
+                  <strong>{owner.phone}</strong>
                 </div>
 
                 <div>
-                  <span>
-                    {ka
-                      ? "მისამართი"
-                      : "Address"}
-                  </span>
-
+                  <span>{ka ? "მისამართი" : "Address"}</span>
                   <strong>
                     {owner.address ||
-                      (ka
-                        ? "არ არის მითითებული"
-                        : "Not provided")}
+                      (ka ? "არ არის მითითებული" : "Not provided")}
                   </strong>
                 </div>
               </div>
@@ -628,16 +517,10 @@ export default function AccountPage() {
           <section className="panel">
             <div className="panelHeader">
               <div className="panelTitle">
-                <div className="panelIcon">
-                  🔐
-                </div>
+                <div className="panelIcon">🔐</div>
 
                 <div>
-                  <span>
-                    {ka
-                      ? "უსაფრთხოება"
-                      : "SECURITY"}
-                  </span>
+                  <span>{ka ? "უსაფრთხოება" : "SECURITY"}</span>
 
                   <h2>
                     {ka
@@ -647,14 +530,8 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              <a
-                href="/account/security"
-                className="smallButton"
-              >
-                {ka
-                  ? "მართვა"
-                  : "Manage"}{" "}
-                →
+              <a href="/account/security" className="smallButton">
+                {ka ? "მართვა" : "Manage"} →
               </a>
             </div>
 
@@ -668,16 +545,13 @@ export default function AccountPage() {
           </section>
         </div>
 
-        <section className="panel chatPanel">
+        <section className="panel">
           <div className="panelHeader">
             <div className="panelTitle">
-              <div className="panelIcon">
-                💬
-              </div>
+              <div className="panelIcon">💬</div>
 
               <div>
                 <span>LIVE CHAT</span>
-
                 <h2>
                   {ka
                     ? "მპოვნელების შეტყობინებები"
@@ -686,22 +560,14 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <a
-              href="/account/chat"
-              className="smallButton"
-            >
-              {ka
-                ? "Inbox-ის გახსნა"
-                : "Open Inbox"}{" "}
-              →
+            <a href="/account/chat" className="smallButton">
+              {ka ? "Inbox-ის გახსნა" : "Open Inbox"} →
             </a>
           </div>
 
           <div className="chatPanelBody">
             <div>
-              <strong>
-                QR RETURN Live Chat
-              </strong>
+              <strong>QR RETURN Live Chat</strong>
 
               <p>
                 {ka
@@ -710,14 +576,8 @@ export default function AccountPage() {
               </p>
             </div>
 
-            <a
-              href="/account/chat"
-              className="openChatButton"
-            >
-              💬{" "}
-              {ka
-                ? "შეტყობინებები"
-                : "Messages"}
+            <a href="/account/chat" className="openChatButton">
+              💬 {ka ? "შეტყობინებები" : "Messages"}
             </a>
           </div>
         </section>
@@ -725,15 +585,11 @@ export default function AccountPage() {
         <section className="panel">
           <div className="panelHeader">
             <div className="panelTitle">
-              <div className="panelIcon">
-                👥
-              </div>
+              <div className="panelIcon">👥</div>
 
               <div>
                 <span>
-                  {ka
-                    ? "ადმინისტრატორი"
-                    : "ADMINISTRATOR"}
+                  {ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}
                 </span>
 
                 <h2>
@@ -748,23 +604,15 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <a
-              href="/account/admin"
-              className="smallButton"
-            >
-              {ka
-                ? "მართვა"
-                : "Manage"}{" "}
-              →
+            <a href="/account/admin" className="smallButton">
+              {ka ? "მართვა" : "Manage"} →
             </a>
           </div>
 
           {admin ? (
             <div className="adminStatus">
               <div>
-                <strong>
-                  {admin.admin_email}
-                </strong>
+                <strong>{admin.admin_email}</strong>
 
                 <p>
                   {ka
@@ -775,9 +623,7 @@ export default function AccountPage() {
 
               <span
                 className={`statusBadge ${
-                  admin.active
-                    ? "active"
-                    : "inactive"
+                  admin.active ? "active" : "inactive"
                 }`}
               >
                 {admin.active
@@ -785,8 +631,8 @@ export default function AccountPage() {
                     ? "აქტიურია"
                     : "Active"
                   : ka
-                  ? "გათიშულია"
-                  : "Disabled"}
+                    ? "გათიშულია"
+                    : "Disabled"}
               </span>
             </div>
           ) : (
@@ -798,10 +644,7 @@ export default function AccountPage() {
               </p>
 
               <a href="/account/admin">
-                +{" "}
-                {ka
-                  ? "Admin-ის დამატება"
-                  : "Add Admin"}
+                + {ka ? "Admin-ის დამატება" : "Add Admin"}
               </a>
             </div>
           )}
@@ -811,15 +654,11 @@ export default function AccountPage() {
           <div className="profilesHeader">
             <div>
               <div className="eyebrow">
-                {ka
-                  ? "ჩემი QR პროფილები"
-                  : "MY QR PROFILES"}
+                {ka ? "ჩემი QR პროფილები" : "MY QR PROFILES"}
               </div>
 
               <h2>
-                {ka
-                  ? "ცხოველები და ნივთები"
-                  : "Pets and items"}
+                {ka ? "ცხოველები და ნივთები" : "Pets and items"}
               </h2>
 
               <p>
@@ -829,22 +668,14 @@ export default function AccountPage() {
               </p>
             </div>
 
-            <a
-              href="/add-profile"
-              className="primaryButton"
-            >
-              +{" "}
-              {ka
-                ? "დამატება"
-                : "Add profile"}
+            <a href="/add-profile" className="primaryButton">
+              + {ka ? "დამატება" : "Add profile"}
             </a>
           </div>
 
           {profiles.length === 0 ? (
             <div className="emptyProfiles">
-              <div className="bigIcon">
-                🏷️
-              </div>
+              <div className="bigIcon">🏷️</div>
 
               <h3>
                 {ka
@@ -868,31 +699,18 @@ export default function AccountPage() {
           ) : (
             <div className="profilesGrid">
               {profiles.map((profile) => {
-                const type =
-                  getType(profile);
+                const type = getType(profile);
 
                 return (
-                  <article
-                    className="profileCard"
-                    key={profile.id}
-                  >
+                  <article className="profileCard" key={profile.id}>
                     <div className="visual">
-                      {profile.photo ? (
-                        <img
-                          src={profile.photo}
-                          alt=""
-                        />
-                      ) : (
-                        <div className="visualPlaceholder">
-                          {type.icon}
-                        </div>
-                      )}
+                      <div className="visualPlaceholder">
+                        {type.icon}
+                      </div>
 
                       <span
                         className={`lostStatus ${
-                          profile.active
-                            ? "lost"
-                            : "safe"
+                          profile.active ? "lost" : "safe"
                         }`}
                       >
                         {profile.active
@@ -900,15 +718,13 @@ export default function AccountPage() {
                             ? "დაკარგულია"
                             : "Lost"
                           : ka
-                          ? "უსაფრთხოდ"
-                          : "Safe"}
+                            ? "უსაფრთხოდ"
+                            : "Safe"}
                       </span>
                     </div>
 
                     <div className="profileContent">
-                      <span className="profileType">
-                        {type.label}
-                      </span>
+                      <span className="profileType">{type.label}</span>
 
                       <h3>
                         {profile.item_name ||
@@ -919,19 +735,13 @@ export default function AccountPage() {
 
                       {profile.tag_code && (
                         <p className="tagCode">
-                          QR ·{" "}
-                          {profile.tag_code}
+                          QR · {profile.tag_code}
                         </p>
                       )}
 
                       <div className="profileActions">
-                        <a
-                          href={`/edit-profile/${profile.id}`}
-                        >
-                          ✏️{" "}
-                          {ka
-                            ? "რედაქტირება"
-                            : "Edit"}
+                        <a href={`/edit-profile/${profile.id}`}>
+                          ✏️ {ka ? "რედაქტირება" : "Edit"}
                         </a>
 
                         {profile.tag_code && (
@@ -1013,20 +823,20 @@ function Styles() {
         text-align: center;
       }
 
-      .stateLogo {
+      .stateLogo,
+      .logo {
         width: 50px;
         height: 50px;
         display: grid;
         place-items: center;
-        margin-bottom: 10px;
         border-radius: 14px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
+        background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
         font-weight: 900;
+      }
+
+      .stateLogo {
+        margin-bottom: 10px;
       }
 
       .statePage > strong {
@@ -1050,21 +860,6 @@ function Styles() {
         align-items: center;
         gap: 12px;
         text-decoration: none;
-      }
-
-      .logo {
-        width: 50px;
-        height: 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
-        color: white;
-        font-weight: 900;
       }
 
       .brand strong,
@@ -1110,7 +905,6 @@ function Styles() {
         cursor: pointer;
       }
 
-      .languages .active,
       .languages button.active {
         background: white;
         color: #1465e8;
@@ -1153,11 +947,7 @@ function Styles() {
 
       .welcome h1 {
         margin: 8px 0;
-        font-size: clamp(
-          40px,
-          5vw,
-          52px
-        );
+        font-size: clamp(40px, 5vw, 52px);
         letter-spacing: -2px;
       }
 
@@ -1222,11 +1012,7 @@ function Styles() {
         justify-content: center;
         border: 0;
         border-radius: 10px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
+        background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
         font-size: 11px;
         font-weight: 900;
@@ -1236,8 +1022,7 @@ function Styles() {
 
       .topGrid {
         display: grid;
-        grid-template-columns:
-          1.5fr 1fr;
+        grid-template-columns: 1.5fr 1fr;
         gap: 20px;
       }
 
@@ -1248,16 +1033,13 @@ function Styles() {
         border: 1px solid #e4e7ec;
         border-radius: 20px;
         background: white;
-        box-shadow:
-          0 10px 30px
-          rgba(16, 24, 40, 0.04);
+        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
       }
 
       .panelHeader {
         display: flex;
         align-items: center;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         gap: 20px;
       }
 
@@ -1273,12 +1055,7 @@ function Styles() {
         display: grid;
         place-items: center;
         border-radius: 13px;
-        background:
-          linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
         font-size: 23px;
       }
 
@@ -1378,17 +1155,11 @@ function Styles() {
         padding: 17px;
         display: flex;
         align-items: center;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         gap: 20px;
         border: 1px solid #dbe7ff;
         border-radius: 14px;
-        background:
-          linear-gradient(
-            135deg,
-            #f5f9ff,
-            #faf8ff
-          );
+        background: linear-gradient(135deg, #f5f9ff, #faf8ff);
       }
 
       .chatPanelBody strong {
@@ -1409,12 +1180,7 @@ function Styles() {
         align-items: center;
         justify-content: center;
         border-radius: 10px;
-        background:
-          linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+        background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
         font-size: 10px;
         font-weight: 900;
@@ -1427,8 +1193,7 @@ function Styles() {
         padding: 15px;
         display: flex;
         align-items: center;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         gap: 20px;
         border-radius: 13px;
         background: #f7f9fc;
@@ -1480,8 +1245,7 @@ function Styles() {
       .profilesHeader {
         display: flex;
         align-items: flex-end;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         gap: 25px;
       }
 
@@ -1534,8 +1298,7 @@ function Styles() {
       .profilesGrid {
         margin-top: 22px;
         display: grid;
-        grid-template-columns:
-          repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 17px;
       }
 
@@ -1552,25 +1315,12 @@ function Styles() {
         background: #eef4ff;
       }
 
-      .visual img,
       .visualPlaceholder {
         width: 100%;
         height: 100%;
-      }
-
-      .visual img {
-        object-fit: cover;
-      }
-
-      .visualPlaceholder {
         display: grid;
         place-items: center;
-        background:
-          linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
         font-size: 50px;
       }
 
@@ -1620,11 +1370,9 @@ function Styles() {
         margin-top: 14px;
         padding-top: 12px;
         display: flex;
-        justify-content:
-          space-between;
+        justify-content: space-between;
         gap: 8px;
-        border-top:
-          1px solid #eaecf0;
+        border-top: 1px solid #eaecf0;
       }
 
       .profileActions a {
@@ -1638,8 +1386,7 @@ function Styles() {
       .errorWrap {
         width: calc(100% - 30px);
         max-width: 620px;
-        min-height:
-          calc(100vh - 86px);
+        min-height: calc(100vh - 86px);
         margin: auto;
         display: flex;
         align-items: center;
@@ -1655,9 +1402,7 @@ function Styles() {
         border: 1px solid #e4e7ec;
         border-radius: 24px;
         background: white;
-        box-shadow:
-          0 25px 65px
-          rgba(16, 24, 40, 0.09);
+        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.09);
       }
 
       .missingIcon,
@@ -1668,12 +1413,7 @@ function Styles() {
         display: grid;
         place-items: center;
         border-radius: 19px;
-        background:
-          linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
         font-size: 32px;
       }
 
@@ -1794,8 +1534,7 @@ function Styles() {
         }
 
         .profilesGrid {
-          grid-template-columns:
-            repeat(2, 1fr);
+          grid-template-columns: repeat(2, 1fr);
         }
       }
 
