@@ -87,7 +87,6 @@ export default function MyProfilesPage() {
 
     if (petType === "dog") return "🐶";
     if (petType === "cat") return "🐱";
-
     if (itemType === "keys") return "🔑";
     if (itemType === "wallet") return "👛";
     if (itemType === "bag") return "👜";
@@ -102,7 +101,6 @@ export default function MyProfilesPage() {
 
     if (petType === "dog") return ka ? "ძაღლი" : "Dog";
     if (petType === "cat") return ka ? "კატა" : "Cat";
-
     if (itemType === "keys") return ka ? "გასაღები" : "Keys";
     if (itemType === "wallet") return ka ? "საფულე" : "Wallet";
     if (itemType === "bag") return ka ? "ჩანთა" : "Bag";
@@ -285,19 +283,25 @@ export default function MyProfilesPage() {
 
                     <div className="cardActions">
                       <a
-                        href={`/profile/${profile.id}`}
+                        href={`/edit-profile/${profile.id}`}
                         className="editButton"
                       >
                         <span>✏️</span>
                         {ka ? "რედაქტირება" : "Edit"}
                       </a>
 
-                      <a
-                        href={`/profile/${profile.id}`}
-                        className="openButton"
-                      >
-                        {ka ? "გახსნა" : "Open"} →
-                      </a>
+                      {profile.tag_code ? (
+                        <a
+                          href={`/profile/${profile.tag_code}`}
+                          className="openButton"
+                        >
+                          {ka ? "გახსნა" : "Open"} →
+                        </a>
+                      ) : (
+                        <span className="noQr">
+                          {ka ? "QR არ არის" : "No QR"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </article>
@@ -709,6 +713,12 @@ export default function MyProfilesPage() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
+        }
+
+        .noQr {
+          color: #98a2b3;
+          font-size: 12px;
+          font-weight: 700;
         }
 
         @media (max-width: 900px) {
