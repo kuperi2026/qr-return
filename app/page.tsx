@@ -35,20 +35,18 @@ const categories = [
     ka: "ძაღლი",
     en: "Dog",
     kaText:
-      "QR პროფილი თქვენი ძაღლის უსაფრთხო დაბრუნებისთვის.",
+      "QR პროფილი თქვენი ძაღლის სწრაფად და უსაფრთხოდ დასაბრუნებლად.",
     enText:
-      "A QR profile to help your dog return home safely.",
-    href: "/register/dog",
+      "A QR profile to help your dog return home quickly and safely.",
   },
   {
     icon: "🐈",
     ka: "კატა",
     en: "Cat",
     kaText:
-      "საკონტაქტო ინფორმაცია და მნიშვნელოვანი დეტალები ერთ QR-ში.",
+      "საკონტაქტო და მნიშვნელოვანი ინფორმაცია ერთ QR პროფილში.",
     enText:
-      "Contact information and important details in one QR.",
-    href: "/register/cat",
+      "Contact and important information in one QR profile.",
   },
   {
     icon: "🔑",
@@ -58,7 +56,6 @@ const categories = [
       "მპოვნელმა მარტივად შეძლოს თქვენთან დაკავშირება.",
     enText:
       "Help a finder contact you quickly.",
-    href: "/register/keys",
   },
   {
     icon: "👛",
@@ -68,47 +65,38 @@ const categories = [
       "დაკარგული საფულის დაბრუნების უფრო მარტივი გზა.",
     enText:
       "A simpler way to get a lost wallet back.",
-    href: "/register/wallet",
   },
   {
     icon: "🧳",
     ka: "ჩემოდანი",
     en: "Suitcase",
     kaText:
-      "მოგზაურობისას თქვენი ბარგისთვის დამატებითი დაცვა.",
+      "დამატებითი დაცვა თქვენი ბარგისთვის მოგზაურობის დროს.",
     enText:
       "Extra protection for your luggage while traveling.",
-    href: "/register/suitcase",
   },
   {
     icon: "🎒",
     ka: "ჩანთა",
     en: "Bag",
     kaText:
-      "QR პროფილი ჩანთის სწრაფად დასაბრუნებლად.",
+      "QR პროფილი ჩანთის სწრაფად და უსაფრთხოდ დასაბრუნებლად.",
     enText:
-      "A QR profile to help return your bag quickly.",
-    href: "/register/bag",
+      "A QR profile to help return your bag quickly and safely.",
   },
 ];
 
 export default function HomePage() {
-  const [language, setLanguage] =
-    useState<Language>("ka");
-
-  const [isAdmin, setIsAdmin] =
-    useState(false);
-
-  const [isLoggedIn, setIsLoggedIn] =
-    useState(false);
+  const [language, setLanguage] = useState<Language>("ka");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const ka = language === "ka";
 
   useEffect(() => {
     async function checkSession() {
-      const {
-        data: userData,
-      } = await supabase.auth.getUser();
+      const { data: userData } =
+        await supabase.auth.getUser();
 
       const user = userData.user;
 
@@ -120,9 +108,7 @@ export default function HomePage() {
 
       setIsLoggedIn(true);
 
-      const {
-        data: adminData,
-      } = await supabase
+      const { data: adminData } = await supabase
         .from("admin_users")
         .select("user_id")
         .eq("user_id", user.id)
@@ -133,52 +119,23 @@ export default function HomePage() {
 
     void checkSession();
 
-    const {
-      data: listener,
-    } =
-      supabase.auth.onAuthStateChange(
-        () => {
-          void checkSession();
-        }
-      );
+    const { data: listener } =
+      supabase.auth.onAuthStateChange(() => {
+        void checkSession();
+      });
 
     return () => {
       listener.subscription.unsubscribe();
     };
   }, []);
 
-  function profileHref(
-    categoryHref: string
-  ) {
-    if (isLoggedIn) {
-      return categoryHref;
-    }
-
-    return "/account/register";
-  }
-
-  function emergencyHref() {
-    if (isLoggedIn) {
-      return "/register/emergency";
-    }
-
-    return "/account/register";
-  }
-
   return (
     <main className="page">
-      {/* =====================================================
-          HEADER
-      ====================================================== */}
+      {/* HEADER */}
 
       <header className="header">
-        <a
-          href="/"
-          className="brand"
-        >
-          <div className="brandMark">
-            QR
-          </div>
+        <a href="/" className="brand">
+          <div className="brandMark">QR</div>
 
           <div>
             <div className="brandName">
@@ -239,9 +196,7 @@ export default function HomePage() {
             <button
               type="button"
               className={
-                ka
-                  ? "selected"
-                  : ""
+                ka ? "selected" : ""
               }
               onClick={() =>
                 setLanguage("ka")
@@ -253,9 +208,7 @@ export default function HomePage() {
             <button
               type="button"
               className={
-                !ka
-                  ? "selected"
-                  : ""
+                !ka ? "selected" : ""
               }
               onClick={() =>
                 setLanguage("en")
@@ -267,9 +220,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* =====================================================
-          HERO
-      ====================================================== */}
+      {/* HERO */}
 
       <section className="hero">
         <div className="heroContent">
@@ -291,8 +242,7 @@ export default function HomePage() {
                 The QR that brings
                 <br />
                 <span>
-                  what&apos;s lost
-                  back to you.
+                  what&apos;s lost back to you.
                 </span>
               </>
             )}
@@ -300,17 +250,17 @@ export default function HomePage() {
 
           <p className="heroDescription">
             {ka
-              ? "ცხოველები, პირადი ნივთები და Emergency სამაჯური — ერთი QR RETURN სისტემაში."
-              : "Pets, personal items and the Emergency Bracelet — all in one QR RETURN system."}
+              ? "ცხოველები, პირადი ნივთები და Emergency ID — ერთი QR RETURN სისტემაში."
+              : "Pets, personal items and Emergency ID — all in one QR RETURN system."}
           </p>
 
           <a
-            href="#profiles"
+            href="#protect"
             className="heroButton"
           >
             {ka
-              ? "აირჩიე რისი დაცვა გინდა"
-              : "Choose what to protect"}{" "}
+              ? "ნახე რას იცავს QR RETURN"
+              : "See what QR RETURN protects"}{" "}
             ↓
           </a>
         </div>
@@ -336,11 +286,10 @@ export default function HomePage() {
                       key={i}
                       className={
                         [
-                          1, 2, 4, 6, 7,
-                          9, 12, 14, 15,
-                          17, 19, 20, 22,
-                          25, 27, 28, 31,
-                          33, 34,
+                          1, 2, 4, 6, 7, 9,
+                          12, 14, 15, 17, 19,
+                          20, 22, 25, 27, 28,
+                          31, 33, 34,
                         ].includes(i)
                           ? "dark"
                           : ""
@@ -363,12 +312,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          CATEGORIES
-      ====================================================== */}
+      {/* WHAT YOU CAN PROTECT */}
 
       <section
-        id="profiles"
+        id="protect"
         className="categorySection"
       >
         <div className="categoryInner">
@@ -379,14 +326,14 @@ export default function HomePage() {
 
             <h2>
               {ka
-                ? "რისთვის შეგიძლიათ გამოიყენოთ?"
+                ? "რისი დაცვა შეგიძლიათ?"
                 : "What can you protect?"}
             </h2>
 
             <p>
               {ka
-                ? "აირჩიეთ ცხოველი ან ნივთი. თუ უკვე გაქვთ QR RETURN ანგარიში, პირდაპირ შექმნით შესაბამის პროფილს."
-                : "Choose a pet or item. If you already have a QR RETURN account, you can create the appropriate profile directly."}
+                ? "QR RETURN შეგიძლიათ გამოიყენოთ ცხოველებისა და ყოველდღიური ნივთებისთვის. პროფილების შექმნა და მართვა ხდება თქვენი პირადი ანგარიშიდან."
+                : "QR RETURN can be used for pets and everyday items. Profiles are created and managed from your private account."}
             </p>
           </div>
 
@@ -402,8 +349,8 @@ export default function HomePage() {
                       {category.icon}
                     </div>
 
-                    <div className="categoryArrow">
-                      ↗
+                    <div className="categoryBadge">
+                      QR
                     </div>
                   </div>
 
@@ -418,30 +365,52 @@ export default function HomePage() {
                       ? category.kaText
                       : category.enText}
                   </p>
-
-                  <a
-                    href={profileHref(
-                      category.href
-                    )}
-                    className="categoryChoose"
-                  >
-                    {isLoggedIn
-                      ? ka
-                        ? "პროფილის შექმნა"
-                        : "Create profile"
-                      : ka
-                      ? "აირჩიე"
-                      : "Choose"}{" "}
-                    →
-                  </a>
                 </div>
               )
             )}
           </div>
 
-          {/* =================================================
-              EMERGENCY BRACELET
-          ================================================== */}
+          {/* ONE ACCOUNT CTA */}
+
+          <div className="accountStrip">
+            <div className="accountStripIcon">
+              👤
+            </div>
+
+            <div className="accountStripText">
+              <strong>
+                {ka
+                  ? "ყველა QR პროფილი ერთი ანგარიშიდან"
+                  : "All QR profiles from one account"}
+              </strong>
+
+              <p>
+                {ka
+                  ? "ანგარიშის შექმნის შემდეგ აირჩევთ შესაბამის კატეგორიას და შექმნით იმდენ პროფილს, რამდენიც გჭირდებათ."
+                  : "After creating an account, choose the category you need and create as many profiles as you want."}
+              </p>
+            </div>
+
+            <a
+              href={
+                isLoggedIn
+                  ? "/account"
+                  : "/account/register"
+              }
+              className="accountStripButton"
+            >
+              {isLoggedIn
+                ? ka
+                  ? "ჩემს ანგარიშში გადასვლა"
+                  : "Go to my account"
+                : ka
+                ? "ანგარიშის შექმნა"
+                : "Create account"}{" "}
+              →
+            </a>
+          </div>
+
+          {/* EMERGENCY */}
 
           <div className="emergencyFeatured">
             <div className="emergencyFeaturedContent">
@@ -451,8 +420,7 @@ export default function HomePage() {
 
               <div className="emergencyCopy">
                 <div className="emergencyLabel">
-                  QR RETURN • EMERGENCY ID
-                  • FOR PEOPLE
+                  QR RETURN • EMERGENCY ID • FOR PEOPLE
                 </div>
 
                 <h2>
@@ -477,8 +445,8 @@ export default function HomePage() {
 
                 <p>
                   {ka
-                    ? "ადამიანებისთვის შექმნილი QR Emergency ID. მნიშვნელოვანი ინფორმაცია და საგანგებო საკონტაქტო მონაცემები ხელმისაწვდომია QR კოდის ერთი დასკანერებით."
-                    : "A QR Emergency ID created for people. Important information and emergency contact details can be accessed with one QR scan."}
+                    ? "ადამიანებისთვის შექმნილი QR Emergency ID. ერთი დასკანერებით შესაძლებელია აუცილებელი ინფორმაციისა და საგანგებო კონტაქტის ნახვა."
+                    : "A QR Emergency ID created for people. One scan can provide access to essential information and emergency contacts."}
                 </p>
 
                 <div className="emergencyMiniFeatures">
@@ -506,19 +474,32 @@ export default function HomePage() {
                         : "No App Required"}
                     </span>
                   </div>
+
+                  <div>
+                    <b>04</b>
+                    <span>
+                      {ka
+                        ? "პირადი მონაცემების კონტროლი"
+                        : "Privacy Control"}
+                    </span>
+                  </div>
                 </div>
 
                 <a
-                  href={emergencyHref()}
+                  href={
+                    isLoggedIn
+                      ? "/account"
+                      : "/account/register"
+                  }
                   className="emergencyButton"
                 >
                   {isLoggedIn
                     ? ka
-                      ? "Emergency ID-ის შექმნა"
-                      : "Create Emergency ID"
+                      ? "Emergency ID-ის მართვა ანგარიშიდან"
+                      : "Manage Emergency ID from account"
                     : ka
-                    ? "Emergency სამაჯური"
-                    : "Emergency Bracelet"}{" "}
+                    ? "ანგარიშის შექმნა"
+                    : "Create account"}{" "}
                   →
                 </a>
               </div>
@@ -570,53 +551,10 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
-          {/* =================================================
-              ONE ACCOUNT MESSAGE
-          ================================================== */}
-
-          <div className="accountInfoStrip">
-            <div className="accountInfoIcon">
-              👤
-            </div>
-
-            <div>
-              <strong>
-                {ka
-                  ? "ერთი ანგარიში — ყველა QR პროფილისთვის"
-                  : "One account for all QR profiles"}
-              </strong>
-
-              <p>
-                {ka
-                  ? "ძაღლი, კატა, ნივთები და Emergency ID ერთ Owner Account-ში იმართება."
-                  : "Manage pets, items and Emergency IDs from one Owner Account."}
-              </p>
-            </div>
-
-            <a
-              href={
-                isLoggedIn
-                  ? "/account"
-                  : "/account/register"
-              }
-            >
-              {isLoggedIn
-                ? ka
-                  ? "ჩემი ანგარიში"
-                  : "My account"
-                : ka
-                ? "ანგარიშის შექმნა"
-                : "Create account"}{" "}
-              →
-            </a>
-          </div>
         </div>
       </section>
 
-      {/* =====================================================
-          HOW IT WORKS
-      ====================================================== */}
+      {/* HOW IT WORKS */}
 
       <section className="information">
         <div className="infoInner">
@@ -630,120 +568,62 @@ export default function HomePage() {
               : "How QR RETURN works"}
           </h2>
 
-          <div className="infoText">
-            {ka ? (
-              <>
-                <p className="lead">
-                  <strong>
-                    მიამაგრეთ QR კოდი
-                    თქვენს ცხოველს ან
-                    ნივთს და გაუმარტივეთ
-                    მპოვნელს თქვენთან
-                    დაკავშირება.
-                  </strong>
-                </p>
+          <div className="stepsGrid">
+            <div className="stepCard">
+              <span>01</span>
+              <strong>
+                {ka
+                  ? "შექმენით ანგარიში"
+                  : "Create your account"}
+              </strong>
+              <p>
+                {ka
+                  ? "ერთი ანგარიში გამოიყენება თქვენი ყველა QR პროფილის სამართავად."
+                  : "One account is used to manage all of your QR profiles."}
+              </p>
+            </div>
 
-                <p>
-                  მპოვნელი ასკანერებს QR
-                  კოდს და{" "}
-                  <strong>
-                    ყოველგვარი
-                    აპლიკაციის
-                    ჩამოტვირთვის გარეშე
-                  </strong>{" "}
-                  გიკავშირდებათ —{" "}
-                  <strong>
-                    Live Chat-ის
-                    საშუალებით ან თქვენ
-                    მიერ ჩართულ
-                    საკონტაქტო მეთოდზე.
-                  </strong>
-                </p>
+            <div className="stepCard">
+              <span>02</span>
+              <strong>
+                {ka
+                  ? "დაამატეთ პროფილი"
+                  : "Add a profile"}
+              </strong>
+              <p>
+                {ka
+                  ? "ანგარიშის შიგნით აირჩიეთ ძაღლი, კატა, ნივთი ან Emergency ID."
+                  : "Inside your account, choose a pet, item or Emergency ID."}
+              </p>
+            </div>
 
-                <p>
-                  მას ასევე შეუძლია{" "}
-                  <strong>
-                    გაგიზიაროთ ნივთის ან
-                    ცხოველის მდებარეობა
-                  </strong>{" "}
-                  პირდაპირ QR RETURN-ის
-                  საშუალებით.
-                </p>
+            <div className="stepCard">
+              <span>03</span>
+              <strong>
+                {ka
+                  ? "მიამაგრეთ QR"
+                  : "Attach the QR"}
+              </strong>
+              <p>
+                {ka
+                  ? "QR კოდი უკავშირდება კონკრეტულ პროფილს და მზად არის დასასკანერებლად."
+                  : "The QR code is linked to a specific profile and ready to scan."}
+              </p>
+            </div>
 
-                <p>
-                  <strong>
-                    დაკავშირების მეთოდს
-                    თავად ირჩევთ.
-                    უსაფრთხოება და
-                    პირადი მონაცემების
-                    კონტროლი QR RETURN-ის
-                    ძირითადი ნაწილია.
-                  </strong>
-                </p>
-
-                <p className="lastLine">
-                  <strong>
-                    ერთი Owner Account-იდან
-                    მართავთ თქვენს ყველა
-                    QR პროფილს.
-                  </strong>
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="lead">
-                  <strong>
-                    Attach a QR code to
-                    your pet or item and
-                    make it easier for a
-                    finder to contact you.
-                  </strong>
-                </p>
-
-                <p>
-                  The finder scans the QR
-                  code and can contact you{" "}
-                  <strong>
-                    without downloading an
-                    app
-                  </strong>{" "}
-                  — through{" "}
-                  <strong>
-                    Live Chat or another
-                    contact method you
-                    enable.
-                  </strong>
-                </p>
-
-                <p>
-                  The finder can also{" "}
-                  <strong>
-                    share the location of
-                    your pet or item
-                  </strong>{" "}
-                  directly through QR
-                  RETURN.
-                </p>
-
-                <p>
-                  <strong>
-                    You choose how you want
-                    to be contacted.
-                    Privacy and personal
-                    data control are core
-                    parts of QR RETURN.
-                  </strong>
-                </p>
-
-                <p className="lastLine">
-                  <strong>
-                    Manage all your QR
-                    profiles from one Owner
-                    Account.
-                  </strong>
-                </p>
-              </>
-            )}
+            <div className="stepCard">
+              <span>04</span>
+              <strong>
+                {ka
+                  ? "მპოვნელი გიკავშირდებათ"
+                  : "The finder contacts you"}
+              </strong>
+              <p>
+                {ka
+                  ? "მპოვნელმა შეიძლება გამოიყენოს Live Chat, ლოკაციის გაზიარება ან თქვენ მიერ ჩართული სხვა საკონტაქტო მეთოდი."
+                  : "A finder can use Live Chat, location sharing or another contact method you enable."}
+              </p>
+            </div>
           </div>
 
           <div className="featureGrid">
@@ -769,9 +649,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          CONTACT
-      ====================================================== */}
+      {/* CONTACT */}
 
       <section
         id="contact"
@@ -791,8 +669,8 @@ export default function HomePage() {
 
             <p>
               {ka
-                ? "კითხვა გაქვთ QR კოდის, ანგარიშის, პროფილის ან ჩვენი სერვისის შესახებ? დაგვიკავშირდით."
-                : "Questions about QR codes, accounts, profiles or our service? Contact us."}
+                ? "კითხვა გაქვთ QR კოდის, ანგარიშის, პროფილის, Emergency ID-ის ან ჩვენი სერვისის შესახებ? დაგვიკავშირდით."
+                : "Questions about QR codes, accounts, profiles, Emergency ID or our service? Contact us."}
             </p>
           </div>
 
@@ -808,18 +686,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          LIVE SUPPORT / CHAT LAUNCHER
-          DO NOT REMOVE
-      ====================================================== */}
+      {/* LIVE CHAT — MUST REMAIN */}
 
       <SupportLauncher
         language={language}
       />
 
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
+      {/* FOOTER */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -859,10 +732,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* =====================================================
-          STYLES
-      ====================================================== */}
-
       <style jsx>{`
         * {
           box-sizing: border-box;
@@ -875,30 +744,21 @@ export default function HomePage() {
         .page {
           background: #ffffff;
           color: #091426;
-          font-family: Inter,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Arial,
-            sans-serif;
+          font-family: Inter, -apple-system,
+            BlinkMacSystemFont, "Segoe UI",
+            Arial, sans-serif;
         }
 
-        /* HEADER */
-
         .header {
-          width: calc(
-            100% - 48px
-          );
+          width: calc(100% - 48px);
           max-width: 1240px;
           min-height: 94px;
           margin: auto;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
           gap: 25px;
-          border-bottom:
-            1px solid #edf1f6;
+          border-bottom: 1px solid #edf1f6;
         }
 
         .brand {
@@ -918,14 +778,8 @@ export default function HomePage() {
           color: white;
           font-size: 15px;
           font-weight: 900;
-          box-shadow:
-            0 9px 24px
-            rgba(
-              20,
-              101,
-              232,
-              0.22
-            );
+          box-shadow: 0 9px 24px
+            rgba(20, 101, 232, 0.22);
         }
 
         .brandName {
@@ -975,44 +829,35 @@ export default function HomePage() {
         }
 
         .loginButton {
-          border:
-            1px solid #e2e7ee;
-          background: white;
           color: #1d2939;
+          border: 1px solid #e2e7ee;
+          background: white;
         }
 
         .adminButton {
-          border:
-            1px solid #6d5dfc;
-          background:
-            linear-gradient(
-              135deg,
-              #1465e8,
-              #7655f7
-            );
           color: white;
-          box-shadow:
-            0 7px 18px
-            rgba(
-              87,
-              74,
-              214,
-              0.18
-            );
+          border: 1px solid #6d5dfc;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
+          box-shadow: 0 7px 18px
+            rgba(87, 74, 214, 0.18);
         }
 
         .language {
           padding: 4px;
-          border-radius: 11px;
           background: #f1f4f8;
+          border-radius: 11px;
         }
 
         .language button {
-          padding: 8px 10px;
           border: 0;
-          border-radius: 8px;
           background: transparent;
           color: #7c8798;
+          padding: 8px 10px;
+          border-radius: 8px;
           font-size: 10px;
           font-weight: 900;
           cursor: pointer;
@@ -1021,17 +866,9 @@ export default function HomePage() {
         .language .selected {
           background: white;
           color: #1465e8;
-          box-shadow:
-            0 2px 8px
-            rgba(
-              20,
-              40,
-              70,
-              0.08
-            );
+          box-shadow: 0 2px 8px
+            rgba(20, 40, 70, 0.08);
         }
-
-        /* HERO */
 
         .hero {
           max-width: 1240px;
@@ -1039,8 +876,7 @@ export default function HomePage() {
           margin: auto;
           padding: 85px 24px;
           display: grid;
-          grid-template-columns:
-            1.2fr 0.8fr;
+          grid-template-columns: 1.2fr 0.8fr;
           align-items: center;
           gap: 50px;
         }
@@ -1057,11 +893,7 @@ export default function HomePage() {
         .hero h1 {
           max-width: 830px;
           margin: 24px 0 0;
-          font-size: clamp(
-            50px,
-            6.5vw,
-            82px
-          );
+          font-size: clamp(50px, 6.5vw, 82px);
           line-height: 1.01;
           letter-spacing: -4.5px;
           font-weight: 900;
@@ -1104,31 +936,24 @@ export default function HomePage() {
           padding: 10px;
           border-radius: 36px;
           background: #081426;
-          box-shadow:
-            0 35px 80px
-            rgba(
-              15,
-              55,
-              110,
-              0.22
-            );
+          box-shadow: 0 35px 80px
+            rgba(15, 55, 110, 0.22);
           transform: rotate(5deg);
         }
 
         .phoneScreen {
           width: 100%;
           height: 100%;
+          border-radius: 27px;
+          background: linear-gradient(
+            160deg,
+            #f9fbff,
+            #eaf3ff
+          );
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          border-radius: 27px;
-          background:
-            linear-gradient(
-              160deg,
-              #f9fbff,
-              #eaf3ff
-            );
         }
 
         .miniLogo {
@@ -1150,14 +975,13 @@ export default function HomePage() {
           width: 90px;
           height: 90px;
           display: grid;
-          grid-template-columns:
-            repeat(6, 1fr);
+          grid-template-columns: repeat(6, 1fr);
           gap: 3px;
         }
 
         .qrPattern i {
-          border-radius: 2px;
           background: #d7dfeb;
+          border-radius: 2px;
         }
 
         .qrPattern i.dark {
@@ -1173,49 +997,41 @@ export default function HomePage() {
         .c1 {
           top: 0;
           left: 0;
-          border-top:
-            3px solid #1465e8;
-          border-left:
-            3px solid #1465e8;
+          border-top: 3px solid #1465e8;
+          border-left: 3px solid #1465e8;
         }
 
         .c2 {
           top: 0;
           right: 0;
-          border-top:
-            3px solid #1465e8;
-          border-right:
-            3px solid #1465e8;
+          border-top: 3px solid #1465e8;
+          border-right: 3px solid #1465e8;
         }
 
         .c3 {
           bottom: 0;
           left: 0;
-          border-bottom:
-            3px solid #1465e8;
-          border-left:
-            3px solid #1465e8;
+          border-bottom: 3px solid #1465e8;
+          border-left: 3px solid #1465e8;
         }
 
         .c4 {
           right: 0;
           bottom: 0;
-          border-right:
-            3px solid #1465e8;
-          border-bottom:
-            3px solid #1465e8;
+          border-right: 3px solid #1465e8;
+          border-bottom: 3px solid #1465e8;
         }
 
         .floatingTag {
-          width: 80px;
-          height: 80px;
           position: absolute;
           right: 25px;
           bottom: 45px;
-          display: grid;
-          place-items: center;
+          width: 80px;
+          height: 80px;
           border-radius: 22px;
           background: #1465e8;
+          display: grid;
+          place-items: center;
           transform: rotate(-9deg);
         }
 
@@ -1223,19 +1039,16 @@ export default function HomePage() {
           width: 42px;
           height: 42px;
           padding: 6px;
-          display: grid;
-          grid-template-columns:
-            1fr 1fr;
-          gap: 4px;
-          border-radius: 8px;
           background: white;
+          border-radius: 8px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4px;
         }
 
         .tinyQR b {
           background: #081426;
         }
-
-        /* CATEGORY */
 
         .categorySection {
           padding: 95px 24px;
@@ -1253,11 +1066,7 @@ export default function HomePage() {
 
         .sectionIntro h2 {
           margin: 15px 0;
-          font-size: clamp(
-            38px,
-            5vw,
-            60px
-          );
+          font-size: clamp(38px, 5vw, 60px);
           line-height: 1.05;
           letter-spacing: -2.8px;
         }
@@ -1272,51 +1081,26 @@ export default function HomePage() {
         .categoryGrid {
           margin-top: 46px;
           display: grid;
-          grid-template-columns:
-            repeat(3, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 16px;
         }
 
         .categoryCard {
-          min-height: 260px;
+          min-height: 230px;
           padding: 25px;
           display: flex;
           flex-direction: column;
-          border:
-            1px solid #e0e6ef;
+          border: 1px solid #e0e6ef;
           border-radius: 22px;
           background: white;
-          box-shadow:
-            0 12px 35px
-            rgba(
-              21,
-              52,
-              93,
-              0.045
-            );
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease;
-        }
-
-        .categoryCard:hover {
-          transform:
-            translateY(-3px);
-          box-shadow:
-            0 18px 45px
-            rgba(
-              21,
-              52,
-              93,
-              0.08
-            );
+          box-shadow: 0 12px 35px
+            rgba(21, 52, 93, 0.045);
         }
 
         .categoryTop {
           display: flex;
+          justify-content: space-between;
           align-items: flex-start;
-          justify-content:
-            space-between;
         }
 
         .categoryEmoji {
@@ -1329,9 +1113,13 @@ export default function HomePage() {
           font-size: 29px;
         }
 
-        .categoryArrow {
-          color: #a0aabb;
-          font-size: 18px;
+        .categoryBadge {
+          padding: 6px 8px;
+          border-radius: 8px;
+          background: #eef4ff;
+          color: #1465e8;
+          font-size: 9px;
+          font-weight: 900;
         }
 
         .categoryCard h3 {
@@ -1342,46 +1130,77 @@ export default function HomePage() {
         }
 
         .categoryCard p {
-          flex: 1;
           margin: 0;
           color: #748094;
           font-size: 13px;
           line-height: 1.6;
         }
 
-        .categoryChoose {
-          margin-top: 18px;
-          color: #1465e8;
-          font-size: 12px;
-          font-weight: 900;
-          text-decoration: none;
+        .accountStrip {
+          margin-top: 24px;
+          padding: 22px 24px;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          border: 1px solid #dbe4f0;
+          border-radius: 18px;
+          background: white;
         }
 
-        /* EMERGENCY */
+        .accountStripIcon {
+          width: 48px;
+          height: 48px;
+          flex: 0 0 48px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: #eef4ff;
+          font-size: 22px;
+        }
+
+        .accountStripText {
+          flex: 1;
+        }
+
+        .accountStripText strong {
+          color: #182438;
+          font-size: 14px;
+        }
+
+        .accountStripText p {
+          margin: 5px 0 0;
+          color: #667286;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .accountStripButton {
+          flex: 0 0 auto;
+          padding: 12px 17px;
+          border-radius: 10px;
+          background: #1465e8;
+          color: white;
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 900;
+        }
 
         .emergencyFeatured {
           position: relative;
           overflow: hidden;
-          margin-top: 22px;
+          margin-top: 24px;
           min-height: 440px;
           padding: 44px 48px;
           display: grid;
-          grid-template-columns:
-            1.15fr 0.85fr;
+          grid-template-columns: 1.15fr 0.85fr;
           align-items: center;
           gap: 40px;
-          border:
-            1px solid #d7e3f4;
+          border: 1px solid #d7e3f4;
           border-radius: 30px;
           background:
             radial-gradient(
               circle at 92% 12%,
-              rgba(
-                227,
-                53,
-                53,
-                0.14
-              ),
+              rgba(227, 53, 53, 0.14),
               transparent 30%
             ),
             linear-gradient(
@@ -1390,44 +1209,16 @@ export default function HomePage() {
               #f8fbff 52%,
               #fff5f5 100%
             );
-          box-shadow:
-            0 24px 65px
-            rgba(
-              16,
-              51,
-              94,
-              0.08
-            );
-        }
-
-        .emergencyFeatured::after {
-          content: "";
-          position: absolute;
-          right: -90px;
-          top: -100px;
-          width: 260px;
-          height: 260px;
-          border:
-            45px solid
-            rgba(
-              20,
-              101,
-              232,
-              0.045
-            );
-          border-radius: 50%;
+          box-shadow: 0 24px 65px
+            rgba(16, 51, 94, 0.08);
         }
 
         .emergencyFeaturedContent {
           position: relative;
           z-index: 2;
           display: flex;
-          align-items: flex-start;
           gap: 20px;
-        }
-
-        .emergencyMark {
-          flex: 0 0 auto;
+          align-items: flex-start;
         }
 
         .emergencyMark span {
@@ -1440,14 +1231,6 @@ export default function HomePage() {
           color: white;
           font-size: 42px;
           line-height: 1;
-          box-shadow:
-            0 14px 30px
-            rgba(
-              229,
-              57,
-              53,
-              0.21
-            );
         }
 
         .emergencyLabel {
@@ -1460,11 +1243,7 @@ export default function HomePage() {
         .emergencyCopy h2 {
           margin: 12px 0 14px;
           color: #0c192b;
-          font-size: clamp(
-            40px,
-            4.6vw,
-            58px
-          );
+          font-size: clamp(40px, 4.6vw, 58px);
           line-height: 1;
           letter-spacing: -2.8px;
         }
@@ -1487,8 +1266,7 @@ export default function HomePage() {
           gap: 9px;
         }
 
-        .emergencyMiniFeatures
-          > div {
+        .emergencyMiniFeatures > div {
           display: flex;
           align-items: center;
           gap: 10px;
@@ -1537,16 +1315,6 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           transform: rotate(-7deg);
-          filter:
-            drop-shadow(
-              0 25px 25px
-              rgba(
-                13,
-                35,
-                68,
-                0.17
-              )
-            );
         }
 
         .braceletSide {
@@ -1556,37 +1324,33 @@ export default function HomePage() {
         }
 
         .braceletSide.left {
-          border-radius:
-            32px 0 0 32px;
+          border-radius: 32px 0 0 32px;
         }
 
         .braceletSide.right {
-          border-radius:
-            0 32px 32px 0;
+          border-radius: 0 32px 32px 0;
         }
 
         .braceletPlate {
           width: 150px;
           height: 122px;
-          flex:
-            0 0 150px;
+          flex: 0 0 150px;
           position: relative;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          border:
-            6px solid #0d5ace;
+          border: 6px solid #0d5ace;
           border-radius: 28px;
           background: white;
         }
 
         .braceletCross {
-          width: 22px;
-          height: 22px;
           position: absolute;
           top: 9px;
           right: 11px;
+          width: 22px;
+          height: 22px;
           display: grid;
           place-items: center;
           border-radius: 6px;
@@ -1600,24 +1364,20 @@ export default function HomePage() {
           height: 62px;
           padding: 7px;
           display: grid;
-          grid-template-columns:
-            repeat(3, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 4px;
           border-radius: 9px;
           background: #f1f5f9;
         }
 
         .braceletQr i {
-          border-radius: 2px;
           background: #13243a;
+          border-radius: 2px;
         }
 
-        .braceletQr
-          i:nth-child(2),
-        .braceletQr
-          i:nth-child(4),
-        .braceletQr
-          i:nth-child(8) {
+        .braceletQr i:nth-child(2),
+        .braceletQr i:nth-child(4),
+        .braceletQr i:nth-child(8) {
           background: #d7e0eb;
         }
 
@@ -1630,49 +1390,24 @@ export default function HomePage() {
         }
 
         .emergencyStatus {
+          position: absolute;
+          bottom: 7px;
+          right: 0;
           min-width: 165px;
           padding: 11px 14px;
-          position: absolute;
-          right: 0;
-          bottom: 7px;
           display: flex;
           align-items: center;
           gap: 9px;
-          border:
-            1px solid #e0e6ee;
+          border: 1px solid #e0e6ee;
           border-radius: 14px;
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.96
-            );
-          box-shadow:
-            0 12px 30px
-            rgba(
-              16,
-              40,
-              75,
-              0.1
-            );
+          background: rgba(255, 255, 255, 0.96);
         }
 
-        .emergencyStatus
-          > span {
+        .emergencyStatus > span {
           width: 10px;
           height: 10px;
-          flex: 0 0 10px;
           border-radius: 50%;
           background: #e53935;
-          box-shadow:
-            0 0 0 5px
-            rgba(
-              229,
-              57,
-              53,
-              0.1
-            );
         }
 
         .emergencyStatus strong,
@@ -1691,64 +1426,9 @@ export default function HomePage() {
           font-size: 8px;
         }
 
-        /* ONE ACCOUNT */
-
-        .accountInfoStrip {
-          margin-top: 24px;
-          padding: 21px 24px;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          border:
-            1px solid #e0e6ee;
-          border-radius: 17px;
-          background: white;
-        }
-
-        .accountInfoIcon {
-          width: 46px;
-          height: 46px;
-          flex: 0 0 46px;
-          display: grid;
-          place-items: center;
-          border-radius: 13px;
-          background: #eef4ff;
-          font-size: 22px;
-        }
-
-        .accountInfoStrip
-          > div:nth-child(2) {
-          flex: 1;
-        }
-
-        .accountInfoStrip strong {
-          color: #182438;
-          font-size: 13px;
-        }
-
-        .accountInfoStrip p {
-          margin: 4px 0 0;
-          color: #667286;
-          font-size: 12px;
-          line-height: 1.5;
-        }
-
-        .accountInfoStrip a {
-          flex: 0 0 auto;
-          padding: 12px 17px;
-          border-radius: 10px;
-          background: #1465e8;
-          color: white;
-          font-size: 12px;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        /* INFORMATION */
-
         .information {
-          padding: 95px 24px;
           background: white;
+          padding: 95px 24px;
         }
 
         .infoInner {
@@ -1758,54 +1438,55 @@ export default function HomePage() {
 
         .information h2 {
           margin: 15px 0 40px;
-          font-size: clamp(
-            36px,
-            5vw,
-            58px
-          );
+          font-size: clamp(36px, 5vw, 58px);
           letter-spacing: -2.5px;
         }
 
-        .infoText {
-          max-width: 850px;
+        .stepsGrid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
         }
 
-        .infoText p {
-          margin: 0 0 21px;
-          color: #5e697b;
-          font-size: 17px;
-          line-height: 1.75;
+        .stepCard {
+          padding: 22px;
+          border: 1px solid #e0e6ef;
+          border-radius: 18px;
+          background: #fafbfd;
         }
 
-        .infoText strong {
+        .stepCard span {
+          color: #1465e8;
+          font-size: 10px;
+          font-weight: 950;
+        }
+
+        .stepCard strong {
+          display: block;
+          margin-top: 14px;
           color: #182438;
+          font-size: 15px;
         }
 
-        .infoText .lead {
-          font-size: 20px;
-        }
-
-        .lastLine {
-          margin-top:
-            32px !important;
+        .stepCard p {
+          margin: 9px 0 0;
+          color: #667286;
+          font-size: 12px;
+          line-height: 1.6;
         }
 
         .featureGrid {
           margin-top: 55px;
           display: grid;
-          grid-template-columns:
-            repeat(4, 1fr);
-          border-top:
-            1px solid #dfe5ed;
-          border-bottom:
-            1px solid #dfe5ed;
+          grid-template-columns: repeat(4, 1fr);
+          border-top: 1px solid #dfe5ed;
+          border-bottom: 1px solid #dfe5ed;
         }
 
         .feature {
           min-height: 120px;
           padding: 28px 20px;
-          border-right:
-            1px solid #dfe5ed;
+          border-right: 1px solid #dfe5ed;
         }
 
         .feature:last-child {
@@ -1825,8 +1506,6 @@ export default function HomePage() {
           font-weight: 850;
         }
 
-        /* CONTACT */
-
         .contact {
           padding: 80px 24px;
           background: #f7f9fc;
@@ -1836,9 +1515,8 @@ export default function HomePage() {
           max-width: 1100px;
           margin: auto;
           display: flex;
+          justify-content: space-between;
           align-items: flex-end;
-          justify-content:
-            space-between;
           gap: 50px;
         }
 
@@ -1866,8 +1544,6 @@ export default function HomePage() {
           font-weight: 850;
         }
 
-        /* FOOTER */
-
         .footer {
           background: #071321;
           color: white;
@@ -1880,8 +1556,7 @@ export default function HomePage() {
           padding: 40px 24px;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
           gap: 35px;
         }
 
@@ -1901,8 +1576,8 @@ export default function HomePage() {
 
         .footerLinks {
           display: flex;
-          flex-wrap: wrap;
           gap: 25px;
+          flex-wrap: wrap;
         }
 
         .footerLinks a,
@@ -1918,66 +1593,35 @@ export default function HomePage() {
           font-size: 11px;
         }
 
-        /* TABLET */
-
-        @media (
-          max-width: 900px
-        ) {
-          .header {
-            width:
-              calc(
-                100% - 28px
-              );
-          }
-
-          .brandSub {
-            display: none;
-          }
-
-          .hero {
-            grid-template-columns:
-              1fr;
+        @media (max-width: 900px) {
+          .hero,
+          .emergencyFeatured {
+            grid-template-columns: 1fr;
           }
 
           .categoryGrid {
-            grid-template-columns:
-              repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr);
           }
 
-          .emergencyFeatured {
-            grid-template-columns:
-              1fr;
-          }
-
-          .emergencyBraceletVisual {
-            min-height: 270px;
+          .stepsGrid {
+            grid-template-columns: repeat(2, 1fr);
           }
 
           .featureGrid {
-            grid-template-columns:
-              repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr);
           }
 
           .contactInner,
           .footerInner {
             flex-direction: column;
-            align-items:
-              flex-start;
+            align-items: flex-start;
           }
         }
 
-        /* MOBILE */
-
-        @media (
-          max-width: 600px
-        ) {
+        @media (max-width: 600px) {
           .header {
+            width: calc(100% - 20px);
             min-height: 78px;
-            gap: 10px;
-          }
-
-          .headerRight {
-            gap: 7px;
           }
 
           .language {
@@ -2001,9 +1645,7 @@ export default function HomePage() {
           }
 
           .hero {
-            min-height: unset;
-            padding:
-              58px 18px 65px;
+            padding: 58px 18px 65px;
           }
 
           .hero h1 {
@@ -2012,21 +1654,23 @@ export default function HomePage() {
             letter-spacing: -3px;
           }
 
-          .heroDescription {
-            font-size: 14px;
-          }
-
           .categorySection {
             padding: 65px 15px;
           }
 
-          .categoryGrid {
-            grid-template-columns:
-              1fr;
+          .categoryGrid,
+          .stepsGrid {
+            grid-template-columns: 1fr;
           }
 
-          .categoryCard {
-            min-height: 220px;
+          .accountStrip {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .accountStripButton {
+            width: 100%;
+            text-align: center;
           }
 
           .emergencyFeatured {
@@ -2042,19 +1686,8 @@ export default function HomePage() {
             margin-bottom: 18px;
           }
 
-          .emergencyMark span {
-            width: 56px;
-            height: 56px;
-            font-size: 36px;
-          }
-
           .emergencyCopy h2 {
             font-size: 39px;
-            letter-spacing: -2px;
-          }
-
-          .emergencyCopy > p {
-            font-size: 14px;
           }
 
           .emergencyButton {
@@ -2065,14 +1698,8 @@ export default function HomePage() {
 
           .bracelet {
             width: 275px;
-            transform:
-              rotate(-5deg)
+            transform: rotate(-5deg)
               scale(0.93);
-          }
-
-          .braceletPlate {
-            width: 135px;
-            flex-basis: 135px;
           }
 
           .emergencyStatus {
@@ -2082,23 +1709,12 @@ export default function HomePage() {
             margin-top: -25px;
           }
 
-          .accountInfoStrip {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .accountInfoStrip a {
-            width: 100%;
-            text-align: center;
-          }
-
           .information {
             padding: 70px 18px;
           }
 
           .featureGrid {
-            grid-template-columns:
-              1fr 1fr;
+            grid-template-columns: 1fr 1fr;
           }
 
           .contact {
