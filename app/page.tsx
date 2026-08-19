@@ -1,19 +1,80 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import SupportLauncher from "./components/SupportLauncher";
 import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
-const ecosystemItems = [
+type HomepageSettings = {
+  hero_title: string;
+  hero_description: string;
+
+  emergency_title: string;
+  emergency_description: string;
+
+  dog_label: string;
+  cat_label: string;
+  keys_label: string;
+  wallet_label: string;
+  suitcase_label: string;
+  bag_label: string;
+
+  dog_image: string;
+  cat_image: string;
+  keys_image: string;
+  wallet_image: string;
+  suitcase_image: string;
+  bag_image: string;
+
+  video_enabled: boolean;
+  steps_enabled: boolean;
+  features_enabled: boolean;
+  rules_enabled: boolean;
+  contact_enabled: boolean;
+};
+
+const homepageDefaults: HomepageSettings = {
+  hero_title:
+    "როცა სიტყვის თქმა შეუძლებელია, ინფორმაცია მაინც ხელმისაწვდომია.",
+
+  hero_description:
+    "Emergency QR პროფილი გაძლევთ საშუალებას წინასწარ განსაზღვროთ რა უნდა იცოდეს დამხმარემ და ვის დაუკავშირდეს საგანგებო სიტუაციაში.",
+
+  emergency_title: "QR RETURN • EMERGENCY ID",
+
+  emergency_description:
+    "საგანგებო კონტაქტი, სამედიცინო ინფორმაცია, ალერგიები და თქვენ მიერ ნებადართული სხვა მნიშვნელოვანი მონაცემები.",
+
+  dog_label: "ძაღლი",
+  cat_label: "კატა",
+  keys_label: "სახლის + მანქანის გასაღები",
+  wallet_label: "საფულე",
+  suitcase_label: "ჩემოდანი",
+  bag_label: "ჩანთა",
+
+  dog_image: "",
+  cat_image: "",
+  keys_image: "",
+  wallet_image: "",
+  suitcase_image: "",
+  bag_image: "",
+
+  video_enabled: true,
+  steps_enabled: true,
+  features_enabled: true,
+  rules_enabled: true,
+  contact_enabled: true,
+};
+
+const defaultProducts = [
   {
     id: "dog",
     ka: "ძაღლი",
     en: "Dog",
     image:
-      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=700&q=88",
+      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=88",
     className: "dog",
   },
   {
@@ -21,7 +82,7 @@ const ecosystemItems = [
     ka: "კატა",
     en: "Cat",
     image:
-      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=700&q=88",
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=88",
     className: "cat",
   },
   {
@@ -36,7 +97,7 @@ const ecosystemItems = [
     ka: "საფულე",
     en: "Wallet",
     image:
-      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=700&q=88",
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=88",
     className: "wallet",
   },
   {
@@ -44,7 +105,7 @@ const ecosystemItems = [
     ka: "ჩემოდანი",
     en: "Luggage",
     image:
-      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=700&q=88",
+      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=900&q=88",
     className: "luggage",
   },
   {
@@ -52,7 +113,7 @@ const ecosystemItems = [
     ka: "ჩანთა",
     en: "Bag",
     image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=700&q=88",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=88",
     className: "bag",
   },
 ];
@@ -62,7 +123,45 @@ export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const [homepage, setHomepage] =
+    useState<HomepageSettings>(homepageDefaults);
+
   const ka = language === "ka";
+
+  /* =========================================================
+     LOAD HOMEPAGE SETTINGS
+  ========================================================= */
+
+  useEffect(() => {
+    async function loadHomepage() {
+      const { data, error } = await supabase
+        .from("homepage_settings")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle();
+
+      if (error) {
+        console.warn(
+          "homepage_settings load error:",
+          error.message
+        );
+        return;
+      }
+
+      if (data) {
+        setHomepage({
+          ...homepageDefaults,
+          ...data,
+        });
+      }
+    }
+
+    void loadHomepage();
+  }, []);
+
+  /* =========================================================
+     AUTH + ADMIN
+  ========================================================= */
 
   useEffect(() => {
     async function loadUser() {
@@ -89,20 +188,53 @@ export default function HomePage() {
 
     void loadUser();
 
-    const { data } = supabase.auth.onAuthStateChange(() => {
-      void loadUser();
-    });
+    const { data } =
+      supabase.auth.onAuthStateChange(() => {
+        void loadUser();
+      });
 
     return () => {
       data.subscription.unsubscribe();
     };
   }, []);
 
+  /* =========================================================
+     PRODUCT SETTINGS
+  ========================================================= */
+
+  const products = useMemo(() => {
+    return defaultProducts.map((item) => {
+      const labels: Record<string, string> = {
+        dog: homepage.dog_label,
+        cat: homepage.cat_label,
+        keys: homepage.keys_label,
+        wallet: homepage.wallet_label,
+        luggage: homepage.suitcase_label,
+        bag: homepage.bag_label,
+      };
+
+      const images: Record<string, string> = {
+        dog: homepage.dog_image,
+        cat: homepage.cat_image,
+        keys: homepage.keys_image,
+        wallet: homepage.wallet_image,
+        luggage: homepage.suitcase_image,
+        bag: homepage.bag_image,
+      };
+
+      return {
+        ...item,
+        customLabel: labels[item.id] || item.ka,
+        customImage: images[item.id] || item.image,
+      };
+    });
+  }, [homepage]);
+
   return (
     <main className="page">
-      {/* =========================================================
+      {/* ======================================================
           HEADER
-      ========================================================= */}
+      ====================================================== */}
 
       <header className="header">
         <a href="/" className="brand">
@@ -128,12 +260,22 @@ export default function HomePage() {
             {isLoggedIn ? (
               <a href="/account" className="accountBtn">
                 <UserIcon />
-                <span>{ka ? "ჩემი ანგარიში" : "My Account"}</span>
+
+                <span>
+                  {ka
+                    ? "ჩემი ანგარიში"
+                    : "My Account"}
+                </span>
               </a>
             ) : (
               <>
-                <a href="/account/register" className="accountBtn">
-                  {ka ? "ანგარიშის შექმნა" : "Create Account"}
+                <a
+                  href="/account/register"
+                  className="accountBtn"
+                >
+                  {ka
+                    ? "ანგარიშის შექმნა"
+                    : "Create Account"}
                 </a>
 
                 <a href="/login" className="loginBtn">
@@ -165,73 +307,78 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* =========================================================
+      {/* ======================================================
           PREMIUM HERO
-      ========================================================= */}
+      ====================================================== */}
 
       <section className="hero">
-        <div className="heroGlow glowOne" />
-        <div className="heroGlow glowTwo" />
+        <div className="heroGlow glowBlue" />
+        <div className="heroGlow glowRed" />
 
         <div className="heroInner">
-          {/* =====================================================
+          {/* ==================================================
               LEFT — EMERGENCY
-          ===================================================== */}
+          ================================================== */}
 
           <div className="emergencyColumn">
             <div className="emergencyEyebrow">
               <span className="medicalMark">+</span>
-              <span>QR RETURN • EMERGENCY ID</span>
+
+              <span>
+                {ka
+                  ? homepage.emergency_title
+                  : "QR RETURN • EMERGENCY ID"}
+              </span>
             </div>
 
             <h1>
               {ka
-                ? "როცა სიტყვის თქმა შეუძლებელია, ინფორმაცია მაინც ხელმისაწვდომია."
+                ? homepage.hero_title
                 : "When you cannot speak, essential information can still speak for you."}
             </h1>
 
             <p className="heroLead">
               {ka
-                ? "Emergency QR პროფილი გაძლევთ საშუალებას წინასწარ განსაზღვროთ რა უნდა იცოდეს დამხმარემ და ვის დაუკავშირდეს საგანგებო სიტუაციაში."
+                ? homepage.hero_description
                 : "Emergency QR lets you decide in advance what a helper should know and who they should contact in an emergency."}
             </p>
 
             {/* PREMIUM BRACELET */}
 
             <div className="braceletArea">
+              <div className="braceletShadow" />
+
               <div className="bracelet">
-                <div className="strap strapRed">
-                  <div className="strapDetail" />
+                <div className="strap redStrap">
+                  <span className="strapLine" />
                 </div>
 
                 <div className="braceletPlate">
-                  <div className="plateTop">
-                    <span className="plateCross">+</span>
+                  <div className="plateHeader">
+                    <span className="tinyCross">+</span>
                     <span>EMERGENCY QR</span>
                   </div>
 
                   <div className="plateQr">
-                    <QrCode size={64} />
+                    <QrCode size={62} />
                   </div>
 
-                  <div className="plateBottom">
+                  <div className="plateBrand">
                     <strong>QR RETURN</strong>
                     <span>SCAN FOR EMERGENCY INFO</span>
                   </div>
                 </div>
 
-                <div className="strap strapBlue">
-                  <div className="strapDetail" />
+                <div className="strap blueStrap">
+                  <span className="strapLine" />
                 </div>
               </div>
-
-              <div className="braceletShadow" />
             </div>
 
-            {/* CLEAN PROFILE */}
+            {/* EMERGENCY INFO */}
 
             <div className="emergencyProfile">
-              <div className="profileHeading">
+              <div className="profileTop">
                 <div>
                   <span>EMERGENCY PROFILE</span>
 
@@ -242,10 +389,10 @@ export default function HomePage() {
                   </strong>
                 </div>
 
-                <span className="statusDot">
+                <div className="ready">
                   <i />
                   SOS READY
-                </span>
+                </div>
               </div>
 
               <div className="profileGrid">
@@ -299,6 +446,12 @@ export default function HomePage() {
               </div>
             </div>
 
+            <p className="emergencyDescription">
+              {ka
+                ? homepage.emergency_description
+                : "Emergency contact, medical information and other essential information you choose to make available."}
+            </p>
+
             <div className="heroActions">
               <a
                 href={
@@ -313,27 +466,29 @@ export default function HomePage() {
                     ? "ჩემი ანგარიში"
                     : "My Account"
                   : ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create Account"}
+                    ? "ანგარიშის შექმნა"
+                    : "Create Account"}
 
                 <ArrowIcon />
               </a>
 
               <a href="#video" className="secondaryCta">
-                {ka ? "როგორ მუშაობს" : "How it works"}
+                {ka
+                  ? "როგორ მუშაობს"
+                  : "How it works"}
               </a>
             </div>
           </div>
 
-          {/* =====================================================
-              RIGHT — PRODUCT ECOSYSTEM
-          ===================================================== */}
+          {/* ==================================================
+              RIGHT — ECOSYSTEM
+          ================================================== */}
 
           <div className="ecosystem">
-            <div className="orbit orbitLarge" />
-            <div className="orbit orbitSmall" />
+            <div className="orbit orbitOuter" />
+            <div className="orbit orbitInner" />
 
-            {/* CENTER PHONE */}
+            {/* PHONE */}
 
             <div className="phone">
               <div className="phoneNotch" />
@@ -346,22 +501,23 @@ export default function HomePage() {
 
                   <div>
                     <span>QR RETURN</span>
-
                     <strong>
-                      {ka ? "მპოვნელის გვერდი" : "Finder Access"}
+                      {ka
+                        ? "მპოვნელის გვერდი"
+                        : "Finder Access"}
                     </strong>
                   </div>
                 </div>
 
-                <div className="phoneState">
-                  <div className="stateIcon">
+                <div className="phoneStatus">
+                  <div className="successCircle">
                     <CheckIcon />
                   </div>
 
                   <span>SCAN COMPLETE</span>
                 </div>
 
-                <div className="phoneContent">
+                <div className="phoneCopy">
                   <strong>
                     {ka
                       ? "დაუკავშირდი მფლობელს"
@@ -376,20 +532,24 @@ export default function HomePage() {
                 </div>
 
                 <div className="phoneButtons">
-                  <button type="button" className="chatBtn">
+                  <button
+                    type="button"
+                    className="phonePrimary"
+                  >
                     <ChatIcon />
-
                     <span>Live Chat</span>
                   </button>
 
                   <button type="button">
                     <LocationIcon />
 
-                    <span>{ka ? "ლოკაცია" : "Location"}</span>
+                    <span>
+                      {ka ? "ლოკაცია" : "Location"}
+                    </span>
                   </button>
                 </div>
 
-                <div className="privacyLine">
+                <div className="privacy">
                   <ShieldIcon />
 
                   <span>
@@ -401,48 +561,55 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ROTATING / FLOATING PRODUCTS */}
+            {/* PRODUCTS */}
 
             <div className="productOrbit">
-              {ecosystemItems.map((item) => (
+              {products.map((item) => (
                 <div
                   key={item.id}
                   className={`productBubble ${item.className}`}
                 >
-                  <div className="bubblePhoto">
-                    {item.id === "keys" ? (
+                  <div className="productImage">
+                    {item.id === "keys" &&
+                    !item.customImage ? (
                       <KeysScene />
                     ) : (
                       <img
-                        src={item.image}
-                        alt={ka ? item.ka : item.en}
+                        src={item.customImage}
+                        alt={
+                          ka
+                            ? item.customLabel
+                            : item.en
+                        }
                       />
                     )}
 
                     <div className="imageShade" />
 
-                    {/* only small physical tag */}
-
-                    <div className={`smallTag ${item.id}`}>
-                      <span className="tagRing" />
+                    <div
+                      className={`miniPhysicalTag ${item.id}`}
+                    >
+                      <span className="tagHole" />
                       <MiniQr />
                     </div>
 
                     {item.id === "luggage" && (
-                      <span className="airport">
+                      <span className="airportBadge">
                         AIRPORT
                       </span>
                     )}
                   </div>
 
                   <strong>
-                    {ka ? item.ka : item.en}
+                    {ka
+                      ? item.customLabel
+                      : item.en}
                   </strong>
                 </div>
               ))}
             </div>
 
-            <div className="ecosystemLabel">
+            <div className="ecosystemCaption">
               <span>QR RETURN</span>
 
               <strong>
@@ -455,262 +622,287 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =========================================================
-          VIDEO SECTION
-      ========================================================= */}
+      {/* ======================================================
+          VIDEO
+      ====================================================== */}
 
-      <section id="video" className="videoSection">
-        <div className="shell">
-          <div className="videoLayout">
-            <div className="videoCopy">
+      {homepage.video_enabled && (
+        <section id="video" className="videoSection">
+          <div className="shell">
+            <div className="videoLayout">
+              <div className="videoCopy">
+                <span className="eyebrow">
+                  QR RETURN IN ACTION
+                </span>
+
+                <h2>
+                  {ka
+                    ? "ერთი სკანი. პირდაპირი კავშირი."
+                    : "One scan. A direct connection."}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას."
+                    : "A short real-world video will show how a finder notices QR RETURN, scans it and starts connecting with the owner."}
+                </p>
+              </div>
+
+              <div className="videoCard">
+                <div className="videoBrand">
+                  <QrIcon />
+                  <span>
+                    QR RETURN PRODUCT DEMO
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className="playButton"
+                >
+                  <PlayIcon />
+                </button>
+
+                <span className="videoSoon">
+                  {ka
+                    ? "ვიდეო დაემატება"
+                    : "Video coming soon"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ======================================================
+          4 STEPS
+      ====================================================== */}
+
+      {homepage.steps_enabled && (
+        <section className="stepsSection">
+          <div className="shell">
+            <div className="sectionHeading">
               <span className="eyebrow">
-                QR RETURN IN ACTION
+                FIND → SCAN → CONNECT → RETURN
               </span>
 
               <h2>
                 {ka
-                  ? "ერთი სკანი. პირდაპირი კავშირი."
-                  : "One scan. A direct connection."}
+                  ? "დაბრუნების გზა ოთხ ნაბიჯში."
+                  : "A clear return path in four steps."}
               </h2>
-
-              <p>
-                {ka
-                  ? "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას."
-                  : "A short real-world video will show how a finder notices QR RETURN, scans it and starts connecting with the owner."}
-              </p>
             </div>
 
-            <div className="videoCard">
-              <div className="videoBrand">
-                <QrIcon />
-                <span>QR RETURN PRODUCT DEMO</span>
-              </div>
+            <div className="steps">
+              <Step
+                number="01"
+                icon={<SearchIcon />}
+                title={ka ? "იპოვეს" : "Found"}
+                text={
+                  ka
+                    ? "მპოვნელი ხედავს QR RETURN კოდს."
+                    : "The finder sees the QR RETURN code."
+                }
+              />
 
-              <button type="button" className="playButton">
-                <PlayIcon />
-              </button>
+              <span className="stepLine" />
 
-              <span className="videoSoon">
-                {ka
-                  ? "ვიდეო დაემატება"
-                  : "Video coming soon"}
-              </span>
+              <Step
+                number="02"
+                icon={<ScanIcon />}
+                title={
+                  ka
+                    ? "დაასკანერეს"
+                    : "Scanned"
+                }
+                text={
+                  ka
+                    ? "აპის ჩამოტვირთვა საჭირო არ არის."
+                    : "No app download is required."
+                }
+              />
+
+              <span className="stepLine" />
+
+              <Step
+                number="03"
+                icon={<ChatIcon />}
+                title={
+                  ka
+                    ? "დაგიკავშირდნენ"
+                    : "Connected"
+                }
+                text={
+                  ka
+                    ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
+                    : "Live Chat, call or another contact method."
+                }
+              />
+
+              <span className="stepLine" />
+
+              <Step
+                number="04"
+                icon={<ReturnIcon />}
+                title={
+                  ka
+                    ? "დაბრუნდა"
+                    : "Returned"
+                }
+                text={
+                  ka
+                    ? "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება."
+                    : "Once connected, getting it back becomes easier."
+                }
+              />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* =========================================================
-          4 STEPS
-      ========================================================= */}
-
-      <section className="stepsSection">
-        <div className="shell">
-          <div className="stepsHeader">
-            <span className="eyebrow">
-              FIND → SCAN → CONNECT → RETURN
-            </span>
-
-            <h2>
-              {ka
-                ? "დაბრუნების გზა ოთხ ნაბიჯში."
-                : "A clear return path in four steps."}
-            </h2>
-          </div>
-
-          <div className="steps">
-            <Step
-              number="01"
-              icon={<SearchIcon />}
-              title={ka ? "იპოვეს" : "Found"}
-              text={
-                ka
-                  ? "მპოვნელი ხედავს QR RETURN კოდს."
-                  : "The finder sees the QR RETURN code."
-              }
-            />
-
-            <span className="stepLine" />
-
-            <Step
-              number="02"
-              icon={<ScanIcon />}
-              title={ka ? "დაასკანერეს" : "Scanned"}
-              text={
-                ka
-                  ? "აპის ჩამოტვირთვა საჭირო არ არის."
-                  : "No app download is required."
-              }
-            />
-
-            <span className="stepLine" />
-
-            <Step
-              number="03"
-              icon={<ChatIcon />}
-              title={
-                ka
-                  ? "დაგიკავშირდნენ"
-                  : "Connected"
-              }
-              text={
-                ka
-                  ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
-                  : "Live Chat, call or another contact method."
-              }
-            />
-
-            <span className="stepLine" />
-
-            <Step
-              number="04"
-              icon={<ReturnIcon />}
-              title={ka ? "დაბრუნდა" : "Returned"}
-              text={
-                ka
-                  ? "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება."
-                  : "Once connected, getting it back becomes easier."
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================
+      {/* ======================================================
           FEATURES
-      ========================================================= */}
+      ====================================================== */}
 
-      <section className="featuresSection">
-        <div className="shell">
-          <div className="featuresHeader">
-            <span>CONNECTION &amp; CONTROL</span>
+      {homepage.features_enabled && (
+        <section className="featuresSection">
+          <div className="shell">
+            <div className="featuresHeading">
+              <span>
+                CONNECTION &amp; CONTROL
+              </span>
 
-            <h2>
-              {ka
-                ? "რაც საჭიროა — ზედმეტი სირთულის გარეშე."
-                : "What you need — without unnecessary complexity."}
-            </h2>
+              <h2>
+                {ka
+                  ? "რაც საჭიროა — ზედმეტი სირთულის გარეშე."
+                  : "What you need — without unnecessary complexity."}
+              </h2>
+            </div>
+
+            <div className="features">
+              <Feature
+                number="01"
+                icon={<ChatIcon />}
+                title="Live Chat"
+                text={
+                  ka
+                    ? "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე."
+                    : "Connect directly without displaying your private phone number."
+                }
+              />
+
+              <Feature
+                number="02"
+                icon={<LocationIcon />}
+                title={
+                  ka
+                    ? "ლოკაციის გაზიარება"
+                    : "Location Sharing"
+                }
+                text={
+                  ka
+                    ? "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ."
+                    : "The finder can share their location with one tap."
+                }
+              />
+
+              <Feature
+                number="03"
+                icon={<RewardIcon />}
+                title={
+                  ka
+                    ? "მპოვნელის ჯილდო"
+                    : "Finder Reward"
+                }
+                text={
+                  ka
+                    ? "სურვილის შემთხვევაში შესთავაზეთ ჯილდო."
+                    : "Optionally offer a reward for a safe return."
+                }
+              />
+
+              <Feature
+                number="04"
+                icon={<ShieldIcon />}
+                title="Privacy Control"
+                text={
+                  ka
+                    ? "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება."
+                    : "You decide exactly what information is visible."
+                }
+              />
+            </div>
           </div>
+        </section>
+      )}
 
-          <div className="features">
-            <Feature
-              number="01"
-              icon={<ChatIcon />}
-              title="Live Chat"
-              text={
-                ka
-                  ? "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე."
-                  : "Connect directly without showing your private phone number."
-              }
-            />
-
-            <Feature
-              number="02"
-              icon={<LocationIcon />}
-              title={
-                ka
-                  ? "ლოკაციის გაზიარება"
-                  : "Location Sharing"
-              }
-              text={
-                ka
-                  ? "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ."
-                  : "The finder can share the location in one tap."
-              }
-            />
-
-            <Feature
-              number="03"
-              icon={<RewardIcon />}
-              title={
-                ka
-                  ? "მპოვნელის ჯილდო"
-                  : "Finder Reward"
-              }
-              text={
-                ka
-                  ? "სურვილის შემთხვევაში შესთავაზეთ ჯილდო."
-                  : "Optionally offer a reward for a safe return."
-              }
-            />
-
-            <Feature
-              number="04"
-              icon={<ShieldIcon />}
-              title="Privacy Control"
-              text={
-                ka
-                  ? "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება."
-                  : "You decide exactly what information is visible."
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================
+      {/* ======================================================
           RULES
-      ========================================================= */}
+      ====================================================== */}
 
-      <section className="rulesSection">
-        <div className="shell">
-          <div className="rulesHeader">
-            <span className="eyebrow">
-              SIMPLE BY DESIGN
-            </span>
+      {homepage.rules_enabled && (
+        <section className="rulesSection">
+          <div className="shell">
+            <div className="sectionHeading">
+              <span className="eyebrow">
+                SIMPLE BY DESIGN
+              </span>
 
-            <h2>
-              {ka
-                ? "მარტივი თქვენთვის. კიდევ უფრო მარტივი მპოვნელისთვის."
-                : "Simple for you. Even simpler for the finder."}
-            </h2>
+              <h2>
+                {ka
+                  ? "მარტივი თქვენთვის. კიდევ უფრო მარტივი მპოვნელისთვის."
+                  : "Simple for you. Even simpler for the finder."}
+              </h2>
+            </div>
+
+            <div className="rules">
+              <Rule
+                number="01"
+                title={
+                  ka ? "აპის გარეშე" : "No App"
+                }
+                text={
+                  ka
+                    ? "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის."
+                    : "The finder does not need to download an app or create an account."
+                }
+              />
+
+              <Rule
+                number="02"
+                title={
+                  ka
+                    ? "თქვენი ინფორმაცია"
+                    : "Your Information"
+                }
+                text={
+                  ka
+                    ? "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი."
+                    : "You decide exactly what information can be shown."
+                }
+              />
+
+              <Rule
+                number="03"
+                title={
+                  ka
+                    ? "ერთი ანგარიში"
+                    : "One Account"
+                }
+                text={
+                  ka
+                    ? "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში."
+                    : "Pets, belongings and Emergency ID in one place."
+                }
+              />
+            </div>
           </div>
+        </section>
+      )}
 
-          <div className="rules">
-            <Rule
-              number="01"
-              title={ka ? "აპის გარეშე" : "No App"}
-              text={
-                ka
-                  ? "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის."
-                  : "The finder does not need to download an app or create an account."
-              }
-            />
-
-            <Rule
-              number="02"
-              title={
-                ka
-                  ? "თქვენი ინფორმაცია"
-                  : "Your Information"
-              }
-              text={
-                ka
-                  ? "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი."
-                  : "You decide exactly what information can be shown."
-              }
-            />
-
-            <Rule
-              number="03"
-              title={
-                ka
-                  ? "ერთი ანგარიში"
-                  : "One Account"
-              }
-              text={
-                ka
-                  ? "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში."
-                  : "Pets, belongings and Emergency ID in one place."
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================
-          ACCOUNT CTA
-      ========================================================= */}
+      {/* ======================================================
+          ACCOUNT
+      ====================================================== */}
 
       <section className="accountSection">
         <div className="shell">
@@ -747,8 +939,8 @@ export default function HomePage() {
                   ? "ჩემი ანგარიში"
                   : "My Account"
                 : ka
-                ? "ანგარიშის შექმნა"
-                : "Create Account"}
+                  ? "ანგარიშის შექმნა"
+                  : "Create Account"}
 
               <ArrowIcon />
             </a>
@@ -756,42 +948,48 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =========================================================
+      {/* ======================================================
           CONTACT
-      ========================================================= */}
+      ====================================================== */}
 
-      <section className="contactSection">
-        <div className="shell contactInner">
-          <div>
-            <span className="eyebrow">CONTACT</span>
+      {homepage.contact_enabled && (
+        <section className="contactSection">
+          <div className="shell contactInner">
+            <div>
+              <span className="eyebrow">
+                CONTACT
+              </span>
 
-            <h2>
-              {ka
-                ? "დაგვიკავშირდით"
-                : "Contact us"}
-            </h2>
+              <h2>
+                {ka
+                  ? "დაგვიკავშირდით"
+                  : "Contact us"}
+              </h2>
 
-            <p>
-              {ka
-                ? "კითხვა გაქვთ QR RETURN-ის ან Emergency ID-ის შესახებ? მოგვწერეთ."
-                : "Questions about QR RETURN or Emergency ID? Send us a message."}
-            </p>
+              <p>
+                {ka
+                  ? "კითხვა გაქვთ QR RETURN-ის ან Emergency ID-ის შესახებ? მოგვწერეთ."
+                  : "Questions about QR RETURN or Emergency ID? Send us a message."}
+              </p>
+            </div>
+
+            <a href="mailto:hello@qrreturn.com">
+              {ka ? "მოგვწერეთ" : "Email us"}
+              <ArrowIcon />
+            </a>
           </div>
+        </section>
+      )}
 
-          <a href="mailto:hello@qrreturn.com">
-            {ka ? "მოგვწერეთ" : "Email us"}
-            <ArrowIcon />
-          </a>
-        </div>
-      </section>
-
-      {/* EXISTING LIVE CHAT */}
+      {/* ======================================================
+          LIVE CHAT — DON'T REMOVE
+      ====================================================== */}
 
       <SupportLauncher language={language} />
 
-      {/* =========================================================
+      {/* ======================================================
           FOOTER
-      ========================================================= */}
+      ====================================================== */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -802,13 +1000,17 @@ export default function HomePage() {
 
             <section>
               <strong>QR RETURN</strong>
-              <span>SMART LOST &amp; FOUND</span>
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
             </section>
           </div>
 
           <div className="footerLinks">
             <a href="#video">
-              {ka ? "როგორ მუშაობს" : "How it works"}
+              {ka
+                ? "როგორ მუშაობს"
+                : "How it works"}
             </a>
 
             <span>Emergency ID</span>
@@ -819,7 +1021,9 @@ export default function HomePage() {
                 : "Privacy"}
             </span>
 
-            <span>{ka ? "პირობები" : "Terms"}</span>
+            <span>
+              {ka ? "პირობები" : "Terms"}
+            </span>
           </div>
 
           <span className="copyright">
@@ -828,9 +1032,9 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* =========================================================
-          GLOBAL PAGE CSS
-      ========================================================= */}
+      {/* ======================================================
+          CSS
+      ====================================================== */}
 
       <style jsx>{`
         :global(*) {
@@ -872,7 +1076,7 @@ export default function HomePage() {
           letter-spacing: 1.7px;
         }
 
-        /* HEADER */
+        /* ================= HEADER ================= */
 
         .header {
           width: calc(100% - 56px);
@@ -882,9 +1086,11 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 20px;
           position: relative;
           z-index: 40;
-          border-bottom: 1px solid rgba(20, 28, 38, 0.075);
+          border-bottom: 1px solid
+            rgba(20, 28, 38, 0.075);
         }
 
         .brand,
@@ -1002,9 +1208,7 @@ export default function HomePage() {
           color: #c84a50;
         }
 
-        /* ======================================================
-           PREMIUM HERO
-        ====================================================== */
+        /* ================= HERO ================= */
 
         .hero {
           min-height: 760px;
@@ -1012,13 +1216,13 @@ export default function HomePage() {
           overflow: hidden;
           background:
             radial-gradient(
-              circle at 90% 10%,
-              rgba(47, 89, 139, 0.075),
-              transparent 30%
+              circle at 88% 12%,
+              rgba(49, 89, 137, 0.07),
+              transparent 31%
             ),
             radial-gradient(
-              circle at 8% 85%,
-              rgba(194, 65, 73, 0.055),
+              circle at 7% 89%,
+              rgba(198, 65, 75, 0.05),
               transparent 25%
             ),
             linear-gradient(
@@ -1033,23 +1237,32 @@ export default function HomePage() {
           position: absolute;
           border-radius: 50%;
           pointer-events: none;
-          filter: blur(2px);
         }
 
-        .glowOne {
-          width: 500px;
-          height: 500px;
-          right: -230px;
-          top: -220px;
-          background: rgba(50, 89, 140, 0.045);
+        .glowBlue {
+          width: 520px;
+          height: 520px;
+          top: -280px;
+          right: -220px;
+          background: rgba(
+            43,
+            93,
+            150,
+            0.045
+          );
         }
 
-        .glowTwo {
+        .glowRed {
           width: 360px;
           height: 360px;
-          left: -190px;
           bottom: -190px;
-          background: rgba(196, 72, 80, 0.04);
+          left: -180px;
+          background: rgba(
+            198,
+            67,
+            76,
+            0.04
+          );
         }
 
         .heroInner {
@@ -1058,14 +1271,15 @@ export default function HomePage() {
           min-height: 760px;
           margin: auto;
           display: grid;
-          grid-template-columns: 0.96fr 1.04fr;
+          grid-template-columns:
+            0.96fr 1.04fr;
           align-items: center;
           gap: 65px;
           position: relative;
           z-index: 2;
         }
 
-        /* LEFT */
+        /* ================= EMERGENCY ================= */
 
         .emergencyColumn {
           max-width: 580px;
@@ -1096,7 +1310,11 @@ export default function HomePage() {
           max-width: 565px;
           margin: 22px 0 0;
           color: #17212b;
-          font-size: clamp(37px, 3.9vw, 49px);
+          font-size: clamp(
+            37px,
+            3.9vw,
+            49px
+          );
           line-height: 1.07;
           letter-spacing: -2.4px;
           font-weight: 690;
@@ -1113,11 +1331,27 @@ export default function HomePage() {
         /* BRACELET */
 
         .braceletArea {
-          height: 180px;
-          margin-top: 27px;
+          min-height: 180px;
+          margin-top: 26px;
           position: relative;
           display: flex;
           align-items: center;
+        }
+
+        .braceletShadow {
+          width: 370px;
+          height: 24px;
+          position: absolute;
+          left: 50px;
+          bottom: 18px;
+          border-radius: 50%;
+          background: rgba(
+            27,
+            37,
+            49,
+            0.09
+          );
+          filter: blur(13px);
         }
 
         .bracelet {
@@ -1134,48 +1368,59 @@ export default function HomePage() {
           height: 48px;
           flex: 1;
           position: relative;
-          box-shadow: inset 0 1px rgba(255,255,255,.25);
+          overflow: hidden;
+          box-shadow:
+            inset 0 1px
+            rgba(255, 255, 255, 0.25);
         }
 
-        .strapRed {
-          border-radius: 25px 0 0 25px;
+        .redStrap {
+          border-radius:
+            25px 0 0 25px;
           background:
             linear-gradient(
               180deg,
-              #de4a50,
-              #bf343a
+              #df4a50,
+              #bd343b
             );
         }
 
-        .strapBlue {
-          border-radius: 0 25px 25px 0;
+        .blueStrap {
+          border-radius:
+            0 25px 25px 0;
           background:
             linear-gradient(
               180deg,
-              #2c78bd,
-              #145c9c
+              #2e79bd,
+              #155c9c
             );
         }
 
-        .strapDetail {
+        .strapLine {
           width: 70%;
           height: 2px;
           position: absolute;
-          top: 50%;
           left: 15%;
+          top: 50%;
           border-radius: 99px;
-          background: rgba(255,255,255,.18);
+          background: rgba(
+            255,
+            255,
+            255,
+            0.18
+          );
         }
 
         .braceletPlate {
           width: 158px;
           height: 118px;
+          padding: 10px 12px;
           flex: 0 0 158px;
-          padding: 11px 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          border: 4px solid #b8bec5;
+          justify-content: center;
+          border: 4px solid #b9c0c6;
           border-radius: 25px;
           background:
             linear-gradient(
@@ -1184,23 +1429,24 @@ export default function HomePage() {
               #f3f4f4
             );
           box-shadow:
-            0 18px 34px rgba(29, 38, 49, 0.16),
+            0 18px 34px
+              rgba(29, 38, 49, 0.16),
             inset 0 1px white;
         }
 
-        .plateTop {
+        .plateHeader {
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 6px;
-          color: #a43f45;
+          color: #a44045;
           font-size: 7px;
           font-weight: 900;
-          letter-spacing: 0.6px;
+          letter-spacing: 0.55px;
         }
 
-        .plateCross {
+        .tinyCross {
           width: 16px;
           height: 16px;
           display: grid;
@@ -1212,94 +1458,90 @@ export default function HomePage() {
         }
 
         .plateQr {
-          margin-top: 7px;
+          margin-top: 6px;
         }
 
-        .plateBottom {
-          margin-top: 5px;
+        .plateBrand {
+          margin-top: 4px;
           text-align: center;
         }
 
-        .plateBottom strong,
-        .plateBottom span {
+        .plateBrand strong,
+        .plateBrand span {
           display: block;
         }
 
-        .plateBottom strong {
+        .plateBrand strong {
           color: #27323d;
           font-size: 6px;
           letter-spacing: 0.5px;
         }
 
-        .plateBottom span {
+        .plateBrand span {
           margin-top: 2px;
           color: #8c949c;
           font-size: 4px;
-          letter-spacing: 0.4px;
-        }
-
-        .braceletShadow {
-          width: 370px;
-          height: 24px;
-          position: absolute;
-          left: 50px;
-          bottom: 16px;
-          border-radius: 50%;
-          background: rgba(27, 37, 49, 0.09);
-          filter: blur(13px);
+          letter-spacing: 0.3px;
         }
 
         /* PROFILE */
 
         .emergencyProfile {
-          margin-top: 8px;
           padding: 17px;
           border: 1px solid #e0e3e6;
           border-radius: 19px;
-          background: rgba(255, 255, 255, 0.86);
-          box-shadow: 0 14px 36px rgba(31, 40, 53, 0.045);
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.87
+            );
+          box-shadow:
+            0 14px 36px
+            rgba(31, 40, 53, 0.045);
           backdrop-filter: blur(14px);
         }
 
-        .profileHeading {
+        .profileTop {
+          padding-bottom: 12px;
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
-          gap: 15px;
-          padding-bottom: 12px;
+          gap: 14px;
         }
 
-        .profileHeading span,
-        .profileHeading strong {
+        .profileTop span,
+        .profileTop strong {
           display: block;
         }
 
-        .profileHeading > div span {
+        .profileTop > div:first-child span {
           color: #c94a50;
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 0.9px;
         }
 
-        .profileHeading > div strong {
+        .profileTop > div:first-child strong {
           margin-top: 4px;
           color: #36414d;
           font-size: 12px;
         }
 
-        .statusDot {
+        .ready {
           padding: 6px 8px;
-          display: flex !important;
+          display: flex;
           align-items: center;
           gap: 5px;
           border-radius: 999px;
-          color: #3c6e50;
+          color: #376b4c;
           background: #edf8f1;
-          font-size: 6px !important;
+          font-size: 6px;
           font-weight: 900;
         }
 
-        .statusDot i {
+        .ready i {
           width: 6px;
           height: 6px;
           border-radius: 50%;
@@ -1308,13 +1550,24 @@ export default function HomePage() {
 
         .profileGrid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          border-top: 1px solid #e7eaed;
-          border-left: 1px solid #e7eaed;
+          grid-template-columns:
+            1fr 1fr;
+          border-top:
+            1px solid #e7eaed;
+          border-left:
+            1px solid #e7eaed;
+        }
+
+        .emergencyDescription {
+          max-width: 535px;
+          margin: 13px 0 0;
+          color: #737d87;
+          font-size: 10px;
+          line-height: 1.6;
         }
 
         .heroActions {
-          margin-top: 24px;
+          margin-top: 23px;
           display: flex;
           gap: 9px;
         }
@@ -1336,7 +1589,9 @@ export default function HomePage() {
         .primaryCta {
           color: white;
           background: #202b37;
-          box-shadow: 0 8px 20px rgba(32, 43, 55, 0.11);
+          box-shadow:
+            0 8px 20px
+            rgba(32, 43, 55, 0.11);
         }
 
         .primaryCta :global(svg) {
@@ -1345,13 +1600,18 @@ export default function HomePage() {
 
         .secondaryCta {
           color: #4d5865;
-          border: 1px solid #d9dde1;
-          background: rgba(255, 255, 255, 0.62);
+          border:
+            1px solid #d9dde1;
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.62
+            );
         }
 
-        /* ======================================================
-           RIGHT ECOSYSTEM
-        ====================================================== */
+        /* ================= ECOSYSTEM ================= */
 
         .ecosystem {
           width: 590px;
@@ -1365,19 +1625,24 @@ export default function HomePage() {
           top: 50%;
           left: 50%;
           border-radius: 50%;
-          transform: translate(-50%, -50%);
+          transform:
+            translate(-50%, -50%);
         }
 
-        .orbitLarge {
+        .orbitOuter {
           width: 500px;
           height: 500px;
-          border: 1px solid rgba(86, 104, 126, 0.11);
+          border:
+            1px solid
+            rgba(86, 104, 126, 0.11);
         }
 
-        .orbitSmall {
+        .orbitInner {
           width: 385px;
           height: 385px;
-          border: 1px dashed rgba(86, 104, 126, 0.08);
+          border:
+            1px dashed
+            rgba(86, 104, 126, 0.08);
         }
 
         /* PHONE */
@@ -1398,8 +1663,10 @@ export default function HomePage() {
               #070b10
             );
           box-shadow:
-            0 32px 70px rgba(24, 33, 44, 0.2);
-          transform: translate(-50%, -50%);
+            0 32px 70px
+            rgba(24, 33, 44, 0.2);
+          transform:
+            translate(-50%, -50%);
         }
 
         .phoneNotch {
@@ -1421,7 +1688,7 @@ export default function HomePage() {
           background:
             linear-gradient(
               180deg,
-              #ffffff,
+              #fff,
               #f6f8fa
             );
         }
@@ -1464,12 +1731,12 @@ export default function HomePage() {
           font-size: 8px;
         }
 
-        .phoneState {
+        .phoneStatus {
           margin-top: 32px;
           text-align: center;
         }
 
-        .stateIcon {
+        .successCircle {
           width: 62px;
           height: 62px;
           margin: auto;
@@ -1480,11 +1747,11 @@ export default function HomePage() {
           background: #edf8f2;
         }
 
-        .stateIcon :global(svg) {
+        .successCircle :global(svg) {
           width: 27px;
         }
 
-        .phoneState > span {
+        .phoneStatus > span {
           display: block;
           margin-top: 9px;
           color: #83909c;
@@ -1493,19 +1760,19 @@ export default function HomePage() {
           letter-spacing: 1px;
         }
 
-        .phoneContent {
+        .phoneCopy {
           margin-top: 15px;
           text-align: center;
         }
 
-        .phoneContent strong {
+        .phoneCopy strong {
           display: block;
           color: #27323d;
           font-size: 14px;
           line-height: 1.3;
         }
 
-        .phoneContent p {
+        .phoneCopy p {
           margin: 6px 0 0;
           color: #7d8793;
           font-size: 8px;
@@ -1515,7 +1782,8 @@ export default function HomePage() {
         .phoneButtons {
           margin-top: 18px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns:
+            1fr 1fr;
           gap: 6px;
         }
 
@@ -1526,7 +1794,8 @@ export default function HomePage() {
           flex-direction: column;
           align-items: flex-start;
           justify-content: space-between;
-          border: 1px solid #e0e4e7;
+          border:
+            1px solid #e0e4e7;
           border-radius: 10px;
           color: #56616d;
           background: white;
@@ -1534,7 +1803,7 @@ export default function HomePage() {
           font-weight: 800;
         }
 
-        .phoneButtons .chatBtn {
+        .phoneButtons .phonePrimary {
           color: white;
           border-color: #202b37;
           background: #202b37;
@@ -1544,38 +1813,43 @@ export default function HomePage() {
           width: 13px;
         }
 
-        .privacyLine {
+        .privacy {
           margin-top: 11px;
           padding-top: 9px;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 6px;
-          border-top: 1px solid #e5e8ea;
+          border-top:
+            1px solid #e5e8ea;
           color: #838d98;
           font-size: 6px;
         }
 
-        .privacyLine :global(svg) {
+        .privacy :global(svg) {
           width: 11px;
           color: #c94a50;
         }
 
-        /* FLOATING PRODUCTS */
+        /* PRODUCTS */
 
         .productOrbit {
           position: absolute;
           inset: 0;
-          animation: orbitMotion 18s ease-in-out infinite alternate;
+          animation:
+            productMovement
+            18s
+            ease-in-out
+            infinite alternate;
         }
 
-        @keyframes orbitMotion {
+        @keyframes productMovement {
           from {
-            transform: rotate(-1.2deg);
+            transform: rotate(-1.1deg);
           }
 
           to {
-            transform: rotate(1.2deg);
+            transform: rotate(1.1deg);
           }
         }
 
@@ -1585,19 +1859,27 @@ export default function HomePage() {
           text-align: center;
         }
 
-        .bubblePhoto {
+        .productImage {
           width: 116px;
           height: 92px;
           position: relative;
           overflow: hidden;
-          border: 4px solid rgba(255, 255, 255, 0.94);
+          border:
+            4px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.95
+            );
           border-radius: 18px;
           background: #e1e4e7;
           box-shadow:
-            0 13px 28px rgba(31, 41, 54, 0.11);
+            0 13px 28px
+            rgba(31, 41, 54, 0.11);
         }
 
-        .bubblePhoto > img {
+        .productImage > img {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -1619,16 +1901,29 @@ export default function HomePage() {
           max-width: 130px;
           margin-top: 8px;
           padding: 5px 8px;
-          border: 1px solid rgba(221, 225, 228, 0.92);
+          border:
+            1px solid
+            rgba(
+              221,
+              225,
+              228,
+              0.92
+            );
           border-radius: 999px;
           color: #465260;
-          background: rgba(255, 255, 255, 0.88);
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.9
+            );
           font-size: 8px;
           line-height: 1.3;
           font-weight: 800;
         }
 
-        .smallTag {
+        .miniPhysicalTag {
           width: 26px;
           height: 32px;
           position: absolute;
@@ -1636,51 +1931,64 @@ export default function HomePage() {
           place-items: center;
           border-radius: 6px;
           background: white;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.13);
+          box-shadow:
+            0 4px 10px
+            rgba(0, 0, 0, 0.13);
           transform: scale(0.72);
         }
 
-        .tagRing {
+        .tagHole {
           width: 7px;
           height: 7px;
           position: absolute;
           top: -5px;
-          border: 1px solid #919ba5;
+          border:
+            1px solid #919ba5;
           border-radius: 50%;
         }
 
-        .smallTag.dog,
-        .smallTag.cat {
+        .miniPhysicalTag.dog,
+        .miniPhysicalTag.cat {
           left: 50%;
           bottom: -3px;
-          transform: translateX(-50%) scale(0.7);
+          transform:
+            translateX(-50%)
+            scale(0.7);
         }
 
-        .smallTag.keys,
-        .smallTag.wallet {
+        .miniPhysicalTag.keys,
+        .miniPhysicalTag.wallet {
           right: 9px;
           bottom: 8px;
         }
 
-        .smallTag.luggage {
+        .miniPhysicalTag.luggage {
           top: 12px;
           left: 50%;
-          transform: translateX(-50%) scale(0.72);
+          transform:
+            translateX(-50%)
+            scale(0.72);
         }
 
-        .smallTag.bag {
+        .miniPhysicalTag.bag {
           top: 17px;
           right: 13px;
         }
 
-        .airport {
+        .airportBadge {
           position: absolute;
           left: 6px;
           bottom: 6px;
           padding: 4px 5px;
           border-radius: 999px;
           color: #42505f;
-          background: rgba(255, 255, 255, 0.88);
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.88
+            );
           font-size: 5px;
           font-weight: 900;
         }
@@ -1715,7 +2023,7 @@ export default function HomePage() {
           bottom: 28px;
         }
 
-        .ecosystemLabel {
+        .ecosystemCaption {
           position: absolute;
           left: 50%;
           bottom: 0;
@@ -1723,25 +2031,25 @@ export default function HomePage() {
           transform: translateX(-50%);
         }
 
-        .ecosystemLabel span,
-        .ecosystemLabel strong {
+        .ecosystemCaption span,
+        .ecosystemCaption strong {
           display: block;
         }
 
-        .ecosystemLabel span {
+        .ecosystemCaption span {
           color: #c94a50;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
-        .ecosystemLabel strong {
+        .ecosystemCaption strong {
           margin-top: 3px;
           color: #6d7782;
           font-size: 8px;
         }
 
-        /* VIDEO */
+        /* ================= VIDEO ================= */
 
         .videoSection {
           padding: 90px 0;
@@ -1750,17 +2058,21 @@ export default function HomePage() {
 
         .videoLayout {
           display: grid;
-          grid-template-columns: 0.75fr 1.25fr;
+          grid-template-columns:
+            0.75fr 1.25fr;
           align-items: center;
           gap: 65px;
         }
 
         .videoCopy h2,
-        .stepsHeader h2,
-        .rulesHeader h2 {
+        .sectionHeading h2 {
           margin: 11px 0 0;
           color: #18222c;
-          font-size: clamp(32px, 3.7vw, 43px);
+          font-size: clamp(
+            32px,
+            3.7vw,
+            43px
+          );
           line-height: 1.07;
           letter-spacing: -2px;
           font-weight: 670;
@@ -1778,12 +2090,18 @@ export default function HomePage() {
           position: relative;
           display: grid;
           place-items: center;
-          border: 1px solid #e0e4e7;
+          border:
+            1px solid #e0e4e7;
           border-radius: 24px;
           background:
             radial-gradient(
               circle at 80% 10%,
-              rgba(50, 89, 140, 0.055),
+              rgba(
+                50,
+                89,
+                140,
+                0.055
+              ),
               transparent 28%
             ),
             linear-gradient(
@@ -1818,7 +2136,14 @@ export default function HomePage() {
           border-radius: 50%;
           color: white;
           background: #202b37;
-          box-shadow: 0 14px 30px rgba(32, 43, 55, 0.15);
+          box-shadow:
+            0 14px 30px
+            rgba(
+              32,
+              43,
+              55,
+              0.15
+            );
           cursor: pointer;
         }
 
@@ -1833,22 +2158,23 @@ export default function HomePage() {
           font-size: 8px;
         }
 
-        /* STEPS */
+        /* ================= STEPS ================= */
 
         .stepsSection {
           padding: 90px 0;
           background: #f1f2ef;
         }
 
-        .stepsHeader {
-          max-width: 690px;
+        .sectionHeading {
+          max-width: 700px;
         }
 
         .steps {
           margin-top: 44px;
           display: grid;
           grid-template-columns:
-            1fr auto 1fr auto 1fr auto 1fr;
+            1fr auto 1fr auto
+            1fr auto 1fr;
           align-items: start;
         }
 
@@ -1859,7 +2185,7 @@ export default function HomePage() {
           background: #d5dade;
         }
 
-        /* FEATURES */
+        /* ================= FEATURES ================= */
 
         .featuresSection {
           padding: 88px 0;
@@ -1867,18 +2193,22 @@ export default function HomePage() {
           background: #202b37;
         }
 
-        .featuresHeader > span {
+        .featuresHeading > span {
           color: #df8c90;
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 1.6px;
         }
 
-        .featuresHeader h2 {
+        .featuresHeading h2 {
           max-width: 730px;
           margin: 10px 0 0;
           color: white;
-          font-size: clamp(31px, 3.6vw, 42px);
+          font-size: clamp(
+            31px,
+            3.6vw,
+            42px
+          );
           line-height: 1.07;
           letter-spacing: -1.9px;
           font-weight: 650;
@@ -1887,31 +2217,45 @@ export default function HomePage() {
         .features {
           margin-top: 40px;
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          border-top: 1px solid rgba(255,255,255,.1);
-          border-bottom: 1px solid rgba(255,255,255,.1);
+          grid-template-columns:
+            repeat(4, 1fr);
+          border-top:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
+          border-bottom:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
         }
 
-        /* RULES */
+        /* ================= RULES ================= */
 
         .rulesSection {
           padding: 86px 0;
           background: #fafaf8;
         }
 
-        .rulesHeader {
-          max-width: 720px;
-        }
-
         .rules {
           margin-top: 38px;
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          border-top: 1px solid #e0e3e6;
-          border-bottom: 1px solid #e0e3e6;
+          grid-template-columns:
+            repeat(3, 1fr);
+          border-top:
+            1px solid #e0e3e6;
+          border-bottom:
+            1px solid #e0e3e6;
         }
 
-        /* ACCOUNT */
+        /* ================= ACCOUNT ================= */
 
         .accountSection {
           padding: 68px 0;
@@ -1921,10 +2265,12 @@ export default function HomePage() {
         .accountPanel {
           padding: 28px;
           display: grid;
-          grid-template-columns: auto 1fr auto;
+          grid-template-columns:
+            auto 1fr auto;
           align-items: center;
           gap: 21px;
-          border: 1px solid #dee2e5;
+          border:
+            1px solid #dee2e5;
           border-radius: 20px;
           background: white;
         }
@@ -1982,7 +2328,7 @@ export default function HomePage() {
           width: 12px;
         }
 
-        /* CONTACT */
+        /* ================= CONTACT ================= */
 
         .contactSection {
           padding: 67px 0;
@@ -2027,7 +2373,7 @@ export default function HomePage() {
           width: 12px;
         }
 
-        /* FOOTER */
+        /* ================= FOOTER ================= */
 
         .footer {
           color: white;
@@ -2035,10 +2381,11 @@ export default function HomePage() {
         }
 
         .footerInner {
+          width: calc(100% - 56px);
           max-width: 1180px;
           min-height: 125px;
           margin: auto;
-          padding: 33px 26px;
+          padding: 33px 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -2097,7 +2444,7 @@ export default function HomePage() {
           font-size: 7px;
         }
 
-        /* TABLET */
+        /* ================= TABLET ================= */
 
         @media (max-width: 1080px) {
           .heroInner {
@@ -2110,7 +2457,7 @@ export default function HomePage() {
           }
 
           .ecosystem {
-            margin-top: 15px;
+            margin-top: 20px;
           }
 
           .videoLayout {
@@ -2120,7 +2467,8 @@ export default function HomePage() {
 
         @media (max-width: 900px) {
           .steps {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns:
+              repeat(2, 1fr);
             gap: 28px;
           }
 
@@ -2129,7 +2477,8 @@ export default function HomePage() {
           }
 
           .features {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns:
+              repeat(2, 1fr);
           }
 
           .rules {
@@ -2137,7 +2486,8 @@ export default function HomePage() {
           }
 
           .accountPanel {
-            grid-template-columns: auto 1fr;
+            grid-template-columns:
+              auto 1fr;
           }
 
           .accountPanel > a {
@@ -2152,11 +2502,12 @@ export default function HomePage() {
           }
         }
 
-        /* MOBILE */
+        /* ================= MOBILE ================= */
 
         @media (max-width: 650px) {
           .header {
             width: calc(100% - 18px);
+            min-height: 70px;
           }
 
           .brandText span,
@@ -2200,21 +2551,16 @@ export default function HomePage() {
           }
 
           .braceletArea {
-            height: 170px;
-            overflow: visible;
+            min-height: 155px;
           }
 
           .bracelet {
-            width: 330px;
+            width: 410px;
             transform:
-              translateX(-10px)
+              translateX(-24px)
               rotate(-4deg)
-              scale(0.83);
+              scale(0.82);
             transform-origin: left center;
-          }
-
-          .emergencyProfile {
-            margin-top: 0;
           }
 
           .profileGrid {
@@ -2235,12 +2581,12 @@ export default function HomePage() {
             height: 600px;
           }
 
-          .orbitLarge {
+          .orbitOuter {
             width: 330px;
             height: 330px;
           }
 
-          .orbitSmall {
+          .orbitInner {
             width: 260px;
             height: 260px;
           }
@@ -2250,7 +2596,7 @@ export default function HomePage() {
             height: 320px;
           }
 
-          .phoneState {
+          .phoneStatus {
             margin-top: 23px;
           }
 
@@ -2258,7 +2604,7 @@ export default function HomePage() {
             width: 92px;
           }
 
-          .bubblePhoto {
+          .productImage {
             width: 92px;
             height: 74px;
           }
@@ -2306,8 +2652,7 @@ export default function HomePage() {
           }
 
           .videoCopy h2,
-          .stepsHeader h2,
-          .rulesHeader h2 {
+          .sectionHeading h2 {
             font-size: 31px;
           }
 
@@ -2320,6 +2665,10 @@ export default function HomePage() {
             grid-template-columns: 1fr;
           }
 
+          .footerInner {
+            width: calc(100% - 28px);
+          }
+
           .footerLinks {
             flex-wrap: wrap;
           }
@@ -2329,9 +2678,9 @@ export default function HomePage() {
   );
 }
 
-/* =============================================================
+/* =========================================================
    EMERGENCY ITEM
-============================================================= */
+========================================================= */
 
 function EmergencyItem({
   icon,
@@ -2344,7 +2693,7 @@ function EmergencyItem({
 }) {
   return (
     <div className="emergencyItem">
-      <div className="emergencyItemIcon">
+      <div className="itemIcon">
         {icon}
       </div>
 
@@ -2355,17 +2704,20 @@ function EmergencyItem({
 
       <style jsx>{`
         .emergencyItem {
-          min-height: 65px;
+          min-height: 66px;
           padding: 11px;
           display: grid;
-          grid-template-columns: auto 1fr;
+          grid-template-columns:
+            auto 1fr;
           align-items: center;
           gap: 9px;
-          border-right: 1px solid #e7eaed;
-          border-bottom: 1px solid #e7eaed;
+          border-right:
+            1px solid #e7eaed;
+          border-bottom:
+            1px solid #e7eaed;
         }
 
-        .emergencyItemIcon {
+        .itemIcon {
           width: 31px;
           height: 31px;
           display: grid;
@@ -2375,7 +2727,7 @@ function EmergencyItem({
           background: #fff1f1;
         }
 
-        .emergencyItemIcon :global(svg) {
+        .itemIcon :global(svg) {
           width: 15px;
         }
 
@@ -2400,9 +2752,9 @@ function EmergencyItem({
   );
 }
 
-/* =============================================================
+/* =========================================================
    STEP
-============================================================= */
+========================================================= */
 
 function Step({
   number,
@@ -2419,7 +2771,9 @@ function Step({
     <article className="step">
       <span>{number}</span>
 
-      <div className="stepIcon">{icon}</div>
+      <div className="stepIcon">
+        {icon}
+      </div>
 
       <strong>{title}</strong>
 
@@ -2438,7 +2792,8 @@ function Step({
           margin-top: 14px;
           display: grid;
           place-items: center;
-          border: 1px solid #dde1e4;
+          border:
+            1px solid #dde1e4;
           border-radius: 13px;
           color: #202b37;
           background: white;
@@ -2466,9 +2821,9 @@ function Step({
   );
 }
 
-/* =============================================================
+/* =========================================================
    FEATURE
-============================================================= */
+========================================================= */
 
 function Feature({
   number,
@@ -2485,6 +2840,7 @@ function Feature({
     <article className="feature">
       <div className="featureTop">
         <span>{number}</span>
+
         <div>{icon}</div>
       </div>
 
@@ -2495,7 +2851,14 @@ function Feature({
         .feature {
           min-height: 190px;
           padding: 21px 19px;
-          border-right: 1px solid rgba(255,255,255,.1);
+          border-right:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
         }
 
         .feature:last-child {
@@ -2504,8 +2867,8 @@ function Feature({
 
         .featureTop {
           display: flex;
-          justify-content: space-between;
           align-items: center;
+          justify-content: space-between;
         }
 
         .featureTop > span {
@@ -2521,7 +2884,13 @@ function Feature({
           place-items: center;
           border-radius: 10px;
           color: #df8c90;
-          background: rgba(255,255,255,.06);
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.06
+            );
         }
 
         .featureTop > div :global(svg) {
@@ -2544,7 +2913,14 @@ function Feature({
         @media (max-width: 900px) {
           .feature {
             border-right: 0;
-            border-bottom: 1px solid rgba(255,255,255,.1);
+            border-bottom:
+              1px solid
+              rgba(
+                255,
+                255,
+                255,
+                0.1
+              );
           }
         }
       `}</style>
@@ -2552,9 +2928,9 @@ function Feature({
   );
 }
 
-/* =============================================================
+/* =========================================================
    RULE
-============================================================= */
+========================================================= */
 
 function Rule({
   number,
@@ -2568,14 +2944,17 @@ function Rule({
   return (
     <article className="rule">
       <span>{number}</span>
+
       <strong>{title}</strong>
+
       <p>{text}</p>
 
       <style jsx>{`
         .rule {
           min-height: 155px;
           padding: 22px;
-          border-right: 1px solid #e0e3e6;
+          border-right:
+            1px solid #e0e3e6;
         }
 
         .rule:last-child {
@@ -2605,7 +2984,8 @@ function Rule({
         @media (max-width: 900px) {
           .rule {
             border-right: 0;
-            border-bottom: 1px solid #e0e3e6;
+            border-bottom:
+              1px solid #e0e3e6;
           }
         }
       `}</style>
@@ -2613,9 +2993,9 @@ function Rule({
   );
 }
 
-/* =============================================================
-   KEYS SCENE
-============================================================= */
+/* =========================================================
+   KEYS VISUAL
+========================================================= */
 
 function KeysScene() {
   return (
@@ -2627,9 +3007,9 @@ function KeysScene() {
       </div>
 
       <div className="carKey">
-        <span className="keyRing" />
+        <span className="carRing" />
 
-        <div className="carFob">
+        <div className="fob">
           <span />
           <span />
         </div>
@@ -2660,7 +3040,8 @@ function KeysScene() {
           width: 29px;
           height: 29px;
           display: block;
-          border: 7px solid #c1a569;
+          border:
+            7px solid #c1a569;
           border-radius: 50%;
         }
 
@@ -2680,8 +3061,10 @@ function KeysScene() {
           position: absolute;
           left: 65px;
           top: 13px;
-          border-right: 6px solid #c1a569;
-          border-bottom: 6px solid #c1a569;
+          border-right:
+            6px solid #c1a569;
+          border-bottom:
+            6px solid #c1a569;
         }
 
         .carKey {
@@ -2691,17 +3074,18 @@ function KeysScene() {
           transform: rotate(12deg);
         }
 
-        .keyRing {
+        .carRing {
           width: 20px;
           height: 20px;
           position: absolute;
           top: -8px;
           left: 8px;
-          border: 4px solid #9ca4ad;
+          border:
+            4px solid #9ca4ad;
           border-radius: 50%;
         }
 
-        .carFob {
+        .fob {
           width: 40px;
           height: 55px;
           padding: 12px 9px;
@@ -2716,10 +3100,17 @@ function KeysScene() {
               #606a75,
               #2b3138
             );
-          box-shadow: 0 8px 15px rgba(24,30,37,.18);
+          box-shadow:
+            0 8px 15px
+            rgba(
+              24,
+              30,
+              37,
+              0.18
+            );
         }
 
-        .carFob span {
+        .fob span {
           height: 7px;
           border-radius: 999px;
           background: #9199a2;
@@ -2729,9 +3120,9 @@ function KeysScene() {
   );
 }
 
-/* =============================================================
+/* =========================================================
    ICONS
-============================================================= */
+========================================================= */
 
 function QrIcon() {
   return (
@@ -2741,9 +3132,30 @@ function QrIcon() {
       stroke="currentColor"
       strokeWidth="1.8"
     >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
       <path d="M14 14h3v3h3v4h-6z" />
       <path d="M12 4v4M12 12v2M11 18h2M18 12h3" />
     </svg>
@@ -2962,11 +3374,15 @@ function PlayIcon() {
   );
 }
 
-/* =============================================================
-   QR VISUALS
-============================================================= */
+/* =========================================================
+   QR VISUAL
+========================================================= */
 
-function QrCode({ size = 64 }: { size?: number }) {
+function QrCode({
+  size = 64,
+}: {
+  size?: number;
+}) {
   const dark = [
     0, 1, 2, 5, 6,
     7, 9, 11, 13,
@@ -2984,17 +3400,25 @@ function QrCode({ size = 64 }: { size?: number }) {
         width: size,
         height: size,
         display: "grid",
-        gridTemplateColumns: "repeat(7,1fr)",
-        gap: Math.max(1.6, size / 38),
+        gridTemplateColumns:
+          "repeat(7,1fr)",
+        gap: Math.max(
+          1.6,
+          size / 38
+        ),
       }}
     >
-      {Array.from({ length: 49 }).map((_, i) => (
+      {Array.from({
+        length: 49,
+      }).map((_, index) => (
         <span
-          key={i}
+          key={index}
           style={{
             display: "block",
             borderRadius: 1,
-            background: dark.includes(i)
+            background: dark.includes(
+              index
+            )
               ? "#17212b"
               : "#dfe4e8",
           }}
@@ -3018,16 +3442,21 @@ function MiniQr() {
         width: 24,
         height: 24,
         display: "grid",
-        gridTemplateColumns: "repeat(5,1fr)",
+        gridTemplateColumns:
+          "repeat(5,1fr)",
         gap: 1.3,
       }}
     >
-      {Array.from({ length: 25 }).map((_, i) => (
+      {Array.from({
+        length: 25,
+      }).map((_, index) => (
         <span
-          key={i}
+          key={index}
           style={{
             display: "block",
-            background: dark.includes(i)
+            background: dark.includes(
+              index
+            )
               ? "#17212b"
               : "#dfe4e8",
           }}
