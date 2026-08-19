@@ -39,6 +39,7 @@ export default function AccountPage() {
   const [admin, setAdmin] = useState<AdminRecord | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [missingOwner, setMissingOwner] = useState(false);
   const [error, setError] = useState("");
 
   const ka = lang === "ka";
@@ -50,6 +51,7 @@ export default function AccountPage() {
   async function loadAccount() {
     setLoading(true);
     setError("");
+    setMissingOwner(false);
 
     try {
       const {
@@ -57,11 +59,22 @@ export default function AccountPage() {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError || !user) {
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
         window.location.href = "/login";
         return;
       }
 
+      /*
+       * 1. OWNER ACCOUNT
+       *
+       * Auth user შეიძლება არსებობდეს, მაგრამ owner_accounts-ში
+       * პროფილი ჯერ არ ჰქონდეს. ასეთ შემთხვევაში ცარიელ ჩანაწერს
+       * აღარ ვქმნით ავტომატურად.
+       */
       const { data: ownerData, error: ownerError } = await supabase
         .from("owner_accounts")
         .select(
@@ -75,33 +88,16 @@ export default function AccountPage() {
       }
 
       if (!ownerData) {
-        const newOwner = {
-          user_id: user.id,
-          first_name: user.user_metadata?.first_name ?? "",
-          last_name: user.user_metadata?.last_name ?? "",
-          email: user.email ?? "",
-          phone: user.user_metadata?.phone ?? "",
-          address: null,
-          photo: null,
-        };
-
-        const { data: createdOwner, error: createError } = await supabase
-          .from("owner_accounts")
-          .insert(newOwner)
-          .select(
-            "user_id, first_name, last_name, email, phone, address, photo"
-          )
-          .single();
-
-        if (createError) {
-          throw createError;
-        }
-
-        setOwner(createdOwner as OwnerAccount);
-      } else {
-        setOwner(ownerData as OwnerAccount);
+        setMissingOwner(true);
+        setLoading(false);
+        return;
       }
 
+      setOwner(ownerData as OwnerAccount);
+
+      /*
+       * 2. QR PROFILES
+       */
       const { data: profileData, error: profileError } = await supabase
         .from("item")
         .select(
@@ -115,6 +111,9 @@ export default function AccountPage() {
 
       setProfiles((profileData ?? []) as QrProfile[]);
 
+      /*
+       * 3. SECONDARY ADMIN
+       */
       const { data: adminData, error: adminError } = await supabase
         .from("owner_admins")
         .select("id, admin_email, active")
@@ -127,6 +126,8 @@ export default function AccountPage() {
 
       setAdmin((adminData ?? null) as AdminRecord | null);
     } catch (err) {
+      console.error("ACCOUNT LOAD ERROR:", err);
+
       setError(
         err instanceof Error
           ? err.message
@@ -195,7 +196,114 @@ export default function AccountPage() {
   if (loading) {
     return (
       <main className="statePage">
-        {ka ? "იტვირთება..." : "Loading..."}
+        <div className="stateLogo">QR</div>
+
+        <strong>QR RETURN</strong>
+
+        <p>{ka ? "იტვირთება..." : "Loading..."}</p>
+
+        <Styles />
+      </main>
+    );
+  }
+
+  /*
+   * Auth user არსებობს,
+   * მაგრამ owner_accounts ჩანაწერი არ არსებობს.
+   */
+  if (missingOwner) {
+    return (
+      <main className="missingPage">
+        <header className="header">
+          <a href="/" className="brand">
+            <div className="logo">QR</div>
+
+            <div>
+              <strong>QR RETURN</strong>
+              <small>OWNER ACCOUNT</small>
+            </div>
+          </a>
+
+          <div className="languages">
+            <button
+              type="button"
+              className={ka ? "active" : ""}
+              onClick={() => setLang("ka")}
+            >
+              GEO
+            </button>
+
+            <button
+              type="button"
+              className={!ka ? "active" : ""}
+              onClick={() => setLang("en")}
+            >
+              ENG
+            </button>
+          </div>
+        </header>
+
+        <section className="missingWrap">
+          <div className="missingCard">
+            <div className="missingIcon">👤</div>
+
+            <div className="eyebrow">
+              {ka ? "OWNER PROFILE" : "OWNER PROFILE"}
+            </div>
+
+            <h1>
+              {ka
+                ? "დაასრულეთ მფლობელის პროფილი"
+                : "Complete your Owner Profile"}
+            </h1>
+
+            <p>
+              {ka
+                ? "თქვენი Login ანგარიში უკვე არსებობს, მაგრამ მფლობელის პროფილის მონაცემები ჯერ არ არის შენახული. პროფილის დასრულების შემდეგ გაიხსნება Dashboard და QR პროფილების მართვა."
+                : "Your login account already exists, but your Owner Profile has not been saved yet. Complete it to access the Dashboard and QR profile management."}
+            </p>
+
+            <div className="missingNotice">
+              <span>🔒</span>
+
+              <div>
+                <strong>
+                  {ka
+                    ? "Login ანგარიში შენარჩუნებულია"
+                    : "Your login account is safe"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "ახალი Auth მომხმარებლის შექმნა საჭირო არ არის."
+                    : "You do not need to create another Auth user."}
+                </p>
+              </div>
+            </div>
+
+            <div className="missingActions">
+              <a
+                href="/account/register"
+                className="primaryButton"
+              >
+                {ka
+                  ? "მფლობელის პროფილის დასრულება"
+                  : "Complete Owner Profile"}{" "}
+                →
+              </a>
+
+              <button
+                type="button"
+                className="logoutSecondary"
+                onClick={handleLogout}
+              >
+                {ka ? "გასვლა" : "Sign out"}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <Styles />
       </main>
     );
   }
@@ -203,10 +311,18 @@ export default function AccountPage() {
   if (!owner) {
     return (
       <main className="statePage">
-        {error ||
-          (ka
-            ? "მფლობელის პროფილი ვერ მოიძებნა."
-            : "Owner profile not found.")}
+        <div className="stateLogo">QR</div>
+
+        <strong>QR RETURN</strong>
+
+        <div className="errorBox">
+          {error ||
+            (ka
+              ? "მფლობელის პროფილი ვერ მოიძებნა."
+              : "Owner profile not found.")}
+        </div>
+
+        <Styles />
       </main>
     );
   }
@@ -278,7 +394,6 @@ export default function AccountPage() {
 
               <div>
                 <small>LIVE CHAT</small>
-
                 <strong>
                   {ka ? "შეტყობინებები" : "Messages"}
                 </strong>
@@ -291,10 +406,10 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {error && <div className="errorBox">{error}</div>}
+        {error && <div className="errorBox">⚠ {error}</div>}
 
         <div className="topGrid">
-          <section className="panel ownerPanel">
+          <section className="panel">
             <div className="panelHeader">
               <div className="panelTitle">
                 <div className="panelIcon">👤</div>
@@ -379,7 +494,7 @@ export default function AccountPage() {
         <section className="panel chatPanel">
           <div className="panelHeader">
             <div className="panelTitle">
-              <div className="panelIcon chatPanelIcon">💬</div>
+              <div className="panelIcon">💬</div>
 
               <div>
                 <span>LIVE CHAT</span>
@@ -399,16 +514,12 @@ export default function AccountPage() {
 
           <div className="chatPanelBody">
             <div>
-              <strong>
-                {ka
-                  ? "QR RETURN Live Chat"
-                  : "QR RETURN Live Chat"}
-              </strong>
+              <strong>QR RETURN Live Chat</strong>
 
               <p>
                 {ka
-                  ? "როდესაც მპოვნელი თქვენი QR კოდიდან Live Chat-ს გამოიყენებს, საუბარი თქვენს Inbox-ში გამოჩნდება."
-                  : "When a finder uses Live Chat from your QR code, the conversation will appear in your Inbox."}
+                  ? "როდესაც მპოვნელი თქვენი QR კოდიდან Live Chat-ს გამოიყენებს, საუბარი აქ გამოჩნდება."
+                  : "When a finder uses Live Chat from your QR code, the conversation will appear here."}
               </p>
             </div>
 
@@ -418,7 +529,7 @@ export default function AccountPage() {
           </div>
         </section>
 
-        <section className="panel adminPanel">
+        <section className="panel">
           <div className="panelHeader">
             <div className="panelTitle">
               <div className="panelIcon">👥</div>
@@ -608,694 +719,776 @@ export default function AccountPage() {
         </section>
       </section>
 
-      <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
+      <Styles />
+    </main>
+  );
+}
 
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-        }
+function Styles() {
+  return (
+    <style jsx global>{`
+      * {
+        box-sizing: border-box;
+      }
 
-        body {
-          background: #f7f9fc;
-          color: #101828;
-          font-family: Inter, Arial, sans-serif;
-        }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
 
-        button {
-          font: inherit;
-        }
+      body {
+        background: #f7f9fc;
+        color: #101828;
+        font-family: Inter, Arial, sans-serif;
+      }
 
-        .page {
-          min-height: 100vh;
-          background:
-            radial-gradient(
-              circle at 8% 10%,
-              rgba(20, 101, 232, 0.07),
-              transparent 28%
-            ),
-            radial-gradient(
-              circle at 94% 8%,
-              rgba(118, 85, 247, 0.07),
-              transparent 28%
-            ),
-            #f7f9fc;
-        }
+      button {
+        font: inherit;
+      }
 
-        .statePage {
-          min-height: 100vh;
-          display: grid;
-          place-items: center;
-          padding: 30px;
-          color: #667085;
-        }
+      .page,
+      .missingPage {
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            circle at 8% 10%,
+            rgba(20, 101, 232, 0.07),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 94% 8%,
+            rgba(118, 85, 247, 0.07),
+            transparent 28%
+          ),
+          #f7f9fc;
+      }
 
-        .header {
-          width: calc(100% - 36px);
-          max-width: 1120px;
-          min-height: 86px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid #e4e7ec;
-        }
+      .statePage {
+        min-height: 100vh;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #667085;
+        text-align: center;
+      }
 
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-        }
+      .stateLogo {
+        width: 50px;
+        height: 50px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 10px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1465e8, #7655f7);
+        color: white;
+        font-weight: 900;
+      }
 
-        .logo {
-          width: 50px;
-          height: 50px;
-          display: grid;
-          place-items: center;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-weight: 900;
-        }
+      .statePage > strong {
+        color: #1465e8;
+        font-size: 20px;
+      }
 
-        .brand strong,
-        .brand small {
-          display: block;
-        }
+      .header {
+        width: calc(100% - 36px);
+        max-width: 1120px;
+        min-height: 86px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #e4e7ec;
+      }
 
-        .brand strong {
-          color: #1465e8;
-          font-size: 21px;
-          font-weight: 900;
-        }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
 
-        .brand small {
-          margin-top: 3px;
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 1.6px;
-        }
+      .logo {
+        width: 50px;
+        height: 50px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1465e8, #7655f7);
+        color: white;
+        font-weight: 900;
+      }
 
-        .headerRight {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+      .brand strong,
+      .brand small {
+        display: block;
+      }
 
-        .languages {
-          padding: 4px;
-          display: flex;
-          border-radius: 10px;
-          background: #eaecf0;
-        }
+      .brand strong {
+        color: #1465e8;
+        font-size: 21px;
+        font-weight: 900;
+      }
 
-        .languages button {
-          padding: 8px 10px;
-          border: 0;
-          border-radius: 8px;
-          background: transparent;
-          color: #667085;
-          font-size: 11px;
-          font-weight: 900;
-          cursor: pointer;
-        }
+      .brand small {
+        margin-top: 3px;
+        color: #7655f7;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 1.6px;
+      }
 
-        .languages .active {
-          background: white;
-          color: #1465e8;
-        }
+      .headerRight {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-        .logoutButton {
-          min-height: 40px;
-          padding: 0 14px;
-          border: 1px solid #d0d5dd;
-          border-radius: 9px;
-          background: white;
-          color: #475467;
-          font-size: 11px;
-          font-weight: 900;
-          cursor: pointer;
-        }
+      .languages {
+        padding: 4px;
+        display: flex;
+        border-radius: 10px;
+        background: #eaecf0;
+      }
 
-        .container {
-          width: calc(100% - 36px);
-          max-width: 1080px;
-          margin: auto;
-          padding: 58px 0 90px;
-        }
+      .languages button {
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #667085;
+        font-size: 11px;
+        font-weight: 900;
+        cursor: pointer;
+      }
 
-        .welcome {
-          margin-bottom: 28px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 30px;
-        }
+      .languages .active {
+        background: white;
+        color: #1465e8;
+      }
 
-        .eyebrow {
-          color: #7655f7;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-        }
+      .logoutButton,
+      .logoutSecondary {
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid #d0d5dd;
+        border-radius: 9px;
+        background: white;
+        color: #475467;
+        font-size: 11px;
+        font-weight: 900;
+        cursor: pointer;
+      }
 
-        .welcome h1 {
-          margin: 8px 0 8px;
-          font-size: clamp(40px, 5vw, 52px);
-          letter-spacing: -2px;
-        }
+      .container {
+        width: calc(100% - 36px);
+        max-width: 1080px;
+        margin: auto;
+        padding: 58px 0 90px;
+      }
 
-        .welcome p,
-        .profilesHeader p {
-          margin: 0;
-          max-width: 650px;
-          color: #667085;
-          font-size: 13px;
-          line-height: 1.6;
-        }
+      .welcome {
+        margin-bottom: 28px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 30px;
+      }
 
-        .welcomeActions {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
+      .eyebrow {
+        color: #7655f7;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+      }
 
-        .messagesButton {
-          min-height: 48px;
-          padding: 0 16px;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          border: 1px solid #dbe7ff;
-          border-radius: 10px;
-          background: white;
-          color: #1465e8;
-          text-decoration: none;
-          box-shadow: 0 5px 15px rgba(20, 101, 232, 0.06);
-          white-space: nowrap;
-        }
+      .welcome h1 {
+        margin: 8px 0;
+        font-size: clamp(40px, 5vw, 52px);
+        letter-spacing: -2px;
+      }
 
-        .messagesIcon {
-          width: 31px;
-          height: 31px;
-          display: grid;
-          place-items: center;
-          border-radius: 9px;
-          background: #eef4ff;
-          font-size: 16px;
-        }
+      .welcome p,
+      .profilesHeader p {
+        margin: 0;
+        max-width: 650px;
+        color: #667085;
+        font-size: 13px;
+        line-height: 1.6;
+      }
 
-        .messagesButton small,
-        .messagesButton strong {
-          display: block;
-        }
+      .welcomeActions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-        .messagesButton small {
-          margin-bottom: 2px;
-          color: #7655f7;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
+      .messagesButton {
+        min-height: 48px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #dbe7ff;
+        border-radius: 10px;
+        background: white;
+        text-decoration: none;
+      }
 
-        .messagesButton strong {
-          color: #1465e8;
-          font-size: 10px;
-          font-weight: 900;
-        }
+      .messagesIcon {
+        width: 31px;
+        height: 31px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: #eef4ff;
+      }
 
-        .messagesButton:hover {
-          background: #f5f9ff;
-        }
+      .messagesButton small,
+      .messagesButton strong {
+        display: block;
+      }
 
-        .primaryButton {
-          min-height: 48px;
-          padding: 0 17px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-size: 11px;
-          font-weight: 900;
-          text-decoration: none;
-          white-space: nowrap;
-        }
+      .messagesButton small {
+        color: #7655f7;
+        font-size: 7px;
+        font-weight: 900;
+      }
 
+      .messagesButton strong {
+        color: #1465e8;
+        font-size: 10px;
+        font-weight: 900;
+      }
+
+      .primaryButton {
+        min-height: 48px;
+        padding: 0 17px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1465e8, #7655f7);
+        color: white;
+        font-size: 11px;
+        font-weight: 900;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .topGrid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 20px;
+      }
+
+      .panel,
+      .profilesSection {
+        margin-top: 20px;
+        padding: 25px;
+        border: 1px solid #e4e7ec;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
+      }
+
+      .panelHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .panelTitle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .panelIcon {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        font-size: 23px;
+      }
+
+      .panelTitle span {
+        color: #7655f7;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 1.3px;
+      }
+
+      .panelTitle h2 {
+        margin: 4px 0 0;
+        font-size: 20px;
+      }
+
+      .smallButton {
+        min-height: 40px;
+        padding: 0 13px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #dbe7ff;
+        border-radius: 9px;
+        background: #f5f9ff;
+        color: #1465e8;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .ownerBody {
+        margin-top: 22px;
+        display: flex;
+        gap: 16px;
+      }
+
+      .avatar {
+        width: 85px;
+        height: 85px;
+        flex: 0 0 85px;
+        overflow: hidden;
+        border-radius: 20px;
+      }
+
+      .avatar img,
+      .avatarPlaceholder {
+        width: 100%;
+        height: 100%;
+      }
+
+      .avatar img {
+        object-fit: cover;
+      }
+
+      .avatarPlaceholder {
+        display: grid;
+        place-items: center;
+        background: #eef4ff;
+        font-size: 34px;
+      }
+
+      .ownerData {
+        flex: 1;
+        display: grid;
+        gap: 10px;
+      }
+
+      .ownerData span {
+        display: block;
+        margin-bottom: 3px;
+        color: #98a2b3;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .ownerData strong {
+        color: #344054;
+        font-size: 12px;
+      }
+
+      .securityText {
+        margin-top: 22px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f7f9fc;
+      }
+
+      .securityText p {
+        margin: 0;
+        color: #667085;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .chatPanelBody {
+        margin-top: 20px;
+        padding: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border: 1px solid #dbe7ff;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f5f9ff, #faf8ff);
+      }
+
+      .chatPanelBody strong {
+        font-size: 13px;
+      }
+
+      .chatPanelBody p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .openChatButton {
+        min-height: 42px;
+        padding: 0 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1465e8, #7655f7);
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .adminStatus {
+        margin-top: 20px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border-radius: 13px;
+        background: #f7f9fc;
+      }
+
+      .adminStatus p {
+        margin: 4px 0 0;
+        color: #667085;
+        font-size: 10px;
+      }
+
+      .statusBadge {
+        padding: 6px 9px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .statusBadge.active {
+        background: #ecfdf3;
+        color: #027a48;
+      }
+
+      .statusBadge.inactive {
+        background: #f2f4f7;
+        color: #667085;
+      }
+
+      .emptyAdmin {
+        margin-top: 18px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f7f9fc;
+      }
+
+      .emptyAdmin p {
+        margin: 0 0 9px;
+        color: #667085;
+        font-size: 11px;
+      }
+
+      .emptyAdmin a {
+        color: #1465e8;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .profilesHeader {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 25px;
+      }
+
+      .profilesHeader h2 {
+        margin: 7px 0;
+        font-size: 25px;
+      }
+
+      .emptyProfiles {
+        margin-top: 22px;
+        padding: 55px 25px;
+        text-align: center;
+        border: 1px dashed #cfd8e8;
+        border-radius: 17px;
+        background: #fafbfc;
+      }
+
+      .bigIcon {
+        width: 64px;
+        height: 64px;
+        margin: auto;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        background: #eef4ff;
+        font-size: 30px;
+      }
+
+      .emptyProfiles h3 {
+        margin: 15px 0 7px;
+      }
+
+      .emptyProfiles p {
+        margin: 0 auto 16px;
+        color: #667085;
+        font-size: 11px;
+      }
+
+      .emptyProfiles a {
+        display: inline-flex;
+        padding: 11px 14px;
+        border-radius: 9px;
+        background: #1465e8;
+        color: white;
+        font-size: 10px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .profilesGrid {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 17px;
+      }
+
+      .profileCard {
+        overflow: hidden;
+        border: 1px solid #e4e7ec;
+        border-radius: 17px;
+        background: white;
+      }
+
+      .visual {
+        height: 165px;
+        position: relative;
+        background: #eef4ff;
+      }
+
+      .visual img,
+      .visualPlaceholder {
+        width: 100%;
+        height: 100%;
+      }
+
+      .visual img {
+        object-fit: cover;
+      }
+
+      .visualPlaceholder {
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        font-size: 50px;
+      }
+
+      .lostStatus {
+        position: absolute;
+        top: 11px;
+        right: 11px;
+        padding: 6px 8px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .lostStatus.safe {
+        background: #ecfdf3;
+        color: #027a48;
+      }
+
+      .lostStatus.lost {
+        background: #fff1f0;
+        color: #b42318;
+      }
+
+      .profileContent {
+        padding: 16px;
+      }
+
+      .profileType {
+        color: #7655f7;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .profileContent h3 {
+        margin: 5px 0 7px;
+        font-size: 19px;
+      }
+
+      .tagCode {
+        margin: 0;
+        color: #98a2b3;
+        font-size: 9px;
+      }
+
+      .profileActions {
+        margin-top: 14px;
+        padding-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border-top: 1px solid #eaecf0;
+      }
+
+      .profileActions a {
+        color: #1465e8;
+        font-size: 9px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .errorBox {
+        margin: 15px 0;
+        padding: 13px;
+        border: 1px solid #fecdca;
+        border-radius: 10px;
+        background: #fff1f0;
+        color: #b42318;
+        font-size: 11px;
+      }
+
+      .missingWrap {
+        width: calc(100% - 30px);
+        max-width: 620px;
+        min-height: calc(100vh - 86px);
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+      }
+
+      .missingCard {
+        width: 100%;
+        padding: 38px;
+        text-align: center;
+        border: 1px solid #e4e7ec;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.09);
+      }
+
+      .missingIcon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 18px;
+        display: grid;
+        place-items: center;
+        border-radius: 19px;
+        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        font-size: 32px;
+      }
+
+      .missingCard h1 {
+        margin: 8px 0 12px;
+        font-size: 32px;
+      }
+
+      .missingCard > p {
+        margin: auto;
+        max-width: 500px;
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .missingNotice {
+        margin-top: 22px;
+        padding: 14px;
+        display: flex;
+        gap: 11px;
+        text-align: left;
+        border: 1px solid #dbe7ff;
+        border-radius: 13px;
+        background: #f5f9ff;
+      }
+
+      .missingNotice strong {
+        font-size: 11px;
+      }
+
+      .missingNotice p {
+        margin: 4px 0 0;
+        color: #667085;
+        font-size: 9px;
+      }
+
+      .missingActions {
+        margin-top: 22px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      @media (max-width: 850px) {
         .topGrid {
-          display: grid;
-          grid-template-columns: 1.5fr 1fr;
-          gap: 20px;
-        }
-
-        .panel,
-        .profilesSection {
-          margin-top: 20px;
-          padding: 25px;
-          border: 1px solid #e4e7ec;
-          border-radius: 20px;
-          background: white;
-          box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
-        }
-
-        .panelHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-        }
-
-        .panelTitle {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .panelIcon {
-          width: 48px;
-          height: 48px;
-          display: grid;
-          place-items: center;
-          border-radius: 13px;
-          background: linear-gradient(135deg, #eef4ff, #f0edff);
-          font-size: 23px;
-        }
-
-        .chatPanelIcon {
-          background: linear-gradient(135deg, #eef4ff, #eeeaff);
-        }
-
-        .panelTitle span {
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 1.3px;
-        }
-
-        .panelTitle h2 {
-          margin: 4px 0 0;
-          font-size: 20px;
-        }
-
-        .smallButton {
-          min-height: 40px;
-          padding: 0 13px;
-          display: inline-flex;
-          align-items: center;
-          border: 1px solid #dbe7ff;
-          border-radius: 9px;
-          background: #f5f9ff;
-          color: #1465e8;
-          font-size: 10px;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        .ownerBody {
-          margin-top: 22px;
-          display: flex;
-          gap: 16px;
-        }
-
-        .avatar {
-          width: 85px;
-          height: 85px;
-          flex: 0 0 85px;
-          overflow: hidden;
-          border-radius: 20px;
-        }
-
-        .avatar img,
-        .avatarPlaceholder {
-          width: 100%;
-          height: 100%;
-        }
-
-        .avatar img {
-          object-fit: cover;
-        }
-
-        .avatarPlaceholder {
-          display: grid;
-          place-items: center;
-          background: #eef4ff;
-          font-size: 34px;
-        }
-
-        .ownerData {
-          flex: 1;
-          display: grid;
-          gap: 10px;
-        }
-
-        .ownerData span {
-          display: block;
-          margin-bottom: 3px;
-          color: #98a2b3;
-          font-size: 9px;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-        .ownerData strong {
-          color: #344054;
-          font-size: 12px;
-        }
-
-        .securityText {
-          margin-top: 22px;
-          padding: 15px;
-          border-radius: 12px;
-          background: #f7f9fc;
-        }
-
-        .securityText p {
-          margin: 0;
-          color: #667085;
-          font-size: 11px;
-          line-height: 1.6;
-        }
-
-        .chatPanelBody {
-          margin-top: 20px;
-          padding: 17px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border: 1px solid #dbe7ff;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #f5f9ff, #faf8ff);
-        }
-
-        .chatPanelBody strong {
-          color: #344054;
-          font-size: 13px;
-        }
-
-        .chatPanelBody p {
-          margin: 5px 0 0;
-          max-width: 650px;
-          color: #667085;
-          font-size: 10px;
-          line-height: 1.6;
-        }
-
-        .openChatButton {
-          min-height: 42px;
-          padding: 0 15px;
-          flex: 0 0 auto;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-size: 10px;
-          font-weight: 900;
-          text-decoration: none;
-          white-space: nowrap;
-        }
-
-        .adminStatus {
-          margin-top: 20px;
-          padding: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-radius: 13px;
-          background: #f7f9fc;
-        }
-
-        .adminStatus strong {
-          font-size: 12px;
-        }
-
-        .adminStatus p {
-          margin: 4px 0 0;
-          color: #667085;
-          font-size: 10px;
-        }
-
-        .statusBadge {
-          padding: 6px 9px;
-          border-radius: 999px;
-          font-size: 9px;
-          font-weight: 900;
-        }
-
-        .statusBadge.active {
-          background: #ecfdf3;
-          color: #027a48;
-        }
-
-        .statusBadge.inactive {
-          background: #f2f4f7;
-          color: #667085;
-        }
-
-        .emptyAdmin {
-          margin-top: 18px;
-          padding: 15px;
-          border-radius: 12px;
-          background: #f7f9fc;
-        }
-
-        .emptyAdmin p {
-          margin: 0 0 9px;
-          color: #667085;
-          font-size: 11px;
-        }
-
-        .emptyAdmin a {
-          color: #1465e8;
-          font-size: 10px;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        .profilesHeader {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 25px;
-        }
-
-        .profilesHeader h2 {
-          margin: 7px 0;
-          font-size: 25px;
-        }
-
-        .emptyProfiles {
-          margin-top: 22px;
-          padding: 55px 25px;
-          text-align: center;
-          border: 1px dashed #cfd8e8;
-          border-radius: 17px;
-          background: #fafbfc;
-        }
-
-        .bigIcon {
-          width: 64px;
-          height: 64px;
-          margin: auto;
-          display: grid;
-          place-items: center;
-          border-radius: 18px;
-          background: #eef4ff;
-          font-size: 30px;
-        }
-
-        .emptyProfiles h3 {
-          margin: 15px 0 7px;
-        }
-
-        .emptyProfiles p {
-          margin: 0 auto 16px;
-          color: #667085;
-          font-size: 11px;
-        }
-
-        .emptyProfiles a {
-          display: inline-flex;
-          padding: 11px 14px;
-          border-radius: 9px;
-          background: #1465e8;
-          color: white;
-          font-size: 10px;
-          font-weight: 900;
-          text-decoration: none;
+          grid-template-columns: 1fr;
         }
 
         .profilesGrid {
-          margin-top: 22px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 17px;
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 650px) {
+        .welcome,
+        .profilesHeader {
+          align-items: stretch;
+          flex-direction: column;
         }
 
-        .profileCard {
-          overflow: hidden;
-          border: 1px solid #e4e7ec;
-          border-radius: 17px;
-          background: white;
-        }
-
-        .visual {
-          height: 165px;
-          position: relative;
-          background: #eef4ff;
-        }
-
-        .visual img,
-        .visualPlaceholder {
+        .welcomeActions,
+        .missingActions {
           width: 100%;
-          height: 100%;
+          flex-direction: column;
+          align-items: stretch;
         }
 
-        .visual img {
-          object-fit: cover;
+        .messagesButton,
+        .primaryButton,
+        .logoutSecondary {
+          width: 100%;
+          justify-content: center;
         }
 
-        .visualPlaceholder {
-          display: grid;
-          place-items: center;
-          background: linear-gradient(135deg, #eef4ff, #f0edff);
-          font-size: 50px;
+        .ownerBody {
+          flex-direction: column;
         }
 
-        .lostStatus {
-          position: absolute;
-          top: 11px;
-          right: 11px;
-          padding: 6px 8px;
-          border-radius: 999px;
-          font-size: 9px;
-          font-weight: 900;
+        .profilesGrid {
+          grid-template-columns: 1fr;
         }
 
-        .lostStatus.safe {
-          background: #ecfdf3;
-          color: #027a48;
+        .panelHeader {
+          align-items: flex-start;
+          flex-direction: column;
         }
 
-        .lostStatus.lost {
-          background: #fff1f0;
-          color: #b42318;
+        .smallButton {
+          width: 100%;
+          justify-content: center;
         }
 
-        .profileContent {
-          padding: 16px;
+        .chatPanelBody {
+          align-items: stretch;
+          flex-direction: column;
         }
 
-        .profileType {
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          text-transform: uppercase;
+        .openChatButton {
+          width: 100%;
         }
-
-        .profileContent h3 {
-          margin: 5px 0 7px;
-          font-size: 19px;
-        }
-
-        .tagCode {
-          margin: 0;
-          color: #98a2b3;
-          font-size: 9px;
-        }
-
-        .profileActions {
-          margin-top: 14px;
-          padding-top: 12px;
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
-          border-top: 1px solid #eaecf0;
-        }
-
-        .profileActions a {
-          color: #1465e8;
-          font-size: 9px;
-          font-weight: 900;
-          text-decoration: none;
-        }
-
-        .errorBox {
-          margin-bottom: 15px;
-          padding: 13px;
-          border: 1px solid #fecdca;
-          border-radius: 10px;
-          background: #fff1f0;
-          color: #b42318;
-          font-size: 11px;
-        }
-
-        @media (max-width: 850px) {
-          .topGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .profilesGrid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 650px) {
-          .welcome,
-          .profilesHeader {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .welcomeActions {
-            width: 100%;
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .messagesButton,
-          .primaryButton {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .ownerBody {
-            flex-direction: column;
-          }
-
-          .profilesGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .panelHeader {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .smallButton {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .chatPanelBody {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .openChatButton {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </main>
+      }
+    `}</style>
   );
 }
