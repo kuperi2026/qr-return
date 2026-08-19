@@ -3,8 +3,10 @@
 import { FormEvent, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+type Lang = "ka" | "en";
+
 export default function SignupPage() {
-  const [lang, setLang] = useState<"ka" | "en">("ka");
+  const [lang, setLang] = useState<Lang>("ka");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -13,11 +15,12 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [verificationCode, setVerificationCode] = useState("");
+
+  const [step, setStep] = useState<"signup" | "verify">("signup");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [needsEmailConfirmation, setNeedsEmailConfirmation] =
-    useState(false);
 
   const ka = lang === "ka";
 
@@ -25,19 +28,22 @@ export default function SignupPage() {
     event.preventDefault();
 
     setError("");
-    setSuccess(false);
-    setNeedsEmailConfirmation(false);
 
     const cleanFirstName = firstName.trim();
     const cleanLastName = lastName.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
 
-    if (!cleanFirstName || !cleanLastName || !cleanEmail) {
+    if (
+      !cleanFirstName ||
+      !cleanLastName ||
+      !cleanEmail ||
+      !cleanPhone
+    ) {
       setError(
         ka
-          ? "გთხოვთ შეავსოთ სახელი, გვარი და ელფოსტა."
-          : "Please enter your first name, last name and email."
+          ? "სახელი, გვარი, ელფოსტა და ტელეფონის ნომერი სავალდებულოა."
+          : "First name, last name, email and phone number are required."
       );
       return;
     }
@@ -63,11 +69,6 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const redirectUrl =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/my-profiles`
-          : undefined;
-
       const { data, error: signupError } =
         await supabase.auth.signUp({
           email: cleanEmail,
@@ -77,9 +78,8 @@ export default function SignupPage() {
               first_name: cleanFirstName,
               last_name: cleanLastName,
               full_name: `${cleanFirstName} ${cleanLastName}`,
-              phone: cleanPhone || null,
+              phone: cleanPhone,
             },
-            emailRedirectTo: redirectUrl,
           },
         });
 
@@ -92,25 +92,22 @@ export default function SignupPage() {
         setError(
           ka
             ? "ანგარიშის შექმნა ვერ მოხერხდა."
-            : "We could not create your account."
+            : "Could not create your account."
         );
         return;
       }
 
-      setSuccess(true);
-
       /*
-        თუ Supabase-ში Email Confirmation ჩართულია,
-        user შეიქმნება, მაგრამ session ჯერ არ გვექნება.
+        თუ Confirm Email ჩართულია,
+        მომხმარებელს ელფოსტაზე მიუვა OTP კოდი.
       */
       if (!data.session) {
-        setNeedsEmailConfirmation(true);
+        setStep("verify");
         return;
       }
 
       /*
-        თუ session უკვე არსებობს,
-        მომხმარებელი პირდაპირ გადავა My QR Profiles-ზე.
+        თუ email confirmation გამორთულია
       */
       window.location.href = "/my-profiles";
     } catch (err) {
@@ -118,46 +115,180 @@ export default function SignupPage() {
         err instanceof Error
           ? err.message
           : ka
-          ? "დაფიქსირდა შეცდომა. სცადეთ თავიდან."
-          : "Something went wrong. Please try again."
+          ? "დაფიქსირდა შეცდომა."
+          : "Something went wrong."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  if (success && needsEmailConfirmation) {
+  async function verifyEmail(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+
+    const token = verificationCode.trim();
+
+    if (!token) {
+      setError(
+        ka
+          ? "შეიყვანეთ ელფოსტაზე მიღებული კოდი."
+          : "Enter the code sent to your email."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error: verifyError } =
+        await supabase.auth.verifyOtp({
+          email: email.trim().toLowerCase(),
+          token,
+          type: "email",
+        });
+
+      if (verifyError) {
+        setError(
+          ka
+            ? "კოდი არასწორია ან ვადა გაუვიდა."
+            : "The code is incorrect or has expired."
+        );
+        return;
+      }
+
+      if (!data.session) {
+        setError(
+          ka
+            ? "ელფოსტის დადასტურება ვერ მოხერხდა."
+            : "Email verification failed."
+        );
+        return;
+      }
+
+      window.location.href = "/my-profiles";
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : ka
+          ? "დადასტურება ვერ მოხერხდა."
+          : "Verification failed."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === "verify") {
     return (
-      <main className="statePage">
-        <div className="successIcon">✓</div>
+      <main className="page">
+        <header className="header">
+          <a href="/" className="brand">
+            <div className="logo">QR</div>
 
-        <div className="miniBrand">QR RETURN</div>
+            <div>
+              <strong>QR RETURN</strong>
+              <small>EMAIL VERIFICATION</small>
+            </div>
+          </a>
 
-        <h1>
-          {ka
-            ? "შეამოწმეთ თქვენი ელფოსტა"
-            : "Check your email"}
-        </h1>
+          <div className="languages">
+            <button
+              type="button"
+              className={ka ? "active" : ""}
+              onClick={() => setLang("ka")}
+            >
+              GEO
+            </button>
 
-        <p>
-          {ka
-            ? `ანგარიში შეიქმნა. დამადასტურებელი ბმული გამოგზავნილია ${email.trim()} მისამართზე.`
-            : `Your account was created. We sent a confirmation link to ${email.trim()}.`}
-        </p>
+            <button
+              type="button"
+              className={!ka ? "active" : ""}
+              onClick={() => setLang("en")}
+            >
+              ENG
+            </button>
+          </div>
+        </header>
 
-        <p className="smallText">
-          {ka
-            ? "ელფოსტის დადასტურების შემდეგ შეძლებთ თქვენს ანგარიშში შესვლას და QR პროფილების დამატებას."
-            : "After confirming your email, you can sign in and start adding QR profiles."}
-        </p>
+        <section className="verifyWrapper">
+          <div className="verifyCard">
+            <div className="mailIcon">✉️</div>
 
-        <a href="/login" className="primaryLink">
-          {ka ? "შესვლის გვერდზე გადასვლა" : "Go to Sign In"}
-        </a>
+            <div className="eyebrow">QR RETURN</div>
 
-        <a href="/" className="homeLink">
-          {ka ? "← მთავარ გვერდზე" : "← Back to home"}
-        </a>
+            <h1>
+              {ka
+                ? "შეიყვანეთ ელფოსტაზე მიღებული კოდი"
+                : "Enter the code sent to your email"}
+            </h1>
+
+            <p>
+              {ka
+                ? `დადასტურების კოდი გავაგზავნეთ მისამართზე ${email}.`
+                : `We sent a verification code to ${email}.`}
+            </p>
+
+            <form onSubmit={verifyEmail}>
+              <label>
+                <span>
+                  {ka
+                    ? "დადასტურების კოდი"
+                    : "Verification code"}
+                </span>
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={verificationCode}
+                  onChange={(event) =>
+                    setVerificationCode(event.target.value)
+                  }
+                  placeholder="000000"
+                  maxLength={8}
+                  className="otpInput"
+                  required
+                />
+              </label>
+
+              {error && (
+                <div className="error">
+                  <strong>!</strong>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="submitButton"
+                disabled={loading}
+              >
+                {loading
+                  ? ka
+                    ? "მოწმდება..."
+                    : "Verifying..."
+                  : ka
+                  ? "დადასტურება"
+                  : "Verify"}
+              </button>
+            </form>
+
+            <button
+              type="button"
+              className="backButton"
+              onClick={() => {
+                setError("");
+                setVerificationCode("");
+                setStep("signup");
+              }}
+            >
+              ← {ka ? "უკან დაბრუნება" : "Go back"}
+            </button>
+          </div>
+        </section>
 
         <Styles />
       </main>
@@ -196,68 +327,36 @@ export default function SignupPage() {
       </header>
 
       <section className="wrapper">
-        <div className="info">
+        <div className="intro">
           <div className="eyebrow">
-            {ka ? "თქვენი QR RETURN ანგარიში" : "YOUR QR RETURN ACCOUNT"}
+            {ka ? "QR RETURN ანგარიში" : "QR RETURN ACCOUNT"}
           </div>
 
           <h1>
-            {ka ? (
-              <>
-                შექმენით ანგარიში.
-                <br />
-                <span>დაიცავით რაც მნიშვნელოვანია.</span>
-              </>
-            ) : (
-              <>
-                Create your account.
-                <br />
-                <span>Protect what matters.</span>
-              </>
-            )}
+            {ka ? "შექმენით თქვენი ანგარიში" : "Create your account"}
           </h1>
 
-          <p className="intro">
+          <p>
             {ka
-              ? "ერთი ანგარიში გაძლევთ საშუალებას მართოთ ყველა თქვენი QR პროფილი ერთ ადგილას."
-              : "One account lets you manage all your QR profiles in one place."}
+              ? "ერთჯერადი რეგისტრაცია. ანგარიშის შექმნის შემდეგ შეძლებთ თქვენი QR პროფილების დამატებას და მართვას."
+              : "Register once. After creating your account, you can add and manage your QR profiles."}
           </p>
 
-          <div className="features">
-            <div className="feature">
-              <div>🐕</div>
-              <span>
-                {ka
-                  ? "დაამატეთ ძაღლი ან კატა"
-                  : "Add your dog or cat"}
-              </span>
-            </div>
+          <div className="note">
+            <span>🔐</span>
 
-            <div className="feature">
-              <div>🧳</div>
-              <span>
+            <div>
+              <strong>
                 {ka
-                  ? "დაამატეთ თქვენი ნივთები"
-                  : "Add your belongings"}
-              </span>
-            </div>
+                  ? "უსაფრთხო რეგისტრაცია"
+                  : "Secure registration"}
+              </strong>
 
-            <div className="feature">
-              <div>🏷️</div>
-              <span>
+              <p>
                 {ka
-                  ? "თითოეულს საკუთარი QR პროფილი"
-                  : "A separate QR profile for each"}
-              </span>
-            </div>
-
-            <div className="feature">
-              <div>🔐</div>
-              <span>
-                {ka
-                  ? "მართეთ ყველაფერი ერთი ანგარიშიდან"
-                  : "Manage everything from one account"}
-              </span>
+                  ? "ელფოსტის მისამართს დაადასტურებთ ერთჯერადი კოდით."
+                  : "You will verify your email using a one-time code."}
+              </p>
             </div>
           </div>
         </div>
@@ -277,8 +376,8 @@ export default function SignupPage() {
 
           <p className="cardDescription">
             {ka
-              ? "ჯერ შექმენით თქვენი პირადი ანგარიში. შემდეგ შეძლებთ ნებისმიერი QR პროფილის დამატებას."
-              : "Create your personal account first. Then you can add any QR profile you need."}
+              ? "შეავსეთ თქვენი ძირითადი საკონტაქტო ინფორმაცია."
+              : "Enter your basic contact information."}
           </p>
 
           <form onSubmit={handleSignup}>
@@ -335,9 +434,7 @@ export default function SignupPage() {
 
             <label>
               <span>
-                {ka
-                  ? "ტელეფონის ნომერი"
-                  : "Phone number"}
+                {ka ? "ტელეფონის ნომერი" : "Phone number"} *
               </span>
 
               <div className="inputWithIcon">
@@ -351,14 +448,9 @@ export default function SignupPage() {
                   }
                   placeholder="+1 000 000 0000"
                   autoComplete="tel"
+                  required
                 />
               </div>
-
-              <small>
-                {ka
-                  ? "არასავალდებულო"
-                  : "Optional"}
-              </small>
             </label>
 
             <label>
@@ -424,29 +516,17 @@ export default function SignupPage() {
               className="submitButton"
               disabled={loading}
             >
-              {loading ? (
-                <>
-                  <span className="buttonLoader" />
-                  {ka ? "იქმნება..." : "Creating..."}
-                </>
-              ) : (
-                <>
-                  {ka ? "ანგარიშის შექმნა" : "Create Account"}
-                  <span>→</span>
-                </>
-              )}
+              {loading
+                ? ka
+                  ? "იქმნება..."
+                  : "Creating..."
+                : ka
+                ? "ანგარიშის შექმნა"
+                : "Create Account"}
+
+              {!loading && <span>→</span>}
             </button>
           </form>
-
-          <div className="security">
-            <span>🔒</span>
-
-            <p>
-              {ka
-                ? "თქვენი პაროლი უსაფრთხოდ მუშავდება და QR RETURN-ს მისი ნახვა არ შეუძლია."
-                : "Your password is securely handled and cannot be viewed by QR RETURN."}
-            </p>
-          </div>
 
           <div className="login">
             <span>
@@ -461,16 +541,6 @@ export default function SignupPage() {
           </div>
         </div>
       </section>
-
-      <footer>
-        <strong>QR RETURN</strong>
-
-        <span>
-          {ka
-            ? "ერთი ანგარიში • ყველა თქვენი QR პროფილი"
-            : "One account • All your QR profiles"}
-        </span>
-      </footer>
 
       <Styles />
     </main>
@@ -506,13 +576,13 @@ function Styles() {
         background:
           radial-gradient(
             circle at 8% 15%,
-            rgba(20, 101, 232, 0.09),
-            transparent 25%
+            rgba(20, 101, 232, 0.1),
+            transparent 27%
           ),
           radial-gradient(
             circle at 93% 10%,
             rgba(118, 85, 247, 0.11),
-            transparent 27%
+            transparent 28%
           ),
           #f7f9fc;
       }
@@ -520,7 +590,7 @@ function Styles() {
       .header {
         width: calc(100% - 36px);
         max-width: 1180px;
-        min-height: 78px;
+        min-height: 86px;
         margin: auto;
         display: flex;
         align-items: center;
@@ -531,21 +601,20 @@ function Styles() {
       .brand {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 12px;
         text-decoration: none;
       }
 
       .logo {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
+        border-radius: 14px;
         background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 900;
-        box-shadow: 0 8px 24px rgba(20, 101, 232, 0.2);
       }
 
       .brand strong,
@@ -555,14 +624,14 @@ function Styles() {
 
       .brand strong {
         color: #1465e8;
-        font-size: 18px;
+        font-size: 21px;
         font-weight: 900;
       }
 
       .brand small {
         margin-top: 3px;
         color: #7655f7;
-        font-size: 8px;
+        font-size: 10px;
         font-weight: 900;
         letter-spacing: 1.7px;
       }
@@ -570,17 +639,17 @@ function Styles() {
       .languages {
         padding: 4px;
         display: flex;
-        border-radius: 9px;
+        border-radius: 10px;
         background: #eaecf0;
       }
 
       .languages button {
-        padding: 7px 9px;
+        padding: 8px 11px;
         border: 0;
-        border-radius: 7px;
+        border-radius: 8px;
         background: transparent;
         color: #667085;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 900;
         cursor: pointer;
       }
@@ -592,165 +661,149 @@ function Styles() {
 
       .wrapper {
         width: calc(100% - 36px);
-        max-width: 1050px;
+        max-width: 1000px;
         margin: auto;
-        padding: 60px 0 70px;
+        padding: 70px 0 80px;
         display: grid;
-        grid-template-columns: 1fr 460px;
+        grid-template-columns: 1fr 470px;
         align-items: center;
         gap: 75px;
       }
 
-      .info {
-        max-width: 520px;
+      .intro {
+        max-width: 470px;
       }
 
       .eyebrow {
         color: #7655f7;
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 900;
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
+        letter-spacing: 1.7px;
       }
 
-      .info h1 {
-        margin: 12px 0 15px;
+      .intro h1 {
+        margin: 13px 0 17px;
         color: #101828;
-        font-size: clamp(37px, 5vw, 56px);
-        line-height: 1.04;
-        letter-spacing: -2.7px;
+        font-size: clamp(42px, 5vw, 58px);
+        line-height: 1.05;
+        letter-spacing: -2.5px;
       }
 
-      .info h1 span {
-        color: #1465e8;
-      }
-
-      .intro {
-        max-width: 470px;
+      .intro > p {
         margin: 0;
         color: #667085;
-        font-size: 14px;
+        font-size: 17px;
         line-height: 1.7;
       }
 
-      .features {
-        margin-top: 35px;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .feature {
-        min-height: 75px;
-        padding: 13px;
+      .note {
+        margin-top: 32px;
+        padding: 17px;
         display: flex;
-        align-items: center;
-        gap: 11px;
-        border: 1px solid #e4e7ec;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.72);
+        align-items: flex-start;
+        gap: 12px;
+        border: 1px solid #dbe7ff;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.75);
       }
 
-      .feature div {
-        width: 42px;
-        height: 42px;
-        flex: 0 0 42px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        background: #eef4ff;
-        font-size: 21px;
+      .note > span {
+        font-size: 24px;
       }
 
-      .feature span {
-        color: #475467;
-        font-size: 10px;
-        font-weight: 800;
-        line-height: 1.4;
+      .note strong {
+        color: #344054;
+        font-size: 14px;
+      }
+
+      .note p {
+        margin: 5px 0 0;
+        color: #667085;
+        font-size: 13px;
+        line-height: 1.5;
       }
 
       .card {
-        padding: 29px;
+        padding: 32px;
         border: 1px solid #e4e7ec;
         border-radius: 24px;
-        background: rgba(255, 255, 255, 0.96);
+        background: rgba(255, 255, 255, 0.97);
         box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
       }
 
       .cardHeader {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 13px;
       }
 
       .cardIcon {
-        width: 50px;
-        height: 50px;
+        width: 54px;
+        height: 54px;
         display: grid;
         place-items: center;
-        border-radius: 14px;
+        border-radius: 15px;
         background: linear-gradient(135deg, #eef4ff, #f0edff);
-        font-size: 23px;
+        font-size: 27px;
       }
 
       .cardHeader span {
         color: #7655f7;
-        font-size: 7px;
+        font-size: 10px;
         font-weight: 900;
         letter-spacing: 1.5px;
       }
 
       .cardHeader h2 {
-        margin: 3px 0 0;
+        margin: 4px 0 0;
         color: #344054;
-        font-size: 22px;
+        font-size: 25px;
       }
 
       .cardDescription {
-        margin: 15px 0 22px;
+        margin: 17px 0 25px;
         color: #667085;
-        font-size: 10px;
+        font-size: 14px;
         line-height: 1.55;
       }
 
       form {
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 17px;
       }
 
       .nameGrid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 11px;
       }
 
       label > span {
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 7px;
         color: #475467;
-        font-size: 9px;
+        font-size: 14px;
         font-weight: 800;
       }
 
       label > small {
         display: block;
-        margin-top: 4px;
+        margin-top: 5px;
         color: #98a2b3;
-        font-size: 7px;
+        font-size: 11px;
       }
 
       input {
         width: 100%;
-        height: 45px;
-        padding: 0 13px;
+        height: 52px;
+        padding: 0 14px;
         outline: none;
         border: 1px solid #d0d5dd;
-        border-radius: 10px;
+        border-radius: 11px;
         background: #fff;
         color: #344054;
-        font-size: 11px;
-        transition: 0.15s ease;
+        font-size: 16px;
       }
 
       input:focus {
@@ -767,110 +820,57 @@ function Styles() {
       }
 
       .inputWithIcon b {
-        width: 40px;
-        height: 45px;
+        width: 43px;
+        height: 52px;
         position: absolute;
         left: 0;
         top: 0;
         display: grid;
         place-items: center;
         color: #98a2b3;
-        font-size: 10px;
+        font-size: 13px;
         pointer-events: none;
       }
 
       .inputWithIcon input {
-        padding-left: 38px;
+        padding-left: 42px;
       }
 
       .submitButton {
         width: 100%;
-        min-height: 48px;
-        margin-top: 3px;
-        padding: 0 17px;
+        min-height: 53px;
+        margin-top: 4px;
+        padding: 0 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 9px;
+        gap: 10px;
         border: 0;
         border-radius: 11px;
         background: linear-gradient(135deg, #1465e8, #7655f7);
         color: white;
-        font-size: 10px;
+        font-size: 15px;
         font-weight: 900;
         cursor: pointer;
-        box-shadow: 0 10px 25px rgba(20, 101, 232, 0.2);
       }
 
       .submitButton:disabled {
         opacity: 0.65;
-        cursor: wait;
       }
 
-      .submitButton > span:last-child {
-        font-size: 16px;
-      }
-
-      .buttonLoader {
-        width: 15px;
-        height: 15px;
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-      }
-
-      .error {
-        padding: 10px;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        border: 1px solid #fecdca;
-        border-radius: 9px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 9px;
-        line-height: 1.45;
-      }
-
-      .error strong {
-        width: 18px;
-        height: 18px;
-        flex: 0 0 18px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: #d92d20;
-        color: white;
-        font-size: 8px;
-      }
-
-      .security {
-        margin-top: 17px;
-        padding: 10px;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        border-radius: 9px;
-        background: #f7f9fc;
-      }
-
-      .security p {
-        margin: 0;
-        color: #667085;
-        font-size: 7.5px;
-        line-height: 1.5;
+      .submitButton > span {
+        font-size: 20px;
       }
 
       .login {
-        margin-top: 19px;
-        padding-top: 17px;
+        margin-top: 22px;
+        padding-top: 19px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 7px;
         border-top: 1px solid #eaecf0;
-        font-size: 9px;
+        font-size: 13px;
       }
 
       .login span {
@@ -883,153 +883,126 @@ function Styles() {
         text-decoration: none;
       }
 
-      footer {
-        width: calc(100% - 36px);
-        max-width: 1050px;
-        margin: auto;
-        padding: 22px 0 35px;
+      .error {
+        padding: 12px;
         display: flex;
-        justify-content: space-between;
-        border-top: 1px solid #e4e7ec;
+        align-items: flex-start;
+        gap: 9px;
+        border: 1px solid #fecdca;
+        border-radius: 10px;
+        background: #fff1f0;
+        color: #b42318;
+        font-size: 13px;
       }
 
-      footer strong {
-        color: #1465e8;
-        font-size: 10px;
-      }
-
-      footer span {
-        color: #98a2b3;
-        font-size: 8px;
-      }
-
-      .statePage {
-        min-height: 100vh;
-        padding: 25px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background:
-          radial-gradient(
-            circle at 50% 10%,
-            rgba(20, 101, 232, 0.1),
-            transparent 30%
-          ),
-          #f7f9fc;
-        color: #344054;
-        font-family: Inter, Arial, sans-serif;
-        text-align: center;
-      }
-
-      .successIcon {
-        width: 65px;
-        height: 65px;
+      .error strong {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
         display: grid;
         place-items: center;
         border-radius: 50%;
-        background: #ecfdf3;
-        color: #079455;
-        font-size: 29px;
-        font-weight: 900;
+        background: #d92d20;
+        color: white;
+        font-size: 10px;
       }
 
-      .miniBrand {
-        margin-top: 18px;
-        color: #7655f7;
-        font-size: 8px;
-        font-weight: 900;
-        letter-spacing: 1.8px;
+      .verifyWrapper {
+        width: calc(100% - 36px);
+        min-height: calc(100vh - 86px);
+        margin: auto;
+        display: grid;
+        place-items: center;
+        padding: 40px 0;
       }
 
-      .statePage h1 {
-        margin: 8px 0 10px;
-        font-size: 27px;
-      }
-
-      .statePage p {
+      .verifyCard {
+        width: 100%;
         max-width: 500px;
-        margin: 0;
+        padding: 40px;
+        border: 1px solid #e4e7ec;
+        border-radius: 24px;
+        background: white;
+        box-shadow: 0 24px 60px rgba(16, 24, 40, 0.1);
+        text-align: center;
+      }
+
+      .mailIcon {
+        font-size: 45px;
+      }
+
+      .verifyCard h1 {
+        margin: 12px 0 12px;
+        color: #344054;
+        font-size: 28px;
+        line-height: 1.25;
+      }
+
+      .verifyCard > p {
+        margin: 0 0 25px;
         color: #667085;
-        font-size: 11px;
+        font-size: 15px;
         line-height: 1.6;
       }
 
-      .statePage .smallText {
-        max-width: 450px;
-        margin-top: 9px;
-        color: #98a2b3;
-        font-size: 9px;
+      .verifyCard label {
+        text-align: left;
       }
 
-      .primaryLink {
-        margin-top: 22px;
-        padding: 12px 18px;
-        border-radius: 10px;
-        background: #1465e8;
-        color: white;
-        font-size: 9px;
+      .otpInput {
+        height: 62px;
+        text-align: center;
+        font-size: 25px;
         font-weight: 900;
-        text-decoration: none;
+        letter-spacing: 8px;
       }
 
-      .homeLink {
-        margin-top: 13px;
+      .backButton {
+        margin-top: 18px;
+        border: 0;
+        background: transparent;
         color: #667085;
-        font-size: 8px;
+        font-size: 13px;
         font-weight: 800;
-        text-decoration: none;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
+        cursor: pointer;
       }
 
       @media (max-width: 850px) {
         .wrapper {
-          max-width: 620px;
+          max-width: 600px;
           grid-template-columns: 1fr;
           gap: 35px;
         }
 
-        .info {
+        .intro {
           max-width: none;
           text-align: center;
         }
 
-        .intro {
-          margin-left: auto;
-          margin-right: auto;
+        .note {
+          text-align: left;
         }
       }
 
       @media (max-width: 550px) {
         .wrapper {
-          padding-top: 35px;
+          padding-top: 40px;
         }
 
-        .info h1 {
-          font-size: 38px;
-        }
-
-        .features {
-          grid-template-columns: 1fr;
+        .intro h1 {
+          font-size: 40px;
         }
 
         .card {
-          padding: 21px;
+          padding: 23px;
         }
 
         .nameGrid {
           grid-template-columns: 1fr;
         }
 
-        footer {
-          align-items: center;
-          flex-direction: column;
-          gap: 7px;
+        .verifyCard {
+          padding: 28px 20px;
         }
       }
     `}</style>
