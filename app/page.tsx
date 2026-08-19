@@ -5,8 +5,7 @@ import SupportLauncher from "./components/SupportLauncher";
 import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
-
-type ProtectionType =
+type ProtectType =
   | "dog"
   | "cat"
   | "keys"
@@ -14,8 +13,8 @@ type ProtectionType =
   | "luggage"
   | "bag";
 
-const protectionTypes: {
-  type: ProtectionType;
+const protectionItems: {
+  type: ProtectType;
   ka: string;
   en: string;
 }[] = [
@@ -33,36 +32,36 @@ const features = [
     ka: "Live Chat",
     en: "Live Chat",
     kaText:
-      "მპოვნელს შეუძლია უსაფრთხოდ მოგწეროთ QR RETURN-ის საშუალებით.",
+      "მპოვნელმა პირდაპირ QR RETURN-ის საშუალებით შეიძლება მოგწეროთ.",
     enText:
-      "A finder can securely message you through QR RETURN.",
+      "A finder can message you directly through QR RETURN.",
   },
   {
     number: "02",
     ka: "ლოკაციის გაზიარება",
     en: "Location Sharing",
     kaText:
-      "მპოვნელმა ერთი მოქმედებით შეიძლება გაგიზიაროთ მიმდინარე მდებარეობა.",
+      "მპოვნელმა ერთი მოქმედებით შეიძლება გაგიზიაროთ ნივთის ან ცხოველის მდებარეობა.",
     enText:
-      "A finder can share the current location in a single step.",
+      "A finder can share the location of your pet or item in one step.",
   },
   {
     number: "03",
     ka: "მპოვნელის ჯილდო",
     en: "Finder Reward",
     kaText:
-      "სურვილის შემთხვევაში შეგიძლიათ მიუთითოთ ჯილდო ნივთის დაბრუნებისთვის.",
+      "სურვილის შემთხვევაში მიუთითეთ ჯილდო უსაფრთხო დაბრუნებისთვის.",
     enText:
-      "Optionally offer a reward for the safe return of your property.",
+      "Optionally offer a reward for a safe return.",
   },
   {
     number: "04",
     ka: "Privacy Control",
     en: "Privacy Control",
     kaText:
-      "თქვენ თავად აკონტროლებთ რა ინფორმაცია გახდება ხილული მპოვნელისთვის.",
+      "თქვენ თავად აკონტროლებთ რა ინფორმაცია გამოჩნდება მპოვნელისთვის.",
     enText:
-      "You decide exactly what information a finder can see.",
+      "You control exactly what information a finder can see.",
   },
 ];
 
@@ -95,17 +94,15 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* =====================================================
-          HEADER
-      ====================================================== */}
+      {/* HEADER */}
 
       <header className="header">
         <a href="/" className="brand">
-          <div className="brandMark">
-            <LogoMark />
+          <div className="brandLogo">
+            <QrLogo />
           </div>
 
-          <div className="brandCopy">
+          <div className="brandText">
             <strong>QR RETURN</strong>
             <span>SMART LOST &amp; FOUND</span>
           </div>
@@ -131,14 +128,12 @@ export default function HomePage() {
                   href="/account/register"
                   className="accountButton"
                 >
-                  <span>
-                    {ka
-                      ? "ანგარიშის შექმნა"
-                      : "Create Account"}
-                  </span>
+                  {ka
+                    ? "ანგარიშის შექმნა"
+                    : "Create Account"}
                 </a>
 
-                <a href="/login" className="loginLink">
+                <a href="/login" className="loginButton">
                   {ka ? "შესვლა" : "Sign In"}
                 </a>
               </>
@@ -165,44 +160,65 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* =====================================================
-          HERO
-      ====================================================== */}
+      {/* HERO */}
 
       <section className="hero">
-        <div className="heroGlow heroGlowOne" />
-        <div className="heroGlow heroGlowTwo" />
+        <div className="heroBackground heroBgOne" />
+        <div className="heroBackground heroBgTwo" />
 
         <div className="heroInner">
           <div className="heroContent">
+            {/* EMERGENCY MINI CARD */}
+
+            <div className="emergencyMiniCard">
+              <div className="emergencyMiniIcon">+</div>
+
+              <div className="emergencyMiniCopy">
+                <span>QR RETURN EMERGENCY ID</span>
+
+                <strong>
+                  {ka
+                    ? "საგანგებო ინფორმაცია — ერთი სკანით"
+                    : "Essential information — one scan away"}
+                </strong>
+
+                <small>
+                  {ka
+                    ? "Emergency Contact • Medical Info • No App"
+                    : "Emergency Contact • Medical Info • No App"}
+                </small>
+              </div>
+
+              <ArrowIcon />
+            </div>
+
             <div className="eyebrow">
-              <span className="eyebrowDot" />
-              QR RETURN
+              SMART LOST &amp; FOUND
             </div>
 
             <h1>
               {ka ? (
                 <>
-                  დაკარგულს
+                  დაკარგულ ნივთსა თუ
                   <br />
-                  <span>დაბრუნების გზა</span>
+                  ცხოველს ჰქონდეს
                   <br />
-                  ყოველთვის ჰქონდეს.
+                  <span>შენამდე დაბრუნების გზა.</span>
                 </>
               ) : (
                 <>
-                  Give what matters
+                  Give lost pets and
                   <br />
-                  <span>a way back</span>
+                  personal items
                   <br />
-                  to you.
+                  <span>a clear way back to you.</span>
                 </>
               )}
             </h1>
 
             <p className="heroDescription">
               {ka
-                ? "QR RETURN აკავშირებს მპოვნელს და მფლობელს სწრაფად, უსაფრთხოდ და ზედმეტი აპლიკაციის გარეშე."
+                ? "QR RETURN აკავშირებს მპოვნელს და მფლობელს სწრაფად, უსაფრთხოდ და დამატებითი აპლიკაციის გარეშე."
                 : "QR RETURN connects finders and owners quickly, securely and without requiring another app."}
             </p>
 
@@ -213,7 +229,7 @@ export default function HomePage() {
                     ? "/account"
                     : "/account/register"
                 }
-                className="primaryCta"
+                className="primaryButton"
               >
                 <span>
                   {isLoggedIn
@@ -228,30 +244,25 @@ export default function HomePage() {
                 <ArrowIcon />
               </a>
 
-              <a href="#how" className="secondaryCta">
-                <PlayIcon />
-                <span>
-                  {ka ? "როგორ მუშაობს" : "How it works"}
-                </span>
+              <a href="#how" className="secondaryButton">
+                {ka ? "როგორ მუშაობს" : "How it works"}
               </a>
             </div>
 
-            <div className="trustLine">
+            <div className="heroProof">
               <div>
                 <ShieldIcon />
                 <span>
                   {ka
                     ? "პირადი მონაცემების კონტროლი"
-                    : "Privacy controlled"}
+                    : "Privacy control"}
                 </span>
               </div>
 
               <div>
                 <ScanIcon />
                 <span>
-                  {ka
-                    ? "აპის გარეშე"
-                    : "No app required"}
+                  {ka ? "აპის გარეშე" : "No app required"}
                 </span>
               </div>
 
@@ -262,65 +273,97 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="heroVisual">
-            <div className="visualHalo" />
+          {/* PHONE PRODUCT VISUAL */}
 
-            <div className="productCard">
-              <div className="productTop">
-                <div>
-                  <span className="productLabel">
-                    QR RETURN
-                  </span>
+          <div className="phoneStage">
+            <div className="phoneGlow" />
 
-                  <strong>
-                    {ka
-                      ? "დაცული პროფილი"
-                      : "Protected Profile"}
-                  </strong>
+            <div className="phone">
+              <div className="phoneNotch" />
+
+              <div className="phoneScreen">
+                <div className="phoneHeader">
+                  <div className="phoneBrand">
+                    <div className="phoneBrandLogo">
+                      <QrLogo />
+                    </div>
+
+                    <div>
+                      <span>QR RETURN</span>
+                      <strong>
+                        {ka ? "დაცული პროფილი" : "Protected profile"}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="activeBadge">
+                    <i />
+                    ACTIVE
+                  </div>
                 </div>
 
-                <span className="onlineBadge">
-                  <i />
-                  ACTIVE
-                </span>
-              </div>
+                <div className="finderProfile">
+                  <div className="profileAvatar">
+                    <DogIcon />
+                  </div>
 
-              <div className="qrStage">
-                <div className="qrFrame">
-                  <span className="scanCorner tl" />
-                  <span className="scanCorner tr" />
-                  <span className="scanCorner bl" />
-                  <span className="scanCorner br" />
+                  <div className="profileCopy">
+                    <span>
+                      {ka ? "დაკარგული ძაღლი" : "LOST DOG"}
+                    </span>
 
-                  <QrPattern />
-                </div>
-              </div>
+                    <strong>Toby</strong>
 
-              <div className="productBottom">
-                <div className="productMeta">
-                  <span>
-                    {ka ? "ერთი სკანი" : "One scan"}
-                  </span>
-                  <strong>
-                    {ka
-                      ? "სწრაფი კავშირი"
-                      : "Instant connection"}
-                  </strong>
+                    <p>
+                      {ka
+                        ? "მე დავიკარგე. გთხოვთ დაუკავშირდეთ ჩემს პატრონს."
+                        : "I am lost. Please contact my owner."}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="miniAction">
-                  <ArrowIcon />
+                <div className="phoneActions">
+                  <div className="phoneAction primary">
+                    <ChatIcon />
+                    <span>Live Chat</span>
+                  </div>
+
+                  <div className="phoneAction">
+                    <LocationIcon />
+                    <span>
+                      {ka ? "ლოკაცია" : "Location"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="phonePrivacy">
+                  <ShieldIcon />
+
+                  <div>
+                    <span>
+                      {ka
+                        ? "მფლობელის მონაცემები დაცულია"
+                        : "Owner information protected"}
+                    </span>
+
+                    <small>
+                      {ka
+                        ? "ნაჩვენებია მხოლოდ ნებადართული ინფორმაცია"
+                        : "Only approved information is visible"}
+                    </small>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="floatingMessage">
-              <div className="messageIcon">
+            <div className="floatingFinder">
+              <div className="floatingIcon">
                 <ChatIcon />
               </div>
 
               <div>
                 <span>LIVE CHAT</span>
+
                 <strong>
                   {ka
                     ? "მპოვნელმა მოგწერათ"
@@ -328,18 +371,16 @@ export default function HomePage() {
                 </strong>
               </div>
 
-              <div className="messageDot" />
+              <i />
             </div>
 
-            <div className="floatingLocation">
+            <div className="floatingMap">
               <LocationIcon />
 
               <div>
                 <span>LOCATION</span>
                 <strong>
-                  {ka
-                    ? "გაზიარებულია"
-                    : "Shared"}
+                  {ka ? "გაზიარებულია" : "Shared"}
                 </strong>
               </div>
             </div>
@@ -347,48 +388,42 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          PROTECTION TYPES
-      ====================================================== */}
+      {/* USE CASES */}
 
-      <section className="protectionSection">
+      <section className="useCases">
         <div className="sectionShell">
-          <div className="sectionHeader splitHeader">
+          <div className="useCasesHeader">
             <div>
-              <div className="eyebrow darkEyebrow">
-                QR RETURN
+              <div className="sectionLabel">
+                PROTECT WHAT MATTERS
               </div>
 
               <h2>
                 {ka
-                  ? "ერთი სისტემა. ყველაფერი, რაც მნიშვნელოვანია."
-                  : "One system. Everything that matters."}
+                  ? "ერთი ანგარიში. ბევრი შესაძლებლობა."
+                  : "One account. Many possibilities."}
               </h2>
             </div>
 
             <p>
               {ka
-                ? "პროფილის შექმნა ხდება თქვენი პირადი ანგარიშიდან. მთავარ გვერდზე კი მხოლოდ ის ხედავთ, რისთვის შეგიძლიათ გამოიყენოთ QR RETURN."
-                : "Profiles are created inside your private account. Here, you can simply see what QR RETURN can protect."}
+                ? "QR RETURN შეგიძლიათ გამოიყენოთ ცხოველებისთვის და ყოველდღიური ნივთებისთვის. რეალური პროფილის შექმნა ხდება მხოლოდ თქვენი ანგარიშის შიგნით."
+                : "Use QR RETURN for pets and everyday items. Actual profiles are created only inside your account."}
             </p>
           </div>
 
-          <div className="protectionRail">
-            {protectionTypes.map((item) => (
-              <div
-                className="protectionItem"
-                key={item.type}
-              >
-                <div className="iconBox">
-                  <ProtectionIcon type={item.type} />
-                </div>
+          <div className="useCaseRail">
+            {protectionItems.map((item, index) => (
+              <div className="useCaseItem" key={item.type}>
+                <div className="useCaseTop">
+                  <span>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
 
-                <span className="protectionNumber">
-                  0
-                  {protectionTypes.findIndex(
-                    (entry) => entry.type === item.type
-                  ) + 1}
-                </span>
+                  <div className="useCaseIcon">
+                    <ProtectionIcon type={item.type} />
+                  </div>
+                </div>
 
                 <strong>
                   {ka ? item.ka : item.en}
@@ -397,29 +432,29 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="accountBanner">
-            <div className="accountBannerIcon">
+          <div className="accountBar">
+            <div className="accountBarIcon">
               <UserIcon />
             </div>
 
-            <div className="accountBannerCopy">
+            <div className="accountBarCopy">
               <span>
                 {ka
-                  ? "ერთი Owner Account"
-                  : "One Owner Account"}
+                  ? "OWNER ACCOUNT"
+                  : "OWNER ACCOUNT"}
               </span>
 
               <strong>
                 {ka
-                  ? "ყველა QR პროფილი ერთ ადგილას."
-                  : "All your QR profiles in one place."}
+                  ? "ყველა პროფილი ერთ სივრცეში"
+                  : "All profiles in one place"}
               </strong>
             </div>
 
             <p>
               {ka
-                ? "ანგარიშის შიგნით დაამატებთ და მართავთ თქვენს ყველა ცხოველს, ნივთს და Emergency ID-ს."
-                : "Add and manage pets, items and Emergency IDs from inside your account."}
+                ? "შექმენით, მართეთ და განაახლეთ თქვენი QR პროფილები ერთი ანგარიშიდან."
+                : "Create, manage and update all your QR profiles from one account."}
             </p>
 
             <a
@@ -445,359 +480,148 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          EMERGENCY
-      ====================================================== */}
-
-      <section className="emergencySection">
-        <div className="sectionShell">
-          <div className="emergencyCard">
-            <div className="emergencyNoise" />
-
-            <div className="emergencyCopy">
-              <div className="medicalEyebrow">
-                <span>+</span>
-                QR RETURN EMERGENCY ID
-              </div>
-
-              <h2>
-                {ka ? (
-                  <>
-                    ინფორმაცია,
-                    <br />
-                    რომელიც <span>საჭირო დროს</span>
-                    <br />
-                    ხელმისაწვდომია.
-                  </>
-                ) : (
-                  <>
-                    The information
-                    <br />
-                    that matters <span>when it matters.</span>
-                  </>
-                )}
-              </h2>
-
-              <p>
-                {ka
-                  ? "Emergency ID ადამიანებისთვის — საგანგებო კონტაქტი, მნიშვნელოვანი სამედიცინო ინფორმაცია და პირადი მონაცემების სრული კონტროლი ერთ QR პროფილში."
-                  : "Emergency ID for people — emergency contacts, important medical information and full privacy control in one QR profile."}
-              </p>
-
-              <div className="emergencyList">
-                <div>
-                  <span>01</span>
-                  <strong>
-                    {ka
-                      ? "Emergency Contact"
-                      : "Emergency Contact"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>02</span>
-                  <strong>
-                    {ka
-                      ? "სამედიცინო ინფორმაცია"
-                      : "Medical Information"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>03</span>
-                  <strong>
-                    {ka
-                      ? "აპის გარეშე"
-                      : "No App Required"}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>04</span>
-                  <strong>
-                    {ka
-                      ? "Privacy Control"
-                      : "Privacy Control"}
-                  </strong>
-                </div>
-              </div>
-
-              <a
-                href={
-                  isLoggedIn
-                    ? "/account"
-                    : "/account/register"
-                }
-                className="emergencyCta"
-              >
-                <span>
-                  {isLoggedIn
-                    ? ka
-                      ? "Emergency ID-ის მართვა"
-                      : "Manage Emergency ID"
-                    : ka
-                      ? "ანგარიშის შექმნა"
-                      : "Create Account"}
-                </span>
-
-                <ArrowIcon />
-              </a>
-            </div>
-
-            <div className="emergencyVisual">
-              <div className="medicalCard">
-                <div className="medicalCardHeader">
-                  <div className="medicalLogo">
-                    +
-                  </div>
-
-                  <div>
-                    <span>QR RETURN</span>
-                    <strong>EMERGENCY ID</strong>
-                  </div>
-
-                  <div className="verifiedBadge">
-                    <CheckIcon />
-                  </div>
-                </div>
-
-                <div className="medicalProfile">
-                  <div className="medicalAvatar">
-                    <UserIcon />
-                  </div>
-
-                  <div>
-                    <span>
-                      {ka
-                        ? "EMERGENCY PROFILE"
-                        : "EMERGENCY PROFILE"}
-                    </span>
-                    <strong>
-                      {ka
-                        ? "მნიშვნელოვანი ინფორმაცია"
-                        : "Essential information"}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="medicalRows">
-                  <div>
-                    <span>
-                      {ka
-                        ? "საგანგებო კონტაქტი"
-                        : "Emergency contact"}
-                    </span>
-                    <strong>Available</strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      {ka
-                        ? "სამედიცინო ინფორმაცია"
-                        : "Medical information"}
-                    </span>
-                    <strong>Protected</strong>
-                  </div>
-                </div>
-
-                <div className="medicalQr">
-                  <QrPattern compact />
-                </div>
-              </div>
-
-              <div className="braceletWrap">
-                <div className="braceletStrap left" />
-
-                <div className="braceletPlate">
-                  <div className="braceletPlus">
-                    +
-                  </div>
-
-                  <QrPattern compact />
-
-                  <small>QR EMERGENCY</small>
-                </div>
-
-                <div className="braceletStrap right" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          HOW IT WORKS
-      ====================================================== */}
+      {/* HOW IT WORKS */}
 
       <section id="how" className="howSection">
         <div className="sectionShell">
-          <div className="sectionHeader">
-            <div className="eyebrow darkEyebrow">
+          <div className="howHeader">
+            <div className="sectionLabel">
               SIMPLE BY DESIGN
             </div>
 
             <h2>
               {ka
-                ? "ოთხი ნაბიჯი დაბრუნებამდე."
-                : "Four steps to getting it back."}
+                ? "მარტივი გზა დაკარგულიდან დაბრუნებამდე."
+                : "A simple path from lost to returned."}
             </h2>
 
             <p>
               {ka
-                ? "მარტივი გამოცდილება მფლობელისთვისაც და მპოვნელისთვისაც."
-                : "A simple experience for both owners and finders."}
+                ? "QR RETURN შექმნილია იმისთვის, რომ მფლობელმაც და მპოვნელმაც ზედმეტი ნაბიჯების გარეშე შეძლონ დაკავშირება."
+                : "QR RETURN is designed to help owners and finders connect without unnecessary steps."}
             </p>
           </div>
 
-          <div className="timeline">
-            <div className="timelineItem">
-              <div className="timelineNumber">
-                01
-              </div>
+          <div className="steps">
+            <div className="step">
+              <span>01</span>
 
-              <div className="timelineIcon">
+              <div className="stepIcon">
                 <UserIcon />
               </div>
 
-              <div className="timelineCopy">
-                <h3>
-                  {ka
-                    ? "შექმენით ანგარიში"
-                    : "Create your account"}
-                </h3>
+              <strong>
+                {ka
+                  ? "შექმენით ანგარიში"
+                  : "Create account"}
+              </strong>
 
-                <p>
-                  {ka
-                    ? "ერთი Owner Account თქვენი ყველა QR პროფილისთვის."
-                    : "One Owner Account for all your QR profiles."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "ერთი Owner Account თქვენი ყველა QR პროფილისთვის."
+                  : "One Owner Account for all QR profiles."}
+              </p>
             </div>
 
-            <div className="timelineConnector" />
+            <div className="stepLine" />
 
-            <div className="timelineItem">
-              <div className="timelineNumber">
-                02
-              </div>
+            <div className="step">
+              <span>02</span>
 
-              <div className="timelineIcon">
+              <div className="stepIcon">
                 <PlusIcon />
               </div>
 
-              <div className="timelineCopy">
-                <h3>
-                  {ka
-                    ? "დაამატეთ პროფილი"
-                    : "Add a profile"}
-                </h3>
+              <strong>
+                {ka
+                  ? "დაამატეთ პროფილი"
+                  : "Add profile"}
+              </strong>
 
-                <p>
-                  {ka
-                    ? "აირჩიეთ ცხოველი, ნივთი ან Emergency ID."
-                    : "Choose a pet, item or Emergency ID."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "აირჩიეთ ცხოველი, ნივთი ან Emergency ID."
+                  : "Choose a pet, item or Emergency ID."}
+              </p>
             </div>
 
-            <div className="timelineConnector" />
+            <div className="stepLine" />
 
-            <div className="timelineItem">
-              <div className="timelineNumber">
-                03
-              </div>
+            <div className="step">
+              <span>03</span>
 
-              <div className="timelineIcon qrTextIcon">
+              <div className="stepIcon qrIcon">
                 QR
               </div>
 
-              <div className="timelineCopy">
-                <h3>
-                  {ka
-                    ? "მიამაგრეთ QR"
-                    : "Attach the QR"}
-                </h3>
+              <strong>
+                {ka
+                  ? "მიამაგრეთ QR"
+                  : "Attach QR"}
+              </strong>
 
-                <p>
-                  {ka
-                    ? "უნიკალური QR უკავშირდება კონკრეტულ პროფილს."
-                    : "A unique QR connects directly to the profile."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "უნიკალური QR უკავშირდება კონკრეტულ პროფილს."
+                  : "A unique QR connects to one specific profile."}
+              </p>
             </div>
 
-            <div className="timelineConnector" />
+            <div className="stepLine" />
 
-            <div className="timelineItem">
-              <div className="timelineNumber">
-                04
-              </div>
+            <div className="step">
+              <span>04</span>
 
-              <div className="timelineIcon">
+              <div className="stepIcon">
                 <ChatIcon />
               </div>
 
-              <div className="timelineCopy">
-                <h3>
-                  {ka
-                    ? "მპოვნელი გიკავშირდებათ"
-                    : "The finder contacts you"}
-                </h3>
+              <strong>
+                {ka
+                  ? "მპოვნელი გიკავშირდებათ"
+                  : "Finder contacts you"}
+              </strong>
 
-                <p>
-                  {ka
-                    ? "Live Chat, ლოკაცია და თქვენ მიერ არჩეული საკონტაქტო გზა."
-                    : "Live Chat, location and the contact options you choose."}
-                </p>
-              </div>
+              <p>
+                {ka
+                  ? "Live Chat, ლოკაციის გაზიარება და თქვენ მიერ არჩეული საკონტაქტო გზა."
+                  : "Live Chat, location sharing and your chosen contact options."}
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          FEATURES
-      ====================================================== */}
+      {/* FEATURES */}
 
       <section className="featuresSection">
         <div className="sectionShell">
-          <div className="featureIntro">
-            <div className="eyebrow">
+          <div className="featureHeader">
+            <div className="sectionLabel lightLabel">
               BUILT AROUND CONTROL
             </div>
 
             <h2>
               {ka
-                ? "ნაკლები სირთულე. მეტი კონტროლი."
-                : "Less friction. More control."}
+                ? "მარტივი მპოვნელისთვის. კონტროლირებადი თქვენთვის."
+                : "Simple for the finder. Controlled by you."}
             </h2>
           </div>
 
           <div className="featureGrid">
             {features.map((feature) => (
               <article
-                className="featureCard"
+                className="featureItem"
                 key={feature.number}
               >
                 <div className="featureTop">
                   <span>{feature.number}</span>
 
                   <div className="featureIcon">
-                    {feature.number === "01" && (
-                      <ChatIcon />
-                    )}
-
-                    {feature.number === "02" && (
-                      <LocationIcon />
-                    )}
-
-                    {feature.number === "03" && (
-                      <RewardIcon />
-                    )}
-
-                    {feature.number === "04" && (
-                      <ShieldIcon />
-                    )}
+                    {feature.number === "01" && <ChatIcon />}
+                    {feature.number === "02" && <LocationIcon />}
+                    {feature.number === "03" && <RewardIcon />}
+                    {feature.number === "04" && <ShieldIcon />}
                   </div>
                 </div>
 
@@ -816,67 +640,64 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          FINAL CTA
-      ====================================================== */}
+      {/* EMERGENCY INFO STRIP */}
 
-      <section className="finalCtaSection">
-        <div className="finalCta">
-          <div>
-            <span className="finalLabel">
-              QR RETURN
-            </span>
+      <section className="emergencyInfo">
+        <div className="sectionShell">
+          <div className="emergencyInfoCard">
+            <div className="emergencyInfoMark">
+              +
+            </div>
 
-            <h2>
+            <div className="emergencyInfoCopy">
+              <span>QR RETURN EMERGENCY ID</span>
+
+              <strong>
+                {ka
+                  ? "საგანგებო ინფორმაცია მაშინ, როცა წამებიც მნიშვნელოვანია."
+                  : "Essential information when every second matters."}
+              </strong>
+
+              <p>
+                {ka
+                  ? "Emergency Contact, Medical Information და Privacy Control ერთ QR პროფილში."
+                  : "Emergency Contact, Medical Information and Privacy Control in one QR profile."}
+              </p>
+            </div>
+
+            <a
+              href={
+                isLoggedIn
+                  ? "/account"
+                  : "/account/register"
+              }
+            >
               {ka
-                ? "რაც მნიშვნელოვანია, დაბრუნების გზაც ჰქონდეს."
-                : "Give what matters a way back."}
-            </h2>
+                ? "იხილე ანგარიშში"
+                : "View in account"}{" "}
+              <ArrowIcon />
+            </a>
           </div>
-
-          <a
-            href={
-              isLoggedIn
-                ? "/account"
-                : "/account/register"
-            }
-          >
-            <span>
-              {isLoggedIn
-                ? ka
-                  ? "ჩემი ანგარიში"
-                  : "My Account"
-                : ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create Account"}
-            </span>
-
-            <ArrowIcon />
-          </a>
         </div>
       </section>
 
-      {/* =====================================================
-          CONTACT
-      ====================================================== */}
+      {/* CONTACT */}
 
       <section id="contact" className="contact">
         <div className="contactInner">
           <div>
-            <div className="eyebrow darkEyebrow">
+            <div className="sectionLabel">
               CONTACT
             </div>
 
             <h2>
-              {ka
-                ? "დაგვიკავშირდით"
-                : "Contact us"}
+              {ka ? "დაგვიკავშირდით" : "Contact us"}
             </h2>
 
             <p>
               {ka
-                ? "კითხვა გაქვთ QR RETURN-ის, პროფილების ან Emergency ID-ის შესახებ? მოგვწერეთ."
-                : "Questions about QR RETURN, profiles or Emergency ID? Send us a message."}
+                ? "კითხვა გაქვთ QR RETURN-ის, ანგარიშის ან Emergency ID-ის შესახებ? მოგვწერეთ."
+                : "Questions about QR RETURN, accounts or Emergency ID? Send us a message."}
             </p>
           </div>
 
@@ -893,21 +714,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          LIVE CHAT — KEEP
-      ====================================================== */}
+      {/* LIVE CHAT */}
 
       <SupportLauncher language={language} />
 
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
+      {/* FOOTER */}
 
       <footer className="footer">
         <div className="footerInner">
-          <div className="footerBrandBlock">
+          <div className="footerBrand">
             <div className="footerLogo">
-              <LogoMark />
+              <QrLogo />
             </div>
 
             <div>
@@ -916,7 +733,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="footerNav">
+          <div className="footerLinks">
             <a href="#how">
               {ka ? "როგორ მუშაობს" : "How it works"}
             </a>
@@ -926,9 +743,7 @@ export default function HomePage() {
             </a>
 
             <span>
-              {ka
-                ? "კონფიდენციალურობა"
-                : "Privacy"}
+              {ka ? "კონფიდენციალურობა" : "Privacy"}
             </span>
 
             <span>
@@ -960,76 +775,75 @@ export default function HomePage() {
           min-height: 100vh;
           overflow: hidden;
           background: #ffffff;
-          color: #101828;
+          color: #0b1220;
           font-family:
             Inter,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
+            Arial,
             sans-serif;
         }
 
-        /* ==================================================
-           HEADER
-        ================================================== */
+        /* HEADER */
 
         .header {
           width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 88px;
+          max-width: 1240px;
+          min-height: 84px;
           margin: auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 24px;
           position: relative;
-          z-index: 20;
+          z-index: 30;
           border-bottom: 1px solid #edf0f4;
         }
 
         .brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 11px;
           text-decoration: none;
         }
 
-        .brandMark {
-          width: 44px;
-          height: 44px;
+        .brandLogo {
+          width: 42px;
+          height: 42px;
           display: grid;
           place-items: center;
-          border-radius: 13px;
-          background: #0f5fe9;
+          border-radius: 12px;
+          background: #0b5fff;
           color: white;
           box-shadow:
-            0 8px 24px
-            rgba(15, 95, 233, 0.18);
+            0 8px 22px
+            rgba(11, 95, 255, 0.18);
         }
 
-        .brandMark :global(svg) {
-          width: 25px;
-          height: 25px;
+        .brandLogo :global(svg) {
+          width: 23px;
+          height: 23px;
         }
 
-        .brandCopy strong,
-        .brandCopy span {
+        .brandText strong,
+        .brandText span {
           display: block;
         }
 
-        .brandCopy strong {
-          color: #0f5fe9;
-          font-size: 19px;
-          font-weight: 800;
+        .brandText strong {
+          color: #0b5fff;
+          font-size: 18px;
+          font-weight: 850;
           letter-spacing: -0.6px;
         }
 
-        .brandCopy span {
+        .brandText span {
           margin-top: 3px;
           color: #98a2b3;
-          font-size: 7px;
-          font-weight: 800;
-          letter-spacing: 2.1px;
+          font-size: 6.5px;
+          font-weight: 900;
+          letter-spacing: 2px;
         }
 
         .headerRight,
@@ -1040,7 +854,7 @@ export default function HomePage() {
         }
 
         .headerRight {
-          gap: 14px;
+          gap: 12px;
         }
 
         .nav {
@@ -1049,45 +863,49 @@ export default function HomePage() {
 
         .adminLink,
         .accountButton,
-        .loginLink {
-          min-height: 40px;
-          padding: 0 14px;
+        .loginButton {
+          min-height: 38px;
+          padding: 0 13px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 7px;
           border-radius: 10px;
-          font-size: 11px;
-          font-weight: 750;
           text-decoration: none;
+          font-size: 10px;
+          font-weight: 850;
           white-space: nowrap;
         }
 
         .adminLink {
-          border: 1px solid #e4e1ff;
-          background: #f7f6ff;
-          color: #6754d8;
+          color: #5946c6;
+          background: #f6f4ff;
+          border: 1px solid #e3defe;
         }
 
-        .adminLink :global(svg),
-        .accountButton :global(svg) {
-          width: 14px;
-          height: 14px;
+        .adminLink :global(svg) {
+          width: 13px;
+          height: 13px;
         }
 
         .accountButton {
-          border: 1px solid #0f5fe9;
-          background: #0f5fe9;
           color: white;
+          background: #0b5fff;
+          border: 1px solid #0b5fff;
           box-shadow:
-            0 6px 18px
-            rgba(15, 95, 233, 0.13);
+            0 6px 17px
+            rgba(11, 95, 255, 0.14);
         }
 
-        .loginLink {
-          border: 1px solid #e4e7ec;
-          background: white;
+        .accountButton :global(svg) {
+          width: 13px;
+          height: 13px;
+        }
+
+        .loginButton {
           color: #344054;
+          background: white;
+          border: 1px solid #e4e7ec;
         }
 
         .languageSwitch {
@@ -1097,1176 +915,895 @@ export default function HomePage() {
         }
 
         .languageSwitch button {
-          min-width: 40px;
-          height: 32px;
+          width: 40px;
+          height: 30px;
           border: 0;
           border-radius: 7px;
           background: transparent;
           color: #98a2b3;
-          font-size: 8px;
-          font-weight: 850;
-          letter-spacing: 0.5px;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 0.6px;
           cursor: pointer;
         }
 
         .languageSwitch button.active {
+          color: #0b5fff;
           background: white;
-          color: #0f5fe9;
           box-shadow:
-            0 2px 8px
+            0 2px 7px
             rgba(16, 24, 40, 0.07);
         }
 
-        /* ==================================================
-           COMMON
-        ================================================== */
+        /* COMMON */
 
         .sectionShell {
           width: calc(100% - 48px);
-          max-width: 1180px;
+          max-width: 1160px;
           margin: auto;
         }
 
+        .sectionLabel,
         .eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: #0f5fe9;
-          font-size: 9px;
-          font-weight: 850;
-          letter-spacing: 2.2px;
+          color: #0b5fff;
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: 2.3px;
         }
 
-        .darkEyebrow {
-          color: #667085;
-        }
-
-        .eyebrowDot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #0f5fe9;
-          box-shadow:
-            0 0 0 5px
-            rgba(15, 95, 233, 0.08);
-        }
-
-        /* ==================================================
-           HERO
-        ================================================== */
+        /* HERO */
 
         .hero {
-          min-height: 720px;
+          min-height: 650px;
           position: relative;
           overflow: hidden;
-          background:
-            linear-gradient(
-              180deg,
-              #ffffff 0%,
-              #fbfdff 100%
-            );
+          border-bottom: 1px solid #edf0f4;
         }
 
         .heroInner {
           width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 720px;
+          max-width: 1240px;
+          min-height: 650px;
           margin: auto;
           display: grid;
-          grid-template-columns: 1.05fr 0.95fr;
+          grid-template-columns: 1fr 0.92fr;
           align-items: center;
           gap: 70px;
           position: relative;
           z-index: 2;
         }
 
-        .heroGlow {
+        .heroBackground {
           position: absolute;
           border-radius: 50%;
-          filter: blur(10px);
           pointer-events: none;
         }
 
-        .heroGlowOne {
-          width: 560px;
-          height: 560px;
-          top: -260px;
+        .heroBgOne {
+          width: 520px;
+          height: 520px;
           right: -180px;
+          top: -230px;
           background:
             radial-gradient(
               circle,
-              rgba(15, 95, 233, 0.1),
-              rgba(15, 95, 233, 0)
+              rgba(11, 95, 255, 0.1),
+              rgba(11, 95, 255, 0)
             );
         }
 
-        .heroGlowTwo {
-          width: 400px;
-          height: 400px;
-          left: -220px;
+        .heroBgTwo {
+          width: 380px;
+          height: 380px;
+          left: -190px;
           bottom: -220px;
           background:
             radial-gradient(
               circle,
-              rgba(98, 84, 216, 0.07),
-              rgba(98, 84, 216, 0)
+              rgba(81, 69, 205, 0.06),
+              rgba(81, 69, 205, 0)
             );
         }
 
         .heroContent {
-          max-width: 710px;
+          max-width: 650px;
+        }
+
+        .emergencyMiniCard {
+          width: min(100%, 425px);
+          min-height: 76px;
+          margin-bottom: 28px;
+          padding: 12px 14px;
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: 11px;
+          border: 1px solid #f1d8db;
+          border-radius: 16px;
+          background:
+            linear-gradient(
+              110deg,
+              #fffafa,
+              #ffffff
+            );
+          box-shadow:
+            0 10px 30px
+            rgba(60, 33, 38, 0.035);
+        }
+
+        .emergencyMiniIcon {
+          width: 42px;
+          height: 42px;
+          display: grid;
+          place-items: center;
+          border-radius: 12px;
+          background: #e5484d;
+          color: white;
+          font-size: 25px;
+          line-height: 1;
+        }
+
+        .emergencyMiniCopy span,
+        .emergencyMiniCopy strong,
+        .emergencyMiniCopy small {
+          display: block;
+        }
+
+        .emergencyMiniCopy span {
+          color: #b4232d;
+          font-size: 6px;
+          font-weight: 900;
+          letter-spacing: 1.3px;
+        }
+
+        .emergencyMiniCopy strong {
+          margin-top: 3px;
+          color: #344054;
+          font-size: 10px;
+          line-height: 1.35;
+        }
+
+        .emergencyMiniCopy small {
+          margin-top: 3px;
+          color: #98a2b3;
+          font-size: 7px;
+        }
+
+        .emergencyMiniCard :global(svg) {
+          width: 13px;
+          height: 13px;
+          color: #e5484d;
         }
 
         .hero h1 {
-          margin: 24px 0 0;
-          color: #101828;
+          margin: 18px 0 0;
+          color: #0a1220;
           font-size:
-            clamp(52px, 6.6vw, 86px);
-          line-height: 0.99;
-          letter-spacing: -5.2px;
+            clamp(42px, 5vw, 61px);
+          line-height: 1.04;
+          letter-spacing: -3.2px;
           font-weight: 760;
         }
 
         .hero h1 span {
-          color: #0f5fe9;
+          color: #0b5fff;
         }
 
         .heroDescription {
-          max-width: 620px;
-          margin: 28px 0 0;
+          max-width: 580px;
+          margin: 22px 0 0;
           color: #667085;
-          font-size: 16px;
-          line-height: 1.75;
+          font-size: 14px;
+          line-height: 1.72;
         }
 
         .heroActions {
-          margin-top: 34px;
+          margin-top: 28px;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 9px;
         }
 
-        .primaryCta,
-        .secondaryCta {
-          min-height: 52px;
-          padding: 0 20px;
+        .primaryButton,
+        .secondaryButton {
+          min-height: 48px;
+          padding: 0 18px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 800;
+          gap: 9px;
+          border-radius: 11px;
+          font-size: 10px;
+          font-weight: 850;
           text-decoration: none;
         }
 
-        .primaryCta {
-          background: #0f5fe9;
+        .primaryButton {
           color: white;
+          background: #0b5fff;
           box-shadow:
-            0 9px 24px
-            rgba(15, 95, 233, 0.18);
+            0 8px 22px
+            rgba(11, 95, 255, 0.16);
         }
 
-        .primaryCta :global(svg),
-        .secondaryCta :global(svg) {
-          width: 15px;
-          height: 15px;
+        .primaryButton :global(svg) {
+          width: 13px;
+          height: 13px;
         }
 
-        .secondaryCta {
-          border: 1px solid #e4e7ec;
-          background: white;
+        .secondaryButton {
           color: #344054;
+          background: white;
+          border: 1px solid #e4e7ec;
         }
 
-        .trustLine {
-          margin-top: 34px;
+        .heroProof {
+          margin-top: 27px;
           display: flex;
           flex-wrap: wrap;
-          gap: 20px;
+          gap: 17px;
         }
 
-        .trustLine > div {
+        .heroProof > div {
           display: flex;
           align-items: center;
-          gap: 7px;
-          color: #7c8797;
-          font-size: 9px;
-          font-weight: 700;
+          gap: 6px;
+          color: #7b8797;
+          font-size: 8px;
+          font-weight: 720;
         }
 
-        .trustLine :global(svg) {
-          width: 14px;
-          height: 14px;
-          color: #0f5fe9;
+        .heroProof :global(svg) {
+          width: 13px;
+          height: 13px;
+          color: #0b5fff;
         }
 
-        /* HERO VISUAL */
+        /* PHONE */
 
-        .heroVisual {
+        .phoneStage {
           min-height: 540px;
           position: relative;
           display: grid;
           place-items: center;
         }
 
-        .visualHalo {
-          width: 470px;
-          height: 470px;
+        .phoneGlow {
+          width: 455px;
+          height: 455px;
           position: absolute;
           border-radius: 50%;
           background:
             radial-gradient(
               circle,
-              rgba(15, 95, 233, 0.11) 0%,
-              rgba(15, 95, 233, 0.025) 48%,
-              rgba(15, 95, 233, 0) 70%
+              rgba(11, 95, 255, 0.11),
+              rgba(11, 95, 255, 0.02) 50%,
+              transparent 72%
             );
         }
 
-        .productCard {
-          width: 340px;
-          min-height: 450px;
-          padding: 24px;
+        .phone {
+          width: 272px;
+          height: 525px;
+          padding: 9px;
           position: relative;
           z-index: 3;
-          border: 1px solid
-            rgba(224, 229, 237, 0.95);
-          border-radius: 29px;
-          background:
-            rgba(255, 255, 255, 0.93);
+          border-radius: 43px;
+          background: #0a111e;
           box-shadow:
-            0 40px 90px
-              rgba(30, 58, 93, 0.11),
-            0 2px 6px
-              rgba(16, 24, 40, 0.03);
-          backdrop-filter: blur(20px);
+            0 42px 95px
+              rgba(17, 39, 70, 0.18),
+            0 3px 10px
+              rgba(16, 24, 40, 0.08);
           transform:
-            perspective(1200px)
+            perspective(1300px)
             rotateY(-4deg)
             rotateX(1deg);
         }
 
-        .productTop {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 15px;
-        }
-
-        .productTop span,
-        .productTop strong {
-          display: block;
-        }
-
-        .productLabel {
-          color: #0f5fe9;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 1.8px;
-        }
-
-        .productTop strong {
-          margin-top: 5px;
-          color: #26364c;
-          font-size: 13px;
-        }
-
-        .onlineBadge {
-          padding: 6px 8px;
-          display: inline-flex !important;
-          align-items: center;
-          gap: 6px;
-          border-radius: 999px;
-          background: #ecfdf3;
-          color: #027a48;
-          font-size: 7px !important;
-          font-weight: 900 !important;
-          letter-spacing: 0.7px;
-        }
-
-        .onlineBadge i {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #12b76a;
-        }
-
-        .qrStage {
-          height: 285px;
-          display: grid;
-          place-items: center;
-        }
-
-        .qrFrame {
-          width: 185px;
-          height: 185px;
-          position: relative;
-          display: grid;
-          place-items: center;
-          border-radius: 28px;
-          background: #f8fafc;
-        }
-
-        .scanCorner {
-          width: 34px;
-          height: 34px;
-          position: absolute;
-        }
-
-        .scanCorner.tl {
-          top: 0;
-          left: 0;
-          border-top: 3px solid #0f5fe9;
-          border-left: 3px solid #0f5fe9;
-          border-radius: 12px 0 0 0;
-        }
-
-        .scanCorner.tr {
-          top: 0;
-          right: 0;
-          border-top: 3px solid #0f5fe9;
-          border-right: 3px solid #0f5fe9;
-          border-radius: 0 12px 0 0;
-        }
-
-        .scanCorner.bl {
-          bottom: 0;
-          left: 0;
-          border-bottom: 3px solid #0f5fe9;
-          border-left: 3px solid #0f5fe9;
-          border-radius: 0 0 0 12px;
-        }
-
-        .scanCorner.br {
-          right: 0;
-          bottom: 0;
-          border-right: 3px solid #0f5fe9;
-          border-bottom: 3px solid #0f5fe9;
-          border-radius: 0 0 12px 0;
-        }
-
-        .productBottom {
-          padding-top: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-top: 1px solid #eef1f5;
-        }
-
-        .productMeta span,
-        .productMeta strong {
-          display: block;
-        }
-
-        .productMeta span {
-          color: #98a2b3;
-          font-size: 7px;
-          font-weight: 800;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-        }
-
-        .productMeta strong {
-          margin-top: 4px;
-          color: #344054;
-          font-size: 11px;
-        }
-
-        .miniAction {
-          width: 36px;
-          height: 36px;
-          display: grid;
-          place-items: center;
-          border-radius: 10px;
-          background: #0f5fe9;
-          color: white;
-        }
-
-        .miniAction :global(svg) {
-          width: 14px;
-          height: 14px;
-        }
-
-        .floatingMessage,
-        .floatingLocation {
-          position: absolute;
-          z-index: 5;
-          border: 1px solid
-            rgba(224, 229, 237, 0.9);
-          background:
-            rgba(255, 255, 255, 0.95);
-          box-shadow:
-            0 20px 50px
-            rgba(26, 51, 82, 0.11);
-          backdrop-filter: blur(18px);
-        }
-
-        .floatingMessage {
-          width: 235px;
-          min-height: 72px;
-          left: -20px;
-          bottom: 80px;
-          padding: 13px;
-          display: flex;
-          align-items: center;
-          gap: 11px;
-          border-radius: 16px;
-        }
-
-        .messageIcon {
-          width: 40px;
-          height: 40px;
-          flex: 0 0 40px;
-          display: grid;
-          place-items: center;
-          border-radius: 12px;
-          background: #edf4ff;
-          color: #0f5fe9;
-        }
-
-        .messageIcon :global(svg) {
-          width: 17px;
-          height: 17px;
-        }
-
-        .floatingMessage span,
-        .floatingMessage strong {
-          display: block;
-        }
-
-        .floatingMessage span {
-          color: #98a2b3;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1.2px;
-        }
-
-        .floatingMessage strong {
-          margin-top: 4px;
-          color: #344054;
-          font-size: 10px;
-        }
-
-        .messageDot {
-          width: 8px;
-          height: 8px;
-          margin-left: auto;
-          border-radius: 50%;
-          background: #12b76a;
-        }
-
-        .floatingLocation {
-          min-width: 150px;
-          top: 72px;
-          right: -5px;
-          padding: 12px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          border-radius: 14px;
-        }
-
-        .floatingLocation :global(svg) {
-          width: 22px;
-          height: 22px;
-          color: #0f5fe9;
-        }
-
-        .floatingLocation span,
-        .floatingLocation strong {
-          display: block;
-        }
-
-        .floatingLocation span {
-          color: #98a2b3;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .floatingLocation strong {
-          margin-top: 3px;
-          color: #344054;
-          font-size: 10px;
-        }
-
-        /* ==================================================
-           PROTECTION
-        ================================================== */
-
-        .protectionSection {
-          padding: 110px 0;
-          background: #f7f9fc;
-          border-top: 1px solid #eef1f5;
-        }
-
-        .splitHeader {
-          display: grid;
-          grid-template-columns:
-            minmax(0, 1fr)
-            minmax(300px, 0.55fr);
-          align-items: end;
-          gap: 90px;
-        }
-
-        .sectionHeader h2,
-        .featureIntro h2 {
-          max-width: 820px;
-          margin: 15px 0 0;
-          color: #101828;
-          font-size:
-            clamp(40px, 5vw, 62px);
-          line-height: 1.04;
-          letter-spacing: -3.4px;
-          font-weight: 740;
-        }
-
-        .splitHeader > p,
-        .sectionHeader > p {
-          margin: 0;
-          color: #667085;
-          font-size: 14px;
-          line-height: 1.75;
-        }
-
-        .protectionRail {
-          margin-top: 55px;
-          display: grid;
-          grid-template-columns:
-            repeat(6, 1fr);
-          border: 1px solid #e3e7ee;
-          border-radius: 22px;
-          background: white;
-          box-shadow:
-            0 14px 40px
-            rgba(30, 50, 80, 0.035);
-          overflow: hidden;
-        }
-
-        .protectionItem {
-          min-height: 180px;
-          padding: 24px 18px;
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          border-right: 1px solid #edf0f4;
-        }
-
-        .protectionItem:last-child {
-          border-right: 0;
-        }
-
-        .iconBox {
-          width: 52px;
-          height: 52px;
-          margin-bottom: 35px;
-          display: grid;
-          place-items: center;
-          border-radius: 14px;
-          background: #f4f7fb;
-          color: #26364c;
-        }
-
-        .iconBox :global(svg) {
-          width: 24px;
-          height: 24px;
-        }
-
-        .protectionNumber {
-          position: absolute;
-          top: 20px;
-          right: 17px;
-          color: #c2c8d0;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .protectionItem strong {
-          color: #26364c;
-          font-size: 12px;
-          font-weight: 760;
-        }
-
-        .accountBanner {
-          margin-top: 18px;
-          padding: 19px 21px;
-          display: grid;
-          grid-template-columns:
-            auto auto 1fr auto;
-          align-items: center;
-          gap: 15px;
-          border: 1px solid #e3e7ee;
-          border-radius: 16px;
-          background: #ffffff;
-        }
-
-        .accountBannerIcon {
-          width: 43px;
-          height: 43px;
-          display: grid;
-          place-items: center;
-          border-radius: 12px;
-          background: #edf4ff;
-          color: #0f5fe9;
-        }
-
-        .accountBannerIcon :global(svg) {
-          width: 18px;
+        .phoneNotch {
+          width: 75px;
           height: 18px;
-        }
-
-        .accountBannerCopy span,
-        .accountBannerCopy strong {
-          display: block;
-        }
-
-        .accountBannerCopy span {
-          color: #98a2b3;
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 1.2px;
-          text-transform: uppercase;
-        }
-
-        .accountBannerCopy strong {
-          margin-top: 4px;
-          color: #344054;
-          font-size: 12px;
-        }
-
-        .accountBanner > p {
-          margin: 0;
-          color: #7c8797;
-          font-size: 10px;
-          line-height: 1.55;
-        }
-
-        .accountBanner > a {
-          min-height: 40px;
-          padding: 0 14px;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          border-radius: 10px;
-          background: #101828;
-          color: white;
-          font-size: 10px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .accountBanner > a :global(svg) {
-          width: 13px;
-          height: 13px;
-        }
-
-        /* ==================================================
-           EMERGENCY
-        ================================================== */
-
-        .emergencySection {
-          padding: 110px 0;
-          background: #ffffff;
-        }
-
-        .emergencyCard {
-          min-height: 590px;
-          padding: 60px;
-          position: relative;
-          overflow: hidden;
-          display: grid;
-          grid-template-columns: 1.08fr 0.92fr;
-          align-items: center;
-          gap: 70px;
-          border-radius: 32px;
-          background:
-            radial-gradient(
-              circle at 90% 12%,
-              rgba(216, 44, 58, 0.13),
-              transparent 27%
-            ),
-            linear-gradient(
-              135deg,
-              #0c1728 0%,
-              #0e1c31 52%,
-              #111e31 100%
-            );
-          box-shadow:
-            0 30px 80px
-            rgba(10, 25, 46, 0.14);
-        }
-
-        .emergencyNoise {
           position: absolute;
-          inset: 0;
-          opacity: 0.35;
+          top: 15px;
+          left: 50%;
+          z-index: 5;
+          border-radius: 999px;
+          background: #0a111e;
+          transform: translateX(-50%);
+        }
+
+        .phoneScreen {
+          height: 100%;
+          padding: 32px 17px 18px;
+          border-radius: 35px;
           background:
             linear-gradient(
-              115deg,
-              transparent 0%,
-              rgba(255, 255, 255, 0.015) 45%,
-              transparent 55%
+              180deg,
+              #ffffff 0%,
+              #f7faff 100%
             );
-          pointer-events: none;
         }
 
-        .emergencyCopy {
-          position: relative;
-          z-index: 3;
-        }
-
-        .medicalEyebrow {
-          display: inline-flex;
+        .phoneHeader {
+          display: flex;
           align-items: center;
-          gap: 10px;
-          color: #aab6c6;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: 2px;
+          justify-content: space-between;
+          gap: 8px;
         }
 
-        .medicalEyebrow span {
+        .phoneBrand {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+
+        .phoneBrandLogo {
           width: 30px;
           height: 30px;
           display: grid;
           place-items: center;
           border-radius: 9px;
-          background: #d92d3a;
+          background: #0b5fff;
           color: white;
-          font-size: 19px;
-          line-height: 1;
         }
 
-        .emergencyCopy h2 {
-          margin: 25px 0 20px;
-          color: #ffffff;
-          font-size:
-            clamp(46px, 5.5vw, 68px);
-          line-height: 1.02;
-          letter-spacing: -3.6px;
-          font-weight: 720;
+        .phoneBrandLogo :global(svg) {
+          width: 16px;
+          height: 16px;
         }
 
-        .emergencyCopy h2 span {
-          color: #ff717c;
-        }
-
-        .emergencyCopy > p {
-          max-width: 590px;
-          margin: 0;
-          color: #aeb8c7;
-          font-size: 14px;
-          line-height: 1.75;
-        }
-
-        .emergencyList {
-          margin-top: 30px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-
-        .emergencyList > div {
-          min-height: 44px;
-          padding: 0 12px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          border: 1px solid
-            rgba(255, 255, 255, 0.08);
-          border-radius: 11px;
-          background:
-            rgba(255, 255, 255, 0.035);
-        }
-
-        .emergencyList span {
-          color: #ff717c;
-          font-size: 7px;
-          font-weight: 900;
-        }
-
-        .emergencyList strong {
-          color: #d8dee8;
-          font-size: 10px;
-          font-weight: 700;
-        }
-
-        .emergencyCta {
-          min-height: 47px;
-          margin-top: 28px;
-          padding: 0 17px;
-          display: inline-flex;
-          align-items: center;
-          gap: 9px;
-          border-radius: 11px;
-          background: #ffffff;
-          color: #101828;
-          font-size: 10px;
-          font-weight: 850;
-          text-decoration: none;
-        }
-
-        .emergencyCta :global(svg) {
-          width: 13px;
-          height: 13px;
-        }
-
-        .emergencyVisual {
-          min-height: 450px;
-          position: relative;
-          display: grid;
-          place-items: center;
-        }
-
-        .medicalCard {
-          width: 315px;
-          min-height: 390px;
-          padding: 23px;
-          position: relative;
-          z-index: 3;
-          border: 1px solid
-            rgba(255, 255, 255, 0.2);
-          border-radius: 26px;
-          background:
-            rgba(255, 255, 255, 0.96);
-          box-shadow:
-            0 32px 70px
-            rgba(0, 0, 0, 0.25);
-          transform: rotate(3deg);
-        }
-
-        .medicalCardHeader {
-          display: grid;
-          grid-template-columns:
-            auto 1fr auto;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .medicalLogo {
-          width: 38px;
-          height: 38px;
-          display: grid;
-          place-items: center;
-          border-radius: 10px;
-          background: #d92d3a;
-          color: white;
-          font-size: 24px;
-        }
-
-        .medicalCardHeader span,
-        .medicalCardHeader strong {
+        .phoneBrand span,
+        .phoneBrand strong {
           display: block;
         }
 
-        .medicalCardHeader span {
+        .phoneBrand span {
+          color: #0b5fff;
+          font-size: 6px;
+          font-weight: 900;
+          letter-spacing: 0.8px;
+        }
+
+        .phoneBrand strong {
+          margin-top: 2px;
+          color: #344054;
+          font-size: 8px;
+        }
+
+        .activeBadge {
+          padding: 5px 6px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          border-radius: 999px;
+          background: #ecfdf3;
+          color: #027a48;
+          font-size: 5.5px;
+          font-weight: 900;
+          letter-spacing: 0.6px;
+        }
+
+        .activeBadge i {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #12b76a;
+        }
+
+        .finderProfile {
+          margin-top: 28px;
+          padding: 20px 15px;
+          display: flex;
+          gap: 12px;
+          border: 1px solid #e8edf3;
+          border-radius: 17px;
+          background: white;
+          box-shadow:
+            0 8px 22px
+            rgba(20, 40, 70, 0.04);
+        }
+
+        .profileAvatar {
+          width: 58px;
+          height: 58px;
+          flex: 0 0 58px;
+          display: grid;
+          place-items: center;
+          border-radius: 16px;
+          background: #eef4ff;
+          color: #26364c;
+        }
+
+        .profileAvatar :global(svg) {
+          width: 31px;
+          height: 31px;
+        }
+
+        .profileCopy span {
+          color: #e5484d;
+          font-size: 5.5px;
+          font-weight: 900;
+          letter-spacing: 0.8px;
+        }
+
+        .profileCopy strong {
+          display: block;
+          margin-top: 3px;
+          color: #101828;
+          font-size: 16px;
+        }
+
+        .profileCopy p {
+          margin: 5px 0 0;
+          color: #7b8797;
+          font-size: 7px;
+          line-height: 1.5;
+        }
+
+        .phoneActions {
+          margin-top: 12px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .phoneAction {
+          min-height: 62px;
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: space-between;
+          border: 1px solid #e5eaf0;
+          border-radius: 14px;
+          background: white;
+          color: #667085;
+          font-size: 7px;
+          font-weight: 800;
+        }
+
+        .phoneAction.primary {
+          color: white;
+          background: #0b5fff;
+          border-color: #0b5fff;
+        }
+
+        .phoneAction :global(svg) {
+          width: 17px;
+          height: 17px;
+        }
+
+        .phonePrivacy {
+          margin-top: 12px;
+          padding: 11px;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          border-radius: 13px;
+          background: #f2f5f9;
+        }
+
+        .phonePrivacy :global(svg) {
+          width: 17px;
+          height: 17px;
+          color: #0b5fff;
+        }
+
+        .phonePrivacy span,
+        .phonePrivacy small {
+          display: block;
+        }
+
+        .phonePrivacy span {
+          color: #344054;
+          font-size: 7px;
+          font-weight: 800;
+        }
+
+        .phonePrivacy small {
+          margin-top: 2px;
+          color: #98a2b3;
+          font-size: 5.5px;
+        }
+
+        .floatingFinder,
+        .floatingMap {
+          position: absolute;
+          z-index: 5;
+          border: 1px solid rgba(226, 231, 238, 0.95);
+          background: rgba(255, 255, 255, 0.96);
+          backdrop-filter: blur(18px);
+          box-shadow:
+            0 18px 45px
+            rgba(29, 52, 85, 0.11);
+        }
+
+        .floatingFinder {
+          width: 220px;
+          min-height: 68px;
+          left: -35px;
+          bottom: 70px;
+          padding: 11px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border-radius: 15px;
+        }
+
+        .floatingIcon {
+          width: 38px;
+          height: 38px;
+          flex: 0 0 38px;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: #edf4ff;
+          color: #0b5fff;
+        }
+
+        .floatingIcon :global(svg) {
+          width: 16px;
+          height: 16px;
+        }
+
+        .floatingFinder span,
+        .floatingFinder strong {
+          display: block;
+        }
+
+        .floatingFinder span {
+          color: #98a2b3;
+          font-size: 5.5px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .floatingFinder strong {
+          margin-top: 3px;
+          color: #344054;
+          font-size: 9px;
+        }
+
+        .floatingFinder > i {
+          width: 7px;
+          height: 7px;
+          margin-left: auto;
+          border-radius: 50%;
+          background: #12b76a;
+        }
+
+        .floatingMap {
+          min-width: 138px;
+          top: 86px;
+          right: -18px;
+          padding: 11px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border-radius: 13px;
+        }
+
+        .floatingMap :global(svg) {
+          width: 20px;
+          height: 20px;
+          color: #0b5fff;
+        }
+
+        .floatingMap span,
+        .floatingMap strong {
+          display: block;
+        }
+
+        .floatingMap span {
+          color: #98a2b3;
+          font-size: 5px;
+          font-weight: 900;
+          letter-spacing: 0.8px;
+        }
+
+        .floatingMap strong {
+          margin-top: 2px;
+          color: #344054;
+          font-size: 8px;
+        }
+
+        /* USE CASES */
+
+        .useCases {
+          padding: 100px 0;
+          background: #f7f9fc;
+        }
+
+        .useCasesHeader {
+          display: grid;
+          grid-template-columns: 1fr 0.65fr;
+          align-items: end;
+          gap: 70px;
+        }
+
+        .useCasesHeader h2 {
+          margin: 13px 0 0;
+          color: #101828;
+          font-size:
+            clamp(36px, 4.7vw, 53px);
+          line-height: 1.05;
+          letter-spacing: -2.8px;
+          font-weight: 740;
+        }
+
+        .useCasesHeader > p {
+          margin: 0;
+          color: #667085;
+          font-size: 13px;
+          line-height: 1.72;
+        }
+
+        .useCaseRail {
+          margin-top: 48px;
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          overflow: hidden;
+          border: 1px solid #e1e6ed;
+          border-radius: 22px;
+          background: white;
+          box-shadow:
+            0 12px 35px
+            rgba(20, 45, 80, 0.035);
+        }
+
+        .useCaseItem {
+          min-height: 175px;
+          padding: 19px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          border-right: 1px solid #edf0f4;
+        }
+
+        .useCaseItem:last-child {
+          border-right: 0;
+        }
+
+        .useCaseTop {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+        }
+
+        .useCaseTop > span {
+          color: #c1c7d0;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 0.8px;
+        }
+
+        .useCaseIcon {
+          width: 56px;
+          height: 56px;
+          display: grid;
+          place-items: center;
+          border-radius: 15px;
+          background: #f2f5f9;
+          color: #233247;
+        }
+
+        .useCaseIcon :global(svg) {
+          width: 28px;
+          height: 28px;
+        }
+
+        .useCaseItem strong {
+          color: #26364c;
+          font-size: 11px;
+          font-weight: 780;
+        }
+
+        .accountBar {
+          margin-top: 16px;
+          padding: 17px 19px;
+          display: grid;
+          grid-template-columns:
+            auto auto 1fr auto;
+          align-items: center;
+          gap: 13px;
+          border: 1px solid #e1e6ed;
+          border-radius: 15px;
+          background: white;
+        }
+
+        .accountBarIcon {
+          width: 40px;
+          height: 40px;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: #edf4ff;
+          color: #0b5fff;
+        }
+
+        .accountBarIcon :global(svg) {
+          width: 17px;
+          height: 17px;
+        }
+
+        .accountBarCopy span,
+        .accountBarCopy strong {
+          display: block;
+        }
+
+        .accountBarCopy span {
           color: #98a2b3;
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1.1px;
         }
 
-        .medicalCardHeader strong {
+        .accountBarCopy strong {
           margin-top: 3px;
-          color: #344054;
-          font-size: 9px;
-        }
-
-        .verifiedBadge {
-          width: 29px;
-          height: 29px;
-          display: grid;
-          place-items: center;
-          border-radius: 9px;
-          background: #ecfdf3;
-          color: #039855;
-        }
-
-        .verifiedBadge :global(svg) {
-          width: 13px;
-          height: 13px;
-        }
-
-        .medicalProfile {
-          margin-top: 25px;
-          padding: 16px 0;
-          display: flex;
-          align-items: center;
-          gap: 11px;
-          border-top: 1px solid #eef1f4;
-          border-bottom: 1px solid #eef1f4;
-        }
-
-        .medicalAvatar {
-          width: 44px;
-          height: 44px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #f2f4f7;
-          color: #667085;
-        }
-
-        .medicalAvatar :global(svg) {
-          width: 19px;
-          height: 19px;
-        }
-
-        .medicalProfile span,
-        .medicalProfile strong {
-          display: block;
-        }
-
-        .medicalProfile span {
-          color: #98a2b3;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .medicalProfile strong {
-          margin-top: 4px;
           color: #344054;
           font-size: 10px;
         }
 
-        .medicalRows {
-          margin-top: 15px;
-          display: grid;
-          gap: 8px;
+        .accountBar > p {
+          margin: 0;
+          color: #7b8797;
+          font-size: 9px;
+          line-height: 1.5;
         }
 
-        .medicalRows > div {
-          min-height: 45px;
-          padding: 0 12px;
-          display: flex;
+        .accountBar > a {
+          min-height: 38px;
+          padding: 0 13px;
+          display: inline-flex;
           align-items: center;
-          justify-content: space-between;
-          border-radius: 10px;
-          background: #f7f9fc;
+          gap: 7px;
+          border-radius: 9px;
+          background: #101828;
+          color: white;
+          font-size: 9px;
+          font-weight: 800;
+          text-decoration: none;
         }
 
-        .medicalRows span {
-          color: #667085;
-          font-size: 8px;
+        .accountBar > a :global(svg) {
+          width: 12px;
+          height: 12px;
         }
 
-        .medicalRows strong {
-          color: #344054;
-          font-size: 8px;
-        }
+        /* HOW */
 
-        .medicalQr {
-          width: 85px;
-          height: 85px;
-          margin: 20px auto 0;
-          padding: 8px;
-          display: grid;
-          place-items: center;
-          border-radius: 14px;
-          background: #f2f4f7;
-        }
-
-        .braceletWrap {
-          width: 310px;
-          height: 110px;
-          position: absolute;
-          right: -55px;
-          bottom: 12px;
-          z-index: 4;
-          display: flex;
-          align-items: center;
-          transform: rotate(-9deg);
-          filter:
-            drop-shadow(
-              0 18px 18px
-              rgba(0, 0, 0, 0.25)
-            );
-        }
-
-        .braceletStrap {
-          flex: 1;
-          height: 47px;
-          background: #0f5fe9;
-        }
-
-        .braceletStrap.left {
-          border-radius: 24px 0 0 24px;
-        }
-
-        .braceletStrap.right {
-          border-radius: 0 24px 24px 0;
-        }
-
-        .braceletPlate {
-          width: 125px;
-          height: 100px;
-          flex: 0 0 125px;
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          border: 5px solid #0d56d1;
-          border-radius: 24px;
+        .howSection {
+          padding: 100px 0;
           background: white;
         }
 
-        .braceletPlus {
-          width: 19px;
-          height: 19px;
-          position: absolute;
-          top: 8px;
-          right: 9px;
-          display: grid;
-          place-items: center;
-          border-radius: 5px;
-          background: #d92d3a;
-          color: white;
-          font-size: 14px;
+        .howHeader {
+          max-width: 720px;
         }
 
-        .braceletPlate small {
-          margin-top: 5px;
-          color: #0f5fe9;
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
+        .howHeader h2 {
+          margin: 13px 0 0;
+          color: #101828;
+          font-size:
+            clamp(36px, 4.7vw, 53px);
+          line-height: 1.05;
+          letter-spacing: -2.8px;
+          font-weight: 740;
         }
 
-        /* ==================================================
-           HOW
-        ================================================== */
-
-        .howSection {
-          padding: 115px 0;
-          background: #f7f9fc;
-          border-top: 1px solid #edf0f4;
+        .howHeader > p {
+          margin: 15px 0 0;
+          color: #667085;
+          font-size: 12px;
+          line-height: 1.7;
         }
 
-        .howSection .sectionHeader {
-          max-width: 760px;
-        }
-
-        .howSection .sectionHeader > p {
-          margin-top: 18px;
-        }
-
-        .timeline {
-          margin-top: 60px;
+        .steps {
+          margin-top: 52px;
           display: grid;
           grid-template-columns:
             1fr auto 1fr auto 1fr auto 1fr;
           align-items: start;
         }
 
-        .timelineItem {
+        .step {
           min-width: 0;
         }
 
-        .timelineNumber {
-          color: #b8c0cc;
-          font-size: 8px;
+        .step > span {
+          color: #b8c0cb;
+          font-size: 7px;
           font-weight: 900;
-          letter-spacing: 1px;
         }
 
-        .timelineIcon {
-          width: 48px;
-          height: 48px;
-          margin-top: 17px;
+        .stepIcon {
+          width: 46px;
+          height: 46px;
+          margin-top: 14px;
           display: grid;
           place-items: center;
-          border: 1px solid #e1e6ed;
-          border-radius: 14px;
-          background: white;
-          color: #0f5fe9;
+          border: 1px solid #e2e7ee;
+          border-radius: 13px;
+          background: #ffffff;
+          color: #0b5fff;
           box-shadow:
-            0 8px 22px
-            rgba(20, 45, 80, 0.04);
+            0 6px 18px
+            rgba(20, 40, 70, 0.035);
         }
 
-        .timelineIcon :global(svg) {
+        .stepIcon :global(svg) {
           width: 18px;
           height: 18px;
         }
 
-        .qrTextIcon {
-          font-size: 10px;
+        .qrIcon {
+          font-size: 9px;
           font-weight: 900;
-          letter-spacing: -0.4px;
         }
 
-        .timelineCopy {
-          margin-top: 22px;
-        }
-
-        .timelineCopy h3 {
-          margin: 0;
+        .step > strong {
+          display: block;
+          margin-top: 18px;
           color: #26364c;
-          font-size: 13px;
-          font-weight: 760;
+          font-size: 11px;
+          font-weight: 800;
         }
 
-        .timelineCopy p {
-          margin: 8px 0 0;
-          color: #7b8798;
-          font-size: 10px;
-          line-height: 1.65;
+        .step > p {
+          margin: 6px 0 0;
+          color: #7b8797;
+          font-size: 9px;
+          line-height: 1.6;
         }
 
-        .timelineConnector {
-          width: 65px;
+        .stepLine {
+          width: 55px;
           height: 1px;
-          margin: 42px 18px 0;
-          background:
-            linear-gradient(
-              90deg,
-              #dce2ea,
-              #eef1f5
-            );
+          margin: 36px 16px 0;
+          background: #e1e6ed;
         }
 
-        /* ==================================================
-           FEATURES
-        ================================================== */
+        /* FEATURES */
 
         .featuresSection {
-          padding: 115px 0;
-          background: #101828;
+          padding: 100px 0;
+          background: #0d1523;
         }
 
-        .featureIntro .eyebrow {
-          color: #8fb6ff;
+        .lightLabel {
+          color: #8cb3ff;
         }
 
-        .featureIntro h2 {
+        .featureHeader h2 {
+          max-width: 760px;
+          margin: 13px 0 0;
           color: white;
+          font-size:
+            clamp(36px, 4.7vw, 52px);
+          line-height: 1.05;
+          letter-spacing: -2.8px;
+          font-weight: 730;
         }
 
         .featureGrid {
-          margin-top: 55px;
+          margin-top: 46px;
           display: grid;
-          grid-template-columns:
-            repeat(4, 1fr);
-          border-top: 1px solid
-            rgba(255, 255, 255, 0.1);
-          border-bottom: 1px solid
-            rgba(255, 255, 255, 0.1);
+          grid-template-columns: repeat(4, 1fr);
+          border-top:
+            1px solid rgba(255, 255, 255, 0.1);
+          border-bottom:
+            1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .featureCard {
-          min-height: 230px;
-          padding: 28px 24px;
-          border-right: 1px solid
-            rgba(255, 255, 255, 0.1);
+        .featureItem {
+          min-height: 210px;
+          padding: 24px 21px;
+          border-right:
+            1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .featureCard:last-child {
+        .featureItem:last-child {
           border-right: 0;
         }
 
@@ -2277,113 +1814,123 @@ export default function HomePage() {
         }
 
         .featureTop > span {
-          color: #697586;
-          font-size: 8px;
+          color: #657184;
+          font-size: 7px;
           font-weight: 900;
         }
 
         .featureIcon {
-          width: 38px;
-          height: 38px;
+          width: 36px;
+          height: 36px;
           display: grid;
           place-items: center;
-          border-radius: 11px;
-          background:
-            rgba(255, 255, 255, 0.06);
-          color: #8fb6ff;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.06);
+          color: #8cb3ff;
         }
 
         .featureIcon :global(svg) {
-          width: 16px;
-          height: 16px;
+          width: 15px;
+          height: 15px;
         }
 
-        .featureCard h3 {
-          margin: 45px 0 0;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 720;
+        .featureItem h3 {
+          margin: 36px 0 0;
+          color: white;
+          font-size: 12px;
+          font-weight: 740;
         }
 
-        .featureCard p {
-          margin: 10px 0 0;
-          color: #8d99a9;
-          font-size: 10px;
-          line-height: 1.7;
+        .featureItem p {
+          margin: 8px 0 0;
+          color: #8b97a7;
+          font-size: 9px;
+          line-height: 1.65;
         }
 
-        /* ==================================================
-           FINAL CTA
-        ================================================== */
+        /* EMERGENCY INFO */
 
-        .finalCtaSection {
-          padding: 85px 24px;
-          background: #ffffff;
+        .emergencyInfo {
+          padding: 72px 0;
+          background: white;
         }
 
-        .finalCta {
-          max-width: 1180px;
-          min-height: 210px;
-          margin: auto;
-          padding: 38px 42px;
-          display: flex;
+        .emergencyInfoCard {
+          min-height: 125px;
+          padding: 20px 22px;
+          display: grid;
+          grid-template-columns: auto 1fr auto;
           align-items: center;
-          justify-content: space-between;
-          gap: 40px;
-          border-radius: 24px;
+          gap: 16px;
+          border: 1px solid #eedbde;
+          border-radius: 18px;
           background:
             linear-gradient(
-              120deg,
-              #edf4ff,
-              #f7f9fc
+              115deg,
+              #fffafa,
+              #ffffff
             );
-          border: 1px solid #e3e8ef;
         }
 
-        .finalLabel {
-          color: #0f5fe9;
-          font-size: 8px;
+        .emergencyInfoMark {
+          width: 48px;
+          height: 48px;
+          display: grid;
+          place-items: center;
+          border-radius: 13px;
+          background: #e5484d;
+          color: white;
+          font-size: 29px;
+        }
+
+        .emergencyInfoCopy span,
+        .emergencyInfoCopy strong,
+        .emergencyInfoCopy p {
+          display: block;
+        }
+
+        .emergencyInfoCopy span {
+          color: #b4232d;
+          font-size: 6px;
           font-weight: 900;
-          letter-spacing: 2px;
+          letter-spacing: 1.3px;
         }
 
-        .finalCta h2 {
-          max-width: 700px;
-          margin: 11px 0 0;
-          color: #101828;
-          font-size:
-            clamp(32px, 4.2vw, 50px);
-          line-height: 1.05;
-          letter-spacing: -2.6px;
-          font-weight: 730;
+        .emergencyInfoCopy strong {
+          margin-top: 4px;
+          color: #344054;
+          font-size: 12px;
         }
 
-        .finalCta > a {
-          min-height: 50px;
-          padding: 0 19px;
-          flex: 0 0 auto;
+        .emergencyInfoCopy p {
+          margin: 4px 0 0;
+          color: #7b8797;
+          font-size: 9px;
+        }
+
+        .emergencyInfoCard > a {
+          min-height: 38px;
+          padding: 0 13px;
           display: inline-flex;
           align-items: center;
-          gap: 9px;
-          border-radius: 12px;
-          background: #0f5fe9;
+          gap: 6px;
+          border-radius: 9px;
+          background: #e5484d;
           color: white;
-          font-size: 11px;
-          font-weight: 850;
+          font-size: 8px;
+          font-weight: 800;
           text-decoration: none;
         }
 
-        .finalCta > a :global(svg) {
-          width: 13px;
-          height: 13px;
+        .emergencyInfoCard > a :global(svg) {
+          width: 11px;
+          height: 11px;
         }
 
-        /* ==================================================
-           CONTACT
-        ================================================== */
+        /* CONTACT */
 
         .contact {
-          padding: 90px 24px;
+          padding: 80px 24px;
           background: #f7f9fc;
         }
 
@@ -2393,189 +1940,175 @@ export default function HomePage() {
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
-          gap: 60px;
+          gap: 55px;
         }
 
         .contact h2 {
-          margin: 13px 0 12px;
+          margin: 11px 0 10px;
           color: #101828;
-          font-size: 42px;
-          letter-spacing: -2px;
+          font-size: 38px;
+          letter-spacing: -1.8px;
         }
 
         .contact p {
-          max-width: 650px;
+          max-width: 620px;
           margin: 0;
           color: #667085;
-          font-size: 13px;
+          font-size: 11px;
           line-height: 1.7;
         }
 
         .contactButton {
-          min-height: 48px;
-          padding: 0 18px;
-          flex: 0 0 auto;
+          min-height: 44px;
+          padding: 0 16px;
           display: inline-flex;
           align-items: center;
-          gap: 9px;
-          border-radius: 11px;
+          gap: 8px;
+          border-radius: 10px;
           background: #101828;
           color: white;
-          font-size: 11px;
-          font-weight: 820;
+          font-size: 9px;
+          font-weight: 800;
           text-decoration: none;
         }
 
         .contactButton :global(svg) {
-          width: 13px;
-          height: 13px;
+          width: 12px;
+          height: 12px;
         }
 
-        /* ==================================================
-           FOOTER
-        ================================================== */
+        /* FOOTER */
 
         .footer {
-          background: #0a111e;
+          background: #09111d;
           color: white;
         }
 
         .footerInner {
           max-width: 1120px;
-          min-height: 150px;
+          min-height: 135px;
           margin: auto;
-          padding: 40px 24px;
+          padding: 35px 24px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 35px;
+          gap: 30px;
         }
 
-        .footerBrandBlock {
+        .footerBrand {
           display: flex;
           align-items: center;
-          gap: 11px;
+          gap: 10px;
         }
 
         .footerLogo {
-          width: 37px;
-          height: 37px;
+          width: 35px;
+          height: 35px;
           display: grid;
           place-items: center;
           border-radius: 10px;
-          background: #0f5fe9;
+          background: #0b5fff;
           color: white;
         }
 
         .footerLogo :global(svg) {
-          width: 20px;
-          height: 20px;
+          width: 19px;
+          height: 19px;
         }
 
-        .footerBrandBlock strong,
-        .footerBrandBlock span {
+        .footerBrand strong,
+        .footerBrand span {
           display: block;
         }
 
-        .footerBrandBlock strong {
-          color: #ffffff;
-          font-size: 13px;
+        .footerBrand strong {
+          font-size: 12px;
         }
 
-        .footerBrandBlock span {
+        .footerBrand span {
           margin-top: 3px;
-          color: #697586;
-          font-size: 6px;
+          color: #667386;
+          font-size: 5.5px;
           font-weight: 800;
-          letter-spacing: 1.6px;
+          letter-spacing: 1.5px;
         }
 
-        .footerNav {
+        .footerLinks {
           display: flex;
           flex-wrap: wrap;
-          gap: 24px;
+          gap: 22px;
         }
 
-        .footerNav a,
-        .footerNav span {
-          color: #7f8a99;
-          font-size: 9px;
+        .footerLinks a,
+        .footerLinks span {
+          color: #7c8797;
+          font-size: 8px;
           font-weight: 700;
           text-decoration: none;
         }
 
         .copyright {
-          color: #566273;
-          font-size: 8px;
+          color: #586475;
+          font-size: 7px;
         }
 
-        /* ==================================================
-           TABLET
-        ================================================== */
+        /* TABLET */
 
-        @media (max-width: 980px) {
-          .heroInner,
-          .emergencyCard {
-            grid-template-columns: 1fr;
-          }
-
+        @media (max-width: 960px) {
           .heroInner {
-            padding: 80px 0;
+            grid-template-columns: 1fr;
+            padding: 70px 0;
           }
 
-          .heroVisual {
+          .phoneStage {
             margin-top: 20px;
           }
 
-          .splitHeader {
+          .useCasesHeader {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 18px;
           }
 
-          .protectionRail {
-            grid-template-columns:
-              repeat(3, 1fr);
+          .useCaseRail {
+            grid-template-columns: repeat(3, 1fr);
           }
 
-          .protectionItem:nth-child(3n) {
+          .useCaseItem:nth-child(3n) {
             border-right: 0;
           }
 
-          .protectionItem:nth-child(-n + 3) {
+          .useCaseItem:nth-child(-n + 3) {
             border-bottom: 1px solid #edf0f4;
           }
 
-          .accountBanner {
-            grid-template-columns:
-              auto 1fr auto;
+          .accountBar {
+            grid-template-columns: auto 1fr auto;
           }
 
-          .accountBanner > p {
+          .accountBar > p {
             grid-column: 2 / -1;
           }
 
-          .timeline {
-            grid-template-columns:
-              repeat(2, 1fr);
-            gap: 28px;
+          .steps {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
           }
 
-          .timelineConnector {
+          .stepLine {
             display: none;
           }
 
           .featureGrid {
-            grid-template-columns:
-              repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr);
           }
 
-          .featureCard:nth-child(2) {
+          .featureItem:nth-child(2) {
             border-right: 0;
           }
 
-          .featureCard:nth-child(-n + 2) {
-            border-bottom: 1px solid
-              rgba(255, 255, 255, 0.1);
+          .featureItem:nth-child(-n + 2) {
+            border-bottom:
+              1px solid rgba(255, 255, 255, 0.1);
           }
 
           .contactInner,
@@ -2585,27 +2118,25 @@ export default function HomePage() {
           }
         }
 
-        /* ==================================================
-           MOBILE
-        ================================================== */
+        /* MOBILE */
 
-        @media (max-width: 680px) {
+        @media (max-width: 650px) {
           .header {
-            width: calc(100% - 20px);
-            min-height: 74px;
+            width: calc(100% - 18px);
+            min-height: 72px;
           }
 
-          .brandCopy span {
+          .brandText span {
             display: none;
           }
 
-          .brandMark {
-            width: 40px;
-            height: 40px;
+          .brandLogo {
+            width: 39px;
+            height: 39px;
           }
 
-          .brandCopy strong {
-            font-size: 16px;
+          .brandText strong {
+            font-size: 15px;
           }
 
           .languageSwitch {
@@ -2613,7 +2144,7 @@ export default function HomePage() {
           }
 
           .adminLink {
-            padding: 0 9px;
+            padding: 0 8px;
           }
 
           .adminLink span {
@@ -2621,33 +2152,37 @@ export default function HomePage() {
           }
 
           .accountButton,
-          .loginLink {
-            min-height: 36px;
-            padding: 0 10px;
-            font-size: 9px;
-          }
-
-          .sectionShell,
-          .heroInner {
-            width: calc(100% - 30px);
+          .loginButton {
+            padding: 0 9px;
+            min-height: 35px;
+            font-size: 8.5px;
           }
 
           .hero {
             min-height: unset;
           }
 
+          .heroInner,
+          .sectionShell {
+            width: calc(100% - 28px);
+          }
+
           .heroInner {
             min-height: unset;
-            padding: 65px 0 75px;
+            padding: 55px 0 70px;
+          }
+
+          .emergencyMiniCard {
+            margin-bottom: 24px;
           }
 
           .hero h1 {
-            font-size: 45px;
-            letter-spacing: -3.3px;
+            font-size: 39px;
+            letter-spacing: -2.5px;
           }
 
           .heroDescription {
-            font-size: 14px;
+            font-size: 13px;
           }
 
           .heroActions {
@@ -2655,164 +2190,105 @@ export default function HomePage() {
             flex-direction: column;
           }
 
-          .primaryCta,
-          .secondaryCta {
+          .primaryButton,
+          .secondaryButton {
             width: 100%;
           }
 
-          .trustLine {
-            gap: 13px;
+          .phoneStage {
+            min-height: 500px;
           }
 
-          .heroVisual {
-            min-height: 470px;
+          .phone {
+            width: 245px;
+            height: 485px;
           }
 
-          .productCard {
-            width: 290px;
-            min-height: 410px;
-          }
-
-          .qrStage {
-            height: 245px;
-          }
-
-          .qrFrame {
-            width: 165px;
-            height: 165px;
-          }
-
-          .floatingMessage {
-            width: 205px;
+          .floatingFinder {
+            width: 198px;
             left: -5px;
-            bottom: 35px;
+            bottom: 45px;
           }
 
-          .floatingLocation {
-            top: 25px;
+          .floatingMap {
             right: -5px;
+            top: 58px;
           }
 
-          .protectionSection,
-          .emergencySection,
+          .useCases,
           .howSection,
           .featuresSection {
-            padding: 80px 0;
+            padding: 78px 0;
           }
 
-          .sectionHeader h2,
-          .featureIntro h2 {
-            font-size: 38px;
-            letter-spacing: -2.4px;
+          .useCasesHeader h2,
+          .howHeader h2,
+          .featureHeader h2 {
+            font-size: 35px;
+            letter-spacing: -2.1px;
           }
 
-          .protectionRail {
-            grid-template-columns:
-              repeat(2, 1fr);
+          .useCaseRail {
+            grid-template-columns: repeat(2, 1fr);
           }
 
-          .protectionItem {
+          .useCaseItem {
             border-right: 1px solid #edf0f4;
             border-bottom: 1px solid #edf0f4;
           }
 
-          .protectionItem:nth-child(even) {
+          .useCaseItem:nth-child(even) {
             border-right: 0;
           }
 
-          .protectionItem:nth-last-child(-n + 2) {
+          .useCaseItem:nth-last-child(-n + 2) {
             border-bottom: 0;
           }
 
-          .accountBanner {
-            grid-template-columns:
-              auto 1fr;
+          .accountBar {
+            grid-template-columns: auto 1fr;
           }
 
-          .accountBanner > p {
+          .accountBar > p {
             grid-column: 1 / -1;
           }
 
-          .accountBanner > a {
+          .accountBar > a {
             grid-column: 1 / -1;
             justify-content: center;
           }
 
-          .emergencyCard {
-            min-height: unset;
-            padding: 30px 22px 45px;
-            border-radius: 24px;
-          }
-
-          .emergencyCopy h2 {
-            font-size: 40px;
-            letter-spacing: -2.6px;
-          }
-
-          .emergencyList {
-            grid-template-columns: 1fr;
-          }
-
-          .emergencyCta {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .emergencyVisual {
-            min-height: 430px;
-            margin-top: 20px;
-          }
-
-          .medicalCard {
-            width: 275px;
-          }
-
-          .braceletWrap {
-            width: 265px;
-            right: -35px;
-          }
-
-          .timeline {
-            grid-template-columns: 1fr;
-          }
-
+          .steps,
           .featureGrid {
             grid-template-columns: 1fr;
           }
 
-          .featureCard,
-          .featureCard:nth-child(2) {
+          .featureItem,
+          .featureItem:nth-child(2) {
             border-right: 0;
-            border-bottom: 1px solid
-              rgba(255, 255, 255, 0.1);
+            border-bottom:
+              1px solid rgba(255, 255, 255, 0.1);
           }
 
-          .featureCard:last-child {
+          .featureItem:last-child {
             border-bottom: 0;
           }
 
-          .finalCtaSection {
-            padding: 65px 15px;
+          .emergencyInfo {
+            padding: 55px 0;
           }
 
-          .finalCta {
-            min-height: unset;
-            padding: 28px 22px;
-            align-items: stretch;
-            flex-direction: column;
+          .emergencyInfoCard {
+            grid-template-columns: auto 1fr;
           }
 
-          .finalCta h2 {
-            font-size: 35px;
-          }
-
-          .finalCta > a {
-            width: 100%;
+          .emergencyInfoCard > a {
+            grid-column: 1 / -1;
             justify-content: center;
           }
 
           .contact {
-            padding: 70px 18px;
+            padding: 65px 18px;
           }
 
           .contactButton {
@@ -2825,11 +2301,9 @@ export default function HomePage() {
   );
 }
 
-/* ==========================================================
-   PREMIUM INLINE ICONS
-========================================================== */
+/* ICONS */
 
-function LogoMark() {
+function QrLogo() {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -2840,7 +2314,7 @@ function LogoMark() {
       <rect x="3" y="3" width="6" height="6" rx="1" />
       <rect x="15" y="3" width="6" height="6" rx="1" />
       <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M15 15h3v3h3v3h-6z" />
+      <path d="M14.5 14.5h3v3h3v3h-6z" />
       <path d="M12 4v4M12 12v2M11 18h2M18 12h3" />
     </svg>
   );
@@ -2855,7 +2329,7 @@ function UserIcon() {
       strokeWidth="1.7"
     >
       <circle cx="12" cy="8" r="4" />
-      <path d="M4.5 21c.8-4.2 3.3-6.4 7.5-6.4s6.7 2.2 7.5 6.4" />
+      <path d="M4.5 21c.8-4.1 3.3-6.3 7.5-6.3s6.7 2.2 7.5 6.3" />
     </svg>
   );
 }
@@ -2868,7 +2342,7 @@ function AdminIcon() {
       stroke="currentColor"
       strokeWidth="1.7"
     >
-      <path d="M12 2.8 19 6v5.4c0 4.6-2.4 7.7-7 9.8-4.6-2.1-7-5.2-7-9.8V6z" />
+      <path d="M12 2.8 19 6v5.3c0 4.6-2.4 7.7-7 9.9-4.6-2.2-7-5.3-7-9.9V6z" />
       <circle cx="12" cy="10" r="2.2" />
       <path d="M8.7 16c.6-1.8 1.7-2.7 3.3-2.7s2.7.9 3.3 2.7" />
     </svg>
@@ -2887,20 +2361,6 @@ function ArrowIcon() {
     >
       <path d="M5 12h14" />
       <path d="m14 7 5 5-5 5" />
-    </svg>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="m10 8.7 5.2 3.3L10 15.3z" />
     </svg>
   );
 }
@@ -2991,69 +2451,31 @@ function PlusIcon() {
   );
 }
 
-function CheckIcon() {
+function DogIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth="1.6"
     >
-      <path d="m6 12 4 4 8-8" />
+      <circle cx="12" cy="13" r="6" />
+      <path d="M7.5 9 5 5.5v6M16.5 9 19 5.5v6" />
+      <path d="M9.5 14h.01M14.5 14h.01M10 17c1.3 1 2.7 1 4 0" />
     </svg>
-  );
-}
-
-function QrPattern({
-  compact = false,
-}: {
-  compact?: boolean;
-}) {
-  const dark = [
-    0, 1, 2, 5, 6,
-    7, 9, 11, 13,
-    14, 16, 18, 20,
-    21, 22, 24, 26,
-    27, 28, 30, 32,
-    34, 35, 36, 38,
-    40, 42, 43, 44,
-    46, 47, 48,
-  ];
-
-  return (
-    <div
-      style={{
-        width: compact ? 52 : 116,
-        height: compact ? 52 : 116,
-        display: "grid",
-        gridTemplateColumns: "repeat(7, 1fr)",
-        gap: compact ? 2 : 3,
-      }}
-    >
-      {Array.from({ length: 49 }).map((_, index) => (
-        <i
-          key={index}
-          style={{
-            display: "block",
-            borderRadius: compact ? 1 : 2,
-            background: dark.includes(index)
-              ? "#101828"
-              : "#dfe5ec",
-          }}
-        />
-      ))}
-    </div>
   );
 }
 
 function ProtectionIcon({
   type,
 }: {
-  type: ProtectionType;
+  type: ProtectType;
 }) {
-  if (type === "dog" || type === "cat") {
+  if (type === "dog") {
+    return <DogIcon />;
+  }
+
+  if (type === "cat") {
     return (
       <svg
         viewBox="0 0 24 24"
@@ -3062,18 +2484,8 @@ function ProtectionIcon({
         strokeWidth="1.6"
       >
         <circle cx="12" cy="13" r="6" />
-
-        {type === "dog" ? (
-          <>
-            <path d="M7.5 9 5 5.5v6M16.5 9 19 5.5v6" />
-            <path d="M9.5 14h.01M14.5 14h.01M10 17c1.3 1 2.7 1 4 0" />
-          </>
-        ) : (
-          <>
-            <path d="m7 9 1-5 3 3M17 9l-1-5-3 3" />
-            <path d="M9.5 14h.01M14.5 14h.01M12 15v2" />
-          </>
-        )}
+        <path d="m7 9 1-5 3 3M17 9l-1-5-3 3" />
+        <path d="M9.5 14h.01M14.5 14h.01M12 15v2" />
       </svg>
     );
   }
