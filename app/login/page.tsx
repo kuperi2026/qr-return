@@ -30,7 +30,6 @@ export default function LoginPage() {
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
 
     const cleanEmail = email.trim().toLowerCase();
@@ -129,10 +128,7 @@ export default function LoginPage() {
             <div className="infoIcon">✓</div>
 
             <div>
-              <strong>
-                {ka ? "ერთი ანგარიში" : "One account"}
-              </strong>
-
+              <strong>{ka ? "ერთი ანგარიში" : "One account"}</strong>
               <p>
                 {ka
                   ? "შექმენით იმდენი ცალკე პროფილი, რამდენიც გსურთ."
@@ -165,9 +161,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="name@example.com"
                 autoComplete="email"
                 required
@@ -180,9 +174,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 autoComplete="current-password"
                 required
@@ -289,11 +281,7 @@ export default function LoginPage() {
           display: grid;
           place-items: center;
           border-radius: 14px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg, #1465e8, #7655f7);
           color: white;
           font-size: 14px;
           font-weight: 900;
@@ -418,8 +406,7 @@ export default function LoginPage() {
           border: 1px solid #e4e7ec;
           border-radius: 24px;
           background: rgba(255, 255, 255, 0.97);
-          box-shadow:
-            0 25px 65px rgba(16, 24, 40, 0.1);
+          box-shadow: 0 25px 65px rgba(16, 24, 40, 0.1);
         }
 
         .cardHeader {
@@ -434,11 +421,7 @@ export default function LoginPage() {
           display: grid;
           place-items: center;
           border-radius: 15px;
-          background: linear-gradient(
-            135deg,
-            #eef4ff,
-            #f0edff
-          );
+          background: linear-gradient(135deg, #eef4ff, #f0edff);
           font-size: 27px;
         }
 
@@ -489,8 +472,7 @@ export default function LoginPage() {
 
         input:focus {
           border-color: #84adff;
-          box-shadow:
-            0 0 0 3px rgba(20, 101, 232, 0.08);
+          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
         }
 
         .error {
@@ -527,11 +509,7 @@ export default function LoginPage() {
           gap: 10px;
           border: 0;
           border-radius: 11px;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg, #1465e8, #7655f7);
           color: white;
           font-size: 15px;
           font-weight: 900;
