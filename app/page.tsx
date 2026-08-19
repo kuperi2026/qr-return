@@ -33,6 +33,79 @@ type HomepageSettings = {
   features_enabled: boolean;
   rules_enabled: boolean;
   contact_enabled: boolean;
+
+  primary_button_text: string;
+  secondary_button_text: string;
+
+  hero_font_size: number;
+  hero_background: string;
+
+  products_animation_enabled: boolean;
+
+  video_title: string;
+  video_description: string;
+  video_url: string;
+
+  steps_title: string;
+
+  step_1_title: string;
+  step_1_text: string;
+
+  step_2_title: string;
+  step_2_text: string;
+
+  step_3_title: string;
+  step_3_text: string;
+
+  step_4_title: string;
+  step_4_text: string;
+
+  features_title: string;
+
+  feature_1_title: string;
+  feature_1_text: string;
+
+  feature_2_title: string;
+  feature_2_text: string;
+
+  feature_3_title: string;
+  feature_3_text: string;
+
+  feature_4_title: string;
+  feature_4_text: string;
+
+  rules_title: string;
+
+  rule_1_title: string;
+  rule_1_text: string;
+
+  rule_2_title: string;
+  rule_2_text: string;
+
+  rule_3_title: string;
+  rule_3_text: string;
+
+  account_title: string;
+  account_description: string;
+
+  contact_title: string;
+  contact_description: string;
+  contact_email: string;
+
+  emergency_profile_enabled: boolean;
+  account_section_enabled: boolean;
+
+  emergency_contact_title: string;
+  emergency_contact_text: string;
+
+  medical_title: string;
+  medical_text: string;
+
+  allergy_title: string;
+  allergy_text: string;
+
+  privacy_title: string;
+  privacy_text: string;
 };
 
 const homepageDefaults: HomepageSettings = {
@@ -66,12 +139,110 @@ const homepageDefaults: HomepageSettings = {
   features_enabled: true,
   rules_enabled: true,
   contact_enabled: true,
+
+  primary_button_text: "ანგარიშის შექმნა",
+  secondary_button_text: "როგორ მუშაობს",
+
+  hero_font_size: 49,
+  hero_background: "#f8f8f5",
+
+  products_animation_enabled: true,
+
+  video_title: "ერთი სკანი. პირდაპირი კავშირი.",
+
+  video_description:
+    "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას.",
+
+  video_url: "",
+
+  steps_title: "დაბრუნების გზა ოთხ ნაბიჯში.",
+
+  step_1_title: "იპოვეს",
+  step_1_text: "მპოვნელი ხედავს QR RETURN კოდს.",
+
+  step_2_title: "დაასკანერეს",
+  step_2_text: "აპის ჩამოტვირთვა საჭირო არ არის.",
+
+  step_3_title: "დაგიკავშირდნენ",
+  step_3_text:
+    "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი.",
+
+  step_4_title: "დაბრუნდა",
+  step_4_text:
+    "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება.",
+
+  features_title:
+    "რაც საჭიროა — ზედმეტი სირთულის გარეშე.",
+
+  feature_1_title: "Live Chat",
+  feature_1_text:
+    "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე.",
+
+  feature_2_title: "ლოკაციის გაზიარება",
+  feature_2_text:
+    "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ.",
+
+  feature_3_title: "მპოვნელის ჯილდო",
+  feature_3_text:
+    "სურვილის შემთხვევაში შესთავაზეთ ჯილდო.",
+
+  feature_4_title: "Privacy Control",
+  feature_4_text:
+    "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება.",
+
+  rules_title:
+    "მარტივი თქვენთვის. კიდევ უფრო მარტივი მპოვნელისთვის.",
+
+  rule_1_title: "აპის გარეშე",
+  rule_1_text:
+    "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის.",
+
+  rule_2_title: "თქვენი ინფორმაცია",
+  rule_2_text:
+    "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი.",
+
+  rule_3_title: "ერთი ანგარიში",
+  rule_3_text:
+    "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში.",
+
+  account_title:
+    "ყველაფერი ერთი ანგარიშიდან.",
+
+  account_description:
+    "მართეთ QR პროფილები, დაკარგვის რეჟიმი, Live Chat და Emergency ID.",
+
+  contact_title: "დაგვიკავშირდით",
+
+  contact_description:
+    "კითხვა გაქვთ QR RETURN-ის ან Emergency ID-ის შესახებ? მოგვწერეთ.",
+
+  contact_email: "hello@qrreturn.com",
+
+  emergency_profile_enabled: true,
+  account_section_enabled: true,
+
+  emergency_contact_title:
+    "საგანგებო კონტაქტი",
+  emergency_contact_text:
+    "თქვენ მიერ არჩეული პირი",
+
+  medical_title:
+    "სამედიცინო ინფორმაცია",
+  medical_text:
+    "მხოლოდ ნებადართული მონაცემები",
+
+  allergy_title: "ალერგიები",
+  allergy_text:
+    "საჭიროების შემთხვევაში",
+
+  privacy_title: "Privacy Control",
+  privacy_text:
+    "თქვენ აკონტროლებთ მონაცემებს",
 };
 
 const defaultProducts = [
   {
     id: "dog",
-    ka: "ძაღლი",
     en: "Dog",
     image:
       "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=88",
@@ -79,7 +250,6 @@ const defaultProducts = [
   },
   {
     id: "cat",
-    ka: "კატა",
     en: "Cat",
     image:
       "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=88",
@@ -87,14 +257,12 @@ const defaultProducts = [
   },
   {
     id: "keys",
-    ka: "სახლის + მანქანის გასაღები",
     en: "Home + Car Keys",
     image: "",
     className: "keys",
   },
   {
     id: "wallet",
-    ka: "საფულე",
     en: "Wallet",
     image:
       "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=88",
@@ -102,7 +270,6 @@ const defaultProducts = [
   },
   {
     id: "luggage",
-    ka: "ჩემოდანი",
     en: "Luggage",
     image:
       "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=900&q=88",
@@ -110,7 +277,6 @@ const defaultProducts = [
   },
   {
     id: "bag",
-    ka: "ჩანთა",
     en: "Bag",
     image:
       "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=88",
@@ -119,30 +285,38 @@ const defaultProducts = [
 ];
 
 export default function HomePage() {
-  const [language, setLanguage] = useState<Language>("ka");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [language, setLanguage] =
+    useState<Language>("ka");
+
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
 
   const [homepage, setHomepage] =
-    useState<HomepageSettings>(homepageDefaults);
+    useState<HomepageSettings>(
+      homepageDefaults
+    );
 
   const ka = language === "ka";
 
-  /* =========================================================
+  /* =====================================================
      LOAD HOMEPAGE SETTINGS
-  ========================================================= */
+  ===================================================== */
 
   useEffect(() => {
     async function loadHomepage() {
-      const { data, error } = await supabase
-        .from("homepage_settings")
-        .select("*")
-        .eq("id", 1)
-        .maybeSingle();
+      const { data, error } =
+        await supabase
+          .from("homepage_settings")
+          .select("*")
+          .eq("id", 1)
+          .maybeSingle();
 
       if (error) {
         console.warn(
-          "homepage_settings load error:",
+          "homepage_settings:",
           error.message
         );
         return;
@@ -159,15 +333,16 @@ export default function HomePage() {
     void loadHomepage();
   }, []);
 
-  /* =========================================================
+  /* =====================================================
      AUTH + ADMIN
-  ========================================================= */
+  ===================================================== */
 
   useEffect(() => {
     async function loadUser() {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } =
+        await supabase.auth.getUser();
 
       if (!user) {
         setIsLoggedIn(false);
@@ -189,52 +364,81 @@ export default function HomePage() {
     void loadUser();
 
     const { data } =
-      supabase.auth.onAuthStateChange(() => {
-        void loadUser();
-      });
+      supabase.auth.onAuthStateChange(
+        () => {
+          void loadUser();
+        }
+      );
 
     return () => {
       data.subscription.unsubscribe();
     };
   }, []);
 
-  /* =========================================================
-     PRODUCT SETTINGS
-  ========================================================= */
+  /* =====================================================
+     PRODUCTS FROM ADMIN
+  ===================================================== */
 
   const products = useMemo(() => {
-    return defaultProducts.map((item) => {
-      const labels: Record<string, string> = {
-        dog: homepage.dog_label,
-        cat: homepage.cat_label,
-        keys: homepage.keys_label,
-        wallet: homepage.wallet_label,
-        luggage: homepage.suitcase_label,
-        bag: homepage.bag_label,
-      };
+    const labels: Record<
+      string,
+      string
+    > = {
+      dog: homepage.dog_label,
+      cat: homepage.cat_label,
+      keys: homepage.keys_label,
+      wallet: homepage.wallet_label,
+      luggage:
+        homepage.suitcase_label,
+      bag: homepage.bag_label,
+    };
 
-      const images: Record<string, string> = {
-        dog: homepage.dog_image,
-        cat: homepage.cat_image,
-        keys: homepage.keys_image,
-        wallet: homepage.wallet_image,
-        luggage: homepage.suitcase_image,
-        bag: homepage.bag_image,
-      };
+    const images: Record<
+      string,
+      string
+    > = {
+      dog: homepage.dog_image,
+      cat: homepage.cat_image,
+      keys: homepage.keys_image,
+      wallet: homepage.wallet_image,
+      luggage:
+        homepage.suitcase_image,
+      bag: homepage.bag_image,
+    };
 
-      return {
+    return defaultProducts.map(
+      (item) => ({
         ...item,
-        customLabel: labels[item.id] || item.ka,
-        customImage: images[item.id] || item.image,
-      };
-    });
+        label:
+          labels[item.id] ||
+          item.en,
+        image:
+          images[item.id] ||
+          item.image,
+      })
+    );
   }, [homepage]);
+
+  const videoEmbedUrl =
+    getVideoEmbedUrl(
+      homepage.video_url
+    );
+
+  const heroBackground =
+    homepage.hero_background ||
+    "#f8f8f5";
+
+  const heroFontSize =
+    homepage.hero_font_size >= 28 &&
+    homepage.hero_font_size <= 80
+      ? homepage.hero_font_size
+      : 49;
 
   return (
     <main className="page">
-      {/* ======================================================
+      {/* =================================================
           HEADER
-      ====================================================== */}
+      ================================================= */}
 
       <header className="header">
         <a href="/" className="brand">
@@ -243,22 +447,35 @@ export default function HomePage() {
           </div>
 
           <div className="brandText">
-            <strong>QR RETURN</strong>
-            <span>SMART LOST &amp; FOUND</span>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <span>
+              SMART LOST &amp; FOUND
+            </span>
           </div>
         </a>
 
         <div className="headerRight">
           <nav className="nav">
             {isAdmin && (
-              <a href="/admin" className="adminBtn">
+              <a
+                href="/admin"
+                className="adminBtn"
+              >
                 <AdminIcon />
-                <span>Admin Panel</span>
+                <span>
+                  Admin Panel
+                </span>
               </a>
             )}
 
             {isLoggedIn ? (
-              <a href="/account" className="accountBtn">
+              <a
+                href="/account"
+                className="accountBtn"
+              >
                 <UserIcon />
 
                 <span>
@@ -274,12 +491,17 @@ export default function HomePage() {
                   className="accountBtn"
                 >
                   {ka
-                    ? "ანგარიშის შექმნა"
+                    ? homepage.primary_button_text
                     : "Create Account"}
                 </a>
 
-                <a href="/login" className="loginBtn">
-                  {ka ? "შესვლა" : "Sign In"}
+                <a
+                  href="/login"
+                  className="loginBtn"
+                >
+                  {ka
+                    ? "შესვლა"
+                    : "Sign In"}
                 </a>
               </>
             )}
@@ -288,8 +510,12 @@ export default function HomePage() {
           <div className="language">
             <button
               type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLanguage("ka")}
+              className={
+                ka ? "active" : ""
+              }
+              onClick={() =>
+                setLanguage("ka")
+              }
             >
               GEO
             </button>
@@ -298,8 +524,12 @@ export default function HomePage() {
 
             <button
               type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLanguage("en")}
+              className={
+                !ka ? "active" : ""
+              }
+              onClick={() =>
+                setLanguage("en")
+              }
             >
               ENG
             </button>
@@ -307,22 +537,30 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ======================================================
-          PREMIUM HERO
-      ====================================================== */}
+      {/* =================================================
+          HERO
+      ================================================= */}
 
-      <section className="hero">
+      <section
+        className="hero"
+        style={{
+          backgroundColor:
+            heroBackground,
+        }}
+      >
         <div className="heroGlow glowBlue" />
         <div className="heroGlow glowRed" />
 
         <div className="heroInner">
-          {/* ==================================================
-              LEFT — EMERGENCY
-          ================================================== */}
+          {/* =============================================
+              LEFT
+          ============================================= */}
 
           <div className="emergencyColumn">
             <div className="emergencyEyebrow">
-              <span className="medicalMark">+</span>
+              <span className="medicalMark">
+                +
+              </span>
 
               <span>
                 {ka
@@ -331,7 +569,11 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1>
+            <h1
+              style={{
+                fontSize: `clamp(34px, 3.9vw, ${heroFontSize}px)`,
+              }}
+            >
               {ka
                 ? homepage.hero_title
                 : "When you cannot speak, essential information can still speak for you."}
@@ -343,7 +585,7 @@ export default function HomePage() {
                 : "Emergency QR lets you decide in advance what a helper should know and who they should contact in an emergency."}
             </p>
 
-            {/* PREMIUM BRACELET */}
+            {/* BRACELET */}
 
             <div className="braceletArea">
               <div className="braceletShadow" />
@@ -355,8 +597,13 @@ export default function HomePage() {
 
                 <div className="braceletPlate">
                   <div className="plateHeader">
-                    <span className="tinyCross">+</span>
-                    <span>EMERGENCY QR</span>
+                    <span className="tinyCross">
+                      +
+                    </span>
+
+                    <span>
+                      EMERGENCY QR
+                    </span>
                   </div>
 
                   <div className="plateQr">
@@ -364,8 +611,13 @@ export default function HomePage() {
                   </div>
 
                   <div className="plateBrand">
-                    <strong>QR RETURN</strong>
-                    <span>SCAN FOR EMERGENCY INFO</span>
+                    <strong>
+                      QR RETURN
+                    </strong>
+
+                    <span>
+                      SCAN FOR EMERGENCY INFO
+                    </span>
                   </div>
                 </div>
 
@@ -375,76 +627,88 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* EMERGENCY INFO */}
+            {/* EMERGENCY PROFILE */}
 
-            <div className="emergencyProfile">
-              <div className="profileTop">
-                <div>
-                  <span>EMERGENCY PROFILE</span>
+            {homepage.emergency_profile_enabled && (
+              <div className="emergencyProfile">
+                <div className="profileTop">
+                  <div>
+                    <span>
+                      EMERGENCY PROFILE
+                    </span>
 
-                  <strong>
-                    {ka
-                      ? "მხოლოდ საჭირო ინფორმაცია."
-                      : "Only what matters."}
-                  </strong>
+                    <strong>
+                      {ka
+                        ? "მხოლოდ საჭირო ინფორმაცია."
+                        : "Only what matters."}
+                    </strong>
+                  </div>
+
+                  <div className="ready">
+                    <i />
+                    SOS READY
+                  </div>
                 </div>
 
-                <div className="ready">
-                  <i />
-                  SOS READY
+                <div className="profileGrid">
+                  <EmergencyItem
+                    icon={<PhoneIcon />}
+                    title={
+                      ka
+                        ? homepage.emergency_contact_title
+                        : "Emergency Contact"
+                    }
+                    text={
+                      ka
+                        ? homepage.emergency_contact_text
+                        : "Your trusted contact"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<HeartIcon />}
+                    title={
+                      ka
+                        ? homepage.medical_title
+                        : "Medical Information"
+                    }
+                    text={
+                      ka
+                        ? homepage.medical_text
+                        : "Only approved information"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<AlertIcon />}
+                    title={
+                      ka
+                        ? homepage.allergy_title
+                        : "Allergies"
+                    }
+                    text={
+                      ka
+                        ? homepage.allergy_text
+                        : "When relevant"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<ShieldIcon />}
+                    title={
+                      ka
+                        ? homepage.privacy_title
+                        : "Privacy Control"
+                    }
+                    text={
+                      ka
+                        ? homepage.privacy_text
+                        : "You stay in control"
+                    }
+                  />
                 </div>
               </div>
-
-              <div className="profileGrid">
-                <EmergencyItem
-                  icon={<PhoneIcon />}
-                  title={
-                    ka
-                      ? "საგანგებო კონტაქტი"
-                      : "Emergency Contact"
-                  }
-                  text={
-                    ka
-                      ? "თქვენ მიერ არჩეული პირი"
-                      : "Your trusted contact"
-                  }
-                />
-
-                <EmergencyItem
-                  icon={<HeartIcon />}
-                  title={
-                    ka
-                      ? "სამედიცინო ინფორმაცია"
-                      : "Medical Information"
-                  }
-                  text={
-                    ka
-                      ? "მხოლოდ ნებადართული მონაცემები"
-                      : "Only approved information"
-                  }
-                />
-
-                <EmergencyItem
-                  icon={<AlertIcon />}
-                  title={ka ? "ალერგიები" : "Allergies"}
-                  text={
-                    ka
-                      ? "საჭიროების შემთხვევაში"
-                      : "When relevant"
-                  }
-                />
-
-                <EmergencyItem
-                  icon={<ShieldIcon />}
-                  title="Privacy Control"
-                  text={
-                    ka
-                      ? "თქვენ აკონტროლებთ მონაცემებს"
-                      : "You stay in control"
-                  }
-                />
-              </div>
-            </div>
+            )}
 
             <p className="emergencyDescription">
               {ka
@@ -466,29 +730,30 @@ export default function HomePage() {
                     ? "ჩემი ანგარიში"
                     : "My Account"
                   : ka
-                    ? "ანგარიშის შექმნა"
-                    : "Create Account"}
+                  ? homepage.primary_button_text
+                  : "Create Account"}
 
                 <ArrowIcon />
               </a>
 
-              <a href="#video" className="secondaryCta">
+              <a
+                href="#video"
+                className="secondaryCta"
+              >
                 {ka
-                  ? "როგორ მუშაობს"
+                  ? homepage.secondary_button_text
                   : "How it works"}
               </a>
             </div>
           </div>
 
-          {/* ==================================================
-              RIGHT — ECOSYSTEM
-          ================================================== */}
+          {/* =============================================
+              RIGHT
+          ============================================= */}
 
           <div className="ecosystem">
             <div className="orbit orbitOuter" />
             <div className="orbit orbitInner" />
-
-            {/* PHONE */}
 
             <div className="phone">
               <div className="phoneNotch" />
@@ -500,7 +765,10 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <span>QR RETURN</span>
+                    <span>
+                      QR RETURN
+                    </span>
+
                     <strong>
                       {ka
                         ? "მპოვნელის გვერდი"
@@ -514,7 +782,9 @@ export default function HomePage() {
                     <CheckIcon />
                   </div>
 
-                  <span>SCAN COMPLETE</span>
+                  <span>
+                    SCAN COMPLETE
+                  </span>
                 </div>
 
                 <div className="phoneCopy">
@@ -537,14 +807,18 @@ export default function HomePage() {
                     className="phonePrimary"
                   >
                     <ChatIcon />
-                    <span>Live Chat</span>
+                    <span>
+                      Live Chat
+                    </span>
                   </button>
 
                   <button type="button">
                     <LocationIcon />
 
                     <span>
-                      {ka ? "ლოკაცია" : "Location"}
+                      {ka
+                        ? "ლოკაცია"
+                        : "Location"}
                     </span>
                   </button>
                 </div>
@@ -561,56 +835,65 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* PRODUCTS */}
+            <div
+              className={
+                homepage.products_animation_enabled
+                  ? "productOrbit animated"
+                  : "productOrbit"
+              }
+            >
+              {products.map(
+                (item) => (
+                  <div
+                    key={item.id}
+                    className={`productBubble ${item.className}`}
+                  >
+                    <div className="productImage">
+                      {item.id === "keys" &&
+                      !item.image ? (
+                        <KeysScene />
+                      ) : (
+                        <img
+                          src={item.image}
+                          alt={
+                            ka
+                              ? item.label
+                              : item.en
+                          }
+                        />
+                      )}
 
-            <div className="productOrbit">
-              {products.map((item) => (
-                <div
-                  key={item.id}
-                  className={`productBubble ${item.className}`}
-                >
-                  <div className="productImage">
-                    {item.id === "keys" &&
-                    !item.customImage ? (
-                      <KeysScene />
-                    ) : (
-                      <img
-                        src={item.customImage}
-                        alt={
-                          ka
-                            ? item.customLabel
-                            : item.en
-                        }
-                      />
-                    )}
+                      <div className="imageShade" />
 
-                    <div className="imageShade" />
+                      <div
+                        className={`miniPhysicalTag ${item.id}`}
+                      >
+                        <span className="tagHole" />
+                        <MiniQr />
+                      </div>
 
-                    <div
-                      className={`miniPhysicalTag ${item.id}`}
-                    >
-                      <span className="tagHole" />
-                      <MiniQr />
+                      {item.id ===
+                        "luggage" && (
+                        <span className="airportBadge">
+                          AIRPORT
+                        </span>
+                      )}
                     </div>
 
-                    {item.id === "luggage" && (
-                      <span className="airportBadge">
-                        AIRPORT
-                      </span>
-                    )}
+                    <strong>
+                      {ka
+                        ? item.label
+                        : item.en}
+                    </strong>
                   </div>
-
-                  <strong>
-                    {ka
-                      ? item.customLabel
-                      : item.en}
-                  </strong>
-                </div>
-              ))}
+                )
+              )}
             </div>
 
             <div className="ecosystemCaption">
-              <span>QR RETURN</span>
+              <span>
+                QR RETURN
+              </span>
 
               <strong>
                 {ka
@@ -622,12 +905,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ======================================================
+      {/* =================================================
           VIDEO
-      ====================================================== */}
+      ================================================= */}
 
       {homepage.video_enabled && (
-        <section id="video" className="videoSection">
+        <section
+          id="video"
+          className="videoSection"
+        >
           <div className="shell">
             <div className="videoLayout">
               <div className="videoCopy">
@@ -637,46 +923,65 @@ export default function HomePage() {
 
                 <h2>
                   {ka
-                    ? "ერთი სკანი. პირდაპირი კავშირი."
+                    ? homepage.video_title
                     : "One scan. A direct connection."}
                 </h2>
 
                 <p>
                   {ka
-                    ? "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას."
-                    : "A short real-world video will show how a finder notices QR RETURN, scans it and starts connecting with the owner."}
+                    ? homepage.video_description
+                    : "See how a finder can scan QR RETURN and connect with the owner."}
                 </p>
               </div>
 
               <div className="videoCard">
-                <div className="videoBrand">
-                  <QrIcon />
-                  <span>
-                    QR RETURN PRODUCT DEMO
-                  </span>
-                </div>
+                {videoEmbedUrl ? (
+                  <iframe
+                    src={videoEmbedUrl}
+                    title="QR RETURN Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : homepage.video_url ? (
+                  <video
+                    src={
+                      homepage.video_url
+                    }
+                    controls
+                  />
+                ) : (
+                  <>
+                    <div className="videoBrand">
+                      <QrIcon />
 
-                <button
-                  type="button"
-                  className="playButton"
-                >
-                  <PlayIcon />
-                </button>
+                      <span>
+                        QR RETURN PRODUCT DEMO
+                      </span>
+                    </div>
 
-                <span className="videoSoon">
-                  {ka
-                    ? "ვიდეო დაემატება"
-                    : "Video coming soon"}
-                </span>
+                    <button
+                      type="button"
+                      className="playButton"
+                    >
+                      <PlayIcon />
+                    </button>
+
+                    <span className="videoSoon">
+                      {ka
+                        ? "ვიდეო დაემატება"
+                        : "Video coming soon"}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* ======================================================
-          4 STEPS
-      ====================================================== */}
+      {/* =================================================
+          FOUR STEPS
+      ================================================= */}
 
       {homepage.steps_enabled && (
         <section className="stepsSection">
@@ -688,7 +993,7 @@ export default function HomePage() {
 
               <h2>
                 {ka
-                  ? "დაბრუნების გზა ოთხ ნაბიჯში."
+                  ? homepage.steps_title
                   : "A clear return path in four steps."}
               </h2>
             </div>
@@ -697,10 +1002,14 @@ export default function HomePage() {
               <Step
                 number="01"
                 icon={<SearchIcon />}
-                title={ka ? "იპოვეს" : "Found"}
+                title={
+                  ka
+                    ? homepage.step_1_title
+                    : "Found"
+                }
                 text={
                   ka
-                    ? "მპოვნელი ხედავს QR RETURN კოდს."
+                    ? homepage.step_1_text
                     : "The finder sees the QR RETURN code."
                 }
               />
@@ -712,12 +1021,12 @@ export default function HomePage() {
                 icon={<ScanIcon />}
                 title={
                   ka
-                    ? "დაასკანერეს"
+                    ? homepage.step_2_title
                     : "Scanned"
                 }
                 text={
                   ka
-                    ? "აპის ჩამოტვირთვა საჭირო არ არის."
+                    ? homepage.step_2_text
                     : "No app download is required."
                 }
               />
@@ -729,12 +1038,12 @@ export default function HomePage() {
                 icon={<ChatIcon />}
                 title={
                   ka
-                    ? "დაგიკავშირდნენ"
+                    ? homepage.step_3_title
                     : "Connected"
                 }
                 text={
                   ka
-                    ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
+                    ? homepage.step_3_text
                     : "Live Chat, call or another contact method."
                 }
               />
@@ -746,12 +1055,12 @@ export default function HomePage() {
                 icon={<ReturnIcon />}
                 title={
                   ka
-                    ? "დაბრუნდა"
+                    ? homepage.step_4_title
                     : "Returned"
                 }
                 text={
                   ka
-                    ? "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება."
+                    ? homepage.step_4_text
                     : "Once connected, getting it back becomes easier."
                 }
               />
@@ -760,9 +1069,9 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ======================================================
+      {/* =================================================
           FEATURES
-      ====================================================== */}
+      ================================================= */}
 
       {homepage.features_enabled && (
         <section className="featuresSection">
@@ -774,7 +1083,7 @@ export default function HomePage() {
 
               <h2>
                 {ka
-                  ? "რაც საჭიროა — ზედმეტი სირთულის გარეშე."
+                  ? homepage.features_title
                   : "What you need — without unnecessary complexity."}
               </h2>
             </div>
@@ -783,10 +1092,14 @@ export default function HomePage() {
               <Feature
                 number="01"
                 icon={<ChatIcon />}
-                title="Live Chat"
+                title={
+                  ka
+                    ? homepage.feature_1_title
+                    : "Live Chat"
+                }
                 text={
                   ka
-                    ? "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე."
+                    ? homepage.feature_1_text
                     : "Connect directly without displaying your private phone number."
                 }
               />
@@ -796,13 +1109,13 @@ export default function HomePage() {
                 icon={<LocationIcon />}
                 title={
                   ka
-                    ? "ლოკაციის გაზიარება"
+                    ? homepage.feature_2_title
                     : "Location Sharing"
                 }
                 text={
                   ka
-                    ? "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ."
-                    : "The finder can share their location with one tap."
+                    ? homepage.feature_2_text
+                    : "The finder can share the location with one tap."
                 }
               />
 
@@ -811,12 +1124,12 @@ export default function HomePage() {
                 icon={<RewardIcon />}
                 title={
                   ka
-                    ? "მპოვნელის ჯილდო"
+                    ? homepage.feature_3_title
                     : "Finder Reward"
                 }
                 text={
                   ka
-                    ? "სურვილის შემთხვევაში შესთავაზეთ ჯილდო."
+                    ? homepage.feature_3_text
                     : "Optionally offer a reward for a safe return."
                 }
               />
@@ -824,10 +1137,14 @@ export default function HomePage() {
               <Feature
                 number="04"
                 icon={<ShieldIcon />}
-                title="Privacy Control"
+                title={
+                  ka
+                    ? homepage.feature_4_title
+                    : "Privacy Control"
+                }
                 text={
                   ka
-                    ? "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება."
+                    ? homepage.feature_4_text
                     : "You decide exactly what information is visible."
                 }
               />
@@ -836,9 +1153,9 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ======================================================
+      {/* =================================================
           RULES
-      ====================================================== */}
+      ================================================= */}
 
       {homepage.rules_enabled && (
         <section className="rulesSection">
@@ -850,7 +1167,7 @@ export default function HomePage() {
 
               <h2>
                 {ka
-                  ? "მარტივი თქვენთვის. კიდევ უფრო მარტივი მპოვნელისთვის."
+                  ? homepage.rules_title
                   : "Simple for you. Even simpler for the finder."}
               </h2>
             </div>
@@ -859,11 +1176,13 @@ export default function HomePage() {
               <Rule
                 number="01"
                 title={
-                  ka ? "აპის გარეშე" : "No App"
+                  ka
+                    ? homepage.rule_1_title
+                    : "No App"
                 }
                 text={
                   ka
-                    ? "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის."
+                    ? homepage.rule_1_text
                     : "The finder does not need to download an app or create an account."
                 }
               />
@@ -872,12 +1191,12 @@ export default function HomePage() {
                 number="02"
                 title={
                   ka
-                    ? "თქვენი ინფორმაცია"
+                    ? homepage.rule_2_title
                     : "Your Information"
                 }
                 text={
                   ka
-                    ? "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი."
+                    ? homepage.rule_2_text
                     : "You decide exactly what information can be shown."
                 }
               />
@@ -886,12 +1205,12 @@ export default function HomePage() {
                 number="03"
                 title={
                   ka
-                    ? "ერთი ანგარიში"
+                    ? homepage.rule_3_title
                     : "One Account"
                 }
                 text={
                   ka
-                    ? "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში."
+                    ? homepage.rule_3_text
                     : "Pets, belongings and Emergency ID in one place."
                 }
               />
@@ -900,57 +1219,61 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ======================================================
-          ACCOUNT
-      ====================================================== */}
+      {/* =================================================
+          ACCOUNT CTA
+      ================================================= */}
 
-      <section className="accountSection">
-        <div className="shell">
-          <div className="accountPanel">
-            <div className="accountIcon">
-              <UserIcon />
-            </div>
+      {homepage.account_section_enabled && (
+        <section className="accountSection">
+          <div className="shell">
+            <div className="accountPanel">
+              <div className="accountIcon">
+                <UserIcon />
+              </div>
 
-            <div className="accountCopy">
-              <span>ONE OWNER ACCOUNT</span>
+              <div className="accountCopy">
+                <span>
+                  ONE OWNER ACCOUNT
+                </span>
 
-              <h2>
-                {ka
-                  ? "ყველაფერი ერთი ანგარიშიდან."
-                  : "Everything from one account."}
-              </h2>
+                <h2>
+                  {ka
+                    ? homepage.account_title
+                    : "Everything from one account."}
+                </h2>
 
-              <p>
-                {ka
-                  ? "მართეთ QR პროფილები, დაკარგვის რეჟიმი, Live Chat და Emergency ID."
-                  : "Manage QR profiles, lost mode, Live Chat and Emergency ID."}
-              </p>
-            </div>
+                <p>
+                  {ka
+                    ? homepage.account_description
+                    : "Manage QR profiles, lost mode, Live Chat and Emergency ID."}
+                </p>
+              </div>
 
-            <a
-              href={
-                isLoggedIn
-                  ? "/account"
-                  : "/account/register"
-              }
-            >
-              {isLoggedIn
-                ? ka
-                  ? "ჩემი ანგარიში"
-                  : "My Account"
-                : ka
-                  ? "ანგარიშის შექმნა"
+              <a
+                href={
+                  isLoggedIn
+                    ? "/account"
+                    : "/account/register"
+                }
+              >
+                {isLoggedIn
+                  ? ka
+                    ? "ჩემი ანგარიში"
+                    : "My Account"
+                  : ka
+                  ? homepage.primary_button_text
                   : "Create Account"}
 
-              <ArrowIcon />
-            </a>
+                <ArrowIcon />
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ======================================================
+      {/* =================================================
           CONTACT
-      ====================================================== */}
+      ================================================= */}
 
       {homepage.contact_enabled && (
         <section className="contactSection">
@@ -962,34 +1285,44 @@ export default function HomePage() {
 
               <h2>
                 {ka
-                  ? "დაგვიკავშირდით"
+                  ? homepage.contact_title
                   : "Contact us"}
               </h2>
 
               <p>
                 {ka
-                  ? "კითხვა გაქვთ QR RETURN-ის ან Emergency ID-ის შესახებ? მოგვწერეთ."
+                  ? homepage.contact_description
                   : "Questions about QR RETURN or Emergency ID? Send us a message."}
               </p>
             </div>
 
-            <a href="mailto:hello@qrreturn.com">
-              {ka ? "მოგვწერეთ" : "Email us"}
+            <a
+              href={`mailto:${
+                homepage.contact_email ||
+                "hello@qrreturn.com"
+              }`}
+            >
+              {ka
+                ? "მოგვწერეთ"
+                : "Email us"}
+
               <ArrowIcon />
             </a>
           </div>
         </section>
       )}
 
-      {/* ======================================================
-          LIVE CHAT — DON'T REMOVE
-      ====================================================== */}
+      {/* =================================================
+          LIVE CHAT
+      ================================================= */}
 
-      <SupportLauncher language={language} />
+      <SupportLauncher
+        language={language}
+      />
 
-      {/* ======================================================
+      {/* =================================================
           FOOTER
-      ====================================================== */}
+      ================================================= */}
 
       <footer className="footer">
         <div className="footerInner">
@@ -999,7 +1332,10 @@ export default function HomePage() {
             </div>
 
             <section>
-              <strong>QR RETURN</strong>
+              <strong>
+                QR RETURN
+              </strong>
+
               <span>
                 SMART LOST &amp; FOUND
               </span>
@@ -1009,11 +1345,13 @@ export default function HomePage() {
           <div className="footerLinks">
             <a href="#video">
               {ka
-                ? "როგორ მუშაობს"
+                ? homepage.secondary_button_text
                 : "How it works"}
             </a>
 
-            <span>Emergency ID</span>
+            <span>
+              Emergency ID
+            </span>
 
             <span>
               {ka
@@ -1022,7 +1360,9 @@ export default function HomePage() {
             </span>
 
             <span>
-              {ka ? "პირობები" : "Terms"}
+              {ka
+                ? "პირობები"
+                : "Terms"}
             </span>
           </div>
 
@@ -1031,10 +1371,6 @@ export default function HomePage() {
           </span>
         </div>
       </footer>
-
-      {/* ======================================================
-          CSS
-      ====================================================== */}
 
       <style jsx>{`
         :global(*) {
@@ -1076,7 +1412,7 @@ export default function HomePage() {
           letter-spacing: 1.7px;
         }
 
-        /* ================= HEADER ================= */
+        /* HEADER */
 
         .header {
           width: calc(100% - 56px);
@@ -1208,13 +1544,13 @@ export default function HomePage() {
           color: #c84a50;
         }
 
-        /* ================= HERO ================= */
+        /* HERO */
 
         .hero {
           min-height: 760px;
           position: relative;
           overflow: hidden;
-          background:
+          background-image:
             radial-gradient(
               circle at 88% 12%,
               rgba(49, 89, 137, 0.07),
@@ -1224,12 +1560,6 @@ export default function HomePage() {
               circle at 7% 89%,
               rgba(198, 65, 75, 0.05),
               transparent 25%
-            ),
-            linear-gradient(
-              120deg,
-              #fbfaf7 0%,
-              #f6f6f3 52%,
-              #f1f3f4 100%
             );
         }
 
@@ -1244,12 +1574,8 @@ export default function HomePage() {
           height: 520px;
           top: -280px;
           right: -220px;
-          background: rgba(
-            43,
-            93,
-            150,
-            0.045
-          );
+          background:
+            rgba(43, 93, 150, 0.045);
         }
 
         .glowRed {
@@ -1257,12 +1583,8 @@ export default function HomePage() {
           height: 360px;
           bottom: -190px;
           left: -180px;
-          background: rgba(
-            198,
-            67,
-            76,
-            0.04
-          );
+          background:
+            rgba(198, 67, 76, 0.04);
         }
 
         .heroInner {
@@ -1278,8 +1600,6 @@ export default function HomePage() {
           position: relative;
           z-index: 2;
         }
-
-        /* ================= EMERGENCY ================= */
 
         .emergencyColumn {
           max-width: 580px;
@@ -1310,11 +1630,6 @@ export default function HomePage() {
           max-width: 565px;
           margin: 22px 0 0;
           color: #17212b;
-          font-size: clamp(
-            37px,
-            3.9vw,
-            49px
-          );
           line-height: 1.07;
           letter-spacing: -2.4px;
           font-weight: 690;
@@ -1345,12 +1660,8 @@ export default function HomePage() {
           left: 50px;
           bottom: 18px;
           border-radius: 50%;
-          background: rgba(
-            27,
-            37,
-            49,
-            0.09
-          );
+          background:
+            rgba(27, 37, 49, 0.09);
           filter: blur(13px);
         }
 
@@ -1369,9 +1680,6 @@ export default function HomePage() {
           flex: 1;
           position: relative;
           overflow: hidden;
-          box-shadow:
-            inset 0 1px
-            rgba(255, 255, 255, 0.25);
         }
 
         .redStrap {
@@ -1403,12 +1711,13 @@ export default function HomePage() {
           left: 15%;
           top: 50%;
           border-radius: 99px;
-          background: rgba(
-            255,
-            255,
-            255,
-            0.18
-          );
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.18
+            );
         }
 
         .braceletPlate {
@@ -1443,7 +1752,6 @@ export default function HomePage() {
           color: #a44045;
           font-size: 7px;
           font-weight: 900;
-          letter-spacing: 0.55px;
         }
 
         .tinyCross {
@@ -1474,14 +1782,12 @@ export default function HomePage() {
         .plateBrand strong {
           color: #27323d;
           font-size: 6px;
-          letter-spacing: 0.5px;
         }
 
         .plateBrand span {
           margin-top: 2px;
           color: #8c949c;
           font-size: 4px;
-          letter-spacing: 0.3px;
         }
 
         /* PROFILE */
@@ -1491,16 +1797,10 @@ export default function HomePage() {
           border: 1px solid #e0e3e6;
           border-radius: 19px;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.87
-            );
+            rgba(255, 255, 255, 0.87);
           box-shadow:
             0 14px 36px
             rgba(31, 40, 53, 0.045);
-          backdrop-filter: blur(14px);
         }
 
         .profileTop {
@@ -1520,7 +1820,6 @@ export default function HomePage() {
           color: #c94a50;
           font-size: 7px;
           font-weight: 900;
-          letter-spacing: 0.9px;
         }
 
         .profileTop > div:first-child strong {
@@ -1589,9 +1888,6 @@ export default function HomePage() {
         .primaryCta {
           color: white;
           background: #202b37;
-          box-shadow:
-            0 8px 20px
-            rgba(32, 43, 55, 0.11);
         }
 
         .primaryCta :global(svg) {
@@ -1600,18 +1896,12 @@ export default function HomePage() {
 
         .secondaryCta {
           color: #4d5865;
-          border:
-            1px solid #d9dde1;
+          border: 1px solid #d9dde1;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.62
-            );
+            rgba(255,255,255,.65);
         }
 
-        /* ================= ECOSYSTEM ================= */
+        /* ECOSYSTEM */
 
         .ecosystem {
           width: 590px;
@@ -1634,7 +1924,7 @@ export default function HomePage() {
           height: 500px;
           border:
             1px solid
-            rgba(86, 104, 126, 0.11);
+            rgba(86,104,126,.11);
         }
 
         .orbitInner {
@@ -1642,7 +1932,7 @@ export default function HomePage() {
           height: 385px;
           border:
             1px dashed
-            rgba(86, 104, 126, 0.08);
+            rgba(86,104,126,.08);
         }
 
         /* PHONE */
@@ -1664,7 +1954,7 @@ export default function HomePage() {
             );
           box-shadow:
             0 32px 70px
-            rgba(24, 33, 44, 0.2);
+            rgba(24,33,44,.2);
           transform:
             translate(-50%, -50%);
         }
@@ -1678,7 +1968,8 @@ export default function HomePage() {
           z-index: 4;
           border-radius: 99px;
           background: #05080c;
-          transform: translateX(-50%);
+          transform:
+            translateX(-50%);
         }
 
         .phoneScreen {
@@ -1722,7 +2013,6 @@ export default function HomePage() {
           color: #c94a50;
           font-size: 6px;
           font-weight: 900;
-          letter-spacing: 0.7px;
         }
 
         .phoneHeader strong {
@@ -1757,7 +2047,6 @@ export default function HomePage() {
           color: #83909c;
           font-size: 6px;
           font-weight: 900;
-          letter-spacing: 1px;
         }
 
         .phoneCopy {
@@ -1769,14 +2058,12 @@ export default function HomePage() {
           display: block;
           color: #27323d;
           font-size: 14px;
-          line-height: 1.3;
         }
 
         .phoneCopy p {
           margin: 6px 0 0;
           color: #7d8793;
           font-size: 8px;
-          line-height: 1.5;
         }
 
         .phoneButtons {
@@ -1793,7 +2080,8 @@ export default function HomePage() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           border:
             1px solid #e0e4e7;
           border-radius: 10px;
@@ -1836,6 +2124,9 @@ export default function HomePage() {
         .productOrbit {
           position: absolute;
           inset: 0;
+        }
+
+        .productOrbit.animated {
           animation:
             productMovement
             18s
@@ -1866,17 +2157,12 @@ export default function HomePage() {
           overflow: hidden;
           border:
             4px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.95
-            );
+            rgba(255,255,255,.95);
           border-radius: 18px;
           background: #e1e4e7;
           box-shadow:
             0 13px 28px
-            rgba(31, 41, 54, 0.11);
+            rgba(31,41,54,.11);
         }
 
         .productImage > img {
@@ -1892,7 +2178,7 @@ export default function HomePage() {
             linear-gradient(
               180deg,
               transparent 58%,
-              rgba(7, 11, 16, 0.13)
+              rgba(7,11,16,.13)
             );
         }
 
@@ -1903,24 +2189,13 @@ export default function HomePage() {
           padding: 5px 8px;
           border:
             1px solid
-            rgba(
-              221,
-              225,
-              228,
-              0.92
-            );
+            rgba(221,225,228,.92);
           border-radius: 999px;
           color: #465260;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.9
-            );
+            rgba(255,255,255,.9);
           font-size: 8px;
           line-height: 1.3;
-          font-weight: 800;
         }
 
         .miniPhysicalTag {
@@ -1933,8 +2208,8 @@ export default function HomePage() {
           background: white;
           box-shadow:
             0 4px 10px
-            rgba(0, 0, 0, 0.13);
-          transform: scale(0.72);
+            rgba(0,0,0,.13);
+          transform: scale(.72);
         }
 
         .tagHole {
@@ -1953,7 +2228,7 @@ export default function HomePage() {
           bottom: -3px;
           transform:
             translateX(-50%)
-            scale(0.7);
+            scale(.7);
         }
 
         .miniPhysicalTag.keys,
@@ -1967,7 +2242,7 @@ export default function HomePage() {
           left: 50%;
           transform:
             translateX(-50%)
-            scale(0.72);
+            scale(.72);
         }
 
         .miniPhysicalTag.bag {
@@ -1983,12 +2258,7 @@ export default function HomePage() {
           border-radius: 999px;
           color: #42505f;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.88
-            );
+            rgba(255,255,255,.88);
           font-size: 5px;
           font-weight: 900;
         }
@@ -2028,7 +2298,8 @@ export default function HomePage() {
           left: 50%;
           bottom: 0;
           text-align: center;
-          transform: translateX(-50%);
+          transform:
+            translateX(-50%);
         }
 
         .ecosystemCaption span,
@@ -2040,7 +2311,6 @@ export default function HomePage() {
           color: #c94a50;
           font-size: 6px;
           font-weight: 900;
-          letter-spacing: 1px;
         }
 
         .ecosystemCaption strong {
@@ -2049,7 +2319,7 @@ export default function HomePage() {
           font-size: 8px;
         }
 
-        /* ================= VIDEO ================= */
+        /* VIDEO */
 
         .videoSection {
           padding: 90px 0;
@@ -2059,7 +2329,7 @@ export default function HomePage() {
         .videoLayout {
           display: grid;
           grid-template-columns:
-            0.75fr 1.25fr;
+            .75fr 1.25fr;
           align-items: center;
           gap: 65px;
         }
@@ -2068,11 +2338,8 @@ export default function HomePage() {
         .sectionHeading h2 {
           margin: 11px 0 0;
           color: #18222c;
-          font-size: clamp(
-            32px,
-            3.7vw,
-            43px
-          );
+          font-size:
+            clamp(32px,3.7vw,43px);
           line-height: 1.07;
           letter-spacing: -2px;
           font-weight: 670;
@@ -2088,27 +2355,26 @@ export default function HomePage() {
         .videoCard {
           min-height: 340px;
           position: relative;
+          overflow: hidden;
           display: grid;
           place-items: center;
           border:
             1px solid #e0e4e7;
           border-radius: 24px;
           background:
-            radial-gradient(
-              circle at 80% 10%,
-              rgba(
-                50,
-                89,
-                140,
-                0.055
-              ),
-              transparent 28%
-            ),
             linear-gradient(
               135deg,
               #eef1f3,
               #fafaf8
             );
+        }
+
+        .videoCard iframe,
+        .videoCard video {
+          width: 100%;
+          height: 340px;
+          border: 0;
+          object-fit: cover;
         }
 
         .videoBrand {
@@ -2136,15 +2402,6 @@ export default function HomePage() {
           border-radius: 50%;
           color: white;
           background: #202b37;
-          box-shadow:
-            0 14px 30px
-            rgba(
-              32,
-              43,
-              55,
-              0.15
-            );
-          cursor: pointer;
         }
 
         .playButton :global(svg) {
@@ -2158,7 +2415,7 @@ export default function HomePage() {
           font-size: 8px;
         }
 
-        /* ================= STEPS ================= */
+        /* STEPS */
 
         .stepsSection {
           padding: 90px 0;
@@ -2185,7 +2442,7 @@ export default function HomePage() {
           background: #d5dade;
         }
 
-        /* ================= FEATURES ================= */
+        /* FEATURES */
 
         .featuresSection {
           padding: 88px 0;
@@ -2197,47 +2454,32 @@ export default function HomePage() {
           color: #df8c90;
           font-size: 7px;
           font-weight: 900;
-          letter-spacing: 1.6px;
         }
 
         .featuresHeading h2 {
           max-width: 730px;
           margin: 10px 0 0;
           color: white;
-          font-size: clamp(
-            31px,
-            3.6vw,
-            42px
-          );
+          font-size:
+            clamp(31px,3.6vw,42px);
           line-height: 1.07;
           letter-spacing: -1.9px;
-          font-weight: 650;
         }
 
         .features {
           margin-top: 40px;
           display: grid;
           grid-template-columns:
-            repeat(4, 1fr);
+            repeat(4,1fr);
           border-top:
             1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.1
-            );
+            rgba(255,255,255,.1);
           border-bottom:
             1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.1
-            );
+            rgba(255,255,255,.1);
         }
 
-        /* ================= RULES ================= */
+        /* RULES */
 
         .rulesSection {
           padding: 86px 0;
@@ -2248,14 +2490,14 @@ export default function HomePage() {
           margin-top: 38px;
           display: grid;
           grid-template-columns:
-            repeat(3, 1fr);
+            repeat(3,1fr);
           border-top:
             1px solid #e0e3e6;
           border-bottom:
             1px solid #e0e3e6;
         }
 
-        /* ================= ACCOUNT ================= */
+        /* ACCOUNT */
 
         .accountSection {
           padding: 68px 0;
@@ -2293,7 +2535,6 @@ export default function HomePage() {
           color: #c94a50;
           font-size: 7px;
           font-weight: 900;
-          letter-spacing: 1.2px;
         }
 
         .accountCopy h2 {
@@ -2307,7 +2548,6 @@ export default function HomePage() {
           margin: 8px 0 0;
           color: #707a85;
           font-size: 10px;
-          line-height: 1.6;
         }
 
         .accountPanel > a {
@@ -2328,7 +2568,7 @@ export default function HomePage() {
           width: 12px;
         }
 
-        /* ================= CONTACT ================= */
+        /* CONTACT */
 
         .contactSection {
           padding: 67px 0;
@@ -2338,7 +2578,8 @@ export default function HomePage() {
         .contactInner {
           display: flex;
           align-items: flex-end;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 45px;
         }
 
@@ -2373,7 +2614,7 @@ export default function HomePage() {
           width: 12px;
         }
 
-        /* ================= FOOTER ================= */
+        /* FOOTER */
 
         .footer {
           color: white;
@@ -2388,7 +2629,8 @@ export default function HomePage() {
           padding: 33px 0;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 30px;
         }
 
@@ -2407,7 +2649,8 @@ export default function HomePage() {
           background: #c94a50;
         }
 
-        .footerBrand > div :global(svg) {
+        .footerBrand > div
+        :global(svg) {
           width: 18px;
         }
 
@@ -2424,7 +2667,6 @@ export default function HomePage() {
           margin-top: 3px;
           color: #707a87;
           font-size: 5px;
-          font-weight: 900;
         }
 
         .footerLinks {
@@ -2444,8 +2686,6 @@ export default function HomePage() {
           font-size: 7px;
         }
 
-        /* ================= TABLET ================= */
-
         @media (max-width: 1080px) {
           .heroInner {
             grid-template-columns: 1fr;
@@ -2456,10 +2696,6 @@ export default function HomePage() {
             max-width: 720px;
           }
 
-          .ecosystem {
-            margin-top: 20px;
-          }
-
           .videoLayout {
             grid-template-columns: 1fr;
           }
@@ -2468,7 +2704,7 @@ export default function HomePage() {
         @media (max-width: 900px) {
           .steps {
             grid-template-columns:
-              repeat(2, 1fr);
+              repeat(2,1fr);
             gap: 28px;
           }
 
@@ -2478,7 +2714,7 @@ export default function HomePage() {
 
           .features {
             grid-template-columns:
-              repeat(2, 1fr);
+              repeat(2,1fr);
           }
 
           .rules {
@@ -2497,17 +2733,16 @@ export default function HomePage() {
 
           .contactInner,
           .footerInner {
-            align-items: flex-start;
+            align-items:
+              flex-start;
             flex-direction: column;
           }
         }
 
-        /* ================= MOBILE ================= */
-
         @media (max-width: 650px) {
           .header {
-            width: calc(100% - 18px);
-            min-height: 70px;
+            width:
+              calc(100% - 18px);
           }
 
           .brandText span,
@@ -2519,21 +2754,10 @@ export default function HomePage() {
             display: none;
           }
 
-          .adminBtn,
-          .accountBtn,
-          .loginBtn {
-            min-height: 35px;
-            padding: 0 9px;
-            font-size: 8px;
-          }
-
           .heroInner,
           .shell {
-            width: calc(100% - 28px);
-          }
-
-          .hero {
-            min-height: unset;
+            width:
+              calc(100% - 28px);
           }
 
           .heroInner {
@@ -2541,8 +2765,11 @@ export default function HomePage() {
             padding: 46px 0 74px;
           }
 
+          .hero {
+            min-height: unset;
+          }
+
           .emergencyColumn h1 {
-            font-size: 35px;
             letter-spacing: -1.9px;
           }
 
@@ -2550,17 +2777,14 @@ export default function HomePage() {
             font-size: 13px;
           }
 
-          .braceletArea {
-            min-height: 155px;
-          }
-
           .bracelet {
             width: 410px;
             transform:
               translateX(-24px)
               rotate(-4deg)
-              scale(0.82);
-            transform-origin: left center;
+              scale(.82);
+            transform-origin:
+              left center;
           }
 
           .profileGrid {
@@ -2594,10 +2818,6 @@ export default function HomePage() {
           .phone {
             width: 155px;
             height: 320px;
-          }
-
-          .phoneStatus {
-            margin-top: 23px;
           }
 
           .productBubble {
@@ -2651,22 +2871,14 @@ export default function HomePage() {
             padding: 68px 0;
           }
 
-          .videoCopy h2,
-          .sectionHeading h2 {
-            font-size: 31px;
-          }
-
-          .videoCard {
-            min-height: 270px;
-          }
-
           .steps,
           .features {
             grid-template-columns: 1fr;
           }
 
           .footerInner {
-            width: calc(100% - 28px);
+            width:
+              calc(100% - 28px);
           }
 
           .footerLinks {
@@ -2678,9 +2890,79 @@ export default function HomePage() {
   );
 }
 
-/* =========================================================
+/* =====================================================
+   VIDEO URL
+===================================================== */
+
+function getVideoEmbedUrl(
+  url: string
+) {
+  if (!url) return "";
+
+  try {
+    const parsed =
+      new URL(url);
+
+    if (
+      parsed.hostname.includes(
+        "youtube.com"
+      )
+    ) {
+      const id =
+        parsed.searchParams.get("v");
+
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+
+      if (
+        parsed.pathname.startsWith(
+          "/embed/"
+        )
+      ) {
+        return url;
+      }
+    }
+
+    if (
+      parsed.hostname ===
+      "youtu.be"
+    ) {
+      const id =
+        parsed.pathname.replace(
+          "/",
+          ""
+        );
+
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+    }
+
+    if (
+      parsed.hostname.includes(
+        "vimeo.com"
+      )
+    ) {
+      const id =
+        parsed.pathname
+          .split("/")
+          .filter(Boolean)[0];
+
+      if (id) {
+        return `https://player.vimeo.com/video/${id}`;
+      }
+    }
+
+    return "";
+  } catch {
+    return "";
+  }
+}
+
+/* =====================================================
    EMERGENCY ITEM
-========================================================= */
+===================================================== */
 
 function EmergencyItem({
   icon,
@@ -2698,8 +2980,13 @@ function EmergencyItem({
       </div>
 
       <div>
-        <strong>{title}</strong>
-        <span>{text}</span>
+        <strong>
+          {title}
+        </strong>
+
+        <span>
+          {text}
+        </span>
       </div>
 
       <style jsx>{`
@@ -2745,16 +3032,15 @@ function EmergencyItem({
           margin-top: 3px;
           color: #87909a;
           font-size: 8px;
-          line-height: 1.35;
         }
       `}</style>
     </div>
   );
 }
 
-/* =========================================================
+/* =====================================================
    STEP
-========================================================= */
+===================================================== */
 
 function Step({
   number,
@@ -2775,7 +3061,9 @@ function Step({
         {icon}
       </div>
 
-      <strong>{title}</strong>
+      <strong>
+        {title}
+      </strong>
 
       <p>{text}</p>
 
@@ -2821,9 +3109,9 @@ function Step({
   );
 }
 
-/* =========================================================
+/* =====================================================
    FEATURE
-========================================================= */
+===================================================== */
 
 function Feature({
   number,
@@ -2840,11 +3128,11 @@ function Feature({
     <article className="feature">
       <div className="featureTop">
         <span>{number}</span>
-
         <div>{icon}</div>
       </div>
 
       <h3>{title}</h3>
+
       <p>{text}</p>
 
       <style jsx>{`
@@ -2853,12 +3141,7 @@ function Feature({
           padding: 21px 19px;
           border-right:
             1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.1
-            );
+            rgba(255,255,255,.1);
         }
 
         .feature:last-child {
@@ -2868,7 +3151,8 @@ function Feature({
         .featureTop {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
         }
 
         .featureTop > span {
@@ -2885,16 +3169,7 @@ function Feature({
           border-radius: 10px;
           color: #df8c90;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.06
-            );
-        }
-
-        .featureTop > div :global(svg) {
-          width: 15px;
+            rgba(255,255,255,.06);
         }
 
         h3 {
@@ -2909,28 +3184,14 @@ function Feature({
           font-size: 9px;
           line-height: 1.65;
         }
-
-        @media (max-width: 900px) {
-          .feature {
-            border-right: 0;
-            border-bottom:
-              1px solid
-              rgba(
-                255,
-                255,
-                255,
-                0.1
-              );
-          }
-        }
       `}</style>
     </article>
   );
 }
 
-/* =========================================================
+/* =====================================================
    RULE
-========================================================= */
+===================================================== */
 
 function Rule({
   number,
@@ -2945,7 +3206,9 @@ function Rule({
     <article className="rule">
       <span>{number}</span>
 
-      <strong>{title}</strong>
+      <strong>
+        {title}
+      </strong>
 
       <p>{text}</p>
 
@@ -2980,22 +3243,14 @@ function Rule({
           font-size: 10px;
           line-height: 1.65;
         }
-
-        @media (max-width: 900px) {
-          .rule {
-            border-right: 0;
-            border-bottom:
-              1px solid #e0e3e6;
-          }
-        }
       `}</style>
     </article>
   );
 }
 
-/* =========================================================
-   KEYS VISUAL
-========================================================= */
+/* =====================================================
+   KEYS
+===================================================== */
 
 function KeysScene() {
   return (
@@ -3033,7 +3288,8 @@ function KeysScene() {
           position: absolute;
           left: 17px;
           top: 27px;
-          transform: rotate(-19deg);
+          transform:
+            rotate(-19deg);
         }
 
         .keyCircle {
@@ -3071,7 +3327,8 @@ function KeysScene() {
           position: absolute;
           right: 20px;
           bottom: 11px;
-          transform: rotate(12deg);
+          transform:
+            rotate(12deg);
         }
 
         .carRing {
@@ -3091,22 +3348,12 @@ function KeysScene() {
           padding: 12px 9px;
           display: grid;
           gap: 6px;
-          position: relative;
-          z-index: 2;
           border-radius: 11px;
           background:
             linear-gradient(
               145deg,
               #606a75,
               #2b3138
-            );
-          box-shadow:
-            0 8px 15px
-            rgba(
-              24,
-              30,
-              37,
-              0.18
             );
         }
 
@@ -3120,9 +3367,9 @@ function KeysScene() {
   );
 }
 
-/* =========================================================
+/* =====================================================
    ICONS
-========================================================= */
+===================================================== */
 
 function QrIcon() {
   return (
@@ -3157,7 +3404,6 @@ function QrIcon() {
       />
 
       <path d="M14 14h3v3h3v4h-6z" />
-      <path d="M12 4v4M12 12v2M11 18h2M18 12h3" />
     </svg>
   );
 }
@@ -3172,7 +3418,6 @@ function AdminIcon() {
     >
       <path d="M12 2.8 19 6v5.3c0 4.6-2.4 7.7-7 9.9-4.6-2.2-7-5.3-7-9.9V6z" />
       <circle cx="12" cy="10" r="2.2" />
-      <path d="M8.7 16c.6-1.8 1.7-2.7 3.3-2.7s2.7.9 3.3 2.7" />
     </svg>
   );
 }
@@ -3185,7 +3430,12 @@ function UserIcon() {
       stroke="currentColor"
       strokeWidth="1.7"
     >
-      <circle cx="12" cy="8" r="4" />
+      <circle
+        cx="12"
+        cy="8"
+        r="4"
+      />
+
       <path d="M4.5 21c.8-4.1 3.3-6.3 7.5-6.3s6.7 2.2 7.5 6.3" />
     </svg>
   );
@@ -3296,7 +3546,12 @@ function SearchIcon() {
       stroke="currentColor"
       strokeWidth="1.7"
     >
-      <circle cx="10.5" cy="10.5" r="6" />
+      <circle
+        cx="10.5"
+        cy="10.5"
+        r="6"
+      />
+
       <path d="m15 15 5 5" />
     </svg>
   );
@@ -3337,8 +3592,6 @@ function ArrowIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
       <path d="M5 12h14" />
       <path d="m14 7 5 5-5 5" />
@@ -3353,8 +3606,6 @@ function CheckIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
       <path d="m6 12 4 4 8-8" />
     </svg>
@@ -3374,9 +3625,9 @@ function PlayIcon() {
   );
 }
 
-/* =========================================================
-   QR VISUAL
-========================================================= */
+/* =====================================================
+   QR VISUALS
+===================================================== */
 
 function QrCode({
   size = 64,
@@ -3415,12 +3666,10 @@ function QrCode({
           key={index}
           style={{
             display: "block",
-            borderRadius: 1,
-            background: dark.includes(
-              index
-            )
-              ? "#17212b"
-              : "#dfe4e8",
+            background:
+              dark.includes(index)
+                ? "#17212b"
+                : "#dfe4e8",
           }}
         />
       ))}
@@ -3454,11 +3703,10 @@ function MiniQr() {
           key={index}
           style={{
             display: "block",
-            background: dark.includes(
-              index
-            )
-              ? "#17212b"
-              : "#dfe4e8",
+            background:
+              dark.includes(index)
+                ? "#17212b"
+                : "#dfe4e8",
           }}
         />
       ))}
