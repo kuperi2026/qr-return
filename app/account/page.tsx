@@ -40,7 +40,9 @@ export default function AccountPage() {
 
   const [loading, setLoading] = useState(true);
   const [missingOwner, setMissingOwner] = useState(false);
+
   const [error, setError] = useState("");
+  const [errorStage, setErrorStage] = useState("");
 
   const ka = lang === "ka";
 
@@ -51,16 +53,22 @@ export default function AccountPage() {
   async function loadAccount() {
     setLoading(true);
     setError("");
+    setErrorStage("");
     setMissingOwner(false);
 
     try {
+      // =====================================================
+      // 1. AUTH USER
+      // =====================================================
+
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (userError) {
-        throw userError;
+        setErrorStage("AUTH");
+        throw new Error(userError.message);
       }
 
       if (!user) {
@@ -68,14 +76,14 @@ export default function AccountPage() {
         return;
       }
 
-      /*
-       * 1. OWNER ACCOUNT
-       *
-       * Auth user შეიძლება არსებობდეს, მაგრამ owner_accounts-ში
-       * პროფილი ჯერ არ ჰქონდეს. ასეთ შემთხვევაში ცარიელ ჩანაწერს
-       * აღარ ვქმნით ავტომატურად.
-       */
-      const { data: ownerData, error: ownerError } = await supabase
+      // =====================================================
+      // 2. OWNER ACCOUNT
+      // =====================================================
+
+      const {
+        data: ownerData,
+        error: ownerError,
+      } = await supabase
         .from("owner_accounts")
         .select(
           "user_id, first_name, last_name, email, phone, address, photo"
@@ -84,21 +92,25 @@ export default function AccountPage() {
         .maybeSingle();
 
       if (ownerError) {
-        throw ownerError;
+        setErrorStage("OWNER");
+        throw new Error(ownerError.message);
       }
 
       if (!ownerData) {
         setMissingOwner(true);
-        setLoading(false);
         return;
       }
 
       setOwner(ownerData as OwnerAccount);
 
-      /*
-       * 2. QR PROFILES
-       */
-      const { data: profileData, error: profileError } = await supabase
+      // =====================================================
+      // 3. QR PROFILES
+      // =====================================================
+
+      const {
+        data: profileData,
+        error: profileError,
+      } = await supabase
         .from("item")
         .select(
           "id, item_name, item_type, pet_type, photo, tag_code, active"
@@ -106,22 +118,28 @@ export default function AccountPage() {
         .eq("owner_id", user.id);
 
       if (profileError) {
-        throw profileError;
+        setErrorStage("ITEM");
+        throw new Error(profileError.message);
       }
 
       setProfiles((profileData ?? []) as QrProfile[]);
 
-      /*
-       * 3. SECONDARY ADMIN
-       */
-      const { data: adminData, error: adminError } = await supabase
+      // =====================================================
+      // 4. SECONDARY ADMIN
+      // =====================================================
+
+      const {
+        data: adminData,
+        error: adminError,
+      } = await supabase
         .from("owner_admins")
         .select("id, admin_email, active")
         .eq("owner_id", user.id)
         .maybeSingle();
 
       if (adminError) {
-        throw adminError;
+        setErrorStage("ADMIN");
+        throw new Error(adminError.message);
       }
 
       setAdmin((adminData ?? null) as AdminRecord | null);
@@ -200,17 +218,119 @@ export default function AccountPage() {
 
         <strong>QR RETURN</strong>
 
-        <p>{ka ? "იტვირთება..." : "Loading..."}</p>
+        <p>
+          {ka
+            ? "ანგარიში იტვირთება..."
+            : "Loading account..."}
+        </p>
 
         <Styles />
       </main>
     );
   }
 
-  /*
-   * Auth user არსებობს,
-   * მაგრამ owner_accounts ჩანაწერი არ არსებობს.
-   */
+  if (error) {
+    return (
+      <main className="errorPage">
+        <header className="header">
+          <a href="/" className="brand">
+            <div className="logo">QR</div>
+
+            <div>
+              <strong>QR RETURN</strong>
+              <small>OWNER ACCOUNT</small>
+            </div>
+          </a>
+
+          <div className="languages">
+            <button
+              type="button"
+              className={ka ? "active" : ""}
+              onClick={() => setLang("ka")}
+            >
+              GEO
+            </button>
+
+            <button
+              type="button"
+              className={!ka ? "active" : ""}
+              onClick={() => setLang("en")}
+            >
+              ENG
+            </button>
+          </div>
+        </header>
+
+        <section className="errorWrap">
+          <div className="diagnosticCard">
+            <div className="diagnosticIcon">⚠️</div>
+
+            <div className="eyebrow">
+              QR RETURN DIAGNOSTIC
+            </div>
+
+            <h1>
+              {ka
+                ? "ანგარიშის ჩატვირთვის შეცდომა"
+                : "Account loading error"}
+            </h1>
+
+            <div className="errorStageBox">
+              <span>
+                {ka
+                  ? "შეცდომის ეტაპი"
+                  : "Error stage"}
+              </span>
+
+              <strong>
+                {errorStage || "UNKNOWN"}
+              </strong>
+            </div>
+
+            <div className="realError">
+              <span>
+                {ka
+                  ? "Supabase პასუხი"
+                  : "Supabase response"}
+              </span>
+
+              <code>{error}</code>
+            </div>
+
+            <p>
+              {ka
+                ? "ეს ტექსტი ზუსტად გვაჩვენებს რომელი მოთხოვნა ვერ სრულდება. გამომიგზავნეთ ზუსტად ეს error."
+                : "This message shows exactly which request is failing. Send me this exact error."}
+            </p>
+
+            <div className="diagnosticActions">
+              <button
+                type="button"
+                className="primaryAction"
+                onClick={() => void loadAccount()}
+              >
+                ↻{" "}
+                {ka
+                  ? "თავიდან ცდა"
+                  : "Try again"}
+              </button>
+
+              <button
+                type="button"
+                className="secondaryAction"
+                onClick={handleLogout}
+              >
+                {ka ? "გასვლა" : "Sign out"}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <Styles />
+      </main>
+    );
+  }
+
   if (missingOwner) {
     return (
       <main className="missingPage">
@@ -248,7 +368,7 @@ export default function AccountPage() {
             <div className="missingIcon">👤</div>
 
             <div className="eyebrow">
-              {ka ? "OWNER PROFILE" : "OWNER PROFILE"}
+              OWNER PROFILE
             </div>
 
             <h1>
@@ -259,8 +379,8 @@ export default function AccountPage() {
 
             <p>
               {ka
-                ? "თქვენი Login ანგარიში უკვე არსებობს, მაგრამ მფლობელის პროფილის მონაცემები ჯერ არ არის შენახული. პროფილის დასრულების შემდეგ გაიხსნება Dashboard და QR პროფილების მართვა."
-                : "Your login account already exists, but your Owner Profile has not been saved yet. Complete it to access the Dashboard and QR profile management."}
+                ? "თქვენი Login ანგარიში არსებობს, მაგრამ Owner Profile ჯერ არ არის შენახული."
+                : "Your Login account exists, but the Owner Profile has not been saved yet."}
             </p>
 
             <div className="missingNotice">
@@ -275,8 +395,8 @@ export default function AccountPage() {
 
                 <p>
                   {ka
-                    ? "ახალი Auth მომხმარებლის შექმნა საჭირო არ არის."
-                    : "You do not need to create another Auth user."}
+                    ? "ახალი Auth მომხმარებელი არ შექმნათ."
+                    : "Do not create another Auth user."}
                 </p>
               </div>
             </div>
@@ -312,15 +432,8 @@ export default function AccountPage() {
     return (
       <main className="statePage">
         <div className="stateLogo">QR</div>
-
         <strong>QR RETURN</strong>
-
-        <div className="errorBox">
-          {error ||
-            (ka
-              ? "მფლობელის პროფილი ვერ მოიძებნა."
-              : "Owner profile not found.")}
-        </div>
+        <p>Owner profile not found.</p>
 
         <Styles />
       </main>
@@ -372,7 +485,9 @@ export default function AccountPage() {
         <div className="welcome">
           <div>
             <div className="eyebrow">
-              {ka ? "მფლობელის ანგარიში" : "OWNER ACCOUNT"}
+              {ka
+                ? "მფლობელის ანგარიში"
+                : "OWNER ACCOUNT"}
             </div>
 
             <h1>
@@ -389,71 +504,121 @@ export default function AccountPage() {
           </div>
 
           <div className="welcomeActions">
-            <a href="/account/chat" className="messagesButton">
-              <span className="messagesIcon">💬</span>
+            <a
+              href="/account/chat"
+              className="messagesButton"
+            >
+              <span className="messagesIcon">
+                💬
+              </span>
 
               <div>
                 <small>LIVE CHAT</small>
+
                 <strong>
-                  {ka ? "შეტყობინებები" : "Messages"}
+                  {ka
+                    ? "შეტყობინებები"
+                    : "Messages"}
                 </strong>
               </div>
             </a>
 
-            <a href="/add-profile" className="primaryButton">
-              + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
+            <a
+              href="/add-profile"
+              className="primaryButton"
+            >
+              +{" "}
+              {ka
+                ? "QR პროფილის დამატება"
+                : "Add QR profile"}
             </a>
           </div>
         </div>
-
-        {error && <div className="errorBox">⚠ {error}</div>}
 
         <div className="topGrid">
           <section className="panel">
             <div className="panelHeader">
               <div className="panelTitle">
-                <div className="panelIcon">👤</div>
+                <div className="panelIcon">
+                  👤
+                </div>
 
                 <div>
-                  <span>{ka ? "მფლობელი" : "OWNER"}</span>
+                  <span>
+                    {ka
+                      ? "მფლობელი"
+                      : "OWNER"}
+                  </span>
 
                   <h2>
-                    {owner.first_name} {owner.last_name}
+                    {owner.first_name}{" "}
+                    {owner.last_name}
                   </h2>
                 </div>
               </div>
 
-              <a href="/account/profile" className="smallButton">
-                ✏️ {ka ? "რედაქტირება" : "Edit"}
+              <a
+                href="/account/profile"
+                className="smallButton"
+              >
+                ✏️{" "}
+                {ka
+                  ? "რედაქტირება"
+                  : "Edit"}
               </a>
             </div>
 
             <div className="ownerBody">
               <div className="avatar">
                 {owner.photo ? (
-                  <img src={owner.photo} alt="" />
+                  <img
+                    src={owner.photo}
+                    alt=""
+                  />
                 ) : (
-                  <div className="avatarPlaceholder">👤</div>
+                  <div className="avatarPlaceholder">
+                    👤
+                  </div>
                 )}
               </div>
 
               <div className="ownerData">
                 <div>
-                  <span>{ka ? "ელფოსტა" : "Email"}</span>
-                  <strong>{owner.email}</strong>
+                  <span>
+                    {ka
+                      ? "ელფოსტა"
+                      : "Email"}
+                  </span>
+
+                  <strong>
+                    {owner.email}
+                  </strong>
                 </div>
 
                 <div>
-                  <span>{ka ? "ტელეფონი" : "Phone"}</span>
-                  <strong>{owner.phone}</strong>
+                  <span>
+                    {ka
+                      ? "ტელეფონი"
+                      : "Phone"}
+                  </span>
+
+                  <strong>
+                    {owner.phone}
+                  </strong>
                 </div>
 
                 <div>
-                  <span>{ka ? "მისამართი" : "Address"}</span>
+                  <span>
+                    {ka
+                      ? "მისამართი"
+                      : "Address"}
+                  </span>
 
                   <strong>
                     {owner.address ||
-                      (ka ? "არ არის მითითებული" : "Not provided")}
+                      (ka
+                        ? "არ არის მითითებული"
+                        : "Not provided")}
                   </strong>
                 </div>
               </div>
@@ -463,10 +628,16 @@ export default function AccountPage() {
           <section className="panel">
             <div className="panelHeader">
               <div className="panelTitle">
-                <div className="panelIcon">🔐</div>
+                <div className="panelIcon">
+                  🔐
+                </div>
 
                 <div>
-                  <span>{ka ? "უსაფრთხოება" : "SECURITY"}</span>
+                  <span>
+                    {ka
+                      ? "უსაფრთხოება"
+                      : "SECURITY"}
+                  </span>
 
                   <h2>
                     {ka
@@ -476,8 +647,14 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              <a href="/account/security" className="smallButton">
-                {ka ? "მართვა" : "Manage"} →
+              <a
+                href="/account/security"
+                className="smallButton"
+              >
+                {ka
+                  ? "მართვა"
+                  : "Manage"}{" "}
+                →
               </a>
             </div>
 
@@ -494,7 +671,9 @@ export default function AccountPage() {
         <section className="panel chatPanel">
           <div className="panelHeader">
             <div className="panelTitle">
-              <div className="panelIcon">💬</div>
+              <div className="panelIcon">
+                💬
+              </div>
 
               <div>
                 <span>LIVE CHAT</span>
@@ -507,14 +686,22 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <a href="/account/chat" className="smallButton">
-              {ka ? "Inbox-ის გახსნა" : "Open Inbox"} →
+            <a
+              href="/account/chat"
+              className="smallButton"
+            >
+              {ka
+                ? "Inbox-ის გახსნა"
+                : "Open Inbox"}{" "}
+              →
             </a>
           </div>
 
           <div className="chatPanelBody">
             <div>
-              <strong>QR RETURN Live Chat</strong>
+              <strong>
+                QR RETURN Live Chat
+              </strong>
 
               <p>
                 {ka
@@ -523,8 +710,14 @@ export default function AccountPage() {
               </p>
             </div>
 
-            <a href="/account/chat" className="openChatButton">
-              💬 {ka ? "შეტყობინებები" : "Messages"}
+            <a
+              href="/account/chat"
+              className="openChatButton"
+            >
+              💬{" "}
+              {ka
+                ? "შეტყობინებები"
+                : "Messages"}
             </a>
           </div>
         </section>
@@ -532,11 +725,15 @@ export default function AccountPage() {
         <section className="panel">
           <div className="panelHeader">
             <div className="panelTitle">
-              <div className="panelIcon">👥</div>
+              <div className="panelIcon">
+                👥
+              </div>
 
               <div>
                 <span>
-                  {ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}
+                  {ka
+                    ? "ადმინისტრატორი"
+                    : "ADMINISTRATOR"}
                 </span>
 
                 <h2>
@@ -551,15 +748,23 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <a href="/account/admin" className="smallButton">
-              {ka ? "მართვა" : "Manage"} →
+            <a
+              href="/account/admin"
+              className="smallButton"
+            >
+              {ka
+                ? "მართვა"
+                : "Manage"}{" "}
+              →
             </a>
           </div>
 
           {admin ? (
             <div className="adminStatus">
               <div>
-                <strong>{admin.admin_email}</strong>
+                <strong>
+                  {admin.admin_email}
+                </strong>
 
                 <p>
                   {ka
@@ -570,7 +775,9 @@ export default function AccountPage() {
 
               <span
                 className={`statusBadge ${
-                  admin.active ? "active" : "inactive"
+                  admin.active
+                    ? "active"
+                    : "inactive"
                 }`}
               >
                 {admin.active
@@ -591,7 +798,10 @@ export default function AccountPage() {
               </p>
 
               <a href="/account/admin">
-                + {ka ? "Admin-ის დამატება" : "Add Admin"}
+                +{" "}
+                {ka
+                  ? "Admin-ის დამატება"
+                  : "Add Admin"}
               </a>
             </div>
           )}
@@ -601,11 +811,15 @@ export default function AccountPage() {
           <div className="profilesHeader">
             <div>
               <div className="eyebrow">
-                {ka ? "ჩემი QR პროფილები" : "MY QR PROFILES"}
+                {ka
+                  ? "ჩემი QR პროფილები"
+                  : "MY QR PROFILES"}
               </div>
 
               <h2>
-                {ka ? "ცხოველები და ნივთები" : "Pets and items"}
+                {ka
+                  ? "ცხოველები და ნივთები"
+                  : "Pets and items"}
               </h2>
 
               <p>
@@ -615,14 +829,22 @@ export default function AccountPage() {
               </p>
             </div>
 
-            <a href="/add-profile" className="primaryButton">
-              + {ka ? "დამატება" : "Add profile"}
+            <a
+              href="/add-profile"
+              className="primaryButton"
+            >
+              +{" "}
+              {ka
+                ? "დამატება"
+                : "Add profile"}
             </a>
           </div>
 
           {profiles.length === 0 ? (
             <div className="emptyProfiles">
-              <div className="bigIcon">🏷️</div>
+              <div className="bigIcon">
+                🏷️
+              </div>
 
               <h3>
                 {ka
@@ -646,13 +868,20 @@ export default function AccountPage() {
           ) : (
             <div className="profilesGrid">
               {profiles.map((profile) => {
-                const type = getType(profile);
+                const type =
+                  getType(profile);
 
                 return (
-                  <article className="profileCard" key={profile.id}>
+                  <article
+                    className="profileCard"
+                    key={profile.id}
+                  >
                     <div className="visual">
                       {profile.photo ? (
-                        <img src={profile.photo} alt="" />
+                        <img
+                          src={profile.photo}
+                          alt=""
+                        />
                       ) : (
                         <div className="visualPlaceholder">
                           {type.icon}
@@ -661,7 +890,9 @@ export default function AccountPage() {
 
                       <span
                         className={`lostStatus ${
-                          profile.active ? "lost" : "safe"
+                          profile.active
+                            ? "lost"
+                            : "safe"
                         }`}
                       >
                         {profile.active
@@ -688,13 +919,19 @@ export default function AccountPage() {
 
                       {profile.tag_code && (
                         <p className="tagCode">
-                          QR · {profile.tag_code}
+                          QR ·{" "}
+                          {profile.tag_code}
                         </p>
                       )}
 
                       <div className="profileActions">
-                        <a href={`/edit-profile/${profile.id}`}>
-                          ✏️ {ka ? "რედაქტირება" : "Edit"}
+                        <a
+                          href={`/edit-profile/${profile.id}`}
+                        >
+                          ✏️{" "}
+                          {ka
+                            ? "რედაქტირება"
+                            : "Edit"}
                         </a>
 
                         {profile.tag_code && (
@@ -748,7 +985,8 @@ function Styles() {
       }
 
       .page,
-      .missingPage {
+      .missingPage,
+      .errorPage {
         min-height: 100vh;
         background:
           radial-gradient(
@@ -782,7 +1020,11 @@ function Styles() {
         place-items: center;
         margin-bottom: 10px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
         font-weight: 900;
       }
@@ -816,7 +1058,11 @@ function Styles() {
         display: grid;
         place-items: center;
         border-radius: 14px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
         font-weight: 900;
       }
@@ -864,7 +1110,8 @@ function Styles() {
         cursor: pointer;
       }
 
-      .languages .active {
+      .languages .active,
+      .languages button.active {
         background: white;
         color: #1465e8;
       }
@@ -906,7 +1153,11 @@ function Styles() {
 
       .welcome h1 {
         margin: 8px 0;
-        font-size: clamp(40px, 5vw, 52px);
+        font-size: clamp(
+          40px,
+          5vw,
+          52px
+        );
         letter-spacing: -2px;
       }
 
@@ -969,8 +1220,13 @@ function Styles() {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        border: 0;
         border-radius: 10px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
+        background: linear-gradient(
+          135deg,
+          #1465e8,
+          #7655f7
+        );
         color: white;
         font-size: 11px;
         font-weight: 900;
@@ -980,7 +1236,8 @@ function Styles() {
 
       .topGrid {
         display: grid;
-        grid-template-columns: 1.5fr 1fr;
+        grid-template-columns:
+          1.5fr 1fr;
         gap: 20px;
       }
 
@@ -991,13 +1248,16 @@ function Styles() {
         border: 1px solid #e4e7ec;
         border-radius: 20px;
         background: white;
-        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
+        box-shadow:
+          0 10px 30px
+          rgba(16, 24, 40, 0.04);
       }
 
       .panelHeader {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 20px;
       }
 
@@ -1013,7 +1273,12 @@ function Styles() {
         display: grid;
         place-items: center;
         border-radius: 13px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        background:
+          linear-gradient(
+            135deg,
+            #eef4ff,
+            #f0edff
+          );
         font-size: 23px;
       }
 
@@ -1113,11 +1378,17 @@ function Styles() {
         padding: 17px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 20px;
         border: 1px solid #dbe7ff;
         border-radius: 14px;
-        background: linear-gradient(135deg, #f5f9ff, #faf8ff);
+        background:
+          linear-gradient(
+            135deg,
+            #f5f9ff,
+            #faf8ff
+          );
       }
 
       .chatPanelBody strong {
@@ -1138,7 +1409,12 @@ function Styles() {
         align-items: center;
         justify-content: center;
         border-radius: 10px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
+        background:
+          linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
         color: white;
         font-size: 10px;
         font-weight: 900;
@@ -1151,7 +1427,8 @@ function Styles() {
         padding: 15px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 20px;
         border-radius: 13px;
         background: #f7f9fc;
@@ -1203,7 +1480,8 @@ function Styles() {
       .profilesHeader {
         display: flex;
         align-items: flex-end;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 25px;
       }
 
@@ -1256,7 +1534,8 @@ function Styles() {
       .profilesGrid {
         margin-top: 22px;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns:
+          repeat(3, 1fr);
         gap: 17px;
       }
 
@@ -1286,7 +1565,12 @@ function Styles() {
       .visualPlaceholder {
         display: grid;
         place-items: center;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        background:
+          linear-gradient(
+            135deg,
+            #eef4ff,
+            #f0edff
+          );
         font-size: 50px;
       }
 
@@ -1336,9 +1620,11 @@ function Styles() {
         margin-top: 14px;
         padding-top: 12px;
         display: flex;
-        justify-content: space-between;
+        justify-content:
+          space-between;
         gap: 8px;
-        border-top: 1px solid #eaecf0;
+        border-top:
+          1px solid #eaecf0;
       }
 
       .profileActions a {
@@ -1348,20 +1634,12 @@ function Styles() {
         text-decoration: none;
       }
 
-      .errorBox {
-        margin: 15px 0;
-        padding: 13px;
-        border: 1px solid #fecdca;
-        border-radius: 10px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 11px;
-      }
-
-      .missingWrap {
+      .missingWrap,
+      .errorWrap {
         width: calc(100% - 30px);
         max-width: 620px;
-        min-height: calc(100vh - 86px);
+        min-height:
+          calc(100vh - 86px);
         margin: auto;
         display: flex;
         align-items: center;
@@ -1369,34 +1647,49 @@ function Styles() {
         padding: 50px 0;
       }
 
-      .missingCard {
+      .missingCard,
+      .diagnosticCard {
         width: 100%;
         padding: 38px;
         text-align: center;
         border: 1px solid #e4e7ec;
         border-radius: 24px;
         background: white;
-        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.09);
+        box-shadow:
+          0 25px 65px
+          rgba(16, 24, 40, 0.09);
       }
 
-      .missingIcon {
+      .missingIcon,
+      .diagnosticIcon {
         width: 70px;
         height: 70px;
         margin: 0 auto 18px;
         display: grid;
         place-items: center;
         border-radius: 19px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
+        background:
+          linear-gradient(
+            135deg,
+            #eef4ff,
+            #f0edff
+          );
         font-size: 32px;
       }
 
-      .missingCard h1 {
+      .diagnosticIcon {
+        background: #fff1f0;
+      }
+
+      .missingCard h1,
+      .diagnosticCard h1 {
         margin: 8px 0 12px;
         font-size: 32px;
       }
 
-      .missingCard > p {
-        margin: auto;
+      .missingCard > p,
+      .diagnosticCard > p {
+        margin: 16px auto 0;
         max-width: 500px;
         color: #667085;
         font-size: 12px;
@@ -1424,11 +1717,75 @@ function Styles() {
         font-size: 9px;
       }
 
-      .missingActions {
+      .missingActions,
+      .diagnosticActions {
         margin-top: 22px;
         display: flex;
         justify-content: center;
         gap: 10px;
+      }
+
+      .errorStageBox {
+        margin-top: 20px;
+        padding: 14px;
+        border-radius: 12px;
+        background: #fff7ed;
+        text-align: left;
+      }
+
+      .errorStageBox span,
+      .realError span {
+        display: block;
+        margin-bottom: 5px;
+        color: #98a2b3;
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .errorStageBox strong {
+        color: #b54708;
+        font-size: 15px;
+      }
+
+      .realError {
+        margin-top: 10px;
+        padding: 14px;
+        border: 1px solid #fecdca;
+        border-radius: 12px;
+        background: #fff1f0;
+        text-align: left;
+      }
+
+      .realError code {
+        display: block;
+        overflow-wrap: anywhere;
+        color: #b42318;
+        font-family: monospace;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .primaryAction,
+      .secondaryAction {
+        min-height: 43px;
+        padding: 0 15px;
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .primaryAction {
+        border: 0;
+        background: #1465e8;
+        color: white;
+      }
+
+      .secondaryAction {
+        border: 1px solid #d0d5dd;
+        background: white;
+        color: #475467;
       }
 
       @media (max-width: 850px) {
@@ -1437,7 +1794,8 @@ function Styles() {
         }
 
         .profilesGrid {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns:
+            repeat(2, 1fr);
         }
       }
 
@@ -1449,7 +1807,8 @@ function Styles() {
         }
 
         .welcomeActions,
-        .missingActions {
+        .missingActions,
+        .diagnosticActions {
           width: 100%;
           flex-direction: column;
           align-items: stretch;
@@ -1457,7 +1816,9 @@ function Styles() {
 
         .messagesButton,
         .primaryButton,
-        .logoutSecondary {
+        .logoutSecondary,
+        .primaryAction,
+        .secondaryAction {
           width: 100%;
           justify-content: center;
         }
