@@ -81,7 +81,6 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      // 1. Admin access claim / load
       const {
         data: accessData,
         error: accessError,
@@ -117,7 +116,6 @@ export default function AdminDashboardPage() {
 
       setAccess(adminAccess);
 
-      // 2. Owner-ის ძირითადი ინფორმაცია
       const {
         data: ownerData,
         error: ownerError,
@@ -135,8 +133,6 @@ export default function AdminDashboardPage() {
 
       setOwner((ownerData ?? null) as OwnerAccount | null);
 
-      // 3. QR პროფილები მხოლოდ მაშინ,
-      // თუ Owner-მა view permission მისცა
       if (adminAccess.can_view_profiles) {
         const {
           data: profileData,
@@ -183,21 +179,30 @@ export default function AdminDashboardPage() {
   }
 
   async function toggleLostMode(profile: QrProfile) {
-    if (!access?.can_manage_lost_mode) return;
+    if (!access?.can_manage_lost_mode) {
+      setError(
+        ka
+          ? "Owner-ს Lost Mode-ის მართვის უფლება არ მოუცია."
+          : "The Owner has not granted Lost Mode permission."
+      );
+      return;
+    }
+
+    setError("");
 
     try {
       const newValue = !Boolean(profile.active);
 
-      const { error } = await supabase
-        .from("item")
-        .update({
-          active: newValue,
-        })
-        .eq("id", profile.id)
-        .eq("owner_id", access.owner_id);
+      const { error: rpcError } = await supabase.rpc(
+        "admin_set_lost_mode",
+        {
+          profile_id: String(profile.id),
+          new_active: newValue,
+        }
+      );
 
-      if (error) {
-        throw error;
+      if (rpcError) {
+        throw rpcError;
       }
 
       setProfiles((current) =>
@@ -355,11 +360,7 @@ export default function AdminDashboardPage() {
               {ka ? "ADMIN წვდომა" : "ADMIN ACCESS"}
             </div>
 
-            <h1>
-              {ka
-                ? "Admin Dashboard"
-                : "Admin Dashboard"}
-            </h1>
+            <h1>Admin Dashboard</h1>
 
             <p>
               {ka
@@ -1288,9 +1289,7 @@ function Permission({
         {icon}
       </div>
 
-      <strong>
-        {label}
-      </strong>
+      <strong>{label}</strong>
 
       <span className="statusText">
         {enabled ? "ON" : "OFF"}
