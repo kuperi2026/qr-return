@@ -23,6 +23,12 @@ type NotificationMetadata = {
 
   item_id?: number | string | null;
 
+  order_id?: string | null;
+
+  status?: string | null;
+
+  tracking_number?: string | null;
+
   source?: string | null;
 
   event?: string | null;
@@ -47,10 +53,20 @@ type NotificationRow = {
 
   read: boolean;
 
-  metadata: NotificationMetadata | null;
+  metadata:
+    | NotificationMetadata
+    | null;
 
   created_at: string;
 };
+
+type Filter =
+  | "all"
+  | "unread"
+  | "scan"
+  | "location"
+  | "chat"
+  | "order";
 
 export default function AccountNotificationsPage() {
   const router =
@@ -72,16 +88,8 @@ export default function AccountNotificationsPage() {
   const [error, setError] =
     useState("");
 
-  const [
-    filter,
-    setFilter,
-  ] = useState<
-    | "all"
-    | "unread"
-    | "scan"
-    | "location"
-    | "chat"
-  >("all");
+  const [filter, setFilter] =
+    useState<Filter>("all");
 
   const ka =
     lang === "ka";
@@ -180,7 +188,7 @@ export default function AccountNotificationsPage() {
 
     if (updateError) {
       console.error(
-        "Mark read error:",
+        "Mark notification read error:",
         updateError
       );
 
@@ -202,53 +210,55 @@ export default function AccountNotificationsPage() {
   }
 
   async function markAllRead() {
-    const {
-      data: { user },
-      error: authError,
-    } =
-      await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } =
+        await supabase.auth.getUser();
 
-    if (
-      authError ||
-      !user
-    ) {
-      return;
-    }
+      if (
+        authError ||
+        !user
+      ) {
+        return;
+      }
 
-    const {
-      error: updateError,
-    } = await supabase
-      .from("notifications")
-      .update({
-        read: true,
-      })
-      .eq(
-        "user_id",
-        user.id
-      )
-      .eq(
-        "read",
-        false
-      );
-
-    if (updateError) {
-      console.error(
-        "Mark all read error:",
-        updateError
-      );
-
-      return;
-    }
-
-    setNotifications(
-      (current) =>
-        current.map(
-          (item) => ({
-            ...item,
-            read: true,
-          })
+      const {
+        error: updateError,
+      } = await supabase
+        .from("notifications")
+        .update({
+          read: true,
+        })
+        .eq(
+          "user_id",
+          user.id
         )
-    );
+        .eq(
+          "read",
+          false
+        );
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setNotifications(
+        (current) =>
+          current.map(
+            (item) => ({
+              ...item,
+              read: true,
+            })
+          )
+      );
+    } catch (err) {
+      console.error(
+        "Mark all notifications read error:",
+        err
+      );
+    }
   }
 
   async function openChat(
@@ -263,14 +273,14 @@ export default function AccountNotificationsPage() {
       );
     }
 
-    const session =
+    const finderSession =
       notification.metadata
         ?.finder_session;
 
-    if (session) {
+    if (finderSession) {
       router.push(
         `/account/messages?session=${encodeURIComponent(
-          session
+          finderSession
         )}`
       );
 
@@ -279,6 +289,23 @@ export default function AccountNotificationsPage() {
 
     router.push(
       "/account/messages"
+    );
+  }
+
+  async function openOrder(
+    notification:
+      NotificationRow
+  ) {
+    if (
+      !notification.read
+    ) {
+      await markRead(
+        notification.id
+      );
+    }
+
+    router.push(
+      "/account/orders"
     );
   }
 
@@ -325,6 +352,16 @@ export default function AccountNotificationsPage() {
             );
           }
 
+          if (
+            filter ===
+            "order"
+          ) {
+            return (
+              notification.type ===
+              "order"
+            );
+          }
+
           return true;
         }
       );
@@ -342,7 +379,8 @@ export default function AccountNotificationsPage() {
   const scanCount =
     notifications.filter(
       (item) =>
-        item.type === "scan"
+        item.type ===
+        "scan"
     ).length;
 
   const locationCount =
@@ -355,7 +393,15 @@ export default function AccountNotificationsPage() {
   const chatCount =
     notifications.filter(
       (item) =>
-        item.type === "chat"
+        item.type ===
+        "chat"
+    ).length;
+
+  const orderCount =
+    notifications.filter(
+      (item) =>
+        item.type ===
+        "order"
     ).length;
 
   if (loading) {
@@ -441,15 +487,18 @@ export default function AccountNotificationsPage() {
         </Link>
 
         <div className="topActions">
-          <Link
-            href="/account/messages"
-          >
+          <Link href="/account/messages">
             💬 Live Chat
           </Link>
 
-          <Link
-            href="/my-profiles"
-          >
+          <Link href="/account/orders">
+            🛒{" "}
+            {ka
+              ? "შეკვეთები"
+              : "Orders"}
+          </Link>
+
+          <Link href="/my-profiles">
             {ka
               ? "ჩემი პროფილები"
               : "My Profiles"}
@@ -502,8 +551,8 @@ export default function AccountNotificationsPage() {
 
             <p>
               {ka
-                ? "QR Scan, ლოკაციის გაზიარება და Live Chat-ის ახალი შეტყობინებები ერთ ადგილას."
-                : "QR scans, shared locations, and new Live Chat messages in one place."}
+                ? "QR Scan, ლოკაცია, Live Chat და შეკვეთის სტატუსის ცვლილებები ერთ ადგილას."
+                : "QR scans, shared locations, Live Chat messages, and order status updates in one place."}
             </p>
           </div>
 
@@ -564,6 +613,13 @@ export default function AccountNotificationsPage() {
             label="LIVE CHAT"
             value={
               chatCount
+            }
+          />
+
+          <Stat
+            label="ORDERS"
+            value={
+              orderCount
             }
           />
         </section>
@@ -635,6 +691,18 @@ export default function AccountNotificationsPage() {
           >
             💬 Live Chat
           </FilterButton>
+
+          <FilterButton
+            active={
+              filter ===
+              "order"
+            }
+            onClick={() =>
+              setFilter("order")
+            }
+          >
+            🛒 Orders
+          </FilterButton>
         </section>
 
         {error && (
@@ -659,8 +727,8 @@ export default function AccountNotificationsPage() {
 
               <p>
                 {ka
-                  ? "როდესაც QR დაასკანერდება, ლოკაცია გაზიარდება ან მპოვნელი Live Chat-ში მოგწერთ, ინფორმაცია აქ გამოჩნდება."
-                  : "QR scans, shared locations, and finder Live Chat messages will appear here."}
+                  ? "QR Scan, ლოკაცია, Live Chat ან შეკვეთის სტატუსის ცვლილება აქ გამოჩნდება."
+                  : "QR scans, shared locations, Live Chat messages, and order updates will appear here."}
               </p>
             </section>
           )}
@@ -688,6 +756,9 @@ export default function AccountNotificationsPage() {
                     }
                     onOpenChat={
                       openChat
+                    }
+                    onOpenOrder={
+                      openOrder
                     }
                   />
                 )
@@ -725,8 +796,7 @@ export default function AccountNotificationsPage() {
           gap: 15px;
 
           border-bottom:
-            1px solid
-            #e0e5e8;
+            1px solid #e0e5e8;
         }
 
         .brand {
@@ -804,8 +874,7 @@ export default function AccountNotificationsPage() {
           align-items: center;
 
           border:
-            1px solid
-            #dfe4e8;
+            1px solid #dfe4e8;
 
           border-radius: 8px;
 
@@ -865,9 +934,10 @@ export default function AccountNotificationsPage() {
               100% - 40px
             );
 
-          max-width: 900px;
+          max-width: 950px;
 
-          margin: 0 auto;
+          margin:
+            0 auto;
 
           padding:
             45px 0 90px;
@@ -935,8 +1005,7 @@ export default function AccountNotificationsPage() {
           flex: 0 0 auto;
 
           border:
-            1px solid
-            #dce2e6;
+            1px solid #dce2e6;
 
           border-radius: 9px;
 
@@ -958,7 +1027,7 @@ export default function AccountNotificationsPage() {
 
           grid-template-columns:
             repeat(
-              5,
+              6,
               minmax(
                 0,
                 1fr
@@ -992,8 +1061,7 @@ export default function AccountNotificationsPage() {
           padding: 13px;
 
           border:
-            1px solid
-            #efd2d4;
+            1px solid #efd2d4;
 
           border-radius: 10px;
 
@@ -1011,8 +1079,7 @@ export default function AccountNotificationsPage() {
             55px 20px;
 
           border:
-            1px solid
-            #e0e5e8;
+            1px solid #e0e5e8;
 
           border-radius: 15px;
 
@@ -1049,12 +1116,12 @@ export default function AccountNotificationsPage() {
         }
 
         @media (
-          max-width: 780px
+          max-width: 850px
         ) {
           .stats {
             grid-template-columns:
               repeat(
-                2,
+                3,
                 minmax(
                   0,
                   1fr
@@ -1108,7 +1175,13 @@ export default function AccountNotificationsPage() {
 
           .stats {
             grid-template-columns:
-              1fr;
+              repeat(
+                2,
+                minmax(
+                  0,
+                  1fr
+                )
+              );
           }
         }
       `}</style>
@@ -1121,6 +1194,7 @@ function NotificationCard({
   language,
   onRead,
   onOpenChat,
+  onOpenOrder,
 }: {
   notification:
     NotificationRow;
@@ -1132,6 +1206,11 @@ function NotificationCard({
   ) => Promise<void>;
 
   onOpenChat: (
+    notification:
+      NotificationRow
+  ) => Promise<void>;
+
+  onOpenOrder: (
     notification:
       NotificationRow
   ) => Promise<void>;
@@ -1165,11 +1244,21 @@ function NotificationCard({
     notification.type ===
     "chat";
 
+  const isOrder =
+    notification.type ===
+    "order";
+
   async function handleCardClick() {
-    if (
-      isChat
-    ) {
+    if (isChat) {
       await onOpenChat(
+        notification
+      );
+
+      return;
+    }
+
+    if (isOrder) {
+      await onOpenOrder(
         notification
       );
 
@@ -1231,6 +1320,36 @@ function NotificationCard({
           </p>
         )}
 
+        {isOrder &&
+          metadata.status && (
+            <div className="orderStatus">
+              <span>
+                STATUS
+              </span>
+
+              <strong>
+                {String(
+                  metadata.status
+                ).toUpperCase()}
+              </strong>
+            </div>
+          )}
+
+        {isOrder &&
+          metadata.tracking_number && (
+            <div className="tracking">
+              <span>
+                TRACKING
+              </span>
+
+              <strong>
+                {
+                  metadata.tracking_number
+                }
+              </strong>
+            </div>
+          )}
+
         <div className="bottom">
           <small>
             {formatNotificationDate(
@@ -1261,6 +1380,27 @@ function NotificationCard({
               </button>
             )}
 
+            {isOrder && (
+              <button
+                type="button"
+                className="orderButton"
+                onClick={(
+                  event
+                ) => {
+                  event.stopPropagation();
+
+                  void onOpenOrder(
+                    notification
+                  );
+                }}
+              >
+                🛒{" "}
+                {ka
+                  ? "შეკვეთის ნახვა"
+                  : "View Order"}
+              </button>
+            )}
+
             {mapUrl && (
               <a
                 href={mapUrl}
@@ -1280,6 +1420,7 @@ function NotificationCard({
             )}
 
             {!isChat &&
+              !isOrder &&
               notification.item_id && (
                 <Link
                   href="/my-profiles"
@@ -1315,8 +1456,7 @@ function NotificationCard({
           gap: 12px;
 
           border:
-            1px solid
-            #e0e5e8;
+            1px solid #e0e5e8;
 
           border-radius: 12px;
 
@@ -1327,11 +1467,9 @@ function NotificationCard({
 
         .unread {
           border-left:
-            3px solid
-            #c84a50;
+            3px solid #c84a50;
 
-          background:
-            #fffdfd;
+          background: #fffdfd;
         }
 
         .icon {
@@ -1340,13 +1478,11 @@ function NotificationCard({
 
           display: grid;
 
-          place-items:
-            center;
+          place-items: center;
 
           border-radius: 11px;
 
-          background:
-            #f1f4f6;
+          background: #f1f4f6;
 
           font-size: 18px;
         }
@@ -1400,8 +1536,7 @@ function NotificationCard({
 
           color: white;
 
-          background:
-            #c84a50;
+          background: #c84a50;
 
           font-size: 5px;
 
@@ -1426,6 +1561,42 @@ function NotificationCard({
 
           overflow-wrap:
             anywhere;
+        }
+
+        .orderStatus,
+        .tracking {
+          margin-top: 9px;
+
+          padding: 8px 9px;
+
+          border-radius: 8px;
+
+          background: #f7f9fb;
+        }
+
+        .orderStatus span,
+        .orderStatus strong,
+        .tracking span,
+        .tracking strong {
+          display: block;
+        }
+
+        .orderStatus span,
+        .tracking span {
+          color: #929ca5;
+
+          font-size: 5px;
+
+          font-weight: 900;
+        }
+
+        .orderStatus strong,
+        .tracking strong {
+          margin-top: 3px;
+
+          color: #4e5a65;
+
+          font-size: 7px;
         }
 
         .bottom {
@@ -1459,7 +1630,8 @@ function NotificationCard({
 
         .actions
           :global(a),
-        .chatButton {
+        .chatButton,
+        .orderButton {
           min-height: 30px;
 
           padding:
@@ -1470,8 +1642,7 @@ function NotificationCard({
           align-items: center;
 
           border:
-            1px solid
-            #dce2e6;
+            1px solid #dce2e6;
 
           border-radius: 7px;
 
@@ -1489,11 +1660,19 @@ function NotificationCard({
         .chatButton {
           color: white;
 
-          border-color:
-            #1465e8;
+          border-color: #1465e8;
 
-          background:
-            #1465e8;
+          background: #1465e8;
+
+          cursor: pointer;
+        }
+
+        .orderButton {
+          color: white;
+
+          border-color: #202b37;
+
+          background: #202b37;
 
           cursor: pointer;
         }
@@ -1527,8 +1706,7 @@ function Stat({
           padding: 13px;
 
           border:
-            1px solid
-            #e0e5e8;
+            1px solid #e0e5e8;
 
           border-radius: 11px;
 
@@ -1591,8 +1769,7 @@ function FilterButton({
             0 10px;
 
           border:
-            1px solid
-            #dce2e6;
+            1px solid #dce2e6;
 
           border-radius:
             999px;
@@ -1625,7 +1802,9 @@ function FilterButton({
 function getIcon(
   type: string
 ) {
-  if (type === "scan") {
+  if (
+    type === "scan"
+  ) {
     return "📱";
   }
 
@@ -1635,11 +1814,15 @@ function getIcon(
     return "📍";
   }
 
-  if (type === "chat") {
+  if (
+    type === "chat"
+  ) {
     return "💬";
   }
 
-  if (type === "order") {
+  if (
+    type === "order"
+  ) {
     return "🛒";
   }
 
@@ -1655,7 +1838,9 @@ function getIcon(
 function getTypeLabel(
   type: string
 ) {
-  if (type === "scan") {
+  if (
+    type === "scan"
+  ) {
     return "QR SCAN";
   }
 
@@ -1665,12 +1850,16 @@ function getTypeLabel(
     return "LOCATION";
   }
 
-  if (type === "chat") {
+  if (
+    type === "chat"
+  ) {
     return "LIVE CHAT";
   }
 
-  if (type === "order") {
-    return "ORDER";
+  if (
+    type === "order"
+  ) {
+    return "ORDER UPDATE";
   }
 
   if (
