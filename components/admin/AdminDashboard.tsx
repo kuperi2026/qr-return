@@ -49,22 +49,22 @@ export default function AdminDashboard({
       href: "/admin/items",
       title: "QR პროფილები",
       description:
-        "ძაღლი, კატა, ნივთები და Emergency QR პროფილები.",
+        "ძაღლი, კატა, გასაღები, საფულე, ჩანთა, ჩემოდანი და სხვა QR პროფილები.",
       icon: "🏷️",
       badge: totalProfiles,
     },
     {
-      href: "/admin/lost-found",
-      title: "Lost & Found",
+      href: "/admin/return-cases",
+      title: "Return Cases",
       description:
-        "დაკარგულად მონიშნული პროფილები და მიმდინარე შემთხვევები.",
+        "დაკარგულად მონიშნული QR პროფილები და მიმდინარე დაბრუნების პროცესები.",
       icon: "📍",
     },
     {
       href: "/admin/orders",
       title: "Orders",
       description:
-        "პროდუქტის შეკვეთები, მომხმარებლის ინფორმაცია, მისამართი, სტატუსი და tracking.",
+        "პროდუქტის შეკვეთები, მომხმარებლის ინფორმაცია, მისამართი, სტატუსი და Tracking.",
       icon: "🛒",
       badge: totalOrders,
     },
@@ -72,7 +72,7 @@ export default function AdminDashboard({
       href: "/admin/notifications",
       title: "შეტყობინებები",
       description:
-        "Support, QR Scan, Order და სისტემური შეტყობინებების მართვა.",
+        "QR Scan, Support, Location, Order და სისტემური შეტყობინებების მართვა.",
       icon: "🔔",
     },
   ];
@@ -82,36 +82,36 @@ export default function AdminDashboard({
       href: "/admin/forms",
       title: "Registration Forms",
       description:
-        "ველების დამატება, დამალვა, Required / Optional და თანმიმდევრობა.",
+        "სარეგისტრაციო ფორმების ველები, Required / Optional პარამეტრები და თანმიმდევრობა.",
       icon: "📝",
     },
     {
       href: "/admin/website",
       title: "Website Editor",
       description:
-        "მთავარი გვერდის ტექსტები, სექციები, ღილაკები და კონტენტი.",
+        "მთავარი გვერდის ტექსტები, სექციები, ღილაკები და სხვა კონტენტი.",
       icon: "🎨",
     },
     {
       href: "/admin/media",
       title: "Media",
       description:
-        "ფოტოების, ილუსტრაციების და სხვა მედიის მართვა.",
+        "პროდუქტის ფოტოების, ილუსტრაციების და სხვა მედიის მართვა.",
       icon: "🖼️",
     },
     {
       href: "/admin/contact",
       title: "Contact Settings",
       description:
-        "Support phone, email, WhatsApp და სხვა საკონტაქტო მონაცემები.",
+        "QR RETURN-ის ტელეფონი, Email, WhatsApp და სხვა საკონტაქტო ინფორმაცია.",
       icon: "☎️",
     },
     {
       href: "/admin/chat-settings",
       title: "Live Chat Settings",
       description:
-        "Support ტექსტები, ავტომატური პასუხები და Chat პარამეტრები.",
-      icon: "👩‍💻",
+        "Live Chat, Support ტექსტები, ავტომატური პასუხები და Chat პარამეტრები.",
+      icon: "💬",
     },
     {
       href: "/admin/system",
@@ -141,7 +141,7 @@ export default function AdminDashboard({
       href: "/admin/admins",
       title: "Admin Accounts",
       description:
-        "Admin მომხმარებლები და მათი უფლებების მართვა.",
+        "Admin მომხმარებლები, როლები და მათი უფლებების მართვა.",
       icon: "🛡️",
     },
     {
@@ -155,14 +155,14 @@ export default function AdminDashboard({
       href: "/admin/backup",
       title: "Backup & Export",
       description:
-        "მონაცემების ექსპორტი და სარეზერვო მართვა.",
+        "QR RETURN მონაცემების ექსპორტი და სარეზერვო მართვა.",
       icon: "☁️",
     },
     {
       href: "/admin/help",
       title: "Admin Help",
       description:
-        "Admin Panel-ის გამოყენების ინსტრუქცია.",
+        "Admin Control Center-ის გამოყენების ინსტრუქცია.",
       icon: "❓",
     },
   ];
@@ -176,14 +176,12 @@ export default function AdminDashboard({
               QR RETURN ADMIN
             </span>
 
-            <h1>
-              Admin Control Center
-            </h1>
+            <h1>Admin Control Center</h1>
 
             <p>
               მართეთ QR RETURN-ის მომხმარებლები,
-              QR პროფილები, Support, Orders,
-              კონტენტი და სისტემური პარამეტრები.
+              QR პროფილები, Return Cases, Support,
+              Orders, კონტენტი და სისტემური პარამეტრები.
             </p>
           </div>
 
@@ -252,14 +250,12 @@ export default function AdminDashboard({
         .dashboard {
           min-height: 100vh;
           padding: 54px 0 90px;
-
           background: #f5f7f8;
         }
 
         .shell {
           width: calc(100% - 40px);
           max-width: 1180px;
-
           margin: 0 auto;
         }
 
@@ -267,13 +263,11 @@ export default function AdminDashboard({
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
-
           gap: 30px;
         }
 
         .eyebrow {
           color: #c84a50;
-
           font-size: 8px;
           font-weight: 900;
           letter-spacing: 1.5px;
@@ -281,70 +275,46 @@ export default function AdminDashboard({
 
         h1 {
           margin: 8px 0 0;
-
           color: #202b37;
-
-          font-size: clamp(
-            35px,
-            4vw,
-            48px
-          );
-
+          font-size: clamp(35px, 4vw, 48px);
           font-weight: 760;
           letter-spacing: -2px;
         }
 
         .header p {
           max-width: 680px;
-
           margin: 10px 0 0;
-
           color: #7b8691;
-
           font-size: 10px;
           line-height: 1.7;
         }
 
         .header a {
           flex: 0 0 auto;
-
           color: #5f6b77;
-
           font-size: 9px;
           font-weight: 800;
-
           text-decoration: none;
         }
 
         .stats {
           margin-top: 34px;
-
           display: grid;
-
           grid-template-columns:
-            repeat(
-              5,
-              minmax(0, 1fr)
-            );
-
+            repeat(5, minmax(0, 1fr));
           gap: 10px;
         }
 
         .sections {
           margin-top: 42px;
-
           display: grid;
-
           gap: 46px;
         }
 
         @media (max-width: 950px) {
           .stats {
             grid-template-columns:
-              repeat(
-                3,
-                minmax(0, 1fr)
-              );
+              repeat(3, minmax(0, 1fr));
           }
         }
 
@@ -354,8 +324,7 @@ export default function AdminDashboard({
           }
 
           .shell {
-            width:
-              calc(100% - 24px);
+            width: calc(100% - 24px);
           }
 
           .header {
@@ -365,10 +334,7 @@ export default function AdminDashboard({
 
           .stats {
             grid-template-columns:
-              repeat(
-                2,
-                minmax(0, 1fr)
-              );
+              repeat(2, minmax(0, 1fr));
           }
         }
       `}</style>
@@ -402,21 +368,15 @@ function StatCard({
       <style jsx>{`
         .card {
           min-height: 105px;
-
           padding: 15px;
-
-          border:
-            1px solid #e0e5e8;
-
+          border: 1px solid #e0e5e8;
           border-radius: 13px;
-
           background: white;
         }
 
         .top {
           display: flex;
           align-items: center;
-
           gap: 7px;
         }
 
@@ -426,18 +386,14 @@ function StatCard({
 
         .label {
           color: #89949e;
-
           font-size: 7px;
           font-weight: 900;
         }
 
         strong {
           display: block;
-
           margin-top: 18px;
-
           color: #293540;
-
           font-size: 24px;
           font-weight: 800;
         }
