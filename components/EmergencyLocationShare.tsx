@@ -14,22 +14,31 @@ export default function EmergencyLocationShare({
   tagCode,
   language = "ka",
 }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const ka = language === "ka";
+  const [message, setMessage] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState(false);
+
+  const ka =
+    language === "ka";
 
   function shareLocation() {
     setMessage("");
     setSuccess(false);
 
-    if (!navigator.geolocation) {
+    if (
+      !navigator.geolocation
+    ) {
       setMessage(
         ka
           ? "თქვენი მოწყობილობა ლოკაციის გაზიარებას არ უჭერს მხარს."
           : "Your device does not support location sharing."
       );
+
       return;
     }
 
@@ -47,18 +56,18 @@ export default function EmergencyLocationShare({
           const accuracy =
             position.coords.accuracy;
 
-          const { error } = await supabase
-            .from("item")
-            .update({
-              last_scan_latitude: latitude,
-              last_scan_longitude: longitude,
-              last_scan_accuracy: accuracy,
-              last_scanned_at:
-                new Date().toISOString(),
-            })
-            .eq("id", itemId)
-            .eq("tag_code", tagCode)
-            .eq("item_type", "emergency");
+          const {
+            error,
+          } = await supabase.rpc(
+            "share_emergency_location",
+            {
+              p_item_id: itemId,
+              p_tag_code: tagCode,
+              p_latitude: latitude,
+              p_longitude: longitude,
+              p_accuracy: accuracy,
+            }
+          );
 
           if (error) {
             throw error;
@@ -104,6 +113,7 @@ export default function EmergencyLocationShare({
               ? "ლოკაციის გასაზიარებლად საჭიროა Location Permission."
               : "Location permission is required."
           );
+
           return;
         }
 
@@ -147,10 +157,16 @@ export default function EmergencyLocationShare({
 
         <button
           type="button"
-          onClick={shareLocation}
-          disabled={loading}
+          onClick={
+            shareLocation
+          }
+          disabled={
+            loading
+          }
         >
-          <span>📍</span>
+          <span>
+            📍
+          </span>
 
           {loading
             ? ka
@@ -188,11 +204,16 @@ export default function EmergencyLocationShare({
           padding: 18px;
 
           display: grid;
-          grid-template-columns: 48px 1fr;
+
+          grid-template-columns:
+            48px
+            minmax(0, 1fr);
 
           gap: 13px;
 
-          border: 1px solid #d9e5ff;
+          border:
+            1px solid #d9e5ff;
+
           border-radius: 14px;
 
           background: #f6f9ff;
@@ -213,7 +234,12 @@ export default function EmergencyLocationShare({
 
           box-shadow:
             0 5px 18px
-            rgba(30, 80, 150, 0.08);
+            rgba(
+              30,
+              80,
+              150,
+              0.08
+            );
         }
 
         .label {
@@ -295,11 +321,13 @@ export default function EmergencyLocationShare({
 
         .success {
           color: #027a48;
+
           background: #ecfdf3;
         }
 
         .error {
           color: #b42318;
+
           background: #fff1f0;
         }
 
@@ -314,9 +342,12 @@ export default function EmergencyLocationShare({
           line-height: 1.5;
         }
 
-        @media (max-width: 520px) {
+        @media (
+          max-width: 520px
+        ) {
           .locationCard {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
