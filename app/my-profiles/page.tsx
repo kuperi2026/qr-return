@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 import AccountHeader from "@/components/account/AccountHeader";
+
 import ProfileCard, {
   type ProfileCardItem,
 } from "@/components/account/ProfileCard";
@@ -35,6 +36,7 @@ type ItemRow = {
   scan_count: number | null;
 
   lost_message: string | null;
+
   lost_seen_location: string | null;
 
   created_at?: string | null;
@@ -42,14 +44,15 @@ type ItemRow = {
 
 type Lang = "ka" | "en";
 
+type ChatThreadCountRow = {
+  unread_count?: number | null;
+};
+
 export default function MyProfilesPage() {
   const router = useRouter();
 
   const [lang, setLang] =
     useState<Lang>("ka");
-
-  const [userId, setUserId] =
-    useState("");
 
   const [email, setEmail] =
     useState("");
@@ -105,11 +108,16 @@ export default function MyProfilesPage() {
         return;
       }
 
-      setUserId(user.id);
-      setEmail(user.email || "");
+      setEmail(
+        user.email || ""
+      );
+
+      /*
+        NOTIFICATIONS COUNT
+      */
 
       const {
-        count: unreadCount,
+        count: unreadNotifications,
         error: notificationError,
       } = await supabase
         .from("notifications")
@@ -117,8 +125,14 @@ export default function MyProfilesPage() {
           count: "exact",
           head: true,
         })
-        .eq("user_id", user.id)
-        .eq("read", false);
+        .eq(
+          "user_id",
+          user.id
+        )
+        .eq(
+          "read",
+          false
+        );
 
       if (notificationError) {
         console.error(
@@ -127,9 +141,13 @@ export default function MyProfilesPage() {
         );
       } else {
         setNotificationCount(
-          unreadCount || 0
+          unreadNotifications || 0
         );
       }
+
+      /*
+        LIVE CHAT UNREAD COUNT
+      */
 
       try {
         const {
@@ -146,15 +164,20 @@ export default function MyProfilesPage() {
           );
         } else {
           const rows =
-            (chatThreads || []) as Array<{
-              unread_count?: number | null;
-            }>;
+            (chatThreads ||
+              []) as ChatThreadCountRow[];
 
           const totalUnread =
             rows.reduce(
-              (sum, row) =>
-                sum +
-                (row.unread_count || 0),
+              (
+                total,
+                thread
+              ) =>
+                total +
+                Number(
+                  thread.unread_count ||
+                    0
+                ),
               0
             );
 
@@ -162,12 +185,18 @@ export default function MyProfilesPage() {
             totalUnread
           );
         }
-      } catch (chatCountError) {
+      } catch (
+        chatCountError
+      ) {
         console.error(
           "Unread chat count failed:",
           chatCountError
         );
       }
+
+      /*
+        OWNER QR PROFILES
+      */
 
       const {
         data,
@@ -188,10 +217,16 @@ export default function MyProfilesPage() {
           lost_seen_location,
           created_at
         `)
-        .eq("owner_id", user.id)
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "owner_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
         throw error;
@@ -235,34 +270,45 @@ export default function MyProfilesPage() {
       return items.filter(
         (item) => {
           const type =
-            getProfileType(item);
+            getProfileType(
+              item
+            );
 
           const filterMatch =
             filter === "all"
               ? true
-              : filter === "emergency"
-              ? type === "emergency"
-              : filter === "return"
+              : filter ===
+                "emergency"
+              ? type ===
+                "emergency"
+              : filter ===
+                "return"
               ? Boolean(
                   item.lost_message ||
                     item
                       .lost_seen_location
                 )
-              : type === filter;
+              : type ===
+                filter;
 
-          const text = [
-            item.tag_code,
-            item.item_name,
-            item.item_type,
-            item.pet_type,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
+          const searchableText =
+            [
+              item.tag_code,
+              item.item_name,
+              item.item_type,
+              item.pet_type,
+            ]
+              .filter(
+                Boolean
+              )
+              .join(" ")
+              .toLowerCase();
 
           const searchMatch =
             !q ||
-            text.includes(q);
+            searchableText.includes(
+              q
+            );
 
           return (
             filterMatch &&
@@ -279,34 +325,90 @@ export default function MyProfilesPage() {
   const emergencyCount =
     items.filter(
       (item) =>
-        getProfileType(item) ===
-        "emergency"
+        getProfileType(
+          item
+        ) === "emergency"
     ).length;
 
   const returnCount =
-    items.filter((item) =>
-      Boolean(
-        item.lost_message ||
-          item.lost_seen_location
-      )
+    items.filter(
+      (item) =>
+        Boolean(
+          item.lost_message ||
+            item
+              .lost_seen_location
+        )
+    ).length;
+
+  const activeCount =
+    items.filter(
+      (item) =>
+        item.active === true
     ).length;
 
   if (loading) {
     return (
       <main className="loading">
-        {ka
-          ? "QR პროფილები იტვირთება..."
-          : "Loading QR profiles..."}
+        <div className="loadingLogo">
+          QR
+        </div>
+
+        <strong>
+          QR RETURN
+        </strong>
+
+        <span>
+          {ka
+            ? "QR პროფილები იტვირთება..."
+            : "Loading QR profiles..."}
+        </span>
 
         <style jsx>{`
           .loading {
             min-height: 100vh;
 
-            display: grid;
-            place-items: center;
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 8px;
 
             color: #687481;
+
             background: #f5f7f8;
+          }
+
+          .loadingLogo {
+            width: 50px;
+            height: 50px;
+
+            display: grid;
+
+            place-items: center;
+
+            border-radius: 14px;
+
+            color: white;
+
+            background:
+              linear-gradient(
+                135deg,
+                #1465e8,
+                #7655f7
+              );
+
+            font-weight: 900;
+          }
+
+          strong {
+            color: #1465e8;
+          }
+
+          span {
+            font-size: 10px;
           }
         `}</style>
       </main>
@@ -319,6 +421,9 @@ export default function MyProfilesPage() {
         email={email}
         notificationCount={
           notificationCount
+        }
+        unreadChatCount={
+          unreadChatCount
         }
         onLogout={() =>
           void handleLogout()
@@ -395,6 +500,56 @@ export default function MyProfilesPage() {
           </div>
         </header>
 
+        <section className="accountAlerts">
+          <Link
+            href="/account/notifications"
+            className="alertCard"
+          >
+            <div className="alertIcon">
+              🔔
+            </div>
+
+            <div>
+              <span>
+                {ka
+                  ? "შეტყობინებები"
+                  : "Notifications"}
+              </span>
+
+              <strong>
+                {notificationCount}
+              </strong>
+            </div>
+
+            <i>
+              →
+            </i>
+          </Link>
+
+          <Link
+            href="/account/messages"
+            className="alertCard"
+          >
+            <div className="alertIcon chat">
+              💬
+            </div>
+
+            <div>
+              <span>
+                Live Chat
+              </span>
+
+              <strong>
+                {unreadChatCount}
+              </strong>
+            </div>
+
+            <i>
+              →
+            </i>
+          </Link>
+        </section>
+
         <section className="stats">
           <Stat
             label={
@@ -402,7 +557,9 @@ export default function MyProfilesPage() {
                 ? "ყველა პროფილი"
                 : "All Profiles"
             }
-            value={items.length}
+            value={
+              items.length
+            }
           />
 
           <Stat
@@ -412,21 +569,22 @@ export default function MyProfilesPage() {
                 : "Active"
             }
             value={
-              items.filter(
-                (item) =>
-                  item.active === true
-              ).length
+              activeCount
             }
           />
 
           <Stat
             label="Emergency ID"
-            value={emergencyCount}
+            value={
+              emergencyCount
+            }
           />
 
           <Stat
             label="Return Cases"
-            value={returnCount}
+            value={
+              returnCount
+            }
           />
         </section>
 
@@ -436,9 +594,12 @@ export default function MyProfilesPage() {
 
             <input
               value={search}
-              onChange={(event) =>
+              onChange={(
+                event
+              ) =>
                 setSearch(
-                  event.target.value
+                  event.target
+                    .value
                 )
               }
               placeholder={
@@ -466,7 +627,9 @@ export default function MyProfilesPage() {
                 filter === "all"
               }
               onClick={() =>
-                setFilter("all")
+                setFilter(
+                  "all"
+                )
               }
             >
               {ka
@@ -479,7 +642,9 @@ export default function MyProfilesPage() {
                 filter === "dog"
               }
               onClick={() =>
-                setFilter("dog")
+                setFilter(
+                  "dog"
+                )
               }
             >
               🐕{" "}
@@ -493,7 +658,9 @@ export default function MyProfilesPage() {
                 filter === "cat"
               }
               onClick={() =>
-                setFilter("cat")
+                setFilter(
+                  "cat"
+                )
               }
             >
               🐈{" "}
@@ -518,10 +685,13 @@ export default function MyProfilesPage() {
 
             <FilterButton
               active={
-                filter === "return"
+                filter ===
+                "return"
               }
               onClick={() =>
-                setFilter("return")
+                setFilter(
+                  "return"
+                )
               }
             >
               📍 Return Cases
@@ -531,19 +701,21 @@ export default function MyProfilesPage() {
 
         {error && (
           <div className="error">
-            {error}
+            ⚠ {error}
           </div>
         )}
 
         {!error &&
-          filteredItems.length === 0 && (
+          filteredItems.length ===
+            0 && (
             <section className="empty">
               <div className="emptyIcon">
                 <QRIcon />
               </div>
 
               <h2>
-                {items.length === 0
+                {items.length ===
+                0
                   ? ka
                     ? "ჯერ QR პროფილი არ გაქვთ"
                     : "You don't have a QR profile yet"
@@ -553,7 +725,8 @@ export default function MyProfilesPage() {
               </h2>
 
               <p>
-                {items.length === 0
+                {items.length ===
+                0
                   ? ka
                     ? "დაარეგისტრირეთ თქვენი პირველი ნივთი, შინაური ცხოველი ან Emergency ID."
                     : "Register your first item, pet, or Emergency ID."
@@ -562,7 +735,8 @@ export default function MyProfilesPage() {
                   : "Try another search or filter."}
               </p>
 
-              {items.length === 0 && (
+              {items.length ===
+                0 && (
                 <div className="emptyActions">
                   <Link href="/account/register">
                     {ka
@@ -579,7 +753,8 @@ export default function MyProfilesPage() {
           )}
 
         {!error &&
-          filteredItems.length > 0 && (
+          filteredItems.length >
+            0 && (
             <section className="profiles">
               {filteredItems.map(
                 (item) => {
@@ -589,8 +764,10 @@ export default function MyProfilesPage() {
                     );
 
                   const profile:
-                    ProfileCardItem = {
-                      id: item.id,
+                    ProfileCardItem =
+                    {
+                      id:
+                        item.id,
 
                       tagCode:
                         item.tag_code,
@@ -627,8 +804,12 @@ export default function MyProfilesPage() {
                   ) {
                     return (
                       <EmergencyProfileCard
-                        key={item.id}
-                        item={item}
+                        key={
+                          item.id
+                        }
+                        item={
+                          item
+                        }
                         language={
                           lang
                         }
@@ -638,7 +819,9 @@ export default function MyProfilesPage() {
 
                   return (
                     <ProfileCard
-                      key={item.id}
+                      key={
+                        item.id
+                      }
                       item={
                         profile
                       }
@@ -683,7 +866,8 @@ export default function MyProfilesPage() {
               href="/account/notifications"
               icon="🔔"
               title={
-                notificationCount > 0
+                notificationCount >
+                0
                   ? ka
                     ? `შეტყობინებები (${notificationCount})`
                     : `Notifications (${notificationCount})`
@@ -697,10 +881,9 @@ export default function MyProfilesPage() {
               href="/account/messages"
               icon="💬"
               title={
-                unreadChatCount > 0
-                  ? ka
-                    ? `Live Chat (${unreadChatCount})`
-                    : `Messages (${unreadChatCount})`
+                unreadChatCount >
+                0
+                  ? `Live Chat (${unreadChatCount})`
                   : "Live Chat"
               }
             />
@@ -739,7 +922,9 @@ export default function MyProfilesPage() {
 
         .shell {
           width:
-            calc(100% - 40px);
+            calc(
+              100% - 40px
+            );
 
           max-width: 1180px;
 
@@ -754,6 +939,8 @@ export default function MyProfilesPage() {
 
           top: 82px;
           right: 22px;
+
+          z-index: 10;
 
           display: flex;
 
@@ -774,27 +961,36 @@ export default function MyProfilesPage() {
           height: 27px;
 
           border: 0;
-          border-radius: 999px;
+
+          border-radius:
+            999px;
 
           color: #89939d;
-          background: transparent;
+
+          background:
+            transparent;
 
           cursor: pointer;
 
           font-size: 7px;
+
           font-weight: 900;
         }
 
         .language
           button.active {
           color: white;
-          background: #202b37;
+
+          background:
+            #202b37;
         }
 
         .hero {
           display: flex;
 
-          align-items: flex-end;
+          align-items:
+            flex-end;
+
           justify-content:
             space-between;
 
@@ -805,12 +1001,16 @@ export default function MyProfilesPage() {
           color: #c84a50;
 
           font-size: 8px;
+
           font-weight: 900;
-          letter-spacing: 1.4px;
+
+          letter-spacing:
+            1.4px;
         }
 
         h1 {
-          margin: 8px 0 0;
+          margin:
+            8px 0 0;
 
           color: #202b37;
 
@@ -822,17 +1022,21 @@ export default function MyProfilesPage() {
             );
 
           font-weight: 760;
-          letter-spacing: -2px;
+
+          letter-spacing:
+            -2px;
         }
 
         .hero p {
           max-width: 650px;
 
-          margin: 10px 0 0;
+          margin:
+            10px 0 0;
 
           color: #78838e;
 
           font-size: 10px;
+
           line-height: 1.7;
         }
 
@@ -844,45 +1048,157 @@ export default function MyProfilesPage() {
           gap: 7px;
         }
 
-        .addArea :global(a) {
+        .addArea
+          :global(a) {
           min-height: 42px;
 
-          padding: 0 13px;
+          padding:
+            0 13px;
 
           display: flex;
-          align-items: center;
 
-          border-radius: 9px;
+          align-items:
+            center;
 
-          text-decoration: none;
+          border-radius:
+            9px;
+
+          text-decoration:
+            none;
 
           font-size: 8px;
+
           font-weight: 850;
         }
 
         .addButton {
           color: white;
-          background: #202b37;
+
+          background:
+            #202b37;
         }
 
         .emergencyButton {
           color: #a13f45;
 
           border:
-            1px solid #ecd4d6;
+            1px solid
+            #ecd4d6;
 
-          background: #fff6f6;
+          background:
+            #fff6f6;
+        }
+
+        .accountAlerts {
+          margin-top: 25px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          gap: 9px;
+        }
+
+        .alertCard {
+          min-height: 76px;
+
+          padding: 13px;
+
+          display: grid;
+
+          grid-template-columns:
+            auto
+            1fr
+            auto;
+
+          align-items: center;
+
+          gap: 10px;
+
+          border:
+            1px solid
+            #e0e5e8;
+
+          border-radius: 12px;
+
+          color: #35414c;
+
+          background: white;
+
+          text-decoration:
+            none;
+        }
+
+        .alertIcon {
+          width: 42px;
+          height: 42px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius: 11px;
+
+          background:
+            #fff1f1;
+
+          font-size: 18px;
+        }
+
+        .alertIcon.chat {
+          background:
+            #eef4ff;
+        }
+
+        .alertCard span,
+        .alertCard strong {
+          display: block;
+        }
+
+        .alertCard span {
+          color: #838e98;
+
+          font-size: 7px;
+
+          font-weight: 850;
+        }
+
+        .alertCard strong {
+          margin-top: 4px;
+
+          color: #35414c;
+
+          font-size: 17px;
+        }
+
+        .alertCard i {
+          color: #929ca5;
+
+          font-size: 15px;
+
+          font-style: normal;
         }
 
         .stats {
-          margin-top: 32px;
+          margin-top: 18px;
 
           display: grid;
 
           grid-template-columns:
             repeat(
               4,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 10px;
@@ -899,13 +1215,17 @@ export default function MyProfilesPage() {
         .searchBox {
           min-height: 50px;
 
-          padding: 0 14px;
+          padding:
+            0 14px;
 
           display: grid;
 
           grid-template-columns:
             auto
-            minmax(0, 1fr)
+            minmax(
+              0,
+              1fr
+            )
             auto;
 
           align-items: center;
@@ -913,7 +1233,8 @@ export default function MyProfilesPage() {
           gap: 10px;
 
           border:
-            1px solid #dfe4e8;
+            1px solid
+            #dfe4e8;
 
           border-radius: 12px;
 
@@ -923,6 +1244,7 @@ export default function MyProfilesPage() {
         .searchBox
           :global(svg) {
           width: 17px;
+
           height: 17px;
 
           color: #8d969f;
@@ -932,9 +1254,11 @@ export default function MyProfilesPage() {
           width: 100%;
 
           border: 0;
+
           outline: 0;
 
-          background: transparent;
+          background:
+            transparent;
 
           font-size: 10px;
         }
@@ -943,7 +1267,9 @@ export default function MyProfilesPage() {
           border: 0;
 
           color: #8d969f;
-          background: transparent;
+
+          background:
+            transparent;
 
           cursor: pointer;
 
@@ -966,7 +1292,10 @@ export default function MyProfilesPage() {
           grid-template-columns:
             repeat(
               3,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 13px;
@@ -978,12 +1307,15 @@ export default function MyProfilesPage() {
           padding: 15px;
 
           border:
-            1px solid #eed3d5;
+            1px solid
+            #eed3d5;
 
           border-radius: 11px;
 
           color: #9c4045;
-          background: #fff6f6;
+
+          background:
+            #fff6f6;
 
           font-size: 9px;
         }
@@ -991,10 +1323,12 @@ export default function MyProfilesPage() {
         .empty {
           margin-top: 30px;
 
-          padding: 65px 20px;
+          padding:
+            65px 20px;
 
           border:
-            1px solid #e0e5e8;
+            1px solid
+            #e0e5e8;
 
           border-radius: 16px;
 
@@ -1005,17 +1339,22 @@ export default function MyProfilesPage() {
 
         .emptyIcon {
           width: 55px;
+
           height: 55px;
 
           margin: auto;
 
           display: grid;
-          place-items: center;
+
+          place-items:
+            center;
 
           border-radius: 14px;
 
           color: #7d8791;
-          background: #f0f3f5;
+
+          background:
+            #f0f3f5;
         }
 
         .emptyIcon
@@ -1024,7 +1363,8 @@ export default function MyProfilesPage() {
         }
 
         .empty h2 {
-          margin: 15px 0 0;
+          margin:
+            15px 0 0;
 
           color: #35414c;
 
@@ -1032,7 +1372,8 @@ export default function MyProfilesPage() {
         }
 
         .empty p {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
           color: #89939d;
 
@@ -1043,7 +1384,9 @@ export default function MyProfilesPage() {
           margin-top: 18px;
 
           display: flex;
-          justify-content: center;
+
+          justify-content:
+            center;
 
           flex-wrap: wrap;
 
@@ -1054,43 +1397,55 @@ export default function MyProfilesPage() {
           :global(a) {
           min-height: 37px;
 
-          padding: 0 11px;
+          padding:
+            0 11px;
 
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
 
           border:
-            1px solid #dce2e6;
+            1px solid
+            #dce2e6;
 
           border-radius: 8px;
 
           color: #53606c;
+
           background: white;
 
-          text-decoration: none;
+          text-decoration:
+            none;
 
           font-size: 8px;
+
           font-weight: 850;
         }
 
         .quickActions {
           margin-top: 50px;
+
           padding-top: 27px;
 
           border-top:
-            1px solid #dfe4e8;
+            1px solid
+            #dfe4e8;
         }
 
-        .quickActions > div:first-child
+        .quickActions >
+          div:first-child
           span {
           color: #c84a50;
 
           font-size: 7px;
+
           font-weight: 900;
         }
 
         .quickActions h2 {
-          margin: 5px 0 0;
+          margin:
+            5px 0 0;
 
           color: #35414c;
 
@@ -1104,8 +1459,11 @@ export default function MyProfilesPage() {
 
           grid-template-columns:
             repeat(
-              4,
-              minmax(0, 1fr)
+              3,
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 9px;
@@ -1118,7 +1476,10 @@ export default function MyProfilesPage() {
             grid-template-columns:
               repeat(
                 2,
-                minmax(0, 1fr)
+                minmax(
+                  0,
+                  1fr
+                )
               );
           }
 
@@ -1127,7 +1488,10 @@ export default function MyProfilesPage() {
             grid-template-columns:
               repeat(
                 2,
-                minmax(0, 1fr)
+                minmax(
+                  0,
+                  1fr
+                )
               );
           }
         }
@@ -1137,25 +1501,33 @@ export default function MyProfilesPage() {
         ) {
           .shell {
             width:
-              calc(100% - 24px);
+              calc(
+                100% - 24px
+              );
 
-            padding-top: 40px;
+            padding-top:
+              40px;
           }
 
           .language {
             top: 75px;
+
             right: 10px;
           }
 
           .hero {
-            align-items: stretch;
-            flex-direction: column;
+            align-items:
+              stretch;
+
+            flex-direction:
+              column;
           }
 
           .addArea {
             display: grid;
           }
 
+          .accountAlerts,
           .profiles,
           .stats,
           .quickGrid {
@@ -1183,7 +1555,9 @@ function EmergencyProfileCard({
       <div className="visual">
         {item.photo ? (
           <img
-            src={item.photo}
+            src={
+              item.photo
+            }
             alt="Emergency ID"
           />
         ) : (
@@ -1214,7 +1588,8 @@ function EmergencyProfileCard({
             </span>
 
             <strong>
-              {item.scan_count || 0}
+              {item.scan_count ||
+                0}
             </strong>
           </div>
 
@@ -1256,7 +1631,8 @@ function EmergencyProfileCard({
           overflow: hidden;
 
           border:
-            1px solid #ead7d9;
+            1px solid
+            #ead7d9;
 
           border-radius: 15px;
 
@@ -1280,6 +1656,7 @@ function EmergencyProfileCard({
 
         .visual img {
           width: 100%;
+
           height: 100%;
 
           object-fit: cover;
@@ -1287,10 +1664,13 @@ function EmergencyProfileCard({
 
         .placeholder {
           width: 100%;
+
           height: 100%;
 
           display: grid;
-          place-items: center;
+
+          place-items:
+            center;
 
           font-size: 43px;
         }
@@ -1299,16 +1679,22 @@ function EmergencyProfileCard({
           position: absolute;
 
           right: 10px;
+
           bottom: 10px;
 
-          padding: 6px 8px;
+          padding:
+            6px 8px;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
           color: white;
-          background: #c84a50;
+
+          background:
+            #c84a50;
 
           font-size: 6px;
+
           font-weight: 900;
         }
 
@@ -1320,11 +1706,13 @@ function EmergencyProfileCard({
           color: #c84a50;
 
           font-size: 6px;
+
           font-weight: 900;
         }
 
         h3 {
-          margin: 5px 0 0;
+          margin:
+            5px 0 0;
 
           color: #303c47;
 
@@ -1333,19 +1721,25 @@ function EmergencyProfileCard({
 
         .stats {
           margin-top: 16px;
+
           padding-top: 12px;
 
           display: grid;
+
           grid-template-columns:
             repeat(
               2,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 10px;
 
           border-top:
-            1px solid #eee4e5;
+            1px solid
+            #eee4e5;
         }
 
         .stats span,
@@ -1357,6 +1751,7 @@ function EmergencyProfileCard({
           color: #9aa2aa;
 
           font-size: 6px;
+
           font-weight: 900;
         }
 
@@ -1372,30 +1767,39 @@ function EmergencyProfileCard({
           margin-top: 15px;
 
           display: flex;
+
           flex-wrap: wrap;
 
           gap: 6px;
         }
 
-        .actions :global(a) {
+        .actions
+          :global(a) {
           min-height: 33px;
 
-          padding: 0 10px;
+          padding:
+            0 10px;
 
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
 
           border:
-            1px solid #dfdfe2;
+            1px solid
+            #dfdfe2;
 
           border-radius: 8px;
 
           color: #53606c;
+
           background: white;
 
-          text-decoration: none;
+          text-decoration:
+            none;
 
           font-size: 7px;
+
           font-weight: 850;
         }
       `}</style>
@@ -1408,6 +1812,7 @@ function Stat({
   value,
 }: {
   label: string;
+
   value: number;
 }) {
   return (
@@ -1427,7 +1832,8 @@ function Stat({
           padding: 15px;
 
           border:
-            1px solid #e0e5e8;
+            1px solid
+            #e0e5e8;
 
           border-radius: 12px;
 
@@ -1438,6 +1844,7 @@ function Stat({
           color: #929ca5;
 
           font-size: 7px;
+
           font-weight: 900;
         }
 
@@ -1461,7 +1868,9 @@ function FilterButton({
   children,
 }: {
   active: boolean;
+
   onClick: () => void;
+
   children:
     React.ReactNode;
 }) {
@@ -1473,7 +1882,9 @@ function FilterButton({
           ? "filter active"
           : "filter"
       }
-      onClick={onClick}
+      onClick={
+        onClick
+      }
     >
       {children}
 
@@ -1481,26 +1892,35 @@ function FilterButton({
         .filter {
           min-height: 31px;
 
-          padding: 0 10px;
+          padding:
+            0 10px;
 
           border:
-            1px solid #dce2e6;
+            1px solid
+            #dce2e6;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
           color: #66727d;
+
           background: white;
 
           cursor: pointer;
 
           font-size: 7px;
+
           font-weight: 850;
         }
 
         .active {
           color: white;
-          border-color: #202b37;
-          background: #202b37;
+
+          border-color:
+            #202b37;
+
+          background:
+            #202b37;
         }
       `}</style>
     </button>
@@ -1513,7 +1933,9 @@ function QuickLink({
   title,
 }: {
   href: string;
+
   icon: string;
+
   title: string;
 }) {
   return (
@@ -1542,21 +1964,27 @@ function QuickLink({
           display: grid;
 
           grid-template-columns:
-            auto 1fr auto;
+            auto
+            1fr
+            auto;
 
-          align-items: center;
+          align-items:
+            center;
 
           gap: 9px;
 
           border:
-            1px solid #e0e5e8;
+            1px solid
+            #e0e5e8;
 
           border-radius: 11px;
 
           color: #35414c;
+
           background: white;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         span {
@@ -1571,6 +1999,7 @@ function QuickLink({
           color: #929ca5;
 
           font-size: 13px;
+
           font-style: normal;
         }
       `}</style>
