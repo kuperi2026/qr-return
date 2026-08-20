@@ -313,6 +313,33 @@ export default function OwnerMessagesPage() {
         );
       }
 
+      /*
+        OWNER OPENS CHAT:
+        mark Finder messages and matching
+        chat notifications as read.
+      */
+
+      const {
+        error: readError,
+      } = await supabase.rpc(
+        "owner_mark_chat_read",
+        {
+          p_chat_session_id:
+            threadId,
+        }
+      );
+
+      if (readError) {
+        console.error(
+          "Mark chat read error:",
+          readError
+        );
+      }
+
+      /*
+        LOAD CHAT MESSAGES
+      */
+
       const {
         data,
         error: rpcError,
@@ -330,6 +357,36 @@ export default function OwnerMessagesPage() {
 
       setMessages(
         (data || []) as ChatMessage[]
+      );
+
+      /*
+        UPDATE UNREAD COUNT LOCALLY
+      */
+
+      setThreads(
+        (current) =>
+          current.map(
+            (thread) =>
+              thread.id ===
+              threadId
+                ? {
+                    ...thread,
+                    unread_count: 0,
+                  }
+                : thread
+          )
+      );
+
+      setSelectedThread(
+        (current) =>
+          current &&
+          current.id ===
+            threadId
+            ? {
+                ...current,
+                unread_count: 0,
+              }
+            : current
       );
 
       setError("");
@@ -1397,10 +1454,6 @@ export default function OwnerMessagesPage() {
           background: #f9fafb;
         }
 
-        .search > span {
-          color: #8d979f;
-        }
-
         .search input {
           width: 100%;
 
@@ -1410,17 +1463,6 @@ export default function OwnerMessagesPage() {
           background: transparent;
 
           font-size: 8px;
-        }
-
-        .search button {
-          border: 0;
-
-          color: #89939c;
-          background: transparent;
-
-          cursor: pointer;
-
-          font-size: 14px;
         }
 
         .threadList {
@@ -1482,7 +1524,6 @@ export default function OwnerMessagesPage() {
 
         .threadTitle {
           display: flex;
-
           align-items: center;
           justify-content: space-between;
 
@@ -1493,7 +1534,6 @@ export default function OwnerMessagesPage() {
           overflow: hidden;
 
           color: #35414c;
-
           font-size: 9px;
 
           text-overflow: ellipsis;
@@ -1557,29 +1597,6 @@ export default function OwnerMessagesPage() {
           text-align: center;
         }
 
-        .noThreads > span {
-          font-size: 27px;
-        }
-
-        .noThreads strong {
-          display: block;
-
-          margin-top: 10px;
-
-          color: #4c5964;
-
-          font-size: 10px;
-        }
-
-        .noThreads p {
-          margin: 6px 0 0;
-
-          color: #8a959e;
-
-          font-size: 7px;
-          line-height: 1.6;
-        }
-
         .chat {
           min-width: 0;
 
@@ -1603,31 +1620,12 @@ export default function OwnerMessagesPage() {
           text-align: center;
         }
 
-        .selectChat div {
-          font-size: 38px;
-        }
-
-        .selectChat strong {
-          margin-top: 12px;
-
-          color: #4e5a65;
-
-          font-size: 12px;
-        }
-
-        .selectChat p {
-          margin: 6px 0 0;
-
-          font-size: 8px;
-        }
-
         .chatHeader {
           min-height: 77px;
 
           padding: 12px 16px;
 
           display: flex;
-
           align-items: center;
           justify-content: space-between;
 
@@ -1672,14 +1670,9 @@ export default function OwnerMessagesPage() {
         .chatIdentity h2 {
           margin: 3px 0 0;
 
-          overflow: hidden;
-
           color: #34404b;
 
           font-size: 13px;
-
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
 
         .chatIdentity p {
@@ -1756,19 +1749,7 @@ export default function OwnerMessagesPage() {
 
           color: #8b959e;
 
-          font-size: 8px;
-
           text-align: center;
-        }
-
-        .messagesEmpty div {
-          font-size: 30px;
-        }
-
-        .messagesEmpty strong {
-          color: #55616c;
-
-          font-size: 10px;
         }
 
         .messageRow {
@@ -1876,19 +1857,6 @@ export default function OwnerMessagesPage() {
           font-size: 9px;
         }
 
-        .composer textarea:focus {
-          border-color: #9fbce8;
-
-          box-shadow:
-            0 0 0 3px
-            rgba(
-              20,
-              101,
-              232,
-              0.08
-            );
-        }
-
         .composer button {
           min-width: 90px;
           min-height: 41px;
@@ -1950,11 +1918,9 @@ export default function OwnerMessagesPage() {
 
             padding: 10px 0;
 
-            align-items:
-              flex-start;
+            align-items: flex-start;
 
-            flex-direction:
-              column;
+            flex-direction: column;
           }
 
           .topRight {
@@ -1969,29 +1935,19 @@ export default function OwnerMessagesPage() {
                 100% - 20px
               );
 
-            padding-top:
-              25px;
+            padding-top: 25px;
           }
 
           .heading {
-            align-items:
-              stretch;
+            align-items: stretch;
 
-            flex-direction:
-              column;
-          }
-
-          .refresh {
-            align-self:
-              flex-start;
+            flex-direction: column;
           }
 
           .chatHeader {
-            align-items:
-              flex-start;
+            align-items: flex-start;
 
-            flex-direction:
-              column;
+            flex-direction: column;
           }
 
           .bubble {
@@ -2047,15 +2003,11 @@ function getTypeIcon(
     return "👜";
   }
 
-  if (
-    type === "suitcase"
-  ) {
+  if (type === "suitcase") {
     return "🧳";
   }
 
-  if (
-    type === "emergency"
-  ) {
+  if (type === "emergency") {
     return "🚑";
   }
 
