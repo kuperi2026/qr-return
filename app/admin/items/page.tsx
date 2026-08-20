@@ -2,34 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type ItemRow = {
   id: string;
-
   owner_id: string | null;
-
   tag_code: string | null;
-
   item_type: string | null;
   pet_type: string | null;
-
   item_name: string | null;
-
   active: boolean | null;
-
   owner_email: string | null;
-
   scan_count: number | null;
-
   lost_message: string | null;
   lost_seen_location: string | null;
-
   photo: string | null;
-
   created_at?: string | null;
-
   last_scanned_at: string | null;
 };
 
@@ -46,30 +35,29 @@ const categories = [
 
 export default function AdminItemsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const ownerFilter =
-    searchParams.get("owner");
+  const [items, setItems] = useState<ItemRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const initialType =
-    searchParams.get("type") || "all";
-
-  const [items, setItems] =
-    useState<ItemRow[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-  const [search, setSearch] =
-    useState("");
-
-  const [category, setCategory] =
-    useState(initialType);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [ownerFilter, setOwnerFilter] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+
+      const owner = params.get("owner");
+      const type = params.get("type");
+
+      setOwnerFilter(owner);
+
+      if (type) {
+        setCategory(type);
+      }
+    }
+
     void loadItems();
   }, []);
 
@@ -78,15 +66,10 @@ export default function AdminItemsPage() {
       setLoading(true);
       setError("");
 
-      /*
-        1. LOGIN CHECK
-      */
-
       const {
         data: { user },
         error: authError,
-      } =
-        await supabase.auth.getUser();
+      } = await supabase.auth.getUser();
 
       if (authError) {
         throw authError;
@@ -96,10 +79,6 @@ export default function AdminItemsPage() {
         router.push("/login");
         return;
       }
-
-      /*
-        2. ADMIN CHECK
-      */
 
       const {
         data: admin,
@@ -115,17 +94,17 @@ export default function AdminItemsPage() {
       }
 
       if (!admin) {
-        setError(
-          "Admin Access Required"
-        );
-
+        setError("Admin Access Required");
         setLoading(false);
         return;
       }
 
-      /*
-        3. QR PROFILES
-      */
+      const params =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+
+      const owner = params?.get("owner") || null;
 
       let query = supabase
         .from("item")
@@ -149,11 +128,8 @@ export default function AdminItemsPage() {
           ascending: false,
         });
 
-      if (ownerFilter) {
-        query = query.eq(
-          "owner_id",
-          ownerFilter
-        );
+      if (owner) {
+        query = query.eq("owner_id", owner);
       }
 
       const {
@@ -165,9 +141,7 @@ export default function AdminItemsPage() {
         throw error;
       }
 
-      setItems(
-        (data || []) as ItemRow[]
-      );
+      setItems((data || []) as ItemRow[]);
     } catch (err) {
       console.error(
         "Admin items error:",
@@ -184,89 +158,58 @@ export default function AdminItemsPage() {
     }
   }
 
-  const filteredItems =
-    useMemo(() => {
-      const q =
-        search
-          .trim()
-          .toLowerCase();
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
 
-      return items.filter(
-        (item) => {
-          const type =
-            getEffectiveType(
-              item
-            );
+    return items.filter((item) => {
+      const type = getEffectiveType(item);
 
-          const categoryMatch =
-            category === "all" ||
-            type === category;
+      const categoryMatch =
+        category === "all" ||
+        type === category;
 
-          const text = [
-            item.tag_code,
-            item.item_name,
-            item.owner_email,
-            item.item_type,
-            item.pet_type,
-            item.owner_id,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
+      const text = [
+        item.tag_code,
+        item.item_name,
+        item.owner_email,
+        item.item_type,
+        item.pet_type,
+        item.owner_id,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-          const searchMatch =
-            !q ||
-            text.includes(q);
+      const searchMatch =
+        !q || text.includes(q);
 
-          return (
-            categoryMatch &&
-            searchMatch
-          );
-        }
-      );
-    }, [
-      items,
-      search,
-      category,
-    ]);
+      return categoryMatch && searchMatch;
+    });
+  }, [items, search, category]);
 
-  const stats =
-    useMemo(() => {
-      return {
-        total:
-          items.length,
+  const stats = useMemo(() => {
+    return {
+      total: items.length,
 
-        active:
-          items.filter(
-            (item) =>
-              item.active === true
-          ).length,
+      active: items.filter(
+        (item) => item.active === true
+      ).length,
 
-        lost:
-          items.filter(
-            (item) =>
-              Boolean(
-                item.lost_message ||
-                  item
-                    .lost_seen_location
-              )
-          ).length,
+      lost: items.filter((item) =>
+        Boolean(
+          item.lost_message ||
+            item.lost_seen_location
+        )
+      ).length,
 
-        scans:
-          items.reduce(
-            (
-              total,
-              item
-            ) =>
-              total +
-              Number(
-                item.scan_count ||
-                  0
-              ),
-            0
-          ),
-      };
-    }, [items]);
+      scans: items.reduce(
+        (total, item) =>
+          total +
+          Number(item.scan_count || 0),
+        0
+      ),
+    };
+  }, [items]);
 
   if (loading) {
     return (
@@ -290,7 +233,6 @@ export default function AdminItemsPage() {
   return (
     <main className="page">
       <div className="shell">
-
         <header className="header">
           <div>
             <Link
@@ -309,9 +251,8 @@ export default function AdminItemsPage() {
             </h1>
 
             <p>
-              ყველა რეგისტრირებული
-              ძაღლი, კატა, ნივთი და
-              Emergency პროფილი.
+              ყველა რეგისტრირებული ძაღლი, კატა,
+              ნივთი და Emergency პროფილი.
             </p>
 
             {ownerFilter && (
@@ -387,27 +328,24 @@ export default function AdminItemsPage() {
           </div>
 
           <div className="categories">
-            {categories.map(
-              (item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={
-                    category ===
+            {categories.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={
+                  category === item.id
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setCategory(
                     item.id
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setCategory(
-                      item.id
-                    )
-                  }
-                >
-                  {item.label}
-                </button>
-              )
-            )}
+                  )
+                }
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </section>
 
@@ -431,39 +369,28 @@ export default function AdminItemsPage() {
               </span>
 
               <strong>
-                {
-                  filteredItems.length
-                }
+                {filteredItems.length}
               </strong>
             </div>
 
-            {filteredItems.length ===
-            0 ? (
+            {filteredItems.length === 0 ? (
               <div className="empty">
                 <strong>
-                  QR პროფილი ვერ
-                  მოიძებნა
+                  QR პროფილი ვერ მოიძებნა
                 </strong>
 
                 <p>
-                  შეცვალეთ ძებნა ან
-                  კატეგორია.
+                  შეცვალეთ ძებნა ან კატეგორია.
                 </p>
               </div>
             ) : (
               <div className="grid">
-                {filteredItems.map(
-                  (item) => (
-                    <ItemCard
-                      key={
-                        item.id
-                      }
-                      item={
-                        item
-                      }
-                    />
-                  )
-                )}
+                {filteredItems.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                  />
+                ))}
               </div>
             )}
           </>
@@ -486,8 +413,7 @@ export default function AdminItemsPage() {
         .header {
           display: flex;
           align-items: flex-end;
-          justify-content:
-            space-between;
+          justify-content: space-between;
           gap: 25px;
         }
 
@@ -496,10 +422,8 @@ export default function AdminItemsPage() {
           margin-bottom: 22px;
 
           color: #697581;
-
           font-size: 9px;
           font-weight: 800;
-
           text-decoration: none;
         }
 
@@ -507,7 +431,6 @@ export default function AdminItemsPage() {
           display: block;
 
           color: #c84a50;
-
           font-size: 8px;
           font-weight: 900;
           letter-spacing: 1.4px;
@@ -691,8 +614,7 @@ export default function AdminItemsPage() {
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           border-bottom:
             1px solid #dfe4e8;
@@ -849,11 +771,7 @@ function ItemCard({
           />
         ) : (
           <div className="placeholder">
-            {
-              getTypeIcon(
-                type
-              )
-            }
+            {getTypeIcon(type)}
           </div>
         )}
 
@@ -867,16 +785,12 @@ function ItemCard({
         <div className="top">
           <div>
             <span className="type">
-              {getTypeLabel(
-                type
-              )}
+              {getTypeLabel(type)}
             </span>
 
             <h3>
               {item.item_name ||
-                getTypeLabel(
-                  type
-                )}
+                getTypeLabel(type)}
             </h3>
           </div>
 
@@ -897,25 +811,21 @@ function ItemCard({
           <Data
             label="SCANS"
             value={String(
-              item.scan_count ||
-                0
+              item.scan_count || 0
             )}
           />
 
           <Data
             label="LOST"
             value={
-              lost
-                ? "YES"
-                : "NO"
+              lost ? "YES" : "NO"
             }
           />
 
           <Data
             label="OWNER"
             value={
-              item.owner_email ||
-              "—"
+              item.owner_email || "—"
             }
           />
 
@@ -1024,8 +934,7 @@ function ItemCard({
         .top {
           display: flex;
           align-items: flex-start;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 10px;
         }
@@ -1217,9 +1126,7 @@ function Data({
 function getEffectiveType(
   item: ItemRow
 ) {
-  if (
-    item.item_type === "pet"
-  ) {
+  if (item.item_type === "pet") {
     return (
       item.pet_type ||
       "pet"
@@ -1237,21 +1144,17 @@ function getTypeLabel(
   type: string
 ) {
   const labels:
-    Record<
-      string,
-      string
-    > = {
-    dog: "ძაღლი",
-    cat: "კატა",
-    pet: "Pet",
-    keys: "გასაღები",
-    wallet: "საფულე",
-    bag: "ჩანთა",
-    suitcase: "ჩემოდანი",
-    luggage: "ჩემოდანი",
-    emergency:
-      "Emergency ID",
-  };
+    Record<string, string> = {
+      dog: "ძაღლი",
+      cat: "კატა",
+      pet: "Pet",
+      keys: "გასაღები",
+      wallet: "საფულე",
+      bag: "ჩანთა",
+      suitcase: "ჩემოდანი",
+      luggage: "ჩემოდანი",
+      emergency: "Emergency ID",
+    };
 
   return (
     labels[type] ||
@@ -1264,20 +1167,17 @@ function getTypeIcon(
   type: string
 ) {
   const icons:
-    Record<
-      string,
-      string
-    > = {
-    dog: "🐕",
-    cat: "🐈",
-    pet: "🐾",
-    keys: "🔑",
-    wallet: "👛",
-    bag: "🎒",
-    suitcase: "🧳",
-    luggage: "🧳",
-    emergency: "🚑",
-  };
+    Record<string, string> = {
+      dog: "🐕",
+      cat: "🐈",
+      pet: "🐾",
+      keys: "🔑",
+      wallet: "👛",
+      bag: "🎒",
+      suitcase: "🧳",
+      luggage: "🧳",
+      emergency: "🚑",
+    };
 
   return (
     icons[type] ||
