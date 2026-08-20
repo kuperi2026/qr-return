@@ -4,13 +4,18 @@ import Link from "next/link";
 
 type Props = {
   email?: string;
+
   notificationCount?: number;
+
+  unreadChatCount?: number;
+
   onLogout?: () => void;
 };
 
 export default function AccountHeader({
   email,
   notificationCount = 0,
+  unreadChatCount = 0,
   onLogout,
 }: Props) {
   return (
@@ -19,7 +24,19 @@ export default function AccountHeader({
         href="/"
         className="brand"
       >
-        QR RETURN
+        <span className="logo">
+          QR
+        </span>
+
+        <span className="brandText">
+          <strong>
+            QR RETURN
+          </strong>
+
+          <small>
+            ACCOUNT
+          </small>
+        </span>
       </Link>
 
       <nav className="right">
@@ -31,18 +48,18 @@ export default function AccountHeader({
 
         <Link
           href="/account/notifications"
-          className="notifications"
+          className="navButton"
         >
-          <span className="bell">
+          <span className="icon">
             🔔
           </span>
 
-          <span>
+          <span className="label">
             Notifications
           </span>
 
           {notificationCount > 0 && (
-            <strong>
+            <strong className="badge notificationBadge">
               {notificationCount > 99
                 ? "99+"
                 : notificationCount}
@@ -51,160 +68,344 @@ export default function AccountHeader({
         </Link>
 
         <Link
-          href="/my-profiles"
+          href="/account/messages"
+          className="navButton"
         >
-          My Profiles
+          <span className="icon">
+            💬
+          </span>
+
+          <span className="label">
+            Live Chat
+          </span>
+
+          {unreadChatCount > 0 && (
+            <strong className="badge chatBadge">
+              {unreadChatCount > 99
+                ? "99+"
+                : unreadChatCount}
+            </strong>
+          )}
+        </Link>
+
+        <Link
+          href="/my-profiles"
+          className="navButton"
+        >
+          <span className="icon">
+            🏷️
+          </span>
+
+          <span className="label">
+            My Profiles
+          </span>
         </Link>
 
         <Link
           href="/account"
+          className="navButton"
         >
-          Account
+          <span className="icon">
+            👤
+          </span>
+
+          <span className="label">
+            Account
+          </span>
         </Link>
 
         <button
           type="button"
+          className="logout"
           onClick={onLogout}
         >
-          Sign Out
+          <span>
+            ↗
+          </span>
+
+          <span>
+            Sign Out
+          </span>
         </button>
       </nav>
 
       <style jsx>{`
         .header {
-          min-height: 68px;
+          width: 100%;
 
-          padding: 0 22px;
+          min-height: 70px;
+
+          padding:
+            0 22px;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           gap: 20px;
 
           border-bottom:
-            1px solid #e4e7ea;
+            1px solid #e1e5e8;
 
-          background: white;
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.96
+            );
+
+          position: relative;
+
+          z-index: 30;
         }
 
         .brand {
+          display: flex;
+
+          align-items: center;
+
+          gap: 9px;
+
           flex: 0 0 auto;
-
-          color: #202b37;
-
-          font-size: 14px;
-          font-weight: 900;
 
           text-decoration: none;
         }
 
+        .logo {
+          width: 40px;
+          height: 40px;
+
+          display: grid;
+
+          place-items: center;
+
+          border-radius: 11px;
+
+          color: white;
+
+          background:
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
+
+          font-size: 12px;
+
+          font-weight: 900;
+        }
+
+        .brandText strong,
+        .brandText small {
+          display: block;
+        }
+
+        .brandText strong {
+          color: #1465e8;
+
+          font-size: 13px;
+
+          font-weight: 900;
+        }
+
+        .brandText small {
+          margin-top: 2px;
+
+          color: #7655f7;
+
+          font-size: 6px;
+
+          font-weight: 900;
+
+          letter-spacing: 1px;
+        }
+
         .right {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-
-          gap: 7px;
-
           min-width: 0;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content:
+            flex-end;
+
+          gap: 6px;
         }
 
         .email {
-          max-width: 180px;
+          max-width: 175px;
+
+          margin-right: 3px;
 
           overflow: hidden;
 
-          color: #8b959e;
+          color: #8a959e;
 
-          font-size: 8px;
+          font-size: 7px;
 
           text-overflow: ellipsis;
+
           white-space: nowrap;
         }
 
-        .right :global(a),
-        button {
-          min-height: 34px;
+        .navButton,
+        .logout {
+          min-height: 35px;
 
-          padding: 0 10px;
+          padding:
+            0 9px;
 
           display: flex;
+
           align-items: center;
-          justify-content: center;
+
+          justify-content:
+            center;
 
           gap: 5px;
+
+          position: relative;
 
           border:
             1px solid #dfe4e8;
 
           border-radius: 8px;
 
-          color: #53606c;
+          color: #53606b;
+
           background: white;
 
           text-decoration: none;
 
           font-size: 7px;
+
           font-weight: 850;
         }
 
-        .notifications {
-          position: relative;
+        .navButton:hover,
+        .logout:hover {
+          border-color: #cbd3da;
+
+          background: #f8fafb;
         }
 
-        .notifications strong {
-          min-width: 17px;
-          height: 17px;
+        .icon {
+          font-size: 11px;
+        }
 
-          padding: 0 4px;
+        .badge {
+          min-width: 18px;
+          height: 18px;
+
+          padding:
+            0 4px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 999px;
 
           color: white;
-          background: #c84a50;
 
           font-size: 5px;
+
           font-weight: 900;
         }
 
-        .bell {
-          font-size: 11px;
+        .notificationBadge {
+          background: #c84a50;
         }
 
-        button {
+        .chatBadge {
+          background: #1465e8;
+        }
+
+        .logout {
+          border-color: #eadadd;
+
+          color: #9d4c51;
+
+          background: #fffafa;
+
           cursor: pointer;
         }
 
-        @media (max-width: 800px) {
+        @media (
+          max-width: 940px
+        ) {
           .email {
             display: none;
           }
+
+          .label {
+            display: none;
+          }
+
+          .navButton,
+          .logout {
+            min-width: 36px;
+
+            padding:
+              0 7px;
+          }
         }
 
-        @media (max-width: 620px) {
+        @media (
+          max-width: 590px
+        ) {
           .header {
             min-height: auto;
 
-            padding: 12px;
+            padding:
+              11px 12px;
 
-            align-items: flex-start;
-            flex-direction: column;
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
           }
 
           .right {
             width: 100%;
 
-            justify-content: flex-start;
+            justify-content:
+              flex-start;
 
             flex-wrap: wrap;
           }
 
-          .right :global(a),
-          button {
-            flex: 1 1 auto;
+          .label {
+            display: inline;
+          }
+
+          .navButton,
+          .logout {
+            flex:
+              1 1 auto;
+          }
+        }
+
+        @media (
+          max-width: 420px
+        ) {
+          .brandText small {
+            display: none;
+          }
+
+          .navButton,
+          .logout {
+            min-height: 38px;
+          }
+
+          .label {
+            font-size: 6px;
           }
         }
       `}</style>
