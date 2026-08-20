@@ -15,25 +15,45 @@ type Lang = "ka" | "en";
 
 type OrderRow = {
   id: string;
-
   user_id: string | null;
+
+  product_id: string | null;
+  product_name: string | null;
+  product_type: string | null;
+  sku: string | null;
+
+  quantity: number | null;
+  unit_price: number | null;
 
   status: string | null;
 
   total_amount: number | null;
-
   currency: string | null;
 
   shipping_name: string | null;
-
   shipping_address: string | null;
 
   tracking_number: string | null;
 
   created_at: string | null;
-
   updated_at?: string | null;
 };
+
+type OrderStatus =
+  | "pending"
+  | "paid"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
+const STATUS_FLOW: OrderStatus[] = [
+  "pending",
+  "paid",
+  "processing",
+  "shipped",
+  "delivered",
+];
 
 export default function AccountOrdersPage() {
   const router = useRouter();
@@ -87,6 +107,12 @@ export default function AccountOrdersPage() {
         .select(`
           id,
           user_id,
+          product_id,
+          product_name,
+          product_type,
+          sku,
+          quantity,
+          unit_price,
           status,
           total_amount,
           currency,
@@ -149,43 +175,58 @@ export default function AccountOrdersPage() {
       filter,
     ]);
 
-  const pendingCount =
-    orders.filter(
-      (order) =>
-        normalizeStatus(
-          order.status
-        ) === "pending"
-    ).length;
+  const counts =
+    useMemo(() => {
+      return {
+        all: orders.length,
 
-  const processingCount =
-    orders.filter(
-      (order) =>
-        normalizeStatus(
-          order.status
-        ) === "processing"
-    ).length;
+        pending:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) === "pending"
+          ).length,
 
-  const shippedCount =
-    orders.filter(
-      (order) =>
-        normalizeStatus(
-          order.status
-        ) === "shipped"
-    ).length;
+        paid:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) === "paid"
+          ).length,
 
-  const deliveredCount =
-    orders.filter(
-      (order) =>
-        normalizeStatus(
-          order.status
-        ) === "delivered"
-    ).length;
+        processing:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) === "processing"
+          ).length,
+
+        shipped:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) === "shipped"
+          ).length,
+
+        delivered:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) === "delivered"
+          ).length,
+      };
+    }, [orders]);
 
   if (loading) {
     return (
       <main className="loading">
         <div className="icon">
-          🛒
+          📦
         </div>
 
         <strong>
@@ -264,10 +305,10 @@ export default function AccountOrdersPage() {
         </Link>
 
         <div className="topActions">
-          <Link href="/my-profiles">
+          <Link href="/store">
             {ka
-              ? "ჩემი პროფილები"
-              : "My Profiles"}
+              ? "მაღაზია"
+              : "Store"}
           </Link>
 
           <Link href="/account/messages">
@@ -279,6 +320,12 @@ export default function AccountOrdersPage() {
             {ka
               ? "შეტყობინებები"
               : "Notifications"}
+          </Link>
+
+          <Link href="/my-profiles">
+            {ka
+              ? "პროფილები"
+              : "Profiles"}
           </Link>
 
           <div className="langs">
@@ -328,8 +375,8 @@ export default function AccountOrdersPage() {
 
             <p>
               {ka
-                ? "ნახეთ QR Tag, Sticker და სხვა QR RETURN პროდუქციის შეკვეთების სტატუსი."
-                : "Track your QR Tag, Sticker, and other QR RETURN product orders."}
+                ? "ნახეთ შეძენილი QR Tag-ები და Sticker-ები, რაოდენობა, მიმდინარე სტატუსი და მიწოდების ინფორმაცია."
+                : "View your QR Tags and Stickers, quantity, order status, and shipping information."}
             </p>
           </div>
 
@@ -349,54 +396,43 @@ export default function AccountOrdersPage() {
             label={
               ka
                 ? "ყველა"
-                : "Total"
+                : "All"
             }
+            value={counts.all}
+          />
+
+          <Stat
+            label="Pending"
             value={
-              orders.length
+              counts.pending
             }
           />
 
           <Stat
-            label={
-              ka
-                ? "მოლოდინში"
-                : "Pending"
-            }
+            label="Paid"
             value={
-              pendingCount
+              counts.paid
             }
           />
 
           <Stat
-            label={
-              ka
-                ? "მუშავდება"
-                : "Processing"
-            }
+            label="Processing"
             value={
-              processingCount
+              counts.processing
             }
           />
 
           <Stat
-            label={
-              ka
-                ? "გაგზავნილი"
-                : "Shipped"
-            }
+            label="Shipped"
             value={
-              shippedCount
+              counts.shipped
             }
           />
 
           <Stat
-            label={
-              ka
-                ? "ჩაბარებული"
-                : "Delivered"
-            }
+            label="Delivered"
             value={
-              deliveredCount
+              counts.delivered
             }
           />
         </section>
@@ -426,6 +462,19 @@ export default function AccountOrdersPage() {
             }
           >
             Pending
+          </FilterButton>
+
+          <FilterButton
+            active={
+              filter === "paid"
+            }
+            onClick={() =>
+              setFilter(
+                "paid"
+              )
+            }
+          >
+            Paid
           </FilterButton>
 
           <FilterButton
@@ -481,7 +530,7 @@ export default function AccountOrdersPage() {
             0 && (
             <section className="empty">
               <div>
-                🛒
+                📦
               </div>
 
               <strong>
@@ -492,8 +541,8 @@ export default function AccountOrdersPage() {
 
               <p>
                 {ka
-                  ? "QR Tag ან Sticker-ის შეძენის შემდეგ შეკვეთა აქ გამოჩნდება."
-                  : "Your QR Tag or Sticker orders will appear here."}
+                  ? "QR Tag ან QR Sticker-ის შეძენის შემდეგ შეკვეთა აქ გამოჩნდება."
+                  : "Your QR Tag or QR Sticker orders will appear here."}
               </p>
 
               <Link href="/store">
@@ -541,8 +590,11 @@ export default function AccountOrdersPage() {
           margin: auto;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           gap: 15px;
 
@@ -552,6 +604,7 @@ export default function AccountOrdersPage() {
 
         .brand {
           display: flex;
+
           align-items: center;
 
           gap: 9px;
@@ -564,6 +617,7 @@ export default function AccountOrdersPage() {
           height: 41px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 11px;
@@ -605,6 +659,7 @@ export default function AccountOrdersPage() {
 
         .topActions {
           display: flex;
+
           align-items: center;
 
           gap: 5px;
@@ -614,9 +669,11 @@ export default function AccountOrdersPage() {
           :global(a) {
           min-height: 32px;
 
-          padding: 0 9px;
+          padding:
+            0 9px;
 
           display: flex;
+
           align-items: center;
 
           border:
@@ -657,7 +714,8 @@ export default function AccountOrdersPage() {
 
           color: #7d8791;
 
-          background: transparent;
+          background:
+            transparent;
 
           cursor: pointer;
 
@@ -689,8 +747,12 @@ export default function AccountOrdersPage() {
 
         .heading {
           display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
+
+          align-items:
+            flex-end;
+
+          justify-content:
+            space-between;
 
           gap: 25px;
         }
@@ -706,7 +768,8 @@ export default function AccountOrdersPage() {
         }
 
         h1 {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
           color: #202b37;
 
@@ -717,13 +780,15 @@ export default function AccountOrdersPage() {
               46px
             );
 
-          letter-spacing: -1.8px;
+          letter-spacing:
+            -1.8px;
         }
 
         .heading p {
           max-width: 650px;
 
-          margin: 9px 0 0;
+          margin:
+            9px 0 0;
 
           color: #78838e;
 
@@ -735,9 +800,11 @@ export default function AccountOrdersPage() {
         .shopButton {
           min-height: 40px;
 
-          padding: 0 12px;
+          padding:
+            0 12px;
 
           display: flex;
+
           align-items: center;
 
           border-radius: 9px;
@@ -760,7 +827,7 @@ export default function AccountOrdersPage() {
 
           grid-template-columns:
             repeat(
-              5,
+              6,
               minmax(
                 0,
                 1fr
@@ -785,7 +852,7 @@ export default function AccountOrdersPage() {
 
           display: grid;
 
-          gap: 10px;
+          gap: 12px;
         }
 
         .error {
@@ -808,7 +875,8 @@ export default function AccountOrdersPage() {
         .empty {
           margin-top: 25px;
 
-          padding: 60px 20px;
+          padding:
+            60px 20px;
 
           border:
             1px solid #e0e5e8;
@@ -835,7 +903,8 @@ export default function AccountOrdersPage() {
         }
 
         .empty p {
-          margin: 7px 0 16px;
+          margin:
+            7px 0 16px;
 
           color: #89939d;
 
@@ -846,9 +915,11 @@ export default function AccountOrdersPage() {
           :global(a) {
           min-height: 36px;
 
-          padding: 0 11px;
+          padding:
+            0 11px;
 
           display: inline-flex;
+
           align-items: center;
 
           border-radius: 8px;
@@ -865,12 +936,12 @@ export default function AccountOrdersPage() {
         }
 
         @media (
-          max-width: 780px
+          max-width: 850px
         ) {
           .stats {
             grid-template-columns:
               repeat(
-                2,
+                3,
                 minmax(
                   0,
                   1fr
@@ -883,11 +954,14 @@ export default function AccountOrdersPage() {
           max-width: 600px
         ) {
           .topbar {
-            padding: 10px 0;
+            padding:
+              10px 0;
 
-            align-items: flex-start;
+            align-items:
+              flex-start;
 
-            flex-direction: column;
+            flex-direction:
+              column;
           }
 
           .topActions {
@@ -902,22 +976,32 @@ export default function AccountOrdersPage() {
                 100% - 24px
               );
 
-            padding-top: 30px;
+            padding-top:
+              30px;
           }
 
           .heading {
-            align-items: stretch;
+            align-items:
+              stretch;
 
-            flex-direction: column;
+            flex-direction:
+              column;
           }
 
           .shopButton {
-            align-self: flex-start;
+            align-self:
+              flex-start;
           }
 
           .stats {
             grid-template-columns:
-              1fr;
+              repeat(
+                2,
+                minmax(
+                  0,
+                  1fr
+                )
+              );
           }
         }
       `}</style>
@@ -940,65 +1024,184 @@ function OrderCard({
       order.status
     );
 
+  const currentIndex =
+    STATUS_FLOW.indexOf(
+      status
+    );
+
+  const icon =
+    order.product_id ===
+    "sticker"
+      ? "🔳"
+      : "🏷️";
+
   return (
     <article className="card">
-      <div className="main">
-        <div className="icon">
-          🛒
+      <div className="cardTop">
+        <div className="product">
+          <div className="productIcon">
+            {icon}
+          </div>
+
+          <div className="productText">
+            <span>
+              QR RETURN ORDER
+            </span>
+
+            <h2>
+              {order.product_name ||
+                (ka
+                  ? "QR პროდუქტი"
+                  : "QR Product")}
+            </h2>
+
+            <p>
+              {ka
+                ? "შეკვეთა"
+                : "Order"}{" "}
+              #{order.id}
+            </p>
+          </div>
         </div>
 
-        <div className="info">
-          <span className="orderId">
-            ORDER
-          </span>
-
-          <strong>
-            #
-            {order.id}
-          </strong>
-
-          <p>
-            {formatDate(
-              order.created_at,
-              language
-            )}
-          </p>
-        </div>
+        <span
+          className={`status ${status}`}
+        >
+          {getStatusLabel(
+            status,
+            language
+          )}
+        </span>
       </div>
 
-      <div className="details">
-        <div>
-          <span>
-            {ka
-              ? "სტატუსი"
-              : "Status"}
-          </span>
+      <div className="productDetails">
+        <Detail
+          label={
+            ka
+              ? "პროდუქტი"
+              : "Product"
+          }
+          value={
+            order.product_name ||
+            "—"
+          }
+        />
 
-          <strong
-            className={`status ${status}`}
-          >
-            {getStatusLabel(
-              status,
-              language
-            )}
-          </strong>
+        <Detail
+          label={
+            ka
+              ? "რაოდენობა"
+              : "Quantity"
+          }
+          value={String(
+            order.quantity || 1
+          )}
+        />
+
+        <Detail
+          label={
+            ka
+              ? "ერთეულის ფასი"
+              : "Unit Price"
+          }
+          value={formatMoney(
+            order.unit_price,
+            order.currency
+          )}
+        />
+
+        <Detail
+          label="SKU"
+          value={
+            order.sku || "—"
+          }
+        />
+
+        <Detail
+          label={
+            ka
+              ? "ჯამი"
+              : "Total"
+          }
+          value={formatMoney(
+            order.total_amount,
+            order.currency
+          )}
+        />
+
+        <Detail
+          label={
+            ka
+              ? "შეკვეთის თარიღი"
+              : "Order Date"
+          }
+          value={formatDate(
+            order.created_at,
+            language
+          )}
+        />
+      </div>
+
+      {status !==
+        "cancelled" && (
+        <div className="progress">
+          {STATUS_FLOW.map(
+            (
+              step,
+              index
+            ) => {
+              const complete =
+                currentIndex >=
+                index;
+
+              const active =
+                status === step;
+
+              return (
+                <div
+                  key={step}
+                  className="progressItem"
+                >
+                  <div
+                    className={
+                      active
+                        ? "dot active"
+                        : complete
+                        ? "dot complete"
+                        : "dot"
+                    }
+                  >
+                    {complete &&
+                    !active
+                      ? "✓"
+                      : index +
+                        1}
+                  </div>
+
+                  <span>
+                    {getStatusLabel(
+                      step,
+                      language
+                    )}
+                  </span>
+                </div>
+              );
+            }
+          )}
         </div>
+      )}
 
-        <div>
-          <span>
-            {ka
-              ? "თანხა"
-              : "Total"}
-          </span>
-
-          <strong>
-            {formatMoney(
-              order.total_amount,
-              order.currency
-            )}
-          </strong>
+      {status ===
+        "cancelled" && (
+        <div className="cancelled">
+          ✕{" "}
+          {ka
+            ? "ეს შეკვეთა გაუქმებულია."
+            : "This order has been cancelled."}
         </div>
+      )}
 
+      <div className="shipping">
         <div>
           <span>
             {ka
@@ -1011,16 +1214,22 @@ function OrderCard({
               "—"}
           </strong>
         </div>
+
+        <div>
+          <span>
+            {ka
+              ? "მიწოდების მისამართი"
+              : "Shipping Address"}
+          </span>
+
+          <strong>
+            {order.shipping_address ||
+              "—"}
+          </strong>
+        </div>
       </div>
 
-      {order.shipping_address && (
-        <div className="address">
-          📍{" "}
-          {order.shipping_address}
-        </div>
-      )}
-
-      {order.tracking_number && (
+      {order.tracking_number ? (
         <div className="tracking">
           <div>
             <span>
@@ -1033,61 +1242,78 @@ function OrderCard({
               }
             </strong>
           </div>
+
+          <span className="trackingIcon">
+            📦
+          </span>
         </div>
-      )}
+      ) : status ===
+        "shipped" ? (
+        <div className="mailNotice">
+          📮{" "}
+          {ka
+            ? "შეკვეთა გაგზავნილია. Tracking Number ამ გზავნილს არ აქვს."
+            : "Your order has been shipped without a tracking number."}
+        </div>
+      ) : null}
 
       <style jsx>{`
         .card {
-          padding: 15px;
-
-          display: grid;
-
-          grid-template-columns:
-            190px
-            minmax(
-              0,
-              1fr
-            );
-
-          gap: 18px;
+          padding: 18px;
 
           border:
-            1px solid #e0e5e8;
+            1px solid #dfe4e8;
 
-          border-radius: 13px;
+          border-radius: 15px;
 
           background: white;
         }
 
-        .main {
+        .cardTop {
           display: flex;
 
-          align-items: center;
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap: 15px;
+        }
+
+        .product {
+          min-width: 0;
+
+          display: flex;
+
+          align-items:
+            center;
 
           gap: 11px;
         }
 
-        .icon {
-          width: 45px;
-          height: 45px;
+        .productIcon {
+          width: 50px;
+          height: 50px;
 
-          flex: 0 0 45px;
+          flex: 0 0 50px;
 
           display: grid;
+
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 12px;
 
           background: #eef4ff;
 
-          font-size: 20px;
+          font-size: 22px;
         }
 
-        .info {
+        .productText {
           min-width: 0;
         }
 
-        .orderId {
+        .productText span {
           display: block;
 
           color: #7655f7;
@@ -1095,33 +1321,98 @@ function OrderCard({
           font-size: 6px;
 
           font-weight: 900;
+
+          letter-spacing:
+            0.8px;
         }
 
-        .info strong {
-          display: block;
-
-          margin-top: 3px;
-
-          overflow: hidden;
+        .productText h2 {
+          margin:
+            4px 0 0;
 
           color: #35414c;
 
-          font-size: 9px;
-
-          text-overflow: ellipsis;
-
-          white-space: nowrap;
+          font-size: 14px;
         }
 
-        .info p {
-          margin: 4px 0 0;
+        .productText p {
+          margin:
+            4px 0 0;
+
+          overflow: hidden;
 
           color: #929ca5;
 
           font-size: 7px;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
         }
 
-        .details {
+        .status {
+          flex: 0 0 auto;
+
+          padding:
+            6px 9px;
+
+          border-radius:
+            999px;
+
+          font-size: 6px;
+
+          font-weight: 900;
+        }
+
+        .status.pending {
+          color: #9a6700;
+
+          background:
+            #fff8e1;
+        }
+
+        .status.paid {
+          color: #027a48;
+
+          background:
+            #ecfdf3;
+        }
+
+        .status.processing {
+          color: #175cd3;
+
+          background:
+            #eff8ff;
+        }
+
+        .status.shipped {
+          color: #6941c6;
+
+          background:
+            #f4f3ff;
+        }
+
+        .status.delivered {
+          color: #027a48;
+
+          background:
+            #ecfdf3;
+        }
+
+        .status.cancelled {
+          color: #b42318;
+
+          background:
+            #fff1f0;
+        }
+
+        .productDetails {
+          margin-top: 18px;
+
+          padding: 14px;
+
           display: grid;
 
           grid-template-columns:
@@ -1133,83 +1424,204 @@ function OrderCard({
               )
             );
 
-          gap: 10px;
+          gap: 13px;
+
+          border-radius: 11px;
+
+          background: #f8fafb;
         }
 
-        .details span,
-        .details strong {
+        .progress {
+          margin-top: 20px;
+
+          padding:
+            17px 4px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              5,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          border-top:
+            1px solid #edf0f2;
+
+          border-bottom:
+            1px solid #edf0f2;
+        }
+
+        .progressItem {
+          position: relative;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          align-items: center;
+
+          gap: 6px;
+
+          color: #84909a;
+
+          font-size: 6px;
+
+          text-align: center;
+        }
+
+        .progressItem:not(
+            :last-child
+          )::after {
+          content: "";
+
+          position:
+            absolute;
+
+          top: 13px;
+
+          left:
+            calc(
+              50% + 17px
+            );
+
+          width:
+            calc(
+              100% - 34px
+            );
+
+          height: 1px;
+
+          background:
+            #dfe4e8;
+        }
+
+        .dot {
+          position: relative;
+
+          z-index: 2;
+
+          width: 27px;
+
+          height: 27px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border:
+            1px solid #d8dee3;
+
+          border-radius:
+            999px;
+
+          color: #929ca5;
+
+          background: white;
+
+          font-size: 7px;
+
+          font-weight: 900;
+        }
+
+        .dot.complete {
+          color: white;
+
+          border-color:
+            #12a86b;
+
+          background:
+            #12a86b;
+        }
+
+        .dot.active {
+          color: white;
+
+          border-color:
+            #1465e8;
+
+          background:
+            #1465e8;
+        }
+
+        .cancelled {
+          margin-top: 18px;
+
+          padding: 12px;
+
+          border:
+            1px solid #fecdca;
+
+          border-radius: 9px;
+
+          color: #b42318;
+
+          background:
+            #fff1f0;
+
+          font-size: 8px;
+        }
+
+        .shipping {
+          margin-top: 17px;
+
+          display: grid;
+
+          grid-template-columns:
+            1fr
+            2fr;
+
+          gap: 14px;
+        }
+
+        .shipping span,
+        .shipping strong {
           display: block;
         }
 
-        .details span {
-          color: #959fa8;
+        .shipping span {
+          color: #929ca5;
 
           font-size: 6px;
 
           font-weight: 900;
         }
 
-        .details strong {
+        .shipping strong {
           margin-top: 5px;
 
-          color: #4f5b66;
+          color: #56626d;
 
           font-size: 8px;
+
+          line-height: 1.5;
         }
 
-        .status {
-          width: fit-content;
-
-          padding: 5px 7px;
-
-          border-radius: 999px;
-        }
-
-        .status.pending {
-          color: #9a6700;
-
-          background: #fff8e1;
-        }
-
-        .status.processing {
-          color: #175cd3;
-
-          background: #eff8ff;
-        }
-
-        .status.shipped {
-          color: #6941c6;
-
-          background: #f4f3ff;
-        }
-
-        .status.delivered {
-          color: #027a48;
-
-          background: #ecfdf3;
-        }
-
-        .status.cancelled {
-          color: #b42318;
-
-          background: #fff1f0;
-        }
-
-        .address,
         .tracking {
-          grid-column:
-            1 / -1;
+          margin-top: 17px;
 
-          padding-top: 11px;
+          padding: 13px;
 
-          border-top:
-            1px solid #edf0f2;
-        }
+          display: flex;
 
-        .address {
-          color: #6e7984;
+          align-items: center;
 
-          font-size: 7px;
+          justify-content:
+            space-between;
+
+          gap: 10px;
+
+          border:
+            1px solid #dfe4e8;
+
+          border-radius: 10px;
+
+          background: #f8fafb;
         }
 
         .tracking span,
@@ -1230,24 +1642,135 @@ function OrderCard({
 
           color: #35414c;
 
+          font-size: 9px;
+        }
+
+        .trackingIcon {
+          font-size: 20px;
+        }
+
+        .mailNotice {
+          margin-top: 17px;
+
+          padding: 12px;
+
+          border:
+            1px solid #e0e5e8;
+
+          border-radius: 9px;
+
+          color: #66727d;
+
+          background: #fafbfc;
+
           font-size: 8px;
+
+          line-height: 1.5;
         }
 
         @media (
           max-width: 700px
         ) {
-          .card {
+          .productDetails {
             grid-template-columns:
-              1fr;
+              repeat(
+                2,
+                minmax(
+                  0,
+                  1fr
+                )
+              );
           }
 
-          .details {
+          .shipping {
             grid-template-columns:
               1fr;
           }
         }
+
+        @media (
+          max-width: 520px
+        ) {
+          .cardTop {
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
+
+          .productDetails {
+            grid-template-columns:
+              1fr;
+          }
+
+          .progress {
+            overflow-x:
+              auto;
+
+            grid-template-columns:
+              repeat(
+                5,
+                85px
+              );
+          }
+        }
       `}</style>
     </article>
+  );
+}
+
+function Detail({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="detail">
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
+
+      <style jsx>{`
+        .detail {
+          min-width: 0;
+        }
+
+        span {
+          display: block;
+
+          color: #929ca5;
+
+          font-size: 6px;
+
+          font-weight: 900;
+        }
+
+        strong {
+          display: block;
+
+          margin-top: 5px;
+
+          overflow: hidden;
+
+          color: #4c5964;
+
+          font-size: 8px;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -1310,7 +1833,9 @@ function FilterButton({
   children,
 }: {
   active: boolean;
+
   onClick: () => void;
+
   children:
     React.ReactNode;
 }) {
@@ -1322,9 +1847,7 @@ function FilterButton({
           ? "filter active"
           : "filter"
       }
-      onClick={
-        onClick
-      }
+      onClick={onClick}
     >
       {children}
 
@@ -1332,12 +1855,14 @@ function FilterButton({
         .filter {
           min-height: 30px;
 
-          padding: 0 9px;
+          padding:
+            0 9px;
 
           border:
             1px solid #dce2e6;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
           color: #66727d;
 
@@ -1353,9 +1878,11 @@ function FilterButton({
         .active {
           color: white;
 
-          border-color: #202b37;
+          border-color:
+            #202b37;
 
-          background: #202b37;
+          background:
+            #202b37;
         }
       `}</style>
     </button>
@@ -1364,7 +1891,7 @@ function FilterButton({
 
 function normalizeStatus(
   value?: string | null
-) {
+): OrderStatus {
   const status =
     (
       value ||
@@ -1374,7 +1901,14 @@ function normalizeStatus(
       .toLowerCase();
 
   if (
-    status === "processing"
+    status === "paid"
+  ) {
+    return "paid";
+  }
+
+  if (
+    status ===
+    "processing"
   ) {
     return "processing";
   }
@@ -1386,14 +1920,17 @@ function normalizeStatus(
   }
 
   if (
-    status === "delivered"
+    status ===
+    "delivered"
   ) {
     return "delivered";
   }
 
   if (
-    status === "cancelled" ||
-    status === "canceled"
+    status ===
+      "cancelled" ||
+    status ===
+      "canceled"
   ) {
     return "cancelled";
   }
@@ -1402,14 +1939,31 @@ function normalizeStatus(
 }
 
 function getStatusLabel(
-  status: string,
+  status: OrderStatus,
   language: Lang
 ) {
   const ka =
     language === "ka";
 
   if (
-    status === "processing"
+    status === "pending"
+  ) {
+    return ka
+      ? "მოლოდინში"
+      : "Pending";
+  }
+
+  if (
+    status === "paid"
+  ) {
+    return ka
+      ? "გადახდილია"
+      : "Paid";
+  }
+
+  if (
+    status ===
+    "processing"
   ) {
     return ka
       ? "მუშავდება"
@@ -1425,24 +1979,17 @@ function getStatusLabel(
   }
 
   if (
-    status === "delivered"
+    status ===
+    "delivered"
   ) {
     return ka
       ? "ჩაბარებულია"
       : "Delivered";
   }
 
-  if (
-    status === "cancelled"
-  ) {
-    return ka
-      ? "გაუქმებულია"
-      : "Cancelled";
-  }
-
   return ka
-    ? "მოლოდინში"
-    : "Pending";
+    ? "გაუქმებულია"
+    : "Cancelled";
 }
 
 function formatMoney(
@@ -1465,9 +2012,7 @@ function formatMoney(
           currency ||
           "USD",
       }
-    ).format(
-      amount
-    );
+    ).format(amount);
   } catch {
     return `${amount} ${
       currency || ""
