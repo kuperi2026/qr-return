@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import Link from "next/link";
+
 import { supabase } from "@/lib/supabase";
 
 type OrderStatus =
@@ -14,13 +21,27 @@ type OrderStatus =
 
 type OrderRow = {
   id: string;
+
   user_id: string | null;
+
+  product_id: string | null;
+  product_name: string | null;
+  product_type: string | null;
+  sku: string | null;
+
+  quantity: number | null;
+  unit_price: number | null;
+
   status: string | null;
+
   total_amount: number | null;
   currency: string | null;
+
   shipping_name: string | null;
   shipping_address: string | null;
+
   tracking_number: string | null;
+
   created_at: string | null;
   updated_at?: string | null;
 };
@@ -34,156 +55,269 @@ const STATUS_ORDER: OrderStatus[] = [
 ];
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [orders, setOrders] =
+    useState<OrderRow[]>([]);
 
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [trackingDrafts, setTrackingDrafts] = useState<
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [filter, setFilter] =
+    useState("all");
+
+  const [
+    savingId,
+    setSavingId,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    trackingDrafts,
+    setTrackingDrafts,
+  ] = useState<
     Record<string, string>
   >({});
 
-  const loadOrders = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  const loadOrders =
+    useCallback(
+      async () => {
+        try {
+          setLoading(true);
+          setError("");
 
-      const { data, error: ordersError } = await supabase
-        .from("orders")
-        .select(
-          `
-            id,
-            user_id,
-            status,
-            total_amount,
-            currency,
-            shipping_name,
-            shipping_address,
-            tracking_number,
-            created_at,
-            updated_at
-          `
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+          const {
+            data,
+            error: ordersError,
+          } = await supabase
+            .from("orders")
+            .select(`
+              id,
+              user_id,
+              product_id,
+              product_name,
+              product_type,
+              sku,
+              quantity,
+              unit_price,
+              status,
+              total_amount,
+              currency,
+              shipping_name,
+              shipping_address,
+              tracking_number,
+              created_at,
+              updated_at
+            `)
+            .order(
+              "created_at",
+              {
+                ascending: false,
+              }
+            );
 
-      if (ordersError) {
-        throw ordersError;
-      }
+          if (ordersError) {
+            throw ordersError;
+          }
 
-      const rows = (data || []) as OrderRow[];
+          const rows =
+            (data ||
+              []) as OrderRow[];
 
-      setOrders(rows);
+          setOrders(rows);
 
-      const drafts: Record<string, string> = {};
+          const drafts:
+            Record<
+              string,
+              string
+            > = {};
 
-      rows.forEach((order) => {
-        drafts[order.id] = order.tracking_number || "";
-      });
+          rows.forEach(
+            (order) => {
+              drafts[
+                order.id
+              ] =
+                order.tracking_number ||
+                "";
+            }
+          );
 
-      setTrackingDrafts(drafts);
-    } catch (err) {
-      console.error("Admin orders load error:", err);
+          setTrackingDrafts(
+            drafts
+          );
+        } catch (err) {
+          console.error(
+            "Admin orders load error:",
+            err
+          );
 
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Orders could not be loaded."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Orders could not be loaded."
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+      []
+    );
 
   useEffect(() => {
     void loadOrders();
   }, [loadOrders]);
 
-  const filteredOrders = useMemo(() => {
-    if (filter === "all") {
-      return orders;
-    }
+  const filteredOrders =
+    useMemo(() => {
+      if (
+        filter === "all"
+      ) {
+        return orders;
+      }
 
-    return orders.filter(
-      (order) => normalizeStatus(order.status) === filter
-    );
-  }, [orders, filter]);
+      return orders.filter(
+        (order) =>
+          normalizeStatus(
+            order.status
+          ) === filter
+      );
+    }, [
+      orders,
+      filter,
+    ]);
 
-  const counts = useMemo(() => {
-    return {
-      all: orders.length,
+  const counts =
+    useMemo(() => {
+      return {
+        all:
+          orders.length,
 
-      pending: orders.filter(
-        (order) => normalizeStatus(order.status) === "pending"
-      ).length,
+        pending:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) ===
+              "pending"
+          ).length,
 
-      paid: orders.filter(
-        (order) => normalizeStatus(order.status) === "paid"
-      ).length,
+        paid:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) ===
+              "paid"
+          ).length,
 
-      processing: orders.filter(
-        (order) => normalizeStatus(order.status) === "processing"
-      ).length,
+        processing:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) ===
+              "processing"
+          ).length,
 
-      shipped: orders.filter(
-        (order) => normalizeStatus(order.status) === "shipped"
-      ).length,
+        shipped:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) ===
+              "shipped"
+          ).length,
 
-      delivered: orders.filter(
-        (order) => normalizeStatus(order.status) === "delivered"
-      ).length,
-    };
-  }, [orders]);
+        delivered:
+          orders.filter(
+            (order) =>
+              normalizeStatus(
+                order.status
+              ) ===
+              "delivered"
+          ).length,
+      };
+    }, [orders]);
 
   async function updateStatus(
     orderId: string,
-    newStatus: OrderStatus
+    newStatus:
+      OrderStatus
   ) {
     try {
-      setSavingId(orderId);
+      setSavingId(
+        orderId
+      );
+
       setError("");
 
       const payload: {
         status: OrderStatus;
-        tracking_number?: string | null;
+        tracking_number?:
+          | string
+          | null;
       } = {
-        status: newStatus,
+        status:
+          newStatus,
       };
 
-      if (newStatus === "shipped") {
+      if (
+        newStatus ===
+        "shipped"
+      ) {
         const tracking =
-          trackingDrafts[orderId]?.trim() || "";
+          trackingDrafts[
+            orderId
+          ]?.trim() || "";
 
-        payload.tracking_number = tracking || null;
+        payload.tracking_number =
+          tracking || null;
       }
 
-      const { error: updateError } = await supabase
+      const {
+        error: updateError,
+      } = await supabase
         .from("orders")
         .update(payload)
-        .eq("id", orderId);
+        .eq(
+          "id",
+          orderId
+        );
 
       if (updateError) {
         throw updateError;
       }
 
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === orderId
-            ? {
-                ...order,
-                status: newStatus,
-                tracking_number:
-                  newStatus === "shipped"
-                    ? trackingDrafts[orderId]?.trim() || null
-                    : order.tracking_number,
-              }
-            : order
-        )
+      setOrders(
+        (current) =>
+          current.map(
+            (order) =>
+              order.id ===
+              orderId
+                ? {
+                    ...order,
+                    status:
+                      newStatus,
+
+                    tracking_number:
+                      newStatus ===
+                      "shipped"
+                        ? trackingDrafts[
+                            orderId
+                          ]?.trim() ||
+                          null
+                        : order.tracking_number,
+                  }
+                : order
+          )
       );
     } catch (err) {
-      console.error("Order status update error:", err);
+      console.error(
+        "Order status update error:",
+        err
+      );
 
       setError(
         err instanceof Error
@@ -195,37 +329,59 @@ export default function AdminOrdersPage() {
     }
   }
 
-  async function saveTracking(orderId: string) {
+  async function saveTracking(
+    orderId: string
+  ) {
     try {
-      setSavingId(orderId);
+      setSavingId(
+        orderId
+      );
+
       setError("");
 
       const tracking =
-        trackingDrafts[orderId]?.trim() || "";
+        trackingDrafts[
+          orderId
+        ]?.trim() || "";
 
-      const { error: updateError } = await supabase
+      const {
+        error: updateError,
+      } = await supabase
         .from("orders")
         .update({
-          tracking_number: tracking || null,
+          tracking_number:
+            tracking ||
+            null,
         })
-        .eq("id", orderId);
+        .eq(
+          "id",
+          orderId
+        );
 
       if (updateError) {
         throw updateError;
       }
 
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === orderId
-            ? {
-                ...order,
-                tracking_number: tracking || null,
-              }
-            : order
-        )
+      setOrders(
+        (current) =>
+          current.map(
+            (order) =>
+              order.id ===
+              orderId
+                ? {
+                    ...order,
+                    tracking_number:
+                      tracking ||
+                      null,
+                  }
+                : order
+          )
       );
     } catch (err) {
-      console.error("Tracking update error:", err);
+      console.error(
+        "Tracking update error:",
+        err
+      );
 
       setError(
         err instanceof Error
@@ -240,25 +396,43 @@ export default function AdminOrdersPage() {
   return (
     <main className="page">
       <header className="topbar">
-        <Link href="/admin" className="brand">
-          <span className="logo">QR</span>
+        <Link
+          href="/admin"
+          className="brand"
+        >
+          <span className="logo">
+            QR
+          </span>
 
           <span>
-            <strong>QR RETURN</strong>
-            <small>ADMIN • ORDERS</small>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <small>
+              ADMIN • ORDERS
+            </small>
           </span>
         </Link>
 
         <nav className="nav">
-          <Link href="/admin">Dashboard</Link>
+          <Link href="/admin">
+            Dashboard
+          </Link>
 
-          <Link href="/admin/chat">Live Chat</Link>
+          <Link href="/admin/chat">
+            Live Chat
+          </Link>
 
-          <Link href="/store">Store</Link>
+          <Link href="/store">
+            Store
+          </Link>
 
           <button
             type="button"
-            onClick={() => void loadOrders()}
+            onClick={() =>
+              void loadOrders()
+            }
           >
             ↻ Refresh
           </button>
@@ -271,62 +445,143 @@ export default function AdminOrdersPage() {
             ORDER MANAGEMENT
           </span>
 
-          <h1>Orders</h1>
+          <h1>
+            Orders
+          </h1>
 
           <p>
-            Manage QR RETURN orders, shipping status and tracking
-            information.
+            Manage QR RETURN
+            products, quantities,
+            shipping and order
+            status.
           </p>
         </section>
 
         <section className="stats">
-          <Stat label="All Orders" value={counts.all} />
-          <Stat label="Pending" value={counts.pending} />
-          <Stat label="Paid" value={counts.paid} />
-          <Stat label="Processing" value={counts.processing} />
-          <Stat label="Shipped" value={counts.shipped} />
-          <Stat label="Delivered" value={counts.delivered} />
+          <Stat
+            label="All Orders"
+            value={
+              counts.all
+            }
+          />
+
+          <Stat
+            label="Pending"
+            value={
+              counts.pending
+            }
+          />
+
+          <Stat
+            label="Paid"
+            value={
+              counts.paid
+            }
+          />
+
+          <Stat
+            label="Processing"
+            value={
+              counts.processing
+            }
+          />
+
+          <Stat
+            label="Shipped"
+            value={
+              counts.shipped
+            }
+          />
+
+          <Stat
+            label="Delivered"
+            value={
+              counts.delivered
+            }
+          />
         </section>
 
         <section className="filters">
           <FilterButton
-            active={filter === "all"}
-            onClick={() => setFilter("all")}
+            active={
+              filter ===
+              "all"
+            }
+            onClick={() =>
+              setFilter(
+                "all"
+              )
+            }
           >
             All
           </FilterButton>
 
           <FilterButton
-            active={filter === "pending"}
-            onClick={() => setFilter("pending")}
+            active={
+              filter ===
+              "pending"
+            }
+            onClick={() =>
+              setFilter(
+                "pending"
+              )
+            }
           >
             Pending
           </FilterButton>
 
           <FilterButton
-            active={filter === "paid"}
-            onClick={() => setFilter("paid")}
+            active={
+              filter ===
+              "paid"
+            }
+            onClick={() =>
+              setFilter(
+                "paid"
+              )
+            }
           >
             Paid
           </FilterButton>
 
           <FilterButton
-            active={filter === "processing"}
-            onClick={() => setFilter("processing")}
+            active={
+              filter ===
+              "processing"
+            }
+            onClick={() =>
+              setFilter(
+                "processing"
+              )
+            }
           >
             Processing
           </FilterButton>
 
           <FilterButton
-            active={filter === "shipped"}
-            onClick={() => setFilter("shipped")}
+            active={
+              filter ===
+              "shipped"
+            }
+            onClick={() =>
+              setFilter(
+                "shipped"
+              )
+            }
           >
             Shipped
           </FilterButton>
 
           <FilterButton
-            active={filter === "delivered"}
-            onClick={() => setFilter("delivered")}
+            active={
+              filter ===
+              "delivered"
+            }
+            onClick={() =>
+              setFilter(
+                "delivered"
+              )
+            }
           >
             Delivered
           </FilterButton>
@@ -340,43 +595,80 @@ export default function AdminOrdersPage() {
 
         {loading ? (
           <section className="empty">
-            <div className="emptyIcon">⌛</div>
-            <strong>Loading orders...</strong>
-          </section>
-        ) : filteredOrders.length === 0 ? (
-          <section className="empty">
-            <div className="emptyIcon">📦</div>
+            <div>
+              ⌛
+            </div>
 
-            <strong>No orders found</strong>
+            <strong>
+              Loading orders...
+            </strong>
+          </section>
+        ) : filteredOrders.length ===
+          0 ? (
+          <section className="empty">
+            <div>
+              📦
+            </div>
+
+            <strong>
+              No orders found
+            </strong>
 
             <p>
-              New customer orders will appear here.
+              New customer
+              orders will
+              appear here.
             </p>
           </section>
         ) : (
           <section className="orders">
-            {filteredOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                saving={savingId === order.id}
-                tracking={
-                  trackingDrafts[order.id] || ""
-                }
-                setTracking={(value) =>
-                  setTrackingDrafts((current) => ({
-                    ...current,
-                    [order.id]: value,
-                  }))
-                }
-                onStatusChange={(status) =>
-                  void updateStatus(order.id, status)
-                }
-                onSaveTracking={() =>
-                  void saveTracking(order.id)
-                }
-              />
-            ))}
+            {filteredOrders.map(
+              (order) => (
+                <OrderCard
+                  key={
+                    order.id
+                  }
+                  order={
+                    order
+                  }
+                  saving={
+                    savingId ===
+                    order.id
+                  }
+                  tracking={
+                    trackingDrafts[
+                      order.id
+                    ] || ""
+                  }
+                  setTracking={(
+                    value
+                  ) =>
+                    setTrackingDrafts(
+                      (
+                        current
+                      ) => ({
+                        ...current,
+                        [order.id]:
+                          value,
+                      })
+                    )
+                  }
+                  onStatusChange={(
+                    status
+                  ) =>
+                    void updateStatus(
+                      order.id,
+                      status
+                    )
+                  }
+                  onSaveTracking={() =>
+                    void saveTracking(
+                      order.id
+                    )
+                  }
+                />
+              )
+            )}
           </section>
         )}
       </div>
@@ -384,53 +676,81 @@ export default function AdminOrdersPage() {
       <style jsx>{`
         .page {
           min-height: 100vh;
-          background: #f5f7f8;
+
           color: #202b37;
+
+          background:
+            #f5f7f8;
         }
 
         .topbar {
-          width: calc(100% - 36px);
-          max-width: 1180px;
-          min-height: 72px;
+          width:
+            calc(
+              100% - 36px
+            );
+
+          max-width:
+            1180px;
+
+          min-height:
+            72px;
+
           margin: auto;
 
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
 
           gap: 15px;
 
-          border-bottom: 1px solid #e0e5e8;
+          border-bottom:
+            1px solid
+            #e0e5e8;
         }
 
         .brand {
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
 
           gap: 9px;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         .logo {
           width: 43px;
+
           height: 43px;
 
           display: grid;
-          place-items: center;
 
-          border-radius: 12px;
+          place-items:
+            center;
+
+          border-radius:
+            12px;
 
           color: white;
 
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
 
-          font-size: 11px;
-          font-weight: 900;
+          font-size:
+            11px;
+
+          font-weight:
+            900;
         }
 
         .brand strong,
@@ -440,197 +760,292 @@ export default function AdminOrdersPage() {
 
         .brand strong {
           color: #1465e8;
-          font-size: 13px;
+
+          font-size:
+            13px;
         }
 
         .brand small {
-          margin-top: 2px;
+          margin-top:
+            2px;
 
           color: #7655f7;
 
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
         }
 
         .nav {
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
 
           gap: 5px;
         }
 
         .nav :global(a),
         .nav button {
-          min-height: 32px;
-          padding: 0 9px;
+          min-height:
+            32px;
+
+          padding:
+            0 9px;
 
           display: flex;
-          align-items: center;
 
-          border: 1px solid #dfe4e8;
-          border-radius: 8px;
+          align-items:
+            center;
+
+          border:
+            1px solid
+            #dfe4e8;
+
+          border-radius:
+            8px;
 
           color: #57646f;
-          background: white;
 
-          text-decoration: none;
+          background:
+            white;
 
-          font-size: 7px;
-          font-weight: 850;
+          text-decoration:
+            none;
+
+          font-size:
+            7px;
+
+          font-weight:
+            850;
 
           cursor: pointer;
         }
 
         .shell {
-          width: calc(100% - 40px);
-          max-width: 1100px;
+          width:
+            calc(
+              100% - 40px
+            );
+
+          max-width:
+            1100px;
 
           margin: auto;
 
-          padding: 48px 0 90px;
+          padding:
+            48px 0 90px;
         }
 
         .eyebrow {
           color: #7655f7;
 
-          font-size: 7px;
-          font-weight: 900;
+          font-size:
+            7px;
 
-          letter-spacing: 1.2px;
+          font-weight:
+            900;
+
+          letter-spacing:
+            1.2px;
         }
 
         .heading h1 {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
-          font-size: clamp(
-            38px,
-            5vw,
-            54px
-          );
+          font-size:
+            clamp(
+              38px,
+              5vw,
+              54px
+            );
 
-          letter-spacing: -2px;
+          letter-spacing:
+            -2px;
         }
 
         .heading p {
-          margin: 9px 0 0;
+          margin:
+            9px 0 0;
 
           color: #7c8791;
 
-          font-size: 9px;
+          font-size:
+            9px;
         }
 
         .stats {
-          margin-top: 28px;
+          margin-top:
+            28px;
 
           display: grid;
 
           grid-template-columns:
             repeat(
               6,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 8px;
         }
 
         .filters {
-          margin-top: 20px;
+          margin-top:
+            20px;
 
           display: flex;
-          flex-wrap: wrap;
+
+          flex-wrap:
+            wrap;
 
           gap: 6px;
         }
 
-        .error {
-          margin-top: 18px;
-
-          padding: 13px;
-
-          border: 1px solid #efd2d4;
-          border-radius: 10px;
-
-          color: #9d4146;
-          background: #fff5f5;
-
-          font-size: 8px;
-        }
-
         .orders {
-          margin-top: 22px;
+          margin-top:
+            22px;
 
           display: grid;
 
           gap: 12px;
         }
 
-        .empty {
-          margin-top: 25px;
+        .error {
+          margin-top:
+            18px;
 
-          padding: 65px 20px;
+          padding:
+            13px;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 15px;
+          border:
+            1px solid
+            #efd2d4;
 
-          background: white;
+          border-radius:
+            10px;
 
-          text-align: center;
+          color: #9d4146;
+
+          background:
+            #fff5f5;
+
+          font-size:
+            8px;
         }
 
-        .emptyIcon {
-          font-size: 30px;
+        .empty {
+          margin-top:
+            25px;
+
+          padding:
+            65px 20px;
+
+          border:
+            1px solid
+            #e0e5e8;
+
+          border-radius:
+            15px;
+
+          background:
+            white;
+
+          text-align:
+            center;
+        }
+
+        .empty div {
+          font-size:
+            30px;
         }
 
         .empty strong {
           display: block;
 
-          margin-top: 10px;
+          margin-top:
+            10px;
 
           color: #44515c;
-          font-size: 11px;
+
+          font-size:
+            11px;
         }
 
         .empty p {
-          margin: 6px 0 0;
+          margin:
+            6px 0 0;
 
           color: #8c969f;
-          font-size: 8px;
+
+          font-size:
+            8px;
         }
 
-        @media (max-width: 900px) {
+        @media (
+          max-width:
+            900px
+        ) {
           .stats {
             grid-template-columns:
               repeat(
                 3,
-                minmax(0, 1fr)
+                minmax(
+                  0,
+                  1fr
+                )
               );
           }
         }
 
-        @media (max-width: 600px) {
+        @media (
+          max-width:
+            600px
+        ) {
           .topbar {
-            padding: 10px 0;
+            padding:
+              10px 0;
 
-            align-items: flex-start;
-            flex-direction: column;
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
           }
 
           .nav {
             width: 100%;
-            flex-wrap: wrap;
+
+            flex-wrap:
+              wrap;
           }
 
           .shell {
-            width: calc(100% - 24px);
-            padding-top: 32px;
+            width:
+              calc(
+                100% - 24px
+              );
+
+            padding-top:
+              32px;
           }
 
           .stats {
             grid-template-columns:
               repeat(
                 2,
-                minmax(0, 1fr)
+                minmax(
+                  0,
+                  1fr
+                )
               );
           }
         }
@@ -648,48 +1063,110 @@ function OrderCard({
   onSaveTracking,
 }: {
   order: OrderRow;
-  saving: boolean;
-  tracking: string;
-  setTracking: (value: string) => void;
-  onStatusChange: (status: OrderStatus) => void;
-  onSaveTracking: () => void;
-}) {
-  const status = normalizeStatus(order.status);
 
-  const currentIndex = STATUS_ORDER.indexOf(
-    status as OrderStatus
-  );
+  saving: boolean;
+
+  tracking: string;
+
+  setTracking: (
+    value: string
+  ) => void;
+
+  onStatusChange: (
+    status:
+      OrderStatus
+  ) => void;
+
+  onSaveTracking:
+    () => void;
+}) {
+  const status =
+    normalizeStatus(
+      order.status
+    );
+
+  const currentIndex =
+    STATUS_ORDER.indexOf(
+      status
+    );
+
+  const icon =
+    order.product_id ===
+    "sticker"
+      ? "🔳"
+      : "🏷️";
 
   return (
     <article className="card">
       <div className="cardHeader">
         <div className="orderTitle">
-          <div className="packageIcon">
-            📦
+          <div className="productIcon">
+            {icon}
           </div>
 
           <div>
-            <span>ORDER</span>
+            <span>
+              ORDER
+            </span>
 
-            <strong>#{order.id}</strong>
+            <strong>
+              #{order.id}
+            </strong>
 
             <p>
-              {formatDate(order.created_at)}
+              {formatDate(
+                order.created_at
+              )}
             </p>
           </div>
         </div>
 
-        <span className={`status ${status}`}>
+        <span
+          className={`status ${status}`}
+        >
           {status.toUpperCase()}
         </span>
       </div>
 
-      <div className="customerGrid">
+      <div className="productBox">
+        <div className="productName">
+          <span>
+            PRODUCT
+          </span>
+
+          <strong>
+            {order.product_name ||
+              "QR Product"}
+          </strong>
+
+          <small>
+            {order.product_type ||
+              "—"}
+          </small>
+        </div>
+
         <Info
-          label="CUSTOMER"
+          label="SKU"
           value={
-            order.shipping_name || "—"
+            order.sku ||
+            "—"
           }
+        />
+
+        <Info
+          label="QUANTITY"
+          value={String(
+            order.quantity ||
+              1
+          )}
+        />
+
+        <Info
+          label="UNIT PRICE"
+          value={formatMoney(
+            order.unit_price,
+            order.currency
+          )}
         />
 
         <Info
@@ -699,60 +1176,97 @@ function OrderCard({
             order.currency
           )}
         />
+      </div>
+
+      <div className="customerGrid">
+        <Info
+          label="CUSTOMER"
+          value={
+            order.shipping_name ||
+            "—"
+          }
+        />
 
         <Info
           label="USER ID"
           value={
-            order.user_id || "—"
+            order.user_id ||
+            "—"
           }
+        />
+
+        <Info
+          label="ORDER DATE"
+          value={formatDate(
+            order.created_at
+          )}
         />
       </div>
 
       <div className="address">
-        <span>SHIPPING ADDRESS</span>
+        <span>
+          SHIPPING ADDRESS
+        </span>
 
         <strong>
-          {order.shipping_address || "—"}
+          {order.shipping_address ||
+            "—"}
         </strong>
       </div>
 
-      <div className="progress">
-        {STATUS_ORDER.map(
-          (step, index) => {
-            const completed =
-              currentIndex >= index;
+      {status !==
+        "cancelled" && (
+        <div className="progress">
+          {STATUS_ORDER.map(
+            (
+              step,
+              index
+            ) => {
+              const completed =
+                currentIndex >=
+                index;
 
-            const active =
-              status === step;
+              const active =
+                status ===
+                step;
 
-            return (
-              <div
-                key={step}
-                className="progressItem"
-              >
+              return (
                 <div
-                  className={
-                    completed
-                      ? active
-                        ? "dot active"
-                        : "dot complete"
-                      : "dot"
-                  }
+                  key={step}
+                  className="progressItem"
                 >
-                  {completed &&
-                  !active
-                    ? "✓"
-                    : index + 1}
-                </div>
+                  <div
+                    className={
+                      active
+                        ? "dot active"
+                        : completed
+                        ? "dot complete"
+                        : "dot"
+                    }
+                  >
+                    {completed &&
+                    !active
+                      ? "✓"
+                      : index +
+                        1}
+                  </div>
 
-                <span>
-                  {step}
-                </span>
-              </div>
-            );
-          }
-        )}
-      </div>
+                  <span>
+                    {step}
+                  </span>
+                </div>
+              );
+            }
+          )}
+        </div>
+      )}
+
+      {status ===
+        "cancelled" && (
+        <div className="cancelled">
+          ✕ ORDER CANCELLED
+        </div>
+      )}
 
       <div className="shipping">
         <div className="tracking">
@@ -762,10 +1276,15 @@ function OrderCard({
 
           <div className="trackingRow">
             <input
-              value={tracking}
-              onChange={(event) =>
+              value={
+                tracking
+              }
+              onChange={(
+                event
+              ) =>
                 setTracking(
-                  event.target.value
+                  event.target
+                    .value
                 )
               }
               placeholder="Optional"
@@ -773,7 +1292,9 @@ function OrderCard({
 
             <button
               type="button"
-              disabled={saving}
+              disabled={
+                saving
+              }
               onClick={
                 onSaveTracking
               }
@@ -783,8 +1304,9 @@ function OrderCard({
           </div>
 
           <small>
-            Leave blank if you send
-            the order without tracking.
+            Leave blank if
+            you ship by mail
+            without tracking.
           </small>
         </div>
 
@@ -795,8 +1317,12 @@ function OrderCard({
 
           <select
             value={status}
-            disabled={saving}
-            onChange={(event) =>
+            disabled={
+              saving
+            }
+            onChange={(
+              event
+            ) =>
               onStatusChange(
                 event.target
                   .value as OrderStatus
@@ -833,11 +1359,15 @@ function OrderCard({
             className="shipButton"
             disabled={
               saving ||
-              status === "shipped" ||
-              status === "delivered"
+              status ===
+                "shipped" ||
+              status ===
+                "delivered"
             }
             onClick={() =>
-              onStatusChange("shipped")
+              onStatusChange(
+                "shipped"
+              )
             }
           >
             {saving
@@ -851,118 +1381,240 @@ function OrderCard({
         .card {
           padding: 18px;
 
-          border: 1px solid #dfe4e8;
-          border-radius: 14px;
+          border:
+            1px solid
+            #dfe4e8;
 
-          background: white;
+          border-radius:
+            14px;
+
+          background:
+            white;
         }
 
         .cardHeader {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
 
           gap: 15px;
         }
 
         .orderTitle {
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
 
           gap: 11px;
 
           min-width: 0;
         }
 
-        .packageIcon {
-          width: 46px;
-          height: 46px;
+        .productIcon {
+          width: 48px;
 
-          flex: 0 0 46px;
+          height: 48px;
+
+          flex:
+            0 0 48px;
 
           display: grid;
-          place-items: center;
 
-          border-radius: 11px;
+          place-items:
+            center;
 
-          background: #eef4ff;
+          border-radius:
+            11px;
 
-          font-size: 20px;
+          background:
+            #eef4ff;
+
+          font-size:
+            21px;
         }
 
         .orderTitle span {
           color: #7655f7;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .orderTitle strong {
           display: block;
 
-          max-width: 420px;
+          margin-top:
+            3px;
 
-          margin-top: 3px;
-
-          overflow: hidden;
+          overflow:
+            hidden;
 
           color: #35414c;
 
-          font-size: 9px;
+          font-size:
+            9px;
 
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
         }
 
         .orderTitle p {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
           color: #929ca5;
 
-          font-size: 7px;
+          font-size:
+            7px;
         }
 
         .status {
-          padding: 6px 9px;
+          padding:
+            6px 9px;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .status.pending {
           color: #9a6700;
-          background: #fff8e1;
+
+          background:
+            #fff8e1;
         }
 
         .status.paid {
           color: #027a48;
-          background: #ecfdf3;
+
+          background:
+            #ecfdf3;
         }
 
         .status.processing {
           color: #175cd3;
-          background: #eff8ff;
+
+          background:
+            #eff8ff;
         }
 
         .status.shipped {
           color: #6941c6;
-          background: #f4f3ff;
+
+          background:
+            #f4f3ff;
         }
 
         .status.delivered {
           color: #027a48;
-          background: #ecfdf3;
+
+          background:
+            #ecfdf3;
         }
 
         .status.cancelled {
           color: #b42318;
-          background: #fff1f0;
+
+          background:
+            #fff1f0;
+        }
+
+        .productBox {
+          margin-top:
+            17px;
+
+          padding: 14px;
+
+          display: grid;
+
+          grid-template-columns:
+            1.5fr
+            repeat(
+              4,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          gap: 12px;
+
+          border-radius:
+            11px;
+
+          background:
+            #f2f6ff;
+        }
+
+        .productName {
+          min-width: 0;
+        }
+
+        .productName span,
+        .productName strong,
+        .productName small {
+          display: block;
+        }
+
+        .productName span {
+          color: #7f8c97;
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+        }
+
+        .productName strong {
+          margin-top:
+            5px;
+
+          color: #35414c;
+
+          font-size:
+            9px;
+        }
+
+        .productName small {
+          margin-top:
+            4px;
+
+          overflow:
+            hidden;
+
+          color: #8e98a1;
+
+          font-size:
+            6px;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
         }
 
         .customerGrid {
-          margin-top: 17px;
+          margin-top:
+            12px;
+
           padding: 14px;
 
           display: grid;
@@ -970,18 +1622,24 @@ function OrderCard({
           grid-template-columns:
             repeat(
               3,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
           gap: 12px;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #f8fafb;
+          background:
+            #f8fafb;
         }
 
         .address {
-          margin-top: 14px;
+          margin-top:
+            14px;
         }
 
         .address span,
@@ -992,107 +1650,194 @@ function OrderCard({
         .address span {
           color: #929ca5;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .address strong {
-          margin-top: 5px;
+          margin-top:
+            5px;
 
           color: #56626d;
 
-          font-size: 8px;
-          line-height: 1.5;
+          font-size:
+            8px;
+
+          line-height:
+            1.5;
         }
 
         .progress {
-          margin-top: 20px;
-          padding: 17px 5px;
+          margin-top:
+            20px;
+
+          padding:
+            17px 5px;
 
           display: grid;
 
           grid-template-columns:
             repeat(
               5,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
-          border-top: 1px solid #edf0f2;
-          border-bottom: 1px solid #edf0f2;
+          border-top:
+            1px solid
+            #edf0f2;
+
+          border-bottom:
+            1px solid
+            #edf0f2;
         }
 
         .progressItem {
-          position: relative;
+          position:
+            relative;
 
           display: flex;
-          flex-direction: column;
 
-          align-items: center;
+          flex-direction:
+            column;
+
+          align-items:
+            center;
 
           gap: 6px;
 
           color: #929ca5;
 
-          font-size: 6px;
+          font-size:
+            6px;
 
-          text-transform: capitalize;
+          text-transform:
+            capitalize;
         }
 
-        .progressItem:not(:last-child)::after {
+        .progressItem:not(
+            :last-child
+          )::after {
           content: "";
 
-          position: absolute;
+          position:
+            absolute;
 
           top: 13px;
-          left: calc(50% + 16px);
 
-          width: calc(100% - 32px);
+          left:
+            calc(
+              50% + 16px
+            );
+
+          width:
+            calc(
+              100% - 32px
+            );
 
           height: 1px;
 
-          background: #dfe4e8;
+          background:
+            #dfe4e8;
         }
 
         .dot {
-          position: relative;
+          position:
+            relative;
+
           z-index: 2;
 
           width: 27px;
+
           height: 27px;
 
           display: grid;
-          place-items: center;
 
-          border: 1px solid #d8dee3;
-          border-radius: 999px;
+          place-items:
+            center;
+
+          border:
+            1px solid
+            #d8dee3;
+
+          border-radius:
+            999px;
 
           color: #929ca5;
-          background: white;
 
-          font-size: 7px;
-          font-weight: 900;
+          background:
+            white;
+
+          font-size:
+            7px;
+
+          font-weight:
+            900;
         }
 
         .dot.complete {
           color: white;
-          border-color: #12a86b;
-          background: #12a86b;
+
+          border-color:
+            #12a86b;
+
+          background:
+            #12a86b;
         }
 
         .dot.active {
           color: white;
-          border-color: #1465e8;
-          background: #1465e8;
+
+          border-color:
+            #1465e8;
+
+          background:
+            #1465e8;
+        }
+
+        .cancelled {
+          margin-top:
+            17px;
+
+          padding:
+            12px;
+
+          border:
+            1px solid
+            #fecdca;
+
+          border-radius:
+            9px;
+
+          color: #b42318;
+
+          background:
+            #fff1f0;
+
+          font-size:
+            8px;
+
+          font-weight:
+            900;
         }
 
         .shipping {
-          margin-top: 17px;
+          margin-top:
+            17px;
 
           display: grid;
 
           grid-template-columns:
-            minmax(0, 1fr)
-            260px;
+            minmax(
+              0,
+              1fr
+            )
+            290px;
 
           gap: 20px;
         }
@@ -1101,19 +1846,26 @@ function OrderCard({
         .actions label {
           display: block;
 
-          margin-bottom: 6px;
+          margin-bottom:
+            6px;
 
           color: #929ca5;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .trackingRow {
           display: grid;
 
           grid-template-columns:
-            minmax(0, 1fr)
+            minmax(
+              0,
+              1fr
+            )
             auto;
 
           gap: 6px;
@@ -1122,46 +1874,67 @@ function OrderCard({
         .trackingRow input,
         .actions select {
           width: 100%;
-          min-height: 38px;
 
-          padding: 0 10px;
+          min-height:
+            38px;
 
-          border: 1px solid #d7dde2;
-          border-radius: 8px;
+          padding:
+            0 10px;
+
+          border:
+            1px solid
+            #d7dde2;
+
+          border-radius:
+            8px;
 
           outline: none;
 
           color: #44515c;
-          background: white;
 
-          font-size: 8px;
+          background:
+            white;
+
+          font-size:
+            8px;
         }
 
         .trackingRow button {
-          min-height: 38px;
+          min-height:
+            38px;
 
-          padding: 0 12px;
+          padding:
+            0 12px;
 
           border: 0;
-          border-radius: 8px;
+
+          border-radius:
+            8px;
 
           color: white;
-          background: #202b37;
+
+          background:
+            #202b37;
 
           cursor: pointer;
 
-          font-size: 7px;
-          font-weight: 900;
+          font-size:
+            7px;
+
+          font-weight:
+            900;
         }
 
         .tracking small {
           display: block;
 
-          margin-top: 5px;
+          margin-top:
+            5px;
 
           color: #969fa7;
 
-          font-size: 6px;
+          font-size:
+            6px;
         }
 
         .actions {
@@ -1170,68 +1943,121 @@ function OrderCard({
           grid-template-columns:
             1fr 1fr;
 
-          align-items: end;
+          align-items:
+            end;
 
           gap: 6px;
         }
 
         .actions label {
-          grid-column: 1 / -1;
-          margin-bottom: 0;
+          grid-column:
+            1 / -1;
+
+          margin-bottom:
+            0;
         }
 
         .shipButton {
-          min-height: 38px;
+          min-height:
+            38px;
 
-          padding: 0 9px;
+          padding:
+            0 9px;
 
           border: 0;
-          border-radius: 8px;
+
+          border-radius:
+            8px;
 
           color: white;
-          background: #1465e8;
+
+          background:
+            #1465e8;
 
           cursor: pointer;
 
-          font-size: 7px;
-          font-weight: 900;
+          font-size:
+            7px;
+
+          font-weight:
+            900;
         }
 
         button:disabled,
         select:disabled {
           opacity: 0.55;
-          cursor: not-allowed;
+
+          cursor:
+            not-allowed;
         }
 
-        @media (max-width: 750px) {
+        @media (
+          max-width:
+            900px
+        ) {
+          .productBox {
+            grid-template-columns:
+              repeat(
+                2,
+                minmax(
+                  0,
+                  1fr
+                )
+              );
+          }
+        }
+
+        @media (
+          max-width:
+            750px
+        ) {
           .customerGrid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .shipping {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
         }
 
-        @media (max-width: 520px) {
+        @media (
+          max-width:
+            520px
+        ) {
           .cardHeader {
-            align-items: flex-start;
-            flex-direction: column;
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
+
+          .productBox {
+            grid-template-columns:
+              1fr;
           }
 
           .progress {
-            overflow-x: auto;
+            overflow-x:
+              auto;
 
             grid-template-columns:
-              repeat(5, 85px);
+              repeat(
+                5,
+                85px
+              );
           }
 
           .actions {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .actions label {
-            grid-column: auto;
+            grid-column:
+              auto;
           }
         }
       `}</style>
@@ -1244,13 +2070,18 @@ function Info({
   value,
 }: {
   label: string;
+
   value: string;
 }) {
   return (
     <div className="info">
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
 
-      <strong>{value}</strong>
+      <strong>
+        {value}
+      </strong>
 
       <style jsx>{`
         .info {
@@ -1262,23 +2093,32 @@ function Info({
 
           color: #929ca5;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         strong {
           display: block;
 
-          margin-top: 5px;
+          margin-top:
+            5px;
 
-          overflow: hidden;
+          overflow:
+            hidden;
 
           color: #4c5964;
 
-          font-size: 8px;
+          font-size:
+            8px;
 
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
         }
       `}</style>
     </div>
@@ -1290,41 +2130,58 @@ function Stat({
   value,
 }: {
   label: string;
+
   value: number;
 }) {
   return (
     <div className="stat">
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
 
-      <strong>{value}</strong>
+      <strong>
+        {value}
+      </strong>
 
       <style jsx>{`
         .stat {
-          min-height: 82px;
+          min-height:
+            82px;
 
-          padding: 13px;
+          padding:
+            13px;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 11px;
+          border:
+            1px solid
+            #e0e5e8;
 
-          background: white;
+          border-radius:
+            11px;
+
+          background:
+            white;
         }
 
         span {
           color: #929ca5;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         strong {
           display: block;
 
-          margin-top: 13px;
+          margin-top:
+            13px;
 
           color: #293540;
 
-          font-size: 20px;
+          font-size:
+            20px;
         }
       `}</style>
     </div>
@@ -1337,8 +2194,12 @@ function FilterButton({
   children,
 }: {
   active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
+
+  onClick:
+    () => void;
+
+  children:
+    React.ReactNode;
 }) {
   return (
     <button
@@ -1348,32 +2209,49 @@ function FilterButton({
           ? "filter active"
           : "filter"
       }
-      onClick={onClick}
+      onClick={
+        onClick
+      }
     >
       {children}
 
       <style jsx>{`
         .filter {
-          min-height: 31px;
+          min-height:
+            31px;
 
-          padding: 0 10px;
+          padding:
+            0 10px;
 
-          border: 1px solid #dce2e6;
-          border-radius: 999px;
+          border:
+            1px solid
+            #dce2e6;
+
+          border-radius:
+            999px;
 
           color: #66727d;
-          background: white;
+
+          background:
+            white;
 
           cursor: pointer;
 
-          font-size: 7px;
-          font-weight: 850;
+          font-size:
+            7px;
+
+          font-weight:
+            850;
         }
 
         .filter.active {
           color: white;
-          border-color: #202b37;
-          background: #202b37;
+
+          border-color:
+            #202b37;
+
+          background:
+            #202b37;
         }
       `}</style>
     </button>
@@ -1381,33 +2259,50 @@ function FilterButton({
 }
 
 function normalizeStatus(
-  value?: string | null
+  value?:
+    | string
+    | null
 ): OrderStatus {
-  const status = (
-    value || "pending"
-  )
-    .trim()
-    .toLowerCase();
+  const status =
+    (
+      value ||
+      "pending"
+    )
+      .trim()
+      .toLowerCase();
 
-  if (status === "paid") {
+  if (
+    status === "paid"
+  ) {
     return "paid";
   }
 
-  if (status === "processing") {
+  if (
+    status ===
+    "processing"
+  ) {
     return "processing";
   }
 
-  if (status === "shipped") {
+  if (
+    status ===
+    "shipped"
+  ) {
     return "shipped";
   }
 
-  if (status === "delivered") {
+  if (
+    status ===
+    "delivered"
+  ) {
     return "delivered";
   }
 
   if (
-    status === "cancelled" ||
-    status === "canceled"
+    status ===
+      "cancelled" ||
+    status ===
+      "canceled"
   ) {
     return "cancelled";
   }
@@ -1416,12 +2311,17 @@ function normalizeStatus(
 }
 
 function formatMoney(
-  amount: number | null,
-  currency: string | null
+  amount:
+    | number
+    | null,
+  currency:
+    | string
+    | null
 ) {
   if (
     amount === null ||
-    amount === undefined
+    amount ===
+      undefined
   ) {
     return "—";
   }
@@ -1430,17 +2330,25 @@ function formatMoney(
     return new Intl.NumberFormat(
       "en-US",
       {
-        style: "currency",
-        currency: currency || "USD",
+        style:
+          "currency",
+
+        currency:
+          currency ||
+          "USD",
       }
     ).format(amount);
   } catch {
-    return `${amount} ${currency || ""}`;
+    return `${amount} ${
+      currency || ""
+    }`;
   }
 }
 
 function formatDate(
-  value: string | null
+  value:
+    | string
+    | null
 ) {
   if (!value) {
     return "—";
@@ -1450,13 +2358,24 @@ function formatDate(
     return new Intl.DateTimeFormat(
       "en-US",
       {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
+        year:
+          "numeric",
+
+        month:
+          "short",
+
+        day:
+          "numeric",
+
+        hour:
+          "numeric",
+
+        minute:
+          "2-digit",
       }
-    ).format(new Date(value));
+    ).format(
+      new Date(value)
+    );
   } catch {
     return value;
   }
