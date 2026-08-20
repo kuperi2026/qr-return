@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import EmergencyPublicProfile, {
+  type EmergencyProfileData,
+} from "@/components/emergency/EmergencyPublicProfile";
 
 type Lang = "ka" | "en";
 
@@ -353,6 +356,34 @@ export default function PublicProfilePage() {
 
         <Styles />
       </main>
+    );
+  }
+
+  if (profile.item_type === "emergency") {
+    let emergencyData: EmergencyProfileData = {};
+
+    try {
+      if (profile.description) {
+        emergencyData = JSON.parse(
+          profile.description
+        ) as EmergencyProfileData;
+      }
+    } catch (err) {
+      console.error(
+        "Could not parse emergency profile:",
+        err
+      );
+    }
+
+    return (
+      <EmergencyPublicProfile
+        data={emergencyData}
+        tagCode={profile.tag_code}
+        ownerEmail={profile.owner_email}
+        finderMessage={profile.finder_message}
+        photo={profile.photo}
+        language={lang}
+      />
     );
   }
 
