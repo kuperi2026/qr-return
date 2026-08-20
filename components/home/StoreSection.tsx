@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+
 import OrderForm, {
   type StoreProduct,
   type OrderFormData,
@@ -53,18 +55,103 @@ export default function StoreSection({
   const [showOrderForm, setShowOrderForm] =
     useState(false);
 
+  const [orderSuccess, setOrderSuccess] =
+    useState(false);
+
   async function handleOrder(
     data: OrderFormData
   ) {
-    /*
-      შემდეგ ეტაპზე აქ დავუკავშირებთ Supabase orders table-ს.
-      ახლა მხოლოდ ფორმის მონაცემებს ვიღებთ.
-    */
+    setOrderSuccess(false);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const {
+      data: createdOrder,
+      error,
+    } = await supabase
+      .from("orders")
+      .insert({
+        user_id:
+          user?.id || null,
+
+        product_id:
+          data.productId,
+
+        quantity:
+          data.quantity,
+
+        first_name:
+          data.firstName,
+
+        last_name:
+          data.lastName,
+
+        phone:
+          data.phone,
+
+        secondary_phone:
+          data.secondaryPhone.trim()
+            ? data.secondaryPhone
+            : null,
+
+        email:
+          data.email.trim()
+            ? data.email
+            : null,
+
+        address_line_1:
+          data.addressLine1,
+
+        address_line_2:
+          data.addressLine2.trim()
+            ? data.addressLine2
+            : null,
+
+        city:
+          data.city,
+
+        state_region:
+          data.stateRegion,
+
+        postal_code:
+          data.postalCode,
+
+        country:
+          data.country,
+
+        note:
+          data.note.trim()
+            ? data.note
+            : null,
+
+        status:
+          "pending",
+
+        payment_status:
+          "not_required_yet",
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error(
+        "Order save error:",
+        error
+      );
+
+      throw new Error(
+        error.message
+      );
+    }
 
     console.log(
-      "QR RETURN ORDER:",
-      data
+      "Order created:",
+      createdOrder.id
     );
+
+    setOrderSuccess(true);
   }
 
   return (
@@ -98,12 +185,18 @@ export default function StoreSection({
                 key={product.id}
                 index={index + 1}
                 product={product}
-                language={language}
-                onBuy={() =>
+                language={
+                  language
+                }
+                onBuy={() => {
+                  setOrderSuccess(
+                    false
+                  );
+
                   setShowOrderForm(
                     true
-                  )
-                }
+                  );
+                }}
               />
             )
           )}
@@ -117,18 +210,22 @@ export default function StoreSection({
 
             <strong>
               {ka
-                ? "პროდუქტის ფოტოები და ფასები მალე დაემატება."
-                : "Product photos and pricing will be added soon."}
+                ? "პროდუქტის ფოტოები და ფასები მოგვიანებით დაემატება."
+                : "Product photos and pricing will be added later."}
             </strong>
           </div>
 
           <button
             type="button"
-            onClick={() =>
+            onClick={() => {
+              setOrderSuccess(
+                false
+              );
+
               setShowOrderForm(
                 true
-              )
-            }
+              );
+            }}
           >
             {ka
               ? "შეკვეთის ფორმა"
@@ -175,6 +272,22 @@ export default function StoreSection({
               </button>
             </div>
 
+            {orderSuccess && (
+              <div className="successMessage">
+                <strong>
+                  {ka
+                    ? "შეკვეთა მიღებულია ✓"
+                    : "Order received ✓"}
+                </strong>
+
+                <span>
+                  {ka
+                    ? "თქვენი შეკვეთა წარმატებით ჩაიწერა სისტემაში."
+                    : "Your order has been saved successfully."}
+                </span>
+              </div>
+            )}
+
             <OrderForm
               language={language}
               products={products}
@@ -190,7 +303,6 @@ export default function StoreSection({
         .storeSection {
           width: 100%;
           padding: 92px 0;
-
           background: #ffffff;
         }
 
@@ -401,6 +513,37 @@ export default function StoreSection({
 
           font-size: 21px;
           font-weight: 300;
+        }
+
+        .successMessage {
+          margin-bottom: 24px;
+
+          padding: 14px 16px;
+
+          border:
+            1px solid #cfe7d9;
+
+          border-radius: 12px;
+
+          color: #28613f;
+          background: #f1faf5;
+        }
+
+        .successMessage strong,
+        .successMessage span {
+          display: block;
+        }
+
+        .successMessage strong {
+          font-size: 10px;
+          font-weight: 850;
+        }
+
+        .successMessage span {
+          margin-top: 4px;
+
+          font-size: 8px;
+          line-height: 1.5;
         }
 
         @media (
