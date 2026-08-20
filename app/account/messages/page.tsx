@@ -88,6 +88,11 @@ export default function OwnerMessagesPage() {
     null
   );
 
+  const [
+    requestedSession,
+    setRequestedSession,
+  ] = useState("");
+
   const [messages, setMessages] =
     useState<ChatMessage[]>([]);
 
@@ -120,7 +125,21 @@ export default function OwnerMessagesPage() {
     lang === "ka";
 
   useEffect(() => {
-    void initialize();
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const session =
+      params.get("session") || "";
+
+    setRequestedSession(
+      session
+    );
+
+    void initialize(
+      session
+    );
   }, []);
 
   useEffect(() => {
@@ -156,7 +175,9 @@ export default function OwnerMessagesPage() {
     );
   }, [messages]);
 
-  async function initialize() {
+  async function initialize(
+    session = ""
+  ) {
     try {
       setLoading(true);
       setError("");
@@ -176,7 +197,9 @@ export default function OwnerMessagesPage() {
         return;
       }
 
-      await loadThreads();
+      await loadThreads(
+        session
+      );
     } catch (err) {
       console.error(
         "Owner chat initialization error:",
@@ -195,7 +218,10 @@ export default function OwnerMessagesPage() {
     }
   }
 
-  async function loadThreads() {
+  async function loadThreads(
+    requestedFinderSession =
+      requestedSession
+  ) {
     try {
       const {
         data,
@@ -214,15 +240,25 @@ export default function OwnerMessagesPage() {
       setThreads(rows);
 
       if (
-        !selectedThread &&
-        rows.length > 0
+        requestedFinderSession
       ) {
-        setSelectedThread(
-          rows[0]
-        );
-      } else if (
-        selectedThread
-      ) {
+        const requested =
+          rows.find(
+            (thread) =>
+              thread.finder_session ===
+              requestedFinderSession
+          );
+
+        if (requested) {
+          setSelectedThread(
+            requested
+          );
+
+          return;
+        }
+      }
+
+      if (selectedThread) {
         const refreshed =
           rows.find(
             (thread) =>
@@ -234,7 +270,21 @@ export default function OwnerMessagesPage() {
           setSelectedThread(
             refreshed
           );
+
+          return;
         }
+      }
+
+      if (
+        rows.length > 0
+      ) {
+        setSelectedThread(
+          rows[0]
+        );
+      } else {
+        setSelectedThread(
+          null
+        );
       }
     } catch (err) {
       console.error(
@@ -354,7 +404,10 @@ export default function OwnerMessagesPage() {
         true
       );
 
-      await loadThreads();
+      await loadThreads(
+        selectedThread.finder_session ||
+          ""
+      );
     } catch (err) {
       console.error(
         "Owner send message error:",
@@ -386,7 +439,7 @@ export default function OwnerMessagesPage() {
 
       return threads.filter(
         (thread) => {
-          const text = [
+          const searchText = [
             thread.item_name,
             thread.tag_code,
             thread.finder_name,
@@ -397,7 +450,9 @@ export default function OwnerMessagesPage() {
             .join(" ")
             .toLowerCase();
 
-          return text.includes(q);
+          return searchText.includes(
+            q
+          );
         }
       );
     }, [
@@ -495,6 +550,7 @@ export default function OwnerMessagesPage() {
             border-radius: 14px;
 
             color: white;
+
             background: #1465e8;
 
             font-weight: 900;
@@ -594,9 +650,7 @@ export default function OwnerMessagesPage() {
             </span>
 
             <h1>
-              {ka
-                ? "Live Chat"
-                : "Live Chat"}
+              Live Chat
             </h1>
 
             <p>
@@ -627,9 +681,6 @@ export default function OwnerMessagesPage() {
         )}
 
         <section className="chatLayout">
-
-          {/* THREADS */}
-
           <aside className="sidebar">
             <div className="sidebarTop">
               <div>
@@ -705,9 +756,7 @@ export default function OwnerMessagesPage() {
 
                     return (
                       <button
-                        key={
-                          thread.id
-                        }
+                        key={thread.id}
                         type="button"
                         className={
                           selected
@@ -776,8 +825,6 @@ export default function OwnerMessagesPage() {
               )}
             </div>
           </aside>
-
-          {/* CHAT */}
 
           <section className="chat">
             {!selectedThread ? (
@@ -900,9 +947,7 @@ export default function OwnerMessagesPage() {
 
                         return (
                           <div
-                            key={
-                              message.id
-                            }
+                            key={message.id}
                             className={
                               mine
                                 ? "messageRow mine"
@@ -1017,12 +1062,8 @@ export default function OwnerMessagesPage() {
 
         body {
           background: #f5f7f8;
-
           color: #202b37;
-
-          font-family:
-            Arial,
-            sans-serif;
+          font-family: Arial, sans-serif;
         }
 
         button,
@@ -1036,253 +1077,155 @@ export default function OwnerMessagesPage() {
         }
 
         .topbar {
-          width:
-            calc(100% - 36px);
+          width: calc(100% - 36px);
+          max-width: 1180px;
+          min-height: 72px;
 
-          max-width:
-            1180px;
+          margin: auto;
 
-          min-height:
-            72px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-          margin:
-            auto;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
-
-          gap:
-            18px;
+          gap: 18px;
 
           border-bottom:
             1px solid #e0e5e8;
         }
 
         .brand {
-          display:
-            flex;
+          display: flex;
+          align-items: center;
+          gap: 9px;
 
-          align-items:
-            center;
-
-          gap:
-            9px;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
         .logo {
-          width:
-            43px;
+          width: 43px;
+          height: 43px;
 
-          height:
-            43px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 12px;
 
-          place-items:
-            center;
+          color: white;
+          background: #1465e8;
 
-          border-radius:
-            12px;
-
-          color:
-            white;
-
-          background:
-            #1465e8;
-
-          font-weight:
-            900;
+          font-weight: 900;
         }
 
         .brand strong,
         .brand small {
-          display:
-            block;
+          display: block;
         }
 
         .brand strong {
-          color:
-            #1465e8;
-
-          font-size:
-            13px;
+          color: #1465e8;
+          font-size: 13px;
         }
 
         .brand small {
-          margin-top:
-            2px;
+          margin-top: 2px;
 
-          color:
-            #7655f7;
+          color: #7655f7;
 
-          font-size:
-            6px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+          font-size: 6px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .topRight {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          gap:
-            6px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
 
         .topLink {
-          min-height:
-            32px;
+          min-height: 32px;
 
-          padding:
-            0 9px;
+          padding: 0 9px;
 
-          display:
-            flex;
-
-          align-items:
-            center;
+          display: flex;
+          align-items: center;
 
           border:
             1px solid #dfe4e8;
 
-          border-radius:
-            8px;
+          border-radius: 8px;
 
-          color:
-            #586571;
+          color: #586571;
+          background: white;
 
-          background:
-            white;
+          text-decoration: none;
 
-          text-decoration:
-            none;
-
-          font-size:
-            7px;
-
-          font-weight:
-            850;
+          font-size: 7px;
+          font-weight: 850;
         }
 
         .langs {
-          padding:
-            3px;
+          padding: 3px;
 
-          display:
-            flex;
+          display: flex;
 
-          gap:
-            2px;
+          gap: 2px;
 
-          border-radius:
-            8px;
+          border-radius: 8px;
 
-          background:
-            #e9edf0;
+          background: #e9edf0;
         }
 
         .langs button {
-          min-width:
-            35px;
+          min-width: 35px;
+          min-height: 27px;
 
-          min-height:
-            27px;
+          border: 0;
+          border-radius: 6px;
 
-          border:
-            0;
+          color: #79848e;
+          background: transparent;
 
-          border-radius:
-            6px;
+          cursor: pointer;
 
-          color:
-            #79848e;
-
-          background:
-            transparent;
-
-          cursor:
-            pointer;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
+          font-size: 7px;
+          font-weight: 900;
         }
 
         .langs button.active {
-          color:
-            #1465e8;
-
-          background:
-            white;
+          color: #1465e8;
+          background: white;
         }
 
         .shell {
-          width:
-            calc(100% - 36px);
+          width: calc(100% - 36px);
+          max-width: 1180px;
 
-          max-width:
-            1180px;
+          margin: 0 auto;
 
-          margin:
-            0 auto;
-
-          padding:
-            38px 0 70px;
+          padding: 38px 0 70px;
         }
 
         .heading {
-          display:
-            flex;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
 
-          align-items:
-            flex-end;
-
-          justify-content:
-            space-between;
-
-          gap:
-            20px;
+          gap: 20px;
         }
 
         .eyebrow {
-          color:
-            #7655f7;
+          color: #7655f7;
 
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .heading h1 {
-          margin:
-            6px 0 0;
+          margin: 6px 0 0;
 
-          color:
-            #202b37;
+          color: #202b37;
 
           font-size:
             clamp(
@@ -1291,77 +1234,53 @@ export default function OwnerMessagesPage() {
               45px
             );
 
-          letter-spacing:
-            -1.5px;
+          letter-spacing: -1.5px;
         }
 
         .heading p {
-          max-width:
-            670px;
+          max-width: 670px;
 
-          margin:
-            8px 0 0;
+          margin: 8px 0 0;
 
-          color:
-            #7c8791;
+          color: #7c8791;
 
-          font-size:
-            9px;
-
-          line-height:
-            1.65;
+          font-size: 9px;
+          line-height: 1.65;
         }
 
         .refresh {
-          min-height:
-            38px;
+          min-height: 38px;
 
-          padding:
-            0 11px;
+          padding: 0 11px;
 
           border:
             1px solid #dce2e6;
 
-          border-radius:
-            8px;
+          border-radius: 8px;
 
-          color:
-            #53606b;
+          color: #53606b;
+          background: white;
 
-          background:
-            white;
+          cursor: pointer;
 
-          cursor:
-            pointer;
-
-          font-size:
-            8px;
-
-          font-weight:
-            850;
+          font-size: 8px;
+          font-weight: 850;
         }
 
         .error {
-          margin-top:
-            16px;
+          margin-top: 16px;
 
-          padding:
-            12px;
+          padding: 12px;
 
           border:
             1px solid #efd2d4;
 
-          border-radius:
-            10px;
+          border-radius: 10px;
 
-          color:
-            #9d4146;
+          color: #9d4146;
+          background: #fff4f4;
 
-          background:
-            #fff4f4;
-
-          font-size:
-            8px;
+          font-size: 8px;
         }
 
         .chatLayout {
@@ -1373,33 +1292,24 @@ export default function OwnerMessagesPage() {
               )
             );
 
-          min-height:
-            560px;
+          min-height: 560px;
 
-          margin-top:
-            25px;
+          margin-top: 25px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
             330px
-            minmax(
-              0,
-              1fr
-            );
+            minmax(0, 1fr);
 
-          overflow:
-            hidden;
+          overflow: hidden;
 
           border:
             1px solid #dfe4e8;
 
-          border-radius:
-            18px;
+          border-radius: 18px;
 
-          background:
-            white;
+          background: white;
 
           box-shadow:
             0 18px 50px
@@ -1412,839 +1322,562 @@ export default function OwnerMessagesPage() {
         }
 
         .sidebar {
-          min-width:
-            0;
+          min-width: 0;
 
-          display:
-            flex;
-
-          flex-direction:
-            column;
+          display: flex;
+          flex-direction: column;
 
           border-right:
             1px solid #e2e6e9;
 
-          background:
-            #fafbfc;
+          background: #fafbfc;
         }
 
         .sidebarTop {
-          padding:
-            15px;
+          padding: 15px;
 
           border-bottom:
             1px solid #e3e7ea;
 
-          background:
-            white;
+          background: white;
         }
 
         .sidebarTop >
-          div:first-child {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
+        div:first-child {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
         .sidebarTop strong {
-          color:
-            #35414c;
-
-          font-size:
-            11px;
+          color: #35414c;
+          font-size: 11px;
         }
 
         .sidebarTop >
-          div:first-child
-          span {
-          min-width:
-            22px;
+        div:first-child
+        span {
+          min-width: 22px;
+          height: 22px;
 
-          height:
-            22px;
+          padding: 0 6px;
 
-          padding:
-            0 6px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 999px;
 
-          place-items:
-            center;
+          color: #1465e8;
+          background: #eef4ff;
 
-          border-radius:
-            999px;
-
-          color:
-            #1465e8;
-
-          background:
-            #eef4ff;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
+          font-size: 7px;
+          font-weight: 900;
         }
 
         .search {
-          min-height:
-            38px;
+          min-height: 38px;
 
-          margin-top:
-            11px;
+          margin-top: 11px;
+          padding: 0 9px;
 
-          padding:
-            0 9px;
-
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
-            auto
-            1fr
-            auto;
+            auto 1fr auto;
 
-          align-items:
-            center;
+          align-items: center;
 
-          gap:
-            6px;
+          gap: 6px;
 
           border:
             1px solid #dde2e6;
 
-          border-radius:
-            9px;
+          border-radius: 9px;
 
-          background:
-            #f9fafb;
+          background: #f9fafb;
         }
 
         .search > span {
-          color:
-            #8d979f;
+          color: #8d979f;
         }
 
         .search input {
-          width:
-            100%;
+          width: 100%;
 
-          border:
-            0;
+          border: 0;
+          outline: 0;
 
-          outline:
-            0;
+          background: transparent;
 
-          background:
-            transparent;
-
-          font-size:
-            8px;
+          font-size: 8px;
         }
 
         .search button {
-          border:
-            0;
+          border: 0;
 
-          color:
-            #89939c;
+          color: #89939c;
+          background: transparent;
 
-          background:
-            transparent;
+          cursor: pointer;
 
-          cursor:
-            pointer;
-
-          font-size:
-            14px;
+          font-size: 14px;
         }
 
         .threadList {
-          flex:
-            1;
+          flex: 1;
 
-          overflow-y:
-            auto;
+          overflow-y: auto;
         }
 
         .thread {
-          width:
-            100%;
+          width: 100%;
 
-          padding:
-            13px 12px;
+          padding: 13px 12px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
             43px
-            minmax(
-              0,
-              1fr
-            );
+            minmax(0, 1fr);
 
-          gap:
-            9px;
+          gap: 9px;
 
-          border:
-            0;
+          border: 0;
 
           border-bottom:
             1px solid #e9ecee;
 
-          background:
-            transparent;
+          background: transparent;
 
-          cursor:
-            pointer;
+          cursor: pointer;
 
-          text-align:
-            left;
+          text-align: left;
         }
 
         .thread:hover {
-          background:
-            #f4f7fb;
+          background: #f4f7fb;
         }
 
         .thread.selected {
-          background:
-            #eef4ff;
+          background: #eef4ff;
         }
 
         .threadIcon {
-          width:
-            43px;
+          width: 43px;
+          height: 43px;
 
-          height:
-            43px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 11px;
 
-          place-items:
-            center;
+          background: white;
 
-          border-radius:
-            11px;
-
-          background:
-            white;
-
-          font-size:
-            19px;
+          font-size: 19px;
         }
 
         .threadContent {
-          min-width:
-            0;
+          min-width: 0;
         }
 
         .threadTitle {
-          display:
-            flex;
+          display: flex;
 
-          align-items:
-            center;
+          align-items: center;
+          justify-content: space-between;
 
-          justify-content:
-            space-between;
-
-          gap:
-            7px;
+          gap: 7px;
         }
 
         .threadTitle strong {
-          overflow:
-            hidden;
+          overflow: hidden;
 
-          color:
-            #35414c;
+          color: #35414c;
 
-          font-size:
-            9px;
+          font-size: 9px;
 
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .unread {
-          min-width:
-            18px;
+          min-width: 18px;
+          height: 18px;
 
-          height:
-            18px;
+          padding: 0 4px;
 
-          padding:
-            0 4px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 999px;
 
-          place-items:
-            center;
+          color: white;
+          background: #c84a50;
 
-          border-radius:
-            999px;
-
-          color:
-            white;
-
-          background:
-            #c84a50;
-
-          font-size:
-            5px;
-
-          font-weight:
-            900;
+          font-size: 5px;
+          font-weight: 900;
         }
 
         .threadContent small {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            3px;
+          margin-top: 3px;
 
-          color:
-            #7e8992;
+          color: #7e8992;
 
-          font-size:
-            7px;
+          font-size: 7px;
         }
 
         .threadContent p {
-          margin:
-            5px 0 0;
+          margin: 5px 0 0;
 
-          overflow:
-            hidden;
+          overflow: hidden;
 
-          color:
-            #929ba4;
+          color: #929ba4;
 
-          font-size:
-            7px;
+          font-size: 7px;
 
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .threadContent time {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            5px;
+          margin-top: 5px;
 
-          color:
-            #a0a8af;
+          color: #a0a8af;
 
-          font-size:
-            6px;
+          font-size: 6px;
         }
 
         .noThreads {
-          padding:
-            55px 20px;
+          padding: 55px 20px;
 
-          text-align:
-            center;
+          text-align: center;
         }
 
         .noThreads > span {
-          font-size:
-            27px;
+          font-size: 27px;
         }
 
         .noThreads strong {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            10px;
+          margin-top: 10px;
 
-          color:
-            #4c5964;
+          color: #4c5964;
 
-          font-size:
-            10px;
+          font-size: 10px;
         }
 
         .noThreads p {
-          margin:
-            6px 0 0;
+          margin: 6px 0 0;
 
-          color:
-            #8a959e;
+          color: #8a959e;
 
-          font-size:
-            7px;
-
-          line-height:
-            1.6;
+          font-size: 7px;
+          line-height: 1.6;
         }
 
         .chat {
-          min-width:
-            0;
+          min-width: 0;
 
-          display:
-            flex;
-
-          flex-direction:
-            column;
+          display: flex;
+          flex-direction: column;
         }
 
         .selectChat {
-          flex:
-            1;
+          flex: 1;
 
-          display:
-            flex;
+          display: flex;
+          flex-direction: column;
 
-          flex-direction:
-            column;
+          align-items: center;
+          justify-content: center;
 
-          align-items:
-            center;
+          padding: 30px;
 
-          justify-content:
-            center;
+          color: #808b95;
 
-          padding:
-            30px;
-
-          color:
-            #808b95;
-
-          text-align:
-            center;
+          text-align: center;
         }
 
         .selectChat div {
-          font-size:
-            38px;
+          font-size: 38px;
         }
 
         .selectChat strong {
-          margin-top:
-            12px;
+          margin-top: 12px;
 
-          color:
-            #4e5a65;
+          color: #4e5a65;
 
-          font-size:
-            12px;
+          font-size: 12px;
         }
 
         .selectChat p {
-          margin:
-            6px 0 0;
+          margin: 6px 0 0;
 
-          font-size:
-            8px;
+          font-size: 8px;
         }
 
         .chatHeader {
-          min-height:
-            77px;
+          min-height: 77px;
 
-          padding:
-            12px 16px;
+          padding: 12px 16px;
 
-          display:
-            flex;
+          display: flex;
 
-          align-items:
-            center;
+          align-items: center;
+          justify-content: space-between;
 
-          justify-content:
-            space-between;
-
-          gap:
-            15px;
+          gap: 15px;
 
           border-bottom:
             1px solid #e4e7ea;
         }
 
         .chatIdentity {
-          min-width:
-            0;
+          min-width: 0;
 
-          display:
-            flex;
+          display: flex;
+          align-items: center;
 
-          align-items:
-            center;
-
-          gap:
-            10px;
+          gap: 10px;
         }
 
         .chatIcon {
-          width:
-            46px;
+          width: 46px;
+          height: 46px;
 
-          height:
-            46px;
+          flex: 0 0 46px;
 
-          flex:
-            0 0 46px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 12px;
 
-          place-items:
-            center;
+          background: #eef4ff;
 
-          border-radius:
-            12px;
-
-          background:
-            #eef4ff;
-
-          font-size:
-            21px;
+          font-size: 21px;
         }
 
         .chatIdentity span {
-          color:
-            #7655f7;
+          color: #7655f7;
 
-          font-size:
-            6px;
-
-          font-weight:
-            900;
+          font-size: 6px;
+          font-weight: 900;
         }
 
         .chatIdentity h2 {
-          margin:
-            3px 0 0;
+          margin: 3px 0 0;
 
-          overflow:
-            hidden;
+          overflow: hidden;
 
-          color:
-            #34404b;
+          color: #34404b;
 
-          font-size:
-            13px;
+          font-size: 13px;
 
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .chatIdentity p {
-          margin:
-            3px 0 0;
+          margin: 3px 0 0;
 
-          color:
-            #8a949d;
+          color: #8a949d;
 
-          font-size:
-            7px;
+          font-size: 7px;
         }
 
         .chatActions {
-          display:
-            flex;
+          display: flex;
+          flex-wrap: wrap;
 
-          flex-wrap:
-            wrap;
-
-          gap:
-            5px;
+          gap: 5px;
         }
 
         .chatActions a {
-          min-height:
-            31px;
+          min-height: 31px;
 
-          padding:
-            0 8px;
+          padding: 0 8px;
 
-          display:
-            flex;
-
-          align-items:
-            center;
+          display: flex;
+          align-items: center;
 
           border:
             1px solid #dce2e6;
 
-          border-radius:
-            7px;
+          border-radius: 7px;
 
-          color:
-            #52606b;
+          color: #52606b;
+          background: white;
 
-          background:
-            white;
+          text-decoration: none;
 
-          text-decoration:
-            none;
-
-          font-size:
-            7px;
-
-          font-weight:
-            850;
+          font-size: 7px;
+          font-weight: 850;
         }
 
         .closedNotice {
-          padding:
-            8px 14px;
+          padding: 8px 14px;
 
-          color:
-            #8b5558;
-
-          background:
-            #fff6f6;
+          color: #8b5558;
+          background: #fff6f6;
 
           border-bottom:
             1px solid #efdada;
 
-          font-size:
-            7px;
+          font-size: 7px;
         }
 
         .messages {
-          flex:
-            1;
+          flex: 1;
 
-          min-height:
-            0;
+          min-height: 0;
 
-          padding:
-            18px;
+          padding: 18px;
 
-          overflow-y:
-            auto;
+          overflow-y: auto;
 
-          background:
-            #f9fafb;
+          background: #f9fafb;
         }
 
         .messagesEmpty {
-          height:
-            100%;
+          height: 100%;
 
-          display:
-            flex;
+          display: flex;
+          flex-direction: column;
 
-          flex-direction:
-            column;
+          align-items: center;
+          justify-content: center;
 
-          align-items:
-            center;
+          gap: 8px;
 
-          justify-content:
-            center;
+          color: #8b959e;
 
-          gap:
-            8px;
+          font-size: 8px;
 
-          color:
-            #8b959e;
-
-          font-size:
-            8px;
-
-          text-align:
-            center;
+          text-align: center;
         }
 
         .messagesEmpty div {
-          font-size:
-            30px;
+          font-size: 30px;
         }
 
         .messagesEmpty strong {
-          color:
-            #55616c;
+          color: #55616c;
 
-          font-size:
-            10px;
+          font-size: 10px;
         }
 
         .messageRow {
-          margin-bottom:
-            12px;
+          margin-bottom: 12px;
 
-          display:
-            flex;
+          display: flex;
+          flex-direction: column;
 
-          flex-direction:
-            column;
-
-          align-items:
-            flex-start;
+          align-items: flex-start;
         }
 
         .messageRow.mine {
-          align-items:
-            flex-end;
+          align-items: flex-end;
         }
 
         .sender {
-          margin:
-            0 0 4px 5px;
+          margin: 0 0 4px 5px;
 
-          color:
-            #909aa3;
+          color: #909aa3;
 
-          font-size:
-            6px;
-
-          font-weight:
-            850;
+          font-size: 6px;
+          font-weight: 850;
         }
 
         .bubble {
-          max-width:
-            76%;
+          max-width: 76%;
 
-          padding:
-            10px 11px 7px;
+          padding: 10px 11px 7px;
 
           border:
             1px solid #e0e5e8;
 
-          border-radius:
-            13px;
+          border-radius: 13px;
 
-          color:
-            #4b5762;
+          color: #4b5762;
 
-          background:
-            white;
+          background: white;
         }
 
         .mine .bubble {
-          border:
-            0;
+          border: 0;
 
-          color:
-            white;
-
-          background:
-            #1465e8;
+          color: white;
+          background: #1465e8;
         }
 
         .bubble p {
-          margin:
-            0;
+          margin: 0;
 
-          font-size:
-            9px;
+          font-size: 9px;
+          line-height: 1.55;
 
-          line-height:
-            1.55;
-
-          white-space:
-            pre-wrap;
-
-          overflow-wrap:
-            anywhere;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
         }
 
         .bubble time {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            5px;
+          margin-top: 5px;
 
-          font-size:
-            6px;
+          font-size: 6px;
 
-          text-align:
-            right;
+          text-align: right;
 
-          opacity:
-            0.7;
+          opacity: 0.7;
         }
 
         .composer {
-          padding:
-            12px 14px;
+          padding: 12px 14px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
-            minmax(
-              0,
-              1fr
-            )
+            minmax(0, 1fr)
             auto;
 
-          align-items:
-            end;
+          align-items: end;
 
-          gap:
-            8px;
+          gap: 8px;
 
           border-top:
             1px solid #e2e6e9;
 
-          background:
-            white;
+          background: white;
         }
 
         .composer textarea {
-          width:
-            100%;
+          width: 100%;
 
-          min-height:
-            61px;
+          min-height: 61px;
+          max-height: 140px;
 
-          max-height:
-            140px;
-
-          padding:
-            10px;
+          padding: 10px;
 
           border:
             1px solid #d5dce1;
 
-          border-radius:
-            10px;
+          border-radius: 10px;
 
-          outline:
-            0;
+          outline: 0;
 
-          resize:
-            vertical;
+          resize: vertical;
 
-          font-size:
-            9px;
+          font-size: 9px;
         }
 
         .composer textarea:focus {
-          border-color:
-            #9fbce8;
+          border-color: #9fbce8;
 
           box-shadow:
             0 0 0 3px
@@ -2257,80 +1890,57 @@ export default function OwnerMessagesPage() {
         }
 
         .composer button {
-          min-width:
-            90px;
+          min-width: 90px;
+          min-height: 41px;
 
-          min-height:
-            41px;
+          padding: 0 12px;
 
-          padding:
-            0 12px;
+          border: 0;
 
-          border:
-            0;
+          border-radius: 9px;
 
-          border-radius:
-            9px;
+          color: white;
+          background: #1465e8;
 
-          color:
-            white;
+          cursor: pointer;
 
-          background:
-            #1465e8;
-
-          cursor:
-            pointer;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
+          font-size: 8px;
+          font-weight: 900;
         }
 
         .composer button:disabled {
-          opacity:
-            0.5;
+          opacity: 0.5;
 
-          cursor:
-            not-allowed;
+          cursor: not-allowed;
         }
 
         @media (
-          max-width:
-            820px
+          max-width: 820px
         ) {
           .chatLayout {
-            height:
-              auto;
-
-            min-height:
-              0;
+            height: auto;
+            min-height: 0;
 
             grid-template-columns:
               1fr;
           }
 
           .sidebar {
-            max-height:
-              330px;
+            max-height: 330px;
 
-            border-right:
-              0;
+            border-right: 0;
 
             border-bottom:
               1px solid #e1e5e8;
           }
 
           .chat {
-            min-height:
-              600px;
+            min-height: 600px;
           }
         }
 
         @media (
-          max-width:
-            600px
+          max-width: 600px
         ) {
           .topbar {
             width:
@@ -2338,8 +1948,7 @@ export default function OwnerMessagesPage() {
                 100% - 20px
               );
 
-            padding:
-              10px 0;
+            padding: 10px 0;
 
             align-items:
               flex-start;
@@ -2349,11 +1958,9 @@ export default function OwnerMessagesPage() {
           }
 
           .topRight {
-            width:
-              100%;
+            width: 100%;
 
-            flex-wrap:
-              wrap;
+            flex-wrap: wrap;
           }
 
           .shell {
@@ -2388,8 +1995,7 @@ export default function OwnerMessagesPage() {
           }
 
           .bubble {
-            max-width:
-              88%;
+            max-width: 88%;
           }
 
           .composer {
@@ -2398,8 +2004,7 @@ export default function OwnerMessagesPage() {
           }
 
           .composer button {
-            width:
-              100%;
+            width: 100%;
           }
         }
       `}</style>
@@ -2434,15 +2039,11 @@ function getTypeIcon(
     return "🔑";
   }
 
-  if (
-    type === "wallet"
-  ) {
+  if (type === "wallet") {
     return "👛";
   }
 
-  if (
-    type === "bag"
-  ) {
+  if (type === "bag") {
     return "👜";
   }
 
