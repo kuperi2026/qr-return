@@ -10,6 +10,8 @@ import { useParams } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
+import QRScanTracker from "@/components/QRScanTracker";
+
 import EmergencyPublicProfile, {
   type EmergencyProfileData,
 } from "@/components/emergency/EmergencyPublicProfile";
@@ -461,13 +463,6 @@ export default function PublicProfilePage() {
 
   /*
     EMERGENCY ID
-
-    ჩვეულებრივი Finder-ის
-    ლოგიკა აქ არ იცვლება.
-
-    მხოლოდ Emergency ტიპს
-    გადავცემთ თავის ცალკე
-    კომპონენტს.
   */
 
   if (
@@ -524,12 +519,6 @@ export default function PublicProfilePage() {
   const type =
     typeInfo();
 
-  /*
-    შენს არსებულ სისტემაში
-    active=true Lost Mode-ის
-    ფუნქციას ასრულებს.
-  */
-
   const lost =
     Boolean(
       profile.active
@@ -564,6 +553,11 @@ export default function PublicProfilePage() {
 
   return (
     <main className="page">
+      <QRScanTracker
+        itemId={profile.id}
+        tagCode={profile.tag_code}
+      />
+
       <header className="header">
         <a
           href="/"
@@ -617,9 +611,6 @@ export default function PublicProfilePage() {
 
       <section className="container">
         <article className="profileCard">
-
-          {/* HERO */}
-
           <section className="hero">
             <div className="mainPhotoWrap">
               {profile.photo &&
@@ -684,8 +675,6 @@ export default function PublicProfilePage() {
             </div>
           </section>
 
-          {/* SAFE NOTICE */}
-
           {!lost && (
             <section className="safeNotice">
               <div className="safeIcon">
@@ -707,8 +696,6 @@ export default function PublicProfilePage() {
               </div>
             </section>
           )}
-
-          {/* OWNER */}
 
           <section className="section">
             <SectionTitle
@@ -779,8 +766,6 @@ export default function PublicProfilePage() {
               </div>
             </div>
           </section>
-
-          {/* ITEM / PET INFO */}
 
           <section className="section">
             <SectionTitle
@@ -998,8 +983,6 @@ export default function PublicProfilePage() {
               )}
           </section>
 
-          {/* FINDER MESSAGE */}
-
           {profile
             .show_finder_message !==
             false &&
@@ -1023,8 +1006,6 @@ export default function PublicProfilePage() {
                 </div>
               </section>
             )}
-
-          {/* ADDITIONAL CONTACT */}
 
           {profile
             .show_additional_contact &&
@@ -1091,8 +1072,6 @@ export default function PublicProfilePage() {
                 </div>
               </section>
             )}
-
-          {/* CONTACT OWNER */}
 
           {lost && (
             <section className="section">
@@ -1185,8 +1164,6 @@ export default function PublicProfilePage() {
               </div>
             </section>
           )}
-
-          {/* LOCATION */}
 
           {lost &&
             profile
