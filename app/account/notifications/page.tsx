@@ -11,6 +11,25 @@ import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
+type Lang = "ka" | "en";
+
+type NotificationMetadata = {
+  latitude?: number | null;
+  longitude?: number | null;
+
+  tag_code?: string | null;
+
+  finder_session?: string | null;
+
+  item_id?: number | string | null;
+
+  source?: string | null;
+
+  event?: string | null;
+
+  profile_type?: string | null;
+};
+
 type NotificationRow = {
   id: string;
 
@@ -24,19 +43,14 @@ type NotificationRow = {
 
   item_id: string | null;
 
+  order_id?: string | null;
+
   read: boolean;
 
-  metadata: Record<
-    string,
-    unknown
-  > | null;
+  metadata: NotificationMetadata | null;
 
   created_at: string;
 };
-
-type Lang =
-  | "ka"
-  | "en";
 
 export default function AccountNotificationsPage() {
   const router =
@@ -58,13 +72,16 @@ export default function AccountNotificationsPage() {
   const [error, setError] =
     useState("");
 
-  const [filter, setFilter] =
-    useState<
-      "all" |
-      "unread" |
-      "scan" |
-      "location"
-    >("all");
+  const [
+    filter,
+    setFilter,
+  ] = useState<
+    | "all"
+    | "unread"
+    | "scan"
+    | "location"
+    | "chat"
+  >("all");
 
   const ka =
     lang === "ka";
@@ -95,35 +112,34 @@ export default function AccountNotificationsPage() {
 
       const {
         data,
-        error,
-      } =
-        await supabase
-          .from("notifications")
-          .select(`
-            id,
-            user_id,
-            type,
-            title,
-            message,
-            item_id,
-            read,
-            metadata,
-            created_at
-          `)
-          .eq(
-            "user_id",
-            user.id
-          )
-          .order(
-            "created_at",
-            {
-              ascending:
-                false,
-            }
-          );
+        error: loadError,
+      } = await supabase
+        .from("notifications")
+        .select(`
+          id,
+          user_id,
+          type,
+          title,
+          message,
+          item_id,
+          order_id,
+          read,
+          metadata,
+          created_at
+        `)
+        .eq(
+          "user_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
-      if (error) {
-        throw error;
+      if (loadError) {
+        throw loadError;
       }
 
       setNotifications(
@@ -131,7 +147,7 @@ export default function AccountNotificationsPage() {
       );
     } catch (err) {
       console.error(
-        "Account notifications error:",
+        "Notifications error:",
         err
       );
 
@@ -151,20 +167,23 @@ export default function AccountNotificationsPage() {
     id: string
   ) {
     const {
-      error,
-    } =
-      await supabase
-        .from("notifications")
-        .update({
-          read: true,
-        })
-        .eq(
-          "id",
-          id
-        );
+      error: updateError,
+    } = await supabase
+      .from("notifications")
+      .update({
+        read: true,
+      })
+      .eq(
+        "id",
+        id
+      );
 
-    if (error) {
-      console.error(error);
+    if (updateError) {
+      console.error(
+        "Mark read error:",
+        updateError
+      );
+
       return;
     }
 
@@ -185,33 +204,39 @@ export default function AccountNotificationsPage() {
   async function markAllRead() {
     const {
       data: { user },
+      error: authError,
     } =
       await supabase.auth.getUser();
 
-    if (!user) {
-      router.push("/login");
+    if (
+      authError ||
+      !user
+    ) {
       return;
     }
 
     const {
-      error,
-    } =
-      await supabase
-        .from("notifications")
-        .update({
-          read: true,
-        })
-        .eq(
-          "user_id",
-          user.id
-        )
-        .eq(
-          "read",
-          false
-        );
+      error: updateError,
+    } = await supabase
+      .from("notifications")
+      .update({
+        read: true,
+      })
+      .eq(
+        "user_id",
+        user.id
+      )
+      .eq(
+        "read",
+        false
+      );
 
-    if (error) {
-      console.error(error);
+    if (updateError) {
+      console.error(
+        "Mark all read error:",
+        updateError
+      );
+
       return;
     }
 
@@ -223,6 +248,37 @@ export default function AccountNotificationsPage() {
             read: true,
           })
         )
+    );
+  }
+
+  async function openChat(
+    notification:
+      NotificationRow
+  ) {
+    if (
+      !notification.read
+    ) {
+      await markRead(
+        notification.id
+      );
+    }
+
+    const session =
+      notification.metadata
+        ?.finder_session;
+
+    if (session) {
+      router.push(
+        `/account/messages?session=${encodeURIComponent(
+          session
+        )}`
+      );
+
+      return;
+    }
+
+    router.push(
+      "/account/messages"
     );
   }
 
@@ -259,6 +315,16 @@ export default function AccountNotificationsPage() {
             );
           }
 
+          if (
+            filter ===
+            "chat"
+          ) {
+            return (
+              notification.type ===
+              "chat"
+            );
+          }
+
           return true;
         }
       );
@@ -273,29 +339,79 @@ export default function AccountNotificationsPage() {
         !item.read
     ).length;
 
+  const scanCount =
+    notifications.filter(
+      (item) =>
+        item.type === "scan"
+    ).length;
+
+  const locationCount =
+    notifications.filter(
+      (item) =>
+        item.type ===
+        "location"
+    ).length;
+
+  const chatCount =
+    notifications.filter(
+      (item) =>
+        item.type === "chat"
+    ).length;
+
   if (loading) {
     return (
       <main className="loading">
-        {ka
-          ? "შეტყობინებები იტვირთება..."
-          : "Loading notifications..."}
+        <div className="loadingIcon">
+          🔔
+        </div>
+
+        <strong>
+          QR RETURN
+        </strong>
+
+        <span>
+          {ka
+            ? "შეტყობინებები იტვირთება..."
+            : "Loading notifications..."}
+        </span>
 
         <style jsx>{`
           .loading {
-            min-height:
-              100vh;
+            min-height: 100vh;
 
-            display:
-              grid;
+            display: flex;
+            flex-direction: column;
 
-            place-items:
-              center;
+            align-items: center;
+            justify-content: center;
 
-            color:
-              #697581;
+            gap: 8px;
 
-            background:
-              #f5f7f8;
+            color: #737f8a;
+
+            background: #f5f7f8;
+          }
+
+          .loadingIcon {
+            width: 50px;
+            height: 50px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 14px;
+
+            background: white;
+
+            font-size: 22px;
+          }
+
+          strong {
+            color: #202b37;
+          }
+
+          span {
+            font-size: 9px;
           }
         `}</style>
       </main>
@@ -304,48 +420,75 @@ export default function AccountNotificationsPage() {
 
   return (
     <main className="page">
-      <div className="language">
-        <button
-          type="button"
-          className={
-            ka
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("ka")
-          }
-        >
-          GEO
-        </button>
-
-        <button
-          type="button"
-          className={
-            !ka
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("en")
-          }
-        >
-          ENG
-        </button>
-      </div>
-
-      <div className="shell">
+      <header className="topbar">
         <Link
           href="/my-profiles"
-          className="back"
+          className="brand"
         >
-          ←{" "}
-          {ka
-            ? "ჩემი პროფილები"
-            : "My Profiles"}
+          <span className="logo">
+            QR
+          </span>
+
+          <span>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <small>
+              NOTIFICATIONS
+            </small>
+          </span>
         </Link>
 
-        <header className="header">
+        <div className="topActions">
+          <Link
+            href="/account/messages"
+          >
+            💬 Live Chat
+          </Link>
+
+          <Link
+            href="/my-profiles"
+          >
+            {ka
+              ? "ჩემი პროფილები"
+              : "My Profiles"}
+          </Link>
+
+          <div className="langs">
+            <button
+              type="button"
+              className={
+                ka
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLang("ka")
+              }
+            >
+              GEO
+            </button>
+
+            <button
+              type="button"
+              className={
+                !ka
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLang("en")
+              }
+            >
+              ENG
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="shell">
+        <header className="heading">
           <div>
             <span className="eyebrow">
               QR RETURN ACCOUNT
@@ -359,8 +502,8 @@ export default function AccountNotificationsPage() {
 
             <p>
               {ka
-                ? "აქ გამოჩნდება QR Scan, Emergency Location და სხვა მნიშვნელოვანი მოვლენები."
-                : "QR scans, Emergency locations, and other important events appear here."}
+                ? "QR Scan, ლოკაციის გაზიარება და Live Chat-ის ახალი შეტყობინებები ერთ ადგილას."
+                : "QR scans, shared locations, and new Live Chat messages in one place."}
             </p>
           </div>
 
@@ -372,6 +515,7 @@ export default function AccountNotificationsPage() {
                 void markAllRead()
               }
             >
+              ✓{" "}
               {ka
                 ? "ყველას წაკითხულად მონიშვნა"
                 : "Mark all read"}
@@ -405,28 +549,27 @@ export default function AccountNotificationsPage() {
           <Stat
             label="QR SCANS"
             value={
-              notifications.filter(
-                (item) =>
-                  item.type ===
-                  "scan"
-              ).length
+              scanCount
             }
           />
 
           <Stat
             label="LOCATIONS"
             value={
-              notifications.filter(
-                (item) =>
-                  item.type ===
-                  "location"
-              ).length
+              locationCount
+            }
+          />
+
+          <Stat
+            label="LIVE CHAT"
+            value={
+              chatCount
             }
           />
         </section>
 
         <section className="filters">
-          <Filter
+          <FilterButton
             active={
               filter === "all"
             }
@@ -437,9 +580,9 @@ export default function AccountNotificationsPage() {
             {ka
               ? "ყველა"
               : "All"}
-          </Filter>
+          </FilterButton>
 
-          <Filter
+          <FilterButton
             active={
               filter ===
               "unread"
@@ -453,20 +596,21 @@ export default function AccountNotificationsPage() {
             {ka
               ? "წაუკითხავი"
               : "Unread"}
-          </Filter>
+          </FilterButton>
 
-          <Filter
+          <FilterButton
             active={
-              filter === "scan"
+              filter ===
+              "scan"
             }
             onClick={() =>
               setFilter("scan")
             }
           >
             📱 Scan
-          </Filter>
+          </FilterButton>
 
-          <Filter
+          <FilterButton
             active={
               filter ===
               "location"
@@ -478,12 +622,24 @@ export default function AccountNotificationsPage() {
             }
           >
             📍 Location
-          </Filter>
+          </FilterButton>
+
+          <FilterButton
+            active={
+              filter ===
+              "chat"
+            }
+            onClick={() =>
+              setFilter("chat")
+            }
+          >
+            💬 Live Chat
+          </FilterButton>
         </section>
 
         {error && (
           <div className="error">
-            {error}
+            ⚠ {error}
           </div>
         )}
 
@@ -503,8 +659,8 @@ export default function AccountNotificationsPage() {
 
               <p>
                 {ka
-                  ? "როდესაც თქვენი QR დაასკანერდება ან ლოკაცია გაზიარდება, ინფორმაცია აქ გამოჩნდება."
-                  : "When your QR is scanned or a location is shared, it will appear here."}
+                  ? "როდესაც QR დაასკანერდება, ლოკაცია გაზიარდება ან მპოვნელი Live Chat-ში მოგწერთ, ინფორმაცია აქ გამოჩნდება."
+                  : "QR scans, shared locations, and finder Live Chat messages will appear here."}
               </p>
             </section>
           )}
@@ -530,6 +686,9 @@ export default function AccountNotificationsPage() {
                     onRead={
                       markRead
                     }
+                    onOpenChat={
+                      openChat
+                    }
                   />
                 )
               )}
@@ -539,17 +698,165 @@ export default function AccountNotificationsPage() {
 
       <style jsx>{`
         .page {
-          min-height:
-            100vh;
+          min-height: 100vh;
 
-          padding:
-            45px 0 90px;
+          background: #f5f7f8;
+        }
 
-          position:
-            relative;
+        .topbar {
+          width:
+            calc(
+              100% - 36px
+            );
+
+          max-width: 1100px;
+
+          min-height: 70px;
+
+          margin: auto;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content:
+            space-between;
+
+          gap: 15px;
+
+          border-bottom:
+            1px solid
+            #e0e5e8;
+        }
+
+        .brand {
+          display: flex;
+
+          align-items: center;
+
+          gap: 9px;
+
+          text-decoration: none;
+        }
+
+        .logo {
+          width: 41px;
+          height: 41px;
+
+          display: grid;
+
+          place-items: center;
+
+          border-radius: 11px;
+
+          color: white;
 
           background:
-            #f5f7f8;
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
+
+          font-size: 11px;
+
+          font-weight: 900;
+        }
+
+        .brand strong,
+        .brand small {
+          display: block;
+        }
+
+        .brand strong {
+          color: #1465e8;
+
+          font-size: 12px;
+        }
+
+        .brand small {
+          margin-top: 2px;
+
+          color: #7655f7;
+
+          font-size: 6px;
+
+          font-weight: 900;
+        }
+
+        .topActions {
+          display: flex;
+
+          align-items: center;
+
+          gap: 5px;
+        }
+
+        .topActions
+          :global(a) {
+          min-height: 32px;
+
+          padding:
+            0 9px;
+
+          display: flex;
+
+          align-items: center;
+
+          border:
+            1px solid
+            #dfe4e8;
+
+          border-radius: 8px;
+
+          color: #57646f;
+
+          background: white;
+
+          text-decoration: none;
+
+          font-size: 7px;
+
+          font-weight: 850;
+        }
+
+        .langs {
+          padding: 3px;
+
+          display: flex;
+
+          gap: 2px;
+
+          border-radius: 8px;
+
+          background: #e9edf0;
+        }
+
+        .langs button {
+          min-width: 34px;
+          min-height: 27px;
+
+          border: 0;
+
+          border-radius: 6px;
+
+          color: #7d8791;
+
+          background:
+            transparent;
+
+          cursor: pointer;
+
+          font-size: 7px;
+
+          font-weight: 900;
+        }
+
+        .langs
+          button.active {
+          color: #1465e8;
+
+          background: white;
         }
 
         .shell {
@@ -558,107 +865,16 @@ export default function AccountNotificationsPage() {
               100% - 40px
             );
 
-          max-width:
-            900px;
+          max-width: 900px;
 
-          margin:
-            0 auto;
-        }
-
-        .language {
-          position:
-            fixed;
-
-          top:
-            18px;
-
-          right:
-            20px;
-
-          z-index:
-            20;
-
-          display:
-            flex;
-
-          gap:
-            4px;
+          margin: 0 auto;
 
           padding:
-            4px;
-
-          border:
-            1px solid
-            #e0e5e8;
-
-          border-radius:
-            999px;
-
-          background:
-            white;
+            45px 0 90px;
         }
 
-        .language button {
-          min-width:
-            38px;
-
-          height:
-            27px;
-
-          border:
-            0;
-
-          border-radius:
-            999px;
-
-          color:
-            #89939d;
-
-          background:
-            transparent;
-
-          cursor:
-            pointer;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-        }
-
-        .language
-          button.active {
-          color:
-            white;
-
-          background:
-            #202b37;
-        }
-
-        .back {
-          display:
-            inline-block;
-
-          margin-bottom:
-            25px;
-
-          color:
-            #697581;
-
-          text-decoration:
-            none;
-
-          font-size:
-            9px;
-
-          font-weight:
-            800;
-        }
-
-        .header {
-          display:
-            flex;
+        .heading {
+          display: flex;
 
           align-items:
             flex-end;
@@ -666,30 +882,25 @@ export default function AccountNotificationsPage() {
           justify-content:
             space-between;
 
-          gap:
-            25px;
+          gap: 25px;
         }
 
         .eyebrow {
-          color:
-            #c84a50;
+          color: #7655f7;
 
-          font-size:
-            8px;
+          font-size: 7px;
 
-          font-weight:
-            900;
+          font-weight: 900;
 
           letter-spacing:
-            1.4px;
+            1.2px;
         }
 
         h1 {
           margin:
             7px 0 0;
 
-          color:
-            #202b37;
+          color: #202b37;
 
           font-size:
             clamp(
@@ -702,125 +913,99 @@ export default function AccountNotificationsPage() {
             -1.8px;
         }
 
-        .header p {
-          max-width:
-            650px;
+        .heading p {
+          max-width: 650px;
 
           margin:
             9px 0 0;
 
-          color:
-            #78838e;
+          color: #78838e;
 
-          font-size:
-            10px;
+          font-size: 9px;
 
-          line-height:
-            1.7;
+          line-height: 1.7;
         }
 
         .markAll {
-          min-height:
-            40px;
+          min-height: 39px;
 
           padding:
-            0 12px;
+            0 11px;
+
+          flex: 0 0 auto;
 
           border:
             1px solid
             #dce2e6;
 
-          border-radius:
-            9px;
+          border-radius: 9px;
 
-          color:
-            #53606c;
+          color: #53606c;
 
-          background:
-            white;
+          background: white;
 
-          cursor:
-            pointer;
+          cursor: pointer;
 
-          font-size:
-            8px;
+          font-size: 7px;
 
-          font-weight:
-            850;
+          font-weight: 850;
         }
 
         .stats {
-          margin-top:
-            30px;
+          margin-top: 28px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
             repeat(
-              4,
+              5,
               minmax(
                 0,
                 1fr
               )
             );
 
-          gap:
-            9px;
+          gap: 8px;
         }
 
         .filters {
-          margin-top:
-            22px;
+          margin-top: 21px;
 
-          display:
-            flex;
+          display: flex;
 
-          flex-wrap:
-            wrap;
+          flex-wrap: wrap;
 
-          gap:
-            6px;
+          gap: 6px;
         }
 
         .list {
-          margin-top:
-            22px;
+          margin-top: 20px;
 
-          display:
-            grid;
+          display: grid;
 
-          gap:
-            9px;
+          gap: 9px;
         }
 
         .error {
-          margin-top:
-            20px;
+          margin-top: 20px;
 
-          padding:
-            14px;
+          padding: 13px;
 
           border:
             1px solid
-            #edd3d5;
+            #efd2d4;
 
-          border-radius:
-            10px;
+          border-radius: 10px;
 
-          color:
-            #9d3f45;
+          color: #9d4146;
 
-          background:
-            #fff5f5;
+          background: #fff5f5;
 
-          font-size:
-            9px;
+          font-size: 8px;
         }
 
         .empty {
-          margin-top:
-            25px;
+          margin-top: 25px;
 
           padding:
             55px 20px;
@@ -829,64 +1014,43 @@ export default function AccountNotificationsPage() {
             1px solid
             #e0e5e8;
 
-          border-radius:
-            15px;
+          border-radius: 15px;
 
-          background:
-            white;
+          background: white;
 
-          text-align:
-            center;
+          text-align: center;
         }
 
         .empty div {
-          font-size:
-            30px;
+          font-size: 30px;
         }
 
         .empty strong {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            12px;
+          margin-top: 12px;
 
-          color:
-            #3d4954;
+          color: #3d4954;
 
-          font-size:
-            12px;
+          font-size: 12px;
         }
 
         .empty p {
-          max-width:
-            500px;
+          max-width: 500px;
 
           margin:
             7px auto 0;
 
-          color:
-            #89939d;
+          color: #89939d;
 
-          font-size:
-            9px;
+          font-size: 8px;
 
-          line-height:
-            1.6;
+          line-height: 1.6;
         }
 
         @media (
-          max-width:
-            700px
+          max-width: 780px
         ) {
-          .header {
-            align-items:
-              stretch;
-
-            flex-direction:
-              column;
-          }
-
           .stats {
             grid-template-columns:
               repeat(
@@ -900,14 +1064,46 @@ export default function AccountNotificationsPage() {
         }
 
         @media (
-          max-width:
-            480px
+          max-width: 600px
         ) {
+          .topbar {
+            padding:
+              10px 0;
+
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
+
+          .topActions {
+            width: 100%;
+
+            flex-wrap: wrap;
+          }
+
           .shell {
             width:
               calc(
                 100% - 24px
               );
+
+            padding-top:
+              30px;
+          }
+
+          .heading {
+            align-items:
+              stretch;
+
+            flex-direction:
+              column;
+          }
+
+          .markAll {
+            align-self:
+              flex-start;
           }
 
           .stats {
@@ -924,6 +1120,7 @@ function NotificationCard({
   notification,
   language,
   onRead,
+  onOpenChat,
 }: {
   notification:
     NotificationRow;
@@ -932,6 +1129,11 @@ function NotificationCard({
 
   onRead: (
     id: string
+  ) => Promise<void>;
+
+  onOpenChat: (
+    notification:
+      NotificationRow
   ) => Promise<void>;
 }) {
   const ka =
@@ -959,6 +1161,30 @@ function NotificationCard({
       ? `https://www.google.com/maps?q=${latitude},${longitude}`
       : null;
 
+  const isChat =
+    notification.type ===
+    "chat";
+
+  async function handleCardClick() {
+    if (
+      isChat
+    ) {
+      await onOpenChat(
+        notification
+      );
+
+      return;
+    }
+
+    if (
+      !notification.read
+    ) {
+      await onRead(
+        notification.id
+      );
+    }
+  }
+
   return (
     <article
       className={
@@ -966,15 +1192,9 @@ function NotificationCard({
           ? "card"
           : "card unread"
       }
-      onClick={() => {
-        if (
-          !notification.read
-        ) {
-          void onRead(
-            notification.id
-          );
-        }
-      }}
+      onClick={() =>
+        void handleCardClick()
+      }
     >
       <div className="icon">
         {getIcon(
@@ -986,7 +1206,9 @@ function NotificationCard({
         <div className="top">
           <div>
             <span>
-              {notification.type.toUpperCase()}
+              {getTypeLabel(
+                notification.type
+              )}
             </span>
 
             <strong>
@@ -1011,24 +1233,32 @@ function NotificationCard({
 
         <div className="bottom">
           <small>
-            {new Date(
-              notification.created_at
-            ).toLocaleString()}
+            {formatNotificationDate(
+              notification.created_at,
+              language
+            )}
           </small>
 
           <div className="actions">
-            {notification.item_id && (
-              <Link
-                href="/my-profiles"
-                onClick={(event) =>
-                  event.stopPropagation()
-                }
+            {isChat && (
+              <button
+                type="button"
+                className="chatButton"
+                onClick={(
+                  event
+                ) => {
+                  event.stopPropagation();
+
+                  void onOpenChat(
+                    notification
+                  );
+                }}
               >
+                💬{" "}
                 {ka
-                  ? "პროფილი"
-                  : "Profile"}
-                {" →"}
-              </Link>
+                  ? "Live Chat-ის გახსნა"
+                  : "Open Live Chat"}
+              </button>
             )}
 
             {mapUrl && (
@@ -1036,7 +1266,9 @@ function NotificationCard({
                 href={mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(event) =>
+                onClick={(
+                  event
+                ) =>
                   event.stopPropagation()
                 }
               >
@@ -1046,17 +1278,32 @@ function NotificationCard({
                   : "Open Map"}
               </a>
             )}
+
+            {!isChat &&
+              notification.item_id && (
+                <Link
+                  href="/my-profiles"
+                  onClick={(
+                    event
+                  ) =>
+                    event.stopPropagation()
+                  }
+                >
+                  {ka
+                    ? "პროფილები"
+                    : "Profiles"}{" "}
+                  →
+                </Link>
+              )}
           </div>
         </div>
       </div>
 
       <style jsx>{`
         .card {
-          padding:
-            15px;
+          padding: 15px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
             auto
@@ -1065,21 +1312,17 @@ function NotificationCard({
               1fr
             );
 
-          gap:
-            12px;
+          gap: 12px;
 
           border:
             1px solid
             #e0e5e8;
 
-          border-radius:
-            12px;
+          border-radius: 12px;
 
-          background:
-            white;
+          background: white;
 
-          cursor:
-            pointer;
+          cursor: pointer;
         }
 
         .unread {
@@ -1092,36 +1335,28 @@ function NotificationCard({
         }
 
         .icon {
-          width:
-            42px;
+          width: 42px;
+          height: 42px;
 
-          height:
-            42px;
-
-          display:
-            grid;
+          display: grid;
 
           place-items:
             center;
 
-          border-radius:
-            11px;
+          border-radius: 11px;
 
           background:
             #f1f4f6;
 
-          font-size:
-            18px;
+          font-size: 18px;
         }
 
         .content {
-          min-width:
-            0;
+          min-width: 0;
         }
 
         .top {
-          display:
-            flex;
+          display: flex;
 
           align-items:
             flex-start;
@@ -1129,39 +1364,31 @@ function NotificationCard({
           justify-content:
             space-between;
 
-          gap:
-            15px;
+          gap: 15px;
         }
 
         .top span,
         .top strong {
-          display:
-            block;
+          display: block;
         }
 
         .top span {
-          color:
-            #c84a50;
+          color: #7655f7;
 
-          font-size:
-            6px;
+          font-size: 6px;
 
-          font-weight:
-            900;
+          font-weight: 900;
 
           letter-spacing:
             0.7px;
         }
 
         .top strong {
-          margin-top:
-            4px;
+          margin-top: 4px;
 
-          color:
-            #35414c;
+          color: #35414c;
 
-          font-size:
-            11px;
+          font-size: 11px;
         }
 
         i {
@@ -1171,110 +1398,104 @@ function NotificationCard({
           border-radius:
             999px;
 
-          color:
-            white;
+          color: white;
 
           background:
             #c84a50;
 
-          font-size:
-            5px;
+          font-size: 5px;
 
           font-style:
             normal;
 
-          font-weight:
-            900;
+          font-weight: 900;
         }
 
         p {
           margin:
             7px 0 0;
 
-          color:
-            #737e89;
+          color: #737e89;
 
-          font-size:
-            9px;
+          font-size: 9px;
 
-          line-height:
-            1.6;
+          line-height: 1.6;
+
+          white-space:
+            pre-wrap;
+
+          overflow-wrap:
+            anywhere;
         }
 
         .bottom {
-          margin-top:
-            11px;
+          margin-top: 11px;
 
-          display:
-            flex;
+          display: flex;
 
-          align-items:
-            center;
+          align-items: center;
 
           justify-content:
             space-between;
 
-          flex-wrap:
-            wrap;
+          flex-wrap: wrap;
 
-          gap:
-            8px;
+          gap: 8px;
         }
 
         small {
-          color:
-            #969fa8;
+          color: #969fa8;
 
-          font-size:
-            7px;
+          font-size: 7px;
         }
 
         .actions {
-          display:
-            flex;
+          display: flex;
 
-          flex-wrap:
-            wrap;
+          flex-wrap: wrap;
 
-          gap:
-            6px;
+          gap: 6px;
         }
 
         .actions
-          :global(a) {
-          min-height:
-            29px;
+          :global(a),
+        .chatButton {
+          min-height: 30px;
 
           padding:
             0 8px;
 
-          display:
-            flex;
+          display: flex;
 
-          align-items:
-            center;
+          align-items: center;
 
           border:
             1px solid
             #dce2e6;
 
-          border-radius:
-            7px;
+          border-radius: 7px;
 
-          color:
-            #53606c;
+          color: #53606c;
+
+          background: white;
+
+          text-decoration: none;
+
+          font-size: 7px;
+
+          font-weight: 850;
+        }
+
+        .chatButton {
+          color: white;
+
+          border-color:
+            #1465e8;
 
           background:
-            white;
+            #1465e8;
 
-          text-decoration:
-            none;
-
-          font-size:
-            7px;
-
-          font-weight:
-            850;
+          cursor: pointer;
         }
       `}</style>
     </article>
@@ -1286,6 +1507,7 @@ function Stat({
   value,
 }: {
   label: string;
+
   value: number;
 }) {
   return (
@@ -1300,59 +1522,50 @@ function Stat({
 
       <style jsx>{`
         .stat {
-          min-height:
-            91px;
+          min-height: 88px;
 
-          padding:
-            14px;
+          padding: 13px;
 
           border:
             1px solid
             #e0e5e8;
 
-          border-radius:
-            12px;
+          border-radius: 11px;
 
-          background:
-            white;
+          background: white;
         }
 
         span {
-          color:
-            #959fa8;
+          color: #929ca5;
 
-          font-size:
-            7px;
+          font-size: 6px;
 
-          font-weight:
-            900;
+          font-weight: 900;
         }
 
         strong {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            15px;
+          margin-top: 14px;
 
-          color:
-            #293540;
+          color: #293540;
 
-          font-size:
-            22px;
+          font-size: 21px;
         }
       `}</style>
     </div>
   );
 }
 
-function Filter({
+function FilterButton({
   active,
   onClick,
   children,
 }: {
   active: boolean;
+
   onClick: () => void;
+
   children:
     React.ReactNode;
 }) {
@@ -1364,14 +1577,15 @@ function Filter({
           ? "filter active"
           : "filter"
       }
-      onClick={onClick}
+      onClick={
+        onClick
+      }
     >
       {children}
 
       <style jsx>{`
         .filter {
-          min-height:
-            31px;
+          min-height: 31px;
 
           padding:
             0 10px;
@@ -1383,25 +1597,19 @@ function Filter({
           border-radius:
             999px;
 
-          color:
-            #66727d;
+          color: #66727d;
 
-          background:
-            white;
+          background: white;
 
-          cursor:
-            pointer;
+          cursor: pointer;
 
-          font-size:
-            7px;
+          font-size: 7px;
 
-          font-weight:
-            850;
+          font-weight: 850;
         }
 
         .active {
-          color:
-            white;
+          color: white;
 
           border-color:
             #202b37;
@@ -1417,21 +1625,82 @@ function Filter({
 function getIcon(
   type: string
 ) {
-  const icons:
-    Record<
-      string,
-      string
-    > = {
-      scan: "📱",
-      location: "📍",
-      chat: "💬",
-      support: "🎧",
-      order: "🛒",
-      system: "🔔",
-    };
+  if (type === "scan") {
+    return "📱";
+  }
 
-  return (
-    icons[type] ||
-    "🔔"
-  );
+  if (
+    type === "location"
+  ) {
+    return "📍";
+  }
+
+  if (type === "chat") {
+    return "💬";
+  }
+
+  if (type === "order") {
+    return "🛒";
+  }
+
+  if (
+    type === "support"
+  ) {
+    return "🎧";
+  }
+
+  return "🔔";
+}
+
+function getTypeLabel(
+  type: string
+) {
+  if (type === "scan") {
+    return "QR SCAN";
+  }
+
+  if (
+    type === "location"
+  ) {
+    return "LOCATION";
+  }
+
+  if (type === "chat") {
+    return "LIVE CHAT";
+  }
+
+  if (type === "order") {
+    return "ORDER";
+  }
+
+  if (
+    type === "support"
+  ) {
+    return "SUPPORT";
+  }
+
+  return "QR RETURN";
+}
+
+function formatNotificationDate(
+  value: string,
+  language: Lang
+) {
+  try {
+    return new Intl.DateTimeFormat(
+      language === "ka"
+        ? "ka-GE"
+        : "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    ).format(
+      new Date(value)
+    );
+  } catch {
+    return value;
+  }
 }
