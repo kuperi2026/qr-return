@@ -1,5 +1,7 @@
 "use client";
 
+import EmergencyScanTracker from "@/components/EmergencyScanTracker";
+
 type Privacy = {
   show_name?: boolean;
   show_date_of_birth?: boolean;
@@ -40,6 +42,10 @@ export type EmergencyProfileData = {
 };
 
 type Props = {
+  itemId?: string;
+
+  currentScanCount?: number | null;
+
   data: EmergencyProfileData;
 
   tagCode?: string | null;
@@ -54,6 +60,9 @@ type Props = {
 };
 
 export default function EmergencyPublicProfile({
+  itemId,
+  currentScanCount = 0,
+
   data,
 
   tagCode,
@@ -110,8 +119,16 @@ export default function EmergencyPublicProfile({
 
   return (
     <main className="page">
-      <div className="shell">
+      {itemId && (
+        <EmergencyScanTracker
+          itemId={itemId}
+          currentScanCount={
+            currentScanCount
+          }
+        />
+      )}
 
+      <div className="shell">
         <header className="brand">
           <div className="brandMark">
             <MedicalIcon />
@@ -172,8 +189,6 @@ export default function EmergencyPublicProfile({
               {showName &&
               fullName
                 ? fullName
-                : ka
-                ? "Emergency ID"
                 : "Emergency ID"}
             </h1>
 
@@ -284,9 +299,7 @@ export default function EmergencyPublicProfile({
               }
               name={
                 data.emergency_contact_name ||
-                (ka
-                  ? "Emergency Contact"
-                  : "Emergency Contact")
+                "Emergency Contact"
               }
               phone={
                 data.emergency_contact_phone
@@ -373,8 +386,8 @@ export default function EmergencyPublicProfile({
 
           <p>
             {ka
-              ? "ეს ინფორმაცია ნაჩვენებია QR პროფილის მფლობელის მიერ არჩეული Privacy პარამეტრების მიხედვით. QR RETURN არ ცვლის პროფესიულ სამედიცინო შეფასებას ან გადაუდებელ დახმარებას."
-              : "This information is displayed according to the profile owner's privacy settings. QR RETURN does not replace professional medical evaluation or emergency care."}
+              ? "ეს ინფორმაცია ნაჩვენებია QR პროფილის მფლობელის მიერ არჩეული Privacy პარამეტრების მიხედვით."
+              : "This information is displayed according to the profile owner's privacy settings."}
           </p>
         </section>
 
@@ -392,28 +405,19 @@ export default function EmergencyPublicProfile({
       <style jsx>{`
         .page {
           min-height: 100vh;
-
           padding: 30px 0 60px;
-
-          background:
-            #f5f7f8;
+          background: #f5f7f8;
         }
 
         .shell {
-          width:
-            calc(100% - 28px);
-
-          max-width:
-            650px;
-
-          margin:
-            0 auto;
+          width: calc(100% - 28px);
+          max-width: 650px;
+          margin: 0 auto;
         }
 
         .brand {
           display: flex;
           align-items: center;
-
           gap: 9px;
         }
 
@@ -430,8 +434,7 @@ export default function EmergencyPublicProfile({
           background: #c84a50;
         }
 
-        .brandMark
-          :global(svg) {
+        .brandMark :global(svg) {
           width: 20px;
         }
 
@@ -442,7 +445,6 @@ export default function EmergencyPublicProfile({
 
         .brand strong {
           color: #202b37;
-
           font-size: 13px;
           font-weight: 900;
         }
@@ -459,7 +461,6 @@ export default function EmergencyPublicProfile({
 
         .alert {
           margin-top: 24px;
-
           padding: 14px;
 
           display: flex;
@@ -468,7 +469,6 @@ export default function EmergencyPublicProfile({
           gap: 11px;
 
           border: 1px solid #edd6d8;
-
           border-radius: 13px;
 
           background: #fff5f5;
@@ -481,16 +481,13 @@ export default function EmergencyPublicProfile({
           display: grid;
           place-items: center;
 
-          flex: 0 0 41px;
-
           border-radius: 11px;
 
           color: white;
           background: #c84a50;
         }
 
-        .alertIcon
-          :global(svg) {
+        .alertIcon :global(svg) {
           width: 19px;
         }
 
@@ -511,13 +508,11 @@ export default function EmergencyPublicProfile({
           margin-top: 4px;
 
           color: #4a3638;
-
           font-size: 10px;
         }
 
         .profile {
           margin-top: 13px;
-
           padding: 18px;
 
           display: grid;
@@ -549,7 +544,6 @@ export default function EmergencyPublicProfile({
         .photo img {
           width: 100%;
           height: 100%;
-
           object-fit: cover;
         }
 
@@ -563,8 +557,7 @@ export default function EmergencyPublicProfile({
           color: #9ca5ad;
         }
 
-        .placeholder
-          :global(svg) {
+        .placeholder :global(svg) {
           width: 39px;
         }
 
@@ -645,7 +638,6 @@ export default function EmergencyPublicProfile({
           padding: 15px;
 
           border: 1px solid #e0e5e8;
-
           border-radius: 12px;
 
           background: white;
@@ -653,7 +645,6 @@ export default function EmergencyPublicProfile({
 
         .detail span {
           color: #c84a50;
-
           font-size: 6px;
           font-weight: 900;
         }
@@ -669,7 +660,6 @@ export default function EmergencyPublicProfile({
 
         .emailCard {
           margin-top: 10px;
-
           padding: 15px;
 
           display: flex;
@@ -679,7 +669,6 @@ export default function EmergencyPublicProfile({
           gap: 15px;
 
           border: 1px solid #e0e5e8;
-
           border-radius: 12px;
 
           background: white;
@@ -701,10 +690,7 @@ export default function EmergencyPublicProfile({
           margin-top: 4px;
 
           color: #45515d;
-
           font-size: 9px;
-
-          overflow-wrap: anywhere;
         }
 
         .emailCard a {
@@ -714,8 +700,6 @@ export default function EmergencyPublicProfile({
 
           display: flex;
           align-items: center;
-
-          flex: 0 0 auto;
 
           border-radius: 8px;
 
@@ -730,7 +714,6 @@ export default function EmergencyPublicProfile({
 
         .notice {
           margin-top: 14px;
-
           padding: 14px;
 
           display: grid;
@@ -746,8 +729,7 @@ export default function EmergencyPublicProfile({
           border-radius: 11px;
         }
 
-        .notice
-          :global(svg) {
+        .notice :global(svg) {
           width: 18px;
         }
 
@@ -760,7 +742,6 @@ export default function EmergencyPublicProfile({
 
         footer {
           margin-top: 23px;
-
           padding-top: 16px;
 
           display: flex;
@@ -771,17 +752,15 @@ export default function EmergencyPublicProfile({
 
         footer strong {
           color: #35414c;
-
           font-size: 8px;
         }
 
         footer span {
           color: #999fa6;
-
           font-size: 7px;
         }
 
-        @media(max-width:520px) {
+        @media (max-width: 520px) {
           .profile {
             grid-template-columns:
               72px 1fr;
@@ -831,13 +810,8 @@ function InfoCard({
           : "card"
       }
     >
-      <span>
-        {label}
-      </span>
-
-      <strong>
-        {value}
-      </strong>
+      <span>{label}</span>
+      <strong>{value}</strong>
 
       <style jsx>{`
         .card {
@@ -872,8 +846,6 @@ function InfoCard({
 
           font-size: 11px;
           line-height: 1.45;
-
-          overflow-wrap: anywhere;
         }
 
         .important strong {
@@ -898,26 +870,18 @@ function ContactCard({
   return (
     <section className="contact">
       <div>
-        <span>
-          {eyebrow}
-        </span>
+        <span>{eyebrow}</span>
 
-        <strong>
-          {name}
-        </strong>
+        <strong>{name}</strong>
 
         {phone && (
-          <small>
-            {phone}
-          </small>
+          <small>{phone}</small>
         )}
       </div>
 
       {phone &&
         allowCall && (
-          <a
-            href={`tel:${phone}`}
-          >
+          <a href={`tel:${phone}`}>
             ☎ Call
           </a>
         )}
@@ -935,7 +899,6 @@ function ContactCard({
           gap: 15px;
 
           border: 1px solid #e0e5e8;
-
           border-radius: 12px;
 
           background: white;
@@ -966,7 +929,6 @@ function ContactCard({
           margin-top: 4px;
 
           color: #7f8993;
-
           font-size: 8px;
         }
 
@@ -974,13 +936,9 @@ function ContactCard({
           min-width: 86px;
           height: 39px;
 
-          padding: 0 11px;
-
           display: flex;
           align-items: center;
           justify-content: center;
-
-          flex: 0 0 auto;
 
           border-radius: 9px;
 
@@ -991,17 +949,6 @@ function ContactCard({
 
           font-size: 8px;
           font-weight: 850;
-        }
-
-        @media(max-width:470px) {
-          .contact {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          a {
-            width: 100%;
-          }
         }
       `}</style>
     </section>
