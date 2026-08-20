@@ -1,136 +1,389 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { supabase } from "@/lib/supabase";
+import AdminDashboard from "@/components/admin/AdminDashboard";
+
+type DashboardStats = {
+  supportCount: number;
+  totalProfiles: number;
+  activeProfiles: number;
+  scanCount: number;
+  totalUsers: number;
+  totalOrders: number;
+};
+
+const emptyStats: DashboardStats = {
+  supportCount: 0,
+  totalProfiles: 0,
+  activeProfiles: 0,
+  scanCount: 0,
+  totalUsers: 0,
+  totalOrders: 0,
+};
 
 export default function AdminPage() {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7f8",
-        padding: "60px 20px",
-      }}
-    >
-      <div
+  const router = useRouter();
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [stats, setStats] =
+    useState<DashboardStats>(
+      emptyStats
+    );
+
+  useEffect(() => {
+    void loadAdmin();
+  }, []);
+
+  async function loadAdmin() {
+    try {
+      setLoading(true);
+      setError("");
+
+      /*
+        1. CHECK LOGIN
+      */
+
+      const {
+        data: { user },
+        error: userError,
+      } =
+        await supabase.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      /*
+        2. CHECK ADMIN ACCESS
+      */
+
+      const {
+        data: admin,
+        error: adminError,
+      } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+      if (adminError) {
+        throw adminError;
+      }
+
+      if (!admin) {
+        setError(
+          "Admin Access Required"
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      /*
+        3. LOAD STATS
+
+        თითო query ცალკეა,
+        რომ რომელიმე ცხრილი თუ დროებით
+        არ არსებობს, მთელი Admin
+        არ ჩამოიშალოს.
+      */
+
+      const [
+        profilesResult,
+        activeResult,
+        usersResult,
+        ordersResult,
+      ] = await Promise.all([
+        supabase
+          .from("item")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true,
+            }
+          ),
+
+        supabase
+          .from("item")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true,
+            }
+          )
+          .eq(
+            "active",
+            true
+          ),
+
+        supabase
+          .from("profiles")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true,
+            }
+          ),
+
+        supabase
+          .from("orders")
+          .select(
+            "id",
+            {
+              count: "exact",
+              head: true,
+            }
+          ),
+      ]);
+
+      /*
+        QR scan count
+        item table-ის
+        scan_count ჯამი
+      */
+
+      const {
+        data: scanRows,
+      } = await supabase
+        .from("item")
+        .select(
+          "scan_count"
+        );
+
+      const scanCount =
+        (scanRows || []).reduce(
+          (
+            total:
+              number,
+            row:
+              {
+                scan_count:
+                  number | null;
+              }
+          ) =>
+            total +
+            Number(
+              row.scan_count ||
+                0
+            ),
+          0
+        );
+
+      /*
+        Support-ის table name
+        პროექტში შეიძლება განსხვავდებოდეს.
+
+        ამიტომ ამ ეტაპზე
+        Support count = 0 რჩება,
+        თვითონ Support გვერდს
+        არ ვეხებით.
+      */
+
+      setStats({
+        supportCount: 0,
+
+        totalProfiles:
+          profilesResult.count ||
+          0,
+
+        activeProfiles:
+          activeResult.count ||
+          0,
+
+        scanCount,
+
+        totalUsers:
+          usersResult.count ||
+          0,
+
+        totalOrders:
+          ordersResult.count ||
+          0,
+      });
+    } catch (err) {
+      console.error(
+        "Admin dashboard error:",
+        err
+      );
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Admin Dashboard-ის ჩატვირთვა ვერ მოხერხდა."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main
         style={{
-          width: "100%",
-          maxWidth: "1100px",
-          margin: "0 auto",
+          minHeight:
+            "100vh",
+
+          display:
+            "grid",
+
+          placeItems:
+            "center",
+
+          background:
+            "#f5f7f8",
+
+          color:
+            "#687481",
+
+          fontFamily:
+            "Arial, sans-serif",
         }}
       >
-        <p
-          style={{
-            color: "#c84a50",
-            fontSize: "12px",
-            fontWeight: 800,
-            letterSpacing: "1.5px",
-          }}
-        >
-          QR RETURN ADMIN
-        </p>
+        Admin Control Center
+        იტვირთება...
+      </main>
+    );
+  }
 
-        <h1
-          style={{
-            margin: "8px 0 10px",
-            color: "#202b37",
-            fontSize: "42px",
-          }}
-        >
-          Admin Panel
-        </h1>
+  if (error) {
+    return (
+      <main
+        style={{
+          minHeight:
+            "100vh",
 
-        <p
-          style={{
-            color: "#75808b",
-            marginBottom: "35px",
-          }}
-        >
-          QR RETURN administration
-        </p>
+          display:
+            "grid",
 
+          placeItems:
+            "center",
+
+          padding:
+            "30px",
+
+          background:
+            "#f5f7f8",
+
+          fontFamily:
+            "Arial, sans-serif",
+        }}
+      >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "15px",
+            maxWidth:
+              "520px",
+
+            padding:
+              "24px",
+
+            border:
+              "1px solid #e1e5e8",
+
+            borderRadius:
+              "14px",
+
+            background:
+              "#ffffff",
+
+            textAlign:
+              "center",
           }}
         >
-          <AdminLink
-            href="/admin/orders"
-            title="Orders"
-            description="Manage customer orders"
-          />
+          <strong
+            style={{
+              display:
+                "block",
 
-          <AdminLink
-            href="/admin/users"
-            title="Users"
-            description="Manage users"
-          />
+              color:
+                "#a33f45",
 
-          <AdminLink
-            href="/admin/items"
-            title="QR Profiles"
-            description="Manage registered QR profiles"
-          />
+              fontSize:
+                "18px",
+            }}
+          >
+            Admin Error
+          </strong>
 
-          <AdminLink
-            href="/admin/support"
-            title="Support"
-            description="Support and customer messages"
-          />
+          <p
+            style={{
+              marginTop:
+                "10px",
 
-          <AdminLink
+              color:
+                "#6f7a85",
+
+              fontSize:
+                "13px",
+            }}
+          >
+            {error}
+          </p>
+
+          <a
             href="/"
-            title="Website"
-            description="Open QR RETURN website"
-          />
+            style={{
+              display:
+                "inline-block",
+
+              marginTop:
+                "15px",
+
+              color:
+                "#225fc7",
+
+              textDecoration:
+                "none",
+
+              fontWeight:
+                700,
+            }}
+          >
+            ← QR RETURN
+          </a>
         </div>
-      </div>
-    </main>
-  );
-}
+      </main>
+    );
+  }
 
-function AdminLink({
-  href,
-  title,
-  description,
-}: {
-  href: string;
-  title: string;
-  description: string;
-}) {
   return (
-    <Link
-      href={href}
-      style={{
-        display: "block",
-        padding: "22px",
-        border: "1px solid #e0e5e8",
-        borderRadius: "14px",
-        background: "#ffffff",
-        color: "#202b37",
-        textDecoration: "none",
-      }}
-    >
-      <strong
-        style={{
-          display: "block",
-          fontSize: "16px",
-          marginBottom: "7px",
-        }}
-      >
-        {title}
-      </strong>
-
-      <span
-        style={{
-          color: "#7b8690",
-          fontSize: "12px",
-        }}
-      >
-        {description}
-      </span>
-    </Link>
+    <AdminDashboard
+      supportCount={
+        stats.supportCount
+      }
+      totalProfiles={
+        stats.totalProfiles
+      }
+      activeProfiles={
+        stats.activeProfiles
+      }
+      scanCount={
+        stats.scanCount
+      }
+      totalUsers={
+        stats.totalUsers
+      }
+      totalOrders={
+        stats.totalOrders
+      }
+    />
   );
 }
