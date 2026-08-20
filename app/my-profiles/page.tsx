@@ -62,6 +62,11 @@ export default function MyProfilesPage() {
     setNotificationCount,
   ] = useState(0);
 
+  const [
+    unreadChatCount,
+    setUnreadChatCount,
+  ] = useState(0);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -123,6 +128,44 @@ export default function MyProfilesPage() {
       } else {
         setNotificationCount(
           unreadCount || 0
+        );
+      }
+
+      try {
+        const {
+          data: chatThreads,
+          error: chatError,
+        } = await supabase.rpc(
+          "owner_get_all_chat_threads"
+        );
+
+        if (chatError) {
+          console.error(
+            "Unread chat count error:",
+            chatError
+          );
+        } else {
+          const rows =
+            (chatThreads || []) as Array<{
+              unread_count?: number | null;
+            }>;
+
+          const totalUnread =
+            rows.reduce(
+              (sum, row) =>
+                sum +
+                (row.unread_count || 0),
+              0
+            );
+
+          setUnreadChatCount(
+            totalUnread
+          );
+        }
+      } catch (chatCountError) {
+        console.error(
+          "Unread chat count failed:",
+          chatCountError
         );
       }
 
@@ -651,6 +694,18 @@ export default function MyProfilesPage() {
             />
 
             <QuickLink
+              href="/account/messages"
+              icon="💬"
+              title={
+                unreadChatCount > 0
+                  ? ka
+                    ? `Live Chat (${unreadChatCount})`
+                    : `Messages (${unreadChatCount})`
+                  : "Live Chat"
+              }
+            />
+
+            <QuickLink
               href="/account"
               icon="👤"
               title={
@@ -1049,7 +1104,7 @@ export default function MyProfilesPage() {
 
           grid-template-columns:
             repeat(
-              5,
+              4,
               minmax(0, 1fr)
             );
 
@@ -1357,8 +1412,13 @@ function Stat({
 }) {
   return (
     <div className="stat">
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
 
       <style jsx>{`
         .stat {
@@ -1469,7 +1529,9 @@ function QuickLink({
         {title}
       </strong>
 
-      <i>→</i>
+      <i>
+        →
+      </i>
 
       <style jsx>{`
         .quick {
@@ -1527,7 +1589,8 @@ function getProfileType(
   }
 
   if (
-    item.item_type === "pet"
+    item.item_type ===
+    "pet"
   ) {
     return (
       item.pet_type ||
