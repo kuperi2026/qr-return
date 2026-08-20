@@ -1,47 +1,3 @@
-"use client";
-
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-import { supabase } from "@/lib/supabase";
-
-import AccountHeader from "@/components/account/AccountHeader";
-import ProfileCard, {
-  type ProfileCardItem,
-} from "@/components/account/ProfileCard";
-
-type ItemRow = {
-  id: string;
-
-  owner_id: string | null;
-
-  tag_code: string | null;
-
-  item_type: string | null;
-  pet_type: string | null;
-
-  item_name: string | null;
-
-  photo: string | null;
-
-  active: boolean | null;
-
-  scan_count: number | null;
-
-  lost_message: string | null;
-  lost_seen_location: string | null;
-
-  created_at?: string | null;
-};
-
-type Lang = "ka" | "en";
-
 export default function MyProfilesPage() {
   const router = useRouter();
 
@@ -88,8 +44,7 @@ export default function MyProfilesPage() {
       const {
         data: { user },
         error: userError,
-      } =
-        await supabase.auth.getUser();
+      } = await supabase.auth.getUser();
 
       if (userError) {
         throw userError;
@@ -202,8 +157,7 @@ export default function MyProfilesPage() {
               : filter === "return"
               ? Boolean(
                   item.lost_message ||
-                    item
-                      .lost_seen_location
+                    item.lost_seen_location
                 )
               : type === filter;
 
@@ -281,5 +235,3 @@ export default function MyProfilesPage() {
           void handleLogout()
         }
       />
-
-      {/* აქედან ქვემოთ დატოვე შენი არსებული კოდი უცვლელად */}
