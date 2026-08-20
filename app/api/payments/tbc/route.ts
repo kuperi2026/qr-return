@@ -3,21 +3,40 @@ import {
   NextResponse,
 } from "next/server";
 
-type ProductId =
-  | "tag"
-  | "sticker";
+import {
+  createClient,
+} from "@supabase/supabase-js";
 
 type TbcCheckoutBody = {
-  productId?: ProductId;
+  productSlug?: string;
   quantity?: number;
-  language?: "KA" | "EN";
   orderId?: string;
+  language?: "KA" | "EN";
+};
+
+type ProductRow = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  design_name: string | null;
+  description: string | null;
+  sku: string;
+  price: number;
+  currency: string;
+  image_url: string | null;
+  stock_quantity: number;
+  active: boolean;
 };
 
 type TbcTokenResponse = {
   access_token?: string;
   token_type?: string;
   expires_in?: number;
+
+  title?: string;
+  detail?: string;
+  message?: string;
 };
 
 type TbcPaymentLink = {
@@ -29,61 +48,27 @@ type TbcPaymentLink = {
 type TbcPaymentResponse = {
   payId?: string;
   status?: string;
-  currency?: string;
-  amount?: number;
 
   links?: TbcPaymentLink[];
 
   transactionId?: string | null;
 
-  httpStatusCode?: number;
+  title?: string;
+  detail?: string;
+  message?: string;
 
   developerMessage?: string | null;
   userMessage?: string | null;
 };
-
-const PRODUCTS = {
-  tag: {
-    name: "QR Tag",
-    priceGel: 27,
-    sku: "QR-TAG-001",
-  },
-
-  sticker: {
-    name: "QR Sticker",
-    priceGel: 14,
-    sku: "QR-STICKER-001",
-  },
-} satisfies Record<
-  ProductId,
-  {
-    name: string;
-    priceGel: number;
-    sku: string;
-  }
->;
-
-function makeOrderId() {
-  const time =
-    Date.now().toString();
-
-  const random =
-    Math.random()
-      .toString(36)
-      .slice(2, 8)
-      .toUpperCase();
-
-  return `QR-${time}-${random}`;
-}
 
 export async function POST(
   request: NextRequest
 ) {
   try {
     /*
-     * --------------------------------
-     * TBC ENVIRONMENT VARIABLES
-     * --------------------------------
+     * ==========================================
+     * ENVIRONMENT VARIABLES
+     * ==========================================
      */
 
     const apiKey =
@@ -95,6 +80,12 @@ export async function POST(
     const clientSecret =
       process.env.TBC_CLIENT_SECRET;
 
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
+
     if (
       !apiKey ||
       !clientId ||
@@ -103,7 +94,22 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "TBC payment credentials are not configured.",
+            "TBC credentials are not configured.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (
+      !supabaseUrl ||
+      !supabaseServiceKey
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Supabase server credentials are not configured.",
         },
         {
           status: 500,
@@ -112,27 +118,68 @@ export async function POST(
     }
 
     /*
-     * --------------------------------
+     * ==========================================
+     * SUPABASE ADMIN
+     * ==========================================
+     */
+
+    const supabaseAdmin =
+      createClient(
+        supabaseUrl,
+        supabaseServiceKey,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken:
+              false,
+          },
+        }
+      );
+
+    /*
+     * ==========================================
      * REQUEST BODY
-     * --------------------------------
+     * ==========================================
      */
 
     const body =
-      (await request.json()) as TbcCheckoutBody;
+      (await request.json()) as
+        TbcCheckoutBody;
 
-    const productId: ProductId =
-      body.productId ===
-      "sticker"
-        ? "sticker"
-        : "tag";
+    const productSlug =
+      body.productSlug?.trim();
 
-    const product =
-      PRODUCTS[productId];
+    if (!productSlug) {
+      return NextResponse.json(
+        {
+          error:
+            "Product slug is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const orderId =
+      body.orderId?.trim();
+
+    if (!orderId) {
+      return NextResponse.json(
+        {
+          error:
+            "Order ID is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     /*
-     * --------------------------------
+     * ==========================================
      * QUANTITY
-     * --------------------------------
+     * ==========================================
      */
 
     const rawQuantity =
@@ -154,45 +201,238 @@ export async function POST(
         : 1;
 
     /*
-     * --------------------------------
-     * TOTAL IN GEL
-     * --------------------------------
+     * ==========================================
+     * LOAD PRODUCT
+     * ==========================================
      */
+
+    const {
+      data: productData,
+      error: productError,
+    } = await supabaseAdmin
+      .from("products")
+      .select(`
+        id,
+        slug,
+        name,
+        category,
+        design_name,
+        description,
+        sku,
+        price,
+        currency,
+        image_url,
+        stock_quantity,
+        active
+      `)
+      .eq(
+        "slug",
+        productSlug
+      )
+      .eq(
+        "active",
+        true
+      )
+      .maybeSingle();
+
+    if (productError) {
+      console.error(
+        "TBC product lookup error:",
+        productError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Could not load product.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (!productData) {
+      return NextResponse.json(
+        {
+          error:
+            "Product not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const product =
+      productData as ProductRow;
+
+    /*
+     * ==========================================
+     * STOCK CHECK
+     * ==========================================
+     */
+
+    if (
+      product.stock_quantity <
+      quantity
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Requested quantity is not available.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /*
+     * ==========================================
+     * VERIFY ORDER
+     * ==========================================
+     */
+
+    const {
+      data: order,
+      error: orderError,
+    } = await supabaseAdmin
+      .from("orders")
+      .select(`
+        id,
+        user_id,
+        status,
+        payment_status,
+        payment_provider,
+        product_id,
+        quantity,
+        total
+      `)
+      .eq(
+        "id",
+        orderId
+      )
+      .maybeSingle();
+
+    if (orderError) {
+      console.error(
+        "TBC order lookup error:",
+        orderError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Could not load order.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (!order) {
+      return NextResponse.json(
+        {
+          error:
+            "Order not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    if (
+      String(
+        order.payment_status ||
+          ""
+      ).toLowerCase() ===
+      "paid"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "This order is already paid.",
+        },
+        {
+          status: 409,
+        }
+      );
+    }
+
+    /*
+     * ==========================================
+     * PAYMENT AMOUNT
+     * ==========================================
+     *
+     * Current products table stores USD prices.
+     *
+     * For TBC we will initially request USD.
+     * Merchant must have USD payments enabled.
+     *
+     * Later we can add separate GEL prices
+     * to products table.
+     */
+
+    const price =
+      Number(
+        product.price
+      );
+
+    if (
+      !Number.isFinite(price) ||
+      price <= 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid product price.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
     const total =
       Number(
         (
-          product.priceGel *
+          price *
           quantity
         ).toFixed(2)
       );
 
+    const currency =
+      (
+        product.currency ||
+        "USD"
+      ).toUpperCase();
+
+    if (
+      ![
+        "USD",
+        "GEL",
+        "EUR",
+      ].includes(currency)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "This currency is not supported by TBC Checkout.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     /*
-     * --------------------------------
-     * LANGUAGE
-     * --------------------------------
-     */
-
-    const language =
-      body.language === "EN"
-        ? "EN"
-        : "KA";
-
-    /*
-     * --------------------------------
-     * ORDER ID
-     * --------------------------------
-     */
-
-    const merchantPaymentId =
-      body.orderId?.trim() ||
-      makeOrderId();
-
-    /*
-     * --------------------------------
-     * STEP 1
+     * ==========================================
+     * STEP 1:
      * GET TBC ACCESS TOKEN
-     * --------------------------------
+     * ==========================================
      */
 
     const tokenBody =
@@ -228,21 +468,16 @@ export async function POST(
           body:
             tokenBody.toString(),
 
-          cache: "no-store",
+          cache:
+            "no-store",
         }
       );
 
     const tokenData =
       (await tokenResponse.json()) as
-        TbcTokenResponse & {
-          title?: string;
-          detail?: string;
-          message?: string;
-        };
+        TbcTokenResponse;
 
-    if (
-      !tokenResponse.ok
-    ) {
+    if (!tokenResponse.ok) {
       console.error(
         "TBC token error:",
         tokenData
@@ -267,15 +502,10 @@ export async function POST(
       tokenData.access_token;
 
     if (!accessToken) {
-      console.error(
-        "TBC token missing:",
-        tokenData
-      );
-
       return NextResponse.json(
         {
           error:
-            "TBC did not return an access token.",
+            "TBC access token was not returned.",
         },
         {
           status: 500,
@@ -284,10 +514,10 @@ export async function POST(
     }
 
     /*
-     * --------------------------------
-     * STEP 2
-     * CREATE PAYMENT
-     * --------------------------------
+     * ==========================================
+     * STEP 2:
+     * CREATE TBC PAYMENT
+     * ==========================================
      */
 
     const origin =
@@ -297,15 +527,20 @@ export async function POST(
       `${origin}/store/success` +
       `?provider=tbc` +
       `&order=${encodeURIComponent(
-        merchantPaymentId
+        String(orderId)
       )}`;
 
     const callbackUrl =
       `${origin}/api/payments/tbc/callback`;
 
+    const description =
+      product.design_name
+        ? `${product.name} ${product.design_name}`
+        : product.name;
+
     const paymentPayload = {
       amount: {
-        currency: "GEL",
+        currency,
         total,
       },
 
@@ -314,11 +549,16 @@ export async function POST(
 
       callbackUrl,
 
-      preAuth: false,
+      preAuth:
+        false,
 
-      language,
+      language:
+        body.language === "EN"
+          ? "EN"
+          : "KA",
 
-      merchantPaymentId,
+      merchantPaymentId:
+        String(orderId),
 
       skipInfoMessage:
         false,
@@ -327,9 +567,15 @@ export async function POST(
         false,
 
       description:
-        product.name.slice(
+        description.slice(
           0,
           30
+        ),
+
+      extra:
+        String(orderId).slice(
+          0,
+          25
         ),
     };
 
@@ -358,21 +604,16 @@ export async function POST(
               paymentPayload
             ),
 
-          cache: "no-store",
+          cache:
+            "no-store",
         }
       );
 
     const paymentData =
       (await paymentResponse.json()) as
-        TbcPaymentResponse & {
-          title?: string;
-          detail?: string;
-          message?: string;
-        };
+        TbcPaymentResponse;
 
-    if (
-      !paymentResponse.ok
-    ) {
+    if (!paymentResponse.ok) {
       console.error(
         "TBC create payment error:",
         paymentData
@@ -396,9 +637,9 @@ export async function POST(
     }
 
     /*
-     * --------------------------------
-     * FIND APPROVAL URL
-     * --------------------------------
+     * ==========================================
+     * APPROVAL URL
+     * ==========================================
      */
 
     const approvalLink =
@@ -420,7 +661,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "TBC payment was created, but approval URL was not returned.",
+            "TBC payment was created but approval URL was not returned.",
         },
         {
           status: 500,
@@ -429,35 +670,122 @@ export async function POST(
     }
 
     /*
-     * --------------------------------
-     * SUCCESS
-     * --------------------------------
+     * ==========================================
+     * SAVE PAYMENT DATA TO ORDER
+     * ==========================================
+     */
+
+    const {
+      error:
+        updateError,
+    } = await supabaseAdmin
+      .from("orders")
+      .update({
+        payment_provider:
+          "tbc",
+
+        payment_status:
+          "pending",
+
+        payment_id:
+          paymentData.payId ||
+          null,
+
+        merchant_payment_id:
+          String(orderId),
+
+        transaction_id:
+          paymentData.transactionId ||
+          null,
+
+        payment_currency:
+          currency,
+
+        payment_amount:
+          total,
+
+        payment_metadata: {
+          provider:
+            "tbc",
+
+          pay_id:
+            paymentData.payId ||
+            null,
+
+          initial_status:
+            paymentData.status ||
+            null,
+
+          product_id:
+            product.id,
+
+          product_slug:
+            product.slug,
+
+          sku:
+            product.sku,
+
+          design_name:
+            product.design_name,
+
+          quantity,
+
+          approval_url:
+            approvalUrl,
+        },
+      })
+      .eq(
+        "id",
+        orderId
+      );
+
+    if (updateError) {
+      console.error(
+        "TBC order update error:",
+        updateError
+      );
+    }
+
+    /*
+     * ==========================================
+     * RESPONSE
+     * ==========================================
      */
 
     return NextResponse.json({
       success: true,
 
-      provider: "tbc",
+      provider:
+        "tbc",
+
+      orderId,
 
       payId:
-        paymentData.payId,
+        paymentData.payId ||
+        null,
 
       status:
-        paymentData.status,
+        paymentData.status ||
+        null,
 
-      merchantPaymentId,
+      productId:
+        product.id,
 
-      productId,
+      productSlug:
+        product.slug,
 
       productName:
         product.name,
+
+      designName:
+        product.design_name,
 
       sku:
         product.sku,
 
       quantity,
 
-      currency: "GEL",
+      currency,
 
       total,
 
