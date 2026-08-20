@@ -45,11 +45,6 @@ export type EmergencyProfileData = {
 type Props = {
   itemId?: string;
 
-  /*
-    დროებით ვტოვებთ თავსებადობისთვის,
-    რადგან profile/[tag_code] გვერდი
-    ჯერ კიდევ გადასცემს ამ prop-ს.
-  */
   currentScanCount?: number | null;
 
   data: EmergencyProfileData;
@@ -67,15 +62,11 @@ type Props = {
 
 export default function EmergencyPublicProfile({
   itemId,
-  currentScanCount: _currentScanCount,
-
   data,
-
   tagCode,
   ownerEmail,
   finderMessage,
   photo,
-
   language = "ka",
 }: Props) {
   const ka = language === "ka";
@@ -520,6 +511,7 @@ export default function EmergencyPublicProfile({
         .alertIcon {
           width: 41px;
           height: 41px;
+
           flex: 0 0 41px;
 
           display: grid;
