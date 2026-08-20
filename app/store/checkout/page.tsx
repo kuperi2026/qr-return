@@ -24,6 +24,8 @@ type Product = {
   name: string;
   price: number;
   icon: string;
+  type: string;
+  sku: string;
 };
 
 const PRODUCTS: Record<ProductId, Product> = {
@@ -32,6 +34,8 @@ const PRODUCTS: Record<ProductId, Product> = {
     name: "QR Tag",
     price: 9.99,
     icon: "🏷️",
+    type: "physical_qr_tag",
+    sku: "QR-TAG-001",
   },
 
   sticker: {
@@ -39,6 +43,8 @@ const PRODUCTS: Record<ProductId, Product> = {
     name: "QR Sticker",
     price: 4.99,
     icon: "🔳",
+    type: "physical_qr_sticker",
+    sku: "QR-STICKER-001",
   },
 };
 
@@ -54,58 +60,94 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [lang, setLang] = useState<Lang>("ka");
+  const [lang, setLang] =
+    useState<Lang>("ka");
 
   const [userId, setUserId] =
     useState<string | null>(null);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
+  const [phone, setPhone] =
+    useState("");
+
+  const [address, setAddress] =
+    useState("");
+
+  const [city, setCity] =
+    useState("");
+
+  const [state, setState] =
+    useState("");
+
+  const [zip, setZip] =
+    useState("");
+
   const [country, setCountry] =
     useState("United States");
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
   const [submitting, setSubmitting] =
     useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
-  const ka = lang === "ka";
+  const ka =
+    lang === "ka";
 
   const rawProduct =
-    searchParams.get("product") || "tag";
+    searchParams.get("product") ||
+    "tag";
 
   const productId: ProductId =
     rawProduct === "sticker"
       ? "sticker"
       : "tag";
 
-  const product = PRODUCTS[productId];
+  const product =
+    PRODUCTS[productId];
 
-  const rawQuantity = Number(
-    searchParams.get("quantity") || "1"
-  );
+  const rawQuantity =
+    Number(
+      searchParams.get(
+        "quantity"
+      ) || "1"
+    );
 
   const quantity =
-    Number.isFinite(rawQuantity) &&
+    Number.isFinite(
+      rawQuantity
+    ) &&
     rawQuantity >= 1
       ? Math.min(
           99,
-          Math.floor(rawQuantity)
+          Math.floor(
+            rawQuantity
+          )
         )
       : 1;
 
-  const subtotal = useMemo(
-    () => product.price * quantity,
-    [product.price, quantity]
-  );
+  const subtotal =
+    useMemo(
+      () =>
+        Number(
+          (
+            product.price *
+            quantity
+          ).toFixed(2)
+        ),
+      [
+        product.price,
+        quantity,
+      ]
+    );
 
   useEffect(() => {
     void loadUser();
@@ -119,16 +161,18 @@ function CheckoutContent() {
       const {
         data: { user },
         error: authError,
-      } = await supabase.auth.getUser();
+      } =
+        await supabase.auth.getUser();
 
       if (authError) {
         throw authError;
       }
 
       if (!user) {
-        const redirect = encodeURIComponent(
-          `/store/checkout?product=${productId}&quantity=${quantity}`
-        );
+        const redirect =
+          encodeURIComponent(
+            `/store/checkout?product=${productId}&quantity=${quantity}`
+          );
 
         router.push(
           `/login?redirect=${redirect}`
@@ -137,11 +181,17 @@ function CheckoutContent() {
         return;
       }
 
-      setUserId(user.id);
-      setEmail(user.email || "");
+      setUserId(
+        user.id
+      );
+
+      setEmail(
+        user.email || ""
+      );
 
       const metadata =
-        user.user_metadata || {};
+        user.user_metadata ||
+        {};
 
       const possibleName =
         metadata.full_name ||
@@ -149,18 +199,24 @@ function CheckoutContent() {
         "";
 
       if (
-        typeof possibleName === "string"
+        typeof possibleName ===
+        "string"
       ) {
-        setName(possibleName);
+        setName(
+          possibleName
+        );
       }
 
       const possiblePhone =
         metadata.phone || "";
 
       if (
-        typeof possiblePhone === "string"
+        typeof possiblePhone ===
+        "string"
       ) {
-        setPhone(possiblePhone);
+        setPhone(
+          possiblePhone
+        );
       }
     } catch (err) {
       console.error(
@@ -288,18 +344,38 @@ function CheckoutContent() {
 
           status: "pending",
 
-          total_amount: Number(
-            subtotal.toFixed(2)
-          ),
+          product_id:
+            product.id,
 
-          currency: "USD",
+          product_name:
+            product.name,
 
-          shipping_name: name.trim(),
+          product_type:
+            product.type,
+
+          sku:
+            product.sku,
+
+          quantity:
+            quantity,
+
+          unit_price:
+            product.price,
+
+          total_amount:
+            subtotal,
+
+          currency:
+            "USD",
+
+          shipping_name:
+            name.trim(),
 
           shipping_address:
             shippingAddress,
 
-          tracking_number: null,
+          tracking_number:
+            null,
         })
         .select("id")
         .single();
@@ -316,7 +392,9 @@ function CheckoutContent() {
 
       router.push(
         `/store/success?order=${encodeURIComponent(
-          String(data.id)
+          String(
+            data.id
+          )
         )}`
       );
     } catch (err) {
@@ -338,7 +416,9 @@ function CheckoutContent() {
   }
 
   if (loading) {
-    return <CheckoutLoading />;
+    return (
+      <CheckoutLoading />
+    );
   }
 
   return (
@@ -381,7 +461,9 @@ function CheckoutContent() {
             <button
               type="button"
               className={
-                ka ? "active" : ""
+                ka
+                  ? "active"
+                  : ""
               }
               onClick={() =>
                 setLang("ka")
@@ -393,7 +475,9 @@ function CheckoutContent() {
             <button
               type="button"
               className={
-                !ka ? "active" : ""
+                !ka
+                  ? "active"
+                  : ""
               }
               onClick={() =>
                 setLang("en")
@@ -426,11 +510,15 @@ function CheckoutContent() {
 
         <form
           className="checkoutGrid"
-          onSubmit={submitOrder}
+          onSubmit={
+            submitOrder
+          }
         >
           <section className="formSide">
             <div className="sectionTitle">
-              <span>01</span>
+              <span>
+                01
+              </span>
 
               <div>
                 <strong>
@@ -472,9 +560,12 @@ function CheckoutContent() {
 
                   <input
                     value={name}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setName(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     placeholder={
@@ -495,9 +586,12 @@ function CheckoutContent() {
 
                   <input
                     value={phone}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setPhone(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     placeholder="+1"
@@ -509,7 +603,9 @@ function CheckoutContent() {
             </div>
 
             <div className="sectionTitle second">
-              <span>02</span>
+              <span>
+                02
+              </span>
 
               <div>
                 <strong>
@@ -536,9 +632,12 @@ function CheckoutContent() {
 
                 <input
                   value={address}
-                  onChange={(event) =>
+                  onChange={(
+                    event
+                  ) =>
                     setAddress(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                   placeholder={
@@ -560,9 +659,12 @@ function CheckoutContent() {
 
                   <input
                     value={city}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setCity(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     placeholder="New York"
@@ -579,9 +681,12 @@ function CheckoutContent() {
 
                   <input
                     value={state}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setState(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     placeholder="NY"
@@ -601,9 +706,12 @@ function CheckoutContent() {
 
                   <input
                     value={zip}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setZip(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     placeholder="10001"
@@ -620,9 +728,12 @@ function CheckoutContent() {
 
                   <select
                     value={country}
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setCountry(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     autoComplete="country-name"
@@ -663,18 +774,50 @@ function CheckoutContent() {
 
             <div className="product">
               <div className="productIcon">
-                {product.icon}
+                {
+                  product.icon
+                }
               </div>
 
               <div>
                 <strong>
-                  {product.name}
+                  {
+                    product.name
+                  }
                 </strong>
 
                 <span>
                   {quantity} × $
-                  {product.price.toFixed(2)}
+                  {product.price.toFixed(
+                    2
+                  )}
                 </span>
+              </div>
+            </div>
+
+            <div className="productData">
+              <div>
+                <span>
+                  SKU
+                </span>
+
+                <strong>
+                  {
+                    product.sku
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  TYPE
+                </span>
+
+                <strong>
+                  {
+                    product.type
+                  }
+                </strong>
               </div>
             </div>
 
@@ -686,7 +829,9 @@ function CheckoutContent() {
               </span>
 
               <strong>
-                {product.name}
+                {
+                  product.name
+                }
               </strong>
             </div>
 
@@ -710,7 +855,10 @@ function CheckoutContent() {
               </span>
 
               <strong>
-                ${product.price.toFixed(2)}
+                $
+                {product.price.toFixed(
+                  2
+                )}
               </strong>
             </div>
 
@@ -724,7 +872,10 @@ function CheckoutContent() {
               </span>
 
               <strong>
-                ${subtotal.toFixed(2)}
+                $
+                {subtotal.toFixed(
+                  2
+                )}
               </strong>
             </div>
 
@@ -737,7 +888,9 @@ function CheckoutContent() {
             <button
               type="submit"
               className="submit"
-              disabled={submitting}
+              disabled={
+                submitting
+              }
             >
               <span>
                 {submitting
@@ -750,15 +903,14 @@ function CheckoutContent() {
               </span>
 
               {!submitting && (
-                <span>→</span>
+                <span>
+                  →
+                </span>
               )}
             </button>
 
             <div className="secure">
-              🔒{" "}
-              {ka
-                ? "QR RETURN Secure Checkout"
-                : "QR RETURN Secure Checkout"}
+              🔒 QR RETURN Secure Checkout
             </div>
           </aside>
         </form>
@@ -803,11 +955,13 @@ function CheckoutContent() {
           border-radius: 12px;
 
           color: white;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+
+          background:
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
 
           font-size: 11px;
           font-weight: 900;
@@ -825,9 +979,7 @@ function CheckoutContent() {
 
         .brand small {
           margin-top: 2px;
-
           color: #7655f7;
-
           font-size: 6px;
           font-weight: 900;
           letter-spacing: 1px;
@@ -893,6 +1045,7 @@ function CheckoutContent() {
           max-width: 1000px;
 
           margin: auto;
+
           padding: 50px 0 90px;
         }
 
@@ -911,11 +1064,12 @@ function CheckoutContent() {
         .heading h1 {
           margin: 8px 0 0;
 
-          font-size: clamp(
-            37px,
-            5vw,
-            52px
-          );
+          font-size:
+            clamp(
+              37px,
+              5vw,
+              52px
+            );
 
           letter-spacing: -2px;
         }
@@ -946,6 +1100,7 @@ function CheckoutContent() {
         .sectionTitle {
           display: flex;
           align-items: flex-start;
+
           gap: 10px;
         }
 
@@ -971,6 +1126,7 @@ function CheckoutContent() {
           display: block;
 
           color: #35414c;
+
           font-size: 11px;
         }
 
@@ -988,6 +1144,7 @@ function CheckoutContent() {
 
         .card {
           margin-top: 14px;
+
           padding: 18px;
 
           border: 1px solid #dfe4e8;
@@ -1024,22 +1181,26 @@ function CheckoutContent() {
           color: #66727d;
 
           font-size: 7px;
+
           font-weight: 850;
         }
 
         .field input,
         .field select {
           width: 100%;
+
           min-height: 43px;
 
           padding: 0 11px;
 
           border: 1px solid #d7dde2;
+
           border-radius: 9px;
 
           outline: none;
 
           color: #35414c;
+
           background: white;
 
           font-size: 9px;
@@ -1051,11 +1212,17 @@ function CheckoutContent() {
 
           box-shadow:
             0 0 0 3px
-            rgba(20, 101, 232, 0.08);
+            rgba(
+              20,
+              101,
+              232,
+              0.08
+            );
         }
 
         .field input:disabled {
           color: #89939c;
+
           background: #f5f7f8;
         }
 
@@ -1068,53 +1235,69 @@ function CheckoutContent() {
           border-radius: 9px;
 
           color: #9d4146;
+
           background: #fff5f5;
 
           font-size: 8px;
+
           line-height: 1.5;
         }
 
         .summary {
           position: sticky;
+
           top: 20px;
 
           padding: 20px;
 
           border: 1px solid #dfe4e8;
+
           border-radius: 16px;
 
           background: white;
 
           box-shadow:
             0 18px 45px
-            rgba(16, 24, 40, 0.06);
+            rgba(
+              16,
+              24,
+              40,
+              0.06
+            );
         }
 
         .summaryLabel {
           color: #7655f7;
 
           font-size: 7px;
+
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
         .product {
           margin-top: 17px;
+
           padding-bottom: 17px;
 
           display: flex;
+
           align-items: center;
 
           gap: 10px;
 
-          border-bottom: 1px solid #edf0f2;
+          border-bottom:
+            1px solid #edf0f2;
         }
 
         .productIcon {
           width: 47px;
+
           height: 47px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 11px;
@@ -1131,6 +1314,7 @@ function CheckoutContent() {
 
         .product strong {
           color: #34404b;
+
           font-size: 10px;
         }
 
@@ -1138,50 +1322,109 @@ function CheckoutContent() {
           margin-top: 4px;
 
           color: #8b959e;
+
           font-size: 7px;
+        }
+
+        .productData {
+          margin-top: 12px;
+
+          padding: 10px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
+
+          gap: 8px;
+
+          border-radius: 8px;
+
+          background: #f8fafb;
+        }
+
+        .productData span,
+        .productData strong {
+          display: block;
+        }
+
+        .productData span {
+          color: #929ca5;
+
+          font-size: 5px;
+
+          font-weight: 900;
+        }
+
+        .productData strong {
+          margin-top: 3px;
+
+          overflow: hidden;
+
+          color: #52606b;
+
+          font-size: 6px;
+
+          text-overflow: ellipsis;
+
+          white-space: nowrap;
         }
 
         .summaryRow {
           margin-top: 14px;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           gap: 10px;
         }
 
         .summaryRow span {
           color: #7e8992;
+
           font-size: 8px;
         }
 
         .summaryRow strong {
           color: #44515c;
+
           font-size: 8px;
         }
 
         .divider {
           margin: 18px 0;
 
-          border-top: 1px solid #e8ecef;
+          border-top:
+            1px solid #e8ecef;
         }
 
         .total {
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
         }
 
         .total span {
           color: #34404b;
 
           font-size: 10px;
+
           font-weight: 850;
         }
 
         .total strong {
           color: #202b37;
+
           font-size: 22px;
         }
 
@@ -1191,34 +1434,44 @@ function CheckoutContent() {
           color: #8b959e;
 
           font-size: 7px;
+
           line-height: 1.55;
         }
 
         .submit {
           width: 100%;
+
           min-height: 49px;
 
           margin-top: 18px;
+
           padding: 0 15px;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           border: 0;
+
           border-radius: 10px;
 
           color: white;
+
           background: #1465e8;
 
           cursor: pointer;
 
           font-size: 8px;
+
           font-weight: 900;
         }
 
         .submit:disabled {
           opacity: 0.6;
+
           cursor: wait;
         }
 
@@ -1232,9 +1485,12 @@ function CheckoutContent() {
           font-size: 6px;
         }
 
-        @media (max-width: 800px) {
+        @media (
+          max-width: 800px
+        ) {
           .checkoutGrid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .summary {
@@ -1242,26 +1498,37 @@ function CheckoutContent() {
           }
         }
 
-        @media (max-width: 600px) {
+        @media (
+          max-width: 600px
+        ) {
           .topbar {
             padding: 10px 0;
 
-            align-items: flex-start;
-            flex-direction: column;
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
           }
 
           .topActions {
             width: 100%;
+
             flex-wrap: wrap;
           }
 
           .shell {
-            width: calc(100% - 24px);
+            width:
+              calc(
+                100% - 24px
+              );
+
             padding-top: 32px;
           }
 
           .fields {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
@@ -1272,7 +1539,9 @@ function CheckoutContent() {
 function CheckoutLoading() {
   return (
     <main className="loading">
-      <div>QR</div>
+      <div>
+        QR
+      </div>
 
       <strong>
         QR RETURN
@@ -1287,33 +1556,39 @@ function CheckoutLoading() {
           min-height: 100vh;
 
           display: flex;
+
           flex-direction: column;
 
           align-items: center;
+
           justify-content: center;
 
           gap: 8px;
 
           color: #7d8791;
+
           background: #f5f7f8;
         }
 
         .loading div {
           width: 52px;
+
           height: 52px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 14px;
 
           color: white;
 
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background:
+            linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
 
           font-weight: 900;
         }
