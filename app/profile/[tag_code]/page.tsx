@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 import QRScanTracker from "@/components/QRScanTracker";
+import QRLocationShare from "@/components/QRLocationShare";
 
 import EmergencyPublicProfile, {
   type EmergencyProfileData,
@@ -117,16 +118,6 @@ export default function PublicProfilePage() {
   const [error, setError] =
     useState("");
 
-  const [
-    locationLoading,
-    setLocationLoading,
-  ] = useState(false);
-
-  const [
-    locationMessage,
-    setLocationMessage,
-  ] = useState("");
-
   const ka = lang === "ka";
 
   const isPet = useMemo(() => {
@@ -204,114 +195,6 @@ export default function PublicProfilePage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  async function shareLocation() {
-    if (
-      !profile ||
-      !profile.location_sharing_enabled
-    ) {
-      return;
-    }
-
-    if (
-      !navigator.geolocation
-    ) {
-      setLocationMessage(
-        ka
-          ? "თქვენი მოწყობილობა ლოკაციის გაზიარებას არ უჭერს მხარს."
-          : "Your device does not support location sharing."
-      );
-
-      return;
-    }
-
-    setLocationLoading(true);
-    setLocationMessage("");
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const {
-            latitude,
-            longitude,
-            accuracy,
-          } = position.coords;
-
-          const {
-            error:
-              updateError,
-          } = await supabase
-            .from("item")
-            .update({
-              last_scan_latitude:
-                latitude,
-
-              last_scan_longitude:
-                longitude,
-
-              last_scan_accuracy:
-                accuracy,
-
-              last_scanned_at:
-                new Date().toISOString(),
-            })
-            .eq(
-              "id",
-              profile.id
-            )
-            .eq(
-              "tag_code",
-              profile.tag_code
-            );
-
-          if (updateError) {
-            throw updateError;
-          }
-
-          setLocationMessage(
-            ka
-              ? "✓ ლოკაცია წარმატებით გაეგზავნა მფლობელს."
-              : "✓ Location shared successfully."
-          );
-        } catch (err) {
-          console.error(err);
-
-          setLocationMessage(
-            err instanceof Error
-              ? err.message
-              : ka
-              ? "ლოკაციის გაზიარება ვერ მოხერხდა."
-              : "Could not share location."
-          );
-        } finally {
-          setLocationLoading(
-            false
-          );
-        }
-      },
-
-      () => {
-        setLocationLoading(
-          false
-        );
-
-        setLocationMessage(
-          ka
-            ? "ლოკაციაზე წვდომა არ მოგიციათ."
-            : "Location permission was not granted."
-        );
-      },
-
-      {
-        enableHighAccuracy:
-          true,
-
-        timeout: 12000,
-
-        maximumAge: 0,
-      }
-    );
   }
 
   function typeInfo() {
@@ -460,10 +343,6 @@ export default function PublicProfilePage() {
       </main>
     );
   }
-
-  /*
-    EMERGENCY ID
-  */
 
   if (
     profile.item_type ===
@@ -1178,59 +1057,13 @@ export default function PublicProfilePage() {
                   }
                 />
 
-                <div className="locationCard">
-                  <div className="locationIcon">
-                    📍
-                  </div>
-
-                  <div className="locationText">
-                    <strong>
-                      {ka
-                        ? "გაუზიარეთ თქვენი ლოკაცია მფლობელს"
-                        : "Share your location with the owner"}
-                    </strong>
-
-                    <p>
-                      {ka
-                        ? "ერთი ღილაკით გაუგზავნეთ ადგილი, სადაც QR კოდი დაასკანერეთ."
-                        : "Send the location where you scanned this QR code."}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={
-                      locationLoading
-                    }
-                    onClick={() =>
-                      void shareLocation()
-                    }
-                  >
-                    {locationLoading
-                      ? ka
-                        ? "იგზავნება..."
-                        : "Sharing..."
-                      : ka
-                      ? "გაზიარება"
-                      : "Share"}
-                  </button>
-                </div>
-
-                {locationMessage && (
-                  <div
-                    className={
-                      locationMessage.startsWith(
-                        "✓"
-                      )
-                        ? "locationMessage success"
-                        : "locationMessage"
-                    }
-                  >
-                    {
-                      locationMessage
-                    }
-                  </div>
-                )}
+                <QRLocationShare
+                  itemId={profile.id}
+                  tagCode={
+                    profile.tag_code
+                  }
+                  language={lang}
+                />
               </section>
             )}
 
@@ -1977,94 +1810,6 @@ function Styles() {
           );
       }
 
-      .locationCard {
-        padding: 16px;
-
-        display: flex;
-        align-items: center;
-
-        gap: 12px;
-
-        border:
-          1px solid #dbe7ff;
-
-        border-radius: 14px;
-
-        background: #f5f9ff;
-      }
-
-      .locationIcon {
-        width: 44px;
-        height: 44px;
-
-        flex: 0 0 44px;
-
-        display: grid;
-        place-items: center;
-
-        border-radius: 12px;
-
-        background: white;
-
-        font-size: 21px;
-      }
-
-      .locationText {
-        flex: 1;
-      }
-
-      .locationText strong {
-        font-size: 12px;
-      }
-
-      .locationText p {
-        margin: 4px 0 0;
-
-        color: #667085;
-
-        font-size: 10px;
-        line-height: 1.5;
-      }
-
-      .locationCard button {
-        min-height: 40px;
-
-        padding: 0 13px;
-
-        border: 0;
-        border-radius: 9px;
-
-        color: white;
-        background: #1465e8;
-
-        cursor: pointer;
-
-        font-size: 10px;
-        font-weight: 900;
-      }
-
-      .locationCard button:disabled {
-        opacity: 0.65;
-      }
-
-      .locationMessage {
-        margin-top: 10px;
-
-        padding: 10px;
-
-        border-radius: 9px;
-
-        color: #b42318;
-        background: #fff1f0;
-
-        font-size: 10px;
-      }
-
-      .locationMessage.success {
-        color: #027a48;
-        background: #ecfdf3;
-      }
-
       .privacyBox {
         margin-top: 28px;
 
@@ -2188,18 +1933,6 @@ function Styles() {
         .contactGrid {
           grid-template-columns:
             1fr;
-        }
-
-        .locationCard {
-          align-items:
-            stretch;
-
-          flex-direction:
-            column;
-        }
-
-        .locationCard button {
-          width: 100%;
         }
 
         .infoGrid {
