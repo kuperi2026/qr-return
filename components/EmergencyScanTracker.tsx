@@ -5,38 +5,40 @@ import { supabase } from "@/lib/supabase";
 
 type Props = {
   itemId: string;
-  currentScanCount?: number | null;
+  tagCode: string;
 };
 
 export default function EmergencyScanTracker({
   itemId,
-  currentScanCount = 0,
+  tagCode,
 }: Props) {
   const tracked = useRef(false);
 
   useEffect(() => {
-    if (!itemId || tracked.current) {
+    if (
+      !itemId ||
+      !tagCode ||
+      tracked.current
+    ) {
       return;
     }
 
     tracked.current = true;
 
     void recordScan();
-  }, [itemId]);
+  }, [itemId, tagCode]);
 
   async function recordScan() {
     try {
-      const nextCount =
-        Number(currentScanCount || 0) + 1;
-
-      const { error } = await supabase
-        .from("item")
-        .update({
-          scan_count: nextCount,
-          last_scanned_at: new Date().toISOString(),
-        })
-        .eq("id", itemId)
-        .eq("item_type", "emergency");
+      const {
+        error,
+      } = await supabase.rpc(
+        "record_emergency_scan",
+        {
+          p_item_id: itemId,
+          p_tag_code: tagCode,
+        }
+      );
 
       if (error) {
         console.error(
