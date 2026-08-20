@@ -57,7 +57,7 @@ export default function SignupPage() {
 
       if (user) {
         window.location.href =
-          "/my-profiles";
+          "/account";
       }
     }
 
@@ -102,9 +102,7 @@ export default function SignupPage() {
       return;
     }
 
-    if (
-      password.length < 8
-    ) {
+    if (password.length < 8) {
       setError(
         ka
           ? "პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს."
@@ -114,10 +112,7 @@ export default function SignupPage() {
       return;
     }
 
-    if (
-      password !==
-      confirmPassword
-    ) {
+    if (password !== confirmPassword) {
       setError(
         ka
           ? "პაროლები ერთმანეთს არ ემთხვევა."
@@ -170,22 +165,23 @@ export default function SignupPage() {
       }
 
       /*
-        თუ Supabase-ში
-        email confirmation გამორთულია,
-        session შეიძლება მაშინვე არსებობდეს.
+        თუ email confirmation გამორთულია,
+        მომხმარებელი პირდაპირ Owner Account-ზე გადავა.
+
+        Account გვერდი თვითონ შეამოწმებს,
+        შექმნილია თუ არა Owner Profile.
       */
 
       if (data.session) {
         window.location.href =
-          "/my-profiles";
+          "/account";
 
         return;
       }
 
       /*
         თუ email confirmation ჩართულია,
-        მომხმარებელს ვეუბნებით,
-        რომ Email შეამოწმოს.
+        მომხმარებელმა ჯერ Email უნდა დაადასტუროს.
       */
 
       setSuccess(
@@ -261,28 +257,17 @@ export default function SignupPage() {
         }
       >
         <SignupForm
-          firstName={
-            firstName
-          }
-          lastName={
-            lastName
-          }
+          firstName={firstName}
+          lastName={lastName}
           email={email}
           phone={phone}
-          password={
-            password
-          }
+          password={password}
           confirmPassword={
             confirmPassword
           }
 
-          loading={
-            loading
-          }
-
-          error={
-            error
-          }
+          loading={loading}
+          error={error}
 
           onFirstNameChange={
             setFirstName
@@ -323,38 +308,26 @@ export default function SignupPage() {
       <style jsx>{`
         .languageBar {
           position: fixed;
-
           top: 18px;
           right: 22px;
-
           z-index: 50;
 
           display: flex;
           gap: 4px;
-
           padding: 4px;
 
-          border:
-            1px solid #e0e5e8;
-
+          border: 1px solid #e0e5e8;
           border-radius: 999px;
 
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.92
-            );
+            rgba(255, 255, 255, 0.92);
 
-          backdrop-filter:
-            blur(10px);
+          backdrop-filter: blur(10px);
         }
 
         .languageBar button {
           min-width: 38px;
           height: 28px;
-
           padding: 0 8px;
 
           border: 0;
@@ -369,33 +342,26 @@ export default function SignupPage() {
           font-weight: 900;
         }
 
-        .languageBar
-          button.active {
+        .languageBar button.active {
           color: white;
           background: #202b37;
         }
 
         .success {
           margin-top: 16px;
-
           padding: 12px;
 
-          border:
-            1px solid #cfe6d8;
-
+          border: 1px solid #cfe6d8;
           border-radius: 9px;
 
           color: #326449;
-
           background: #f2faf5;
 
           font-size: 8px;
           line-height: 1.55;
         }
 
-        @media (
-          max-width: 520px
-        ) {
+        @media (max-width: 520px) {
           .languageBar {
             top: 10px;
             right: 10px;
