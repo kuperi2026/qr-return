@@ -1,6 +1,7 @@
 "use client";
 
 import EmergencyScanTracker from "@/components/EmergencyScanTracker";
+import EmergencyLocationShare from "@/components/EmergencyLocationShare";
 
 type Privacy = {
   show_name?: boolean;
@@ -72,7 +73,8 @@ export default function EmergencyPublicProfile({
 
   language = "ka",
 }: Props) {
-  const ka = language === "ka";
+  const ka =
+    language === "ka";
 
   const privacy =
     data.privacy || {};
@@ -129,6 +131,9 @@ export default function EmergencyPublicProfile({
       )}
 
       <div className="shell">
+
+        {/* BRAND */}
+
         <header className="brand">
           <div className="brandMark">
             <MedicalIcon />
@@ -144,6 +149,8 @@ export default function EmergencyPublicProfile({
             </span>
           </div>
         </header>
+
+        {/* EMERGENCY NOTICE */}
 
         <section className="alert">
           <div className="alertIcon">
@@ -162,6 +169,8 @@ export default function EmergencyPublicProfile({
             </strong>
           </div>
         </section>
+
+        {/* PROFILE */}
 
         <section className="profile">
           <div className="photo">
@@ -194,11 +203,13 @@ export default function EmergencyPublicProfile({
 
             {tagCode && (
               <span className="tag">
-                {tagCode}
+                QR · {tagCode}
               </span>
             )}
           </div>
         </section>
+
+        {/* FINDER MESSAGE */}
 
         {finderMessage && (
           <section className="message">
@@ -214,7 +225,21 @@ export default function EmergencyPublicProfile({
           </section>
         )}
 
+        {/* LOCATION SHARING */}
+
+        {itemId &&
+          tagCode && (
+            <EmergencyLocationShare
+              itemId={itemId}
+              tagCode={tagCode}
+              language={language}
+            />
+          )}
+
+        {/* MEDICAL GRID */}
+
         <section className="medicalGrid">
+
           {showDob &&
             data.date_of_birth && (
               <InfoCard
@@ -272,7 +297,10 @@ export default function EmergencyPublicProfile({
                 }
               />
             )}
+
         </section>
+
+        {/* MEDICAL INFORMATION */}
 
         {showMedical &&
           data.medical_info && (
@@ -288,6 +316,8 @@ export default function EmergencyPublicProfile({
               </p>
             </section>
           )}
+
+        {/* PRIMARY CONTACT */}
 
         {showPrimary &&
           data.emergency_contact_phone && (
@@ -307,8 +337,13 @@ export default function EmergencyPublicProfile({
               allowCall={
                 allowCall
               }
+              language={
+                language
+              }
             />
           )}
+
+        {/* SECONDARY CONTACT */}
 
         {showSecondary &&
           data.secondary_contact_phone && (
@@ -330,8 +365,13 @@ export default function EmergencyPublicProfile({
               allowCall={
                 allowCall
               }
+              language={
+                language
+              }
             />
           )}
+
+        {/* DOCTOR */}
 
         {showDoctor &&
           (data.doctor_name ||
@@ -355,8 +395,13 @@ export default function EmergencyPublicProfile({
               allowCall={
                 allowCall
               }
+              language={
+                language
+              }
             />
           )}
+
+        {/* EMAIL */}
 
         {allowEmail &&
           ownerEmail && (
@@ -381,43 +426,81 @@ export default function EmergencyPublicProfile({
             </section>
           )}
 
+        {/* PRIVACY NOTICE */}
+
         <section className="notice">
           <ShieldIcon />
 
           <p>
             {ka
-              ? "ეს ინფორმაცია ნაჩვენებია QR პროფილის მფლობელის მიერ არჩეული Privacy პარამეტრების მიხედვით."
-              : "This information is displayed according to the profile owner's privacy settings."}
+              ? "ეს ინფორმაცია ნაჩვენებია QR პროფილის მფლობელის მიერ არჩეული Privacy პარამეტრების მიხედვით. QR RETURN აჩვენებს მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც მფლობელმა დაუშვა."
+              : "This information is displayed according to the profile owner's privacy settings. QR RETURN only shows information the owner has chosen to share."}
           </p>
         </section>
 
-        <footer>
-          <strong>
-            QR RETURN
-          </strong>
+        {/* MEDICAL DISCLAIMER */}
 
+        <section className="disclaimer">
           <span>
-            Emergency ID
+            +
           </span>
+
+          <p>
+            {ka
+              ? "Emergency ID-ზე მითითებული ინფორმაცია არ ცვლის პროფესიულ სამედიცინო შეფასებას ან გადაუდებელ სამედიცინო დახმარებას."
+              : "Information shown on this Emergency ID does not replace professional medical evaluation or emergency medical care."}
+          </p>
+        </section>
+
+        {/* FOOTER */}
+
+        <footer>
+          <div>
+            <strong>
+              QR RETURN
+            </strong>
+
+            <span>
+              Emergency ID
+            </span>
+          </div>
+
+          <a href="/">
+            {ka
+              ? "მთავარი"
+              : "Home"}{" "}
+            →
+          </a>
         </footer>
       </div>
 
       <style jsx>{`
         .page {
           min-height: 100vh;
-          padding: 30px 0 60px;
-          background: #f5f7f8;
+
+          padding:
+            30px 0 60px;
+
+          background:
+            #f5f7f8;
         }
 
         .shell {
-          width: calc(100% - 28px);
-          max-width: 650px;
-          margin: 0 auto;
+          width:
+            calc(100% - 28px);
+
+          max-width:
+            650px;
+
+          margin:
+            0 auto;
         }
 
         .brand {
           display: flex;
+
           align-items: center;
+
           gap: 9px;
         }
 
@@ -426,16 +509,22 @@ export default function EmergencyPublicProfile({
           height: 40px;
 
           display: grid;
+
           place-items: center;
 
-          border-radius: 11px;
+          border-radius:
+            11px;
 
           color: white;
-          background: #c84a50;
+
+          background:
+            #c84a50;
         }
 
-        .brandMark :global(svg) {
+        .brandMark
+          :global(svg) {
           width: 20px;
+          height: 20px;
         }
 
         .brand strong,
@@ -444,348 +533,698 @@ export default function EmergencyPublicProfile({
         }
 
         .brand strong {
-          color: #202b37;
-          font-size: 13px;
-          font-weight: 900;
+          color:
+            #202b37;
+
+          font-size:
+            13px;
+
+          font-weight:
+            900;
         }
 
         .brand span {
-          margin-top: 2px;
+          margin-top:
+            2px;
 
-          color: #9b4b50;
+          color:
+            #9b4b50;
 
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
         }
 
         .alert {
-          margin-top: 24px;
-          padding: 14px;
+          margin-top:
+            24px;
 
-          display: flex;
-          align-items: center;
+          padding:
+            14px;
 
-          gap: 11px;
+          display:
+            flex;
 
-          border: 1px solid #edd6d8;
-          border-radius: 13px;
+          align-items:
+            center;
 
-          background: #fff5f5;
+          gap:
+            11px;
+
+          border:
+            1px solid
+            #edd6d8;
+
+          border-radius:
+            13px;
+
+          background:
+            #fff5f5;
         }
 
         .alertIcon {
-          width: 41px;
-          height: 41px;
+          width:
+            41px;
 
-          display: grid;
-          place-items: center;
+          height:
+            41px;
 
-          border-radius: 11px;
+          flex:
+            0 0 41px;
 
-          color: white;
-          background: #c84a50;
+          display:
+            grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            11px;
+
+          color:
+            white;
+
+          background:
+            #c84a50;
         }
 
-        .alertIcon :global(svg) {
-          width: 19px;
+        .alertIcon
+          :global(svg) {
+          width:
+            19px;
         }
 
         .alert span,
         .alert strong {
-          display: block;
+          display:
+            block;
         }
 
         .alert span {
-          color: #c84a50;
+          color:
+            #c84a50;
 
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
         }
 
         .alert strong {
-          margin-top: 4px;
+          margin-top:
+            4px;
 
-          color: #4a3638;
-          font-size: 10px;
+          color:
+            #4a3638;
+
+          font-size:
+            10px;
         }
 
         .profile {
-          margin-top: 13px;
-          padding: 18px;
+          margin-top:
+            13px;
 
-          display: grid;
+          padding:
+            18px;
+
+          display:
+            grid;
 
           grid-template-columns:
-            90px 1fr;
+            90px
+            minmax(
+              0,
+              1fr
+            );
 
-          align-items: center;
+          align-items:
+            center;
 
-          gap: 16px;
+          gap:
+            16px;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 15px;
+          border:
+            1px solid
+            #e0e5e8;
 
-          background: white;
+          border-radius:
+            15px;
+
+          background:
+            white;
         }
 
         .photo {
-          width: 90px;
-          height: 90px;
+          width:
+            90px;
 
-          overflow: hidden;
+          height:
+            90px;
 
-          border-radius: 15px;
+          overflow:
+            hidden;
 
-          background: #f0f2f4;
+          border-radius:
+            15px;
+
+          background:
+            #f0f2f4;
         }
 
         .photo img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+          width:
+            100%;
+
+          height:
+            100%;
+
+          object-fit:
+            cover;
         }
 
         .placeholder {
-          width: 100%;
-          height: 100%;
+          width:
+            100%;
 
-          display: grid;
-          place-items: center;
+          height:
+            100%;
 
-          color: #9ca5ad;
+          display:
+            grid;
+
+          place-items:
+            center;
+
+          color:
+            #9ca5ad;
         }
 
-        .placeholder :global(svg) {
-          width: 39px;
+        .placeholder
+          :global(svg) {
+          width:
+            39px;
+
+          height:
+            39px;
+        }
+
+        .identity {
+          min-width:
+            0;
         }
 
         .type {
-          color: #c84a50;
+          color:
+            #c84a50;
 
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 1px;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
         }
 
         h1 {
-          margin: 5px 0 0;
+          margin:
+            5px 0 0;
 
-          color: #28343f;
+          color:
+            #28343f;
 
-          font-size: 25px;
-          line-height: 1.1;
+          font-size:
+            25px;
+
+          line-height:
+            1.1;
+
+          overflow-wrap:
+            anywhere;
         }
 
         .tag {
-          display: inline-block;
+          display:
+            inline-block;
 
-          margin-top: 8px;
+          margin-top:
+            8px;
 
-          padding: 5px 7px;
+          padding:
+            5px 7px;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
-          color: #67737e;
-          background: #f0f3f5;
+          color:
+            #67737e;
 
-          font-size: 6px;
-          font-weight: 900;
+          background:
+            #f0f3f5;
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .message {
-          margin-top: 12px;
+          margin-top:
+            12px;
 
-          padding: 16px;
+          padding:
+            16px;
 
-          border-radius: 13px;
+          border-radius:
+            13px;
 
-          color: white;
-          background: #c84a50;
+          color:
+            white;
+
+          background:
+            #c84a50;
         }
 
         .message span {
-          font-size: 6px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            0.8px;
         }
 
         .message p {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
-          font-size: 10px;
-          line-height: 1.65;
+          font-size:
+            10px;
+
+          line-height:
+            1.65;
         }
 
         .medicalGrid {
-          margin-top: 12px;
+          margin-top:
+            12px;
 
-          display: grid;
+          display:
+            grid;
 
           grid-template-columns:
             repeat(
               2,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
-          gap: 9px;
+          gap:
+            9px;
         }
 
         .detail {
-          margin-top: 10px;
+          margin-top:
+            10px;
 
-          padding: 15px;
+          padding:
+            15px;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 12px;
+          border:
+            1px solid
+            #e0e5e8;
 
-          background: white;
+          border-radius:
+            12px;
+
+          background:
+            white;
         }
 
         .detail span {
-          color: #c84a50;
-          font-size: 6px;
-          font-weight: 900;
+          color:
+            #c84a50;
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .detail p {
-          margin: 6px 0 0;
+          margin:
+            6px 0 0;
 
-          color: #596672;
+          color:
+            #596672;
 
-          font-size: 9px;
-          line-height: 1.65;
+          font-size:
+            9px;
+
+          line-height:
+            1.65;
+
+          white-space:
+            pre-wrap;
         }
 
         .emailCard {
-          margin-top: 10px;
-          padding: 15px;
+          margin-top:
+            10px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          padding:
+            15px;
 
-          gap: 15px;
+          display:
+            flex;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 12px;
+          align-items:
+            center;
 
-          background: white;
+          justify-content:
+            space-between;
+
+          gap:
+            15px;
+
+          border:
+            1px solid
+            #e0e5e8;
+
+          border-radius:
+            12px;
+
+          background:
+            white;
         }
 
         .emailCard span,
         .emailCard strong {
-          display: block;
+          display:
+            block;
         }
 
         .emailCard span {
-          color: #99a2aa;
+          color:
+            #99a2aa;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         .emailCard strong {
-          margin-top: 4px;
+          margin-top:
+            4px;
 
-          color: #45515d;
-          font-size: 9px;
+          color:
+            #45515d;
+
+          font-size:
+            9px;
+
+          overflow-wrap:
+            anywhere;
         }
 
         .emailCard a {
-          min-height: 36px;
+          min-height:
+            36px;
 
-          padding: 0 10px;
+          padding:
+            0 10px;
 
-          display: flex;
-          align-items: center;
+          display:
+            flex;
 
-          border-radius: 8px;
+          align-items:
+            center;
 
-          color: white;
-          background: #202b37;
+          justify-content:
+            center;
 
-          text-decoration: none;
+          flex:
+            0 0 auto;
 
-          font-size: 7px;
-          font-weight: 850;
+          border-radius:
+            8px;
+
+          color:
+            white;
+
+          background:
+            #202b37;
+
+          text-decoration:
+            none;
+
+          font-size:
+            7px;
+
+          font-weight:
+            850;
         }
 
         .notice {
-          margin-top: 14px;
-          padding: 14px;
+          margin-top:
+            14px;
 
-          display: grid;
+          padding:
+            14px;
+
+          display:
+            grid;
 
           grid-template-columns:
             auto 1fr;
 
-          gap: 9px;
+          gap:
+            9px;
 
-          color: #78838e;
-          background: #eef1f3;
+          color:
+            #78838e;
 
-          border-radius: 11px;
+          background:
+            #eef1f3;
+
+          border-radius:
+            11px;
         }
 
-        .notice :global(svg) {
-          width: 18px;
+        .notice
+          :global(svg) {
+          width:
+            18px;
+
+          height:
+            18px;
         }
 
         .notice p {
-          margin: 0;
+          margin:
+            0;
 
-          font-size: 7px;
-          line-height: 1.55;
+          font-size:
+            7px;
+
+          line-height:
+            1.55;
+        }
+
+        .disclaimer {
+          margin-top:
+            8px;
+
+          padding:
+            12px;
+
+          display:
+            grid;
+
+          grid-template-columns:
+            auto 1fr;
+
+          gap:
+            9px;
+
+          border:
+            1px solid
+            #ece2e3;
+
+          border-radius:
+            10px;
+
+          color:
+            #7f6d6f;
+
+          background:
+            #fffafa;
+        }
+
+        .disclaimer span {
+          width:
+            20px;
+
+          height:
+            20px;
+
+          display:
+            grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            6px;
+
+          color:
+            white;
+
+          background:
+            #c84a50;
+
+          font-size:
+            12px;
+
+          font-weight:
+            900;
+        }
+
+        .disclaimer p {
+          margin:
+            0;
+
+          font-size:
+            7px;
+
+          line-height:
+            1.55;
         }
 
         footer {
-          margin-top: 23px;
-          padding-top: 16px;
+          margin-top:
+            23px;
 
-          display: flex;
-          justify-content: space-between;
+          padding-top:
+            16px;
 
-          border-top: 1px solid #dfe4e8;
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap:
+            15px;
+
+          border-top:
+            1px solid
+            #dfe4e8;
+        }
+
+        footer strong,
+        footer span {
+          display:
+            block;
         }
 
         footer strong {
-          color: #35414c;
-          font-size: 8px;
+          color:
+            #35414c;
+
+          font-size:
+            8px;
         }
 
         footer span {
-          color: #999fa6;
-          font-size: 7px;
+          margin-top:
+            2px;
+
+          color:
+            #999fa6;
+
+          font-size:
+            7px;
         }
 
-        @media (max-width: 520px) {
+        footer a {
+          color:
+            #56626d;
+
+          text-decoration:
+            none;
+
+          font-size:
+            7px;
+
+          font-weight:
+            850;
+        }
+
+        @media (
+          max-width:
+            520px
+        ) {
           .profile {
             grid-template-columns:
-              72px 1fr;
+              72px
+              minmax(
+                0,
+                1fr
+              );
           }
 
           .photo {
-            width: 72px;
-            height: 72px;
+            width:
+              72px;
+
+            height:
+              72px;
           }
 
           h1 {
-            font-size: 21px;
+            font-size:
+              21px;
           }
 
           .medicalGrid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .emailCard {
-            align-items: stretch;
-            flex-direction: column;
+            align-items:
+              stretch;
+
+            flex-direction:
+              column;
           }
 
           .emailCard a {
-            justify-content: center;
+            width:
+              100%;
           }
         }
       `}</style>
@@ -810,46 +1249,75 @@ function InfoCard({
           : "card"
       }
     >
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
 
       <style jsx>{`
         .card {
-          min-height: 90px;
+          min-height:
+            90px;
 
-          padding: 14px;
+          padding:
+            14px;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 12px;
+          border:
+            1px solid
+            #e0e5e8;
 
-          background: white;
+          border-radius:
+            12px;
+
+          background:
+            white;
         }
 
         .important {
-          border-color: #edd5d7;
-          background: #fff7f7;
+          border-color:
+            #edd5d7;
+
+          background:
+            #fff7f7;
         }
 
         span {
-          color: #969fa8;
+          color:
+            #969fa8;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         strong {
-          display: block;
+          display:
+            block;
 
-          margin-top: 9px;
+          margin-top:
+            9px;
 
-          color: #3f4b56;
+          color:
+            #3f4b56;
 
-          font-size: 11px;
-          line-height: 1.45;
+          font-size:
+            11px;
+
+          line-height:
+            1.45;
+
+          overflow-wrap:
+            anywhere;
         }
 
         .important strong {
-          color: #9d4147;
+          color:
+            #9d4147;
         }
       `}</style>
     </article>
@@ -861,94 +1329,181 @@ function ContactCard({
   name,
   phone,
   allowCall,
+  language,
 }: {
   eyebrow: string;
   name: string;
   phone: string;
   allowCall: boolean;
+  language: "ka" | "en";
 }) {
+  const ka =
+    language === "ka";
+
+  const cleanPhone =
+    phone.replace(
+      /[^\d+]/g,
+      ""
+    );
+
   return (
     <section className="contact">
       <div>
-        <span>{eyebrow}</span>
+        <span>
+          {eyebrow}
+        </span>
 
-        <strong>{name}</strong>
+        <strong>
+          {name}
+        </strong>
 
         {phone && (
-          <small>{phone}</small>
+          <small>
+            {phone}
+          </small>
         )}
       </div>
 
       {phone &&
         allowCall && (
-          <a href={`tel:${phone}`}>
-            ☎ Call
+          <a
+            href={`tel:${cleanPhone}`}
+          >
+            ☎{" "}
+            {ka
+              ? "დარეკვა"
+              : "Call"}
           </a>
         )}
 
       <style jsx>{`
         .contact {
-          margin-top: 10px;
+          margin-top:
+            10px;
 
-          padding: 15px;
+          padding:
+            15px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          display:
+            flex;
 
-          gap: 15px;
+          align-items:
+            center;
 
-          border: 1px solid #e0e5e8;
-          border-radius: 12px;
+          justify-content:
+            space-between;
 
-          background: white;
+          gap:
+            15px;
+
+          border:
+            1px solid
+            #e0e5e8;
+
+          border-radius:
+            12px;
+
+          background:
+            white;
         }
 
         span,
         strong,
         small {
-          display: block;
+          display:
+            block;
         }
 
         span {
-          color: #c84a50;
+          color:
+            #c84a50;
 
-          font-size: 6px;
-          font-weight: 900;
+          font-size:
+            6px;
+
+          font-weight:
+            900;
         }
 
         strong {
-          margin-top: 5px;
+          margin-top:
+            5px;
 
-          color: #3e4a55;
+          color:
+            #3e4a55;
 
-          font-size: 11px;
+          font-size:
+            11px;
         }
 
         small {
-          margin-top: 4px;
+          margin-top:
+            4px;
 
-          color: #7f8993;
-          font-size: 8px;
+          color:
+            #7f8993;
+
+          font-size:
+            8px;
         }
 
         a {
-          min-width: 86px;
-          height: 39px;
+          min-width:
+            86px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          min-height:
+            39px;
 
-          border-radius: 9px;
+          padding:
+            0 11px;
 
-          color: white;
-          background: #c84a50;
+          display:
+            flex;
 
-          text-decoration: none;
+          align-items:
+            center;
 
-          font-size: 8px;
-          font-weight: 850;
+          justify-content:
+            center;
+
+          flex:
+            0 0 auto;
+
+          border-radius:
+            9px;
+
+          color:
+            white;
+
+          background:
+            #c84a50;
+
+          text-decoration:
+            none;
+
+          font-size:
+            8px;
+
+          font-weight:
+            850;
+        }
+
+        @media (
+          max-width:
+            470px
+        ) {
+          .contact {
+            align-items:
+              stretch;
+
+            flex-direction:
+              column;
+          }
+
+          a {
+            width:
+              100%;
+          }
         }
       `}</style>
     </section>
