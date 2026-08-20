@@ -17,78 +17,47 @@ import {
 import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
-type ProductId = "tag" | "sticker";
+type PaymentMethod = "stripe" | "tbc" | "bog";
 
 type Product = {
-  id: ProductId;
+  id: string;
+  slug: string;
   name: string;
-  price: number;
-  icon: string;
-  type: string;
+  category: string;
+  design_name: string | null;
+  description: string | null;
   sku: string;
+  price: number;
+  currency: string;
+  image_url: string | null;
+  stock_quantity: number;
+  active: boolean;
 };
 
-const PRODUCTS: Record<ProductId, Product> = {
-  tag: {
-    id: "tag",
-    name: "QR Tag",
-    price: 9.99,
-    icon: "🏷️",
-    type: "physical_qr_tag",
-    sku: "QR-TAG-001",
-  },
-
-  sticker: {
-    id: "sticker",
-    name: "QR Sticker",
-    price: 4.99,
-    icon: "🔳",
-    type: "physical_qr_sticker",
-    sku: "QR-STICKER-001",
-  },
+type ShippingForm = {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
 };
-
-export default function CheckoutPage() {
-  return (
-    <Suspense fallback={<CheckoutLoading />}>
-      <CheckoutContent />
-    </Suspense>
-  );
-}
 
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [lang, setLang] =
-    useState<Lang>("ka");
+  const [lang, setLang] = useState<Lang>("ka");
+
+  const [product, setProduct] =
+    useState<Product | null>(null);
 
   const [userId, setUserId] =
     useState<string | null>(null);
 
   const [email, setEmail] =
     useState("");
-
-  const [name, setName] =
-    useState("");
-
-  const [phone, setPhone] =
-    useState("");
-
-  const [address, setAddress] =
-    useState("");
-
-  const [city, setCity] =
-    useState("");
-
-  const [state, setState] =
-    useState("");
-
-  const [zip, setZip] =
-    useState("");
-
-  const [country, setCountry] =
-    useState("United States");
 
   const [loading, setLoading] =
     useState(true);
@@ -99,128 +68,144 @@ function CheckoutContent() {
   const [error, setError] =
     useState("");
 
-  const ka =
-    lang === "ka";
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("stripe");
 
-  const rawProduct =
-    searchParams.get("product") ||
-    "tag";
+  const [form, setForm] =
+    useState<ShippingForm>({
+      fullName: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zip: "",
+      country: "United States",
+    });
 
-  const productId: ProductId =
-    rawProduct === "sticker"
-      ? "sticker"
-      : "tag";
+  const ka = lang === "ka";
 
-  const product =
-    PRODUCTS[productId];
+  const productSlug =
+    searchParams.get("product") || "";
 
   const rawQuantity =
-    Number(
-      searchParams.get(
-        "quantity"
-      ) || "1"
-    );
+    Number(searchParams.get("quantity") || "1");
 
   const quantity =
-    Number.isFinite(
-      rawQuantity
-    ) &&
-    rawQuantity >= 1
-      ? Math.min(
-          99,
-          Math.floor(
-            rawQuantity
-          )
-        )
+    Number.isFinite(rawQuantity) && rawQuantity >= 1
+      ? Math.min(99, Math.floor(rawQuantity))
       : 1;
 
-  const subtotal =
-    useMemo(
-      () =>
-        Number(
-          (
-            product.price *
-            quantity
-          ).toFixed(2)
-        ),
-      [
-        product.price,
-        quantity,
-      ]
-    );
-
   useEffect(() => {
-    void loadUser();
-  }, []);
+    void initialize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productSlug]);
 
-  async function loadUser() {
+  async function initialize() {
     try {
       setLoading(true);
       setError("");
 
+      /*
+       * 1. USER MUST BE LOGGED IN
+       */
+
       const {
         data: { user },
         error: authError,
-      } =
-        await supabase.auth.getUser();
+      } = await supabase.auth.getUser();
 
       if (authError) {
         throw authError;
       }
 
       if (!user) {
-        const redirect =
-          encodeURIComponent(
-            `/store/checkout?product=${productId}&quantity=${quantity}`
-          );
+        const currentPath =
+          `/store/checkout?product=${encodeURIComponent(
+            productSlug
+          )}&quantity=${quantity}`;
 
-        router.push(
-          `/login?redirect=${redirect}`
+        router.replace(
+          `/login?redirect=${encodeURIComponent(
+            currentPath
+          )}`
         );
 
         return;
       }
 
-      setUserId(
-        user.id
-      );
+      setUserId(user.id);
+      setEmail(user.email || "");
 
-      setEmail(
-        user.email || ""
-      );
+      /*
+       * 2. PRODUCT IS REQUIRED
+       */
 
-      const metadata =
-        user.user_metadata ||
-        {};
-
-      const possibleName =
-        metadata.full_name ||
-        metadata.name ||
-        "";
-
-      if (
-        typeof possibleName ===
-        "string"
-      ) {
-        setName(
-          possibleName
-        );
+      if (!productSlug) {
+        router.replace("/store");
+        return;
       }
 
-      const possiblePhone =
-        metadata.phone || "";
+      /*
+       * 3. LOAD PRODUCT FROM SUPABASE
+       */
+
+      const {
+        data: productData,
+        error: productError,
+      } = await supabase
+        .from("products")
+        .select(`
+          id,
+          slug,
+          name,
+          category,
+          design_name,
+          description,
+          sku,
+          price,
+          currency,
+          image_url,
+          stock_quantity,
+          active
+        `)
+        .eq("slug", productSlug)
+        .eq("active", true)
+        .maybeSingle();
+
+      if (productError) {
+        throw productError;
+      }
+
+      if (!productData) {
+        setError(
+          ka
+            ? "პროდუქტი ვერ მოიძებნა."
+            : "Product not found."
+        );
+
+        return;
+      }
+
+      const selectedProduct =
+        productData as Product;
 
       if (
-        typeof possiblePhone ===
-        "string"
+        selectedProduct.stock_quantity <
+        quantity
       ) {
-        setPhone(
-          possiblePhone
+        setError(
+          ka
+            ? "არჩეული რაოდენობა მარაგში არ არის."
+            : "The selected quantity is not available."
         );
+
+        return;
       }
+
+      setProduct(selectedProduct);
     } catch (err) {
       console.error(
-        "Checkout auth error:",
+        "Checkout initialization error:",
         err
       );
 
@@ -228,102 +213,407 @@ function CheckoutContent() {
         err instanceof Error
           ? err.message
           : ka
-          ? "მომხმარებლის მონაცემების ჩატვირთვა ვერ მოხერხდა."
-          : "Could not load your account."
+          ? "Checkout-ის ჩატვირთვა ვერ მოხერხდა."
+          : "Could not load checkout."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  function buildShippingAddress() {
-    return [
-      address.trim(),
-      city.trim(),
-      state.trim(),
-      zip.trim(),
-      country.trim(),
-    ]
-      .filter(Boolean)
-      .join(", ");
+  const subtotal = useMemo(() => {
+    if (!product) return 0;
+
+    return (
+      Number(product.price) *
+      quantity
+    );
+  }, [product, quantity]);
+
+  /*
+   * Shipping ჯერ 0 გვაქვს.
+   * მოგვიანებით შეგვიძლია ქვეყნების მიხედვით
+   * ცალკე shipping rates დავამატოთ.
+   */
+
+  const shipping = 0;
+
+  const total =
+    subtotal + shipping;
+
+  function formatMoney(
+    amount: number,
+    currency?: string
+  ) {
+    try {
+      return new Intl.NumberFormat(
+        "en-US",
+        {
+          style: "currency",
+          currency:
+            currency || "USD",
+        }
+      ).format(amount);
+    } catch {
+      return `$${amount.toFixed(2)}`;
+    }
   }
 
-  async function submitOrder(
-    event: FormEvent<HTMLFormElement>
+  function updateField(
+    field: keyof ShippingForm,
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function validateForm() {
+    if (!form.fullName.trim()) {
+      return ka
+        ? "შეიყვანეთ სახელი და გვარი."
+        : "Enter your full name.";
+    }
+
+    if (!form.phone.trim()) {
+      return ka
+        ? "შეიყვანეთ ტელეფონის ნომერი."
+        : "Enter your phone number.";
+    }
+
+    if (!form.address.trim()) {
+      return ka
+        ? "შეიყვანეთ მისამართი."
+        : "Enter your address.";
+    }
+
+    if (!form.city.trim()) {
+      return ka
+        ? "შეიყვანეთ ქალაქი."
+        : "Enter your city.";
+    }
+
+    if (!form.country.trim()) {
+      return ka
+        ? "შეიყვანეთ ქვეყანა."
+        : "Enter your country.";
+    }
+
+    return "";
+  }
+
+  async function createPendingOrder() {
+    if (!product || !userId) {
+      throw new Error(
+        "Product or user is missing."
+      );
+    }
+
+    /*
+     * Order number
+     */
+
+    const orderNumber =
+      `QR-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 7)
+        .toUpperCase()}`;
+
+    /*
+     * IMPORTANT:
+     * products table არის ჩვენი source of truth.
+     * ფასი client-ის URL-იდან არ მოდის.
+     */
+
+    const orderPayload = {
+      user_id: userId,
+
+      order_number: orderNumber,
+
+      status: "pending",
+
+      payment_status: "pending",
+
+      payment_provider: paymentMethod,
+
+      payment_currency:
+        product.currency || "USD",
+
+      payment_amount: total,
+
+      subtotal,
+
+      total,
+
+      quantity,
+
+      product_id: product.id,
+
+      product_name: product.name,
+
+      product_sku: product.sku,
+
+      shipping_name: form.fullName.trim(),
+
+      shipping_email: email,
+
+      shipping_phone: form.phone.trim(),
+
+      shipping_address: form.address.trim(),
+
+      shipping_city: form.city.trim(),
+
+      shipping_state: form.state.trim(),
+
+      shipping_zip: form.zip.trim(),
+
+      shipping_country: form.country.trim(),
+
+      payment_metadata: {
+        product_slug: product.slug,
+        design_name:
+          product.design_name,
+        category: product.category,
+      },
+    };
+
+    const {
+      data,
+      error: orderError,
+    } = await supabase
+      .from("orders")
+      .insert(orderPayload)
+      .select()
+      .single();
+
+    if (orderError) {
+      throw orderError;
+    }
+
+    return data;
+  }
+
+  async function startStripePayment(
+    orderId: string | number
+  ) {
+    if (!product) {
+      throw new Error(
+        "Product is missing."
+      );
+    }
+
+    const response =
+      await fetch(
+        "/api/checkout",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            productId:
+              product.slug,
+
+            productSlug:
+              product.slug,
+
+            quantity,
+
+            orderId:
+              String(orderId),
+
+            customerEmail:
+              email,
+
+            shippingName:
+              form.fullName,
+
+            shippingPhone:
+              form.phone,
+
+            shippingAddress:
+              form.address,
+
+            shippingCity:
+              form.city,
+
+            shippingState:
+              form.state,
+
+            shippingZip:
+              form.zip,
+
+            shippingCountry:
+              form.country,
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+          "Stripe checkout could not be created."
+      );
+    }
+
+    if (!data.url) {
+      throw new Error(
+        "Stripe Checkout URL was not returned."
+      );
+    }
+
+    window.location.href =
+      data.url;
+  }
+
+  async function startTbcPayment(
+    orderId: string | number
+  ) {
+    if (!product) {
+      throw new Error(
+        "Product is missing."
+      );
+    }
+
+    const response =
+      await fetch(
+        "/api/payments/tbc",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            productId:
+              product.slug,
+
+            productSlug:
+              product.slug,
+
+            quantity,
+
+            orderId:
+              String(orderId),
+
+            language:
+              ka ? "KA" : "EN",
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+          "TBC payment could not be created."
+      );
+    }
+
+    if (!data.approvalUrl) {
+      throw new Error(
+        "TBC approval URL was not returned."
+      );
+    }
+
+    window.location.href =
+      data.approvalUrl;
+  }
+
+  async function startBogPayment(
+    orderId: string | number
+  ) {
+    if (!product) {
+      throw new Error(
+        "Product is missing."
+      );
+    }
+
+    const response =
+      await fetch(
+        "/api/payments/bog",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            productId:
+              product.slug,
+
+            productSlug:
+              product.slug,
+
+            quantity,
+
+            orderId:
+              String(orderId),
+
+            language:
+              ka ? "ka" : "en",
+
+            customerEmail:
+              email,
+
+            shipping: form,
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+          "Bank of Georgia payment could not be created."
+      );
+    }
+
+    if (!data.redirectUrl) {
+      throw new Error(
+        "Bank of Georgia payment URL was not returned."
+      );
+    }
+
+    window.location.href =
+      data.redirectUrl;
+  }
+
+  async function handleSubmit(
+    event: FormEvent
   ) {
     event.preventDefault();
 
-    if (submitting) {
+    if (
+      submitting ||
+      !product ||
+      !userId
+    ) {
       return;
     }
 
-    if (!userId) {
+    const validationError =
+      validateForm();
+
+    if (validationError) {
       setError(
-        ka
-          ? "შეკვეთისთვის ანგარიშში შესვლა აუცილებელია."
-          : "Please sign in before placing an order."
+        validationError
       );
-
-      return;
-    }
-
-    if (!name.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ მიმღების სახელი."
-          : "Enter the recipient name."
-      );
-
-      return;
-    }
-
-    if (!phone.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ ტელეფონის ნომერი."
-          : "Enter a phone number."
-      );
-
-      return;
-    }
-
-    if (!address.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ მისამართი."
-          : "Enter the street address."
-      );
-
-      return;
-    }
-
-    if (!city.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ ქალაქი."
-          : "Enter the city."
-      );
-
-      return;
-    }
-
-    if (!state.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ შტატი/რეგიონი."
-          : "Enter the state or region."
-      );
-
-      return;
-    }
-
-    if (!zip.trim()) {
-      setError(
-        ka
-          ? "შეიყვანეთ ZIP / საფოსტო კოდი."
-          : "Enter the ZIP / postal code."
-      );
-
       return;
     }
 
@@ -331,75 +621,48 @@ function CheckoutContent() {
       setSubmitting(true);
       setError("");
 
-      const shippingAddress =
-        buildShippingAddress();
+      /*
+       * First create PENDING order.
+       * Payment confirmation later changes it to PAID.
+       */
 
-      const {
-        data,
-        error: insertError,
-      } = await supabase
-        .from("orders")
-        .insert({
-          user_id: userId,
+      const order =
+        await createPendingOrder();
 
-          status: "pending",
+      const orderId =
+        order.id;
 
-          product_id:
-            product.id,
-
-          product_name:
-            product.name,
-
-          product_type:
-            product.type,
-
-          sku:
-            product.sku,
-
-          quantity:
-            quantity,
-
-          unit_price:
-            product.price,
-
-          total_amount:
-            subtotal,
-
-          currency:
-            "USD",
-
-          shipping_name:
-            name.trim(),
-
-          shipping_address:
-            shippingAddress,
-
-          tracking_number:
-            null,
-        })
-        .select("id")
-        .single();
-
-      if (insertError) {
-        throw insertError;
+      if (
+        paymentMethod ===
+        "stripe"
+      ) {
+        await startStripePayment(
+          orderId
+        );
+        return;
       }
 
-      if (!data?.id) {
-        throw new Error(
-          "Order ID was not returned."
+      if (
+        paymentMethod ===
+        "tbc"
+      ) {
+        await startTbcPayment(
+          orderId
+        );
+        return;
+      }
+
+      if (
+        paymentMethod ===
+        "bog"
+      ) {
+        await startBogPayment(
+          orderId
         );
       }
-
-      router.push(
-        `/store/success?order=${encodeURIComponent(
-          String(
-            data.id
-          )
-        )}`
-      );
     } catch (err) {
       console.error(
-        "Create order error:",
+        "Checkout submit error:",
         err
       );
 
@@ -407,8 +670,8 @@ function CheckoutContent() {
         err instanceof Error
           ? err.message
           : ka
-          ? "შეკვეთის შექმნა ვერ მოხერხდა."
-          : "Could not create your order."
+          ? "გადახდის დაწყება ვერ მოხერხდა."
+          : "Could not start payment."
       );
     } finally {
       setSubmitting(false);
@@ -417,18 +680,68 @@ function CheckoutContent() {
 
   if (loading) {
     return (
-      <CheckoutLoading />
+      <main className="loadingPage">
+        <div className="loader">
+          <span>QR</span>
+        </div>
+
+        <strong>
+          QR RETURN
+        </strong>
+
+        <p>
+          {ka
+            ? "Checkout იტვირთება..."
+            : "Loading checkout..."}
+        </p>
+
+        <style jsx>{`
+          .loadingPage {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7f8;
+            color: #7d8791;
+          }
+
+          .loader {
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            color: white;
+            background: linear-gradient(
+              135deg,
+              #1465e8,
+              #7655f7
+            );
+            font-weight: 900;
+          }
+
+          strong {
+            margin-top: 10px;
+            color: #26323d;
+          }
+
+          p {
+            font-size: 10px;
+          }
+        `}</style>
+      </main>
     );
   }
 
   return (
     <main className="page">
-      <header className="topbar">
+      <header className="header">
         <Link
           href="/store"
           className="brand"
         >
-          <span className="logo">
+          <span className="brandLogo">
             QR
           </span>
 
@@ -443,27 +756,19 @@ function CheckoutContent() {
           </span>
         </Link>
 
-        <div className="topActions">
-          <Link href="/store">
-            ←{" "}
+        <div className="headerRight">
+          <span className="secure">
+            🔒{" "}
             {ka
-              ? "მაღაზია"
-              : "Store"}
-          </Link>
-
-          <Link href="/account/orders">
-            {ka
-              ? "ჩემი შეკვეთები"
-              : "My Orders"}
-          </Link>
+              ? "უსაფრთხო გადახდა"
+              : "Secure Checkout"}
+          </span>
 
           <div className="langs">
             <button
               type="button"
               className={
-                ka
-                  ? "active"
-                  : ""
+                ka ? "active" : ""
               }
               onClick={() =>
                 setLang("ka")
@@ -475,9 +780,7 @@ function CheckoutContent() {
             <button
               type="button"
               className={
-                !ka
-                  ? "active"
-                  : ""
+                !ka ? "active" : ""
               }
               onClick={() =>
                 setLang("en")
@@ -490,442 +793,646 @@ function CheckoutContent() {
       </header>
 
       <div className="shell">
-        <header className="heading">
-          <span className="eyebrow">
+        <Link
+          href="/store"
+          className="back"
+        >
+          ←{" "}
+          {ka
+            ? "მაღაზიაში დაბრუნება"
+            : "Back to Store"}
+        </Link>
+
+        <div className="title">
+          <span>
             QR RETURN CHECKOUT
           </span>
 
           <h1>
             {ka
               ? "შეკვეთის გაფორმება"
-              : "Checkout"}
+              : "Complete Your Order"}
           </h1>
 
           <p>
             {ka
-              ? "შეავსეთ მიწოდების ინფორმაცია და გადაამოწმეთ შეკვეთა."
-              : "Enter your shipping information and review your order."}
+              ? "შეამოწმეთ პროდუქტი, შეავსეთ მიწოდების ინფორმაცია და აირჩიეთ გადახდის მეთოდი."
+              : "Review your product, enter shipping details, and choose a payment method."}
           </p>
-        </header>
+        </div>
 
-        <form
-          className="checkoutGrid"
-          onSubmit={
-            submitOrder
-          }
-        >
-          <section className="formSide">
-            <div className="sectionTitle">
-              <span>
-                01
-              </span>
+        {error && (
+          <div className="error">
+            <strong>⚠</strong>
+            <span>{error}</span>
+          </div>
+        )}
 
-              <div>
-                <strong>
-                  {ka
-                    ? "საკონტაქტო ინფორმაცია"
-                    : "Contact Information"}
-                </strong>
+        {!product ? (
+          <div className="notFound">
+            <div>◈</div>
 
-                <p>
-                  {ka
-                    ? "ინფორმაცია შეკვეთასთან დასაკავშირებლად."
-                    : "Information used for your order."}
-                </p>
-              </div>
-            </div>
+            <h2>
+              {ka
+                ? "პროდუქტი ვერ მოიძებნა"
+                : "Product Not Found"}
+            </h2>
 
-            <div className="card">
-              <div className="field full">
-                <label>
-                  {ka
-                    ? "ელფოსტა"
-                    : "Email"}
-                </label>
-
-                <input
-                  value={email}
-                  disabled
-                  type="email"
-                />
-              </div>
-
-              <div className="fields">
-                <div className="field">
-                  <label>
+            <Link href="/store">
+              {ka
+                ? "მაღაზიაში დაბრუნება"
+                : "Return to Store"}
+            </Link>
+          </div>
+        ) : (
+          <form
+            onSubmit={
+              handleSubmit
+            }
+          >
+            <div className="checkoutGrid">
+              <div className="left">
+                <section className="card productCard">
+                  <div className="sectionLabel">
+                    01 ·{" "}
                     {ka
-                      ? "მიმღების სახელი"
-                      : "Recipient name"}
-                  </label>
+                      ? "პროდუქტი"
+                      : "PRODUCT"}
+                  </div>
 
-                  <input
-                    value={name}
-                    onChange={(
-                      event
-                    ) =>
-                      setName(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder={
-                      ka
-                        ? "სახელი და გვარი"
-                        : "Full name"
-                    }
-                    autoComplete="name"
-                  />
-                </div>
+                  <div className="product">
+                    <div className="productImage">
+                      {product.image_url ? (
+                        <img
+                          src={
+                            product.image_url
+                          }
+                          alt={
+                            product.name
+                          }
+                        />
+                      ) : (
+                        <div className="placeholder">
+                          <span>
+                            {product.category ===
+                            "sticker"
+                              ? "🔳"
+                              : "🏷️"}
+                          </span>
 
-                <div className="field">
-                  <label>
+                          <strong>
+                            QR
+                          </strong>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="productInfo">
+                      <span className="category">
+                        {
+                          product.category
+                        }
+                      </span>
+
+                      <h2>
+                        {product.name}
+                      </h2>
+
+                      {product.design_name && (
+                        <strong className="design">
+                          {
+                            product.design_name
+                          }
+                        </strong>
+                      )}
+
+                      <span className="sku">
+                        SKU:{" "}
+                        {product.sku}
+                      </span>
+
+                      <div className="stock">
+                        ✓{" "}
+                        {ka
+                          ? `მარაგში: ${product.stock_quantity}`
+                          : `In stock: ${product.stock_quantity}`}
+                      </div>
+                    </div>
+
+                    <div className="productPrice">
+                      <strong>
+                        {formatMoney(
+                          Number(
+                            product.price
+                          ),
+                          product.currency
+                        )}
+                      </strong>
+
+                      <span>
+                        × {quantity}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="card">
+                  <div className="sectionLabel">
+                    02 ·{" "}
                     {ka
-                      ? "ტელეფონი"
-                      : "Phone"}
-                  </label>
+                      ? "მიწოდების ინფორმაცია"
+                      : "SHIPPING INFORMATION"}
+                  </div>
 
-                  <input
-                    value={phone}
-                    onChange={(
-                      event
-                    ) =>
-                      setPhone(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder="+1"
-                    type="tel"
-                    autoComplete="tel"
-                  />
-                </div>
+                  <div className="formGrid">
+                    <label className="full">
+                      <span>
+                        {ka
+                          ? "სახელი და გვარი"
+                          : "Full Name"}
+                        *
+                      </span>
+
+                      <input
+                        value={
+                          form.fullName
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "fullName",
+                            e.target.value
+                          )
+                        }
+                        placeholder={
+                          ka
+                            ? "სახელი გვარი"
+                            : "First and last name"
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        Email
+                      </span>
+
+                      <input
+                        value={email}
+                        disabled
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        {ka
+                          ? "ტელეფონი"
+                          : "Phone"}
+                        *
+                      </span>
+
+                      <input
+                        value={
+                          form.phone
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "phone",
+                            e.target.value
+                          )
+                        }
+                        placeholder="+1..."
+                      />
+                    </label>
+
+                    <label className="full">
+                      <span>
+                        {ka
+                          ? "მისამართი"
+                          : "Street Address"}
+                        *
+                      </span>
+
+                      <input
+                        value={
+                          form.address
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "address",
+                            e.target.value
+                          )
+                        }
+                        placeholder={
+                          ka
+                            ? "ქუჩა, სახლის/ბინის ნომერი"
+                            : "Street, house or apartment"
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        {ka
+                          ? "ქალაქი"
+                          : "City"}
+                        *
+                      </span>
+
+                      <input
+                        value={
+                          form.city
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "city",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        {ka
+                          ? "შტატი / რეგიონი"
+                          : "State / Region"}
+                      </span>
+
+                      <input
+                        value={
+                          form.state
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "state",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        {ka
+                          ? "ZIP / საფოსტო კოდი"
+                          : "ZIP / Postal Code"}
+                      </span>
+
+                      <input
+                        value={
+                          form.zip
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "zip",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        {ka
+                          ? "ქვეყანა"
+                          : "Country"}
+                        *
+                      </span>
+
+                      <select
+                        value={
+                          form.country
+                        }
+                        onChange={(e) =>
+                          updateField(
+                            "country",
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option>
+                          United States
+                        </option>
+
+                        <option>
+                          Georgia
+                        </option>
+
+                        <option>
+                          Canada
+                        </option>
+
+                        <option>
+                          United Kingdom
+                        </option>
+
+                        <option>
+                          Germany
+                        </option>
+
+                        <option>
+                          France
+                        </option>
+
+                        <option>
+                          Italy
+                        </option>
+
+                        <option>
+                          Spain
+                        </option>
+                      </select>
+                    </label>
+                  </div>
+                </section>
+
+                <section className="card">
+                  <div className="sectionLabel">
+                    03 ·{" "}
+                    {ka
+                      ? "გადახდის მეთოდი"
+                      : "PAYMENT METHOD"}
+                  </div>
+
+                  <div className="paymentMethods">
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "stripe"
+                          ? "payment active"
+                          : "payment"
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "stripe"
+                        )
+                      }
+                    >
+                      <span className="paymentIcon">
+                        💳
+                      </span>
+
+                      <span className="paymentText">
+                        <strong>
+                          Card / Stripe
+                        </strong>
+
+                        <small>
+                          {ka
+                            ? "საერთაშორისო ბარათით გადახდა"
+                            : "International card payment"}
+                        </small>
+                      </span>
+
+                      <span className="radio">
+                        {paymentMethod ===
+                        "stripe"
+                          ? "●"
+                          : "○"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "tbc"
+                          ? "payment active"
+                          : "payment"
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "tbc"
+                        )
+                      }
+                    >
+                      <span className="paymentIcon tbc">
+                        TBC
+                      </span>
+
+                      <span className="paymentText">
+                        <strong>
+                          TBC Bank
+                        </strong>
+
+                        <small>
+                          {ka
+                            ? "TBC Checkout"
+                            : "TBC Checkout"}
+                        </small>
+                      </span>
+
+                      <span className="radio">
+                        {paymentMethod ===
+                        "tbc"
+                          ? "●"
+                          : "○"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "bog"
+                          ? "payment active"
+                          : "payment"
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "bog"
+                        )
+                      }
+                    >
+                      <span className="paymentIcon bog">
+                        BOG
+                      </span>
+
+                      <span className="paymentText">
+                        <strong>
+                          Bank of Georgia
+                        </strong>
+
+                        <small>
+                          {ka
+                            ? "საქართველოს ბანკით გადახდა"
+                            : "Bank of Georgia payment"}
+                        </small>
+                      </span>
+
+                      <span className="radio">
+                        {paymentMethod ===
+                        "bog"
+                          ? "●"
+                          : "○"}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="paymentNote">
+                    🔒{" "}
+                    {ka
+                      ? "QR RETURN არ ინახავს თქვენი ბარათის მონაცემებს."
+                      : "QR RETURN does not store your card details."}
+                  </div>
+                </section>
               </div>
-            </div>
 
-            <div className="sectionTitle second">
-              <span>
-                02
-              </span>
-
-              <div>
-                <strong>
-                  {ka
-                    ? "მიწოდების მისამართი"
-                    : "Shipping Address"}
-                </strong>
-
-                <p>
-                  {ka
-                    ? "შეიყვანეთ მისამართი, სადაც შეკვეთა უნდა მიიღოთ."
-                    : "Enter the address where you want to receive the order."}
-                </p>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="field full">
-                <label>
-                  {ka
-                    ? "ქუჩა და მისამართი"
-                    : "Street address"}
-                </label>
-
-                <input
-                  value={address}
-                  onChange={(
-                    event
-                  ) =>
-                    setAddress(
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder={
-                    ka
-                      ? "მაგ. 123 Main Street, Apt 4"
-                      : "123 Main Street, Apt 4"
-                  }
-                  autoComplete="street-address"
-                />
-              </div>
-
-              <div className="fields">
-                <div className="field">
-                  <label>
+              <aside className="summary">
+                <div className="summaryCard">
+                  <span className="summaryLabel">
                     {ka
-                      ? "ქალაქი"
-                      : "City"}
-                  </label>
+                      ? "შეკვეთის შეჯამება"
+                      : "ORDER SUMMARY"}
+                  </span>
 
-                  <input
-                    value={city}
-                    onChange={(
-                      event
-                    ) =>
-                      setCity(
-                        event.target
-                          .value
-                      )
+                  <div className="summaryProduct">
+                    <div>
+                      <strong>
+                        {product.name}
+                      </strong>
+
+                      {product.design_name && (
+                        <span>
+                          {
+                            product.design_name
+                          }
+                        </span>
+                      )}
+
+                      <small>
+                        {quantity} ×{" "}
+                        {formatMoney(
+                          Number(
+                            product.price
+                          ),
+                          product.currency
+                        )}
+                      </small>
+                    </div>
+
+                    <strong>
+                      {formatMoney(
+                        subtotal,
+                        product.currency
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="line" />
+
+                  <div className="row">
+                    <span>
+                      {ka
+                        ? "პროდუქტი"
+                        : "Subtotal"}
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        subtotal,
+                        product.currency
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="row">
+                    <span>
+                      {ka
+                        ? "მიწოდება"
+                        : "Shipping"}
+                    </span>
+
+                    <strong className="free">
+                      {shipping === 0
+                        ? ka
+                          ? "უფასო"
+                          : "Free"
+                        : formatMoney(
+                            shipping,
+                            product.currency
+                          )}
+                    </strong>
+                  </div>
+
+                  <div className="line" />
+
+                  <div className="total">
+                    <span>
+                      {ka
+                        ? "სულ"
+                        : "Total"}
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        total,
+                        product.currency
+                      )}
+                    </strong>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="payButton"
+                    disabled={
+                      submitting
                     }
-                    placeholder="New York"
-                    autoComplete="address-level2"
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    {ka
-                      ? "შტატი / რეგიონი"
-                      : "State / Region"}
-                  </label>
-
-                  <input
-                    value={state}
-                    onChange={(
-                      event
-                    ) =>
-                      setState(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder="NY"
-                    autoComplete="address-level1"
-                  />
-                </div>
-              </div>
-
-              <div className="fields">
-                <div className="field">
-                  <label>
-                    ZIP /{" "}
-                    {ka
-                      ? "საფოსტო კოდი"
-                      : "Postal code"}
-                  </label>
-
-                  <input
-                    value={zip}
-                    onChange={(
-                      event
-                    ) =>
-                      setZip(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder="10001"
-                    autoComplete="postal-code"
-                  />
-                </div>
-
-                <div className="field">
-                  <label>
-                    {ka
-                      ? "ქვეყანა"
-                      : "Country"}
-                  </label>
-
-                  <select
-                    value={country}
-                    onChange={(
-                      event
-                    ) =>
-                      setCountry(
-                        event.target
-                          .value
-                      )
-                    }
-                    autoComplete="country-name"
                   >
-                    <option value="United States">
-                      United States
-                    </option>
+                    {submitting
+                      ? ka
+                        ? "გადახდა იტვირთება..."
+                        : "Starting payment..."
+                      : ka
+                      ? "გადახდა"
+                      : "Pay Now"}
 
-                    <option value="Georgia">
-                      Georgia
-                    </option>
+                    {!submitting && (
+                      <span>
+                        →
+                      </span>
+                    )}
+                  </button>
 
-                    <option value="Canada">
-                      Canada
-                    </option>
+                  <div className="accountInfo">
+                    <span>✓</span>
 
-                    <option value="United Kingdom">
-                      United Kingdom
-                    </option>
-                  </select>
+                    <p>
+                      {ka
+                        ? "შეკვეთა დაკავშირებული იქნება თქვენს QR RETURN ანგარიშთან."
+                        : "This order will be linked to your QR RETURN account."}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </aside>
             </div>
-
-            {error && (
-              <div className="error">
-                ⚠ {error}
-              </div>
-            )}
-          </section>
-
-          <aside className="summary">
-            <span className="summaryLabel">
-              {ka
-                ? "შეკვეთის შეჯამება"
-                : "ORDER SUMMARY"}
-            </span>
-
-            <div className="product">
-              <div className="productIcon">
-                {
-                  product.icon
-                }
-              </div>
-
-              <div>
-                <strong>
-                  {
-                    product.name
-                  }
-                </strong>
-
-                <span>
-                  {quantity} × $
-                  {product.price.toFixed(
-                    2
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <div className="productData">
-              <div>
-                <span>
-                  SKU
-                </span>
-
-                <strong>
-                  {
-                    product.sku
-                  }
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  TYPE
-                </span>
-
-                <strong>
-                  {
-                    product.type
-                  }
-                </strong>
-              </div>
-            </div>
-
-            <div className="summaryRow">
-              <span>
-                {ka
-                  ? "პროდუქტი"
-                  : "Product"}
-              </span>
-
-              <strong>
-                {
-                  product.name
-                }
-              </strong>
-            </div>
-
-            <div className="summaryRow">
-              <span>
-                {ka
-                  ? "რაოდენობა"
-                  : "Quantity"}
-              </span>
-
-              <strong>
-                {quantity}
-              </strong>
-            </div>
-
-            <div className="summaryRow">
-              <span>
-                {ka
-                  ? "ერთეულის ფასი"
-                  : "Unit price"}
-              </span>
-
-              <strong>
-                $
-                {product.price.toFixed(
-                  2
-                )}
-              </strong>
-            </div>
-
-            <div className="divider" />
-
-            <div className="total">
-              <span>
-                {ka
-                  ? "ჯამი"
-                  : "Total"}
-              </span>
-
-              <strong>
-                $
-                {subtotal.toFixed(
-                  2
-                )}
-              </strong>
-            </div>
-
-            <p className="note">
-              {ka
-                ? "ამ ეტაპზე შეკვეთა შეიქმნება Pending სტატუსით. ონლაინ გადახდის სისტემა შემდეგ ეტაპზე დაემატება."
-                : "For now, the order will be created with Pending status. Online payment will be added in the next step."}
-            </p>
-
-            <button
-              type="submit"
-              className="submit"
-              disabled={
-                submitting
-              }
-            >
-              <span>
-                {submitting
-                  ? ka
-                    ? "იქმნება..."
-                    : "Creating..."
-                  : ka
-                  ? "შეკვეთის დადასტურება"
-                  : "Place Order"}
-              </span>
-
-              {!submitting && (
-                <span>
-                  →
-                </span>
-              )}
-            </button>
-
-            <div className="secure">
-              🔒 QR RETURN Secure Checkout
-            </div>
-          </aside>
-        </form>
+          </form>
+        )}
       </div>
+
+      <footer>
+        <strong>
+          QR RETURN
+        </strong>
+
+        <span>
+          {ka
+            ? "დაკარგვა არ ნიშნავს დამშვიდობებას."
+            : "Never lose what matters."}
+        </span>
+      </footer>
 
       <style jsx>{`
         .page {
           min-height: 100vh;
-          color: #202b37;
           background: #f5f7f8;
+          color: #25313c;
         }
 
-        .topbar {
-          width: calc(100% - 36px);
-          max-width: 1100px;
+        .header {
+          width: calc(100% - 40px);
+          max-width: 1180px;
           min-height: 72px;
           margin: auto;
 
@@ -933,9 +1440,7 @@ function CheckoutContent() {
           align-items: center;
           justify-content: space-between;
 
-          gap: 16px;
-
-          border-bottom: 1px solid #e0e5e8;
+          border-bottom: 1px solid #dfe5e9;
         }
 
         .brand {
@@ -945,7 +1450,7 @@ function CheckoutContent() {
           text-decoration: none;
         }
 
-        .logo {
+        .brandLogo {
           width: 43px;
           height: 43px;
 
@@ -956,12 +1461,11 @@ function CheckoutContent() {
 
           color: white;
 
-          background:
-            linear-gradient(
-              135deg,
-              #1465e8,
-              #7655f7
-            );
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
 
           font-size: 11px;
           font-weight: 900;
@@ -985,36 +1489,22 @@ function CheckoutContent() {
           letter-spacing: 1px;
         }
 
-        .topActions {
+        .headerRight {
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 8px;
         }
 
-        .topActions :global(a) {
-          min-height: 32px;
-          padding: 0 9px;
-
-          display: flex;
-          align-items: center;
-
-          border: 1px solid #dfe4e8;
-          border-radius: 8px;
-
-          color: #57646f;
-          background: white;
-
-          text-decoration: none;
+        .secure {
+          color: #74808a;
           font-size: 7px;
-          font-weight: 850;
+          font-weight: 800;
         }
 
         .langs {
           padding: 3px;
-
           display: flex;
           gap: 2px;
-
           border-radius: 8px;
           background: #e9edf0;
         }
@@ -1022,475 +1512,589 @@ function CheckoutContent() {
         .langs button {
           min-width: 34px;
           min-height: 27px;
-
           border: 0;
           border-radius: 6px;
-
-          color: #7d8791;
           background: transparent;
-
+          color: #7d8791;
           cursor: pointer;
-
           font-size: 7px;
           font-weight: 900;
         }
 
         .langs button.active {
-          color: #1465e8;
           background: white;
+          color: #1465e8;
         }
 
         .shell {
           width: calc(100% - 40px);
-          max-width: 1000px;
-
+          max-width: 1180px;
           margin: auto;
-
-          padding: 50px 0 90px;
+          padding: 38px 0 80px;
         }
 
-        .heading {
-          max-width: 700px;
+        .back {
+          color: #6d7983;
+          text-decoration: none;
+          font-size: 8px;
+          font-weight: 800;
         }
 
-        .eyebrow {
+        .title {
+          margin-top: 28px;
+        }
+
+        .title > span,
+        .sectionLabel,
+        .summaryLabel {
           color: #7655f7;
-
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 1.2px;
         }
 
-        .heading h1 {
-          margin: 8px 0 0;
-
-          font-size:
-            clamp(
-              37px,
-              5vw,
-              52px
-            );
-
-          letter-spacing: -2px;
+        .title h1 {
+          margin: 7px 0 0;
+          color: #27333e;
+          font-size: 38px;
+          letter-spacing: -1.5px;
         }
 
-        .heading p {
-          margin: 10px 0 0;
-
-          color: #7d8791;
-
+        .title p {
+          max-width: 620px;
+          margin: 8px 0 0;
+          color: #7e8992;
           font-size: 9px;
           line-height: 1.7;
         }
 
+        .error {
+          margin-top: 22px;
+          padding: 13px 15px;
+
+          display: flex;
+          gap: 8px;
+
+          border: 1px solid #efcfd1;
+          border-radius: 10px;
+
+          background: #fff4f4;
+          color: #9e4147;
+
+          font-size: 8px;
+        }
+
         .checkoutGrid {
-          margin-top: 38px;
+          margin-top: 30px;
 
           display: grid;
 
           grid-template-columns:
             minmax(0, 1fr)
-            310px;
+            350px;
 
           align-items: start;
 
-          gap: 25px;
+          gap: 18px;
         }
 
-        .sectionTitle {
-          display: flex;
-          align-items: flex-start;
-
-          gap: 10px;
-        }
-
-        .sectionTitle > span {
-          width: 30px;
-          height: 30px;
-
-          flex: 0 0 30px;
-
+        .left {
           display: grid;
-          place-items: center;
-
-          border-radius: 8px;
-
-          color: #1465e8;
-          background: #eaf2ff;
-
-          font-size: 7px;
-          font-weight: 900;
+          gap: 14px;
         }
 
-        .sectionTitle strong {
-          display: block;
+        .card,
+        .summaryCard {
+          padding: 22px;
 
-          color: #35414c;
-
-          font-size: 11px;
-        }
-
-        .sectionTitle p {
-          margin: 4px 0 0;
-
-          color: #8a949d;
-
-          font-size: 8px;
-        }
-
-        .sectionTitle.second {
-          margin-top: 28px;
-        }
-
-        .card {
-          margin-top: 14px;
-
-          padding: 18px;
-
-          border: 1px solid #dfe4e8;
-          border-radius: 14px;
-
-          background: white;
-        }
-
-        .fields {
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-
-          gap: 11px;
-        }
-
-        .fields + .fields {
-          margin-top: 12px;
-        }
-
-        .field.full {
-          margin-bottom: 12px;
-        }
-
-        .field label {
-          display: block;
-
-          margin-bottom: 6px;
-
-          color: #66727d;
-
-          font-size: 7px;
-
-          font-weight: 850;
-        }
-
-        .field input,
-        .field select {
-          width: 100%;
-
-          min-height: 43px;
-
-          padding: 0 11px;
-
-          border: 1px solid #d7dde2;
-
-          border-radius: 9px;
-
-          outline: none;
-
-          color: #35414c;
-
-          background: white;
-
-          font-size: 9px;
-        }
-
-        .field input:focus,
-        .field select:focus {
-          border-color: #1465e8;
-
-          box-shadow:
-            0 0 0 3px
-            rgba(
-              20,
-              101,
-              232,
-              0.08
-            );
-        }
-
-        .field input:disabled {
-          color: #89939c;
-
-          background: #f5f7f8;
-        }
-
-        .error {
-          margin-top: 15px;
-
-          padding: 12px;
-
-          border: 1px solid #efd2d4;
-          border-radius: 9px;
-
-          color: #9d4146;
-
-          background: #fff5f5;
-
-          font-size: 8px;
-
-          line-height: 1.5;
-        }
-
-        .summary {
-          position: sticky;
-
-          top: 20px;
-
-          padding: 20px;
-
-          border: 1px solid #dfe4e8;
-
+          border: 1px solid #dfe5e9;
           border-radius: 16px;
 
           background: white;
-
-          box-shadow:
-            0 18px 45px
-            rgba(
-              16,
-              24,
-              40,
-              0.06
-            );
-        }
-
-        .summaryLabel {
-          color: #7655f7;
-
-          font-size: 7px;
-
-          font-weight: 900;
-
-          letter-spacing: 1px;
         }
 
         .product {
           margin-top: 17px;
 
-          padding-bottom: 17px;
+          display: grid;
 
-          display: flex;
+          grid-template-columns:
+            115px
+            minmax(0, 1fr)
+            auto;
 
           align-items: center;
 
-          gap: 10px;
-
-          border-bottom:
-            1px solid #edf0f2;
+          gap: 17px;
         }
 
-        .productIcon {
-          width: 47px;
+        .productImage {
+          height: 115px;
 
-          height: 47px;
+          overflow: hidden;
+
+          border-radius: 13px;
+
+          background: linear-gradient(
+            145deg,
+            #edf4ff,
+            #f3efff
+          );
+        }
+
+        .productImage img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .placeholder {
+          width: 100%;
+          height: 100%;
 
           display: grid;
-
           place-items: center;
 
-          border-radius: 11px;
-
-          background: #eef4ff;
-
-          font-size: 21px;
+          position: relative;
         }
 
-        .product strong,
-        .product span {
+        .placeholder span {
+          font-size: 39px;
+        }
+
+        .placeholder strong {
+          position: absolute;
+          right: 8px;
+          bottom: 7px;
+
+          color: rgba(
+            20,
+            101,
+            232,
+            0.3
+          );
+
+          font-size: 17px;
+        }
+
+        .category {
+          color: #7655f7;
+          font-size: 6px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .productInfo h2 {
+          margin: 5px 0 0;
+          font-size: 18px;
+        }
+
+        .design {
+          display: block;
+          margin-top: 3px;
+          color: #6f7b86;
+          font-size: 9px;
+        }
+
+        .sku {
+          display: block;
+          margin-top: 8px;
+          color: #9aa3aa;
+          font-size: 6px;
+        }
+
+        .stock {
+          margin-top: 7px;
+          color: #27845c;
+          font-size: 7px;
+          font-weight: 800;
+        }
+
+        .productPrice {
+          text-align: right;
+        }
+
+        .productPrice strong,
+        .productPrice span {
           display: block;
         }
 
-        .product strong {
-          color: #34404b;
-
-          font-size: 10px;
+        .productPrice strong {
+          font-size: 17px;
         }
 
-        .product span {
+        .productPrice span {
           margin-top: 4px;
-
-          color: #8b959e;
-
-          font-size: 7px;
+          color: #87919a;
+          font-size: 8px;
         }
 
-        .productData {
-          margin-top: 12px;
-
-          padding: 10px;
+        .formGrid {
+          margin-top: 18px;
 
           display: grid;
 
           grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
+            repeat(2, minmax(0, 1fr));
 
-          gap: 8px;
-
-          border-radius: 8px;
-
-          background: #f8fafb;
+          gap: 12px;
         }
 
-        .productData span,
-        .productData strong {
+        label {
           display: block;
         }
 
-        .productData span {
-          color: #929ca5;
-
-          font-size: 5px;
-
-          font-weight: 900;
+        label.full {
+          grid-column: 1 / -1;
         }
 
-        .productData strong {
-          margin-top: 3px;
+        label > span {
+          display: block;
 
-          overflow: hidden;
+          margin-bottom: 6px;
 
-          color: #52606b;
+          color: #68747f;
 
-          font-size: 6px;
-
-          text-overflow: ellipsis;
-
-          white-space: nowrap;
+          font-size: 7px;
+          font-weight: 850;
         }
 
-        .summaryRow {
-          margin-top: 14px;
+        input,
+        select {
+          width: 100%;
+          min-height: 43px;
 
-          display: flex;
+          box-sizing: border-box;
+
+          padding: 0 11px;
+
+          border: 1px solid #dce2e6;
+          border-radius: 9px;
+
+          outline: none;
+
+          color: #35414c;
+          background: white;
+
+          font-size: 9px;
+        }
+
+        input:focus,
+        select:focus {
+          border-color: #1465e8;
+          box-shadow: 0 0 0 3px
+            rgba(20, 101, 232, 0.08);
+        }
+
+        input:disabled {
+          background: #f4f6f7;
+          color: #8c969e;
+        }
+
+        .paymentMethods {
+          margin-top: 18px;
+
+          display: grid;
+
+          gap: 8px;
+        }
+
+        .payment {
+          width: 100%;
+
+          padding: 12px;
+
+          display: grid;
+
+          grid-template-columns:
+            45px
+            minmax(0, 1fr)
+            auto;
 
           align-items: center;
 
-          justify-content:
-            space-between;
-
           gap: 10px;
+
+          border: 1px solid #dce2e6;
+          border-radius: 11px;
+
+          background: white;
+
+          text-align: left;
+          cursor: pointer;
         }
 
-        .summaryRow span {
-          color: #7e8992;
+        .payment.active {
+          border-color: #1465e8;
+          box-shadow: 0 0 0 3px
+            rgba(20, 101, 232, 0.06);
+        }
+
+        .paymentIcon {
+          width: 42px;
+          height: 42px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 10px;
+
+          background: #f1f5fb;
+
+          font-size: 17px;
+          font-weight: 900;
+        }
+
+        .paymentIcon.tbc {
+          color: white;
+          background: #00a5df;
+          font-size: 9px;
+        }
+
+        .paymentIcon.bog {
+          color: white;
+          background: #ef5b2a;
+          font-size: 8px;
+        }
+
+        .paymentText strong,
+        .paymentText small {
+          display: block;
+        }
+
+        .paymentText strong {
+          color: #34404b;
+          font-size: 9px;
+        }
+
+        .paymentText small {
+          margin-top: 3px;
+          color: #8b959d;
+          font-size: 7px;
+        }
+
+        .radio {
+          color: #1465e8;
+          font-size: 13px;
+        }
+
+        .paymentNote {
+          margin-top: 12px;
+
+          padding: 10px;
+
+          border-radius: 8px;
+
+          color: #73808a;
+          background: #f6f8fa;
+
+          font-size: 7px;
+        }
+
+        .summary {
+          position: sticky;
+          top: 20px;
+        }
+
+        .summaryProduct {
+          margin-top: 18px;
+
+          display: flex;
+          justify-content: space-between;
+          gap: 15px;
+        }
+
+        .summaryProduct
+          > div
+          > strong,
+        .summaryProduct span,
+        .summaryProduct small {
+          display: block;
+        }
+
+        .summaryProduct
+          > div
+          > strong {
+          font-size: 10px;
+        }
+
+        .summaryProduct span {
+          margin-top: 3px;
+          color: #76828c;
+          font-size: 8px;
+        }
+
+        .summaryProduct small {
+          margin-top: 5px;
+          color: #969fa7;
+          font-size: 7px;
+        }
+
+        .summaryProduct
+          > strong {
+          font-size: 11px;
+        }
+
+        .line {
+          height: 1px;
+
+          margin: 17px 0;
+
+          background: #e8ecef;
+        }
+
+        .row {
+          margin-top: 10px;
+
+          display: flex;
+          justify-content: space-between;
+
+          color: #707c86;
 
           font-size: 8px;
         }
 
-        .summaryRow strong {
-          color: #44515c;
-
-          font-size: 8px;
+        .row strong {
+          color: #3a4651;
         }
 
-        .divider {
-          margin: 18px 0;
-
-          border-top:
-            1px solid #e8ecef;
+        .row .free {
+          color: #27845c;
         }
 
         .total {
           display: flex;
-
           align-items: center;
-
-          justify-content:
-            space-between;
+          justify-content: space-between;
         }
 
         .total span {
-          color: #34404b;
-
           font-size: 10px;
-
-          font-weight: 850;
+          font-weight: 900;
         }
 
         .total strong {
-          color: #202b37;
-
-          font-size: 22px;
+          color: #1465e8;
+          font-size: 23px;
         }
 
-        .note {
-          margin: 12px 0 0;
-
-          color: #8b959e;
-
-          font-size: 7px;
-
-          line-height: 1.55;
-        }
-
-        .submit {
+        .payButton {
           width: 100%;
+          min-height: 48px;
 
-          min-height: 49px;
-
-          margin-top: 18px;
-
+          margin-top: 20px;
           padding: 0 15px;
 
           display: flex;
-
           align-items: center;
-
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           border: 0;
-
           border-radius: 10px;
 
           color: white;
 
-          background: #1465e8;
+          background: linear-gradient(
+            135deg,
+            #1465e8,
+            #7655f7
+          );
 
           cursor: pointer;
 
-          font-size: 8px;
-
+          font-size: 9px;
           font-weight: 900;
         }
 
-        .submit:disabled {
-          opacity: 0.6;
-
-          cursor: wait;
+        .payButton:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
         }
 
-        .secure {
-          margin-top: 13px;
+        .accountInfo {
+          margin-top: 14px;
 
-          color: #929ca5;
+          display: flex;
+          gap: 7px;
+
+          color: #76828c;
+        }
+
+        .accountInfo span {
+          color: #27845c;
+        }
+
+        .accountInfo p {
+          margin: 0;
+          font-size: 7px;
+          line-height: 1.5;
+        }
+
+        .notFound {
+          margin-top: 30px;
+
+          padding: 60px 20px;
+
+          border: 1px solid #dfe5e9;
+          border-radius: 16px;
+
+          background: white;
 
           text-align: center;
-
-          font-size: 6px;
         }
 
-        @media (
-          max-width: 800px
-        ) {
+        .notFound > div {
+          font-size: 35px;
+        }
+
+        .notFound h2 {
+          margin-top: 10px;
+        }
+
+        .notFound :global(a) {
+          display: inline-flex;
+
+          margin-top: 12px;
+          padding: 10px 14px;
+
+          border-radius: 8px;
+
+          color: white;
+          background: #1465e8;
+
+          text-decoration: none;
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        footer {
+          width: calc(100% - 40px);
+          max-width: 1180px;
+
+          min-height: 90px;
+
+          margin: auto;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          border-top: 1px solid #dfe5e9;
+        }
+
+        footer strong {
+          color: #1465e8;
+          font-size: 11px;
+        }
+
+        footer span {
+          color: #8c969e;
+          font-size: 7px;
+        }
+
+        @media (max-width: 850px) {
           .checkoutGrid {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .summary {
@@ -1498,37 +2102,53 @@ function CheckoutContent() {
           }
         }
 
-        @media (
-          max-width: 600px
-        ) {
-          .topbar {
+        @media (max-width: 600px) {
+          .header {
             padding: 10px 0;
-
-            align-items:
-              flex-start;
-
-            flex-direction:
-              column;
-          }
-
-          .topActions {
-            width: 100%;
-
-            flex-wrap: wrap;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
           }
 
           .shell {
-            width:
-              calc(
-                100% - 24px
-              );
-
-            padding-top: 32px;
+            width: calc(100% - 24px);
           }
 
-          .fields {
+          .title h1 {
+            font-size: 31px;
+          }
+
+          .product {
             grid-template-columns:
-              1fr;
+              85px
+              minmax(0, 1fr);
+          }
+
+          .productImage {
+            height: 85px;
+          }
+
+          .productPrice {
+            grid-column: 1 / -1;
+            text-align: left;
+          }
+
+          .formGrid {
+            grid-template-columns: 1fr;
+          }
+
+          label.full {
+            grid-column: auto;
+          }
+
+          footer {
+            width: calc(100% - 24px);
+            padding: 20px 0;
+
+            align-items: flex-start;
+            flex-direction: column;
+
+            gap: 6px;
           }
         }
       `}</style>
@@ -1536,71 +2156,23 @@ function CheckoutContent() {
   );
 }
 
-function CheckoutLoading() {
+export default function CheckoutPage() {
   return (
-    <main className="loading">
-      <div>
-        QR
-      </div>
-
-      <strong>
-        QR RETURN
-      </strong>
-
-      <span>
-        Loading checkout...
-      </span>
-
-      <style jsx>{`
-        .loading {
-          min-height: 100vh;
-
-          display: flex;
-
-          flex-direction: column;
-
-          align-items: center;
-
-          justify-content: center;
-
-          gap: 8px;
-
-          color: #7d8791;
-
-          background: #f5f7f8;
-        }
-
-        .loading div {
-          width: 52px;
-
-          height: 52px;
-
-          display: grid;
-
-          place-items: center;
-
-          border-radius: 14px;
-
-          color: white;
-
-          background:
-            linear-gradient(
-              135deg,
-              #1465e8,
-              #7655f7
-            );
-
-          font-weight: 900;
-        }
-
-        .loading strong {
-          color: #202b37;
-        }
-
-        .loading span {
-          font-size: 8px;
-        }
-      `}</style>
-    </main>
+    <Suspense
+      fallback={
+        <main
+          style={{
+            minHeight: "100vh",
+            display: "grid",
+            placeItems: "center",
+            background: "#f5f7f8",
+          }}
+        >
+          Loading checkout...
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }
