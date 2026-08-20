@@ -3,13 +3,12 @@ import {
   NextResponse,
 } from "next/server";
 
-type TbcCallbackBody = {
-  PaymentId?: string;
-  payId?: string;
-  status?: string;
-  merchantPaymentId?: string;
-  transactionId?: string;
-};
+import {
+  createClient,
+} from "@supabase/supabase-js";
+
+export const runtime =
+  "nodejs";
 
 type TbcTokenResponse = {
   access_token?: string;
@@ -23,21 +22,78 @@ type TbcTokenResponse = {
 
 type TbcPaymentDetails = {
   payId?: string;
-  status?: string;
 
-  currency?: string;
-  amount?: number;
+  status?: string;
 
   merchantPaymentId?: string;
 
   transactionId?: string | null;
 
+  currency?: string;
+
+  amount?: number | {
+    currency?: string;
+    total?: number;
+    subTotal?: number;
+    tax?: number;
+  };
+
   title?: string;
   detail?: string;
   message?: string;
-  developerMessage?: string;
-  userMessage?: string;
+
+  developerMessage?: string | null;
+  userMessage?: string | null;
+
+  [key: string]: unknown;
 };
+
+type CallbackBody = {
+  PaymentId?: string;
+  paymentId?: string;
+  payId?: string;
+
+  status?: string;
+
+  merchantPaymentId?: string;
+
+  transactionId?: string;
+
+  [key: string]: unknown;
+};
+
+function getSupabaseAdmin() {
+  const supabaseUrl =
+    process.env
+      .NEXT_PUBLIC_SUPABASE_URL;
+
+  const serviceRoleKey =
+    process.env
+      .SUPABASE_SERVICE_ROLE_KEY;
+
+  if (
+    !supabaseUrl ||
+    !serviceRoleKey
+  ) {
+    throw new Error(
+      "Supabase server credentials are not configured."
+    );
+  }
+
+  return createClient(
+    supabaseUrl,
+    serviceRoleKey,
+    {
+      auth: {
+        persistSession:
+          false,
+
+        autoRefreshToken:
+          false,
+      },
+    }
+  );
+}
 
 async function getTbcAccessToken() {
   const apiKey =
@@ -59,15 +115,15 @@ async function getTbcAccessToken() {
     );
   }
 
-  const body =
+  const tokenBody =
     new URLSearchParams();
 
-  body.set(
+  tokenBody.set(
     "client_id",
     clientId
   );
 
-  body.set(
+  tokenBody.set(
     "client_secret",
     clientSecret
   );
@@ -76,7 +132,8 @@ async function getTbcAccessToken() {
     await fetch(
       "https://api.tbcbank.ge/v1/tpay/access-token",
       {
-        method: "POST",
+        method:
+          "POST",
 
         headers: {
           apikey:
@@ -90,7 +147,7 @@ async function getTbcAccessToken() {
         },
 
         body:
-          body.toString(),
+          tokenBody.toString(),
 
         cache:
           "no-store",
@@ -102,6 +159,11 @@ async function getTbcAccessToken() {
       TbcTokenResponse;
 
   if (!response.ok) {
+    console.error(
+      "TBC callback token error:",
+      data
+    );
+
     throw new Error(
       data.detail ||
         data.message ||
@@ -117,19 +179,18 @@ async function getTbcAccessToken() {
   }
 
   return {
+    apiKey,
     accessToken:
       data.access_token,
-
-    apiKey,
   };
 }
 
-async function getPaymentDetails(
+async function getTbcPayment(
   payId: string
 ) {
   const {
-    accessToken,
     apiKey,
+    accessToken,
   } =
     await getTbcAccessToken();
 
@@ -139,7 +200,8 @@ async function getPaymentDetails(
         payId
       )}`,
       {
-        method: "GET",
+        method:
+          "GET",
 
         headers: {
           apikey:
@@ -162,153 +224,756 @@ async function getPaymentDetails(
       TbcPaymentDetails;
 
   if (!response.ok) {
+    console.error(
+      "TBC payment verification error:",
+      data
+    );
+
     throw new Error(
       data.userMessage ||
         data.detail ||
         data.message ||
         data.developerMessage ||
         data.title ||
-        "Could not read TBC payment details."
+        "Could not verify TBC payment."
     );
   }
 
   return data;
 }
 
+async function readCallbackBody(
+  request: NextRequest
+) {
+  const contentType =
+    request.headers.get(
+      "content-type"
+    ) || "";
+
+  /*
+   * JSON CALLBACK
+   */
+
+  if (
+    contentType.includes(
+      "application/json"
+    )
+  ) {
+    try {
+      return (
+        (await request.json()) as
+          CallbackBody
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  /*
+   * FORM CALLBACK
+   */
+
+  if (
+    contentType.includes(
+      "application/x-www-form-urlencoded"
+    ) ||
+    contentType.includes(
+      "multipart/form-data"
+    )
+  ) {
+    try {
+      const formData =
+        await request.formData();
+
+      const result:
+        CallbackBody = {};
+
+      for (
+        const [
+          key,
+          value,
+        ] of formData.entries()
+      ) {
+        if (
+          typeof value ===
+          "string"
+        ) {
+          result[key] =
+            value;
+        }
+      }
+
+      return result;
+    } catch {
+      return {};
+    }
+  }
+
+  /*
+   * FALLBACK RAW TEXT
+   */
+
+  try {
+    const raw =
+      await request.text();
+
+    if (!raw) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(
+        raw
+      ) as CallbackBody;
+    } catch {
+      const params =
+        new URLSearchParams(
+          raw
+        );
+
+      const result:
+        CallbackBody = {};
+
+      params.forEach(
+        (value, key) => {
+          result[key] =
+            value;
+        }
+      );
+
+      return result;
+    }
+  } catch {
+    return {};
+  }
+}
+
+function normalizeStatus(
+  value?: string | null
+) {
+  return (
+    value || ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+function isPaidStatus(
+  status: string
+) {
+  return [
+    "succeeded",
+    "success",
+    "paid",
+    "completed",
+  ].includes(status);
+}
+
+function isFailedStatus(
+  status: string
+) {
+  return [
+    "failed",
+    "declined",
+    "cancelled",
+    "canceled",
+    "expired",
+    "rejected",
+  ].includes(status);
+}
+
+function getPaymentAmount(
+  payment:
+    TbcPaymentDetails
+) {
+  if (
+    typeof payment.amount ===
+    "number"
+  ) {
+    return payment.amount;
+  }
+
+  if (
+    payment.amount &&
+    typeof payment.amount ===
+      "object" &&
+    typeof payment.amount
+      .total === "number"
+  ) {
+    return payment.amount
+      .total;
+  }
+
+  return null;
+}
+
+function getPaymentCurrency(
+  payment:
+    TbcPaymentDetails
+) {
+  if (
+    typeof payment.currency ===
+    "string"
+  ) {
+    return payment.currency;
+  }
+
+  if (
+    payment.amount &&
+    typeof payment.amount ===
+      "object" &&
+    typeof payment.amount
+      .currency === "string"
+  ) {
+    return payment.amount
+      .currency;
+  }
+
+  return null;
+}
+
 export async function POST(
   request: NextRequest
 ) {
   try {
-    let body:
-      TbcCallbackBody = {};
-
-    try {
-      body =
-        (await request.json()) as
-          TbcCallbackBody;
-    } catch {
-      const text =
-        await request.text();
-
-      console.log(
-        "TBC callback raw body:",
-        text
+    const callbackBody =
+      await readCallbackBody(
+        request
       );
-    }
+
+    console.log(
+      "TBC callback received:",
+      callbackBody
+    );
+
+    /*
+     * =====================================
+     * GET PAY ID
+     * =====================================
+     */
 
     const payId =
-      body.PaymentId ||
-      body.payId ||
-      "";
+      String(
+        callbackBody.PaymentId ||
+          callbackBody.paymentId ||
+          callbackBody.payId ||
+          ""
+      ).trim();
 
     if (!payId) {
-      /*
-       * Callback ფორმატი შეიძლება
-       * merchant configuration-ის მიხედვით
-       * განსხვავდებოდეს.
-       *
-       * HTTP 200-ს მაინც ვაბრუნებთ,
-       * რომ provider-ს endless retries
-       * არ გავუჩინოთ.
-       */
-
       console.warn(
-        "TBC callback received without payId:",
-        body
+        "TBC callback without payId:",
+        callbackBody
       );
+
+      /*
+       * We acknowledge callback receipt,
+       * but payment cannot be verified.
+       */
 
       return NextResponse.json({
         received: true,
         verified: false,
         reason:
-          "payId was not provided",
+          "Payment ID missing.",
       });
     }
 
     /*
-     * არ ვენდობით მხოლოდ callback-ში
-     * გამოგზავნილ status-ს.
-     *
-     * TBC API-დან ხელახლა ვკითხულობთ
-     * payment details-ს.
+     * =====================================
+     * VERIFY PAYMENT DIRECTLY WITH TBC
+     * =====================================
      */
 
     const payment =
-      await getPaymentDetails(
+      await getTbcPayment(
         payId
       );
 
     console.log(
-      "TBC verified payment:",
+      "Verified TBC payment:",
       payment
     );
 
-    const status =
-      (
-        payment.status ||
-        ""
-      ).toLowerCase();
+    const verifiedPayId =
+      payment.payId ||
+      payId;
 
-    const paid =
-      status ===
-        "succeeded" ||
-      status ===
-        "success" ||
-      status ===
-        "completed" ||
-      status ===
-        "paid";
+    const status =
+      normalizeStatus(
+        payment.status
+      );
+
+    const merchantPaymentId =
+      String(
+        payment.merchantPaymentId ||
+          callbackBody.merchantPaymentId ||
+          ""
+      ).trim();
 
     /*
-     * შემდეგ ეტაპზე აქ Supabase orders
-     * table-ს განვაახლებთ:
-     *
-     * payment_provider = "tbc"
-     * payment_id = payId
-     * payment_status = payment.status
-     * status = paid ? "paid" : ...
-     *
-     * ჯერ DB-ს არ ვეხებით,
-     * სანამ orders table-ის არსებული
-     * columns ზუსტად არ გადავამოწმეთ.
+     * merchantPaymentId = our orders.id
      */
+
+    if (
+      !merchantPaymentId
+    ) {
+      console.error(
+        "TBC payment has no merchantPaymentId:",
+        payment
+      );
+
+      return NextResponse.json(
+        {
+          received: true,
+          verified: true,
+          updated: false,
+          reason:
+            "merchantPaymentId missing.",
+        }
+      );
+    }
+
+    /*
+     * =====================================
+     * LOAD ORDER
+     * =====================================
+     */
+
+    const supabaseAdmin =
+      getSupabaseAdmin();
+
+    const {
+      data: order,
+      error: orderError,
+    } = await supabaseAdmin
+      .from("orders")
+      .select(`
+        id,
+        user_id,
+        status,
+        payment_status,
+        payment_provider,
+        payment_id,
+        merchant_payment_id,
+        transaction_id,
+        payment_amount,
+        payment_currency
+      `)
+      .eq(
+        "id",
+        merchantPaymentId
+      )
+      .maybeSingle();
+
+    if (orderError) {
+      console.error(
+        "TBC callback order lookup error:",
+        orderError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Could not load order.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (!order) {
+      console.error(
+        "TBC order not found:",
+        merchantPaymentId
+      );
+
+      return NextResponse.json({
+        received: true,
+        verified: true,
+        updated: false,
+        reason:
+          "Order not found.",
+      });
+    }
+
+    /*
+     * =====================================
+     * PAYMENT VALUES
+     * =====================================
+     */
+
+    const amount =
+      getPaymentAmount(
+        payment
+      );
+
+    const currency =
+      getPaymentCurrency(
+        payment
+      );
+
+    const transactionId =
+      payment.transactionId ||
+      callbackBody.transactionId ||
+      null;
+
+    /*
+     * =====================================
+     * PAID
+     * =====================================
+     */
+
+    if (
+      isPaidStatus(
+        status
+      )
+    ) {
+      /*
+       * Idempotency:
+       * repeated callback should not hurt.
+       */
+
+      if (
+        normalizeStatus(
+          order.payment_status
+        ) === "paid"
+      ) {
+        return NextResponse.json({
+          received: true,
+          verified: true,
+          updated: false,
+          alreadyPaid: true,
+
+          orderId:
+            order.id,
+
+          payId:
+            verifiedPayId,
+
+          status:
+            payment.status,
+        });
+      }
+
+      const {
+        error:
+          updateError,
+      } =
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            status:
+              "paid",
+
+            payment_status:
+              "paid",
+
+            payment_provider:
+              "tbc",
+
+            payment_id:
+              verifiedPayId,
+
+            merchant_payment_id:
+              merchantPaymentId,
+
+            transaction_id:
+              transactionId,
+
+            paid_at:
+              new Date().toISOString(),
+
+            payment_currency:
+              currency ||
+              order.payment_currency ||
+              null,
+
+            payment_amount:
+              amount ??
+              order.payment_amount ??
+              null,
+
+            payment_metadata: {
+              provider:
+                "tbc",
+
+              pay_id:
+                verifiedPayId,
+
+              merchant_payment_id:
+                merchantPaymentId,
+
+              transaction_id:
+                transactionId,
+
+              verified_status:
+                payment.status ||
+                null,
+
+              callback_received:
+                true,
+
+              verified_at:
+                new Date().toISOString(),
+
+              tbc_payment:
+                payment,
+            },
+          })
+          .eq(
+            "id",
+            merchantPaymentId
+          );
+
+      if (
+        updateError
+      ) {
+        console.error(
+          "TBC paid order update error:",
+          updateError
+        );
+
+        return NextResponse.json(
+          {
+            error:
+              "Could not update paid order.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+      console.log(
+        "TBC order marked PAID:",
+        merchantPaymentId
+      );
+
+      return NextResponse.json({
+        received: true,
+        verified: true,
+        updated: true,
+
+        paid: true,
+
+        orderId:
+          merchantPaymentId,
+
+        payId:
+          verifiedPayId,
+
+        status:
+          payment.status,
+
+        transactionId,
+      });
+    }
+
+    /*
+     * =====================================
+     * FAILED / CANCELLED
+     * =====================================
+     */
+
+    if (
+      isFailedStatus(
+        status
+      )
+    ) {
+      const {
+        error:
+          updateError,
+      } =
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_provider:
+              "tbc",
+
+            payment_status:
+              "failed",
+
+            payment_id:
+              verifiedPayId,
+
+            merchant_payment_id:
+              merchantPaymentId,
+
+            transaction_id:
+              transactionId,
+
+            payment_currency:
+              currency ||
+              order.payment_currency ||
+              null,
+
+            payment_amount:
+              amount ??
+              order.payment_amount ??
+              null,
+
+            payment_metadata: {
+              provider:
+                "tbc",
+
+              pay_id:
+                verifiedPayId,
+
+              merchant_payment_id:
+                merchantPaymentId,
+
+              transaction_id:
+                transactionId,
+
+              verified_status:
+                payment.status ||
+                null,
+
+              failed:
+                true,
+
+              callback_received:
+                true,
+
+              verified_at:
+                new Date().toISOString(),
+
+              tbc_payment:
+                payment,
+            },
+          })
+          .eq(
+            "id",
+            merchantPaymentId
+          );
+
+      if (
+        updateError
+      ) {
+        console.error(
+          "TBC failed order update error:",
+          updateError
+        );
+      }
+
+      return NextResponse.json({
+        received: true,
+        verified: true,
+        updated:
+          !updateError,
+
+        paid: false,
+
+        orderId:
+          merchantPaymentId,
+
+        payId:
+          verifiedPayId,
+
+        status:
+          payment.status,
+      });
+    }
+
+    /*
+     * =====================================
+     * STILL PENDING
+     * =====================================
+     */
+
+    const {
+      error:
+        pendingUpdateError,
+    } = await supabaseAdmin
+      .from("orders")
+      .update({
+        payment_provider:
+          "tbc",
+
+        payment_status:
+          "pending",
+
+        payment_id:
+          verifiedPayId,
+
+        merchant_payment_id:
+          merchantPaymentId,
+
+        transaction_id:
+          transactionId,
+
+        payment_currency:
+          currency ||
+          order.payment_currency ||
+          null,
+
+        payment_amount:
+          amount ??
+          order.payment_amount ??
+          null,
+
+        payment_metadata: {
+          provider:
+            "tbc",
+
+          pay_id:
+            verifiedPayId,
+
+          merchant_payment_id:
+            merchantPaymentId,
+
+          verified_status:
+            payment.status ||
+            null,
+
+          callback_received:
+            true,
+
+          verified_at:
+            new Date().toISOString(),
+
+          tbc_payment:
+            payment,
+        },
+      })
+      .eq(
+        "id",
+        merchantPaymentId
+      );
+
+    if (
+      pendingUpdateError
+    ) {
+      console.error(
+        "TBC pending update error:",
+        pendingUpdateError
+      );
+    }
 
     return NextResponse.json({
       received: true,
       verified: true,
 
+      paid: false,
+
+      pending: true,
+
+      orderId:
+        merchantPaymentId,
+
       payId:
-        payment.payId ||
-        payId,
-
-      merchantPaymentId:
-        payment.merchantPaymentId ||
-        body.merchantPaymentId ||
-        null,
-
-      transactionId:
-        payment.transactionId ||
-        body.transactionId ||
-        null,
+        verifiedPayId,
 
       status:
-        payment.status ||
-        body.status ||
-        null,
-
-      paid,
+        payment.status,
     });
   } catch (error) {
     console.error(
       "TBC callback error:",
       error
     );
-
-    /*
-     * აქ 500-ს ვაბრუნებთ,
-     * რადგან verification რეალურად
-     * ვერ დასრულდა.
-     */
 
     return NextResponse.json(
       {
