@@ -1,1445 +1,3715 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import SupportLauncher from "./components/SupportLauncher";
+import { supabase } from "@/lib/supabase";
 
-type Lang = "ka" | "en";
+type Language = "ka" | "en";
+
+type HomepageSettings = {
+  hero_title: string;
+  hero_description: string;
+
+  emergency_title: string;
+  emergency_description: string;
+
+  dog_label: string;
+  cat_label: string;
+  keys_label: string;
+  wallet_label: string;
+  suitcase_label: string;
+  bag_label: string;
+
+  dog_image: string;
+  cat_image: string;
+  keys_image: string;
+  wallet_image: string;
+  suitcase_image: string;
+  bag_image: string;
+
+  video_enabled: boolean;
+  steps_enabled: boolean;
+  features_enabled: boolean;
+  rules_enabled: boolean;
+  contact_enabled: boolean;
+
+  primary_button_text: string;
+  secondary_button_text: string;
+
+  hero_font_size: number;
+  hero_background: string;
+
+  products_animation_enabled: boolean;
+
+  video_title: string;
+  video_description: string;
+  video_url: string;
+
+  steps_title: string;
+
+  step_1_title: string;
+  step_1_text: string;
+
+  step_2_title: string;
+  step_2_text: string;
+
+  step_3_title: string;
+  step_3_text: string;
+
+  step_4_title: string;
+  step_4_text: string;
+
+  features_title: string;
+
+  feature_1_title: string;
+  feature_1_text: string;
+
+  feature_2_title: string;
+  feature_2_text: string;
+
+  feature_3_title: string;
+  feature_3_text: string;
+
+  feature_4_title: string;
+  feature_4_text: string;
+
+  rules_title: string;
+
+  rule_1_title: string;
+  rule_1_text: string;
+
+  rule_2_title: string;
+  rule_2_text: string;
+
+  rule_3_title: string;
+  rule_3_text: string;
+
+  account_title: string;
+  account_description: string;
+
+  contact_title: string;
+  contact_description: string;
+  contact_email: string;
+
+  emergency_profile_enabled: boolean;
+  account_section_enabled: boolean;
+
+  emergency_contact_title: string;
+  emergency_contact_text: string;
+
+  medical_title: string;
+  medical_text: string;
+
+  allergy_title: string;
+  allergy_text: string;
+
+  privacy_title: string;
+  privacy_text: string;
+};
+
+const homepageDefaults: HomepageSettings = {
+  hero_title:
+    "როცა სიტყვის თქმა შეუძლებელია, ინფორმაცია მაინც ხელმისაწვდომია.",
+
+  hero_description:
+    "Emergency QR პროფილი გაძლევთ საშუალებას წინასწარ განსაზღვროთ რა უნდა იცოდეს დამხმარემ და ვის დაუკავშირდეს საგანგებო სიტუაციაში.",
+
+  emergency_title: "QR RETURN • EMERGENCY ID",
+
+  emergency_description:
+    "საგანგებო კონტაქტი, სამედიცინო ინფორმაცია, ალერგიები და თქვენ მიერ ნებადართული სხვა მნიშვნელოვანი მონაცემები.",
+
+  dog_label: "ძაღლი",
+  cat_label: "კატა",
+  keys_label: "სახლის + მანქანის გასაღები",
+  wallet_label: "საფულე",
+  suitcase_label: "ჩემოდანი",
+  bag_label: "ჩანთა",
+
+  dog_image: "",
+  cat_image: "",
+  keys_image: "",
+  wallet_image: "",
+  suitcase_image: "",
+  bag_image: "",
+
+  video_enabled: true,
+  steps_enabled: true,
+  features_enabled: true,
+  rules_enabled: true,
+  contact_enabled: true,
+
+  primary_button_text: "ანგარიშის შექმნა",
+  secondary_button_text: "როგორ მუშაობს",
+
+  hero_font_size: 49,
+  hero_background: "#f8f8f5",
+
+  products_animation_enabled: true,
+
+  video_title: "ერთი სკანი. პირდაპირი კავშირი.",
+
+  video_description:
+    "აქ განთავსდება მოკლე რეალური ვიდეო — როგორ ხედავს მპოვნელი QR RETURN-ს, როგორ ასკანერებს და როგორ იწყებს მფლობელთან დაკავშირებას.",
+
+  video_url: "",
+
+  steps_title: "დაბრუნების გზა ოთხ ნაბიჯში.",
+
+  step_1_title: "იპოვეს",
+  step_1_text: "მპოვნელი ხედავს QR RETURN კოდს.",
+
+  step_2_title: "დაასკანერეს",
+  step_2_text: "აპის ჩამოტვირთვა საჭირო არ არის.",
+
+  step_3_title: "დაგიკავშირდნენ",
+  step_3_text:
+    "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი.",
+
+  step_4_title: "დაბრუნდა",
+  step_4_text:
+    "მპოვნელთან კავშირის შემდეგ დაბრუნება მარტივდება.",
+
+  features_title:
+    "რაც საჭიროა — ზედმეტი სირთულის გარეშე.",
+
+  feature_1_title: "Live Chat",
+  feature_1_text:
+    "მპოვნელთან პირდაპირი კავშირი პირადი ნომრის გამოჩენის გარეშე.",
+
+  feature_2_title: "ლოკაციის გაზიარება",
+  feature_2_text:
+    "მპოვნელმა შეიძლება ლოკაცია ერთი ღილაკით გაგიზიაროთ.",
+
+  feature_3_title: "მპოვნელის ჯილდო",
+  feature_3_text:
+    "სურვილის შემთხვევაში შესთავაზეთ ჯილდო.",
+
+  feature_4_title: "Privacy Control",
+  feature_4_text:
+    "თქვენ წყვეტთ რა ინფორმაცია გამოჩნდება.",
+
+  rules_title:
+    "მარტივი თქვენთვის. კიდევ უფრო მარტივი მპოვნელისთვის.",
+
+  rule_1_title: "აპის გარეშე",
+  rule_1_text:
+    "მპოვნელისთვის აპის ჩამოტვირთვა ან რეგისტრაცია საჭირო არ არის.",
+
+  rule_2_title: "თქვენი ინფორმაცია",
+  rule_2_text:
+    "თქვენ თავად განსაზღვრავთ რა იქნება ხელმისაწვდომი.",
+
+  rule_3_title: "ერთი ანგარიში",
+  rule_3_text:
+    "ცხოველები, ნივთები და Emergency ID ერთ სივრცეში.",
+
+  account_title:
+    "ყველაფერი ერთი ანგარიშიდან.",
+
+  account_description:
+    "მართეთ QR პროფილები, დაკარგვის რეჟიმი, Live Chat და Emergency ID.",
+
+  contact_title: "დაგვიკავშირდით",
+
+  contact_description:
+    "კითხვა გაქვთ QR RETURN-ის ან Emergency ID-ის შესახებ? მოგვწერეთ.",
+
+  contact_email: "hello@qrreturn.com",
+
+  emergency_profile_enabled: true,
+  account_section_enabled: true,
+
+  emergency_contact_title:
+    "საგანგებო კონტაქტი",
+  emergency_contact_text:
+    "თქვენ მიერ არჩეული პირი",
+
+  medical_title:
+    "სამედიცინო ინფორმაცია",
+  medical_text:
+    "მხოლოდ ნებადართული მონაცემები",
+
+  allergy_title: "ალერგიები",
+  allergy_text:
+    "საჭიროების შემთხვევაში",
+
+  privacy_title: "Privacy Control",
+  privacy_text:
+    "თქვენ აკონტროლებთ მონაცემებს",
+};
+
+const defaultProducts = [
+  {
+    id: "dog",
+    en: "Dog",
+    image:
+      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=88",
+    className: "dog",
+  },
+  {
+    id: "cat",
+    en: "Cat",
+    image:
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=900&q=88",
+    className: "cat",
+  },
+  {
+    id: "keys",
+    en: "Home + Car Keys",
+    image: "",
+    className: "keys",
+  },
+  {
+    id: "wallet",
+    en: "Wallet",
+    image:
+      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=88",
+    className: "wallet",
+  },
+  {
+    id: "luggage",
+    en: "Luggage",
+    image:
+      "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=900&q=88",
+    className: "luggage",
+  },
+  {
+    id: "bag",
+    en: "Bag",
+    image:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=88",
+    className: "bag",
+  },
+];
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Lang>("ka");
-  const ka = lang === "ka";
+  const [language, setLanguage] =
+    useState<Language>("ka");
+
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
+
+  const [homepage, setHomepage] =
+    useState<HomepageSettings>(
+      homepageDefaults
+    );
+
+  const ka = language === "ka";
+
+  /* =====================================================
+     LOAD HOMEPAGE SETTINGS
+  ===================================================== */
+
+  useEffect(() => {
+    async function loadHomepage() {
+      const { data, error } =
+        await supabase
+          .from("homepage_settings")
+          .select("*")
+          .eq("id", 1)
+          .maybeSingle();
+
+      if (error) {
+        console.warn(
+          "homepage_settings:",
+          error.message
+        );
+        return;
+      }
+
+      if (data) {
+        setHomepage({
+          ...homepageDefaults,
+          ...data,
+        });
+      }
+    }
+
+    void loadHomepage();
+  }, []);
+
+  /* =====================================================
+     AUTH + ADMIN
+  ===================================================== */
+
+  useEffect(() => {
+    async function loadUser() {
+      const {
+        data: { user },
+      } =
+        await supabase.auth.getUser();
+
+      if (!user) {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsLoggedIn(true);
+
+      const { data } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setIsAdmin(Boolean(data));
+    }
+
+    void loadUser();
+
+    const { data } =
+      supabase.auth.onAuthStateChange(
+        () => {
+          void loadUser();
+        }
+      );
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  /* =====================================================
+     PRODUCTS FROM ADMIN
+  ===================================================== */
+
+  const products = useMemo(() => {
+    const labels: Record<
+      string,
+      string
+    > = {
+      dog: homepage.dog_label,
+      cat: homepage.cat_label,
+      keys: homepage.keys_label,
+      wallet: homepage.wallet_label,
+      luggage:
+        homepage.suitcase_label,
+      bag: homepage.bag_label,
+    };
+
+    const images: Record<
+      string,
+      string
+    > = {
+      dog: homepage.dog_image,
+      cat: homepage.cat_image,
+      keys: homepage.keys_image,
+      wallet: homepage.wallet_image,
+      luggage:
+        homepage.suitcase_image,
+      bag: homepage.bag_image,
+    };
+
+    return defaultProducts.map(
+      (item) => ({
+        ...item,
+        label:
+          labels[item.id] ||
+          item.en,
+        image:
+          images[item.id] ||
+          item.image,
+      })
+    );
+  }, [homepage]);
+
+  const videoEmbedUrl =
+    getVideoEmbedUrl(
+      homepage.video_url
+    );
+
+  const heroBackground =
+    homepage.hero_background ||
+    "#f8f8f5";
+
+  const heroFontSize =
+    homepage.hero_font_size >= 28 &&
+    homepage.hero_font_size <= 80
+      ? homepage.hero_font_size
+      : 49;
 
   return (
     <main className="page">
+      {/* =================================================
+          HEADER
+      ================================================= */}
+
       <header className="header">
-        <Link href="/" className="brand">
-          <span className="logo">QR</span>
+        <a href="/" className="brand">
+          <div className="brandIcon">
+            <QrIcon />
+          </div>
 
-          <span className="brandText">
-            <strong>QR RETURN</strong>
-            <small>SECURE RETURN SYSTEM</small>
-          </span>
-        </Link>
+          <div className="brandText">
+            <strong>
+              QR RETURN
+            </strong>
 
-        <nav className="nav">
-          <a href="#start">
-            {ka ? "როგორ დავიწყო" : "How to Start"}
-          </a>
+            <span>
+              SMART LOST &amp; FOUND
+            </span>
+          </div>
+        </a>
 
-          <a href="#features">
-            {ka ? "შესაძლებლობები" : "Features"}
-          </a>
+        <div className="headerRight">
+          <nav className="nav">
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="adminBtn"
+              >
+                <AdminIcon />
+                <span>
+                  Admin Panel
+                </span>
+              </a>
+            )}
 
-          <a href="#emergency">Emergency</a>
+            {isLoggedIn ? (
+              <a
+                href="/account"
+                className="accountBtn"
+              >
+                <UserIcon />
 
-          <Link href="/store">
-            {ka ? "მაღაზია" : "Store"}
-          </Link>
-        </nav>
+                <span>
+                  {ka
+                    ? "ჩემი ანგარიში"
+                    : "My Account"}
+                </span>
+              </a>
+            ) : (
+              <>
+                <a
+                  href="/account/register"
+                  className="accountBtn"
+                >
+                  {ka
+                    ? homepage.primary_button_text
+                    : "Create Account"}
+                </a>
 
-        <div className="actions">
-          <div className="languages">
+                <a
+                  href="/login"
+                  className="loginBtn"
+                >
+                  {ka
+                    ? "შესვლა"
+                    : "Sign In"}
+                </a>
+              </>
+            )}
+          </nav>
+
+          <div className="language">
             <button
               type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
+              className={
+                ka ? "active" : ""
+              }
+              onClick={() =>
+                setLanguage("ka")
+              }
             >
               GEO
             </button>
 
+            <span />
+
             <button
               type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
+              className={
+                !ka ? "active" : ""
+              }
+              onClick={() =>
+                setLanguage("en")
+              }
             >
               ENG
             </button>
           </div>
-
-          <Link href="/admin" className="admin">
-            Admin
-          </Link>
-
-          <Link href="/login" className="login">
-            {ka ? "შესვლა" : "Login"}
-          </Link>
-
-          <Link href="/register" className="register">
-            {ka ? "ანგარიშის შექმნა" : "Create Account"}
-          </Link>
         </div>
       </header>
 
-      <section className="hero">
-        <div className="heroCopy">
-          <span className="eyebrow">
-            QR RETURN · SMART LOST & FOUND
-          </span>
+      {/* =================================================
+          HERO
+      ================================================= */}
 
-          <h1>
-            {ka ? (
-              <>
-                დაკარგვა არ ნიშნავს
-                <br />
-                <span>დამშვიდობებას.</span>
-              </>
-            ) : (
-              <>
-                Losing it doesn&apos;t mean
-                <br />
-                <span>saying goodbye.</span>
-              </>
-            )}
-          </h1>
+      <section
+        className="hero"
+        style={{
+          backgroundColor:
+            heroBackground,
+        }}
+      >
+        <div className="heroGlow glowBlue" />
+        <div className="heroGlow glowRed" />
 
-          <p>
-            {ka
-              ? "შექმენი ერთი QR RETURN ანგარიში, შეავსე მფლობელის პროფილი და შემდეგ დაამატე შენი ძაღლის, კატის ან ნივთების QR პროფილები."
-              : "Create one QR RETURN account, complete your Owner Profile, then add QR profiles for your pets and belongings."}
-          </p>
+        <div className="heroInner">
+          {/* =============================================
+              LEFT
+          ============================================= */}
 
-          <div className="heroButtons">
-            <Link href="/register" className="primary">
-              {ka ? "ანგარიშის შექმნა" : "Create Account"}
-              <span>→</span>
-            </Link>
+          <div className="emergencyColumn">
+            <div className="emergencyEyebrow">
+              <span className="medicalMark">
+                +
+              </span>
 
-            <Link href="/login" className="secondary">
-              {ka ? "შესვლა" : "Sign In"}
-            </Link>
-          </div>
+              <span>
+                {ka
+                  ? homepage.emergency_title
+                  : "QR RETURN • EMERGENCY ID"}
+              </span>
+            </div>
 
-          <div className="quickLinks">
-            <Link href="/my-profiles">
-              {ka ? "ჩემი პროფილები" : "My Profiles"}
-            </Link>
-
-            <Link href="/account/messages">Live Chat</Link>
-
-            <Link href="/store">
-              {ka ? "მაღაზია" : "Store"}
-            </Link>
-          </div>
-        </div>
-
-        <div className="heroVisual">
-          <div className="visualCard">
-            <span className="visualLabel">QR RETURN</span>
-
-            <div className="profileCircle">QR</div>
-
-            <h3>Owner Connected</h3>
-
-            <p>
+            <h1
+              style={{
+                fontSize: `clamp(34px, 3.9vw, ${heroFontSize}px)`,
+              }}
+            >
               {ka
-                ? "ერთი სკანირება მპოვნელს აკავშირებს მფლობელთან."
-                : "One scan connects the finder with the owner."}
+                ? homepage.hero_title
+                : "When you cannot speak, essential information can still speak for you."}
+            </h1>
+
+            <p className="heroLead">
+              {ka
+                ? homepage.hero_description
+                : "Emergency QR lets you decide in advance what a helper should know and who they should contact in an emergency."}
             </p>
 
-            <div className="visualActions">
-              <div>
-                <strong>Live Chat</strong>
-                <small>Secure contact</small>
-              </div>
+            {/* BRACELET */}
 
-              <div>
-                <strong>Location</strong>
-                <small>Share securely</small>
+            <div className="braceletArea">
+              <div className="braceletShadow" />
+
+              <div className="bracelet">
+                <div className="strap redStrap">
+                  <span className="strapLine" />
+                </div>
+
+                <div className="braceletPlate">
+                  <div className="plateHeader">
+                    <span className="tinyCross">
+                      +
+                    </span>
+
+                    <span>
+                      EMERGENCY QR
+                    </span>
+                  </div>
+
+                  <div className="plateQr">
+                    <QrCode size={62} />
+                  </div>
+
+                  <div className="plateBrand">
+                    <strong>
+                      QR RETURN
+                    </strong>
+
+                    <span>
+                      SCAN FOR EMERGENCY INFO
+                    </span>
+                  </div>
+                </div>
+
+                <div className="strap blueStrap">
+                  <span className="strapLine" />
+                </div>
               </div>
+            </div>
+
+            {/* EMERGENCY PROFILE */}
+
+            {homepage.emergency_profile_enabled && (
+              <div className="emergencyProfile">
+                <div className="profileTop">
+                  <div>
+                    <span>
+                      EMERGENCY PROFILE
+                    </span>
+
+                    <strong>
+                      {ka
+                        ? "მხოლოდ საჭირო ინფორმაცია."
+                        : "Only what matters."}
+                    </strong>
+                  </div>
+
+                  <div className="ready">
+                    <i />
+                    SOS READY
+                  </div>
+                </div>
+
+                <div className="profileGrid">
+                  <EmergencyItem
+                    icon={<PhoneIcon />}
+                    title={
+                      ka
+                        ? homepage.emergency_contact_title
+                        : "Emergency Contact"
+                    }
+                    text={
+                      ka
+                        ? homepage.emergency_contact_text
+                        : "Your trusted contact"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<HeartIcon />}
+                    title={
+                      ka
+                        ? homepage.medical_title
+                        : "Medical Information"
+                    }
+                    text={
+                      ka
+                        ? homepage.medical_text
+                        : "Only approved information"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<AlertIcon />}
+                    title={
+                      ka
+                        ? homepage.allergy_title
+                        : "Allergies"
+                    }
+                    text={
+                      ka
+                        ? homepage.allergy_text
+                        : "When relevant"
+                    }
+                  />
+
+                  <EmergencyItem
+                    icon={<ShieldIcon />}
+                    title={
+                      ka
+                        ? homepage.privacy_title
+                        : "Privacy Control"
+                    }
+                    text={
+                      ka
+                        ? homepage.privacy_text
+                        : "You stay in control"
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            <p className="emergencyDescription">
+              {ka
+                ? homepage.emergency_description
+                : "Emergency contact, medical information and other essential information you choose to make available."}
+            </p>
+
+            <div className="heroActions">
+              <a
+                href={
+                  isLoggedIn
+                    ? "/account"
+                    : "/account/register"
+                }
+                className="primaryCta"
+              >
+                {isLoggedIn
+                  ? ka
+                    ? "ჩემი ანგარიში"
+                    : "My Account"
+                  : ka
+                  ? homepage.primary_button_text
+                  : "Create Account"}
+
+                <ArrowIcon />
+              </a>
+
+              <a
+                href="#video"
+                className="secondaryCta"
+              >
+                {ka
+                  ? homepage.secondary_button_text
+                  : "How it works"}
+              </a>
+            </div>
+          </div>
+
+          {/* =============================================
+              RIGHT
+          ============================================= */}
+
+          <div className="ecosystem">
+            <div className="orbit orbitOuter" />
+            <div className="orbit orbitInner" />
+
+            <div className="phone">
+              <div className="phoneNotch" />
+
+              <div className="phoneScreen">
+                <div className="phoneHeader">
+                  <div className="phoneLogo">
+                    <QrIcon />
+                  </div>
+
+                  <div>
+                    <span>
+                      QR RETURN
+                    </span>
+
+                    <strong>
+                      {ka
+                        ? "მპოვნელის გვერდი"
+                        : "Finder Access"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="phoneStatus">
+                  <div className="successCircle">
+                    <CheckIcon />
+                  </div>
+
+                  <span>
+                    SCAN COMPLETE
+                  </span>
+                </div>
+
+                <div className="phoneCopy">
+                  <strong>
+                    {ka
+                      ? "დაუკავშირდი მფლობელს"
+                      : "Contact the owner"}
+                  </strong>
+
+                  <p>
+                    {ka
+                      ? "აირჩიე შენთვის მოსახერხებელი მეთოდი."
+                      : "Choose the contact method that works for you."}
+                  </p>
+                </div>
+
+                <div className="phoneButtons">
+                  <button
+                    type="button"
+                    className="phonePrimary"
+                  >
+                    <ChatIcon />
+                    <span>
+                      Live Chat
+                    </span>
+                  </button>
+
+                  <button type="button">
+                    <LocationIcon />
+
+                    <span>
+                      {ka
+                        ? "ლოკაცია"
+                        : "Location"}
+                    </span>
+                  </button>
+                </div>
+
+                <div className="privacy">
+                  <ShieldIcon />
+
+                  <span>
+                    {ka
+                      ? "პირადი მონაცემები დაცულია"
+                      : "Private information protected"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={
+                homepage.products_animation_enabled
+                  ? "productOrbit animated"
+                  : "productOrbit"
+              }
+            >
+              {products.map(
+                (item) => (
+                  <div
+                    key={item.id}
+                    className={`productBubble ${item.className}`}
+                  >
+                    <div className="productImage">
+                      {item.id === "keys" &&
+                      !item.image ? (
+                        <KeysScene />
+                      ) : (
+                        <img
+                          src={item.image}
+                          alt={
+                            ka
+                              ? item.label
+                              : item.en
+                          }
+                        />
+                      )}
+
+                      <div className="imageShade" />
+
+                      <div
+                        className={`miniPhysicalTag ${item.id}`}
+                      >
+                        <span className="tagHole" />
+                        <MiniQr />
+                      </div>
+
+                      {item.id ===
+                        "luggage" && (
+                        <span className="airportBadge">
+                          AIRPORT
+                        </span>
+                      )}
+                    </div>
+
+                    <strong>
+                      {ka
+                        ? item.label
+                        : item.en}
+                    </strong>
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="ecosystemCaption">
+              <span>
+                QR RETURN
+              </span>
+
+              <strong>
+                {ka
+                  ? "ერთი სისტემა. ბევრი გამოყენება."
+                  : "One system. Many uses."}
+              </strong>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="start" id="start">
-        <div className="sectionTitle">
-          <span>01 · START HERE</span>
+      {/* =================================================
+          VIDEO
+      ================================================= */}
 
-          <h2>
-            {ka
-              ? "ჯერ ანგარიში. შემდეგ მფლობელი. მერე QR პროფილები."
-              : "Account first. Then Owner Profile. Then QR Profiles."}
-          </h2>
-        </div>
+      {homepage.video_enabled && (
+        <section
+          id="video"
+          className="videoSection"
+        >
+          <div className="shell">
+            <div className="videoLayout">
+              <div className="videoCopy">
+                <span className="eyebrow">
+                  QR RETURN IN ACTION
+                </span>
 
-        <div className="flow">
-          <article>
-            <span>01</span>
-            <h3>
-              {ka ? "ანგარიშის შექმნა" : "Create Account"}
-            </h3>
-            <p>
-              {ka
-                ? "შექმენი შენი პირადი QR RETURN ანგარიში."
-                : "Create your personal QR RETURN account."}
-            </p>
-            <Link href="/register">
-              {ka ? "დაწყება" : "Start"} →
-            </Link>
-          </article>
+                <h2>
+                  {ka
+                    ? homepage.video_title
+                    : "One scan. A direct connection."}
+                </h2>
 
-          <article>
-            <span>02</span>
-            <h3>
-              {ka ? "მფლობელის პროფილი" : "Owner Profile"}
-            </h3>
-            <p>
-              {ka
-                ? "შეავსე მფლობელის ინფორმაცია და ხილვადობის პარამეტრები."
-                : "Complete owner information and visibility settings."}
-            </p>
-          </article>
+                <p>
+                  {ka
+                    ? homepage.video_description
+                    : "See how a finder can scan QR RETURN and connect with the owner."}
+                </p>
+              </div>
 
-          <article>
-            <span>03</span>
-            <h3>
-              {ka ? "QR პროფილის შექმნა" : "Create QR Profile"}
-            </h3>
-            <p>
-              {ka
-                ? "დაამატე ძაღლი, კატა ან ნივთი შენს ანგარიშში."
-                : "Add a dog, cat or item inside your account."}
-            </p>
-            <Link href="/my-profiles">
-              {ka ? "ჩემი პროფილები" : "My Profiles"} →
-            </Link>
-          </article>
+              <div className="videoCard">
+                {videoEmbedUrl ? (
+                  <iframe
+                    src={videoEmbedUrl}
+                    title="QR RETURN Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : homepage.video_url ? (
+                  <video
+                    src={
+                      homepage.video_url
+                    }
+                    controls
+                  />
+                ) : (
+                  <>
+                    <div className="videoBrand">
+                      <QrIcon />
 
-          <article>
-            <span>04</span>
-            <h3>
-              {ka ? "QR-ის მიბმა" : "Connect QR"}
-            </h3>
-            <p>
-              {ka
-                ? "მიაბი ბრელოკი ან სტიკერი კონკრეტულ პროფილს."
-                : "Connect a tag or sticker to the selected profile."}
-            </p>
-            <Link href="/store">
-              {ka ? "მაღაზია" : "Store"} →
-            </Link>
-          </article>
-        </div>
-      </section>
+                      <span>
+                        QR RETURN PRODUCT DEMO
+                      </span>
+                    </div>
 
-      <section className="profileTypes">
-        <div className="sectionTitle">
-          <span>02 · QR PROFILE TYPES</span>
+                    <button
+                      type="button"
+                      className="playButton"
+                    >
+                      <PlayIcon />
+                    </button>
 
-          <h2>
-            {ka
-              ? "ერთი ანგარიში. რამდენიმე ტიპის პროფილი."
-              : "One account. Multiple profile types."}
-          </h2>
-        </div>
+                    <span className="videoSoon">
+                      {ka
+                        ? "ვიდეო დაემატება"
+                        : "Video coming soon"}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
-        <div className="profileGrid">
-          {[
-            ["DOG", ka ? "ძაღლი" : "Dog"],
-            ["CAT", ka ? "კატა" : "Cat"],
-            ["KEYS", ka ? "გასაღები" : "Keys"],
-            ["WALLET", ka ? "საფულე" : "Wallet"],
-            ["SUITCASE", ka ? "ჩემოდანი" : "Suitcase"],
-            ["BAG", ka ? "ჩანთა" : "Bag"],
-          ].map(([code, title]) => (
-            <article key={code}>
-              <span>{code}</span>
-              <div className="typeMark">{code.charAt(0)}</div>
-              <h3>{title}</h3>
+      {/* =================================================
+          FOUR STEPS
+      ================================================= */}
+
+      {homepage.steps_enabled && (
+        <section className="stepsSection">
+          <div className="shell">
+            <div className="sectionHeading">
+              <span className="eyebrow">
+                FIND → SCAN → CONNECT → RETURN
+              </span>
+
+              <h2>
+                {ka
+                  ? homepage.steps_title
+                  : "A clear return path in four steps."}
+              </h2>
+            </div>
+
+            <div className="steps">
+              <Step
+                number="01"
+                icon={<SearchIcon />}
+                title={
+                  ka
+                    ? homepage.step_1_title
+                    : "Found"
+                }
+                text={
+                  ka
+                    ? homepage.step_1_text
+                    : "The finder sees the QR RETURN code."
+                }
+              />
+
+              <span className="stepLine" />
+
+              <Step
+                number="02"
+                icon={<ScanIcon />}
+                title={
+                  ka
+                    ? homepage.step_2_title
+                    : "Scanned"
+                }
+                text={
+                  ka
+                    ? homepage.step_2_text
+                    : "No app download is required."
+                }
+              />
+
+              <span className="stepLine" />
+
+              <Step
+                number="03"
+                icon={<ChatIcon />}
+                title={
+                  ka
+                    ? homepage.step_3_title
+                    : "Connected"
+                }
+                text={
+                  ka
+                    ? homepage.step_3_text
+                    : "Live Chat, call or another contact method."
+                }
+              />
+
+              <span className="stepLine" />
+
+              <Step
+                number="04"
+                icon={<ReturnIcon />}
+                title={
+                  ka
+                    ? homepage.step_4_title
+                    : "Returned"
+                }
+                text={
+                  ka
+                    ? homepage.step_4_text
+                    : "Once connected, getting it back becomes easier."
+                }
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================================================
+          FEATURES
+      ================================================= */}
+
+      {homepage.features_enabled && (
+        <section className="featuresSection">
+          <div className="shell">
+            <div className="featuresHeading">
+              <span>
+                CONNECTION &amp; CONTROL
+              </span>
+
+              <h2>
+                {ka
+                  ? homepage.features_title
+                  : "What you need — without unnecessary complexity."}
+              </h2>
+            </div>
+
+            <div className="features">
+              <Feature
+                number="01"
+                icon={<ChatIcon />}
+                title={
+                  ka
+                    ? homepage.feature_1_title
+                    : "Live Chat"
+                }
+                text={
+                  ka
+                    ? homepage.feature_1_text
+                    : "Connect directly without displaying your private phone number."
+                }
+              />
+
+              <Feature
+                number="02"
+                icon={<LocationIcon />}
+                title={
+                  ka
+                    ? homepage.feature_2_title
+                    : "Location Sharing"
+                }
+                text={
+                  ka
+                    ? homepage.feature_2_text
+                    : "The finder can share the location with one tap."
+                }
+              />
+
+              <Feature
+                number="03"
+                icon={<RewardIcon />}
+                title={
+                  ka
+                    ? homepage.feature_3_title
+                    : "Finder Reward"
+                }
+                text={
+                  ka
+                    ? homepage.feature_3_text
+                    : "Optionally offer a reward for a safe return."
+                }
+              />
+
+              <Feature
+                number="04"
+                icon={<ShieldIcon />}
+                title={
+                  ka
+                    ? homepage.feature_4_title
+                    : "Privacy Control"
+                }
+                text={
+                  ka
+                    ? homepage.feature_4_text
+                    : "You decide exactly what information is visible."
+                }
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================================================
+          RULES
+      ================================================= */}
+
+      {homepage.rules_enabled && (
+        <section className="rulesSection">
+          <div className="shell">
+            <div className="sectionHeading">
+              <span className="eyebrow">
+                SIMPLE BY DESIGN
+              </span>
+
+              <h2>
+                {ka
+                  ? homepage.rules_title
+                  : "Simple for you. Even simpler for the finder."}
+              </h2>
+            </div>
+
+            <div className="rules">
+              <Rule
+                number="01"
+                title={
+                  ka
+                    ? homepage.rule_1_title
+                    : "No App"
+                }
+                text={
+                  ka
+                    ? homepage.rule_1_text
+                    : "The finder does not need to download an app or create an account."
+                }
+              />
+
+              <Rule
+                number="02"
+                title={
+                  ka
+                    ? homepage.rule_2_title
+                    : "Your Information"
+                }
+                text={
+                  ka
+                    ? homepage.rule_2_text
+                    : "You decide exactly what information can be shown."
+                }
+              />
+
+              <Rule
+                number="03"
+                title={
+                  ka
+                    ? homepage.rule_3_title
+                    : "One Account"
+                }
+                text={
+                  ka
+                    ? homepage.rule_3_text
+                    : "Pets, belongings and Emergency ID in one place."
+                }
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================================================
+          ACCOUNT CTA
+      ================================================= */}
+
+      {homepage.account_section_enabled && (
+        <section className="accountSection">
+          <div className="shell">
+            <div className="accountPanel">
+              <div className="accountIcon">
+                <UserIcon />
+              </div>
+
+              <div className="accountCopy">
+                <span>
+                  ONE OWNER ACCOUNT
+                </span>
+
+                <h2>
+                  {ka
+                    ? homepage.account_title
+                    : "Everything from one account."}
+                </h2>
+
+                <p>
+                  {ka
+                    ? homepage.account_description
+                    : "Manage QR profiles, lost mode, Live Chat and Emergency ID."}
+                </p>
+              </div>
+
+              <a
+                href={
+                  isLoggedIn
+                    ? "/account"
+                    : "/account/register"
+                }
+              >
+                {isLoggedIn
+                  ? ka
+                    ? "ჩემი ანგარიში"
+                    : "My Account"
+                  : ka
+                  ? homepage.primary_button_text
+                  : "Create Account"}
+
+                <ArrowIcon />
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =================================================
+          CONTACT
+      ================================================= */}
+
+      {homepage.contact_enabled && (
+        <section className="contactSection">
+          <div className="shell contactInner">
+            <div>
+              <span className="eyebrow">
+                CONTACT
+              </span>
+
+              <h2>
+                {ka
+                  ? homepage.contact_title
+                  : "Contact us"}
+              </h2>
+
               <p>
                 {ka
-                  ? "პროფილი იქმნება ანგარიშში შესვლის შემდეგ."
-                  : "Created after signing in to your account."}
+                  ? homepage.contact_description
+                  : "Questions about QR RETURN or Emergency ID? Send us a message."}
               </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="features" id="features">
-        <div className="sectionTitle light">
-          <span>03 · SMART PROTECTION</span>
-
-          <h2>
-            {ka
-              ? "მეტი ვიდრე უბრალოდ QR კოდი."
-              : "More than just a QR code."}
-          </h2>
-        </div>
-
-        <div className="featureGrid">
-          <article>
-            <span>01</span>
-            <h3>Live Chat</h3>
-            <p>
-              {ka
-                ? "Finder-ს შეუძლია მფლობელს პირდაპირ პლატფორმიდან მისწეროს."
-                : "The finder can contact the owner directly through the platform."}
-            </p>
-          </article>
-
-          <article>
-            <span>02</span>
-            <h3>
-              {ka ? "ლოკაციის გაზიარება" : "Location Sharing"}
-            </h3>
-            <p>
-              {ka
-                ? "მპოვნელს შეუძლია მდებარეობის გაზიარება ერთი მოქმედებით."
-                : "A finder can share location with one action."}
-            </p>
-          </article>
-
-          <article>
-            <span>03</span>
-            <h3>WhatsApp / Phone</h3>
-            <p>
-              {ka
-                ? "მფლობელი თავად ირჩევს რომელი დაკავშირების მეთოდი გამოჩნდეს."
-                : "The owner chooses which contact methods are visible."}
-            </p>
-          </article>
-
-          <article>
-            <span>04</span>
-            <h3>
-              {ka ? "პირადი მონაცემების კონტროლი" : "Privacy Control"}
-            </h3>
-            <p>
-              {ka
-                ? "მფლობელი ზუსტად აკონტროლებს რას დაინახავს Finder."
-                : "The owner controls exactly what the finder can see."}
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section className="chatSection">
-        <div className="chatPreview">
-          <div className="chatHeader">
-            <div>
-              <strong>Finder</strong>
-              <small>● Online</small>
             </div>
 
-            <span>SECURE CHAT</span>
+            <a
+              href={`mailto:${
+                homepage.contact_email ||
+                "hello@qrreturn.com"
+              }`}
+            >
+              {ka
+                ? "მოგვწერეთ"
+                : "Email us"}
+
+              <ArrowIcon />
+            </a>
           </div>
+        </section>
+      )}
 
-          <div className="messages">
-            <div className="finderMessage">
-              {ka
-                ? "გამარჯობა, თქვენი ნივთი ვიპოვე."
-                : "Hi, I found your item."}
-            </div>
+      {/* =================================================
+          LIVE CHAT
+      ================================================= */}
 
-            <div className="ownerMessage">
-              {ka
-                ? "დიდი მადლობა. შეგიძლიათ ლოკაცია გამიზიაროთ?"
-                : "Thank you. Could you share your location?"}
-            </div>
+      <SupportLauncher
+        language={language}
+      />
 
-            <div className="locationMessage">
-              {ka
-                ? "ლოკაცია გაზიარებულია"
-                : "Location shared"}
-            </div>
-          </div>
-        </div>
-
-        <div className="chatCopy">
-          <span>LIVE CHAT</span>
-
-          <h2>
-            {ka
-              ? "Finder-ს რეგისტრაცია არ სჭირდება."
-              : "The finder does not need an account."}
-          </h2>
-
-          <p>
-            {ka
-              ? "ერთი QR სკანირების შემდეგ მპოვნელმა შეიძლება გახსნას Live Chat, გამოგიგზავნოს შეტყობინება ან ლოკაცია."
-              : "After one QR scan, the finder can open Live Chat, send a message or share location."}
-          </p>
-
-          <Link href="/account/messages">
-            Live Chat →
-          </Link>
-        </div>
-      </section>
-
-      <section className="emergency" id="emergency">
-        <div>
-          <span className="emergencyLabel">
-            QR RETURN EMERGENCY
-          </span>
-
-          <h2>
-            {ka
-              ? "Emergency პროფილიც იქმნება შენი ანგარიშიდან."
-              : "Emergency profiles are also created from your account."}
-          </h2>
-
-          <p>
-            {ka
-              ? "ჯერ ქმნი QR RETURN ანგარიშს, შემდეგ Owner Profile-ს და ამის შემდეგ შეგიძლია Emergency პროფილის დამატება."
-              : "Create your QR RETURN account first, complete the Owner Profile, then add an Emergency profile."}
-          </p>
-        </div>
-
-        <div className="emergencyButtons">
-          <Link href="/register" className="emergencyPrimary">
-            {ka ? "ანგარიშის შექმნა" : "Create Account"}
-            <span>→</span>
-          </Link>
-
-          <Link href="/my-profiles" className="emergencySecondary">
-            {ka ? "ჩემი პროფილები" : "My Profiles"}
-          </Link>
-        </div>
-      </section>
-
-      <section className="store">
-        <div>
-          <span>QR RETURN STORE</span>
-
-          <h2>
-            {ka
-              ? "QR ბრელოკები და სტიკერები სხვადასხვა დიზაინით."
-              : "QR tags and stickers in multiple designs."}
-          </h2>
-
-          <p>
-            {ka
-              ? "პროდუქტის ყიდვა მხოლოდ რეგისტრირებული მომხმარებლის ანგარიშიდან ხდება."
-              : "Purchases are made through a registered QR RETURN account."}
-          </p>
-
-          <Link href="/store">
-            {ka ? "მაღაზიის გახსნა" : "Explore Store"} →
-          </Link>
-        </div>
-
-        <div className="storeGraphic">
-          <div className="tagLarge">QR</div>
-          <div className="tagSmall">QR</div>
-          <div className="sticker">QR RETURN</div>
-        </div>
-      </section>
-
-      <section className="accountLinks">
-        <div className="sectionTitle">
-          <span>YOUR ACCOUNT</span>
-
-          <h2>
-            {ka
-              ? "შესვლის შემდეგ ყველაფერი ერთ სივრცეშია."
-              : "Everything stays in one place after sign-in."}
-          </h2>
-        </div>
-
-        <div className="accountGrid">
-          <Link href="/my-profiles">
-            <span>01</span>
-            <strong>
-              {ka ? "ჩემი პროფილები" : "My Profiles"}
-            </strong>
-            <b>→</b>
-          </Link>
-
-          <Link href="/account/messages">
-            <span>02</span>
-            <strong>Live Chat</strong>
-            <b>→</b>
-          </Link>
-
-          <Link href="/account/notifications">
-            <span>03</span>
-            <strong>
-              {ka ? "შეტყობინებები" : "Notifications"}
-            </strong>
-            <b>→</b>
-          </Link>
-
-          <Link href="/account/orders">
-            <span>04</span>
-            <strong>
-              {ka ? "ჩემი შეკვეთები" : "My Orders"}
-            </strong>
-            <b>→</b>
-          </Link>
-        </div>
-      </section>
-
-      <section className="adminSection">
-        <div>
-          <span>QR RETURN ADMINISTRATION</span>
-
-          <h2>Admin Panel</h2>
-
-          <p>
-            {ka
-              ? "პლატფორმის ადმინისტრაციული მართვა."
-              : "Administrative management for the platform."}
-          </p>
-        </div>
-
-        <Link href="/admin">
-          Open Admin Panel →
-        </Link>
-      </section>
+      {/* =================================================
+          FOOTER
+      ================================================= */}
 
       <footer className="footer">
-        <div>
-          <strong>QR RETURN</strong>
-          <p>
-            {ka
-              ? "დაკარგვა არ ნიშნავს დამშვიდობებას."
-              : "Never lose what matters."}
-          </p>
+        <div className="footerInner">
+          <div className="footerBrand">
+            <div>
+              <QrIcon />
+            </div>
+
+            <section>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
+            </section>
+          </div>
+
+          <div className="footerLinks">
+            <a href="#video">
+              {ka
+                ? homepage.secondary_button_text
+                : "How it works"}
+            </a>
+
+            <span>
+              Emergency ID
+            </span>
+
+            <span>
+              {ka
+                ? "კონფიდენციალურობა"
+                : "Privacy"}
+            </span>
+
+            <span>
+              {ka
+                ? "პირობები"
+                : "Terms"}
+            </span>
+          </div>
+
+          <span className="copyright">
+            © 2026 QR RETURN
+          </span>
         </div>
-
-        <Link href="/register">
-          {ka ? "ანგარიშის შექმნა" : "Create Account"}
-        </Link>
-
-        <Link href="/login">
-          {ka ? "შესვლა" : "Login"}
-        </Link>
-
-        <Link href="/admin">
-          Admin
-        </Link>
       </footer>
 
       <style jsx>{`
-        * {
+        :global(*) {
           box-sizing: border-box;
         }
 
+        :global(html) {
+          scroll-behavior: smooth;
+        }
+
+        :global(body) {
+          margin: 0;
+          background: #f8f8f5;
+        }
+
         .page {
-          min-height: 100vh;
           overflow: hidden;
-          background: #ffffff;
-          color: #142236;
+          color: #18212b;
+          background: #f8f8f5;
           font-family:
             Inter,
-            ui-sans-serif,
-            system-ui,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
+            Arial,
             sans-serif;
         }
 
-        .header {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 84px;
+        .shell {
+          width: calc(100% - 56px);
+          max-width: 1180px;
           margin: auto;
-          display: grid;
-          grid-template-columns: auto 1fr auto;
+        }
+
+        .eyebrow {
+          color: #c84a50;
+          font-size: 9px;
+          font-weight: 850;
+          letter-spacing: 1.7px;
+        }
+
+        /* HEADER */
+
+        .header {
+          width: calc(100% - 56px);
+          max-width: 1280px;
+          min-height: 78px;
+          margin: auto;
+          display: flex;
           align-items: center;
-          gap: 32px;
-          border-bottom: 1px solid #e7ecf1;
+          justify-content: space-between;
+          gap: 20px;
+          position: relative;
+          z-index: 40;
+          border-bottom: 1px solid
+            rgba(20, 28, 38, 0.075);
+        }
+
+        .brand,
+        .headerRight,
+        .nav,
+        .language {
+          display: flex;
+          align-items: center;
         }
 
         .brand {
-          display: flex;
-          align-items: center;
-          gap: 11px;
+          gap: 10px;
           text-decoration: none;
         }
 
-        .logo {
-          width: 47px;
-          height: 47px;
+        .brandIcon {
+          width: 39px;
+          height: 39px;
           display: grid;
           place-items: center;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #0874f9, #6557f5);
-          color: #ffffff;
-          font-size: 13px;
-          font-weight: 900;
+          border-radius: 11px;
+          color: white;
+          background: #202b37;
+        }
+
+        .brandIcon :global(svg) {
+          width: 20px;
         }
 
         .brandText strong,
-        .brandText small {
+        .brandText span {
           display: block;
         }
 
         .brandText strong {
-          color: #0874f9;
-          font-size: 16px;
-          font-weight: 900;
+          color: #202b37;
+          font-size: 17px;
+          font-weight: 850;
+          letter-spacing: -0.4px;
         }
 
-        .brandText small {
+        .brandText span {
           margin-top: 3px;
-          color: #7767e8;
-          font-size: 8px;
-          font-weight: 800;
-          letter-spacing: 1.2px;
+          color: #929aa3;
+          font-size: 6px;
+          font-weight: 850;
+          letter-spacing: 1.7px;
+        }
+
+        .headerRight {
+          gap: 14px;
         }
 
         .nav {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 26px;
-        }
-
-        .nav a {
-          color: #58677a;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 650;
-        }
-
-        .actions {
-          display: flex;
-          align-items: center;
           gap: 7px;
         }
 
-        .languages {
-          padding: 4px;
-          display: flex;
-          border-radius: 10px;
-          background: #f1f4f7;
-        }
-
-        .languages button {
-          width: 39px;
-          height: 30px;
-          border: 0;
-          border-radius: 7px;
-          background: transparent;
-          color: #84909d;
-          cursor: pointer;
-          font-size: 11px;
-          font-weight: 800;
-        }
-
-        .languages button.active {
-          background: #ffffff;
-          color: #0874f9;
-        }
-
-        .admin,
-        .login,
-        .register {
-          min-height: 40px;
+        .adminBtn,
+        .accountBtn,
+        .loginBtn {
+          min-height: 38px;
           padding: 0 13px;
-          display: flex;
-          align-items: center;
-          border-radius: 9px;
-          text-decoration: none;
-          font-size: 13px;
-          font-weight: 750;
-        }
-
-        .admin {
-          color: #654fc0;
-          border: 1px solid #e4ddf6;
-          background: #fbf9ff;
-        }
-
-        .login {
-          color: #536174;
-          border: 1px solid #dde4ea;
-        }
-
-        .register {
-          color: white;
-          background: #0874f9;
-        }
-
-        .hero {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 690px;
-          margin: auto;
-          display: grid;
-          grid-template-columns: minmax(0, 1.1fr) minmax(400px, 0.9fr);
-          align-items: center;
-          gap: 70px;
-        }
-
-        .eyebrow,
-        .sectionTitle > span,
-        .chatCopy > span,
-        .store > div:first-child > span {
-          color: #6c5bea;
-          font-size: 12px;
-          font-weight: 850;
-          letter-spacing: 1.3px;
-        }
-
-        .hero h1 {
-          margin: 22px 0 0;
-          max-width: 800px;
-          font-size: clamp(60px, 6vw, 82px);
-          line-height: 0.98;
-          letter-spacing: -4px;
-        }
-
-        .hero h1 span {
-          color: #0874f9;
-        }
-
-        .heroCopy > p {
-          max-width: 680px;
-          margin: 25px 0 0;
-          color: #657487;
-          font-size: 18px;
-          line-height: 1.7;
-        }
-
-        .heroButtons {
-          margin-top: 32px;
-          display: flex;
-          gap: 9px;
-          flex-wrap: wrap;
-        }
-
-        .primary,
-        .secondary {
-          min-height: 52px;
-          padding: 0 17px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 35px;
+          gap: 7px;
           border-radius: 10px;
           text-decoration: none;
-          font-size: 15px;
-          font-weight: 800;
-        }
-
-        .primary {
-          color: white;
-          background: linear-gradient(135deg, #0874f9, #6557f5);
-        }
-
-        .secondary {
-          color: #536174;
-          border: 1px solid #dce3e9;
-        }
-
-        .quickLinks {
-          margin-top: 22px;
-          display: flex;
-          gap: 20px;
-          flex-wrap: wrap;
-        }
-
-        .quickLinks a {
-          color: #637285;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 650;
-        }
-
-        .heroVisual {
-          display: flex;
-          justify-content: center;
-        }
-
-        .visualCard {
-          width: 360px;
-          padding: 28px;
-          border: 1px solid #dfe6ed;
-          border-radius: 28px;
-          background: linear-gradient(145deg, #f5f9ff, #f9f7ff);
-          box-shadow: 0 35px 90px rgba(29, 49, 78, 0.13);
-        }
-
-        .visualLabel {
-          color: #0874f9;
-          font-size: 11px;
-          font-weight: 900;
-        }
-
-        .profileCircle {
-          width: 110px;
-          height: 110px;
-          margin: 35px auto 0;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          color: white;
-          background: linear-gradient(145deg, #0874f9, #6557f5);
-          font-size: 30px;
-          font-weight: 900;
-        }
-
-        .visualCard h3 {
-          margin: 24px 0 0;
-          text-align: center;
-          font-size: 24px;
-        }
-
-        .visualCard > p {
-          margin: 10px auto 0;
-          max-width: 260px;
-          text-align: center;
-          color: #748294;
-          font-size: 14px;
-          line-height: 1.6;
-        }
-
-        .visualActions {
-          margin-top: 28px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-        }
-
-        .visualActions div {
-          padding: 16px;
-          border: 1px solid #dfe5eb;
-          border-radius: 12px;
-          background: white;
-        }
-
-        .visualActions strong,
-        .visualActions small {
-          display: block;
-        }
-
-        .visualActions strong {
-          font-size: 14px;
-        }
-
-        .visualActions small {
-          margin-top: 4px;
-          color: #89949f;
-          font-size: 11px;
-        }
-
-        .start,
-        .profileTypes,
-        .accountLinks {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          margin: auto;
-          padding: 100px 0;
-          border-top: 1px solid #e9edf2;
-        }
-
-        .sectionTitle {
-          max-width: 850px;
-        }
-
-        .sectionTitle h2,
-        .chatCopy h2,
-        .emergency h2,
-        .store h2 {
-          margin: 12px 0 0;
-          font-size: clamp(42px, 4vw, 56px);
-          line-height: 1.05;
-          letter-spacing: -2.3px;
-        }
-
-        .flow {
-          margin-top: 45px;
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 12px;
-        }
-
-        .flow article,
-        .profileGrid article {
-          min-height: 270px;
-          padding: 25px;
-          border: 1px solid #e1e7ec;
-          border-radius: 18px;
-          background: white;
-        }
-
-        .flow article > span,
-        .profileGrid article > span {
-          color: #8f9aa5;
-          font-size: 11px;
-          font-weight: 800;
-        }
-
-        .flow h3,
-        .profileGrid h3 {
-          margin: 45px 0 0;
-          font-size: 21px;
-        }
-
-        .flow p,
-        .profileGrid p {
-          margin: 9px 0 0;
-          color: #768496;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .flow a {
-          display: inline-block;
-          margin-top: 25px;
-          color: #0874f9;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 750;
-        }
-
-        .profileGrid {
-          margin-top: 45px;
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-
-        .typeMark {
-          width: 68px;
-          height: 68px;
-          margin-top: 34px;
-          display: grid;
-          place-items: center;
-          border-radius: 18px;
-          color: white;
-          background: linear-gradient(145deg, #0874f9, #6557f5);
-          font-size: 25px;
-          font-weight: 900;
-        }
-
-        .profileGrid h3 {
-          margin-top: 22px;
-        }
-
-        .features {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          margin: auto;
-          padding: 70px;
-          border-radius: 28px;
-          background: #102139;
-          color: white;
-        }
-
-        .sectionTitle.light h2 {
-          color: white;
-        }
-
-        .featureGrid {
-          margin-top: 45px;
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .featureGrid article {
-          min-height: 220px;
-          padding: 22px;
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px;
-          background: rgba(255,255,255,0.035);
-        }
-
-        .featureGrid article > span {
-          color: #8b7cff;
-          font-size: 11px;
-          font-weight: 800;
-        }
-
-        .featureGrid h3 {
-          margin: 40px 0 0;
-          font-size: 19px;
-        }
-
-        .featureGrid p {
-          margin: 9px 0 0;
-          color: #a3afbc;
-          font-size: 14px;
-          line-height: 1.6;
-        }
-
-        .chatSection {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          margin: 100px auto;
-          padding: 65px;
-          display: grid;
-          grid-template-columns: minmax(400px, 0.9fr) minmax(0, 1.1fr);
-          align-items: center;
-          gap: 75px;
-          border-radius: 28px;
-          background: linear-gradient(145deg, #f5f9ff, #faf8ff);
-        }
-
-        .chatPreview {
-          padding: 18px;
-          border: 1px solid #dfe5eb;
-          border-radius: 20px;
-          background: white;
-        }
-
-        .chatHeader {
-          min-height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid #e9edf1;
-        }
-
-        .chatHeader strong,
-        .chatHeader small {
-          display: block;
-        }
-
-        .chatHeader strong {
-          font-size: 15px;
-        }
-
-        .chatHeader small {
-          margin-top: 3px;
-          color: #2bab6d;
-          font-size: 11px;
-        }
-
-        .chatHeader > span {
-          color: #8c98a4;
           font-size: 10px;
           font-weight: 800;
         }
 
-        .messages {
-          min-height: 280px;
-          padding: 30px 10px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          background: #fafbfd;
+        .adminBtn {
+          color: #9d4044;
+          border: 1px solid #ecd8da;
+          background: #fff8f8;
         }
 
-        .finderMessage,
-        .ownerMessage,
-        .locationMessage {
-          max-width: 73%;
-          padding: 13px 16px;
-          border-radius: 14px;
-          font-size: 14px;
+        .adminBtn :global(svg),
+        .accountBtn :global(svg) {
+          width: 13px;
         }
 
-        .finderMessage {
-          align-self: flex-start;
-          border: 1px solid #e1e6eb;
-          background: white;
-        }
-
-        .ownerMessage {
-          align-self: flex-end;
+        .accountBtn {
           color: white;
-          background: #0874f9;
+          background: #202b37;
         }
 
-        .locationMessage {
-          align-self: flex-start;
-          color: #36715a;
-          background: #e8f7ef;
+        .loginBtn {
+          color: #53606d;
+          border: 1px solid #dce0e4;
         }
 
-        .chatCopy p {
-          max-width: 600px;
-          margin: 18px 0 0;
-          color: #687789;
-          font-size: 17px;
-          line-height: 1.7;
+        .language {
+          gap: 7px;
         }
 
-        .chatCopy a {
-          display: inline-block;
-          margin-top: 25px;
-          color: #0874f9;
-          text-decoration: none;
-          font-size: 15px;
-          font-weight: 800;
+        .language > span {
+          width: 1px;
+          height: 12px;
+          background: #d6dade;
         }
 
-        .emergency,
-        .store {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          margin: 0 auto 100px;
-          padding: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 50px;
-          border-radius: 26px;
+        .language button {
+          padding: 0;
+          border: 0;
+          color: #999fa8;
+          background: transparent;
+          font-size: 8px;
+          font-weight: 900;
+          cursor: pointer;
         }
 
-        .emergency {
-          border: 1px solid #efdadd;
-          background: #fff9f9;
+        .language button.active {
+          color: #c84a50;
         }
 
-        .emergency > div:first-child {
-          max-width: 800px;
-        }
+        /* HERO */
 
-        .emergencyLabel {
-          color: #d64b56;
-          font-size: 12px;
-          font-weight: 850;
-          letter-spacing: 1.2px;
-        }
-
-        .emergency p,
-        .store p {
-          max-width: 700px;
-          margin: 16px 0 0;
-          color: #707e8d;
-          font-size: 17px;
-          line-height: 1.7;
-        }
-
-        .emergencyButtons {
-          min-width: 210px;
-          display: grid;
-          gap: 8px;
-        }
-
-        .emergencyPrimary,
-        .emergencySecondary {
-          min-height: 49px;
-          padding: 0 15px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-radius: 10px;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .emergencyPrimary {
-          color: white;
-          background: #d64b56;
-        }
-
-        .emergencySecondary {
-          color: #754e54;
-          border: 1px solid #ead9dc;
-          background: white;
-        }
-
-        .store {
-          min-height: 430px;
-          color: white;
-          background: #11233b;
-        }
-
-        .store > div:first-child {
-          max-width: 730px;
-        }
-
-        .store h2 {
-          color: white;
-        }
-
-        .store p {
-          color: #a7b3c0;
-        }
-
-        .store a {
-          display: inline-block;
-          margin-top: 25px;
-          color: #11233b;
-          background: white;
-          padding: 14px 18px;
-          border-radius: 10px;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .storeGraphic {
-          width: 360px;
-          height: 260px;
+        .hero {
+          min-height: 760px;
           position: relative;
+          overflow: hidden;
+          background-image:
+            radial-gradient(
+              circle at 88% 12%,
+              rgba(49, 89, 137, 0.07),
+              transparent 31%
+            ),
+            radial-gradient(
+              circle at 7% 89%,
+              rgba(198, 65, 75, 0.05),
+              transparent 25%
+            );
         }
 
-        .tagLarge,
-        .tagSmall,
-        .sticker {
+        .heroGlow {
           position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+        }
+
+        .glowBlue {
+          width: 520px;
+          height: 520px;
+          top: -280px;
+          right: -220px;
+          background:
+            rgba(43, 93, 150, 0.045);
+        }
+
+        .glowRed {
+          width: 360px;
+          height: 360px;
+          bottom: -190px;
+          left: -180px;
+          background:
+            rgba(198, 67, 76, 0.04);
+        }
+
+        .heroInner {
+          width: calc(100% - 56px);
+          max-width: 1280px;
+          min-height: 760px;
+          margin: auto;
+          display: grid;
+          grid-template-columns:
+            0.96fr 1.04fr;
+          align-items: center;
+          gap: 65px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .emergencyColumn {
+          max-width: 580px;
+        }
+
+        .emergencyEyebrow {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          color: #a84248;
+          font-size: 9px;
+          font-weight: 850;
+          letter-spacing: 1.3px;
+        }
+
+        .medicalMark {
+          width: 25px;
+          height: 25px;
           display: grid;
           place-items: center;
-          color: #0874f9;
-          background: white;
-          box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+          border-radius: 7px;
+          color: white;
+          background: #c94a50;
+          font-size: 17px;
+        }
+
+        .emergencyColumn h1 {
+          max-width: 565px;
+          margin: 22px 0 0;
+          color: #17212b;
+          line-height: 1.07;
+          letter-spacing: -2.4px;
+          font-weight: 690;
+        }
+
+        .heroLead {
+          max-width: 535px;
+          margin: 18px 0 0;
+          color: #68727c;
+          font-size: 15px;
+          line-height: 1.72;
+        }
+
+        /* BRACELET */
+
+        .braceletArea {
+          min-height: 180px;
+          margin-top: 26px;
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .braceletShadow {
+          width: 370px;
+          height: 24px;
+          position: absolute;
+          left: 50px;
+          bottom: 18px;
+          border-radius: 50%;
+          background:
+            rgba(27, 37, 49, 0.09);
+          filter: blur(13px);
+        }
+
+        .bracelet {
+          width: 470px;
+          height: 120px;
+          display: flex;
+          align-items: center;
+          position: relative;
+          z-index: 2;
+          transform: rotate(-4deg);
+        }
+
+        .strap {
+          height: 48px;
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .redStrap {
+          border-radius:
+            25px 0 0 25px;
+          background:
+            linear-gradient(
+              180deg,
+              #df4a50,
+              #bd343b
+            );
+        }
+
+        .blueStrap {
+          border-radius:
+            0 25px 25px 0;
+          background:
+            linear-gradient(
+              180deg,
+              #2e79bd,
+              #155c9c
+            );
+        }
+
+        .strapLine {
+          width: 70%;
+          height: 2px;
+          position: absolute;
+          left: 15%;
+          top: 50%;
+          border-radius: 99px;
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.18
+            );
+        }
+
+        .braceletPlate {
+          width: 158px;
+          height: 118px;
+          padding: 10px 12px;
+          flex: 0 0 158px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          border: 4px solid #b9c0c6;
+          border-radius: 25px;
+          background:
+            linear-gradient(
+              145deg,
+              #ffffff,
+              #f3f4f4
+            );
+          box-shadow:
+            0 18px 34px
+              rgba(29, 38, 49, 0.16),
+            inset 0 1px white;
+        }
+
+        .plateHeader {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          color: #a44045;
+          font-size: 7px;
           font-weight: 900;
         }
 
-        .tagLarge {
-          width: 160px;
-          height: 160px;
-          left: 20px;
-          top: 55px;
-          border-radius: 50%;
-          font-size: 34px;
-        }
-
-        .tagSmall {
-          width: 105px;
-          height: 105px;
-          right: 15px;
-          top: 10px;
-          border-radius: 50%;
-          font-size: 25px;
-        }
-
-        .sticker {
-          width: 150px;
-          height: 95px;
-          right: 0;
-          bottom: 5px;
-          border-radius: 17px;
-          font-size: 14px;
-        }
-
-        .accountGrid {
-          margin-top: 42px;
+        .tinyCross {
+          width: 16px;
+          height: 16px;
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .accountGrid a {
-          min-height: 85px;
-          padding: 0 20px;
-          display: grid;
-          grid-template-columns: 45px 1fr auto;
-          align-items: center;
-          gap: 15px;
-          border: 1px solid #e1e7ec;
-          border-radius: 14px;
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .accountGrid span {
-          color: #0874f9;
-          font-size: 12px;
-          font-weight: 850;
-        }
-
-        .accountGrid strong {
-          font-size: 17px;
-        }
-
-        .accountGrid b {
-          color: #0874f9;
-          font-size: 20px;
-        }
-
-        .adminSection {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          margin: 0 auto 100px;
-          padding: 35px 40px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 30px;
-          border: 1px solid #e4def4;
-          border-radius: 18px;
-          background: #faf9ff;
-        }
-
-        .adminSection > div > span {
-          color: #7058ca;
-          font-size: 11px;
-          font-weight: 850;
-        }
-
-        .adminSection h2 {
-          margin: 6px 0 0;
-          font-size: 28px;
-        }
-
-        .adminSection p {
-          margin: 5px 0 0;
-          color: #81798d;
-          font-size: 14px;
-        }
-
-        .adminSection a {
-          min-height: 48px;
-          padding: 0 17px;
-          display: flex;
-          align-items: center;
-          border-radius: 10px;
+          place-items: center;
+          border-radius: 5px;
           color: white;
-          background: #614ab6;
+          background: #c94a50;
+          font-size: 11px;
+        }
+
+        .plateQr {
+          margin-top: 6px;
+        }
+
+        .plateBrand {
+          margin-top: 4px;
+          text-align: center;
+        }
+
+        .plateBrand strong,
+        .plateBrand span {
+          display: block;
+        }
+
+        .plateBrand strong {
+          color: #27323d;
+          font-size: 6px;
+        }
+
+        .plateBrand span {
+          margin-top: 2px;
+          color: #8c949c;
+          font-size: 4px;
+        }
+
+        /* PROFILE */
+
+        .emergencyProfile {
+          padding: 17px;
+          border: 1px solid #e0e3e6;
+          border-radius: 19px;
+          background:
+            rgba(255, 255, 255, 0.87);
+          box-shadow:
+            0 14px 36px
+            rgba(31, 40, 53, 0.045);
+        }
+
+        .profileTop {
+          padding-bottom: 12px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+        }
+
+        .profileTop span,
+        .profileTop strong {
+          display: block;
+        }
+
+        .profileTop > div:first-child span {
+          color: #c94a50;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .profileTop > div:first-child strong {
+          margin-top: 4px;
+          color: #36414d;
+          font-size: 12px;
+        }
+
+        .ready {
+          padding: 6px 8px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          border-radius: 999px;
+          color: #376b4c;
+          background: #edf8f1;
+          font-size: 6px;
+          font-weight: 900;
+        }
+
+        .ready i {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #2aa76b;
+        }
+
+        .profileGrid {
+          display: grid;
+          grid-template-columns:
+            1fr 1fr;
+          border-top:
+            1px solid #e7eaed;
+          border-left:
+            1px solid #e7eaed;
+        }
+
+        .emergencyDescription {
+          max-width: 535px;
+          margin: 13px 0 0;
+          color: #737d87;
+          font-size: 10px;
+          line-height: 1.6;
+        }
+
+        .heroActions {
+          margin-top: 23px;
+          display: flex;
+          gap: 9px;
+        }
+
+        .primaryCta,
+        .secondaryCta {
+          min-height: 44px;
+          padding: 0 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border-radius: 10px;
           text-decoration: none;
+          font-size: 10px;
+          font-weight: 820;
+        }
+
+        .primaryCta {
+          color: white;
+          background: #202b37;
+        }
+
+        .primaryCta :global(svg) {
+          width: 12px;
+        }
+
+        .secondaryCta {
+          color: #4d5865;
+          border: 1px solid #d9dde1;
+          background:
+            rgba(255,255,255,.65);
+        }
+
+        /* ECOSYSTEM */
+
+        .ecosystem {
+          width: 590px;
+          height: 600px;
+          margin: auto;
+          position: relative;
+        }
+
+        .orbit {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          border-radius: 50%;
+          transform:
+            translate(-50%, -50%);
+        }
+
+        .orbitOuter {
+          width: 500px;
+          height: 500px;
+          border:
+            1px solid
+            rgba(86,104,126,.11);
+        }
+
+        .orbitInner {
+          width: 385px;
+          height: 385px;
+          border:
+            1px dashed
+            rgba(86,104,126,.08);
+        }
+
+        /* PHONE */
+
+        .phone {
+          width: 175px;
+          height: 350px;
+          padding: 7px;
+          position: absolute;
+          z-index: 5;
+          top: 50%;
+          left: 50%;
+          border-radius: 29px;
+          background:
+            linear-gradient(
+              145deg,
+              #171e26,
+              #070b10
+            );
+          box-shadow:
+            0 32px 70px
+            rgba(24,33,44,.2);
+          transform:
+            translate(-50%, -50%);
+        }
+
+        .phoneNotch {
+          width: 46px;
+          height: 9px;
+          position: absolute;
+          top: 10px;
+          left: 50%;
+          z-index: 4;
+          border-radius: 99px;
+          background: #05080c;
+          transform:
+            translateX(-50%);
+        }
+
+        .phoneScreen {
+          height: 100%;
+          padding: 27px 13px 13px;
+          border-radius: 23px;
+          background:
+            linear-gradient(
+              180deg,
+              #fff,
+              #f6f8fa
+            );
+        }
+
+        .phoneHeader {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .phoneLogo {
+          width: 30px;
+          height: 30px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          color: white;
+          background: #202b37;
+        }
+
+        .phoneLogo :global(svg) {
+          width: 15px;
+        }
+
+        .phoneHeader span,
+        .phoneHeader strong {
+          display: block;
+        }
+
+        .phoneHeader span {
+          color: #c94a50;
+          font-size: 6px;
+          font-weight: 900;
+        }
+
+        .phoneHeader strong {
+          margin-top: 2px;
+          color: #4a5562;
+          font-size: 8px;
+        }
+
+        .phoneStatus {
+          margin-top: 32px;
+          text-align: center;
+        }
+
+        .successCircle {
+          width: 62px;
+          height: 62px;
+          margin: auto;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          color: #2b9663;
+          background: #edf8f2;
+        }
+
+        .successCircle :global(svg) {
+          width: 27px;
+        }
+
+        .phoneStatus > span {
+          display: block;
+          margin-top: 9px;
+          color: #83909c;
+          font-size: 6px;
+          font-weight: 900;
+        }
+
+        .phoneCopy {
+          margin-top: 15px;
+          text-align: center;
+        }
+
+        .phoneCopy strong {
+          display: block;
+          color: #27323d;
           font-size: 14px;
+        }
+
+        .phoneCopy p {
+          margin: 6px 0 0;
+          color: #7d8793;
+          font-size: 8px;
+        }
+
+        .phoneButtons {
+          margin-top: 18px;
+          display: grid;
+          grid-template-columns:
+            1fr 1fr;
+          gap: 6px;
+        }
+
+        .phoneButtons button {
+          min-height: 47px;
+          padding: 7px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content:
+            space-between;
+          border:
+            1px solid #e0e4e7;
+          border-radius: 10px;
+          color: #56616d;
+          background: white;
+          font-size: 7px;
           font-weight: 800;
         }
 
-        .footer {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 115px;
-          margin: auto;
+        .phoneButtons .phonePrimary {
+          color: white;
+          border-color: #202b37;
+          background: #202b37;
+        }
+
+        .phoneButtons :global(svg) {
+          width: 13px;
+        }
+
+        .privacy {
+          margin-top: 11px;
+          padding-top: 9px;
           display: flex;
           align-items: center;
-          gap: 30px;
-          border-top: 1px solid #e5eaee;
+          justify-content: center;
+          gap: 6px;
+          border-top:
+            1px solid #e5e8ea;
+          color: #838d98;
+          font-size: 6px;
         }
 
-        .footer > div {
-          margin-right: auto;
+        .privacy :global(svg) {
+          width: 11px;
+          color: #c94a50;
         }
 
-        .footer strong {
-          color: #0874f9;
-          font-size: 16px;
+        /* PRODUCTS */
+
+        .productOrbit {
+          position: absolute;
+          inset: 0;
         }
 
-        .footer p {
-          margin: 4px 0 0;
-          color: #89949f;
-          font-size: 13px;
+        .productOrbit.animated {
+          animation:
+            productMovement
+            18s
+            ease-in-out
+            infinite alternate;
         }
 
-        .footer a {
-          color: #5d6c7d;
+        @keyframes productMovement {
+          from {
+            transform: rotate(-1.1deg);
+          }
+
+          to {
+            transform: rotate(1.1deg);
+          }
+        }
+
+        .productBubble {
+          width: 116px;
+          position: absolute;
+          text-align: center;
+        }
+
+        .productImage {
+          width: 116px;
+          height: 92px;
+          position: relative;
+          overflow: hidden;
+          border:
+            4px solid
+            rgba(255,255,255,.95);
+          border-radius: 18px;
+          background: #e1e4e7;
+          box-shadow:
+            0 13px 28px
+            rgba(31,41,54,.11);
+        }
+
+        .productImage > img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .imageShade {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              180deg,
+              transparent 58%,
+              rgba(7,11,16,.13)
+            );
+        }
+
+        .productBubble > strong {
+          display: inline-block;
+          max-width: 130px;
+          margin-top: 8px;
+          padding: 5px 8px;
+          border:
+            1px solid
+            rgba(221,225,228,.92);
+          border-radius: 999px;
+          color: #465260;
+          background:
+            rgba(255,255,255,.9);
+          font-size: 8px;
+          line-height: 1.3;
+        }
+
+        .miniPhysicalTag {
+          width: 26px;
+          height: 32px;
+          position: absolute;
+          display: grid;
+          place-items: center;
+          border-radius: 6px;
+          background: white;
+          box-shadow:
+            0 4px 10px
+            rgba(0,0,0,.13);
+          transform: scale(.72);
+        }
+
+        .tagHole {
+          width: 7px;
+          height: 7px;
+          position: absolute;
+          top: -5px;
+          border:
+            1px solid #919ba5;
+          border-radius: 50%;
+        }
+
+        .miniPhysicalTag.dog,
+        .miniPhysicalTag.cat {
+          left: 50%;
+          bottom: -3px;
+          transform:
+            translateX(-50%)
+            scale(.7);
+        }
+
+        .miniPhysicalTag.keys,
+        .miniPhysicalTag.wallet {
+          right: 9px;
+          bottom: 8px;
+        }
+
+        .miniPhysicalTag.luggage {
+          top: 12px;
+          left: 50%;
+          transform:
+            translateX(-50%)
+            scale(.72);
+        }
+
+        .miniPhysicalTag.bag {
+          top: 17px;
+          right: 13px;
+        }
+
+        .airportBadge {
+          position: absolute;
+          left: 6px;
+          bottom: 6px;
+          padding: 4px 5px;
+          border-radius: 999px;
+          color: #42505f;
+          background:
+            rgba(255,255,255,.88);
+          font-size: 5px;
+          font-weight: 900;
+        }
+
+        .dog {
+          top: 25px;
+          left: 92px;
+        }
+
+        .cat {
+          top: 25px;
+          right: 88px;
+        }
+
+        .keys {
+          top: 236px;
+          left: 2px;
+        }
+
+        .wallet {
+          top: 236px;
+          right: 2px;
+        }
+
+        .luggage {
+          left: 93px;
+          bottom: 28px;
+        }
+
+        .bag {
+          right: 88px;
+          bottom: 28px;
+        }
+
+        .ecosystemCaption {
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          text-align: center;
+          transform:
+            translateX(-50%);
+        }
+
+        .ecosystemCaption span,
+        .ecosystemCaption strong {
+          display: block;
+        }
+
+        .ecosystemCaption span {
+          color: #c94a50;
+          font-size: 6px;
+          font-weight: 900;
+        }
+
+        .ecosystemCaption strong {
+          margin-top: 3px;
+          color: #6d7782;
+          font-size: 8px;
+        }
+
+        /* VIDEO */
+
+        .videoSection {
+          padding: 90px 0;
+          background: #fbfbf9;
+        }
+
+        .videoLayout {
+          display: grid;
+          grid-template-columns:
+            .75fr 1.25fr;
+          align-items: center;
+          gap: 65px;
+        }
+
+        .videoCopy h2,
+        .sectionHeading h2 {
+          margin: 11px 0 0;
+          color: #18222c;
+          font-size:
+            clamp(32px,3.7vw,43px);
+          line-height: 1.07;
+          letter-spacing: -2px;
+          font-weight: 670;
+        }
+
+        .videoCopy p {
+          margin: 15px 0 0;
+          color: #6d7782;
+          font-size: 12px;
+          line-height: 1.72;
+        }
+
+        .videoCard {
+          min-height: 340px;
+          position: relative;
+          overflow: hidden;
+          display: grid;
+          place-items: center;
+          border:
+            1px solid #e0e4e7;
+          border-radius: 24px;
+          background:
+            linear-gradient(
+              135deg,
+              #eef1f3,
+              #fafaf8
+            );
+        }
+
+        .videoCard iframe,
+        .videoCard video {
+          width: 100%;
+          height: 340px;
+          border: 0;
+          object-fit: cover;
+        }
+
+        .videoBrand {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #59646f;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .videoBrand :global(svg) {
+          width: 18px;
+        }
+
+        .playButton {
+          width: 64px;
+          height: 64px;
+          display: grid;
+          place-items: center;
+          border: 0;
+          border-radius: 50%;
+          color: white;
+          background: #202b37;
+        }
+
+        .playButton :global(svg) {
+          width: 22px;
+        }
+
+        .videoSoon {
+          position: absolute;
+          bottom: 18px;
+          color: #8b949e;
+          font-size: 8px;
+        }
+
+        /* STEPS */
+
+        .stepsSection {
+          padding: 90px 0;
+          background: #f1f2ef;
+        }
+
+        .sectionHeading {
+          max-width: 700px;
+        }
+
+        .steps {
+          margin-top: 44px;
+          display: grid;
+          grid-template-columns:
+            1fr auto 1fr auto
+            1fr auto 1fr;
+          align-items: start;
+        }
+
+        .stepLine {
+          width: 55px;
+          height: 1px;
+          margin: 36px 17px 0;
+          background: #d5dade;
+        }
+
+        /* FEATURES */
+
+        .featuresSection {
+          padding: 88px 0;
+          color: white;
+          background: #202b37;
+        }
+
+        .featuresHeading > span {
+          color: #df8c90;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .featuresHeading h2 {
+          max-width: 730px;
+          margin: 10px 0 0;
+          color: white;
+          font-size:
+            clamp(31px,3.6vw,42px);
+          line-height: 1.07;
+          letter-spacing: -1.9px;
+        }
+
+        .features {
+          margin-top: 40px;
+          display: grid;
+          grid-template-columns:
+            repeat(4,1fr);
+          border-top:
+            1px solid
+            rgba(255,255,255,.1);
+          border-bottom:
+            1px solid
+            rgba(255,255,255,.1);
+        }
+
+        /* RULES */
+
+        .rulesSection {
+          padding: 86px 0;
+          background: #fafaf8;
+        }
+
+        .rules {
+          margin-top: 38px;
+          display: grid;
+          grid-template-columns:
+            repeat(3,1fr);
+          border-top:
+            1px solid #e0e3e6;
+          border-bottom:
+            1px solid #e0e3e6;
+        }
+
+        /* ACCOUNT */
+
+        .accountSection {
+          padding: 68px 0;
+          background: #f1f2ef;
+        }
+
+        .accountPanel {
+          padding: 28px;
+          display: grid;
+          grid-template-columns:
+            auto 1fr auto;
+          align-items: center;
+          gap: 21px;
+          border:
+            1px solid #dee2e5;
+          border-radius: 20px;
+          background: white;
+        }
+
+        .accountIcon {
+          width: 56px;
+          height: 56px;
+          display: grid;
+          place-items: center;
+          border-radius: 15px;
+          color: #202b37;
+          background: #eef1f3;
+        }
+
+        .accountIcon :global(svg) {
+          width: 23px;
+        }
+
+        .accountCopy > span {
+          color: #c94a50;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .accountCopy h2 {
+          margin: 7px 0 0;
+          color: #19232d;
+          font-size: 31px;
+          letter-spacing: -1.6px;
+        }
+
+        .accountCopy p {
+          margin: 8px 0 0;
+          color: #707a85;
+          font-size: 10px;
+        }
+
+        .accountPanel > a {
+          min-height: 42px;
+          padding: 0 14px;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          border-radius: 10px;
+          color: white;
+          background: #202b37;
           text-decoration: none;
-          font-size: 14px;
+          font-size: 9px;
+          font-weight: 850;
         }
 
-        @media (max-width: 1000px) {
-          .nav {
+        .accountPanel > a :global(svg) {
+          width: 12px;
+        }
+
+        /* CONTACT */
+
+        .contactSection {
+          padding: 67px 0;
+          background: #eaeae8;
+        }
+
+        .contactInner {
+          display: flex;
+          align-items: flex-end;
+          justify-content:
+            space-between;
+          gap: 45px;
+        }
+
+        .contactInner h2 {
+          margin: 9px 0 8px;
+          color: #19232d;
+          font-size: 34px;
+          letter-spacing: -1.6px;
+        }
+
+        .contactInner p {
+          margin: 0;
+          color: #707984;
+          font-size: 10px;
+        }
+
+        .contactInner > a {
+          min-height: 41px;
+          padding: 0 14px;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          border-radius: 10px;
+          color: white;
+          background: #202b37;
+          text-decoration: none;
+          font-size: 9px;
+          font-weight: 850;
+        }
+
+        .contactInner > a :global(svg) {
+          width: 12px;
+        }
+
+        /* FOOTER */
+
+        .footer {
+          color: white;
+          background: #111820;
+        }
+
+        .footerInner {
+          width: calc(100% - 56px);
+          max-width: 1180px;
+          min-height: 125px;
+          margin: auto;
+          padding: 33px 0;
+          display: flex;
+          align-items: center;
+          justify-content:
+            space-between;
+          gap: 30px;
+        }
+
+        .footerBrand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .footerBrand > div {
+          width: 35px;
+          height: 35px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          background: #c94a50;
+        }
+
+        .footerBrand > div
+        :global(svg) {
+          width: 18px;
+        }
+
+        .footerBrand strong,
+        .footerBrand span {
+          display: block;
+        }
+
+        .footerBrand strong {
+          font-size: 12px;
+        }
+
+        .footerBrand span {
+          margin-top: 3px;
+          color: #707a87;
+          font-size: 5px;
+        }
+
+        .footerLinks {
+          display: flex;
+          gap: 21px;
+        }
+
+        .footerLinks a,
+        .footerLinks span {
+          color: #87909b;
+          font-size: 8px;
+          text-decoration: none;
+        }
+
+        .copyright {
+          color: #5e6874;
+          font-size: 7px;
+        }
+
+        @media (max-width: 1080px) {
+          .heroInner {
+            grid-template-columns: 1fr;
+            padding: 60px 0 90px;
+          }
+
+          .emergencyColumn {
+            max-width: 720px;
+          }
+
+          .videoLayout {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .steps {
+            grid-template-columns:
+              repeat(2,1fr);
+            gap: 28px;
+          }
+
+          .stepLine {
             display: none;
           }
 
-          .hero {
+          .features {
+            grid-template-columns:
+              repeat(2,1fr);
+          }
+
+          .rules {
             grid-template-columns: 1fr;
-            padding: 70px 0;
-            text-align: center;
           }
 
-          .heroCopy > p {
-            margin-left: auto;
-            margin-right: auto;
+          .accountPanel {
+            grid-template-columns:
+              auto 1fr;
           }
 
-          .heroButtons,
-          .quickLinks {
+          .accountPanel > a {
+            grid-column: 1 / -1;
             justify-content: center;
           }
 
-          .flow,
-          .featureGrid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .chatSection {
-            grid-template-columns: 1fr;
-          }
-
-          .emergency,
-          .store {
+          .contactInner,
+          .footerInner {
+            align-items:
+              flex-start;
             flex-direction: column;
-            align-items: flex-start;
           }
         }
 
         @media (max-width: 650px) {
-          .header,
-          .hero,
-          .start,
-          .profileTypes,
-          .features,
-          .chatSection,
-          .emergency,
-          .store,
-          .accountLinks,
-          .adminSection,
-          .footer {
-            width: calc(100% - 26px);
-          }
-
           .header {
-            grid-template-columns: auto 1fr;
+            width:
+              calc(100% - 18px);
           }
 
-          .languages,
-          .admin,
-          .login {
+          .brandText span,
+          .language {
             display: none;
           }
 
-          .brandText small {
+          .adminBtn span {
             display: none;
           }
 
-          .hero h1 {
-            font-size: 46px;
-            letter-spacing: -2.5px;
+          .heroInner,
+          .shell {
+            width:
+              calc(100% - 28px);
           }
 
-          .heroCopy > p {
-            font-size: 16px;
+          .heroInner {
+            min-height: unset;
+            padding: 46px 0 74px;
           }
 
-          .heroButtons {
-            flex-direction: column;
+          .hero {
+            min-height: unset;
           }
 
-          .primary,
-          .secondary {
-            width: 100%;
+          .emergencyColumn h1 {
+            letter-spacing: -1.9px;
           }
 
-          .visualCard {
-            width: 100%;
+          .heroLead {
+            font-size: 13px;
           }
 
-          .flow,
-          .profileGrid,
-          .featureGrid,
-          .accountGrid {
+          .bracelet {
+            width: 410px;
+            transform:
+              translateX(-24px)
+              rotate(-4deg)
+              scale(.82);
+            transform-origin:
+              left center;
+          }
+
+          .profileGrid {
             grid-template-columns: 1fr;
           }
 
-          .features,
-          .chatSection,
-          .emergency,
-          .store {
-            padding: 30px 20px;
-          }
-
-          .storeGraphic {
-            width: 100%;
-          }
-
-          .adminSection {
-            align-items: flex-start;
+          .heroActions {
             flex-direction: column;
           }
 
-          .adminSection a {
+          .primaryCta,
+          .secondaryCta {
             width: 100%;
           }
 
-          .footer {
-            padding: 30px 0;
-            align-items: flex-start;
-            flex-direction: column;
+          .ecosystem {
+            width: 350px;
+            height: 600px;
           }
 
-          .footer > div {
-            margin-right: 0;
+          .orbitOuter {
+            width: 330px;
+            height: 330px;
+          }
+
+          .orbitInner {
+            width: 260px;
+            height: 260px;
+          }
+
+          .phone {
+            width: 155px;
+            height: 320px;
+          }
+
+          .productBubble {
+            width: 92px;
+          }
+
+          .productImage {
+            width: 92px;
+            height: 74px;
+          }
+
+          .productBubble > strong {
+            max-width: 105px;
+            font-size: 6px;
+          }
+
+          .dog {
+            left: 12px;
+            top: 40px;
+          }
+
+          .cat {
+            right: 12px;
+            top: 40px;
+          }
+
+          .keys {
+            left: -5px;
+            top: 245px;
+          }
+
+          .wallet {
+            right: -5px;
+            top: 245px;
+          }
+
+          .luggage {
+            left: 18px;
+            bottom: 52px;
+          }
+
+          .bag {
+            right: 18px;
+            bottom: 52px;
+          }
+
+          .videoSection,
+          .stepsSection,
+          .featuresSection,
+          .rulesSection {
+            padding: 68px 0;
+          }
+
+          .steps,
+          .features {
+            grid-template-columns: 1fr;
+          }
+
+          .footerInner {
+            width:
+              calc(100% - 28px);
+          }
+
+          .footerLinks {
+            flex-wrap: wrap;
           }
         }
       `}</style>
     </main>
+  );
+}
+
+/* =====================================================
+   VIDEO URL
+===================================================== */
+
+function getVideoEmbedUrl(
+  url: string
+) {
+  if (!url) return "";
+
+  try {
+    const parsed =
+      new URL(url);
+
+    if (
+      parsed.hostname.includes(
+        "youtube.com"
+      )
+    ) {
+      const id =
+        parsed.searchParams.get("v");
+
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+
+      if (
+        parsed.pathname.startsWith(
+          "/embed/"
+        )
+      ) {
+        return url;
+      }
+    }
+
+    if (
+      parsed.hostname ===
+      "youtu.be"
+    ) {
+      const id =
+        parsed.pathname.replace(
+          "/",
+          ""
+        );
+
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+    }
+
+    if (
+      parsed.hostname.includes(
+        "vimeo.com"
+      )
+    ) {
+      const id =
+        parsed.pathname
+          .split("/")
+          .filter(Boolean)[0];
+
+      if (id) {
+        return `https://player.vimeo.com/video/${id}`;
+      }
+    }
+
+    return "";
+  } catch {
+    return "";
+  }
+}
+
+/* =====================================================
+   EMERGENCY ITEM
+===================================================== */
+
+function EmergencyItem({
+  icon,
+  title,
+  text,
+}: {
+  icon: ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="emergencyItem">
+      <div className="itemIcon">
+        {icon}
+      </div>
+
+      <div>
+        <strong>
+          {title}
+        </strong>
+
+        <span>
+          {text}
+        </span>
+      </div>
+
+      <style jsx>{`
+        .emergencyItem {
+          min-height: 66px;
+          padding: 11px;
+          display: grid;
+          grid-template-columns:
+            auto 1fr;
+          align-items: center;
+          gap: 9px;
+          border-right:
+            1px solid #e7eaed;
+          border-bottom:
+            1px solid #e7eaed;
+        }
+
+        .itemIcon {
+          width: 31px;
+          height: 31px;
+          display: grid;
+          place-items: center;
+          border-radius: 9px;
+          color: #c94a50;
+          background: #fff1f1;
+        }
+
+        .itemIcon :global(svg) {
+          width: 15px;
+        }
+
+        strong,
+        span {
+          display: block;
+        }
+
+        strong {
+          color: #3d4854;
+          font-size: 10px;
+        }
+
+        span {
+          margin-top: 3px;
+          color: #87909a;
+          font-size: 8px;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* =====================================================
+   STEP
+===================================================== */
+
+function Step({
+  number,
+  icon,
+  title,
+  text,
+}: {
+  number: string;
+  icon: ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <article className="step">
+      <span>{number}</span>
+
+      <div className="stepIcon">
+        {icon}
+      </div>
+
+      <strong>
+        {title}
+      </strong>
+
+      <p>{text}</p>
+
+      <style jsx>{`
+        .step > span {
+          color: #a9b0b8;
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        .stepIcon {
+          width: 48px;
+          height: 48px;
+          margin-top: 14px;
+          display: grid;
+          place-items: center;
+          border:
+            1px solid #dde1e4;
+          border-radius: 13px;
+          color: #202b37;
+          background: white;
+        }
+
+        .stepIcon :global(svg) {
+          width: 19px;
+        }
+
+        .step > strong {
+          display: block;
+          margin-top: 17px;
+          color: #2d3844;
+          font-size: 13px;
+        }
+
+        .step p {
+          margin: 7px 0 0;
+          color: #727c87;
+          font-size: 10px;
+          line-height: 1.6;
+        }
+      `}</style>
+    </article>
+  );
+}
+
+/* =====================================================
+   FEATURE
+===================================================== */
+
+function Feature({
+  number,
+  icon,
+  title,
+  text,
+}: {
+  number: string;
+  icon: ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <article className="feature">
+      <div className="featureTop">
+        <span>{number}</span>
+        <div>{icon}</div>
+      </div>
+
+      <h3>{title}</h3>
+
+      <p>{text}</p>
+
+      <style jsx>{`
+        .feature {
+          min-height: 190px;
+          padding: 21px 19px;
+          border-right:
+            1px solid
+            rgba(255,255,255,.1);
+        }
+
+        .feature:last-child {
+          border-right: 0;
+        }
+
+        .featureTop {
+          display: flex;
+          align-items: center;
+          justify-content:
+            space-between;
+        }
+
+        .featureTop > span {
+          color: #697481;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .featureTop > div {
+          width: 35px;
+          height: 35px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          color: #df8c90;
+          background:
+            rgba(255,255,255,.06);
+        }
+
+        h3 {
+          margin: 31px 0 0;
+          color: white;
+          font-size: 13px;
+        }
+
+        p {
+          margin: 8px 0 0;
+          color: #98a1ac;
+          font-size: 9px;
+          line-height: 1.65;
+        }
+      `}</style>
+    </article>
+  );
+}
+
+/* =====================================================
+   RULE
+===================================================== */
+
+function Rule({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <article className="rule">
+      <span>{number}</span>
+
+      <strong>
+        {title}
+      </strong>
+
+      <p>{text}</p>
+
+      <style jsx>{`
+        .rule {
+          min-height: 155px;
+          padding: 22px;
+          border-right:
+            1px solid #e0e3e6;
+        }
+
+        .rule:last-child {
+          border-right: 0;
+        }
+
+        .rule > span {
+          color: #c94a50;
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        .rule strong {
+          display: block;
+          margin-top: 27px;
+          color: #2c3743;
+          font-size: 13px;
+        }
+
+        .rule p {
+          margin: 8px 0 0;
+          color: #707a86;
+          font-size: 10px;
+          line-height: 1.65;
+        }
+      `}</style>
+    </article>
+  );
+}
+
+/* =====================================================
+   KEYS
+===================================================== */
+
+function KeysScene() {
+  return (
+    <div className="keysScene">
+      <div className="homeKey">
+        <span className="keyCircle" />
+        <span className="keyStem" />
+        <span className="keyTeeth" />
+      </div>
+
+      <div className="carKey">
+        <span className="carRing" />
+
+        <div className="fob">
+          <span />
+          <span />
+        </div>
+      </div>
+
+      <style jsx>{`
+        .keysScene {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+          background:
+            linear-gradient(
+              145deg,
+              #ece4d9,
+              #f7f3ed
+            );
+        }
+
+        .homeKey {
+          position: absolute;
+          left: 17px;
+          top: 27px;
+          transform:
+            rotate(-19deg);
+        }
+
+        .keyCircle {
+          width: 29px;
+          height: 29px;
+          display: block;
+          border:
+            7px solid #c1a569;
+          border-radius: 50%;
+        }
+
+        .keyStem {
+          width: 52px;
+          height: 8px;
+          position: absolute;
+          left: 24px;
+          top: 11px;
+          border-radius: 3px;
+          background: #c1a569;
+        }
+
+        .keyTeeth {
+          width: 17px;
+          height: 14px;
+          position: absolute;
+          left: 65px;
+          top: 13px;
+          border-right:
+            6px solid #c1a569;
+          border-bottom:
+            6px solid #c1a569;
+        }
+
+        .carKey {
+          position: absolute;
+          right: 20px;
+          bottom: 11px;
+          transform:
+            rotate(12deg);
+        }
+
+        .carRing {
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          top: -8px;
+          left: 8px;
+          border:
+            4px solid #9ca4ad;
+          border-radius: 50%;
+        }
+
+        .fob {
+          width: 40px;
+          height: 55px;
+          padding: 12px 9px;
+          display: grid;
+          gap: 6px;
+          border-radius: 11px;
+          background:
+            linear-gradient(
+              145deg,
+              #606a75,
+              #2b3138
+            );
+        }
+
+        .fob span {
+          height: 7px;
+          border-radius: 999px;
+          background: #9199a2;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* =====================================================
+   ICONS
+===================================================== */
+
+function QrIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <path d="M14 14h3v3h3v4h-6z" />
+    </svg>
+  );
+}
+
+function AdminIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 2.8 19 6v5.3c0 4.6-2.4 7.7-7 9.9-4.6-2.2-7-5.3-7-9.9V6z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <circle
+        cx="12"
+        cy="8"
+        r="4"
+      />
+
+      <path d="M4.5 21c.8-4.1 3.3-6.3 7.5-6.3s6.7 2.2 7.5 6.3" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M7 3h3l1 4-2 1.5c1.4 3 3.5 5.1 6.5 6.5L17 13l4 1v3c0 2.2-1.8 4-4 4C9.3 21 3 14.7 3 7a4 4 0 0 1 4-4Z" />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z" />
+    </svg>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 3 2.8 20h18.4z" />
+      <path d="M12 9v5M12 17h.01" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 2.5 19 6v5.3c0 4.7-2.4 7.8-7 10.2-4.6-2.4-7-5.5-7-10.2V6z" />
+      <path d="m8.8 12 2.1 2.1 4.5-4.5" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M4 5.5h16v11H9l-5 4z" />
+      <path d="M8 10h8M8 13h5" />
+    </svg>
+  );
+}
+
+function LocationIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </svg>
+  );
+}
+
+function RewardIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M6 9h12v11H6z" />
+      <path d="M4 6h16v3H4z" />
+      <path d="M12 6v14" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <circle
+        cx="10.5"
+        cy="10.5"
+        r="6"
+      />
+
+      <path d="m15 15 5 5" />
+    </svg>
+  );
+}
+
+function ScanIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" />
+      <path d="M7 12h10" />
+    </svg>
+  );
+}
+
+function ReturnIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    >
+      <path d="M9 7 4 12l5 5" />
+      <path d="M5 12h9a5 5 0 0 1 5 5v2" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M5 12h14" />
+      <path d="m14 7 5 5-5 5" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="m6 12 4 4 8-8" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="m9 6 9 6-9 6z" />
+    </svg>
+  );
+}
+
+/* =====================================================
+   QR VISUALS
+===================================================== */
+
+function QrCode({
+  size = 64,
+}: {
+  size?: number;
+}) {
+  const dark = [
+    0, 1, 2, 5, 6,
+    7, 9, 11, 13,
+    14, 16, 18, 20,
+    21, 22, 24, 26,
+    27, 28, 30, 32,
+    34, 35, 36, 38,
+    40, 42, 43, 44,
+    46, 47, 48,
+  ];
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: "grid",
+        gridTemplateColumns:
+          "repeat(7,1fr)",
+        gap: Math.max(
+          1.6,
+          size / 38
+        ),
+      }}
+    >
+      {Array.from({
+        length: 49,
+      }).map((_, index) => (
+        <span
+          key={index}
+          style={{
+            display: "block",
+            background:
+              dark.includes(index)
+                ? "#17212b"
+                : "#dfe4e8",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MiniQr() {
+  const dark = [
+    0, 1, 2, 4, 6,
+    7, 8, 10, 12,
+    14, 15, 17, 18,
+    20, 21, 22, 24,
+  ];
+
+  return (
+    <div
+      style={{
+        width: 24,
+        height: 24,
+        display: "grid",
+        gridTemplateColumns:
+          "repeat(5,1fr)",
+        gap: 1.3,
+      }}
+    >
+      {Array.from({
+        length: 25,
+      }).map((_, index) => (
+        <span
+          key={index}
+          style={{
+            display: "block",
+            background:
+              dark.includes(index)
+                ? "#17212b"
+                : "#dfe4e8",
+          }}
+        />
+      ))}
+    </div>
   );
 }
