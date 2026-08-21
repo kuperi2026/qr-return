@@ -1,17 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
-type Menu = "about" | "shop" | "faq" | "contact" | null;
+
+type Menu =
+  | "about"
+  | "shop"
+  | "faq"
+  | "contact"
+  | null;
 
 export default function HomePage() {
-  const [language, setLanguage] = useState<Lang>("ka");
-  const [openMenu, setOpenMenu] = useState<Menu>(null);
+  const [language, setLanguage] =
+    useState<Lang>("ka");
+
+  const [openMenu, setOpenMenu] =
+    useState<Menu>(null);
+
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
 
   const ka = language === "ka";
 
-  function toggleMenu(menu: Exclude<Menu, null>) {
+  useEffect(() => {
+    async function loadUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsLoggedIn(true);
+
+      const { data: admin } =
+        await supabase
+          .from("admin_users")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+      setIsAdmin(Boolean(admin));
+    }
+
+    void loadUser();
+
+    const { data } =
+      supabase.auth.onAuthStateChange(
+        () => {
+          void loadUser();
+        }
+      );
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  function toggleMenu(
+    menu: Exclude<Menu, null>
+  ) {
     setOpenMenu((current) =>
       current === menu ? null : menu
     );
@@ -19,77 +75,125 @@ export default function HomePage() {
 
   return (
     <main className="page">
+
       {/* ================= HEADER ================= */}
 
       <header className="header">
         <div className="headerInner">
-          <a href="/" className="brand">
+
+          <a
+            href="/"
+            className="brand"
+          >
             <div className="logoMark">
               <QRIcon />
             </div>
 
             <div className="brandText">
-              <strong>QR RETURN</strong>
-              <span>SMART LOST &amp; FOUND</span>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
             </div>
           </a>
 
           <nav className="navigation">
+
             <button
               type="button"
-              className={openMenu === "about" ? "nav active" : "nav"}
-              onClick={() => toggleMenu("about")}
+              className={
+                openMenu === "about"
+                  ? "nav active"
+                  : "nav"
+              }
+              onClick={() =>
+                toggleMenu("about")
+              }
             >
-              {ka ? "ჩვენ შესახებ" : "About"}
-              <Chevron open={openMenu === "about"} />
+              {ka
+                ? "ჩვენ შესახებ"
+                : "About"}
+
+              <Chevron
+                open={
+                  openMenu === "about"
+                }
+              />
             </button>
 
             <button
               type="button"
-              className={openMenu === "shop" ? "nav active" : "nav"}
-              onClick={() => toggleMenu("shop")}
+              className={
+                openMenu === "shop"
+                  ? "nav active"
+                  : "nav"
+              }
+              onClick={() =>
+                toggleMenu("shop")
+              }
             >
-              {ka ? "ონლაინ შეძენა" : "Shop Online"}
-              <Chevron open={openMenu === "shop"} />
+              {ka
+                ? "ონლაინ შეძენა"
+                : "Shop Online"}
+
+              <Chevron
+                open={
+                  openMenu === "shop"
+                }
+              />
             </button>
 
             <button
               type="button"
-              className={openMenu === "faq" ? "nav active" : "nav"}
-              onClick={() => toggleMenu("faq")}
+              className={
+                openMenu === "faq"
+                  ? "nav active"
+                  : "nav"
+              }
+              onClick={() =>
+                toggleMenu("faq")
+              }
             >
-              {ka ? "ხშირად დასმული კითხვები" : "FAQ"}
+              {ka
+                ? "ხშირად დასმული კითხვები"
+                : "FAQ"}
             </button>
 
             <button
               type="button"
-              className={openMenu === "contact" ? "nav active" : "nav"}
-              onClick={() => toggleMenu("contact")}
+              className={
+                openMenu === "contact"
+                  ? "nav active"
+                  : "nav"
+              }
+              onClick={() =>
+                toggleMenu("contact")
+              }
             >
-              {ka ? "კონტაქტი" : "Contact"}
+              {ka
+                ? "კონტაქტი"
+                : "Contact"}
             </button>
           </nav>
 
           <div className="actions">
-            {/*
-              ADMIN აქ განზრახ არ არის.
-              ჩვეულებრივ მომხმარებელს საერთოდ არ ვაჩვენებთ.
-              მოგვიანებით შენს Admin ავტორიზაციას მივაბამთ.
-            */}
 
-            <a href="/login" className="blueButton">
-              {ka ? "შესვლა" : "Sign In"}
-            </a>
-
-            <a href="/signup" className="blueButton">
-              {ka ? "რეგისტრაცია" : "Register"}
-            </a>
+            {/* LANGUAGES — შესვლამდე */}
 
             <div className="languages">
               <button
                 type="button"
-                className={language === "ka" ? "selected" : ""}
-                onClick={() => setLanguage("ka")}
+                className={
+                  language === "ka"
+                    ? "selected"
+                    : ""
+                }
+                onClick={() =>
+                  setLanguage("ka")
+                }
               >
                 GEO
               </button>
@@ -98,426 +202,562 @@ export default function HomePage() {
 
               <button
                 type="button"
-                className={language === "en" ? "selected" : ""}
-                onClick={() => setLanguage("en")}
+                className={
+                  language === "en"
+                    ? "selected"
+                    : ""
+                }
+                onClick={() =>
+                  setLanguage("en")
+                }
               >
                 ENG
               </button>
             </div>
+
+            {/* ADMIN — მხოლოდ ADMIN ხედავს */}
+
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="adminButton"
+              >
+                {ka
+                  ? "ადმინ პანელი"
+                  : "Admin Panel"}
+              </a>
+            )}
+
+            {isLoggedIn ? (
+              <a
+                href="/account"
+                className="blueButton"
+              >
+                {ka
+                  ? "ჩემი ანგარიში"
+                  : "My Account"}
+              </a>
+            ) : (
+              <>
+                <a
+                  href="/login"
+                  className="blueButton"
+                >
+                  {ka
+                    ? "შესვლა"
+                    : "Sign In"}
+                </a>
+
+                <a
+                  href="/signup"
+                  className="blueButton"
+                >
+                  {ka
+                    ? "რეგისტრაცია"
+                    : "Register"}
+                </a>
+              </>
+            )}
           </div>
         </div>
       </header>
 
-      {/* ================= DROPDOWN ================= */}
+      {/* ================= ABOUT ================= */}
 
-      {openMenu && (
+      {openMenu === "about" && (
         <section className="megaMenu">
           <div className="megaInner">
 
-            {/* ============ ABOUT ============ */}
+            <div className="sectionIntro">
+              <span className="eyebrow">
+                QR RETURN
+              </span>
 
-            {openMenu === "about" && (
-              <div className="aboutLayout">
-                <aside className="sideTitle">
-                  <span className="sectionNumber">01</span>
+              <h1>
+                {ka
+                  ? "ჩვენ შესახებ"
+                  : "About QR RETURN"}
+              </h1>
 
-                  <span className="eyebrow">
-                    {ka ? "QR RETURN-ის შესახებ" : "ABOUT QR RETURN"}
-                  </span>
+              <p>
+                {ka
+                  ? "იდეა, მისია და ხედვა, რომლებზეც QR RETURN შეიქმნა."
+                  : "The idea, mission and vision behind QR RETURN."}
+              </p>
+            </div>
 
-                  <h2>
-                    {ka
-                      ? "ერთი სწორი კავშირი საჭირო მომენტში."
-                      : "The right connection when it matters."}
-                  </h2>
-                </aside>
+            <div className="aboutCards">
 
-                <div className="aboutContent">
-                  <section className="contentBlock">
-                    <div className="contentHeading">
-                      <span>01</span>
-                      <h3>
-                        {ka
-                          ? "დამფუძნებლის სიტყვა"
-                          : "Founder’s Message"}
-                      </h3>
-                    </div>
+              {/* FOUNDER */}
 
-                    {ka ? (
-                      <>
-                        <p className="lead">
-                          QR RETURN-ის იდეა ერთი მარტივი შეკითხვიდან
-                          გაჩნდა: რა ხდება მაშინ, როდესაც ადამიანი კარგავს
-                          მისთვის მნიშვნელოვან ნივთს, საყვარელ ცხოველს, ან
-                          როდესაც ოჯახის წევრს გადაუდებელ სიტუაციაში
-                          დახმარება სჭირდება და მის შესახებ აუცილებელი
-                          ინფორმაცია ხელმისაწვდომი არ არის?
-                        </p>
+              <article className="aboutCard founderCard">
+                <span className="cardNumber">
+                  01
+                </span>
 
-                        <p>
-                          ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ
-                          არ იცის, ვის დაუკავშირდეს. დაკარგულ ცხოველს არ
-                          შეუძლია პატრონის ვინაობის თქმა, ნივთზე კი, როგორც
-                          წესი, არ არსებობს ინფორმაცია, რომელიც მის
-                          დაბრუნებას გაამარტივებს.
-                        </p>
+                <div className="founderIdentity">
+                  <div className="founderAvatar">
+                    NK
+                  </div>
 
-                        <p>
-                          Emergency სამაჯურის შემთხვევაში თითოეულ წუთსაც
-                          შეიძლება დიდი მნიშვნელობა ჰქონდეს — განსაკუთრებით
-                          მაშინ, როდესაც ადამიანი ვერ ახერხებს საკუთარი
-                          სახელის, ჯანმრთელობის მდგომარეობის ან ოჯახის
-                          წევრის საკონტაქტო ინფორმაციის თქმას.
-                        </p>
+                  <div>
+                    <strong>
+                      Nino Kuprava
+                    </strong>
 
-                        <div className="founderStatement">
-                          <small>QR RETURN</small>
-                          <strong>
-                            მარტივი და უსაფრთხო სისტემა, რომელიც საჭირო
-                            მომენტში ადამიანებს სწრაფად აკავშირებს.
-                          </strong>
-                        </div>
+                    <span>
+                      Founder &amp; CEO
+                    </span>
 
-                        <p>
-                          QR RETURN აერთიანებს დაკარგული ნივთების
-                          დაბრუნებას, საყვარელი ცხოველების დაცვას და
-                          ადამიანებისთვის განკუთვნილ Emergency პროფილებს.
-                          QR კოდის დასკანერებით დამხმარე ადამიანს შეუძლია
-                          ნახოს მხოლოდ ის ინფორმაცია, რომლის გაზიარებაც
-                          მომხმარებელს წინასწარ აქვს არჩეული.
-                        </p>
-
-                        <p>
-                          ჩემთვის განსაკუთრებით მნიშვნელოვანია, რომ
-                          მომხმარებელი თავად აკონტროლებდეს საკუთარ
-                          ინფორმაციას — რას აჩვენებს, ვის აჩვენებს და რა
-                          გზით შეიძლება მასთან დაკავშირება. ამიტომ QR
-                          RETURN-ის საფუძველია სიმარტივე, უსაფრთხოება,
-                          კონფიდენციალურობა და ნდობა.
-                        </p>
-
-                        <p>
-                          QR RETURN ჩემთვის უბრალოდ პროდუქტი ან
-                          ტექნოლოგიური პლატფორმა არ არის. ჩემი მიზანია, ის
-                          გახდეს პატარა, მაგრამ მნიშვნელოვანი დამცავი
-                          რგოლი ადამიანებს, მათ საყვარელ ცხოველებსა და
-                          მათთვის ძვირფას ნივთებს შორის — რადგან ზოგჯერ
-                          დასაბრუნებლად ან დასახმარებლად მხოლოდ ერთი სწორი
-                          კავშირია საჭირო.
-                        </p>
-
-                        <p className="thanks">
-                          მადლობა, რომ ენდობით QR RETURN-ს.
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="lead">
-                          QR RETURN began with one simple question: what
-                          happens when someone loses something important,
-                          a beloved pet, or needs urgent help when essential
-                          information is not immediately available?
-                        </p>
-
-                        <p>
-                          QR RETURN was created to establish a simple,
-                          secure and fast connection when it matters most.
-                        </p>
-
-                        <p>
-                          The platform brings together lost belongings, pet
-                          protection and Emergency profiles while giving
-                          users control over the information they share.
-                        </p>
-                      </>
-                    )}
-
-                    <div className="signature">
-                      <div className="signatureMark">NK</div>
-
-                      <div>
-                        <strong>Nino Kuprava</strong>
-                        <span>Founder &amp; CEO</span>
-                        <small>QR RETURN</small>
-                      </div>
-                    </div>
-                  </section>
-
-                  <div className="twoColumns">
-                    <section className="miniCard">
-                      <span>02</span>
-
-                      <h3>
-                        {ka ? "ჩვენი მისია" : "Our Mission"}
-                      </h3>
-
-                      <p>
-                        {ka
-                          ? "ჩვენი მისიაა ერთი QR სკანირებით მპოვნელსა და მფლობელს შორის უსაფრთხო და მარტივი კავშირის შექმნა."
-                          : "Our mission is to create a simple and secure connection between a finder and an owner with a single QR scan."}
-                      </p>
-                    </section>
-
-                    <section className="miniCard">
-                      <span>03</span>
-
-                      <h3>
-                        {ka ? "ჩვენი ხედვა" : "Our Vision"}
-                      </h3>
-
-                      <p>
-                        {ka
-                          ? "ჩვენი ხედვაა QR RETURN გახდეს უნივერსალური სისტემა ნივთების, ცხოველებისა და Emergency პროფილების დასაცავად."
-                          : "Our vision is for QR RETURN to become a universal system for belongings, pets and Emergency profiles."}
-                      </p>
-                    </section>
+                    <small>
+                      QR RETURN
+                    </small>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* ============ SHOP ============ */}
+                <h2>
+                  {ka
+                    ? "დამფუძნებლის სიტყვა"
+                    : "Founder's Message"}
+                </h2>
 
-            {openMenu === "shop" && (
-              <div className="simpleLayout">
-                <div className="sideTitle">
-                  <span className="sectionNumber">02</span>
-
-                  <span className="eyebrow">
-                    {ka ? "ონლაინ შეძენა" : "SHOP ONLINE"}
-                  </span>
-
-                  <h2>
-                    {ka
-                      ? "აირჩიეთ QR RETURN თქვენი საჭიროებისთვის."
-                      : "Choose QR RETURN for what matters to you."}
-                  </h2>
-                </div>
-
-                <div className="cards">
-                  <a href="#how-to-order" className="menuCard">
-                    <span className="cardNumber">01</span>
-
-                    <h3>
-                      {ka ? "როგორ შევუკვეთო" : "How to Order"}
-                    </h3>
-
+                {ka ? (
+                  <>
                     <p>
-                      {ka
-                        ? "აირჩიეთ თქვენთვის საჭირო QR პროდუქტი, შეიძინეთ ონლაინ და მიღების შემდეგ დაარეგისტრირეთ თქვენს ანგარიშზე."
-                        : "Choose your QR product, purchase it online and register it to your account after delivery."}
+                      QR RETURN-ის იდეა ერთი
+                      მარტივი შეკითხვიდან
+                      გაჩნდა: რა ხდება მაშინ,
+                      როდესაც ადამიანი კარგავს
+                      მისთვის მნიშვნელოვან
+                      ნივთს, საყვარელ ცხოველს,
+                      ან როდესაც ოჯახის წევრს
+                      გადაუდებელ სიტუაციაში
+                      დახმარება სჭირდება და
+                      მის შესახებ აუცილებელი
+                      ინფორმაცია
+                      ხელმისაწვდომი არ არის?
                     </p>
 
-                    <strong className="cardLink">
-                      {ka ? "გაიგეთ მეტი" : "Learn more"} →
-                    </strong>
-                  </a>
-
-                  <a href="/store" className="menuCard featured">
-                    <span className="cardNumber">02</span>
-
-                    <h3>{ka ? "მაღაზია" : "Store"}</h3>
-
                     <p>
-                      {ka
-                        ? "იხილეთ QR RETURN-ის პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
-                        : "Explore QR RETURN products for belongings, pets and Emergency use."}
+                      ხშირად მპოვნელს დახმარება
+                      ნამდვილად სურს, მაგრამ არ
+                      იცის, ვის დაუკავშირდეს.
+                      დაკარგულ ცხოველს არ
+                      შეუძლია პატრონის ვინაობის
+                      თქმა, ნივთზე კი ხშირად არ
+                      არსებობს ინფორმაცია,
+                      რომელიც მის დაბრუნებას
+                      გაამარტივებს.
                     </p>
 
-                    <strong className="cardLink">
-                      {ka ? "პროდუქტების ნახვა" : "View products"} →
-                    </strong>
-                  </a>
-                </div>
-              </div>
-            )}
+                    <p>
+                      Emergency სამაჯურის
+                      შემთხვევაში თითოეულ
+                      წუთსაც შეიძლება დიდი
+                      მნიშვნელობა ჰქონდეს —
+                      განსაკუთრებით მაშინ,
+                      როდესაც ადამიანი თავად
+                      ვერ ახერხებს საჭირო
+                      ინფორმაციის მიწოდებას.
+                    </p>
 
-            {/* ============ FAQ ============ */}
-
-            {openMenu === "faq" && (
-              <div className="simpleLayout">
-                <div className="sideTitle">
-                  <span className="sectionNumber">03</span>
-
-                  <span className="eyebrow">
-                    {ka ? "დახმარება" : "HELP CENTER"}
-                  </span>
-
-                  <h2>
-                    {ka
-                      ? "ხშირად დასმული კითხვები"
-                      : "Frequently Asked Questions"}
-                  </h2>
-
-                  <p className="sideDescription">
-                    {ka
-                      ? "მოკლე პასუხები QR RETURN-ის გამოყენების, კონფიდენციალურობისა და პროდუქტების შესახებ."
-                      : "Quick answers about using QR RETURN, privacy and products."}
-                  </p>
-                </div>
-
-                <div className="faqList">
-                  <FAQ
-                    question={
-                      ka
-                        ? "როგორ მუშაობს QR RETURN?"
-                        : "How does QR RETURN work?"
-                    }
-                    answer={
-                      ka
-                        ? "QR კოდის დასკანერების შემდეგ მპოვნელი ხედავს თქვენ მიერ წინასწარ არჩეულ ინფორმაციას და ხელმისაწვდომ დაკავშირების მეთოდებს."
-                        : "After scanning the QR code, the finder sees only the information and contact methods you have chosen to make available."
-                    }
-                  />
-
-                  <FAQ
-                    question={
-                      ka
-                        ? "სჭირდება თუ არა მპოვნელს რეგისტრაცია?"
-                        : "Does the finder need an account?"
-                    }
-                    answer={
-                      ka
-                        ? "არა. QR კოდის დასკანერებისთვის და მფლობელთან დასაკავშირებლად მპოვნელს რეგისტრაცია არ სჭირდება."
-                        : "No. The finder does not need to register to scan the QR code and contact the owner."
-                    }
-                  />
-
-                  <FAQ
-                    question={
-                      ka
-                        ? "ვინ აკონტროლებს ჩემს ინფორმაციას?"
-                        : "Who controls my information?"
-                    }
-                    answer={
-                      ka
-                        ? "თქვენ თავად ირჩევთ, რომელი ინფორმაცია იყოს ხილული QR პროფილში და რა გზით შეძლოს მპოვნელმა თქვენთან დაკავშირება."
-                        : "You control which information is visible on the QR profile and how a finder may contact you."
-                    }
-                  />
-
-                  <FAQ
-                    question={
-                      ka
-                        ? "შემიძლია რამდენიმე QR პროფილის დამატება?"
-                        : "Can I add multiple QR profiles?"
-                    }
-                    answer={
-                      ka
-                        ? "დიახ. ერთ ანგარიშში შეგიძლიათ მართოთ რამდენიმე QR პროფილი თქვენი ნივთებისა და ცხოველებისთვის."
-                        : "Yes. You can manage multiple QR profiles for your belongings and pets from one account."
-                    }
-                  />
-
-                  <FAQ
-                    question={
-                      ka
-                        ? "რისთვის გამოიყენება Emergency პროფილი?"
-                        : "What is an Emergency profile for?"
-                    }
-                    answer={
-                      ka
-                        ? "Emergency პროფილი შექმნილია იმისთვის, რომ საჭიროების შემთხვევაში დამხმარე ადამიანს სწრაფად მიაწოდოს მომხმარებლის მიერ არჩეული მნიშვნელოვანი ინფორმაცია და საკონტაქტო პირები."
-                        : "An Emergency profile helps provide selected essential information and emergency contacts when assistance is needed."
-                    }
-                  />
-
-                  <FAQ
-                    question={
-                      ka
-                        ? "რა მოხდება, თუ QR კოდი დაასკანერეს?"
-                        : "What happens when my QR code is scanned?"
-                    }
-                    answer={
-                      ka
-                        ? "მპოვნელი გადადის QR RETURN-ის პროფილზე, სადაც ხედავს მხოლოდ თქვენ მიერ გასაჯაროებულ ინფორმაციას და დაკავშირების ხელმისაწვდომ გზებს."
-                        : "The finder is taken to the QR RETURN profile and sees only the information and contact options you have made available."
-                    }
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ============ CONTACT ============ */}
-
-            {openMenu === "contact" && (
-              <div className="simpleLayout">
-                <div className="sideTitle">
-                  <span className="sectionNumber">04</span>
-
-                  <span className="eyebrow">QR RETURN SUPPORT</span>
-
-                  <h2>
-                    {ka ? "დაგვიკავშირდით" : "Contact Us"}
-                  </h2>
-
-                  <p className="sideDescription">
-                    {ka
-                      ? "თუ გაქვთ შეკითხვა ანგარიშის, QR პროფილის, შეკვეთის ან პროდუქტის შესახებ, დაგვიკავშირდით."
-                      : "Contact us with questions about your account, QR profile, order or product."}
-                  </p>
-                </div>
-
-                <div className="contactCards">
-                  <a href="/support" className="contactCard">
-                    <div className="contactIcon">
-                      <ChatIcon />
+                    <div className="quote">
+                      QR RETURN-ის მთავარი
+                      ღირებულება მხოლოდ QR
+                      კოდში არ არის — ეს არის
+                      სწრაფად შექმნილი სწორი
+                      კავშირი მაშინ, როდესაც
+                      დრო, უსაფრთხოება და
+                      ინფორმაცია ყველაზე
+                      მნიშვნელოვანია.
                     </div>
 
-                    <div className="contactText">
-                      <small>LIVE CHAT</small>
+                    <p>
+                      ჩემთვის განსაკუთრებით
+                      მნიშვნელოვანია, რომ
+                      მომხმარებელი თავად
+                      აკონტროლებდეს საკუთარ
+                      ინფორმაციას — რას
+                      აჩვენებს, ვის აჩვენებს და
+                      რა გზით შეიძლება მასთან
+                      დაკავშირება.
+                    </p>
 
-                      <h3>
-                        {ka ? "მოგვწერეთ პირდაპირ" : "Chat with us"}
-                      </h3>
+                    <p>
+                      QR RETURN ჩემთვის მხოლოდ
+                      ტექნოლოგიური პროდუქტი არ
+                      არის. ჩემი მიზანია, ის
+                      გახდეს პატარა, მაგრამ
+                      მნიშვნელოვანი დამცავი
+                      რგოლი ადამიანებს, მათ
+                      საყვარელ ცხოველებსა და
+                      მათთვის ძვირფას ნივთებს
+                      შორის.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      QR RETURN began with one
+                      simple question: what
+                      happens when someone loses
+                      something important, a
+                      beloved pet, or needs
+                      urgent help when essential
+                      information is not
+                      available?
+                    </p>
 
-                      <p>
-                        {ka
-                          ? "გახსენით QR RETURN-ის მხარდაჭერის Live Chat."
-                          : "Open QR RETURN support Live Chat."}
-                      </p>
-                    </div>
+                    <p>
+                      QR RETURN was created to
+                      make the right connection
+                      faster, simpler and safer.
+                    </p>
+                  </>
+                )}
+              </article>
 
-                    <span className="arrow">→</span>
-                  </a>
+              {/* MISSION */}
 
-                  <div className="contactCard">
-                    <div className="contactIcon">
-                      <PhoneIcon />
-                    </div>
+              <article className="aboutCard">
+                <span className="cardNumber">
+                  02
+                </span>
 
-                    <div className="contactText">
-                      <small>{ka ? "ტელეფონი" : "PHONE"}</small>
-
-                      <h3>
-                        {ka
-                          ? "QR RETURN მხარდაჭერა"
-                          : "QR RETURN Support"}
-                      </h3>
-
-                      <p>
-                        {ka
-                          ? "საკონტაქტო ტელეფონის ნომერი დაემატება აქ."
-                          : "The support phone number will appear here."}
-                      </p>
-                    </div>
-                  </div>
+                <div className="cardIcon">
+                  <TargetIcon />
                 </div>
-              </div>
-            )}
+
+                <h2>
+                  {ka
+                    ? "ჩვენი მისია"
+                    : "Our Mission"}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "ჩვენი მისიაა ერთი QR სკანირებით შევქმნათ პირდაპირი, უსაფრთხო და მარტივი კავშირი მპოვნელსა და მფლობელს შორის."
+                    : "Our mission is to create a direct, simple and secure connection between a finder and an owner through a single QR scan."}
+                </p>
+
+                <p>
+                  {ka
+                    ? "ნივთის, ცხოველის თუ Emergency პროფილის შემთხვევაში მომხმარებელი თავად აკონტროლებს, რა ინფორმაცია გახდება ხელმისაწვდომი და როგორ შეძლებს სხვა ადამიანი მასთან დაკავშირებას."
+                    : "Users remain in control of what information is shared and how others can contact them."}
+                </p>
+
+                <strong className="cardStatement">
+                  {ka
+                    ? "მარტივი. სწრაფი. უსაფრთხო."
+                    : "Simple. Fast. Secure."}
+                </strong>
+              </article>
+
+              {/* VISION */}
+
+              <article className="aboutCard">
+                <span className="cardNumber">
+                  03
+                </span>
+
+                <div className="cardIcon">
+                  <VisionIcon />
+                </div>
+
+                <h2>
+                  {ka
+                    ? "ჩვენი ხედვა"
+                    : "Our Vision"}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "ჩვენი ხედვაა QR RETURN გახდეს უნივერსალური დაცვის სისტემა ნივთებისთვის, ცხოველებისა და Emergency პროფილებისთვის."
+                    : "Our vision is for QR RETURN to become a universal protection system for belongings, pets and Emergency profiles."}
+                </p>
+
+                <p>
+                  {ka
+                    ? "ჩვენ გვინდა QR კოდი იქცეს არა მხოლოდ იდენტიფიკატორად, არამედ სანდო კავშირად სწორ ადამიანს, სწორ ინფორმაციასა და საჭირო მომენტს შორის."
+                    : "We want the QR code to become more than an identifier — a trusted connection between the right person, the right information and the right moment."}
+                </p>
+
+                <strong className="cardStatement">
+                  {ka
+                    ? "ერთი სისტემა. მრავალი დაცული რამ."
+                    : "One system. More protected."}
+                </strong>
+              </article>
+            </div>
           </div>
         </section>
       )}
 
-      {/* დროებით ცარიელია — ახლა მხოლოდ Header/Mega Menu-ს ვტესტავთ */}
+      {/* ================= SHOP ================= */}
 
-      <section className="previewArea">
-        <span>QR RETURN</span>
+      {openMenu === "shop" && (
+        <section className="megaMenu">
+          <div className="megaInner shopLayout">
+
+            <article className="shopCard">
+              <span className="cardNumber">
+                01
+              </span>
+
+              <h2>
+                {ka
+                  ? "როგორ შევუკვეთო"
+                  : "How to Order"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "აირჩიეთ თქვენთვის საჭირო QR RETURN პროდუქტი, გაიარეთ რეგისტრაცია ან შედით ანგარიშში, დაასრულეთ ონლაინ შეკვეთა და პროდუქტის მიღების შემდეგ დაარეგისტრირეთ QR კოდი შესაბამის პროფილზე."
+                  : "Choose your QR RETURN product, sign in or register, complete your order and connect the QR code to the relevant profile after delivery."}
+              </p>
+
+              <div className="orderSteps">
+                <span>01 არჩევა</span>
+                <span>02 რეგისტრაცია</span>
+                <span>03 შეკვეთა</span>
+                <span>04 აქტივაცია</span>
+              </div>
+            </article>
+
+            <a
+              href="/store"
+              className="shopCard storeCard"
+            >
+              <span className="cardNumber">
+                02
+              </span>
+
+              <h2>
+                {ka
+                  ? "მაღაზია"
+                  : "Store"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "იხილეთ QR RETURN-ის ხელმისაწვდომი პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
+                  : "Explore QR RETURN products for belongings, pets and Emergency use."}
+              </p>
+
+              <strong>
+                {ka
+                  ? "პროდუქტების ნახვა"
+                  : "View Products"}
+                {" →"}
+              </strong>
+            </a>
+          </div>
+        </section>
+      )}
+
+      {/* ================= FAQ ================= */}
+
+      {openMenu === "faq" && (
+        <section className="megaMenu">
+          <div className="megaInner faqLayout">
+
+            <div className="faqIntro">
+              <span className="eyebrow">
+                FAQ
+              </span>
+
+              <h2>
+                {ka
+                  ? "ხშირად დასმული კითხვები"
+                  : "Frequently Asked Questions"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "ყველაზე მნიშვნელოვანი ინფორმაცია QR RETURN-ის გამოყენების შესახებ."
+                  : "Essential information about using QR RETURN."}
+              </p>
+            </div>
+
+            <div className="faqList">
+              <FAQ
+                question={
+                  ka
+                    ? "რა არის QR RETURN?"
+                    : "What is QR RETURN?"
+                }
+                answer={
+                  ka
+                    ? "QR RETURN არის QR-ზე დაფუძნებული სისტემა ნივთების, ცხოველებისა და Emergency პროფილებისთვის."
+                    : "QR RETURN is a QR-based system for belongings, pets and Emergency profiles."
+                }
+              />
+
+              <FAQ
+                question={
+                  ka
+                    ? "სჭირდება თუ არა მპოვნელს რეგისტრაცია?"
+                    : "Does the finder need an account?"
+                }
+                answer={
+                  ka
+                    ? "არა. მპოვნელს რეგისტრაცია ან აპლიკაციის ჩამოტვირთვა არ სჭირდება."
+                    : "No. The finder does not need to register or download an app."
+                }
+              />
+
+              <FAQ
+                question={
+                  ka
+                    ? "რა ინფორმაციას დაინახავს მპოვნელი?"
+                    : "What information can a finder see?"
+                }
+                answer={
+                  ka
+                    ? "მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც თავად გაქვთ გააქტიურებული."
+                    : "Only the information you have chosen to make visible."
+                }
+              />
+
+              <FAQ
+                question={
+                  ka
+                    ? "შემიძლია რამდენიმე პროფილის მართვა?"
+                    : "Can I manage multiple profiles?"
+                }
+                answer={
+                  ka
+                    ? "დიახ. ერთი ანგარიშიდან შესაძლებელია რამდენიმე QR პროფილის მართვა."
+                    : "Yes. Multiple QR profiles can be managed from one account."
+                }
+              />
+
+              <FAQ
+                question={
+                  ka
+                    ? "რა არის Emergency პროფილი?"
+                    : "What is an Emergency profile?"
+                }
+                answer={
+                  ka
+                    ? "Emergency პროფილი გამოიყენება საჭირო სიტუაციაში მომხმარებლის მიერ წინასწარ შერჩეული მნიშვნელოვანი ინფორმაციის სწრაფად გასაზიარებლად."
+                    : "An Emergency profile provides selected essential information when assistance is needed."
+                }
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ================= CONTACT ================= */}
+
+      {openMenu === "contact" && (
+        <section className="megaMenu">
+          <div className="megaInner contactLayout">
+
+            <div className="contactIntro">
+              <span className="eyebrow">
+                QR RETURN SUPPORT
+              </span>
+
+              <h2>
+                {ka
+                  ? "როგორ დაგეხმაროთ?"
+                  : "How can we help?"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "დაგვიკავშირდით ანგარიშის, QR პროფილის, შეკვეთის ან პროდუქტის შესახებ."
+                  : "Contact us about your account, QR profile, order or product."}
+              </p>
+            </div>
+
+            <div className="supportCards">
+
+              <a
+                href="/support"
+                className="supportCard"
+              >
+                <div className="agentAvatar">
+                  <div className="agentHair" />
+                  <div className="agentFace" />
+                  <div className="headset">
+                    <span />
+                  </div>
+                </div>
+
+                <div className="supportCopy">
+                  <small>
+                    LIVE CHAT
+                  </small>
+
+                  <h3>
+                    {ka
+                      ? "მოგვწერეთ პირდაპირ"
+                      : "Chat with our team"}
+                  </h3>
+
+                  <p>
+                    {ka
+                      ? "QR RETURN-ის მხარდაჭერის გუნდი დაგეხმარებათ ანგარიშის, QR პროფილისა და შეკვეთის საკითხებში."
+                      : "Our support team can help with your account, QR profile and order."}
+                  </p>
+
+                  <strong>
+                    {ka
+                      ? "Live Chat-ის გახსნა"
+                      : "Open Live Chat"}
+                    {" →"}
+                  </strong>
+                </div>
+              </a>
+
+              <div className="supportCard">
+                <div className="supportIcon">
+                  <PhoneIcon />
+                </div>
+
+                <div className="supportCopy">
+                  <small>
+                    {ka
+                      ? "ტელეფონი"
+                      : "PHONE"}
+                  </small>
+
+                  <h3>
+                    QR RETURN Support
+                  </h3>
+
+                  <p>
+                    {ka
+                      ? "საკონტაქტო ნომერი დაემატება მხარდაჭერის ოფიციალური ნომრის გააქტიურების შემდეგ."
+                      : "The official support number will appear here once activated."}
+                  </p>
+
+                  <span className="availability">
+                    {ka
+                      ? "Support Contact"
+                      : "Support Contact"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* დროებითი ადგილი */}
+
+      <section className="preview">
+        <span>
+          QR RETURN
+        </span>
 
         <h1>
           {ka
-            ? "მთავარი გვერდის შემდეგ ნაწილებს აქ დავამატებთ."
-            : "The next sections of the homepage will be added here."}
+            ? "შემდეგი მთავარი სექცია აქ დაემატება."
+            : "The next homepage section will be added here."}
         </h1>
       </section>
 
@@ -528,37 +768,51 @@ export default function HomePage() {
 
         .page {
           min-height: 100vh;
-          margin: 0;
+
+          color: #192b42;
           background: #ffffff;
-          color: #17283d;
         }
 
         /* HEADER */
 
         .header {
-          width: 100%;
           position: relative;
+
           z-index: 100;
+
+          width: 100%;
+
           background: #ffffff;
-          border-bottom: 1px solid #e7ebf0;
+
+          border-bottom:
+            1px solid #e5ebf1;
         }
 
         .headerInner {
-          width: calc(100% - 72px);
+          width:
+            calc(100% - 72px);
+
           max-width: 1400px;
           min-height: 78px;
-          margin: 0 auto;
+
+          margin: auto;
 
           display: grid;
-          grid-template-columns: 210px 1fr auto;
+
+          grid-template-columns:
+            210px 1fr auto;
+
           align-items: center;
+
           gap: 20px;
         }
 
         .brand {
           display: flex;
           align-items: center;
+
           gap: 10px;
+
           text-decoration: none;
         }
 
@@ -570,8 +824,10 @@ export default function HomePage() {
           place-items: center;
 
           border-radius: 10px;
-          color: #ffffff;
-          background: #17283d;
+
+          color: white;
+
+          background: #162b44;
         }
 
         .brandText strong,
@@ -580,26 +836,31 @@ export default function HomePage() {
         }
 
         .brandText strong {
-          color: #17283d;
+          color: #162b44;
+
           font-size: 16px;
           font-weight: 900;
-          letter-spacing: -0.35px;
         }
 
         .brandText span {
           margin-top: 3px;
-          color: #929ca8;
+
+          color: #929daa;
+
           font-size: 7px;
           font-weight: 850;
-          letter-spacing: 1.35px;
+
+          letter-spacing: 1.3px;
         }
 
         .navigation {
           display: flex;
           align-items: center;
-          justify-content: flex-start;
-          gap: 27px;
-          transform: translateX(-18px);
+
+          gap: 28px;
+
+          transform:
+            translateX(-18px);
         }
 
         .nav {
@@ -607,76 +868,54 @@ export default function HomePage() {
 
           display: inline-flex;
           align-items: center;
+
           gap: 5px;
 
           border: 0;
-          background: transparent;
 
           color: #1266e9;
+          background: transparent;
 
           cursor: pointer;
+
           font-family: inherit;
+
           font-size: 13px;
-          font-weight: 750;
+          font-weight: 800;
 
           white-space: nowrap;
-
-          transition: color 0.18s ease;
         }
 
         .nav:hover,
         .nav.active {
-          color: #084eaf;
+          color: #084daf;
         }
 
         .actions {
           display: flex;
           align-items: center;
+
           gap: 7px;
         }
 
-        .blueButton {
-          min-height: 39px;
-          padding: 0 14px;
-
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-
-          border: 1px solid #1266e9;
-          border-radius: 9px;
-
-          color: #ffffff;
-          background: #1266e9;
-
-          text-decoration: none;
-          white-space: nowrap;
-
-          font-size: 11px;
-          font-weight: 800;
-
-          transition: background 0.18s ease;
-        }
-
-        .blueButton:hover {
-          background: #0d57c8;
-        }
+        /* LANGUAGE ახლა შესვლამდეა */
 
         .languages {
-          margin-left: 7px;
+          margin-right: 5px;
 
           display: flex;
           align-items: center;
+
           gap: 6px;
         }
 
         .languages button {
-          padding: 4px 1px;
+          padding: 4px 2px;
 
           border: 0;
-          background: transparent;
 
           color: #9aa4af;
+          background: transparent;
 
           cursor: pointer;
 
@@ -691,10 +930,47 @@ export default function HomePage() {
         .languages span {
           width: 1px;
           height: 12px;
-          background: #d8dee5;
+
+          background: #d9dfe6;
         }
 
-        /* MEGA MENU */
+        .blueButton,
+        .adminButton {
+          min-height: 39px;
+
+          padding: 0 14px;
+
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 9px;
+
+          color: white;
+
+          text-decoration: none;
+
+          font-size: 11px;
+          font-weight: 850;
+
+          white-space: nowrap;
+        }
+
+        .blueButton {
+          border:
+            1px solid #1266e9;
+
+          background: #1266e9;
+        }
+
+        .adminButton {
+          border:
+            1px solid #162b44;
+
+          background: #162b44;
+        }
+
+        /* MEGA */
 
         .megaMenu {
           position: relative;
@@ -702,249 +978,115 @@ export default function HomePage() {
 
           width: 100%;
 
-          background: #fbfcfe;
+          background: #f8fbff;
 
-          border-bottom: 1px solid #e4e9ef;
+          border-bottom:
+            1px solid #dfe7f0;
 
-          box-shadow: 0 18px 45px rgba(25, 42, 65, 0.07);
+          box-shadow:
+            0 20px 55px
+            rgba(
+              28,
+              49,
+              76,
+              0.08
+            );
         }
 
         .megaInner {
-          width: calc(100% - 72px);
+          width:
+            calc(100% - 72px);
+
           max-width: 1240px;
-          margin: 0 auto;
 
-          padding: 52px 0 58px;
+          margin: auto;
+
+          padding: 48px 0 54px;
         }
 
-        .aboutLayout,
-        .simpleLayout {
-          display: grid;
-          grid-template-columns: 0.72fr 1.28fr;
-          gap: 72px;
-          align-items: start;
-        }
+        .sectionIntro {
+          max-width: 620px;
 
-        .sideTitle {
-          padding-right: 20px;
-        }
-
-        .sectionNumber {
-          display: block;
-
-          color: #1266e9;
-
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1px;
+          margin-bottom: 28px;
         }
 
         .eyebrow {
-          display: block;
-
-          margin-top: 16px;
-
-          color: #8995a4;
+          color: #1266e9;
 
           font-size: 8px;
           font-weight: 900;
+
           letter-spacing: 1.5px;
         }
 
-        .sideTitle h2 {
-          max-width: 390px;
+        .sectionIntro h1,
+        .faqIntro h2,
+        .contactIntro h2 {
+          margin: 8px 0 0;
+
+          color: #1b3049;
+
+          font-size: 27px;
+          line-height: 1.15;
+
+          letter-spacing: -0.9px;
+        }
+
+        .sectionIntro p,
+        .faqIntro p,
+        .contactIntro p {
+          max-width: 540px;
 
           margin: 10px 0 0;
 
-          color: #182b43;
-
-          font-size: 27px;
-          line-height: 1.13;
-          letter-spacing: -1px;
-
-          font-weight: 760;
-        }
-
-        .sideDescription {
-          max-width: 380px;
-
-          margin: 15px 0 0;
-
-          color: #738195;
+          color: #718095;
 
           font-size: 11.5px;
-          line-height: 1.7;
+          line-height: 1.65;
         }
 
-        /* FOUNDER */
+        /* ABOUT — სამი ბარათი */
 
-        .aboutContent {
-          min-width: 0;
-        }
-
-        .contentBlock {
-          padding-left: 30px;
-
-          border-left: 1px solid #dfe5ec;
-        }
-
-        .contentHeading {
-          margin-bottom: 22px;
-
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .contentHeading span {
-          color: #1266e9;
-
-          font-size: 9px;
-          font-weight: 900;
-        }
-
-        .contentHeading h3 {
-          margin: 0;
-
-          color: #25384f;
-
-          font-size: 15px;
-          font-weight: 800;
-        }
-
-        .contentBlock p {
-          max-width: 720px;
-
-          margin: 0 0 13px;
-
-          color: #68778a;
-
-          font-size: 11.5px;
-          line-height: 1.72;
-        }
-
-        .contentBlock .lead {
-          color: #35475d;
-
-          font-size: 12.5px;
-          line-height: 1.7;
-        }
-
-        .founderStatement {
-          max-width: 720px;
-
-          margin: 21px 0;
-          padding: 17px 19px;
-
-          border: 1px solid #e1e8f4;
-          border-radius: 12px;
-
-          background: #f4f8ff;
-        }
-
-        .founderStatement small {
-          display: block;
-
-          color: #1266e9;
-
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 1.2px;
-        }
-
-        .founderStatement strong {
-          display: block;
-
-          margin-top: 6px;
-
-          color: #2b3e55;
-
-          font-size: 13px;
-          line-height: 1.5;
-          font-weight: 750;
-        }
-
-        .thanks {
-          color: #31445b !important;
-          font-weight: 750;
-        }
-
-        .signature {
-          max-width: 720px;
-
-          margin-top: 23px;
-          padding-top: 19px;
-
-          display: flex;
-          align-items: center;
-          gap: 11px;
-
-          border-top: 1px solid #e2e7ed;
-        }
-
-        .signatureMark {
-          width: 40px;
-          height: 40px;
-
+        .aboutCards {
           display: grid;
-          place-items: center;
 
-          border-radius: 50%;
+          grid-template-columns:
+            1.35fr 0.825fr 0.825fr;
 
-          color: #ffffff;
-          background: #1266e9;
+          gap: 13px;
 
-          font-size: 10px;
-          font-weight: 900;
+          align-items: stretch;
         }
 
-        .signature strong,
-        .signature span,
-        .signature small {
-          display: block;
-        }
+        .aboutCard {
+          padding: 24px;
 
-        .signature strong {
-          color: #26394f;
-          font-size: 12px;
-        }
+          border:
+            1px solid #cfe0fa;
 
-        .signature span {
-          margin-top: 2px;
-
-          color: #778598;
-
-          font-size: 9px;
-        }
-
-        .signature small {
-          margin-top: 2px;
-
-          color: #1266e9;
-
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .twoColumns {
-          margin-top: 27px;
-
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 11px;
-        }
-
-        .miniCard {
-          padding: 20px;
-
-          border: 1px solid #e2e7ed;
-          border-radius: 13px;
+          border-radius: 16px;
 
           background: #ffffff;
+
+          box-shadow:
+            0 8px 26px
+            rgba(
+              40,
+              79,
+              130,
+              0.05
+            );
         }
 
-        .miniCard > span,
+        .aboutCard:hover {
+          border-color: #aac9f6;
+        }
+
+        .founderCard {
+          border-top:
+            3px solid #1266e9;
+        }
+
         .cardNumber {
           color: #1266e9;
 
@@ -952,145 +1094,103 @@ export default function HomePage() {
           font-weight: 900;
         }
 
-        .miniCard h3,
-        .menuCard h3 {
-          margin: 8px 0 0;
+        .founderIdentity {
+          margin-top: 15px;
 
-          color: #293c53;
+          display: flex;
+          align-items: center;
 
-          font-size: 14px;
-          font-weight: 800;
+          gap: 11px;
         }
 
-        .miniCard p,
-        .menuCard p {
-          margin: 8px 0 0;
+        .founderAvatar {
+          width: 44px;
+          height: 44px;
 
-          color: #738195;
+          display: grid;
+          place-items: center;
+
+          flex: 0 0 44px;
+
+          border-radius: 50%;
+
+          color: #ffffff;
+
+          background: #1266e9;
 
           font-size: 11px;
-          line-height: 1.65;
+          font-weight: 900;
         }
 
-        /* SHOP */
-
-        .cards {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-        }
-
-        .menuCard {
-          min-height: 185px;
-
-          padding: 23px;
-
+        .founderIdentity strong,
+        .founderIdentity span,
+        .founderIdentity small {
           display: block;
-
-          border: 1px solid #e1e7ed;
-          border-radius: 15px;
-
-          color: inherit;
-          background: #ffffff;
-
-          text-decoration: none;
-
-          transition:
-            transform 0.18s ease,
-            border-color 0.18s ease,
-            box-shadow 0.18s ease;
         }
 
-        .menuCard:hover {
-          transform: translateY(-2px);
+        .founderIdentity strong {
+          color: #20354f;
 
-          border-color: #cddcf4;
-
-          box-shadow: 0 10px 30px rgba(34, 65, 110, 0.07);
+          font-size: 13px;
         }
 
-        .menuCard.featured {
-          background: #f4f8ff;
+        .founderIdentity span {
+          margin-top: 2px;
+
+          color: #6f7f91;
+
+          font-size: 10px;
         }
 
-        .cardLink {
-          display: block;
-
-          margin-top: 22px;
+        .founderIdentity small {
+          margin-top: 2px;
 
           color: #1266e9;
 
-          font-size: 10px;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .aboutCard h2 {
+          margin: 20px 0 0;
+
+          color: #233851;
+
+          font-size: 17px;
           font-weight: 800;
         }
 
-        /* FAQ */
+        .aboutCard p {
+          margin: 11px 0 0;
 
-        .faqList {
-          border-top: 1px solid #dde4eb;
-        }
-
-        .faqItem {
-          padding: 17px 2px;
-
-          border-bottom: 1px solid #e1e7ed;
-        }
-
-        .faqItem h3 {
-          margin: 0;
-
-          color: #2a3c52;
-
-          font-size: 12.5px;
-          font-weight: 800;
-        }
-
-        .faqItem p {
-          max-width: 720px;
-
-          margin: 7px 0 0;
-
-          color: #738195;
+          color: #6c7b8e;
 
           font-size: 11px;
-          line-height: 1.65;
+          line-height: 1.67;
         }
 
-        /* CONTACT */
+        .quote {
+          margin: 16px 0;
 
-        .contactCards {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
+          padding: 15px;
+
+          border-radius: 11px;
+
+          color: #28415e;
+
+          background: #eef5ff;
+
+          font-size: 11.5px;
+          line-height: 1.6;
+
+          font-weight: 700;
         }
 
-        .contactCard {
-          min-height: 150px;
+        .cardIcon {
+          width: 42px;
+          height: 42px;
 
-          padding: 22px;
-
-          display: grid;
-          grid-template-columns: 40px 1fr auto;
-          align-items: center;
-          gap: 13px;
-
-          border: 1px solid #e1e7ed;
-          border-radius: 15px;
-
-          color: inherit;
-          background: #ffffff;
-
-          text-decoration: none;
-        }
-
-        a.contactCard:hover {
-          border-color: #cbdcf7;
-          background: #f7faff;
-        }
-
-        .contactIcon {
-          width: 40px;
-          height: 40px;
+          margin-top: 17px;
 
           display: grid;
           place-items: center;
@@ -1098,119 +1198,432 @@ export default function HomePage() {
           border-radius: 11px;
 
           color: #1266e9;
-          background: #eaf2ff;
+
+          background: #edf4ff;
         }
 
-        .contactText small {
+        .cardStatement {
           display: block;
 
+          margin-top: 20px;
+
+          color: #1266e9;
+
+          font-size: 10px;
+          font-weight: 850;
+        }
+
+        /* SHOP */
+
+        .shopLayout {
+          display: grid;
+
+          grid-template-columns:
+            1fr 1fr;
+
+          gap: 13px;
+        }
+
+        .shopCard {
+          padding: 26px;
+
+          border:
+            1px solid #cfe0fa;
+
+          border-radius: 16px;
+
+          color: inherit;
+          background: white;
+
+          text-decoration: none;
+        }
+
+        .shopCard h2 {
+          margin: 12px 0 0;
+
+          color: #263b54;
+
+          font-size: 17px;
+        }
+
+        .shopCard p {
+          margin: 10px 0 0;
+
+          color: #6f7e91;
+
+          font-size: 11px;
+          line-height: 1.65;
+        }
+
+        .storeCard {
+          background: #eef5ff;
+        }
+
+        .storeCard strong {
+          display: block;
+
+          margin-top: 22px;
+
+          color: #1266e9;
+
+          font-size: 11px;
+        }
+
+        .orderSteps {
+          margin-top: 22px;
+
+          display: flex;
+          flex-wrap: wrap;
+
+          gap: 7px;
+        }
+
+        .orderSteps span {
+          padding: 7px 9px;
+
+          border-radius: 8px;
+
+          color: #1266e9;
+          background: #edf4ff;
+
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        /* FAQ */
+
+        .faqLayout {
+          display: grid;
+
+          grid-template-columns:
+            0.65fr 1.35fr;
+
+          gap: 60px;
+        }
+
+        .faqList {
+          border-top:
+            1px solid #dce5ee;
+        }
+
+        .faqItem {
+          padding: 15px 0;
+
+          border-bottom:
+            1px solid #dce5ee;
+        }
+
+        .faqItem h3 {
+          margin: 0;
+
+          color: #2b3f57;
+
+          font-size: 12.5px;
+        }
+
+        .faqItem p {
+          max-width: 700px;
+
+          margin: 6px 0 0;
+
+          color: #748296;
+
+          font-size: 10.5px;
+          line-height: 1.65;
+        }
+
+        /* CONTACT */
+
+        .contactLayout {
+          display: grid;
+
+          grid-template-columns:
+            0.65fr 1.35fr;
+
+          gap: 60px;
+        }
+
+        .supportCards {
+          display: grid;
+
+          grid-template-columns:
+            repeat(2, 1fr);
+
+          gap: 13px;
+        }
+
+        .supportCard {
+          min-height: 170px;
+
+          padding: 22px;
+
+          display: grid;
+
+          grid-template-columns:
+            58px 1fr;
+
+          align-items: center;
+
+          gap: 16px;
+
+          border:
+            1px solid #cfe0fa;
+
+          border-radius: 16px;
+
+          color: inherit;
+          background: #ffffff;
+
+          text-decoration: none;
+        }
+
+        a.supportCard:hover {
+          border-color: #a9c9f6;
+
+          background: #f7faff;
+        }
+
+        /* პატარა support-agent illustration */
+
+        .agentAvatar {
+          width: 58px;
+          height: 58px;
+
+          position: relative;
+
+          flex: 0 0 58px;
+
+          overflow: hidden;
+
+          border-radius: 50%;
+
+          background: #dceaff;
+        }
+
+        .agentFace {
+          width: 27px;
+          height: 32px;
+
+          position: absolute;
+
+          left: 16px;
+          top: 14px;
+
+          border-radius:
+            48% 48% 44% 44%;
+
+          background: #f4c6a6;
+        }
+
+        .agentHair {
+          width: 36px;
+          height: 31px;
+
+          position: absolute;
+
+          z-index: 2;
+
+          left: 11px;
+          top: 8px;
+
+          border-radius:
+            50% 50% 35% 35%;
+
+          background: #29394e;
+        }
+
+        .agentFace {
+          z-index: 3;
+        }
+
+        .headset {
+          width: 39px;
+          height: 33px;
+
+          position: absolute;
+
+          z-index: 4;
+
+          left: 9px;
+          top: 13px;
+
+          border:
+            2px solid #1266e9;
+
+          border-bottom: 0;
+
+          border-radius:
+            22px 22px 0 0;
+        }
+
+        .headset span {
+          width: 10px;
+          height: 3px;
+
+          position: absolute;
+
+          right: -4px;
+          bottom: 2px;
+
+          border-radius: 10px;
+
+          background: #1266e9;
+        }
+
+        .supportIcon {
+          width: 50px;
+          height: 50px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 13px;
+
+          color: #1266e9;
+
+          background: #edf4ff;
+        }
+
+        .supportCopy small {
           color: #1266e9;
 
           font-size: 7px;
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
-        .contactText h3 {
+        .supportCopy h3 {
           margin: 5px 0 0;
 
-          color: #293c53;
+          color: #263b54;
 
           font-size: 13px;
-          font-weight: 800;
         }
 
-        .contactText p {
-          margin: 5px 0 0;
+        .supportCopy p {
+          margin: 6px 0 0;
 
-          color: #758396;
+          color: #718095;
 
           font-size: 10.5px;
           line-height: 1.55;
         }
 
-        .arrow {
+        .supportCopy strong {
+          display: block;
+
+          margin-top: 12px;
+
           color: #1266e9;
-          font-size: 17px;
+
+          font-size: 10px;
+        }
+
+        .availability {
+          display: inline-block;
+
+          margin-top: 12px;
+
+          padding: 5px 8px;
+
+          border-radius: 7px;
+
+          color: #1266e9;
+
+          background: #edf4ff;
+
+          font-size: 8px;
+          font-weight: 800;
         }
 
         /* PREVIEW */
 
-        .previewArea {
-          min-height: 500px;
+        .preview {
+          min-height: 520px;
 
-          padding: 110px 36px;
+          padding: 120px 30px;
 
           text-align: center;
-
-          background: #ffffff;
         }
 
-        .previewArea span {
+        .preview span {
           color: #1266e9;
 
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 900;
-          letter-spacing: 1.5px;
+
+          letter-spacing: 1.4px;
         }
 
-        .previewArea h1 {
+        .preview h1 {
           max-width: 650px;
 
           margin: 15px auto 0;
 
-          color: #1d3047;
+          color: #20354d;
 
-          font-size: 34px;
-          line-height: 1.15;
-          letter-spacing: -1.4px;
+          font-size: 32px;
+
+          line-height: 1.14;
+
+          letter-spacing: -1.3px;
         }
 
         /* RESPONSIVE */
 
-        @media (max-width: 1050px) {
+        @media (
+          max-width: 1120px
+        ) {
           .navigation {
-            gap: 14px;
+            gap: 15px;
+
             transform: none;
           }
 
           .nav {
             font-size: 11px;
           }
-
-          .headerInner {
-            width: calc(100% - 36px);
-          }
         }
 
-        @media (max-width: 900px) {
+        @media (
+          max-width: 950px
+        ) {
           .navigation {
             display: none;
           }
 
           .headerInner {
-            grid-template-columns: auto 1fr;
+            grid-template-columns:
+              auto 1fr;
           }
 
           .actions {
             justify-self: end;
           }
 
-          .aboutLayout,
-          .simpleLayout {
-            grid-template-columns: 1fr;
-            gap: 35px;
+          .aboutCards {
+            grid-template-columns:
+              1fr;
           }
 
-          .contentBlock {
-            padding-left: 0;
-            border-left: 0;
+          .faqLayout,
+          .contactLayout {
+            grid-template-columns:
+              1fr;
           }
         }
 
-        @media (max-width: 650px) {
+        @media (
+          max-width: 650px
+        ) {
+          .headerInner,
+          .megaInner {
+            width:
+              calc(100% - 26px);
+          }
+
           .headerInner {
-            width: calc(100% - 20px);
             min-height: 70px;
           }
 
@@ -1219,33 +1632,24 @@ export default function HomePage() {
             display: none;
           }
 
-          .blueButton {
+          .blueButton,
+          .adminButton {
             min-height: 35px;
+
             padding: 0 8px;
+
             font-size: 9px;
           }
 
           .megaInner {
-            width: calc(100% - 28px);
-            padding: 35px 0 42px;
+            padding:
+              34px 0 40px;
           }
 
-          .sideTitle h2 {
-            font-size: 23px;
-          }
-
-          .twoColumns,
-          .cards,
-          .contactCards {
-            grid-template-columns: 1fr;
-          }
-
-          .contentBlock p {
-            font-size: 11px;
-          }
-
-          .previewArea h1 {
-            font-size: 27px;
+          .shopLayout,
+          .supportCards {
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
@@ -1268,7 +1672,11 @@ function FAQ({
   );
 }
 
-function Chevron({ open }: { open: boolean }) {
+function Chevron({
+  open,
+}: {
+  open: boolean;
+}) {
   return (
     <svg
       width="11"
@@ -1278,8 +1686,11 @@ function Chevron({ open }: { open: boolean }) {
       stroke="currentColor"
       strokeWidth="2"
       style={{
-        transform: open ? "rotate(180deg)" : "rotate(0deg)",
-        transition: "transform .2s ease",
+        transform: open
+          ? "rotate(180deg)"
+          : "rotate(0deg)",
+        transition:
+          "transform .2s ease",
       }}
     >
       <path d="m6 9 6 6 6-6" />
@@ -1297,25 +1708,79 @@ function QRIcon() {
       stroke="currentColor"
       strokeWidth="1.8"
     >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
       <path d="M14 14h3v3h3v4h-6z" />
     </svg>
   );
 }
 
-function ChatIcon() {
+function TargetIcon() {
   return (
     <svg
-      width="19"
-      height="19"
+      width="21"
+      height="21"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
     >
-      <path d="M21 12a8 8 0 0 1-8 8H6l-3 2 1-5a9 9 0 1 1 17-5Z" />
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
+      />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="3"
+      />
+
+      <path d="M12 2v3M22 12h-3" />
+    </svg>
+  );
+}
+
+function VisionIcon() {
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z" />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="2.5"
+      />
     </svg>
   );
 }
@@ -1323,8 +1788,8 @@ function ChatIcon() {
 function PhoneIcon() {
   return (
     <svg
-      width="19"
-      height="19"
+      width="21"
+      height="21"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
