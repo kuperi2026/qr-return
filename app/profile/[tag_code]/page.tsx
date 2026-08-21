@@ -93,10 +93,7 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (
-    !supabaseUrl ||
-    !supabaseKey
-  ) {
+  if (!supabaseUrl || !supabaseKey) {
     return null;
   }
 
@@ -134,6 +131,24 @@ export default function PublicProfilePage() {
   const [
     errorMessage,
     setErrorMessage,
+  ] =
+    useState("");
+
+  const [
+    locationLoading,
+    setLocationLoading,
+  ] =
+    useState(false);
+
+  const [
+    locationSuccess,
+    setLocationSuccess,
+  ] =
+    useState("");
+
+  const [
+    locationError,
+    setLocationError,
   ] =
     useState("");
 
@@ -247,6 +262,154 @@ export default function PublicProfilePage() {
 
     loadProfile();
   }, [tagCode]);
+
+  async function shareLocation() {
+    setLocationError("");
+    setLocationSuccess("");
+
+    if (!profile) {
+      setLocationError(
+        "პროფილი ვერ მოიძებნა."
+      );
+
+      return;
+    }
+
+    if (
+      typeof navigator ===
+        "undefined" ||
+      !navigator.geolocation
+    ) {
+      setLocationError(
+        "თქვენი ბრაუზერი მდებარეობის გაზიარებას არ უჭერს მხარს."
+      );
+
+      return;
+    }
+
+    setLocationLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const supabase =
+            createSupabaseClient();
+
+          if (!supabase) {
+            throw new Error(
+              "Supabase კავშირი ვერ მოიძებნა."
+            );
+          }
+
+          const {
+            latitude,
+            longitude,
+            accuracy,
+          } = position.coords;
+
+          const {
+            data,
+            error,
+          } =
+            await supabase.rpc(
+              "share_finder_location",
+              {
+                p_tag_code:
+                  profile.tag_code,
+
+                p_latitude:
+                  latitude,
+
+                p_longitude:
+                  longitude,
+
+                p_accuracy:
+                  accuracy,
+              }
+            );
+
+          if (error) {
+            throw error;
+          }
+
+          if (data !== true) {
+            throw new Error(
+              "მდებარეობის გაზიარება ვერ დადასტურდა."
+            );
+          }
+
+          setLocationSuccess(
+            "მდებარეობა წარმატებით გაეგზავნა მფლობელს."
+          );
+        } catch (error) {
+          console.error(
+            "Location share error:",
+            error
+          );
+
+          setLocationError(
+            error instanceof Error
+              ? error.message
+              : "მდებარეობის გაზიარება ვერ მოხერხდა."
+          );
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+
+      (error) => {
+        setLocationLoading(false);
+
+        if (
+          error.code ===
+          error.PERMISSION_DENIED
+        ) {
+          setLocationError(
+            "მდებარეობაზე წვდომა არ დაუშვით. სურვილის შემთხვევაში შეგიძლიათ ბრაუზერის პარამეტრებიდან ჩართოთ Location."
+          );
+
+          return;
+        }
+
+        if (
+          error.code ===
+          error.POSITION_UNAVAILABLE
+        ) {
+          setLocationError(
+            "მიმდინარე მდებარეობის განსაზღვრა ვერ მოხერხდა."
+          );
+
+          return;
+        }
+
+        if (
+          error.code ===
+          error.TIMEOUT
+        ) {
+          setLocationError(
+            "მდებარეობის მიღების დრო ამოიწურა. სცადეთ კიდევ ერთხელ."
+          );
+
+          return;
+        }
+
+        setLocationError(
+          "მდებარეობის გაზიარება ვერ მოხერხდა."
+        );
+      },
+
+      {
+        enableHighAccuracy:
+          true,
+
+        timeout:
+          12000,
+
+        maximumAge:
+          0,
+      }
+    );
+  }
 
   if (loading) {
     return (
@@ -444,8 +607,6 @@ export default function PublicProfilePage() {
       <main className="page">
         <div className="container">
 
-          {/* HEADER */}
-
           <header className="header">
             <a
               href="/"
@@ -470,8 +631,6 @@ export default function PublicProfilePage() {
               ✓ VERIFIED QR
             </div>
           </header>
-
-          {/* PROFILE HERO */}
 
           <section className="profileHero">
             <div className="categoryIcon">
@@ -498,8 +657,6 @@ export default function PublicProfilePage() {
             </div>
           </section>
 
-          {/* OWNER */}
-
           <section className="ownerCard">
             <div className="sectionTitle">
               <span>
@@ -513,7 +670,8 @@ export default function PublicProfilePage() {
 
             <div className="ownerIdentity">
               <div className="avatar">
-                {profile.owner_first_name
+                {profile
+                  .owner_first_name
                   ?.charAt(0)
                   .toUpperCase() ||
                   "O"}
@@ -533,23 +691,21 @@ export default function PublicProfilePage() {
 
             <div className="alwaysVisible">
               <div>
-                <span>
-                  სახელი
-                </span>
+                <span>სახელი</span>
 
                 <strong>
-                  {profile.owner_first_name ||
+                  {profile
+                    .owner_first_name ||
                     "—"}
                 </strong>
               </div>
 
               <div>
-                <span>
-                  გვარი
-                </span>
+                <span>გვარი</span>
 
                 <strong>
-                  {profile.owner_last_name ||
+                  {profile
+                    .owner_last_name ||
                     "—"}
                 </strong>
               </div>
@@ -560,7 +716,8 @@ export default function PublicProfilePage() {
                 </span>
 
                 <strong>
-                  {profile.owner_phone ||
+                  {profile
+                    .owner_phone ||
                     "—"}
                 </strong>
               </div>
@@ -570,8 +727,6 @@ export default function PublicProfilePage() {
               ✓ სახელი, გვარი და ტელეფონის ნომერი ყოველთვის ხილულია.
             </div>
           </section>
-
-          {/* PHOTO */}
 
           {profile.show_pet_photo &&
             profile.photo && (
@@ -586,8 +741,6 @@ export default function PublicProfilePage() {
               </section>
             )}
 
-          {/* OWNER MESSAGE */}
-
           {profile.show_finder_message &&
             profile.finder_message && (
               <section className="finderMessage">
@@ -601,7 +754,55 @@ export default function PublicProfilePage() {
               </section>
             )}
 
-          {/* CONTACT */}
+          <section className="locationCard">
+            <div className="locationIcon">
+              📍
+            </div>
+
+            <div className="locationContent">
+              <span>
+                SHARE LOCATION
+              </span>
+
+              <h2>
+                დაეხმარეთ მფლობელს სწრაფად პოვნაში
+              </h2>
+
+              <p>
+                სურვილის შემთხვევაში შეგიძლიათ
+                ერთი ღილაკით გაუზიაროთ თქვენი
+                მიმდინარე მდებარეობა მფლობელს.
+                ბრაუზერი ჯერ მოგთხოვთ
+                ნებართვას.
+              </p>
+
+              <button
+                type="button"
+                onClick={
+                  shareLocation
+                }
+                disabled={
+                  locationLoading
+                }
+              >
+                {locationLoading
+                  ? "მდებარეობა იგზავნება..."
+                  : "📍 მდებარეობის გაზიარება"}
+              </button>
+
+              {locationSuccess && (
+                <div className="locationSuccess">
+                  ✓ {locationSuccess}
+                </div>
+              )}
+
+              {locationError && (
+                <div className="locationError">
+                  {locationError}
+                </div>
+              )}
+            </div>
+          </section>
 
           <section className="contactCard">
             <div className="sectionTitle">
@@ -621,7 +822,6 @@ export default function PublicProfilePage() {
             </div>
 
             <div className="contactActions">
-
               {profile.owner_phone && (
                 <a
                   href={phoneHref}
@@ -641,7 +841,8 @@ export default function PublicProfilePage() {
                 </a>
               )}
 
-              {profile.live_chat_enabled && (
+              {profile
+                .live_chat_enabled && (
                 <a
                   href={`/chat/finder/${profile.tag_code}`}
                   className="secondaryAction"
@@ -659,7 +860,6 @@ export default function PublicProfilePage() {
                   <b>→</b>
                 </a>
               )}
-
             </div>
 
             {profile.show_email &&
@@ -678,17 +878,18 @@ export default function PublicProfilePage() {
                   <a
                     href={`mailto:${profile.owner_email}`}
                   >
-                    {profile.owner_email}
+                    {
+                      profile.owner_email
+                    }
                   </a>
                 </div>
               )}
           </section>
 
-          {/* ADDITIONAL INFORMATION */}
-
           {(profile.show_medical_info &&
             profile.medical_info) ||
-          (profile.show_behaviour_note &&
+          (profile
+            .show_behaviour_note &&
             profile.behaviour_note) ||
           (profile.show_description &&
             profile.description) ? (
@@ -704,8 +905,8 @@ export default function PublicProfilePage() {
               </div>
 
               <div className="detailsList">
-
-                {profile.show_medical_info &&
+                {profile
+                  .show_medical_info &&
                   profile.medical_info && (
                     <InfoRow
                       title="სამედიცინო ინფორმაცია"
@@ -715,17 +916,21 @@ export default function PublicProfilePage() {
                     />
                   )}
 
-                {profile.show_behaviour_note &&
-                  profile.behaviour_note && (
+                {profile
+                  .show_behaviour_note &&
+                  profile
+                    .behaviour_note && (
                     <InfoRow
                       title="ქცევის შესახებ ინფორმაცია"
                       text={
-                        profile.behaviour_note
+                        profile
+                          .behaviour_note
                       }
                     />
                   )}
 
-                {profile.show_description &&
+                {profile
+                  .show_description &&
                   profile.description && (
                     <InfoRow
                       title="აღწერა"
@@ -734,12 +939,9 @@ export default function PublicProfilePage() {
                       }
                     />
                   )}
-
               </div>
             </section>
           ) : null}
-
-          {/* QR INFO */}
 
           <section className="qrInfo">
             <div className="qrSmall">
@@ -788,11 +990,8 @@ export default function PublicProfilePage() {
         }
 
         .container {
-          width:
-            calc(100% - 32px);
-
+          width: calc(100% - 32px);
           max-width: 660px;
-
           margin: auto;
         }
 
@@ -801,8 +1000,7 @@ export default function PublicProfilePage() {
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 15px;
 
@@ -864,13 +1062,10 @@ export default function PublicProfilePage() {
           border-radius: 999px;
 
           background: #eaf2ff;
-
           color: #1266e9;
 
           font-size: 6px;
           font-weight: 900;
-
-          letter-spacing: .5px;
         }
 
         .profileHero {
@@ -899,15 +1094,6 @@ export default function PublicProfilePage() {
           background: #ffffff;
 
           font-size: 35px;
-
-          box-shadow:
-            0 10px 25px
-            rgba(
-              30,
-              70,
-              120,
-              .05
-            );
         }
 
         .profileIntro > span {
@@ -915,8 +1101,6 @@ export default function PublicProfilePage() {
 
           font-size: 8px;
           font-weight: 900;
-
-          letter-spacing: 1.2px;
         }
 
         .profileIntro h1 {
@@ -925,7 +1109,6 @@ export default function PublicProfilePage() {
           color: #1f3852;
 
           font-size: 31px;
-          line-height: 1.08;
         }
 
         .profileIntro p {
@@ -940,6 +1123,7 @@ export default function PublicProfilePage() {
         }
 
         .ownerCard,
+        .locationCard,
         .contactCard,
         .detailsCard {
           margin-top: 14px;
@@ -952,18 +1136,10 @@ export default function PublicProfilePage() {
           border-radius: 16px;
 
           background: #ffffff;
-
-          box-shadow:
-            0 12px 28px
-            rgba(
-              30,
-              70,
-              120,
-              .045
-            );
         }
 
-        .sectionTitle > span {
+        .sectionTitle > span,
+        .locationContent > span {
           color: #1266e9;
 
           font-size: 7px;
@@ -972,7 +1148,8 @@ export default function PublicProfilePage() {
           letter-spacing: 1.1px;
         }
 
-        .sectionTitle h2 {
+        .sectionTitle h2,
+        .locationContent h2 {
           margin: 6px 0 0;
 
           color: #29415b;
@@ -980,12 +1157,14 @@ export default function PublicProfilePage() {
           font-size: 17px;
         }
 
-        .sectionTitle p {
+        .sectionTitle p,
+        .locationContent p {
           margin: 5px 0 0;
 
           color: #8492a1;
 
           font-size: 8px;
+          line-height: 1.55;
         }
 
         .ownerIdentity {
@@ -1000,8 +1179,6 @@ export default function PublicProfilePage() {
         .avatar {
           width: 46px;
           height: 46px;
-
-          flex: 0 0 46px;
 
           display: grid;
           place-items: center;
@@ -1025,9 +1202,6 @@ export default function PublicProfilePage() {
           color: #9aa5b2;
 
           font-size: 7px;
-          font-weight: 900;
-
-          letter-spacing: 1px;
         }
 
         .ownerIdentity strong {
@@ -1046,7 +1220,7 @@ export default function PublicProfilePage() {
           grid-template-columns:
             repeat(
               3,
-              minmax(0, 1fr)
+              minmax(0,1fr)
             );
 
           gap: 8px;
@@ -1074,7 +1248,6 @@ export default function PublicProfilePage() {
           color: #95a1af;
 
           font-size: 7px;
-          font-weight: 850;
         }
 
         .alwaysVisible strong {
@@ -1083,9 +1256,6 @@ export default function PublicProfilePage() {
           color: #344c66;
 
           font-size: 9px;
-
-          word-break:
-            break-word;
         }
 
         .requiredInfo {
@@ -1112,8 +1282,6 @@ export default function PublicProfilePage() {
             1px solid #dbe5f0;
 
           border-radius: 16px;
-
-          background: #ffffff;
         }
 
         .photoCard img {
@@ -1148,8 +1316,6 @@ export default function PublicProfilePage() {
 
           font-size: 7px;
           font-weight: 900;
-
-          letter-spacing: 1.1px;
         }
 
         .finderMessage p {
@@ -1159,6 +1325,95 @@ export default function PublicProfilePage() {
 
           font-size: 11px;
           line-height: 1.65;
+        }
+
+        .locationCard {
+          display: flex;
+          align-items: flex-start;
+
+          gap: 14px;
+
+          border-color: #cfe0f6;
+
+          background:
+            linear-gradient(
+              135deg,
+              #ffffff,
+              #f2f7ff
+            );
+        }
+
+        .locationIcon {
+          width: 46px;
+          height: 46px;
+
+          flex: 0 0 46px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 13px;
+
+          background: #edf4ff;
+
+          font-size: 21px;
+        }
+
+        .locationContent {
+          flex: 1;
+        }
+
+        .locationContent button {
+          min-height: 44px;
+
+          margin-top: 14px;
+
+          padding: 0 15px;
+
+          border: 0;
+          border-radius: 10px;
+
+          background: #1266e9;
+
+          color: #ffffff;
+
+          font-family: inherit;
+
+          font-size: 9px;
+          font-weight: 900;
+
+          cursor: pointer;
+        }
+
+        .locationContent button:disabled {
+          opacity: .6;
+
+          cursor: wait;
+        }
+
+        .locationSuccess,
+        .locationError {
+          margin-top: 10px;
+
+          padding: 10px 11px;
+
+          border-radius: 9px;
+
+          font-size: 8px;
+
+          line-height: 1.5;
+        }
+
+        .locationSuccess {
+          background: #eef9f2;
+
+          color: #357357;
+        }
+
+        .locationError {
+          background: #fff4f5;
+
+          color: #a34750;
         }
 
         .contactActions {
@@ -1179,8 +1434,6 @@ export default function PublicProfilePage() {
           justify-content:
             space-between;
 
-          gap: 15px;
-
           border-radius: 12px;
 
           text-decoration: none;
@@ -1193,7 +1446,6 @@ export default function PublicProfilePage() {
 
         .contactActions strong {
           font-size: 10px;
-          font-weight: 900;
         }
 
         .contactActions span {
@@ -1202,24 +1454,10 @@ export default function PublicProfilePage() {
           font-size: 8px;
         }
 
-        .contactActions b {
-          font-size: 16px;
-        }
-
         .primaryAction {
           background: #1266e9;
 
           color: #ffffff;
-        }
-
-        .primaryAction span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .75
-            );
         }
 
         .secondaryAction {
@@ -1229,10 +1467,6 @@ export default function PublicProfilePage() {
           background: #f7faff;
 
           color: #35506c;
-        }
-
-        .secondaryAction span {
-          color: #8392a2;
         }
 
         .emailRow {
@@ -1251,8 +1485,6 @@ export default function PublicProfilePage() {
             1px solid #e1e8f0;
 
           border-radius: 10px;
-
-          background: #fbfcfe;
         }
 
         .emailRow span,
@@ -1264,7 +1496,6 @@ export default function PublicProfilePage() {
           color: #99a4b1;
 
           font-size: 7px;
-          font-weight: 900;
         }
 
         .emailRow strong {
@@ -1279,12 +1510,8 @@ export default function PublicProfilePage() {
           color: #1266e9;
 
           font-size: 9px;
-          font-weight: 850;
 
           text-decoration: none;
-
-          word-break:
-            break-all;
         }
 
         .detailsList {
@@ -1316,8 +1543,6 @@ export default function PublicProfilePage() {
           width: 42px;
           height: 42px;
 
-          flex: 0 0 42px;
-
           display: grid;
           place-items: center;
 
@@ -1341,9 +1566,6 @@ export default function PublicProfilePage() {
           color: #9aa5b2;
 
           font-size: 7px;
-          font-weight: 900;
-
-          letter-spacing: 1px;
         }
 
         .qrInfo strong {
@@ -1352,9 +1574,6 @@ export default function PublicProfilePage() {
           color: #324c68;
 
           font-size: 10px;
-
-          word-break:
-            break-all;
         }
 
         .qrInfo p {
@@ -1365,25 +1584,9 @@ export default function PublicProfilePage() {
           font-size: 7px;
         }
 
-        @media (
-          max-width: 550px
-        ) {
+        @media (max-width: 550px) {
           .profileHero {
-            align-items:
-              flex-start;
-          }
-
-          .categoryIcon {
-            width: 62px;
-            height: 62px;
-
-            flex-basis: 62px;
-
-            font-size: 29px;
-          }
-
-          .profileIntro h1 {
-            font-size: 26px;
+            align-items: flex-start;
           }
 
           .alwaysVisible {
@@ -1391,12 +1594,18 @@ export default function PublicProfilePage() {
               1fr;
           }
 
-          .emailRow {
-            align-items:
-              flex-start;
+          .locationCard {
+            flex-direction: column;
+          }
 
-            flex-direction:
-              column;
+          .emailRow {
+            flex-direction: column;
+
+            align-items: flex-start;
+          }
+
+          .locationContent button {
+            width: 100%;
           }
         }
       `}</style>
@@ -1414,7 +1623,8 @@ function InfoRow({
   return (
     <div
       style={{
-        padding: "14px 2px",
+        padding:
+          "14px 2px",
 
         borderBottom:
           "1px solid #e4eaf1",
