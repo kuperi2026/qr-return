@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  Chevron,
+  QRIcon,
+} from "./HomeIcons";
+
 type Lang = "ka" | "en";
 
 type Menu =
@@ -15,44 +20,6 @@ type Props = {
   setLanguage: (language: Lang) => void;
   toggleMenu: (menu: Exclude<Menu, null>) => void;
 };
-
-function QRIcon({ size = 24 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M14 14h3v3h4" />
-      <path d="M14 21v-4" />
-      <path d="M18 18h3v3" />
-    </svg>
-  );
-}
-
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="11"
-      height="11"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      style={{
-        transform: open ? "rotate(180deg)" : "rotate(0)",
-      }}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
 
 export default function HomeHeader({
   language,
