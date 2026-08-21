@@ -22,16 +22,19 @@ type ProfileData = {
   tag_code: string;
   item_type: string;
   pet_type: string | null;
+
   item_name: string | null;
   colour: string | null;
   sex: string | null;
   date_of_birth: string | null;
   weight: number | null;
   photo: string | null;
+
   medical_info: string | null;
   behaviour_note: string | null;
   description: string | null;
   finder_message: string | null;
+
   show_email: boolean | null;
   show_address: boolean | null;
   show_pet_photo: boolean | null;
@@ -39,8 +42,14 @@ type ProfileData = {
   show_behaviour_note: boolean | null;
   show_description: boolean | null;
   show_finder_message: boolean | null;
+
   live_chat_enabled: boolean | null;
   active: boolean | null;
+
+  lost: boolean | null;
+  lost_at: string | null;
+  lost_message: string | null;
+  found_at: string | null;
 };
 
 function createSupabaseClient() {
@@ -125,6 +134,11 @@ export default function EditProfilePage() {
 
   const [saving, setSaving] =
     useState(false);
+
+  const [
+    statusLoading,
+    setStatusLoading,
+  ] = useState(false);
 
   const [
     errorMessage,
@@ -219,6 +233,28 @@ export default function EditProfilePage() {
   const [active, setActive] =
     useState(true);
 
+  const [lost, setLost] =
+    useState(false);
+
+  const [
+    lostMessage,
+    setLostMessage,
+  ] = useState("");
+
+  const [
+    lostAt,
+    setLostAt,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
+    foundAt,
+    setFoundAt,
+  ] = useState<string | null>(
+    null
+  );
+
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -237,9 +273,7 @@ export default function EditProfilePage() {
         setSupabase(client);
 
         const {
-          data: {
-            user,
-          },
+          data: { user },
           error: userError,
         } =
           await client.auth.getUser();
@@ -257,7 +291,6 @@ export default function EditProfilePage() {
             "პროფილის ID ვერ მოიძებნა."
           );
 
-          setLoading(false);
           return;
         }
 
@@ -291,7 +324,11 @@ export default function EditProfilePage() {
               show_description,
               show_finder_message,
               live_chat_enabled,
-              active
+              active,
+              lost,
+              lost_at,
+              lost_message,
+              found_at
             `
           )
           .eq(
@@ -330,8 +367,7 @@ export default function EditProfilePage() {
         );
 
         setWeight(
-          loaded.weight !== null &&
-          loaded.weight !== undefined
+          loaded.weight !== null
             ? String(
                 loaded.weight
               )
@@ -405,6 +441,22 @@ export default function EditProfilePage() {
         setActive(
           loaded.active !== false
         );
+
+        setLost(
+          loaded.lost === true
+        );
+
+        setLostMessage(
+          loaded.lost_message || ""
+        );
+
+        setLostAt(
+          loaded.lost_at
+        );
+
+        setFoundAt(
+          loaded.found_at
+        );
       } catch (error) {
         console.error(
           "Load profile error:",
@@ -457,87 +509,86 @@ export default function EditProfilePage() {
     setSaving(true);
 
     try {
-      const {
-        error,
-      } = await supabase
-        .from("item")
-        .update({
-          item_name:
-            itemName.trim(),
+      const { error } =
+        await supabase
+          .from("item")
+          .update({
+            item_name:
+              itemName.trim(),
 
-          colour:
-            colour.trim() ||
-            null,
+            colour:
+              colour.trim() ||
+              null,
 
-          sex:
-            sex || null,
+            sex:
+              sex || null,
 
-          date_of_birth:
-            dateOfBirth ||
-            null,
+            date_of_birth:
+              dateOfBirth ||
+              null,
 
-          weight:
-            weight
-              ? Number(weight)
-              : null,
+            weight:
+              weight
+                ? Number(weight)
+                : null,
 
-          photo:
-            photo.trim() ||
-            null,
+            photo:
+              photo.trim() ||
+              null,
 
-          medical_info:
-            medicalInfo.trim() ||
-            null,
+            medical_info:
+              medicalInfo.trim() ||
+              null,
 
-          behaviour_note:
-            behaviourNote.trim() ||
-            null,
+            behaviour_note:
+              behaviourNote.trim() ||
+              null,
 
-          description:
-            description.trim() ||
-            null,
+            description:
+              description.trim() ||
+              null,
 
-          finder_message:
-            finderMessage.trim() ||
-            null,
+            finder_message:
+              finderMessage.trim() ||
+              null,
 
-          show_email:
-            showEmail,
+            show_email:
+              showEmail,
 
-          show_address:
-            showAddress,
+            show_address:
+              showAddress,
 
-          show_pet_photo:
-            showPetPhoto,
+            show_pet_photo:
+              showPetPhoto,
 
-          show_medical_info:
-            showMedicalInfo,
+            show_medical_info:
+              showMedicalInfo,
 
-          show_behaviour_note:
-            showBehaviourNote,
+            show_behaviour_note:
+              showBehaviourNote,
 
-          show_description:
-            showDescription,
+            show_description:
+              showDescription,
 
-          show_finder_message:
-            showFinderMessage,
+            show_finder_message:
+              showFinderMessage,
 
-          phone_enabled:
-            true,
+            phone_enabled:
+              true,
 
-          live_chat_enabled:
-            liveChatEnabled,
+            live_chat_enabled:
+              liveChatEnabled,
 
-          active,
-        })
-        .eq(
-          "id",
-          profile.id
-        )
-        .eq(
-          "owner_id",
-          profile.owner_id
-        );
+            active,
+          })
+          .eq(
+            "id",
+            profile.id
+          )
+          .eq(
+            "owner_id",
+            profile.owner_id
+          );
 
       if (error) {
         throw error;
@@ -562,33 +613,128 @@ export default function EditProfilePage() {
     }
   }
 
+  async function markAsLost() {
+    if (
+      !supabase ||
+      !profile
+    ) {
+      return;
+    }
+
+    setStatusLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
+        "mark_profile_lost",
+        {
+          p_item_id:
+            profile.id,
+
+          p_lost_message:
+            lostMessage.trim() ||
+            null,
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      if (data !== true) {
+        throw new Error(
+          "Lost სტატუსის შეცვლა ვერ დადასტურდა."
+        );
+      }
+
+      const now =
+        new Date().toISOString();
+
+      setLost(true);
+      setLostAt(now);
+      setFoundAt(null);
+
+      setSuccessMessage(
+        "პროფილი მონიშნულია დაკარგულად."
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Lost სტატუსის შეცვლა ვერ მოხერხდა."
+      );
+    } finally {
+      setStatusLoading(false);
+    }
+  }
+
+  async function markAsFound() {
+    if (
+      !supabase ||
+      !profile
+    ) {
+      return;
+    }
+
+    setStatusLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
+        "mark_profile_found",
+        {
+          p_item_id:
+            profile.id,
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      if (data !== true) {
+        throw new Error(
+          "Found სტატუსის შეცვლა ვერ დადასტურდა."
+        );
+      }
+
+      const now =
+        new Date().toISOString();
+
+      setLost(false);
+      setFoundAt(now);
+
+      setSuccessMessage(
+        "პროფილი მონიშნულია დაბრუნებულად."
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Found სტატუსის შეცვლა ვერ მოხერხდა."
+      );
+    } finally {
+      setStatusLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="statePage">
         პროფილი იტვირთება...
-
-        <style jsx>{`
-          .statePage {
-            min-height: 100vh;
-
-            display: grid;
-            place-items: center;
-
-            background: #f7faff;
-
-            color: #718095;
-
-            font-size: 11px;
-          }
-        `}</style>
       </main>
     );
   }
 
-  if (
-    !profile ||
-    errorMessage
-  ) {
+  if (!profile) {
     return (
       <main className="statePage">
         <div className="errorCard">
@@ -602,68 +748,9 @@ export default function EditProfilePage() {
           </p>
 
           <a href="/my-profiles">
-            ჩემს პროფილებზე დაბრუნება
+            უკან დაბრუნება
           </a>
         </div>
-
-        <style jsx>{`
-          .statePage {
-            min-height: 100vh;
-
-            display: grid;
-            place-items: center;
-
-            padding: 25px;
-
-            background: #f7faff;
-          }
-
-          .errorCard {
-            width: 100%;
-            max-width: 480px;
-
-            padding: 30px;
-
-            text-align: center;
-
-            border: 1px solid #dce6f1;
-            border-radius: 16px;
-
-            background: #ffffff;
-          }
-
-          h1 {
-            margin: 0;
-
-            color: #243b54;
-
-            font-size: 23px;
-          }
-
-          p {
-            color: #7d8b9c;
-
-            font-size: 10px;
-          }
-
-          a {
-            display: inline-flex;
-
-            margin-top: 15px;
-
-            padding: 12px 15px;
-
-            border-radius: 9px;
-
-            background: #1266e9;
-
-            color: white;
-
-            font-size: 9px;
-
-            text-decoration: none;
-          }
-        `}</style>
       </main>
     );
   }
@@ -719,46 +806,155 @@ export default function EditProfilePage() {
               </h1>
 
               <p>
-                შეგიძლიათ შეცვალოთ პროფილის
-                ინფორმაცია და Finder View-ის
-                პარამეტრები.
+                მართეთ პროფილი, Finder View
+                და Lost / Found სტატუსი.
               </p>
             </div>
           </section>
 
+          <section
+            className={
+              lost
+                ? "lostCard activeLost"
+                : "lostCard"
+            }
+          >
+            <div className="lostTop">
+              <div>
+                <span>
+                  LOST / FOUND STATUS
+                </span>
+
+                <h2>
+                  {lost
+                    ? "პროფილი დაკარგულად არის მონიშნული"
+                    : "პროფილი უსაფრთხოდ არის"}
+                </h2>
+
+                <p>
+                  {lost
+                    ? "Finder-ს შეუძლია დაგიკავშირდეთ და გაგიზიაროთ მდებარეობა."
+                    : "თუ ნივთი ან ცხოველი დაიკარგა, აქედან ჩართეთ Lost რეჟიმი."}
+                </p>
+              </div>
+
+              <div
+                className={
+                  lost
+                    ? "statusPill lost"
+                    : "statusPill safe"
+                }
+              >
+                {lost
+                  ? "LOST"
+                  : "SAFE"}
+              </div>
+            </div>
+
+            {!lost && (
+              <>
+                <label className="lostLabel">
+                  შეტყობინება მპოვნელისთვის
+                </label>
+
+                <textarea
+                  className="lostTextarea"
+                  rows={4}
+                  value={lostMessage}
+                  onChange={(event) =>
+                    setLostMessage(
+                      event.target.value
+                    )
+                  }
+                  placeholder="მაგ. გთხოვთ დამიკავშირდეთ. ძალიან მნიშვნელოვანია მისი უსაფრთხოდ დაბრუნება."
+                />
+
+                <button
+                  type="button"
+                  className="lostButton"
+                  onClick={markAsLost}
+                  disabled={
+                    statusLoading
+                  }
+                >
+                  {statusLoading
+                    ? "სტატუსი იცვლება..."
+                    : "Mark as Lost"}
+                </button>
+              </>
+            )}
+
+            {lost && (
+              <>
+                {lostMessage && (
+                  <div className="lostMessageBox">
+                    <span>
+                      LOST MESSAGE
+                    </span>
+
+                    <p>
+                      {lostMessage}
+                    </p>
+                  </div>
+                )}
+
+                {lostAt && (
+                  <p className="dateLine">
+                    Lost since:{" "}
+                    {new Date(
+                      lostAt
+                    ).toLocaleString()}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  className="foundButton"
+                  onClick={markAsFound}
+                  disabled={
+                    statusLoading
+                  }
+                >
+                  {statusLoading
+                    ? "სტატუსი იცვლება..."
+                    : "✓ Mark as Found"}
+                </button>
+              </>
+            )}
+
+            {!lost &&
+              foundAt && (
+                <p className="dateLine">
+                  Last found:{" "}
+                  {new Date(
+                    foundAt
+                  ).toLocaleString()}
+                </p>
+              )}
+          </section>
+
           <div className="lockedBox">
-            <div className="lock">
-              🔒
-            </div>
+            <strong>
+              🔒 {meta.emoji}{" "}
+              {meta.label}
+            </strong>
 
-            <div>
-              <span>
-                LOCKED QR CATEGORY
-              </span>
-
-              <h2>
-                {meta.emoji}{" "}
-                {meta.label}
-              </h2>
-
-              <p>
-                QR კოდი{" "}
-                <strong>
-                  {profile.tag_code}
-                </strong>{" "}
-                უკვე დარეგისტრირებულია
-                როგორც{" "}
-                <strong>
-                  {meta.label}
-                </strong>
-                . კატეგორიის შეცვლა
-                შეუძლებელია.
-              </p>
-            </div>
+            <p>
+              QR Code:{" "}
+              {profile.tag_code}.
+              კატეგორიის შეცვლა
+              შეუძლებელია.
+            </p>
           </div>
 
+          {errorMessage && (
+            <div className="message error">
+              {errorMessage}
+            </div>
+          )}
+
           {successMessage && (
-            <div className="successBox">
+            <div className="message success">
               ✓ {successMessage}
             </div>
           )}
@@ -769,20 +965,9 @@ export default function EditProfilePage() {
             }
           >
             <section className="card">
-              <div className="cardHeader">
-                <span>01</span>
-
-                <div>
-                  <h2>
-                    ძირითადი ინფორმაცია
-                  </h2>
-
-                  <p>
-                    პროფილის მონაცემების
-                    რედაქტირება.
-                  </p>
-                </div>
-              </div>
+              <h2>
+                ძირითადი ინფორმაცია
+              </h2>
 
               <div className="grid">
                 <Field
@@ -795,13 +980,9 @@ export default function EditProfilePage() {
                 >
                   <input
                     value={itemName}
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       setItemName(
-                        event
-                          .target
-                          .value
+                        event.target.value
                       )
                     }
                     required
@@ -811,13 +992,9 @@ export default function EditProfilePage() {
                 <Field label="ფერი">
                   <input
                     value={colour}
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       setColour(
-                        event
-                          .target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -827,13 +1004,9 @@ export default function EditProfilePage() {
                   <Field label="სქესი">
                     <select
                       value={sex}
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         setSex(
-                          event
-                            .target
-                            .value
+                          event.target.value
                         )
                       }
                     >
@@ -863,13 +1036,9 @@ export default function EditProfilePage() {
                       value={
                         dateOfBirth
                       }
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         setDateOfBirth(
-                          event
-                            .target
-                            .value
+                          event.target.value
                         )
                       }
                     />
@@ -882,16 +1051,10 @@ export default function EditProfilePage() {
                       type="number"
                       min="0"
                       step="0.1"
-                      value={
-                        weight
-                      }
-                      onChange={(
-                        event
-                      ) =>
+                      value={weight}
+                      onChange={(event) =>
                         setWeight(
-                          event
-                            .target
-                            .value
+                          event.target.value
                         )
                       }
                     />
@@ -905,16 +1068,11 @@ export default function EditProfilePage() {
                   <input
                     type="url"
                     value={photo}
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       setPhoto(
-                        event
-                          .target
-                          .value
+                        event.target.value
                       )
                     }
-                    placeholder="https://..."
                   />
                 </Field>
               </div>
@@ -922,171 +1080,117 @@ export default function EditProfilePage() {
 
             {isPet && (
               <section className="card">
-                <div className="cardHeader">
-                  <span>02</span>
+                <h2>
+                  ჯანმრთელობა და აღწერა
+                </h2>
 
-                  <div>
-                    <h2>
-                      ჯანმრთელობა და აღწერა
-                    </h2>
+                <Field
+                  label="სამედიცინო ინფორმაცია"
+                  full
+                >
+                  <textarea
+                    rows={4}
+                    value={
+                      medicalInfo
+                    }
+                    onChange={(event) =>
+                      setMedicalInfo(
+                        event.target.value
+                      )
+                    }
+                  />
+                </Field>
 
-                    <p>
-                      დამატებითი ინფორმაცია
-                      მპოვნელისთვის.
-                    </p>
-                  </div>
-                </div>
+                <Field
+                  label="ქცევის ინფორმაცია"
+                  full
+                >
+                  <textarea
+                    rows={4}
+                    value={
+                      behaviourNote
+                    }
+                    onChange={(event) =>
+                      setBehaviourNote(
+                        event.target.value
+                      )
+                    }
+                  />
+                </Field>
 
-                <div className="textareaGrid">
-                  <Field
-                    label="სამედიცინო ინფორმაცია"
-                    full
-                  >
-                    <textarea
-                      rows={4}
-                      value={
-                        medicalInfo
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        setMedicalInfo(
-                          event
-                            .target
-                            .value
-                        )
-                      }
-                    />
-                  </Field>
+                <Field
+                  label="აღწერა"
+                  full
+                >
+                  <textarea
+                    rows={4}
+                    value={
+                      description
+                    }
+                    onChange={(event) =>
+                      setDescription(
+                        event.target.value
+                      )
+                    }
+                  />
+                </Field>
 
-                  <Field
-                    label="ქცევის შესახებ ინფორმაცია"
-                    full
-                  >
-                    <textarea
-                      rows={4}
-                      value={
-                        behaviourNote
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        setBehaviourNote(
-                          event
-                            .target
-                            .value
-                        )
-                      }
-                    />
-                  </Field>
-
-                  <Field
-                    label="დამატებითი აღწერა"
-                    full
-                  >
-                    <textarea
-                      rows={4}
-                      value={
-                        description
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        setDescription(
-                          event
-                            .target
-                            .value
-                        )
-                      }
-                    />
-                  </Field>
-
-                  <Field
-                    label="შეტყობინება მპოვნელისთვის"
-                    full
-                  >
-                    <textarea
-                      rows={4}
-                      value={
-                        finderMessage
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        setFinderMessage(
-                          event
-                            .target
-                            .value
-                        )
-                      }
-                    />
-                  </Field>
-                </div>
+                <Field
+                  label="Finder Message"
+                  full
+                >
+                  <textarea
+                    rows={4}
+                    value={
+                      finderMessage
+                    }
+                    onChange={(event) =>
+                      setFinderMessage(
+                        event.target.value
+                      )
+                    }
+                  />
+                </Field>
               </section>
             )}
 
             <section className="card">
-              <div className="cardHeader">
-                <span>03</span>
+              <h2>
+                Finder View
+              </h2>
 
-                <div>
-                  <h2>
-                    Finder View
-                  </h2>
+              <Toggle
+                label="Email"
+                checked={showEmail}
+                onChange={
+                  setShowEmail
+                }
+              />
 
-                  <p>
-                    დამატებითი ინფორმაციის
-                    ხილვადობა.
-                  </p>
-                </div>
-              </div>
+              <Toggle
+                label="Address"
+                checked={
+                  showAddress
+                }
+                onChange={
+                  setShowAddress
+                }
+              />
 
-              <div className="always">
-                <strong>
-                  ყოველთვის ხილული
-                </strong>
+              <Toggle
+                label="Photo"
+                checked={
+                  showPetPhoto
+                }
+                onChange={
+                  setShowPetPhoto
+                }
+              />
 
-                <p>
-                  სახელი, გვარი და ტელეფონის
-                  ნომერი მპოვნელისთვის
-                  ყოველთვის ხელმისაწვდომია.
-                </p>
-              </div>
-
-              <div className="toggles">
-                <Toggle
-                  label="ელფოსტა"
-                  checked={
-                    showEmail
-                  }
-                  onChange={
-                    setShowEmail
-                  }
-                />
-
-                <Toggle
-                  label="მისამართი"
-                  checked={
-                    showAddress
-                  }
-                  onChange={
-                    setShowAddress
-                  }
-                />
-
-                <Toggle
-                  label="ფოტო"
-                  checked={
-                    showPetPhoto
-                  }
-                  onChange={
-                    setShowPetPhoto
-                  }
-                />
-
-                {isPet && (
+              {isPet && (
+                <>
                   <Toggle
-                    label="სამედიცინო ინფორმაცია"
+                    label="Medical info"
                     checked={
                       showMedicalInfo
                     }
@@ -1094,11 +1198,9 @@ export default function EditProfilePage() {
                       setShowMedicalInfo
                     }
                   />
-                )}
 
-                {isPet && (
                   <Toggle
-                    label="ქცევის ინფორმაცია"
+                    label="Behaviour"
                     checked={
                       showBehaviourNote
                     }
@@ -1106,66 +1208,31 @@ export default function EditProfilePage() {
                       setShowBehaviourNote
                     }
                   />
-                )}
-
-                <Toggle
-                  label="დამატებითი აღწერა"
-                  checked={
-                    showDescription
-                  }
-                  onChange={
-                    setShowDescription
-                  }
-                />
-
-                {isPet && (
-                  <Toggle
-                    label="შეტყობინება მპოვნელისთვის"
-                    checked={
-                      showFinderMessage
-                    }
-                    onChange={
-                      setShowFinderMessage
-                    }
-                  />
-                )}
-              </div>
-            </section>
-
-            <section className="card">
-              <div className="cardHeader">
-                <span>04</span>
-
-                <div>
-                  <h2>
-                    კონტაქტი და სტატუსი
-                  </h2>
-
-                  <p>
-                    Phone ყოველთვის აქტიურია.
-                  </p>
-                </div>
-              </div>
-
-              <div className="fixedPhone">
-                <div>
-                  <strong>
-                    ☎ ტელეფონი
-                  </strong>
-
-                  <p>
-                    ყოველთვის ხელმისაწვდომია
-                    მპოვნელისთვის.
-                  </p>
-                </div>
-
-                <span>
-                  ACTIVE
-                </span>
-              </div>
+                </>
+              )}
 
               <Toggle
-                label="QR RETURN Live Chat"
+                label="Description"
+                checked={
+                  showDescription
+                }
+                onChange={
+                  setShowDescription
+                }
+              />
+
+              <Toggle
+                label="Finder message"
+                checked={
+                  showFinderMessage
+                }
+                onChange={
+                  setShowFinderMessage
+                }
+              />
+
+              <Toggle
+                label="Live Chat"
                 checked={
                   liveChatEnabled
                 }
@@ -1175,7 +1242,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="პროფილი აქტიურია"
+                label="Profile active"
                 checked={active}
                 onChange={
                   setActive
@@ -1185,39 +1252,24 @@ export default function EditProfilePage() {
 
             <section className="saveBar">
               <div>
-                <span>
-                  SAVE CHANGES
-                </span>
-
-                <h2>
+                <strong>
                   ცვლილებების შენახვა
-                </h2>
+                </strong>
 
                 <p>
-                  QR კოდი და კატეგორია არ
-                  შეიცვლება.
+                  QR Code და category
+                  არ შეიცვლება.
                 </p>
               </div>
 
-              <div className="saveActions">
-                <a
-                  href="/my-profiles"
-                  className="cancel"
-                >
-                  გაუქმება
-                </a>
-
-                <button
-                  type="submit"
-                  disabled={
-                    saving
-                  }
-                >
-                  {saving
-                    ? "ინახება..."
-                    : "ცვლილებების შენახვა"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={saving}
+              >
+                {saving
+                  ? "ინახება..."
+                  : "Save Changes"}
+              </button>
             </section>
           </form>
         </div>
@@ -1230,537 +1282,320 @@ export default function EditProfilePage() {
 
         .page {
           min-height: 100vh;
-
           padding-bottom: 70px;
-
-          background:
-            radial-gradient(
-              circle at 100% 0%,
-              rgba(18,102,233,.06),
-              transparent 28%
-            ),
-            #f7faff;
+          background: #f7faff;
         }
 
         .container {
-          width:
-            calc(100% - 40px);
-
+          width: calc(100% - 40px);
           max-width: 900px;
-
           margin: auto;
         }
 
         .topbar {
-          min-height: 75px;
-
+          min-height: 74px;
           display: flex;
-
           align-items: center;
-
-          justify-content:
-            space-between;
-
-          border-bottom:
-            1px solid #e2e9f1;
+          justify-content: space-between;
+          border-bottom: 1px solid #e2e9f1;
         }
 
         .topbar a {
           text-decoration: none;
+          font-weight: 900;
         }
 
         .back {
-          color: #61758a;
-
+          color: #62768b;
           font-size: 9px;
-
-          font-weight: 850;
         }
 
         .brand {
           color: #1266e9;
-
           font-size: 12px;
-
-          font-weight: 950;
         }
 
         .hero {
-          margin-top: 45px;
-
+          margin-top: 40px;
           display: flex;
-
           align-items: center;
-
-          gap: 17px;
+          gap: 16px;
         }
 
         .categoryIcon {
-          width: 66px;
-          height: 66px;
-
-          flex: 0 0 66px;
-
+          width: 65px;
+          height: 65px;
           display: grid;
-
           place-items: center;
-
-          border-radius: 17px;
-
-          background: #ffffff;
-
-          border:
-            1px solid #dae5f2;
-
-          font-size: 32px;
+          border: 1px solid #d8e4f2;
+          border-radius: 16px;
+          background: white;
+          font-size: 31px;
         }
 
         .hero span {
           color: #1266e9;
-
-          font-size: 8px;
-
+          font-size: 7px;
           font-weight: 900;
-
-          letter-spacing: 1.3px;
         }
 
         .hero h1 {
-          margin: 6px 0 0;
-
-          color: #233b55;
-
-          font-size: 31px;
+          margin: 5px 0 0;
+          color: #243d57;
+          font-size: 29px;
         }
 
         .hero p {
-          margin: 6px 0 0;
-
-          color: #7e8da0;
-
+          margin: 5px 0 0;
+          color: #8090a2;
           font-size: 9px;
         }
 
-        .lockedBox {
-          margin-top: 25px;
+        .lostCard {
+          margin-top: 24px;
+          padding: 22px;
+          border: 1px solid #d8e4f2;
+          border-radius: 16px;
+          background: white;
+        }
 
-          padding: 18px;
+        .activeLost {
+          border-color: #efc2c6;
+          background: #fff8f8;
+        }
 
+        .lostTop {
           display: flex;
-
-          gap: 12px;
-
-          border:
-            1px solid #cddff5;
-
-          border-radius: 14px;
-
-          background: #eef5ff;
+          justify-content: space-between;
+          gap: 20px;
         }
 
-        .lock {
-          width: 38px;
-          height: 38px;
-
-          flex: 0 0 38px;
-
-          display: grid;
-
-          place-items: center;
-
-          border-radius: 10px;
-
-          background: #ffffff;
-
-          font-size: 17px;
-        }
-
-        .lockedBox span {
+        .lostTop span {
           color: #1266e9;
-
           font-size: 7px;
-
           font-weight: 900;
         }
 
-        .lockedBox h2 {
-          margin: 4px 0 0;
-
-          color: #28425f;
-
-          font-size: 15px;
+        .lostTop h2 {
+          margin: 6px 0 0;
+          color: #29425d;
+          font-size: 17px;
         }
 
-        .lockedBox p {
-          margin: 5px 0 0;
-
-          color: #718399;
-
-          font-size: 8px;
-
-          line-height: 1.5;
-        }
-
-        .successBox {
-          margin-top: 16px;
-
-          padding: 13px;
-
-          border:
-            1px solid #c5dfd1;
-
-          border-radius: 11px;
-
-          background: #f5fbf7;
-
-          color: #397057;
-
+        .lostTop p {
+          margin: 6px 0 0;
+          color: #8190a0;
           font-size: 9px;
         }
 
-        .card {
-          margin-top: 16px;
-
-          padding: 24px;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius: 16px;
-
-          background: #ffffff;
-
-          box-shadow:
-            0 10px 27px
-            rgba(30,70,120,.045);
-        }
-
-        .cardHeader {
-          padding-bottom: 18px;
-
-          display: flex;
-
-          gap: 11px;
-
-          border-bottom:
-            1px solid #e7edf4;
-        }
-
-        .cardHeader > span {
-          width: 34px;
-          height: 34px;
-
-          flex: 0 0 34px;
-
-          display: grid;
-
-          place-items: center;
-
-          border-radius: 9px;
-
-          background: #edf4ff;
-
-          color: #1266e9;
-
-          font-size: 9px;
-
+        .statusPill {
+          height: fit-content;
+          padding: 6px 9px;
+          border-radius: 999px;
+          font-size: 7px;
           font-weight: 950;
         }
 
-        .cardHeader h2 {
-          margin: 0;
-
-          color: #29425d;
-
-          font-size: 16px;
+        .statusPill.safe {
+          background: #eaf2ff;
+          color: #1266e9;
         }
 
-        .cardHeader p {
-          margin: 4px 0 0;
+        .statusPill.lost {
+          background: #fbe6e8;
+          color: #b7444e;
+        }
 
-          color: #8794a3;
+        .lostLabel {
+          display: block;
+          margin-top: 18px;
+          margin-bottom: 7px;
+          color: #415873;
+          font-size: 9px;
+          font-weight: 850;
+        }
 
+        .lostTextarea {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #d6e1ec;
+          border-radius: 10px;
+          font-family: inherit;
+        }
+
+        .lostButton,
+        .foundButton {
+          min-height: 43px;
+          margin-top: 12px;
+          padding: 0 15px;
+          border: 0;
+          border-radius: 9px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .lostButton {
+          background: #c94d57;
+          color: white;
+        }
+
+        .foundButton {
+          background: #1266e9;
+          color: white;
+        }
+
+        .lostMessageBox {
+          margin-top: 16px;
+          padding: 13px;
+          border-radius: 10px;
+          background: white;
+          border: 1px solid #f0d5d8;
+        }
+
+        .lostMessageBox span {
+          color: #b94c55;
+          font-size: 7px;
+          font-weight: 900;
+        }
+
+        .lostMessageBox p {
+          margin: 6px 0 0;
+          color: #674f52;
+          font-size: 9px;
+        }
+
+        .dateLine {
+          color: #8795a4;
           font-size: 8px;
         }
 
-        .grid {
-          margin-top: 20px;
-
-          display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 16px 14px;
+        .lockedBox,
+        .message,
+        .card,
+        .saveBar {
+          margin-top: 16px;
+          padding: 20px;
+          border: 1px solid #dce6f1;
+          border-radius: 14px;
+          background: white;
         }
 
-        .textareaGrid {
-          margin-top: 20px;
+        .lockedBox {
+          background: #eef5ff;
+        }
 
+        .lockedBox strong {
+          color: #29425d;
+          font-size: 10px;
+        }
+
+        .lockedBox p {
+          color: #74869a;
+          font-size: 8px;
+        }
+
+        .message {
+          font-size: 9px;
+        }
+
+        .message.error {
+          background: #fff7f8;
+          color: #a3434c;
+        }
+
+        .message.success {
+          background: #f5fbf7;
+          color: #397057;
+        }
+
+        .card h2 {
+          margin: 0 0 18px;
+          color: #29425d;
+          font-size: 17px;
+        }
+
+        .grid {
           display: grid;
-
-          gap: 16px;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
         }
 
         input,
         select,
         textarea {
           width: 100%;
-
-          border:
-            1px solid #d5e0eb;
-
+          border: 1px solid #d5e0eb;
           border-radius: 10px;
-
-          outline: none;
-
-          background: white;
-
-          color: #263e57;
-
           font-family: inherit;
-
-          font-size: 11px;
+          color: #29425d;
         }
 
         input,
         select {
-          min-height: 48px;
-
-          padding: 0 13px;
+          min-height: 46px;
+          padding: 0 12px;
         }
 
         textarea {
-          padding: 12px 13px;
-
+          padding: 12px;
           resize: vertical;
-
-          line-height: 1.5;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-          border-color:
-            #1266e9;
-
-          box-shadow:
-            0 0 0 4px
-            rgba(18,102,233,.08);
-        }
-
-        .always {
-          margin-top: 20px;
-
-          padding: 13px;
-
-          border:
-            1px solid #d7e4f3;
-
-          border-radius: 10px;
-
-          background: #f7faff;
-        }
-
-        .always strong {
-          color: #38516d;
-
-          font-size: 9px;
-        }
-
-        .always p {
-          margin: 4px 0 0;
-
-          color: #8492a1;
-
-          font-size: 8px;
-        }
-
-        .toggles {
-          margin-top: 10px;
-        }
-
-        .fixedPhone {
-          margin-top: 20px;
-
-          padding: 13px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            space-between;
-
-          gap: 15px;
-
-          border:
-            1px solid #d5e3f4;
-
-          border-radius: 10px;
-
-          background: #f7faff;
-        }
-
-        .fixedPhone strong {
-          color: #304a65;
-
-          font-size: 10px;
-        }
-
-        .fixedPhone p {
-          margin: 4px 0 0;
-
-          color: #8795a5;
-
-          font-size: 8px;
-        }
-
-        .fixedPhone > span {
-          padding: 5px 8px;
-
-          border-radius: 999px;
-
-          background: #eaf2ff;
-
-          color: #1266e9;
-
-          font-size: 6px;
-
-          font-weight: 900;
+          margin-bottom: 14px;
         }
 
         .saveBar {
-          margin-top: 16px;
-
-          padding: 21px 23px;
-
           display: flex;
-
+          justify-content: space-between;
           align-items: center;
-
-          justify-content:
-            space-between;
-
           gap: 20px;
-
-          border:
-            1px solid #cddff5;
-
-          border-radius: 16px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #f7faff,
-              #edf5ff
-            );
+          background: #eef5ff;
         }
 
-        .saveBar span {
-          color: #1266e9;
-
-          font-size: 7px;
-
-          font-weight: 900;
-        }
-
-        .saveBar h2 {
-          margin: 5px 0 0;
-
+        .saveBar strong {
           color: #29425d;
-
-          font-size: 16px;
+          font-size: 11px;
         }
 
         .saveBar p {
-          margin: 5px 0 0;
-
-          color: #8391a0;
-
+          margin: 4px 0 0;
+          color: #8291a1;
           font-size: 8px;
         }
 
-        .saveActions {
-          display: flex;
-
-          gap: 8px;
-        }
-
-        .saveActions a,
-        .saveActions button {
-          min-height: 43px;
-
-          padding: 0 14px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          border-radius: 9px;
-
-          font-family: inherit;
-
-          font-size: 8px;
-
-          font-weight: 900;
-
-          text-decoration: none;
-        }
-
-        .cancel {
-          border:
-            1px solid #ccd9e7;
-
-          background: #ffffff;
-
-          color: #63768a;
-        }
-
-        .saveActions button {
+        .saveBar button {
+          min-height: 44px;
+          padding: 0 16px;
           border: 0;
-
+          border-radius: 9px;
           background: #1266e9;
-
           color: white;
-
+          font-weight: 900;
           cursor: pointer;
         }
 
-        .saveActions button:disabled {
-          opacity: .65;
+        .statePage {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          background: #f7faff;
+          color: #718095;
         }
 
-        @media (
-          max-width: 650px
-        ) {
+        .errorCard {
+          padding: 30px;
+          text-align: center;
+          background: white;
+          border-radius: 15px;
+        }
+
+        @media (max-width: 650px) {
           .grid {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
-          .hero {
-            align-items:
-              flex-start;
-          }
-
-          .hero h1 {
-            font-size: 26px;
-          }
-
+          .lostTop,
           .saveBar {
-            flex-direction:
-              column;
-
-            align-items:
-              stretch;
-          }
-
-          .saveActions a,
-          .saveActions button {
-            flex: 1;
+            flex-direction: column;
+            align-items: stretch;
           }
         }
       `}</style>
@@ -1816,20 +1651,18 @@ function Toggle({
   return (
     <div
       style={{
-        minHeight: "62px",
-        padding: "12px 2px",
+        minHeight: "60px",
         display: "flex",
         alignItems: "center",
         justifyContent:
           "space-between",
-        gap: "15px",
         borderBottom:
-          "1px solid #e4eaf1",
+          "1px solid #e5ebf2",
       }}
     >
       <strong
         style={{
-          color: "#344b64",
+          color: "#3c536d",
           fontSize: "9px",
         }}
       >
@@ -1841,9 +1674,8 @@ function Toggle({
         onClick={() =>
           onChange(!checked)
         }
-        aria-pressed={checked}
         style={{
-          width: "45px",
+          width: "44px",
           height: "25px",
           padding: "3px",
           border: 0,
@@ -1861,13 +1693,11 @@ function Toggle({
             height: "19px",
             display: "block",
             borderRadius: "50%",
-            background: "#ffffff",
+            background: "white",
             transform:
               checked
-                ? "translateX(20px)"
+                ? "translateX(19px)"
                 : "translateX(0)",
-            transition:
-              "transform .2s ease",
           }}
         />
       </button>
