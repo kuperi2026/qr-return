@@ -1,6 +1,9 @@
 "use client";
 
 type PetBasicInfoProps = {
+  tagCode: string;
+  setTagCode: (value: string) => void;
+
   itemName: string;
   setItemName: (value: string) => void;
 
@@ -21,6 +24,8 @@ type PetBasicInfoProps = {
 };
 
 export default function PetBasicInfo({
+  tagCode,
+  setTagCode,
   itemName,
   setItemName,
   colour,
@@ -38,15 +43,59 @@ export default function PetBasicInfo({
     <>
       <section className="sectionCard">
         <div className="sectionHeader">
-          <div className="sectionNumber">01</div>
+          <div className="sectionNumber">03</div>
 
           <div>
-            <span>PROFILE INFORMATION</span>
-            <h3>ძირითადი ინფორმაცია</h3>
+            <span>QR PROFILE INFORMATION</span>
+
+            <h3>ცხოველის ძირითადი ინფორმაცია</h3>
+
             <p>
-              შეავსეთ ცხოველის ძირითადი მონაცემები. მოგვიანებით ამ
-              ინფორმაციის შეცვლა შეძლებთ.
+              ჯერ მიუთითეთ შეძენილი QR RETURN კოდი, შემდეგ შეავსეთ
+              ცხოველის ძირითადი მონაცემები.
             </p>
+          </div>
+        </div>
+
+        <div className="qrBlock">
+          <div className="qrBlockTop">
+            <div className="qrIcon">
+              QR
+            </div>
+
+            <div>
+              <strong>QR / TAG CODE</strong>
+
+              <p>
+                შეიყვანეთ თქვენს QR პროდუქტზე მითითებული უნიკალური კოდი.
+              </p>
+            </div>
+          </div>
+
+          <div className="field">
+            <label>
+              QR კოდი
+              <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              value={tagCode}
+              onChange={(event) =>
+                setTagCode(
+                  event.target.value
+                    .toUpperCase()
+                    .replace(/\s/g, "")
+                )
+              }
+              placeholder="მაგ. QR-DOG-000123"
+              autoComplete="off"
+            />
+
+            <small>
+              ერთი QR კოდი შეიძლება დარეგისტრირდეს მხოლოდ ერთხელ.
+              რეგისტრაციის შემდეგ ამ QR-ის კატეგორია აღარ შეიცვლება.
+            </small>
           </div>
         </div>
 
@@ -120,9 +169,7 @@ export default function PetBasicInfo({
               type="date"
               value={dateOfBirth}
               onChange={(event) =>
-                setDateOfBirth(
-                  event.target.value
-                )
+                setDateOfBirth(event.target.value)
               }
             />
           </div>
@@ -163,8 +210,8 @@ export default function PetBasicInfo({
             />
 
             <small>
-              ამ ეტაპზე შეგიძლიათ გამოიყენოთ ფოტოს URL. შემდეგ ეტაპზე
-              Supabase Storage upload-საც დავამატებთ.
+              ფოტოს ატვირთვის ფუნქციას Supabase Storage-თან ცალკე
+              დავაკავშირებთ.
             </small>
           </div>
         </div>
@@ -172,6 +219,7 @@ export default function PetBasicInfo({
 
       <style jsx>{`
         .sectionCard {
+          margin-top: 16px;
           padding: 25px;
 
           border: 1px solid #dce6f1;
@@ -194,8 +242,7 @@ export default function PetBasicInfo({
 
           padding-bottom: 21px;
 
-          border-bottom:
-            1px solid #e7edf4;
+          border-bottom: 1px solid #e7edf4;
         }
 
         .sectionNumber {
@@ -208,7 +255,6 @@ export default function PetBasicInfo({
           border-radius: 10px;
 
           background: #edf4ff;
-
           color: #1266e9;
 
           font-size: 10px;
@@ -233,7 +279,7 @@ export default function PetBasicInfo({
         }
 
         .sectionHeader p {
-          max-width: 560px;
+          max-width: 590px;
 
           margin: 7px 0 0;
 
@@ -241,6 +287,68 @@ export default function PetBasicInfo({
 
           font-size: 9px;
           line-height: 1.55;
+        }
+
+        .qrBlock {
+          margin-top: 23px;
+          padding: 18px;
+
+          border: 1px solid #cbdff7;
+          border-radius: 14px;
+
+          background:
+            linear-gradient(
+              135deg,
+              #f8fbff 0%,
+              #eef5ff 100%
+            );
+        }
+
+        .qrBlockTop {
+          margin-bottom: 16px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 11px;
+        }
+
+        .qrIcon {
+          width: 42px;
+          height: 42px;
+
+          flex: 0 0 42px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 11px;
+
+          background: #1266e9;
+          color: #ffffff;
+
+          font-size: 9px;
+          font-weight: 950;
+        }
+
+        .qrBlockTop strong {
+          display: block;
+
+          color: #27415f;
+
+          font-size: 10px;
+          font-weight: 900;
+
+          letter-spacing: 0.6px;
+        }
+
+        .qrBlockTop p {
+          margin: 4px 0 0;
+
+          color: #78889a;
+
+          font-size: 8px;
+          line-height: 1.45;
         }
 
         .formGrid {
@@ -285,15 +393,12 @@ export default function PetBasicInfo({
 
           padding: 0 14px;
 
-          border:
-            1px solid #d5e0eb;
-
+          border: 1px solid #d5e0eb;
           border-radius: 11px;
 
           outline: none;
 
           background: #ffffff;
-
           color: #1f344b;
 
           font-family: inherit;
