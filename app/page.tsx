@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import HomeHeader from "./components/home/HomeHeader";
+import HomeHeader from "@/components/home/HomeHeader";
 
 type Lang = "ka" | "en";
 
@@ -15,7 +15,9 @@ export default function HomePage() {
         onLanguageChange={setLanguage}
       />
 
-      <main />
+      <main>
+        {/* შემდეგი მთავარი გვერდის კომპონენტები აქ დაემატება */}
+      </main>
     </>
   );
 }
