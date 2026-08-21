@@ -7,6 +7,7 @@ import AboutMenu from "./components/home/AboutMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import FAQMenu from "./components/home/FAQMenu";
 import ContactMenu from "./components/home/ContactMenu";
+import HomeHero from "./components/home/HomeHero";
 
 type Lang = "ka" | "en";
 
@@ -27,6 +28,8 @@ export default function HomePage() {
     );
   };
 
+  const ka = language === "ka";
+
   return (
     <main
       style={{
@@ -42,51 +45,22 @@ export default function HomePage() {
       />
 
       {openMenu === "about" && (
-        <AboutMenu ka={language === "ka"} />
+        <AboutMenu ka={ka} />
       )}
 
       {openMenu === "shop" && (
-        <ShopMenu ka={language === "ka"} />
+        <ShopMenu ka={ka} />
       )}
 
       {openMenu === "faq" && (
-        <FAQMenu ka={language === "ka"} />
+        <FAQMenu ka={ka} />
       )}
 
       {openMenu === "contact" && (
-        <ContactMenu ka={language === "ka"} />
+        <ContactMenu ka={ka} />
       )}
 
-      <section
-        style={{
-          minHeight: "650px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#ffffff",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "48px",
-            }}
-          >
-            QR RETURN
-          </h1>
-
-          <p
-            style={{
-              marginTop: "10px",
-              fontSize: "13px",
-              letterSpacing: "2px",
-            }}
-          >
-            SMART LOST &amp; FOUND
-          </p>
-        </div>
-      </section>
+      <HomeHero ka={ka} />
     </main>
   );
 }
