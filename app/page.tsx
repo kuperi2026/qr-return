@@ -5,6 +5,7 @@ import { useState } from "react";
 import HomeHeader from "./components/home/HomeHeader";
 import AboutMenu from "./components/home/AboutMenu";
 import ShopMenu from "./components/home/ShopMenu";
+import FAQMenu from "./components/home/FAQMenu";
 
 type Lang = "ka" | "en";
 
@@ -45,6 +46,10 @@ export default function HomePage() {
 
       {openMenu === "shop" && (
         <ShopMenu ka={language === "ka"} />
+      )}
+
+      {openMenu === "faq" && (
+        <FAQMenu ka={language === "ka"} />
       )}
 
       <section
