@@ -6,6 +6,7 @@ import HomeHeader from "./components/home/HomeHeader";
 import AboutMenu from "./components/home/AboutMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import FAQMenu from "./components/home/FAQMenu";
+import ContactMenu from "./components/home/ContactMenu";
 
 type Lang = "ka" | "en";
 
@@ -50,6 +51,10 @@ export default function HomePage() {
 
       {openMenu === "faq" && (
         <FAQMenu ka={language === "ka"} />
+      )}
+
+      {openMenu === "contact" && (
+        <ContactMenu ka={language === "ka"} />
       )}
 
       <section
