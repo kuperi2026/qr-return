@@ -1,9 +1,23 @@
-import FounderSection from "@/components/home/FounderSection";
+"use client";
+
+import { useState } from "react";
+import HomeHeader from "@/components/home/HomeHeader";
+
+type Lang = "ka" | "en";
 
 export default function HomePage() {
+  const [language, setLanguage] = useState<Lang>("ka");
+
   return (
-    <main>
-      <FounderSection />
-    </main>
+    <>
+      <HomeHeader
+        language={language}
+        onLanguageChange={setLanguage}
+      />
+
+      <main>
+        {/* შემდეგ კომპონენტს აქ დავამატებთ */}
+      </main>
+    </>
   );
 }
