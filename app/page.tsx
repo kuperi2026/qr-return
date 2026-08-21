@@ -41,14 +41,23 @@ export default function HomePage() {
 
       setIsLoggedIn(true);
 
-      const { data: admin } =
-        await supabase
-          .from("admin_users")
-          .select("user_id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+      const {
+        data: adminRow,
+        error: adminError,
+      } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      setIsAdmin(Boolean(admin));
+      if (adminError) {
+        console.warn(
+          "Admin check:",
+          adminError.message
+        );
+      }
+
+      setIsAdmin(Boolean(adminRow));
     }
 
     void loadUser();
@@ -75,12 +84,12 @@ export default function HomePage() {
 
   return (
     <main className="page">
-
-      {/* ================= HEADER ================= */}
+      {/* ======================================
+          HEADER
+      ====================================== */}
 
       <header className="header">
         <div className="headerInner">
-
           <a
             href="/"
             className="brand"
@@ -101,7 +110,6 @@ export default function HomePage() {
           </a>
 
           <nav className="navigation">
-
             <button
               type="button"
               className={
@@ -180,8 +188,7 @@ export default function HomePage() {
           </nav>
 
           <div className="actions">
-
-            {/* LANGUAGES — შესვლამდე */}
+            {/* ენები ახლა შესვლამდეა */}
 
             <div className="languages">
               <button
@@ -215,7 +222,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* ADMIN — მხოლოდ ADMIN ხედავს */}
+            {/* მხოლოდ Admin ხედავს */}
 
             {isAdmin && (
               <a
@@ -262,12 +269,13 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ================= ABOUT ================= */}
+      {/* ======================================
+          ABOUT
+      ====================================== */}
 
       {openMenu === "about" && (
         <section className="megaMenu">
           <div className="megaInner">
-
             <div className="sectionIntro">
               <span className="eyebrow">
                 QR RETURN
@@ -287,11 +295,10 @@ export default function HomePage() {
             </div>
 
             <div className="aboutCards">
-
               {/* FOUNDER */}
 
               <article className="aboutCard founderCard">
-                <span className="cardNumber">
+                <span className="number">
                   01
                 </span>
 
@@ -318,7 +325,7 @@ export default function HomePage() {
                 <h2>
                   {ka
                     ? "დამფუძნებლის სიტყვა"
-                    : "Founder's Message"}
+                    : "Founder’s Message"}
                 </h2>
 
                 {ka ? (
@@ -332,10 +339,10 @@ export default function HomePage() {
                       ნივთს, საყვარელ ცხოველს,
                       ან როდესაც ოჯახის წევრს
                       გადაუდებელ სიტუაციაში
-                      დახმარება სჭირდება და
-                      მის შესახებ აუცილებელი
-                      ინფორმაცია
-                      ხელმისაწვდომი არ არის?
+                      დახმარება სჭირდება და მის
+                      შესახებ აუცილებელი
+                      ინფორმაცია ხელმისაწვდომი
+                      არ არის?
                     </p>
 
                     <p>
@@ -348,17 +355,6 @@ export default function HomePage() {
                       არსებობს ინფორმაცია,
                       რომელიც მის დაბრუნებას
                       გაამარტივებს.
-                    </p>
-
-                    <p>
-                      Emergency სამაჯურის
-                      შემთხვევაში თითოეულ
-                      წუთსაც შეიძლება დიდი
-                      მნიშვნელობა ჰქონდეს —
-                      განსაკუთრებით მაშინ,
-                      როდესაც ადამიანი თავად
-                      ვერ ახერხებს საჭირო
-                      ინფორმაციის მიწოდებას.
                     </p>
 
                     <div className="quote">
@@ -384,9 +380,7 @@ export default function HomePage() {
                     </p>
 
                     <p>
-                      QR RETURN ჩემთვის მხოლოდ
-                      ტექნოლოგიური პროდუქტი არ
-                      არის. ჩემი მიზანია, ის
+                      ჩემი მიზანია QR RETURN
                       გახდეს პატარა, მაგრამ
                       მნიშვნელოვანი დამცავი
                       რგოლი ადამიანებს, მათ
@@ -404,8 +398,7 @@ export default function HomePage() {
                       something important, a
                       beloved pet, or needs
                       urgent help when essential
-                      information is not
-                      available?
+                      information is unavailable?
                     </p>
 
                     <p>
@@ -420,11 +413,11 @@ export default function HomePage() {
               {/* MISSION */}
 
               <article className="aboutCard">
-                <span className="cardNumber">
+                <span className="number">
                   02
                 </span>
 
-                <div className="cardIcon">
+                <div className="smallIcon">
                   <TargetIcon />
                 </div>
 
@@ -436,17 +429,17 @@ export default function HomePage() {
 
                 <p>
                   {ka
-                    ? "ჩვენი მისიაა ერთი QR სკანირებით შევქმნათ პირდაპირი, უსაფრთხო და მარტივი კავშირი მპოვნელსა და მფლობელს შორის."
-                    : "Our mission is to create a direct, simple and secure connection between a finder and an owner through a single QR scan."}
+                    ? "ჩვენი მისიაა ერთი QR სკანირებით შევქმნათ სწრაფი, მარტივი და უსაფრთხო კავშირი მპოვნელსა და მფლობელს შორის."
+                    : "Our mission is to create a fast, simple and secure connection between a finder and an owner through one QR scan."}
                 </p>
 
                 <p>
                   {ka
-                    ? "ნივთის, ცხოველის თუ Emergency პროფილის შემთხვევაში მომხმარებელი თავად აკონტროლებს, რა ინფორმაცია გახდება ხელმისაწვდომი და როგორ შეძლებს სხვა ადამიანი მასთან დაკავშირებას."
-                    : "Users remain in control of what information is shared and how others can contact them."}
+                    ? "მომხმარებელი თავად აკონტროლებს, რა ინფორმაცია გამოჩნდება და რა გზით შეიძლება მასთან დაკავშირება."
+                    : "The user remains in control of what information is shown and how others may make contact."}
                 </p>
 
-                <strong className="cardStatement">
+                <strong className="statement">
                   {ka
                     ? "მარტივი. სწრაფი. უსაფრთხო."
                     : "Simple. Fast. Secure."}
@@ -456,11 +449,11 @@ export default function HomePage() {
               {/* VISION */}
 
               <article className="aboutCard">
-                <span className="cardNumber">
+                <span className="number">
                   03
                 </span>
 
-                <div className="cardIcon">
+                <div className="smallIcon">
                   <VisionIcon />
                 </div>
 
@@ -478,14 +471,14 @@ export default function HomePage() {
 
                 <p>
                   {ka
-                    ? "ჩვენ გვინდა QR კოდი იქცეს არა მხოლოდ იდენტიფიკატორად, არამედ სანდო კავშირად სწორ ადამიანს, სწორ ინფორმაციასა და საჭირო მომენტს შორის."
-                    : "We want the QR code to become more than an identifier — a trusted connection between the right person, the right information and the right moment."}
+                    ? "QR კოდი უნდა იყოს არა მხოლოდ იდენტიფიკატორი, არამედ სანდო კავშირი სწორ ადამიანს, სწორ ინფორმაციასა და საჭირო მომენტს შორის."
+                    : "A QR code should be more than an identifier — it should connect the right person with the right information at the right moment."}
                 </p>
 
-                <strong className="cardStatement">
+                <strong className="statement">
                   {ka
-                    ? "ერთი სისტემა. მრავალი დაცული რამ."
-                    : "One system. More protected."}
+                    ? "ერთი სისტემა. მეტი დაცულობა."
+                    : "One system. More protection."}
                 </strong>
               </article>
             </div>
@@ -493,86 +486,125 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ================= SHOP ================= */}
+      {/* ======================================
+          ONLINE SHOP
+      ====================================== */}
 
       {openMenu === "shop" && (
         <section className="megaMenu">
-          <div className="megaInner shopLayout">
-
-            <article className="shopCard">
-              <span className="cardNumber">
-                01
-              </span>
-
-              <h2>
-                {ka
-                  ? "როგორ შევუკვეთო"
-                  : "How to Order"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "აირჩიეთ თქვენთვის საჭირო QR RETURN პროდუქტი, გაიარეთ რეგისტრაცია ან შედით ანგარიშში, დაასრულეთ ონლაინ შეკვეთა და პროდუქტის მიღების შემდეგ დაარეგისტრირეთ QR კოდი შესაბამის პროფილზე."
-                  : "Choose your QR RETURN product, sign in or register, complete your order and connect the QR code to the relevant profile after delivery."}
-              </p>
-
-              <div className="orderSteps">
-                <span>01 არჩევა</span>
-                <span>02 რეგისტრაცია</span>
-                <span>03 შეკვეთა</span>
-                <span>04 აქტივაცია</span>
-              </div>
-            </article>
-
-            <a
-              href="/store"
-              className="shopCard storeCard"
-            >
-              <span className="cardNumber">
+          <div className="megaInner">
+            <div className="sectionIntro">
+              <span className="sectionIndex">
                 02
               </span>
 
-              <h2>
+              <span className="eyebrow">
                 {ka
-                  ? "მაღაზია"
-                  : "Store"}
-              </h2>
+                  ? "ონლაინ შეძენა"
+                  : "SHOP ONLINE"}
+              </span>
+
+              <h1>
+                {ka
+                  ? "აირჩიეთ QR RETURN თქვენი საჭიროებისთვის."
+                  : "Choose QR RETURN for your needs."}
+              </h1>
 
               <p>
                 {ka
-                  ? "იხილეთ QR RETURN-ის ხელმისაწვდომი პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
-                  : "Explore QR RETURN products for belongings, pets and Emergency use."}
+                  ? "პროდუქტის შერჩევიდან QR პროფილის გააქტიურებამდე — ყველაფერი რამდენიმე მარტივ ნაბიჯში."
+                  : "From choosing a product to activating your QR profile in a few simple steps."}
               </p>
+            </div>
 
-              <strong>
-                {ka
-                  ? "პროდუქტების ნახვა"
-                  : "View Products"}
-                {" →"}
-              </strong>
-            </a>
+            <div className="shopCards">
+              <a
+                href="#how-to-order"
+                className="shopCard"
+              >
+                <span className="number">
+                  01
+                </span>
+
+                <div className="smallIcon">
+                  <OrderIcon />
+                </div>
+
+                <h2>
+                  {ka
+                    ? "როგორ შევუკვეთო"
+                    : "How to Order"}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "აირჩიეთ თქვენთვის საჭირო QR პროდუქტი, შეიძინეთ ონლაინ და მიღების შემდეგ დაარეგისტრირეთ თქვენს QR RETURN ანგარიშზე."
+                    : "Choose your QR product, purchase it online and register it to your QR RETURN account after delivery."}
+                </p>
+
+                <strong>
+                  {ka
+                    ? "გაიგეთ მეტი"
+                    : "Learn more"}
+                  {"  →"}
+                </strong>
+              </a>
+
+              <a
+                href="/store"
+                className="shopCard featured"
+              >
+                <span className="number">
+                  02
+                </span>
+
+                <div className="smallIcon">
+                  <StoreIcon />
+                </div>
+
+                <h2>
+                  {ka
+                    ? "მაღაზია"
+                    : "Store"}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "იხილეთ QR RETURN-ის პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
+                    : "Explore QR RETURN products for belongings, pets and Emergency use."}
+                </p>
+
+                <strong>
+                  {ka
+                    ? "პროდუქტების ნახვა"
+                    : "View Products"}
+                  {"  →"}
+                </strong>
+              </a>
+            </div>
           </div>
         </section>
       )}
 
-      {/* ================= FAQ ================= */}
+      {/* ======================================
+          FAQ
+      ====================================== */}
 
       {openMenu === "faq" && (
         <section className="megaMenu">
           <div className="megaInner faqLayout">
-
-            <div className="faqIntro">
+            <div>
               <span className="eyebrow">
                 FAQ
               </span>
 
-              <h2>
+              <h1 className="menuTitle">
                 {ka
                   ? "ხშირად დასმული კითხვები"
                   : "Frequently Asked Questions"}
-              </h2>
+              </h1>
 
-              <p>
+              <p className="menuDescription">
                 {ka
                   ? "ყველაზე მნიშვნელოვანი ინფორმაცია QR RETURN-ის გამოყენების შესახებ."
                   : "Essential information about using QR RETURN."}
@@ -602,7 +634,7 @@ export default function HomePage() {
                 answer={
                   ka
                     ? "არა. მპოვნელს რეგისტრაცია ან აპლიკაციის ჩამოტვირთვა არ სჭირდება."
-                    : "No. The finder does not need to register or download an app."
+                    : "No. The finder does not need an account or an app."
                 }
               />
 
@@ -614,20 +646,20 @@ export default function HomePage() {
                 }
                 answer={
                   ka
-                    ? "მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც თავად გაქვთ გააქტიურებული."
-                    : "Only the information you have chosen to make visible."
+                    ? "მხოლოდ იმ ინფორმაციას, რომლის გაზიარებაც პროფილის მფლობელმა თავად აირჩია."
+                    : "Only the information the profile owner has chosen to share."
                 }
               />
 
               <FAQ
                 question={
                   ka
-                    ? "შემიძლია რამდენიმე პროფილის მართვა?"
+                    ? "შემიძლია რამდენიმე QR პროფილის მართვა?"
                     : "Can I manage multiple profiles?"
                 }
                 answer={
                   ka
-                    ? "დიახ. ერთი ანგარიშიდან შესაძლებელია რამდენიმე QR პროფილის მართვა."
+                    ? "დიახ. ერთი ანგარიშიდან შეგიძლიათ მართოთ რამდენიმე QR პროფილი."
                     : "Yes. Multiple QR profiles can be managed from one account."
                 }
               />
@@ -640,8 +672,8 @@ export default function HomePage() {
                 }
                 answer={
                   ka
-                    ? "Emergency პროფილი გამოიყენება საჭირო სიტუაციაში მომხმარებლის მიერ წინასწარ შერჩეული მნიშვნელოვანი ინფორმაციის სწრაფად გასაზიარებლად."
-                    : "An Emergency profile provides selected essential information when assistance is needed."
+                    ? "Emergency პროფილი გამოიყენება მომხმარებლის მიერ წინასწარ არჩეული მნიშვნელოვანი ინფორმაციისა და საგანგებო კონტაქტების სწრაფად მისაწვდომად."
+                    : "An Emergency profile provides fast access to selected essential information and emergency contacts."
                 }
               />
             </div>
@@ -649,96 +681,96 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ================= CONTACT ================= */}
+      {/* ======================================
+          CONTACT
+      ====================================== */}
 
       {openMenu === "contact" && (
         <section className="megaMenu">
           <div className="megaInner contactLayout">
-
-            <div className="contactIntro">
+            <div>
               <span className="eyebrow">
                 QR RETURN SUPPORT
               </span>
 
-              <h2>
+              <h1 className="menuTitle">
                 {ka
                   ? "როგორ დაგეხმაროთ?"
                   : "How can we help?"}
-              </h2>
+              </h1>
 
-              <p>
+              <p className="menuDescription">
                 {ka
-                  ? "დაგვიკავშირდით ანგარიშის, QR პროფილის, შეკვეთის ან პროდუქტის შესახებ."
-                  : "Contact us about your account, QR profile, order or product."}
+                  ? "დაგვიკავშირდით ანგარიშის, QR პროფილის, შეკვეთის ან პროდუქტის შესახებ. აირჩიეთ დახმარების ტიპი."
+                  : "Contact us about your account, QR profile, order or product. Choose the type of support you need."}
               </p>
             </div>
 
             <div className="supportCards">
-
               <a
                 href="/support"
                 className="supportCard"
               >
                 <div className="agentAvatar">
-                  <div className="agentHair" />
-                  <div className="agentFace" />
+                  <div className="hair" />
+                  <div className="face" />
                   <div className="headset">
-                    <span />
+                    <i />
                   </div>
                 </div>
 
-                <div className="supportCopy">
+                <div className="supportText">
                   <small>
                     LIVE CHAT
                   </small>
 
-                  <h3>
+                  <h2>
                     {ka
                       ? "მოგვწერეთ პირდაპირ"
-                      : "Chat with our team"}
-                  </h3>
+                      : "Chat with us"}
+                  </h2>
 
                   <p>
                     {ka
-                      ? "QR RETURN-ის მხარდაჭერის გუნდი დაგეხმარებათ ანგარიშის, QR პროფილისა და შეკვეთის საკითხებში."
-                      : "Our support team can help with your account, QR profile and order."}
+                      ? "გახსენით QR RETURN-ის მხარდაჭერის Live Chat და მოგვწერეთ თქვენი საკითხის შესახებ."
+                      : "Open QR RETURN Live Chat and tell us how we can help."}
                   </p>
 
                   <strong>
                     {ka
                       ? "Live Chat-ის გახსნა"
                       : "Open Live Chat"}
-                    {" →"}
+                    {"  →"}
                   </strong>
                 </div>
               </a>
 
               <div className="supportCard">
-                <div className="supportIcon">
+                <div className="phoneIcon">
                   <PhoneIcon />
                 </div>
 
-                <div className="supportCopy">
+                <div className="supportText">
                   <small>
                     {ka
                       ? "ტელეფონი"
                       : "PHONE"}
                   </small>
 
-                  <h3>
+                  <h2>
                     QR RETURN Support
-                  </h3>
+                  </h2>
 
                   <p>
                     {ka
-                      ? "საკონტაქტო ნომერი დაემატება მხარდაჭერის ოფიციალური ნომრის გააქტიურების შემდეგ."
-                      : "The official support number will appear here once activated."}
+                      ? "სატელეფონო მხარდაჭერის ოფიციალური ნომერი აქ გამოჩნდება მისი გააქტიურების შემდეგ."
+                      : "The official support phone number will appear here once activated."}
                   </p>
 
-                  <span className="availability">
+                  <span className="phoneStatus">
                     {ka
-                      ? "Support Contact"
-                      : "Support Contact"}
+                      ? "სატელეფონო მხარდაჭერა"
+                      : "Phone Support"}
                   </span>
                 </div>
               </div>
@@ -747,18 +779,18 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* დროებითი ადგილი */}
+      {/* დროებით */}
 
       <section className="preview">
         <span>
           QR RETURN
         </span>
 
-        <h1>
+        <h2>
           {ka
-            ? "შემდეგი მთავარი სექცია აქ დაემატება."
+            ? "შემდეგ მთავარ სექციას აქ დავამატებთ."
             : "The next homepage section will be added here."}
-        </h1>
+        </h2>
       </section>
 
       <style jsx>{`
@@ -768,16 +800,14 @@ export default function HomePage() {
 
         .page {
           min-height: 100vh;
-
-          color: #192b42;
           background: #ffffff;
+          color: #1d3048;
         }
 
         /* HEADER */
 
         .header {
           position: relative;
-
           z-index: 100;
 
           width: 100%;
@@ -785,7 +815,7 @@ export default function HomePage() {
           background: #ffffff;
 
           border-bottom:
-            1px solid #e5ebf1;
+            1px solid #e5eaf0;
         }
 
         .headerInner {
@@ -795,7 +825,7 @@ export default function HomePage() {
           max-width: 1400px;
           min-height: 78px;
 
-          margin: auto;
+          margin: 0 auto;
 
           display: grid;
 
@@ -804,7 +834,7 @@ export default function HomePage() {
 
           align-items: center;
 
-          gap: 20px;
+          gap: 18px;
         }
 
         .brand {
@@ -825,9 +855,9 @@ export default function HomePage() {
 
           border-radius: 10px;
 
-          color: white;
+          color: #ffffff;
 
-          background: #162b44;
+          background: #162a43;
         }
 
         .brandText strong,
@@ -836,7 +866,7 @@ export default function HomePage() {
         }
 
         .brandText strong {
-          color: #162b44;
+          color: #162a43;
 
           font-size: 16px;
           font-weight: 900;
@@ -845,19 +875,19 @@ export default function HomePage() {
         .brandText span {
           margin-top: 3px;
 
-          color: #929daa;
+          color: #929ca8;
 
           font-size: 7px;
           font-weight: 850;
 
-          letter-spacing: 1.3px;
+          letter-spacing: 1.35px;
         }
 
         .navigation {
           display: flex;
           align-items: center;
 
-          gap: 28px;
+          gap: 27px;
 
           transform:
             translateX(-18px);
@@ -888,7 +918,7 @@ export default function HomePage() {
 
         .nav:hover,
         .nav.active {
-          color: #084daf;
+          color: #084dad;
         }
 
         .actions {
@@ -898,10 +928,10 @@ export default function HomePage() {
           gap: 7px;
         }
 
-        /* LANGUAGE ახლა შესვლამდეა */
+        /* LANGUAGES */
 
         .languages {
-          margin-right: 5px;
+          margin-right: 8px;
 
           display: flex;
           align-items: center;
@@ -910,16 +940,16 @@ export default function HomePage() {
         }
 
         .languages button {
-          padding: 4px 2px;
+          padding: 5px 2px;
 
           border: 0;
 
-          color: #9aa4af;
+          color: #8d98a5;
           background: transparent;
 
           cursor: pointer;
 
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 900;
         }
 
@@ -929,9 +959,9 @@ export default function HomePage() {
 
         .languages span {
           width: 1px;
-          height: 12px;
+          height: 13px;
 
-          background: #d9dfe6;
+          background: #d8dfe6;
         }
 
         .blueButton,
@@ -946,14 +976,14 @@ export default function HomePage() {
 
           border-radius: 9px;
 
-          color: white;
+          color: #ffffff;
 
           text-decoration: none;
 
+          white-space: nowrap;
+
           font-size: 11px;
           font-weight: 850;
-
-          white-space: nowrap;
         }
 
         .blueButton {
@@ -965,12 +995,12 @@ export default function HomePage() {
 
         .adminButton {
           border:
-            1px solid #162b44;
+            1px solid #172b43;
 
-          background: #162b44;
+          background: #172b43;
         }
 
-        /* MEGA */
+        /* MEGA MENU */
 
         .megaMenu {
           position: relative;
@@ -984,12 +1014,12 @@ export default function HomePage() {
             1px solid #dfe7f0;
 
           box-shadow:
-            0 20px 55px
+            0 18px 48px
             rgba(
               28,
               49,
               76,
-              0.08
+              0.07
             );
         }
 
@@ -1001,13 +1031,22 @@ export default function HomePage() {
 
           margin: auto;
 
-          padding: 48px 0 54px;
+          padding: 44px 0 50px;
         }
 
         .sectionIntro {
-          max-width: 620px;
+          max-width: 650px;
 
-          margin-bottom: 28px;
+          margin-bottom: 26px;
+        }
+
+        .sectionIndex {
+          margin-right: 9px;
+
+          color: #1266e9;
+
+          font-size: 8px;
+          font-weight: 900;
         }
 
         .eyebrow {
@@ -1016,70 +1055,67 @@ export default function HomePage() {
           font-size: 8px;
           font-weight: 900;
 
-          letter-spacing: 1.5px;
+          letter-spacing: 1.4px;
         }
 
         .sectionIntro h1,
-        .faqIntro h2,
-        .contactIntro h2 {
+        .menuTitle {
           margin: 8px 0 0;
 
-          color: #1b3049;
+          color: #1d324c;
 
-          font-size: 27px;
+          font-size: 25px;
+
           line-height: 1.15;
 
-          letter-spacing: -0.9px;
+          letter-spacing: -0.8px;
         }
 
         .sectionIntro p,
-        .faqIntro p,
-        .contactIntro p {
-          max-width: 540px;
+        .menuDescription {
+          max-width: 560px;
 
           margin: 10px 0 0;
 
-          color: #718095;
+          color: #728095;
 
-          font-size: 11.5px;
+          font-size: 11px;
           line-height: 1.65;
         }
 
-        /* ABOUT — სამი ბარათი */
+        /* ABOUT */
 
         .aboutCards {
           display: grid;
 
           grid-template-columns:
-            1.35fr 0.825fr 0.825fr;
+            1.3fr 0.85fr 0.85fr;
 
-          gap: 13px;
-
-          align-items: stretch;
+          gap: 12px;
         }
 
-        .aboutCard {
-          padding: 24px;
-
+        .aboutCard,
+        .shopCard,
+        .supportCard {
           border:
             1px solid #cfe0fa;
 
-          border-radius: 16px;
+          border-radius: 15px;
 
           background: #ffffff;
 
           box-shadow:
-            0 8px 26px
+            0 7px 22px
             rgba(
               40,
               79,
               130,
-              0.05
+              0.04
             );
         }
 
-        .aboutCard:hover {
-          border-color: #aac9f6;
+        .aboutCard {
+          padding: 22px;
         }
 
         .founderCard {
@@ -1087,7 +1123,7 @@ export default function HomePage() {
             3px solid #1266e9;
         }
 
-        .cardNumber {
+        .number {
           color: #1266e9;
 
           font-size: 8px;
@@ -1095,22 +1131,20 @@ export default function HomePage() {
         }
 
         .founderIdentity {
-          margin-top: 15px;
+          margin-top: 14px;
 
           display: flex;
           align-items: center;
 
-          gap: 11px;
+          gap: 10px;
         }
 
         .founderAvatar {
-          width: 44px;
-          height: 44px;
+          width: 42px;
+          height: 42px;
 
           display: grid;
           place-items: center;
-
-          flex: 0 0 44px;
 
           border-radius: 50%;
 
@@ -1118,7 +1152,7 @@ export default function HomePage() {
 
           background: #1266e9;
 
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 900;
         }
 
@@ -1129,17 +1163,17 @@ export default function HomePage() {
         }
 
         .founderIdentity strong {
-          color: #20354f;
+          color: #21364f;
 
-          font-size: 13px;
+          font-size: 12px;
         }
 
         .founderIdentity span {
           margin-top: 2px;
 
-          color: #6f7f91;
+          color: #718095;
 
-          font-size: 10px;
+          font-size: 9px;
         }
 
         .founderIdentity small {
@@ -1152,153 +1186,137 @@ export default function HomePage() {
         }
 
         .aboutCard h2 {
-          margin: 20px 0 0;
+          margin: 17px 0 0;
 
-          color: #233851;
+          color: #283d55;
 
-          font-size: 17px;
-          font-weight: 800;
+          font-size: 15px;
         }
 
         .aboutCard p {
-          margin: 11px 0 0;
+          margin: 9px 0 0;
 
-          color: #6c7b8e;
+          color: #6e7d90;
 
-          font-size: 11px;
-          line-height: 1.67;
+          font-size: 10.5px;
+
+          line-height: 1.65;
         }
 
         .quote {
-          margin: 16px 0;
+          margin: 14px 0;
 
-          padding: 15px;
+          padding: 13px 14px;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
-          color: #28415e;
+          color: #29425f;
 
-          background: #eef5ff;
+          background: #edf5ff;
 
-          font-size: 11.5px;
-          line-height: 1.6;
+          font-size: 10.5px;
+
+          line-height: 1.58;
 
           font-weight: 700;
         }
 
-        .cardIcon {
-          width: 42px;
-          height: 42px;
+        .smallIcon {
+          width: 40px;
+          height: 40px;
 
-          margin-top: 17px;
+          margin-top: 15px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
           color: #1266e9;
 
           background: #edf4ff;
         }
 
-        .cardStatement {
+        .statement {
+          display: block;
+
+          margin-top: 18px;
+
+          color: #1266e9;
+
+          font-size: 9px;
+          font-weight: 850;
+        }
+
+        /* SHOP */
+
+        .shopCards {
+          display: grid;
+
+          grid-template-columns:
+            repeat(2, 1fr);
+
+          gap: 12px;
+
+          max-width: 850px;
+        }
+
+        .shopCard {
+          min-height: 205px;
+
+          padding: 22px;
+
+          color: inherit;
+
+          text-decoration: none;
+        }
+
+        .shopCard.featured {
+          background: #f0f6ff;
+        }
+
+        .shopCard h2 {
+          margin: 14px 0 0;
+
+          color: #273d56;
+
+          font-size: 15px;
+        }
+
+        .shopCard p {
+          max-width: 420px;
+
+          margin: 9px 0 0;
+
+          color: #718095;
+
+          font-size: 10.5px;
+
+          line-height: 1.65;
+        }
+
+        .shopCard strong {
           display: block;
 
           margin-top: 20px;
 
           color: #1266e9;
 
-          font-size: 10px;
+          font-size: 9.5px;
+
           font-weight: 850;
-        }
-
-        /* SHOP */
-
-        .shopLayout {
-          display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 13px;
-        }
-
-        .shopCard {
-          padding: 26px;
-
-          border:
-            1px solid #cfe0fa;
-
-          border-radius: 16px;
-
-          color: inherit;
-          background: white;
-
-          text-decoration: none;
-        }
-
-        .shopCard h2 {
-          margin: 12px 0 0;
-
-          color: #263b54;
-
-          font-size: 17px;
-        }
-
-        .shopCard p {
-          margin: 10px 0 0;
-
-          color: #6f7e91;
-
-          font-size: 11px;
-          line-height: 1.65;
-        }
-
-        .storeCard {
-          background: #eef5ff;
-        }
-
-        .storeCard strong {
-          display: block;
-
-          margin-top: 22px;
-
-          color: #1266e9;
-
-          font-size: 11px;
-        }
-
-        .orderSteps {
-          margin-top: 22px;
-
-          display: flex;
-          flex-wrap: wrap;
-
-          gap: 7px;
-        }
-
-        .orderSteps span {
-          padding: 7px 9px;
-
-          border-radius: 8px;
-
-          color: #1266e9;
-          background: #edf4ff;
-
-          font-size: 9px;
-          font-weight: 800;
         }
 
         /* FAQ */
 
-        .faqLayout {
+        .faqLayout,
+        .contactLayout {
           display: grid;
 
           grid-template-columns:
             0.65fr 1.35fr;
 
-          gap: 60px;
+          gap: 56px;
         }
 
         .faqList {
@@ -1307,7 +1325,7 @@ export default function HomePage() {
         }
 
         .faqItem {
-          padding: 15px 0;
+          padding: 14px 0;
 
           border-bottom:
             1px solid #dce5ee;
@@ -1316,9 +1334,9 @@ export default function HomePage() {
         .faqItem h3 {
           margin: 0;
 
-          color: #2b3f57;
+          color: #2c4058;
 
-          font-size: 12.5px;
+          font-size: 12px;
         }
 
         .faqItem p {
@@ -1328,20 +1346,12 @@ export default function HomePage() {
 
           color: #748296;
 
-          font-size: 10.5px;
+          font-size: 10px;
+
           line-height: 1.65;
         }
 
         /* CONTACT */
-
-        .contactLayout {
-          display: grid;
-
-          grid-template-columns:
-            0.65fr 1.35fr;
-
-          gap: 60px;
-        }
 
         .supportCards {
           display: grid;
@@ -1349,13 +1359,13 @@ export default function HomePage() {
           grid-template-columns:
             repeat(2, 1fr);
 
-          gap: 13px;
+          gap: 12px;
         }
 
         .supportCard {
           min-height: 170px;
 
-          padding: 22px;
+          padding: 21px;
 
           display: grid;
 
@@ -1364,15 +1374,9 @@ export default function HomePage() {
 
           align-items: center;
 
-          gap: 16px;
-
-          border:
-            1px solid #cfe0fa;
-
-          border-radius: 16px;
+          gap: 15px;
 
           color: inherit;
-          background: #ffffff;
 
           text-decoration: none;
         }
@@ -1380,18 +1384,14 @@ export default function HomePage() {
         a.supportCard:hover {
           border-color: #a9c9f6;
 
-          background: #f7faff;
+          background: #f6faff;
         }
-
-        /* პატარა support-agent illustration */
 
         .agentAvatar {
           width: 58px;
           height: 58px;
 
           position: relative;
-
-          flex: 0 0 58px;
 
           overflow: hidden;
 
@@ -1400,51 +1400,49 @@ export default function HomePage() {
           background: #dceaff;
         }
 
-        .agentFace {
+        .hair {
+          width: 38px;
+          height: 34px;
+
+          position: absolute;
+
+          z-index: 1;
+
+          left: 10px;
+          top: 7px;
+
+          border-radius:
+            50% 50% 38% 38%;
+
+          background: #26384e;
+        }
+
+        .face {
           width: 27px;
           height: 32px;
 
           position: absolute;
 
-          left: 16px;
-          top: 14px;
-
-          border-radius:
-            48% 48% 44% 44%;
-
-          background: #f4c6a6;
-        }
-
-        .agentHair {
-          width: 36px;
-          height: 31px;
-
-          position: absolute;
-
           z-index: 2;
 
-          left: 11px;
-          top: 8px;
+          left: 16px;
+          top: 15px;
 
           border-radius:
-            50% 50% 35% 35%;
+            48% 48% 43% 43%;
 
-          background: #29394e;
-        }
-
-        .agentFace {
-          z-index: 3;
+          background: #f3c3a3;
         }
 
         .headset {
-          width: 39px;
-          height: 33px;
+          width: 41px;
+          height: 34px;
 
           position: absolute;
 
-          z-index: 4;
+          z-index: 3;
 
-          left: 9px;
+          left: 8px;
           top: 13px;
 
           border:
@@ -1456,35 +1454,35 @@ export default function HomePage() {
             22px 22px 0 0;
         }
 
-        .headset span {
-          width: 10px;
+        .headset i {
+          width: 11px;
           height: 3px;
 
           position: absolute;
 
-          right: -4px;
-          bottom: 2px;
+          right: -5px;
+          bottom: 1px;
 
-          border-radius: 10px;
+          border-radius: 5px;
 
           background: #1266e9;
         }
 
-        .supportIcon {
+        .phoneIcon {
           width: 50px;
           height: 50px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 13px;
+          border-radius: 12px;
 
           color: #1266e9;
 
           background: #edf4ff;
         }
 
-        .supportCopy small {
+        .supportText small {
           color: #1266e9;
 
           font-size: 7px;
@@ -1493,37 +1491,38 @@ export default function HomePage() {
           letter-spacing: 1px;
         }
 
-        .supportCopy h3 {
+        .supportText h2 {
           margin: 5px 0 0;
 
-          color: #263b54;
+          color: #273d56;
 
           font-size: 13px;
         }
 
-        .supportCopy p {
+        .supportText p {
           margin: 6px 0 0;
 
           color: #718095;
 
-          font-size: 10.5px;
+          font-size: 10px;
+
           line-height: 1.55;
         }
 
-        .supportCopy strong {
+        .supportText strong {
           display: block;
 
-          margin-top: 12px;
+          margin-top: 11px;
 
           color: #1266e9;
 
-          font-size: 10px;
+          font-size: 9px;
         }
 
-        .availability {
+        .phoneStatus {
           display: inline-block;
 
-          margin-top: 12px;
+          margin-top: 11px;
 
           padding: 5px 8px;
 
@@ -1540,9 +1539,9 @@ export default function HomePage() {
         /* PREVIEW */
 
         .preview {
-          min-height: 520px;
+          min-height: 500px;
 
-          padding: 120px 30px;
+          padding: 115px 30px;
 
           text-align: center;
         }
@@ -1556,27 +1555,23 @@ export default function HomePage() {
           letter-spacing: 1.4px;
         }
 
-        .preview h1 {
-          max-width: 650px;
+        .preview h2 {
+          max-width: 600px;
 
-          margin: 15px auto 0;
+          margin: 14px auto 0;
 
-          color: #20354d;
+          color: #223750;
 
-          font-size: 32px;
+          font-size: 29px;
 
-          line-height: 1.14;
-
-          letter-spacing: -1.3px;
+          line-height: 1.16;
         }
 
-        /* RESPONSIVE */
-
         @media (
-          max-width: 1120px
+          max-width: 1100px
         ) {
           .navigation {
-            gap: 15px;
+            gap: 14px;
 
             transform: none;
           }
@@ -1627,9 +1622,12 @@ export default function HomePage() {
             min-height: 70px;
           }
 
-          .brandText span,
-          .languages {
+          .brandText span {
             display: none;
+          }
+
+          .languages {
+            margin-right: 2px;
           }
 
           .blueButton,
@@ -1641,12 +1639,7 @@ export default function HomePage() {
             font-size: 9px;
           }
 
-          .megaInner {
-            padding:
-              34px 0 40px;
-          }
-
-          .shopLayout,
+          .shopCards,
           .supportCards {
             grid-template-columns:
               1fr;
@@ -1715,7 +1708,6 @@ function QRIcon() {
         height="6"
         rx="1"
       />
-
       <rect
         x="15"
         y="3"
@@ -1723,7 +1715,6 @@ function QRIcon() {
         height="6"
         rx="1"
       />
-
       <rect
         x="3"
         y="15"
@@ -1731,7 +1722,6 @@ function QRIcon() {
         height="6"
         rx="1"
       />
-
       <path d="M14 14h3v3h3v4h-6z" />
     </svg>
   );
@@ -1740,8 +1730,8 @@ function QRIcon() {
 function TargetIcon() {
   return (
     <svg
-      width="21"
-      height="21"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -1752,14 +1742,11 @@ function TargetIcon() {
         cy="12"
         r="8"
       />
-
       <circle
         cx="12"
         cy="12"
         r="3"
       />
-
-      <path d="M12 2v3M22 12h-3" />
     </svg>
   );
 }
@@ -1767,15 +1754,14 @@ function TargetIcon() {
 function VisionIcon() {
   return (
     <svg
-      width="21"
-      height="21"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
     >
       <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z" />
-
       <circle
         cx="12"
         cy="12"
@@ -1785,11 +1771,44 @@ function VisionIcon() {
   );
 }
 
+function OrderIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M7 4h10l2 4v12H5V8l2-4Z" />
+      <path d="M9 12h6M9 16h4" />
+    </svg>
+  );
+}
+
+function StoreIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M4 10v10h16V10" />
+      <path d="M3 4h18l-2 6H5L3 4Z" />
+      <path d="M9 20v-5h6v5" />
+    </svg>
+  );
+}
+
 function PhoneIcon() {
   return (
     <svg
-      width="21"
-      height="21"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
