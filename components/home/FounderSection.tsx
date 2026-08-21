@@ -1,449 +1,376 @@
 "use client";
 
-type Language = "ka" | "en";
-
 type Props = {
-  language?: Language;
-
-  name?: string;
-
-  roleKa?: string;
-  roleEn?: string;
-
-  titleKa?: string;
-  titleEn?: string;
-
-  bioKa?: string;
-  bioEn?: string;
-
-  image?: string;
-
-  locationKa?: string;
-  locationEn?: string;
-
-  linkedin?: string;
+  language?: "ka" | "en";
 };
 
 export default function FounderSection({
   language = "ka",
-
-  name = "Nino Kuprava",
-
-  roleKa = "დამფუძნებელი და CEO",
-  roleEn = "Founder & CEO",
-
-  titleKa = "QR RETURN-ის დამფუძნებელი",
-  titleEn = "Founder of QR RETURN",
-
-  bioKa =
-    "QR RETURN შეიქმნა ერთი მარტივი იდეით — დაკარგული ნივთის, შინაური ცხოველის ან მნიშვნელოვანი ინფორმაციის დაბრუნება მაქსიმალურად მარტივი და სწრაფი უნდა იყოს. პლატფორმა აერთიანებს QR ტექნოლოგიას, Live Chat-ს, კონფიდენციალურობის კონტროლს და Emergency ID ფუნქციებს ერთ სისტემაში.",
-
-  bioEn =
-    "QR RETURN was created around a simple idea: reconnecting people with lost belongings, pets, or important information should be fast and simple. The platform brings QR technology, Live Chat, privacy controls, and Emergency ID features together in one system.",
-
-  image = "",
-
-  locationKa = "აშშ / საქართველო",
-  locationEn = "USA / Georgia",
-
-  linkedin = "",
 }: Props) {
   const ka = language === "ka";
 
   return (
-    <section
-      id="founder"
-      className="founderSection"
-    >
-      <div className="shell">
-        <div className="layout">
-          <div className="photoSide">
-            <div className="photoCard">
-              {image ? (
-                <img
-                  src={image}
-                  alt={name}
-                />
-              ) : (
-                <div className="placeholder">
-                  <PersonIcon />
+    <section className="founder" id="founder">
+      <div className="inner">
+        <div className="intro">
+          <span className="number">01</span>
 
-                  <span>
-                    {ka
-                      ? "Founder photo"
-                      : "Founder photo"}
-                  </span>
-                </div>
-              )}
+          <span className="eyebrow">
+            {ka
+              ? "დამფუძნებლისგან"
+              : "FROM THE FOUNDER"}
+          </span>
 
-              <div className="badge">
-                FOUNDER
+          <h2>
+            {ka
+              ? "იდეა, რომელიც ერთი მარტივი შეკითხვიდან დაიწყო."
+              : "An idea that started with one simple question."}
+          </h2>
+        </div>
+
+        <article className="letter">
+          {ka ? (
+            <>
+              <p className="lead">
+                QR RETURN-ის იდეა ერთი მარტივი შეკითხვიდან გაჩნდა:
+                რა ხდება მაშინ, როდესაც ადამიანი კარგავს მისთვის
+                მნიშვნელოვან ნივთს, საყვარელ ცხოველს, ან როდესაც
+                გადაუდებელ სიტუაციაში მის შესახებ აუცილებელი
+                ინფორმაცია ხელმისაწვდომი არ არის?
+              </p>
+
+              <p>
+                ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ არ
+                იცის, ვის დაუკავშირდეს. დაკარგულ ცხოველს არ შეუძლია
+                პატრონის ვინაობის თქმა, ნივთზე კი ხშირად არ არსებობს
+                ინფორმაცია, რომელიც მის დაბრუნებას გაამარტივებს.
+              </p>
+
+              <p>
+                Emergency სამაჯურის შემთხვევაში თითოეულ წუთსაც შეიძლება
+                დიდი მნიშვნელობა ჰქონდეს — განსაკუთრებით მაშინ, როდესაც
+                ადამიანი თავად ვერ ახერხებს საკუთარი სახელის,
+                ჯანმრთელობის მდგომარეობის ან ოჯახის წევრის საკონტაქტო
+                ინფორმაციის თქმას.
+              </p>
+
+              <div className="statement">
+                <span>QR RETURN</span>
+
+                <strong>
+                  ერთი მარტივი და უსაფრთხო სისტემა, რომელიც საჭირო
+                  მომენტში ადამიანებს სწრაფად აკავშირებს.
+                </strong>
               </div>
+
+              <p>
+                QR RETURN აერთიანებს სამ მნიშვნელოვან მიმართულებას:
+                დაკარგული ნივთების დაბრუნებას, საყვარელი ცხოველების
+                დაცვას და ადამიანებისთვის განკუთვნილ Emergency
+                პროფილებს.
+              </p>
+
+              <p>
+                QR კოდის დასკანერებით მპოვნელს ან დამხმარე ადამიანს
+                შეუძლია ნახოს მხოლოდ ის ინფორმაცია, რომლის გაზიარებაც
+                მომხმარებელმა წინასწარ აირჩია, და დაუკავშირდეს
+                მფლობელს, ოჯახის წევრს ან საგანგებო საკონტაქტო პირს.
+              </p>
+
+              <p>
+                პროდუქტის მთავარი ღირებულება მხოლოდ QR კოდში არ არის.
+                მისი მნიშვნელობა არის{" "}
+                <strong>სწრაფად აღმოჩენილი სწორი კავშირი</strong> მაშინ,
+                როდესაც დრო, უსაფრთხოება და ინფორმაცია ყველაზე მეტად
+                გვჭირდება.
+              </p>
+
+              <p>
+                ჩემთვის განსაკუთრებით მნიშვნელოვანია, რომ მომხმარებელი
+                თავად აკონტროლებდეს საკუთარ ინფორმაციას — რას აზიარებს,
+                ვის აჩვენებს და როგორ შეიძლება მასთან დაკავშირება.
+                ამიტომ QR RETURN-ის საფუძველია სიმარტივე, უსაფრთხოება,
+                კონფიდენციალურობა და ნდობა.
+              </p>
+
+              <p>
+                QR RETURN ჩემთვის უბრალოდ პროდუქტი ან ტექნოლოგიური
+                პლატფორმა არ არის. ჩემი მიზანია, ის გახდეს პატარა,
+                მაგრამ მნიშვნელოვანი დამცავი რგოლი ადამიანებს, მათ
+                საყვარელ ცხოველებსა და მათთვის ძვირფას ნივთებს შორის —
+                რადგან ზოგჯერ დასაბრუნებლად ან დასახმარებლად მხოლოდ ერთი
+                სწორი კავშირია საჭირო.
+              </p>
+
+              <p className="thanks">
+                მადლობა, რომ ენდობით QR RETURN-ს.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="lead">
+                QR RETURN began with one simple question: what happens
+                when someone loses something important, a beloved pet,
+                or needs urgent help when essential information is not
+                immediately available?
+              </p>
+
+              <p>
+                QR RETURN was created to make that connection faster,
+                simpler and safer.
+              </p>
+
+              <p>
+                The system brings together lost belongings, pet
+                protection and Emergency profiles while allowing users
+                to control what information is shared.
+              </p>
+
+              <p>
+                Its value is not simply in the QR code itself, but in
+                creating the right connection at the moment it matters
+                most.
+              </p>
+            </>
+          )}
+
+          <footer className="signature">
+            <div className="signatureMark">
+              NK
             </div>
-          </div>
 
-          <div className="content">
-            <span className="eyebrow">
-              QR RETURN STORY
-            </span>
-
-            <h2>
-              {ka
-                ? titleKa
-                : titleEn}
-            </h2>
-
-            <div className="identity">
+            <div>
               <strong>
-                {name}
+                Nino Kuprava
               </strong>
 
               <span>
-                {ka
-                  ? roleKa
-                  : roleEn}
+                Founder &amp; CEO
               </span>
+
+              <small>
+                QR RETURN
+              </small>
             </div>
-
-            <p className="bio">
-              {ka ? bioKa : bioEn}
-            </p>
-
-            <div className="meta">
-              <div>
-                <span>
-                  {ka
-                    ? "როლი"
-                    : "Role"}
-                </span>
-
-                <strong>
-                  {ka
-                    ? roleKa
-                    : roleEn}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  {ka
-                    ? "ლოკაცია"
-                    : "Location"}
-                </span>
-
-                <strong>
-                  {ka
-                    ? locationKa
-                    : locationEn}
-                </strong>
-              </div>
-            </div>
-
-            {linkedin && (
-              <a
-                href={linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className="linkedin"
-              >
-                LinkedIn ↗
-              </a>
-            )}
-          </div>
-        </div>
+          </footer>
+        </article>
       </div>
 
       <style jsx>{`
-        .founderSection {
-          width: 100%;
-          padding: 92px 0;
-
-          background: #f7f8f6;
+        .founder {
+          padding: 110px 0;
+          background: #ffffff;
         }
 
-        .shell {
-          width:
-            calc(100% - 56px);
-
+        .inner {
+          width: calc(100% - 56px);
           max-width: 1180px;
+          margin: auto;
 
-          margin: 0 auto;
-        }
-
-        .layout {
           display: grid;
-
-          grid-template-columns:
-            minmax(330px, 0.8fr)
-            minmax(0, 1.2fr);
-
-          align-items: center;
-
-          gap: 70px;
+          grid-template-columns: 0.78fr 1.22fr;
+          gap: 90px;
+          align-items: start;
         }
 
-        .photoSide {
-          min-width: 0;
+        .intro {
+          position: sticky;
+          top: 120px;
         }
 
-        .photoCard {
-          width: 100%;
-          max-width: 420px;
-
-          aspect-ratio: 4 / 5;
-
-          position: relative;
-
-          overflow: hidden;
-
-          border-radius: 24px;
-
-          background:
-            linear-gradient(
-              145deg,
-              #e8ecef,
-              #f8f8f6
-            );
-
-          box-shadow:
-            0 20px 45px
-            rgba(
-              32,
-              43,
-              55,
-              0.08
-            );
-        }
-
-        .photoCard img {
-          width: 100%;
-          height: 100%;
-
-          object-fit: cover;
-        }
-
-        .placeholder {
-          width: 100%;
-          height: 100%;
-
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-
-          gap: 10px;
-
-          color: #a2abb4;
-        }
-
-        .placeholder
-          :global(svg) {
-          width: 62px;
-          height: 62px;
-        }
-
-        .placeholder span {
-          font-size: 9px;
-          font-weight: 800;
-        }
-
-        .badge {
-          position: absolute;
-
-          left: 18px;
-          bottom: 18px;
-
-          padding: 7px 10px;
-
-          border-radius: 999px;
-
-          color: white;
-          background:
-            rgba(
-              32,
-              43,
-              55,
-              0.9
-            );
-
-          font-size: 7px;
+        .number {
+          display: block;
+          color: #1266e9;
+          font-size: 13px;
           font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .content {
-          max-width: 610px;
         }
 
         .eyebrow {
-          color: #c84a50;
+          display: block;
+          margin-top: 22px;
 
-          font-size: 7px;
+          color: #7a8796;
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: 1.7px;
+        }
+
+        h2 {
+          max-width: 430px;
+          margin: 14px 0 0;
+
+          color: #142338;
+          font-size: clamp(38px, 4vw, 54px);
+          line-height: 1.06;
+          letter-spacing: -2.5px;
+        }
+
+        .letter {
+          padding-left: 42px;
+          border-left: 1px solid #e2e7ed;
+        }
+
+        p {
+          margin: 0 0 21px;
+
+          color: #667487;
+          font-size: 15px;
+          line-height: 1.83;
+        }
+
+        .lead {
+          color: #27384d;
+          font-size: 17px;
+          line-height: 1.78;
+        }
+
+        p strong {
+          color: #27384d;
+        }
+
+        .statement {
+          margin: 34px 0;
+          padding: 26px 28px;
+
+          border-radius: 17px;
+
+          background:
+            linear-gradient(
+              135deg,
+              #f4f8ff,
+              #f7f5ff
+            );
+        }
+
+        .statement span {
+          display: block;
+
+          color: #1266e9;
+          font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.5px;
         }
 
-        h2 {
-          margin: 10px 0 0;
-
-          color: #202b37;
-
-          font-size:
-            clamp(
-              36px,
-              4vw,
-              48px
-            );
-
-          font-weight: 680;
-          line-height: 1.06;
-          letter-spacing: -2px;
-        }
-
-        .identity {
-          margin-top: 22px;
-        }
-
-        .identity strong,
-        .identity span {
+        .statement strong {
           display: block;
+
+          margin-top: 9px;
+
+          color: #25364b;
+          font-size: 19px;
+          line-height: 1.55;
         }
 
-        .identity strong {
-          color: #303b46;
-
-          font-size: 17px;
-          font-weight: 800;
+        .thanks {
+          margin-top: 30px;
+          color: #293a4f;
+          font-weight: 700;
         }
 
-        .identity span {
-          margin-top: 4px;
+        .signature {
+          margin-top: 44px;
+          padding-top: 28px;
 
-          color: #c84a50;
+          display: flex;
+          align-items: center;
+          gap: 14px;
 
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: 0.6px;
+          border-top: 1px solid #e5e9ee;
         }
 
-        .bio {
-          margin: 20px 0 0;
-
-          color: #6f7a85;
-
-          font-size: 11px;
-          line-height: 1.8;
-        }
-
-        .meta {
-          margin-top: 27px;
-
-          padding-top: 20px;
+        .signatureMark {
+          width: 48px;
+          height: 48px;
 
           display: grid;
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
+          place-items: center;
+
+          border-radius: 50%;
+
+          color: white;
+
+          background:
+            linear-gradient(
+              135deg,
+              #1266e9,
+              #7255f5
             );
 
-          gap: 18px;
-
-          border-top:
-            1px solid #dce1e4;
+          font-size: 13px;
+          font-weight: 900;
         }
 
-        .meta span,
-        .meta strong {
+        .signature strong,
+        .signature span,
+        .signature small {
           display: block;
         }
 
-        .meta span {
-          color: #9aa2aa;
-
-          font-size: 7px;
-          font-weight: 900;
-          letter-spacing: 0.6px;
+        .signature strong {
+          color: #203146;
+          font-size: 15px;
         }
 
-        .meta strong {
-          margin-top: 5px;
-
-          color: #44505b;
-
-          font-size: 10px;
-          font-weight: 800;
+        .signature span {
+          margin-top: 3px;
+          color: #677588;
+          font-size: 12px;
         }
 
-        .linkedin {
-          display: inline-block;
-
-          margin-top: 24px;
-
-          color: #225fc7;
-
+        .signature small {
+          margin-top: 2px;
+          color: #1266e9;
           font-size: 9px;
           font-weight: 850;
-
-          text-decoration: none;
+          letter-spacing: 1px;
         }
 
-        @media (
-          max-width: 900px
-        ) {
-          .layout {
-            grid-template-columns:
-              1fr;
-
-            gap: 40px;
+        @media (max-width: 850px) {
+          .inner {
+            grid-template-columns: 1fr;
+            gap: 42px;
           }
 
-          .photoCard {
-            max-width: 360px;
+          .intro {
+            position: static;
+          }
+
+          .letter {
+            padding-left: 0;
+            border-left: 0;
           }
         }
 
-        @media (
-          max-width: 650px
-        ) {
-          .founderSection {
-            padding: 65px 0;
+        @media (max-width: 650px) {
+          .founder {
+            padding: 75px 0;
           }
 
-          .shell {
-            width:
-              calc(100% - 28px);
+          .inner {
+            width: calc(100% - 28px);
           }
 
-          .photoCard {
-            max-width: 100%;
+          h2 {
+            font-size: 38px;
           }
 
-          .meta {
-            grid-template-columns:
-              1fr;
+          p {
+            font-size: 14px;
+          }
+
+          .lead {
+            font-size: 16px;
+          }
+
+          .statement {
+            padding: 22px;
+          }
+
+          .statement strong {
+            font-size: 17px;
           }
         }
       `}</style>
     </section>
-  );
-}
-
-function PersonIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    >
-      <circle
-        cx="12"
-        cy="8"
-        r="4"
-      />
-
-      <path d="M4.5 21c.8-4.1 3.3-6.3 7.5-6.3s6.7 2.2 7.5 6.3" />
-    </svg>
   );
 }
