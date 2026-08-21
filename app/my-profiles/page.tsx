@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  createClient,
+} from "@supabase/supabase-js";
 
 type Profile = {
   id: string;
@@ -11,6 +20,18 @@ type Profile = {
   item_name: string | null;
   photo: string | null;
   active: boolean | null;
+
+  scan_count: number | null;
+  last_scanned_at: string | null;
+
+  last_scan_latitude:
+    number | null;
+
+  last_scan_longitude:
+    number | null;
+
+  last_scan_accuracy:
+    number | null;
 };
 
 function createSupabaseClient() {
@@ -21,7 +42,10 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (
+    !supabaseUrl ||
+    !supabaseKey
+  ) {
     return null;
   }
 
@@ -69,16 +93,46 @@ const CATEGORY_META: Record<
   },
 };
 
+function formatScanDate(
+  value: string | null
+) {
+  if (!value) {
+    return "ჯერ არ დასკანერებულა";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return date.toLocaleString();
+}
+
 export default function MyProfilesPage() {
   const router = useRouter();
 
-  const [profiles, setProfiles] =
+  const [
+    profiles,
+    setProfiles,
+  ] =
     useState<Profile[]>([]);
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true);
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
     useState("");
 
   useEffect(() => {
@@ -92,7 +146,6 @@ export default function MyProfilesPage() {
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
 
-          setLoading(false);
           return;
         }
 
@@ -108,35 +161,45 @@ export default function MyProfilesPage() {
           userError ||
           !user
         ) {
-          router.replace("/login");
+          router.replace(
+            "/login"
+          );
+
           return;
         }
 
         const {
           data,
           error,
-        } = await supabase
-          .from("item")
-          .select(
-            `
-              id,
-              tag_code,
-              item_type,
-              item_name,
-              photo,
-              active
-            `
-          )
-          .eq(
-            "owner_id",
-            user.id
-          )
-          .order(
-            "id",
-            {
-              ascending: false,
-            }
-          );
+        } =
+          await supabase
+            .from("item")
+            .select(
+              `
+                id,
+                tag_code,
+                item_type,
+                item_name,
+                photo,
+                active,
+                scan_count,
+                last_scanned_at,
+                last_scan_latitude,
+                last_scan_longitude,
+                last_scan_accuracy
+              `
+            )
+            .eq(
+              "owner_id",
+              user.id
+            )
+            .order(
+              "id",
+              {
+                ascending:
+                  false,
+              }
+            );
 
         if (error) {
           throw error;
@@ -186,7 +249,9 @@ export default function MyProfilesPage() {
           .loaderCard {
             padding: 22px 28px;
 
-            border: 1px solid #dce6f1;
+            border:
+              1px solid #dce6f1;
+
             border-radius: 14px;
 
             background: #ffffff;
@@ -244,8 +309,10 @@ export default function MyProfilesPage() {
 
           <p>
             აქ შეგიძლიათ მართოთ
-            თქვენი ყველა QR RETURN
-            პროფილი ერთი ანგარიშიდან.
+            ყველა თქვენი QR RETURN
+            პროფილი, ნახოთ ბოლო
+            სკანირება და მპოვნელის
+            გაზიარებული მდებარეობა.
           </p>
         </section>
 
@@ -266,9 +333,10 @@ export default function MyProfilesPage() {
             </h2>
 
             <p>
-              დაამატეთ პირველი QR პროფილი
-              ძაღლისთვის, კატისთვის ან
-              თქვენი ნივთისთვის.
+              დაამატეთ პირველი QR
+              პროფილი ძაღლისთვის,
+              კატისთვის ან თქვენი
+              ნივთისთვის.
             </p>
 
             <a
@@ -301,38 +369,61 @@ export default function MyProfilesPage() {
                 (profile) => {
                   const meta =
                     CATEGORY_META[
-                      profile.item_type
+                      profile
+                        .item_type
                     ] || {
                       label:
-                        profile.item_type,
+                        profile
+                          .item_type,
                       emoji: "QR",
                     };
 
+                  const hasLocation =
+                    profile
+                      .last_scan_latitude !==
+                      null &&
+                    profile
+                      .last_scan_longitude !==
+                      null;
+
+                  const mapsUrl =
+                    hasLocation
+                      ? `https://www.google.com/maps?q=${profile.last_scan_latitude},${profile.last_scan_longitude}`
+                      : "";
+
                   return (
                     <article
-                      key={profile.id}
+                      key={
+                        profile.id
+                      }
                       className="card"
                     >
                       <div className="cardTop">
                         <div className="categoryIcon">
-                          {meta.emoji}
+                          {
+                            meta.emoji
+                          }
                         </div>
 
                         <div
                           className={
-                            profile.active !== false
+                            profile.active !==
+                            false
                               ? "status active"
                               : "status"
                           }
                         >
-                          {profile.active !== false
+                          {profile.active !==
+                          false
                             ? "ACTIVE"
                             : "INACTIVE"}
                         </div>
                       </div>
 
                       <div className="category">
-                        {meta.label}
+                        {
+                          meta.label
+                        }
                       </div>
 
                       <h2>
@@ -346,8 +437,95 @@ export default function MyProfilesPage() {
                         </span>
 
                         <strong>
-                          {profile.tag_code}
+                          {
+                            profile.tag_code
+                          }
                         </strong>
+                      </div>
+
+                      <div className="scanBox">
+                        <div className="scanHeader">
+                          <div>
+                            <span>
+                              LAST SCAN
+                            </span>
+
+                            <strong>
+                              {formatScanDate(
+                                profile.last_scanned_at
+                              )}
+                            </strong>
+                          </div>
+
+                          <div className="scanCount">
+                            <span>
+                              SCANS
+                            </span>
+
+                            <strong>
+                              {profile.scan_count ||
+                                0}
+                            </strong>
+                          </div>
+                        </div>
+
+                        {hasLocation ? (
+                          <>
+                            <div className="locationData">
+                              <div>
+                                <span>
+                                  LAT
+                                </span>
+
+                                <strong>
+                                  {profile.last_scan_latitude?.toFixed(
+                                    6
+                                  )}
+                                </strong>
+                              </div>
+
+                              <div>
+                                <span>
+                                  LNG
+                                </span>
+
+                                <strong>
+                                  {profile.last_scan_longitude?.toFixed(
+                                    6
+                                  )}
+                                </strong>
+                              </div>
+                            </div>
+
+                            {profile.last_scan_accuracy !==
+                              null && (
+                              <div className="accuracy">
+                                Accuracy:{" "}
+                                <strong>
+                                  {Math.round(
+                                    profile.last_scan_accuracy
+                                  )}{" "}
+                                  m
+                                </strong>
+                              </div>
+                            )}
+
+                            <a
+                              href={
+                                mapsUrl
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mapButton"
+                            >
+                              📍 Open Location
+                            </a>
+                          </>
+                        ) : (
+                          <div className="noLocation">
+                            📍 მპოვნელს მდებარეობა ჯერ არ გაუზიარებია.
+                          </div>
+                        )}
                       </div>
 
                       <div className="actions">
@@ -376,18 +554,26 @@ export default function MyProfilesPage() {
 
       <style jsx>{`
         * {
-          box-sizing: border-box;
+          box-sizing:
+            border-box;
         }
 
         .page {
-          min-height: 100vh;
+          min-height:
+            100vh;
 
-          padding-bottom: 80px;
+          padding-bottom:
+            80px;
 
           background:
             radial-gradient(
               circle at 100% 0%,
-              rgba(18,102,233,.07),
+              rgba(
+                18,
+                102,
+                233,
+                .07
+              ),
               transparent 26%
             ),
             linear-gradient(
@@ -399,265 +585,345 @@ export default function MyProfilesPage() {
 
         .header {
           width:
-            calc(100% - 60px);
+            calc(
+              100% - 60px
+            );
 
-          max-width: 1200px;
+          max-width:
+            1200px;
 
-          min-height: 80px;
+          min-height:
+            80px;
 
-          margin: auto;
+          margin:
+            auto;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
 
-          gap: 20px;
+          gap:
+            20px;
 
           border-bottom:
             1px solid #e5ebf2;
         }
 
         .brand {
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          gap: 10px;
+          gap:
+            10px;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         .brandMark {
-          width: 42px;
-          height: 42px;
+          width:
+            42px;
 
-          display: grid;
+          height:
+            42px;
 
-          place-items: center;
+          display:
+            grid;
 
-          border-radius: 11px;
+          place-items:
+            center;
 
-          background: #1266e9;
+          border-radius:
+            11px;
 
-          color: #ffffff;
+          background:
+            #1266e9;
 
-          font-size: 10px;
+          color:
+            #ffffff;
 
-          font-weight: 950;
+          font-size:
+            10px;
+
+          font-weight:
+            950;
         }
 
         .brand strong,
         .brand span {
-          display: block;
+          display:
+            block;
         }
 
         .brand strong {
-          color: #172b43;
+          color:
+            #172b43;
 
-          font-size: 15px;
+          font-size:
+            15px;
 
-          font-weight: 950;
+          font-weight:
+            950;
         }
 
         .brand span {
-          margin-top: 3px;
+          margin-top:
+            3px;
 
-          color: #8b97a5;
+          color:
+            #8b97a5;
 
-          font-size: 7px;
+          font-size:
+            7px;
 
-          font-weight: 850;
+          font-weight:
+            850;
 
-          letter-spacing: 1.3px;
+          letter-spacing:
+            1.3px;
         }
 
         .addTop {
-          min-height: 42px;
+          min-height:
+            42px;
 
-          padding: 0 14px;
+          padding:
+            0 14px;
 
-          display: inline-flex;
+          display:
+            inline-flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #1266e9;
+          background:
+            #1266e9;
 
-          color: #ffffff;
+          color:
+            #ffffff;
 
-          font-size: 9px;
+          font-size:
+            9px;
 
-          font-weight: 900;
+          font-weight:
+            900;
 
-          text-decoration: none;
+          text-decoration:
+            none;
+        }
+
+        .hero,
+        .summary,
+        .grid,
+        .errorBox {
+          width:
+            calc(
+              100% - 60px
+            );
+
+          max-width:
+            1200px;
+
+          margin-left:
+            auto;
+
+          margin-right:
+            auto;
         }
 
         .hero {
-          width:
-            calc(100% - 60px);
-
-          max-width: 1200px;
-
-          margin:
-            60px auto 0;
+          margin-top:
+            60px;
         }
 
         .hero > span {
-          color: #1266e9;
+          color:
+            #1266e9;
 
-          font-size: 8px;
+          font-size:
+            8px;
 
-          font-weight: 900;
+          font-weight:
+            900;
 
-          letter-spacing: 1.5px;
+          letter-spacing:
+            1.5px;
         }
 
         .hero h1 {
-          margin: 9px 0 0;
+          margin:
+            9px 0 0;
 
-          color: #172b43;
+          color:
+            #172b43;
 
-          font-size: 40px;
-
-          line-height: 1.08;
-
-          letter-spacing: -1.4px;
+          font-size:
+            40px;
         }
 
         .hero p {
-          max-width: 560px;
+          max-width:
+            580px;
 
-          margin: 12px 0 0;
+          margin:
+            12px 0 0;
 
-          color: #77869a;
+          color:
+            #77869a;
 
-          font-size: 11px;
+          font-size:
+            11px;
 
-          line-height: 1.65;
+          line-height:
+            1.65;
         }
 
         .errorBox {
-          width:
-            calc(100% - 60px);
+          margin-top:
+            24px;
 
-          max-width: 1200px;
-
-          margin:
-            24px auto 0;
-
-          padding: 14px;
+          padding:
+            14px;
 
           border:
             1px solid #efc7cb;
 
-          border-radius: 12px;
+          border-radius:
+            12px;
 
-          background: #fff7f8;
+          background:
+            #fff7f8;
 
-          color: #a3434c;
+          color:
+            #a3434c;
 
-          font-size: 10px;
+          font-size:
+            10px;
         }
 
         .summary {
-          width:
-            calc(100% - 60px);
+          margin-top:
+            34px;
 
-          max-width: 1200px;
+          padding:
+            16px 18px;
 
-          margin:
-            34px auto 0;
+          display:
+            flex;
 
-          padding: 16px 18px;
-
-          display: flex;
-
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
 
-          gap: 20px;
+          gap:
+            20px;
 
           border:
             1px solid #dce6f1;
 
-          border-radius: 14px;
+          border-radius:
+            14px;
 
-          background: #ffffff;
+          background:
+            #ffffff;
         }
 
         .summary span {
-          display: block;
+          display:
+            block;
 
-          color: #8a97a6;
+          color:
+            #8a97a6;
 
-          font-size: 7px;
+          font-size:
+            7px;
 
-          font-weight: 900;
-
-          letter-spacing: 1px;
+          font-weight:
+            900;
         }
 
         .summary strong {
-          display: block;
+          display:
+            block;
 
-          margin-top: 4px;
+          margin-top:
+            4px;
 
-          color: #172b43;
+          color:
+            #172b43;
 
-          font-size: 22px;
+          font-size:
+            22px;
         }
 
         .summary a {
-          color: #1266e9;
+          color:
+            #1266e9;
 
-          font-size: 9px;
+          font-size:
+            9px;
 
-          font-weight: 900;
+          font-weight:
+            900;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         .grid {
-          width:
-            calc(100% - 60px);
+          margin-top:
+            18px;
 
-          max-width: 1200px;
-
-          margin:
-            18px auto 0;
-
-          display: grid;
+          display:
+            grid;
 
           grid-template-columns:
             repeat(
               3,
-              minmax(0, 1fr)
+              minmax(
+                0,
+                1fr
+              )
             );
 
-          gap: 15px;
+          gap:
+            15px;
         }
 
         .card {
-          min-height: 285px;
+          min-height:
+            400px;
 
-          padding: 20px;
+          padding:
+            20px;
 
-          display: flex;
+          display:
+            flex;
 
-          flex-direction: column;
+          flex-direction:
+            column;
 
           border:
             1px solid #dce6f1;
 
-          border-radius: 16px;
+          border-radius:
+            16px;
 
-          background: #ffffff;
+          background:
+            #ffffff;
 
           box-shadow:
             0 12px 28px
@@ -670,268 +936,525 @@ export default function MyProfilesPage() {
         }
 
         .cardTop {
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
 
-          gap: 10px;
+          gap:
+            10px;
         }
 
         .categoryIcon {
-          width: 48px;
-          height: 48px;
+          width:
+            48px;
 
-          display: grid;
+          height:
+            48px;
 
-          place-items: center;
+          display:
+            grid;
 
-          border-radius: 13px;
+          place-items:
+            center;
 
-          background: #f0f5fd;
+          border-radius:
+            13px;
 
-          font-size: 24px;
+          background:
+            #f0f5fd;
+
+          font-size:
+            24px;
         }
 
         .status {
-          padding: 5px 8px;
+          padding:
+            5px 8px;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
-          background: #edf0f4;
+          background:
+            #edf0f4;
 
-          color: #8b97a5;
+          color:
+            #8b97a5;
 
-          font-size: 6px;
+          font-size:
+            6px;
 
-          font-weight: 900;
+          font-weight:
+            900;
         }
 
         .status.active {
-          background: #eaf2ff;
+          background:
+            #eaf2ff;
 
-          color: #1266e9;
+          color:
+            #1266e9;
         }
 
         .category {
-          margin-top: 22px;
+          margin-top:
+            22px;
 
-          color: #1266e9;
+          color:
+            #1266e9;
 
-          font-size: 8px;
+          font-size:
+            8px;
 
-          font-weight: 900;
-
-          letter-spacing: 1px;
-
-          text-transform: uppercase;
+          font-weight:
+            900;
         }
 
         .card h2 {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
-          color: #263e57;
+          color:
+            #263e57;
 
-          font-size: 19px;
+          font-size:
+            19px;
         }
 
         .tag {
-          margin-top: 18px;
+          margin-top:
+            18px;
 
-          padding: 12px;
+          padding:
+            12px;
 
           border:
             1px solid #e1e8f0;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #fafcff;
+          background:
+            #fafcff;
         }
 
         .tag span,
         .tag strong {
-          display: block;
+          display:
+            block;
         }
 
         .tag span {
-          color: #9aa6b4;
+          color:
+            #9aa6b4;
 
-          font-size: 7px;
+          font-size:
+            7px;
 
-          font-weight: 900;
-
-          letter-spacing: 1px;
+          font-weight:
+            900;
         }
 
         .tag strong {
-          margin-top: 5px;
+          margin-top:
+            5px;
 
-          color: #536980;
+          color:
+            #536980;
 
-          font-size: 10px;
+          font-size:
+            10px;
 
           word-break:
             break-all;
         }
 
-        .actions {
-          margin-top: auto;
+        .scanBox {
+          margin-top:
+            12px;
 
-          padding-top: 20px;
+          padding:
+            13px;
 
-          display: grid;
+          border:
+            1px solid #d9e5f3;
+
+          border-radius:
+            11px;
+
+          background:
+            #f8fbff;
+        }
+
+        .scanHeader {
+          display:
+            flex;
+
+          align-items:
+            flex-start;
+
+          justify-content:
+            space-between;
+
+          gap:
+            10px;
+        }
+
+        .scanHeader span,
+        .locationData span {
+          display:
+            block;
+
+          color:
+            #97a3b1;
+
+          font-size:
+            6px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            .7px;
+        }
+
+        .scanHeader strong {
+          display:
+            block;
+
+          margin-top:
+            4px;
+
+          color:
+            #405974;
+
+          font-size:
+            8px;
+
+          line-height:
+            1.4;
+        }
+
+        .scanCount {
+          min-width:
+            48px;
+
+          text-align:
+            right;
+        }
+
+        .scanCount strong {
+          color:
+            #1266e9;
+
+          font-size:
+            15px;
+        }
+
+        .locationData {
+          margin-top:
+            12px;
+
+          display:
+            grid;
 
           grid-template-columns:
             1fr 1fr;
 
-          gap: 8px;
+          gap:
+            7px;
+        }
+
+        .locationData > div {
+          padding:
+            8px;
+
+          border:
+            1px solid #e0e8f1;
+
+          border-radius:
+            8px;
+
+          background:
+            #ffffff;
+        }
+
+        .locationData strong {
+          display:
+            block;
+
+          margin-top:
+            4px;
+
+          color:
+            #526b84;
+
+          font-size:
+            8px;
+        }
+
+        .accuracy {
+          margin-top:
+            8px;
+
+          color:
+            #8594a5;
+
+          font-size:
+            7px;
+        }
+
+        .mapButton {
+          min-height:
+            37px;
+
+          margin-top:
+            10px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius:
+            8px;
+
+          background:
+            #1266e9;
+
+          color:
+            #ffffff;
+
+          font-size:
+            8px;
+
+          font-weight:
+            900;
+
+          text-decoration:
+            none;
+        }
+
+        .noLocation {
+          margin-top:
+            10px;
+
+          color:
+            #8796a7;
+
+          font-size:
+            8px;
+
+          line-height:
+            1.45;
+        }
+
+        .actions {
+          margin-top:
+            auto;
+
+          padding-top:
+            18px;
+
+          display:
+            grid;
+
+          grid-template-columns:
+            1fr 1fr;
+
+          gap:
+            8px;
         }
 
         .actions a {
-          min-height: 40px;
+          min-height:
+            40px;
 
-          display: flex;
+          display:
+            flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          justify-content: center;
+          justify-content:
+            center;
 
-          border-radius: 9px;
+          border-radius:
+            9px;
 
-          font-size: 8px;
+          font-size:
+            8px;
 
-          font-weight: 900;
+          font-weight:
+            900;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         .viewButton {
-          background: #1266e9;
+          background:
+            #1266e9;
 
-          color: #ffffff;
+          color:
+            #ffffff;
         }
 
         .editButton {
           border:
             1px solid #ccdae9;
 
-          background: #ffffff;
+          background:
+            #ffffff;
 
-          color: #61758a;
+          color:
+            #61758a;
         }
 
         .emptyState {
           width:
-            calc(100% - 60px);
+            calc(
+              100% - 60px
+            );
 
-          max-width: 620px;
+          max-width:
+            620px;
 
           margin:
             60px auto 0;
 
-          padding: 50px 30px;
+          padding:
+            50px 30px;
 
-          text-align: center;
+          text-align:
+            center;
 
           border:
             1px solid #dce6f1;
 
-          border-radius: 18px;
+          border-radius:
+            18px;
 
-          background: #ffffff;
-
-          box-shadow:
-            0 15px 35px
-            rgba(
-              30,
-              70,
-              120,
-              .06
-            );
+          background:
+            #ffffff;
         }
 
         .emptyIcon {
-          width: 60px;
-          height: 60px;
+          width:
+            60px;
 
-          margin: auto;
+          height:
+            60px;
 
-          display: grid;
+          margin:
+            auto;
 
-          place-items: center;
+          display:
+            grid;
 
-          border-radius: 16px;
+          place-items:
+            center;
 
-          background: #edf4ff;
+          border-radius:
+            16px;
 
-          color: #1266e9;
+          background:
+            #edf4ff;
 
-          font-size: 12px;
+          color:
+            #1266e9;
 
-          font-weight: 950;
+          font-size:
+            12px;
+
+          font-weight:
+            950;
         }
 
         .emptyState h2 {
-          margin: 20px 0 0;
+          margin:
+            20px 0 0;
 
-          color: #263e57;
+          color:
+            #263e57;
 
-          font-size: 22px;
+          font-size:
+            22px;
         }
 
         .emptyState p {
-          max-width: 430px;
-
           margin:
             10px auto 0;
 
-          color: #7e8da0;
+          color:
+            #7e8da0;
 
-          font-size: 10px;
-
-          line-height: 1.6;
+          font-size:
+            10px;
         }
 
         .primaryButton {
-          min-height: 44px;
+          min-height:
+            44px;
 
-          margin-top: 22px;
+          margin-top:
+            22px;
 
-          padding: 0 17px;
+          padding:
+            0 17px;
 
-          display: inline-flex;
+          display:
+            inline-flex;
 
-          align-items: center;
+          align-items:
+            center;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #1266e9;
+          background:
+            #1266e9;
 
-          color: #ffffff;
+          color:
+            #ffffff;
 
-          font-size: 9px;
+          font-size:
+            9px;
 
-          font-weight: 900;
+          font-weight:
+            900;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         @media (
-          max-width: 900px
+          max-width:
+            900px
         ) {
           .grid {
             grid-template-columns:
               repeat(
                 2,
-                minmax(0, 1fr)
+                minmax(
+                  0,
+                  1fr
+                )
               );
           }
         }
 
         @media (
-          max-width: 600px
+          max-width:
+            600px
         ) {
           .header,
           .hero,
@@ -945,16 +1468,9 @@ export default function MyProfilesPage() {
               );
           }
 
-          .header {
-            min-height: 70px;
-          }
-
-          .hero {
-            margin-top: 42px;
-          }
-
           .hero h1 {
-            font-size: 31px;
+            font-size:
+              31px;
           }
 
           .grid {
@@ -963,17 +1479,11 @@ export default function MyProfilesPage() {
           }
 
           .summary {
-            align-items:
-              flex-start;
-
             flex-direction:
               column;
-          }
 
-          .addTop {
-            padding: 0 10px;
-
-            font-size: 7px;
+            align-items:
+              flex-start;
           }
         }
       `}</style>
