@@ -2,281 +2,250 @@
 
 import { useState } from "react";
 
-type Lang = "ka" | "en";
-type Menu = "buy" | "order" | "about" | "faq" | null;
+type Language = "ka" | "en";
+type OpenMenu = "shop" | "about" | "faq" | null;
 
-export default function HomePage() {
-  const [lang, setLang] = useState<Lang>("ka");
-  const [openMenu, setOpenMenu] = useState<Menu>(null);
+export default function HomeHeader() {
+  const [language, setLanguage] =
+    useState<Language>("ka");
 
-  const ka = lang === "ka";
+  const [openMenu, setOpenMenu] =
+    useState<OpenMenu>(null);
 
-  function toggleMenu(menu: Menu) {
-    setOpenMenu((current) => (current === menu ? null : menu));
+  const ka = language === "ka";
+
+  function toggleMenu(menu: OpenMenu) {
+    setOpenMenu((current) =>
+      current === menu ? null : menu
+    );
   }
 
   return (
-    <main className="page">
-      {/* HEADER */}
-      <header className="header">
+    <header className="header">
+      <div className="inner">
+        {/* BRAND */}
         <a href="/" className="brand">
           QR RETURN
         </a>
 
+        {/* MAIN MENU */}
         <nav className="nav">
-          <button onClick={() => toggleMenu("buy")}>
-            {ka ? "ონლაინ შეძენა" : "Online purchase"} <span>⌄</span>
+          <button
+            type="button"
+            className={
+              openMenu === "shop"
+                ? "menuButton active"
+                : "menuButton"
+            }
+            onClick={() =>
+              toggleMenu("shop")
+            }
+          >
+            {ka
+              ? "ონლაინ შეძენა"
+              : "Online purchase"}
+
+            <ChevronIcon />
           </button>
 
-          <button onClick={() => toggleMenu("order")}>
-            {ka ? "ონლაინ შეკვეთა" : "Online order"} <span>⌄</span>
+          <button
+            type="button"
+            className={
+              openMenu === "about"
+                ? "menuButton active"
+                : "menuButton"
+            }
+            onClick={() =>
+              toggleMenu("about")
+            }
+          >
+            {ka
+              ? "ჩვენს შესახებ"
+              : "About us"}
+
+            <ChevronIcon />
           </button>
 
-          <button onClick={() => toggleMenu("about")}>
-            {ka ? "ჩვენს შესახებ" : "About us"} <span>⌄</span>
-          </button>
+          <button
+            type="button"
+            className={
+              openMenu === "faq"
+                ? "menuButton active"
+                : "menuButton"
+            }
+            onClick={() =>
+              toggleMenu("faq")
+            }
+          >
+            {ka
+              ? "ხშირად დასმული კითხვები"
+              : "FAQ"}
 
-          <button onClick={() => toggleMenu("faq")}>
-            {ka ? "50 კითხვა" : "50 questions"} <span>⌄</span>
+            <ChevronIcon />
           </button>
         </nav>
 
-        <div className="headerActions">
-          <div className="language">
+        {/* RIGHT SIDE */}
+        <div className="actions">
+          <div className="languages">
             <button
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
+              type="button"
+              className={
+                ka ? "selected" : ""
+              }
+              onClick={() =>
+                setLanguage("ka")
+              }
             >
               GEO
             </button>
 
-            <span>/</span>
+            <span />
 
             <button
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
+              type="button"
+              className={
+                !ka ? "selected" : ""
+              }
+              onClick={() =>
+                setLanguage("en")
+              }
             >
               ENG
             </button>
           </div>
 
-          <a href="/login" className="login">
-            {ka ? "შესვლა" : "Sign in"}
+          <a
+            href="/login"
+            className="login"
+          >
+            {ka
+              ? "შესვლა"
+              : "Sign in"}
           </a>
 
-          <a href="/signup" className="create">
-            {ka ? "ანგარიშის შექმნა" : "Create account"}
+          <a
+            href="/signup"
+            className="signup"
+          >
+            {ka
+              ? "ანგარიშის შექმნა"
+              : "Create account"}
           </a>
 
-          <a href="/admin" className="admin">
+          <a
+            href="/admin"
+            className="admin"
+          >
             Admin Panel
           </a>
         </div>
-      </header>
+      </div>
 
-      {/* DROPDOWN */}
-      {openMenu && (
-        <section className="dropdown">
-          <button
-            className="close"
-            onClick={() => setOpenMenu(null)}
-            aria-label="Close"
-          >
-            ×
-          </button>
+      {/* SHOP DROPDOWN */}
+      {openMenu === "shop" && (
+        <div className="dropdown">
+          <div className="dropdownInner">
+            <div>
+              <span className="dropdownLabel">
+                QR RETURN STORE
+              </span>
 
-          {openMenu === "buy" && (
-            <>
-              <span className="dropLabel">QR RETURN</span>
-              <h2>{ka ? "ონლაინ შეძენა" : "Online purchase"}</h2>
-              <p>
-                {ka
-                  ? "აირჩიეთ თქვენთვის სასურველი QR პროდუქტი შინაური ცხოველის ან პირადი ნივთის დასაცავად."
-                  : "Choose a QR product for your pet or personal belongings."}
-              </p>
-              <a href="/store">
-                {ka ? "პროდუქტების ნახვა →" : "View products →"}
-              </a>
-            </>
-          )}
-
-          {openMenu === "order" && (
-            <>
-              <span className="dropLabel">QR RETURN</span>
-              <h2>{ka ? "ონლაინ შეკვეთა" : "Online order"}</h2>
-              <p>
-                {ka
-                  ? "შეუკვეთეთ QR RETURN პროდუქტი ონლაინ და დააკავშირეთ იგი თქვენს ანგარიშთან."
-                  : "Order your QR RETURN product online and connect it to your account."}
-              </p>
-              <a href="/store">
-                {ka ? "შეკვეთის დაწყება →" : "Start order →"}
-              </a>
-            </>
-          )}
-
-          {openMenu === "about" && (
-            <>
-              <span className="dropLabel">QR RETURN</span>
-              <h2>{ka ? "ჩვენს შესახებ" : "About us"}</h2>
-              <p>
-                {ka
-                  ? "QR RETURN ქმნის მარტივ კავშირს დაკარგული ნივთის ან შინაური ცხოველის მპოვნელსა და მფლობელს შორის."
-                  : "QR RETURN creates a simple connection between the finder of a lost item or pet and its owner."}
-              </p>
-            </>
-          )}
-
-          {openMenu === "faq" && (
-            <>
-              <span className="dropLabel">HELP CENTER</span>
               <h2>
                 {ka
-                  ? "50 კითხვა პროდუქტის შესახებ"
-                  : "50 product questions"}
+                  ? "აირჩიეთ თქვენთვის სასურველი QR პროდუქტი"
+                  : "Choose your QR RETURN product"}
               </h2>
+
               <p>
                 {ka
-                  ? "როგორ მუშაობს QR კოდი, რეგისტრაცია, ლოკაციის გაზიარება, უსაფრთხოება და სხვა მნიშვნელოვანი ინფორმაცია."
-                  : "Learn about QR codes, registration, location sharing, security and other important features."}
+                  ? "პროდუქტის არჩევის შემდეგ შეძლებთ დიზაინის, რაოდენობისა და შეძენის დეტალების ნახვას."
+                  : "Choose a product to view available designs, quantities and purchase details."}
               </p>
-            </>
-          )}
-        </section>
+            </div>
+
+            <a
+              href="/store"
+              className="dropdownAction"
+            >
+              {ka
+                ? "პროდუქტების ნახვა"
+                : "View products"}
+
+              <ArrowIcon />
+            </a>
+          </div>
+        </div>
       )}
 
-      {/* HERO */}
-      <section className="hero">
-        {/* EMERGENCY BRACELET */}
-        <div className="emergency">
-          <div className="emergencyTop">
-            <span className="medicalIcon">+</span>
-            <span className="smallTitle">
-              {ka ? "უსაფრთხოება ყოველდღე" : "Everyday safety"}
-            </span>
-          </div>
+      {/* ABOUT DROPDOWN */}
+      {openMenu === "about" && (
+        <div className="dropdown">
+          <div className="dropdownInner">
+            <div>
+              <span className="dropdownLabel">
+                QR RETURN
+              </span>
 
-          <h1>
-            Emergency
-            <br />
-            Bracelet
-          </h1>
+              <h2>
+                {ka
+                  ? "დაკარგულ ნივთსა და მფლობელს შორის მარტივი კავშირი."
+                  : "A simpler connection between a lost item and its owner."}
+              </h2>
 
-          <p>
-            {ka
-              ? "QR სამაჯური მნიშვნელოვანი ინფორმაციის სწრაფად სანახავად საგანგებო სიტუაციაში."
-              : "A QR bracelet for quick access to important information in an emergency."}
-          </p>
-
-          <div className="emergencyPoints">
-            <span>
-              <b>01</b>
-              {ka ? "ერთი სკანირება" : "One scan"}
-            </span>
-
-            <span>
-              <b>02</b>
-              {ka ? "სწრაფი ინფორმაცია" : "Quick information"}
-            </span>
-
-            <span>
-              <b>03</b>
-              {ka ? "მარტივი დაკავშირება" : "Easy contact"}
-            </span>
-          </div>
-
-          <a href="/emergency" className="learnMore">
-            {ka ? "გაიგეთ მეტი" : "Learn more"} →
-          </a>
-        </div>
-
-        {/* QR ORBIT */}
-        <div className="visual">
-          <div className="orbit">
-            <div className="orbitLine" />
-
-            <div className="product dog">
-              <DogIcon />
-            </div>
-
-            <div className="product cat">
-              <CatIcon />
-            </div>
-
-            <div className="product keys">
-              <KeyIcon />
-            </div>
-
-            <div className="product wallet">
-              <WalletIcon />
-            </div>
-
-            <div className="product suitcase">
-              <SuitcaseIcon />
-            </div>
-
-            <div className="product bag">
-              <BagIcon />
-            </div>
-
-            <div className="qr">
-              <QRIcon />
+              <p>
+                {ka
+                  ? "QR RETURN აერთიანებს QR პროფილებს, უსაფრთხო დაკავშირებას, Live Chat-ს, ლოკაციის გაზიარებას და Emergency სერვისებს ერთ სისტემაში."
+                  : "QR RETURN combines QR profiles, secure contact, Live Chat, location sharing and Emergency services in one system."}
+              </p>
             </div>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* SMALL INFO */}
-      <section className="bottomInfo">
-        <div>
-          <strong>{ka ? "ერთი QR." : "One QR."}</strong>
-          <span>
-            {ka
-              ? "მარტივი გზა მფლობელთან დასაკავშირებლად."
-              : "A simple way to connect with the owner."}
-          </span>
+      {/* FAQ DROPDOWN */}
+      {openMenu === "faq" && (
+        <div className="dropdown">
+          <div className="dropdownInner faqInner">
+            <div>
+              <span className="dropdownLabel">
+                FAQ
+              </span>
+
+              <h2>
+                {ka
+                  ? "ხშირად დასმული კითხვები"
+                  : "Frequently asked questions"}
+              </h2>
+
+              <p>
+                {ka
+                  ? "როგორ მუშაობს QR კოდი? სჭირდება თუ არა მპოვნელს რეგისტრაცია? როგორ ხდება ლოკაციის გაზიარება? რა ინფორმაცია ჩანს QR-ის სკანირებისას?"
+                  : "How does the QR code work? Does a finder need an account? How does location sharing work? What information is visible after a scan?"}
+              </p>
+            </div>
+
+            <a
+              href="/support"
+              className="textAction"
+            >
+              {ka
+                ? "ყველა კითხვის ნახვა →"
+                : "View all questions →"}
+            </a>
+          </div>
         </div>
-
-        <div>
-          <strong>{ka ? "თქვენ აკონტროლებთ." : "You stay in control."}</strong>
-          <span>
-            {ka
-              ? "თქვენ ირჩევთ რომელი ინფორმაცია გამოჩნდება."
-              : "You choose what information is visible."}
-          </span>
-        </div>
-
-        <div>
-          <strong>{ka ? "მარტივი სკანირება." : "Simple scanning."}</strong>
-          <span>
-            {ka
-              ? "მპოვნელს აპლიკაციის ჩამოტვირთვა არ სჭირდება."
-              : "The finder does not need to download an app."}
-          </span>
-        </div>
-      </section>
-
-      {/* LIVE CHAT */}
-      <a href="/support" className="liveChat">
-        <span className="chatDot" />
-        Live Chat
-      </a>
+      )}
 
       <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
+        .header {
+          width: 100%;
+          position: relative;
+          z-index: 1000;
 
-        .page {
-          min-height: 100vh;
+          background: #0d47b5;
           color: #ffffff;
-          background:
-            radial-gradient(
-              circle at 78% 48%,
-              rgba(64, 132, 255, 0.22),
-              transparent 28%
-            ),
-            linear-gradient(135deg, #071d55 0%, #0b43ad 55%, #0862dc 100%);
+
           font-family:
             Inter,
             -apple-system,
@@ -286,17 +255,20 @@ export default function HomePage() {
             sans-serif;
         }
 
-        /* HEADER */
-
-        .header {
+        .inner {
+          width: calc(100% - 56px);
+          max-width: 1380px;
           min-height: 88px;
-          padding: 0 34px;
+
+          margin: 0 auto;
 
           display: flex;
           align-items: center;
 
-          border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+          gap: 38px;
         }
+
+        /* BRAND */
 
         .brand {
           flex: 0 0 auto;
@@ -304,84 +276,141 @@ export default function HomePage() {
           color: #ffffff;
           text-decoration: none;
 
-          font-size: 22px;
-          font-weight: 900;
-          letter-spacing: -0.5px;
+          font-size: 23px;
+          font-weight: 850;
+
+          letter-spacing: -0.7px;
         }
+
+        /* NAVIGATION */
 
         .nav {
-          margin-left: 55px;
-
           display: flex;
           align-items: center;
-          gap: 7px;
+
+          gap: 5px;
         }
 
-        .nav button {
-          padding: 12px 10px;
+        .menuButton {
+          min-height: 43px;
+          padding: 0 12px;
+
+          display: inline-flex;
+          align-items: center;
+
+          gap: 7px;
 
           border: 0;
+          border-radius: 9px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.82
+            );
+
           background: transparent;
-          color: rgba(255, 255, 255, 0.82);
 
           font-family: inherit;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 650;
 
           cursor: pointer;
-          white-space: nowrap;
+
+          transition:
+            color 160ms ease,
+            background 160ms ease;
         }
 
-        .nav button:hover {
+        .menuButton:hover,
+        .menuButton.active {
           color: #ffffff;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
         }
 
-        .nav span {
-          margin-left: 4px;
-          opacity: 0.6;
+        .menuButton
+          :global(svg) {
+          width: 13px;
+          height: 13px;
         }
 
-        .headerActions {
+        /* RIGHT SIDE */
+
+        .actions {
           margin-left: auto;
 
           display: flex;
           align-items: center;
-          gap: 11px;
+
+          gap: 9px;
         }
 
-        .language {
+        /* LANGUAGE */
+
+        .languages {
+          margin-right: 7px;
+
           display: flex;
           align-items: center;
-          gap: 7px;
 
-          margin-right: 6px;
+          gap: 8px;
         }
 
-        .language button {
+        .languages button {
+          padding: 5px 1px;
+
           border: 0;
-          padding: 4px 0;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.58
+            );
 
           background: transparent;
-          color: rgba(255, 255, 255, 0.55);
 
-          font-size: 13px;
-          font-weight: 750;
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 700;
 
           cursor: pointer;
         }
 
-        .language button.active {
+        .languages button.selected {
           color: #ffffff;
         }
 
-        .language span {
-          color: rgba(255, 255, 255, 0.3);
+        .languages > span {
+          width: 1px;
+          height: 16px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.28
+            );
         }
 
+        /* ACTION BUTTONS */
+
         .login,
-        .create,
+        .signup,
         .admin {
-          min-height: 43px;
+          min-height: 44px;
+
           padding: 0 15px;
 
           display: inline-flex;
@@ -391,581 +420,309 @@ export default function HomePage() {
           border-radius: 10px;
 
           text-decoration: none;
-          font-size: 13px;
-          font-weight: 750;
+
+          font-size: 14px;
+          font-weight: 700;
 
           white-space: nowrap;
         }
 
         .login {
           color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.25);
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.25
+            );
         }
 
-        .create {
-          color: #0a3b9d;
+        .signup {
+          color: #0d47b5;
           background: #ffffff;
+
+          box-shadow:
+            0 7px 20px
+            rgba(
+              0,
+              28,
+              90,
+              0.18
+            );
         }
 
         .admin {
           color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.45);
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.46
+            );
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.07
+            );
         }
 
         /* DROPDOWN */
 
         .dropdown {
-          position: relative;
-          z-index: 20;
+          width: 100%;
 
-          width: calc(100% - 68px);
-          max-width: 1100px;
+          position: absolute;
+          top: 88px;
+          left: 0;
 
-          margin: 12px auto 0;
-          padding: 26px 30px;
+          color: #172033;
+          background: #ffffff;
 
-          border: 1px solid rgba(255, 255, 255, 0.22);
-          border-radius: 18px;
+          border-top:
+            1px solid #e6eaf0;
 
-          background: rgba(255, 255, 255, 0.97);
-          color: #10234c;
-
-          box-shadow: 0 20px 60px rgba(0, 20, 70, 0.22);
+          box-shadow:
+            0 24px 55px
+            rgba(
+              12,
+              34,
+              75,
+              0.14
+            );
         }
 
-        .dropLabel {
-          color: #1768e5;
-          font-size: 11px;
-          font-weight: 850;
-          letter-spacing: 1.4px;
+        .dropdownInner {
+          width:
+            calc(
+              100% - 56px
+            );
+
+          max-width: 1380px;
+
+          margin: 0 auto;
+          padding: 31px 0 34px;
+
+          display: flex;
+
+          align-items: flex-end;
+          justify-content:
+            space-between;
+
+          gap: 40px;
+        }
+
+        .dropdownInner > div {
+          max-width: 780px;
+        }
+
+        .dropdownLabel {
+          color: #2563eb;
+
+          font-size: 12px;
+          font-weight: 800;
+
+          letter-spacing: 1.2px;
         }
 
         .dropdown h2 {
-          margin: 8px 0 7px;
-          font-size: 22px;
+          margin: 8px 0 0;
+
+          color: #172033;
+
+          font-size: 25px;
+          line-height: 1.25;
+
+          letter-spacing: -0.7px;
         }
 
         .dropdown p {
-          max-width: 720px;
-          margin: 0;
+          max-width: 760px;
 
-          color: #64718a;
-          font-size: 14px;
+          margin: 10px 0 0;
+
+          color: #667085;
+
+          font-size: 15px;
           line-height: 1.65;
         }
 
-        .dropdown a {
-          display: inline-block;
-          margin-top: 14px;
+        .dropdownAction {
+          min-height: 46px;
 
-          color: #1768e5;
-          text-decoration: none;
+          padding: 0 17px;
 
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .close {
-          position: absolute;
-          top: 17px;
-          right: 20px;
-
-          border: 0;
-          background: transparent;
-
-          color: #73809a;
-          font-size: 24px;
-
-          cursor: pointer;
-        }
-
-        /* HERO */
-
-        .hero {
-          width: calc(100% - 68px);
-          max-width: 1320px;
-          min-height: 620px;
-
-          margin: 0 auto;
-          padding: 60px 0 50px;
-
-          display: grid;
-          grid-template-columns: 0.82fr 1.18fr;
-          align-items: center;
-          gap: 50px;
-        }
-
-        /* EMERGENCY */
-
-        .emergency {
-          max-width: 490px;
-        }
-
-        .emergencyTop {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-
-          margin-bottom: 20px;
-        }
-
-        .medicalIcon {
-          width: 31px;
-          height: 31px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-          background: #ffffff;
-
-          color: #1559c7;
-          font-size: 22px;
-          font-weight: 500;
-        }
-
-        .smallTitle {
-          color: rgba(255, 255, 255, 0.7);
-
-          font-size: 12px;
-          font-weight: 750;
-          letter-spacing: 0.6px;
-          text-transform: uppercase;
-        }
-
-        .emergency h1 {
-          margin: 0;
-
-          color: #ffffff;
-
-          font-size: clamp(48px, 5vw, 76px);
-          line-height: 0.94;
-          letter-spacing: -3px;
-        }
-
-        .emergency p {
-          max-width: 440px;
-
-          margin: 25px 0 0;
-
-          color: rgba(255, 255, 255, 0.76);
-
-          font-size: 16px;
-          line-height: 1.7;
-        }
-
-        .emergencyPoints {
-          margin-top: 30px;
-
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .emergencyPoints span {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-
-          color: rgba(255, 255, 255, 0.86);
-
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .emergencyPoints b {
-          width: 30px;
-
-          color: rgba(255, 255, 255, 0.42);
-
-          font-size: 11px;
-          letter-spacing: 1px;
-        }
-
-        .learnMore {
           display: inline-flex;
 
-          margin-top: 32px;
-          padding: 13px 19px;
+          align-items: center;
+          justify-content: center;
 
-          border: 1px solid rgba(255, 255, 255, 0.38);
-          border-radius: 11px;
+          gap: 9px;
+
+          flex-shrink: 0;
+
+          border-radius: 10px;
 
           color: #ffffff;
+          background: #2563eb;
+
           text-decoration: none;
 
           font-size: 14px;
           font-weight: 750;
         }
 
-        /* QR VISUAL */
-
-        .visual {
-          min-height: 550px;
-
-          display: grid;
-          place-items: center;
+        .dropdownAction
+          :global(svg) {
+          width: 15px;
+          height: 15px;
         }
 
-        .orbit {
-          position: relative;
+        .textAction {
+          flex-shrink: 0;
 
-          width: 540px;
-          height: 540px;
-        }
-
-        .orbitLine {
-          position: absolute;
-          inset: 56px;
-
-          border: 1px dashed rgba(255, 255, 255, 0.35);
-          border-radius: 50%;
-        }
-
-        .qr {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-
-          width: 185px;
-          height: 185px;
-
-          transform: translate(-50%, -50%);
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 27px;
-
-          background: #ffffff;
-
-          color: #0c3b9e;
-
-          box-shadow: 0 22px 55px rgba(0, 17, 65, 0.25);
-        }
-
-        .product {
-          position: absolute;
-
-          width: 88px;
-          height: 88px;
-
-          display: grid;
-          place-items: center;
-
-          border: 1px solid rgba(255, 255, 255, 0.32);
-          border-radius: 50%;
-
-          background: rgba(255, 255, 255, 0.11);
-          color: #ffffff;
-
-          backdrop-filter: blur(8px);
-        }
-
-        .product :global(svg) {
-          width: 40px;
-          height: 40px;
-        }
-
-        .dog {
-          top: 5px;
-          left: 226px;
-        }
-
-        .cat {
-          top: 103px;
-          left: 30px;
-        }
-
-        .keys {
-          top: 103px;
-          right: 30px;
-        }
-
-        .wallet {
-          bottom: 91px;
-          left: 32px;
-        }
-
-        .suitcase {
-          right: 32px;
-          bottom: 91px;
-        }
-
-        .bag {
-          bottom: 0;
-          left: 226px;
-        }
-
-        /* INFO */
-
-        .bottomInfo {
-          width: calc(100% - 68px);
-          max-width: 1320px;
-
-          margin: 0 auto;
-          padding: 26px 0 40px;
-
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-
-          border-top: 1px solid rgba(255, 255, 255, 0.16);
-        }
-
-        .bottomInfo div {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .bottomInfo strong {
-          font-size: 14px;
-        }
-
-        .bottomInfo span {
-          color: rgba(255, 255, 255, 0.6);
-
-          font-size: 12px;
-          line-height: 1.5;
-        }
-
-        /* CHAT */
-
-        .liveChat {
-          position: fixed;
-          right: 24px;
-          bottom: 22px;
-
-          z-index: 50;
-
-          min-height: 49px;
-          padding: 0 19px;
-
-          display: flex;
-          align-items: center;
-          gap: 9px;
-
-          border: 1px solid rgba(255, 255, 255, 0.35);
-          border-radius: 999px;
-
-          background: #ffffff;
-          color: #0b43ad;
+          color: #2563eb;
 
           text-decoration: none;
 
           font-size: 14px;
-          font-weight: 800;
-
-          box-shadow: 0 14px 35px rgba(0, 20, 70, 0.25);
+          font-weight: 750;
         }
 
-        .chatDot {
-          width: 9px;
-          height: 9px;
+        /* TABLET */
 
-          border-radius: 50%;
-          background: #24b36b;
+        @media (
+          max-width: 1080px
+        ) {
+          .inner {
+            gap: 20px;
+          }
+
+          .nav {
+            gap: 0;
+          }
+
+          .menuButton {
+            padding: 0 8px;
+
+            font-size: 13px;
+          }
+
+          .admin {
+            display: none;
+          }
         }
 
-        @media (max-width: 1100px) {
+        /* MOBILE */
+
+        @media (
+          max-width: 780px
+        ) {
+          .inner {
+            width:
+              calc(
+                100% - 28px
+              );
+
+            min-height: 76px;
+
+            gap: 15px;
+          }
+
+          .brand {
+            font-size: 19px;
+          }
+
           .nav {
             display: none;
           }
 
-          .hero {
-            grid-template-columns: 1fr;
-          }
-
-          .emergency {
-            max-width: 650px;
-          }
-
-          .visual {
-            min-height: 570px;
-          }
-        }
-
-        @media (max-width: 700px) {
-          .header {
-            min-height: 76px;
-            padding: 0 16px;
-          }
-
-          .brand {
-            font-size: 18px;
-          }
-
-          .language,
-          .login,
-          .admin {
+          .languages {
             display: none;
           }
 
-          .create {
-            min-height: 40px;
+          .login {
+            display: none;
+          }
+
+          .signup {
+            min-height: 41px;
+
             padding: 0 12px;
 
-            font-size: 12px;
-          }
-
-          .hero {
-            width: calc(100% - 32px);
-
-            padding-top: 45px;
-            gap: 25px;
-          }
-
-          .emergency h1 {
-            font-size: 48px;
-            letter-spacing: -2px;
-          }
-
-          .visual {
-            min-height: 390px;
-          }
-
-          .orbit {
-            width: 360px;
-            height: 360px;
-
-            transform: scale(0.95);
-          }
-
-          .orbitLine {
-            inset: 44px;
-          }
-
-          .qr {
-            width: 130px;
-            height: 130px;
-          }
-
-          .product {
-            width: 67px;
-            height: 67px;
-          }
-
-          .product :global(svg) {
-            width: 31px;
-            height: 31px;
-          }
-
-          .dog {
-            top: 0;
-            left: 147px;
-          }
-
-          .cat {
-            top: 68px;
-            left: 9px;
-          }
-
-          .keys {
-            top: 68px;
-            right: 9px;
-          }
-
-          .wallet {
-            bottom: 64px;
-            left: 9px;
-          }
-
-          .suitcase {
-            bottom: 64px;
-            right: 9px;
-          }
-
-          .bag {
-            bottom: 0;
-            left: 147px;
-          }
-
-          .bottomInfo {
-            width: calc(100% - 32px);
-            grid-template-columns: 1fr;
+            font-size: 13px;
           }
 
           .dropdown {
-            width: calc(100% - 32px);
+            top: 76px;
+          }
+
+          .dropdownInner {
+            width:
+              calc(
+                100% - 32px
+              );
+
+            padding: 25px 0;
+
+            align-items:
+              flex-start;
+
+            flex-direction: column;
+
+            gap: 18px;
+          }
+
+          .dropdown h2 {
+            font-size: 21px;
+          }
+
+          .dropdown p {
+            font-size: 14px;
           }
         }
       `}</style>
-    </main>
+    </header>
   );
 }
 
-/* ICONS */
-
-function QRIcon() {
+function ChevronIcon() {
   return (
-    <svg width="125" height="125" viewBox="0 0 100 100" fill="none">
-      <rect x="6" y="6" width="27" height="27" stroke="currentColor" strokeWidth="7" />
-      <rect x="67" y="6" width="27" height="27" stroke="currentColor" strokeWidth="7" />
-      <rect x="6" y="67" width="27" height="27" stroke="currentColor" strokeWidth="7" />
-
-      <rect x="14" y="14" width="11" height="11" fill="currentColor" />
-      <rect x="75" y="14" width="11" height="11" fill="currentColor" />
-      <rect x="14" y="75" width="11" height="11" fill="currentColor" />
-
-      <path
-        d="M45 8h10v10H45zM43 27h12v10H43zM61 42h12v11H61zM42 45h10v10H42zM78 44h12v12H78zM45 63h12v10H45zM62 61h10v12H62zM78 67h15v10H78zM43 81h12v12H43zM62 80h10v13H62zM82 84h11v9H82z"
-        fill="currentColor"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
     </svg>
   );
 }
 
-function DogIcon() {
+function ArrowIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="M7 9 4 5v6c0 5 3 9 8 9s8-4 8-9V5l-3 4" />
-      <path d="M8 8c1-2 7-2 8 0M9 14h.01M15 14h.01M10 17c1.3 1 2.7 1 4 0" />
-    </svg>
-  );
-}
-
-function CatIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="m5 9 1-5 4 3h4l4-3 1 5v5c0 4-3 7-7 7s-7-3-7-7Z" />
-      <path d="M9 13h.01M15 13h.01M10 17h4M4 15H1M20 15h3" />
-    </svg>
-  );
-}
-
-function KeyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-      <circle cx="8" cy="12" r="4" />
-      <path d="M12 12h9M17 12v3M20 12v2" />
-    </svg>
-  );
-}
-
-function WalletIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-      <rect x="3" y="6" width="18" height="13" rx="3" />
-      <path d="M3 9h18M15 13h6M17 15h.01" />
-    </svg>
-  );
-}
-
-function SuitcaseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-      <rect x="5" y="6" width="14" height="15" rx="2" />
-      <path d="M9 6V3h6v3M9 10v7M15 10v7M8 21v2M16 21v2" />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-      <path d="M5 8h14l1 13H4Z" />
-      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
     </svg>
   );
 }
