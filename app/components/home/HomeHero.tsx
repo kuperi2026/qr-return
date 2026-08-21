@@ -1,5 +1,7 @@
 "use client";
 
+import EmergencySection from "./EmergencySection";
+
 export default function HomeHero({
   ka,
 }: {
@@ -26,75 +28,7 @@ export default function HomeHero({
           alignItems: "center",
         }}
       >
-        <div
-          style={{
-            maxWidth: "640px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "9px",
-              fontWeight: 900,
-              letterSpacing: "1.5px",
-              color: "rgba(255,255,255,.72)",
-            }}
-          >
-            QR RETURN · EMERGENCY
-          </span>
-
-          <h1
-            style={{
-              maxWidth: "610px",
-              margin: "14px 0 0",
-              fontSize: "clamp(35px, 3.5vw, 49px)",
-              lineHeight: 1.08,
-              letterSpacing: "-1.7px",
-              color: "#ffffff",
-            }}
-          >
-            {ka
-              ? "გადაუდებელ სიტუაციაში საჭირო ინფორმაცია — ერთი სკანირებით."
-              : "Essential information in an emergency — one scan away."}
-          </h1>
-
-          <p
-            style={{
-              maxWidth: "590px",
-              margin: "18px 0 0",
-              color: "rgba(255,255,255,.82)",
-              fontSize: "13px",
-              lineHeight: 1.72,
-            }}
-          >
-            {ka
-              ? "Emergency პროფილი სწრაფად აჩვენებს თქვენ მიერ წინასწარ შერჩეულ მნიშვნელოვან ინფორმაციას და საგანგებო საკონტაქტო პირებს, რათა დახმარების აღმოჩენა უფრო სწრაფად და ორგანიზებულად მოხდეს."
-              : "An Emergency profile provides quick access to the essential information and emergency contacts you have chosen in advance."}
-          </p>
-
-          <div
-            style={{
-              marginTop: "30px",
-              minHeight: "205px",
-              border: "1px solid rgba(255,255,255,.18)",
-              borderRadius: "14px",
-              background: "rgba(255,255,255,.1)",
-              display: "grid",
-              placeItems: "center",
-              padding: "24px",
-              textAlign: "center",
-            }}
-          >
-            <strong
-              style={{
-                fontSize: "16px",
-              }}
-            >
-              {ka
-                ? "Emergency ნაწილი შემდეგ ეტაპზე აქ ჩაიტვირთება."
-                : "The Emergency section will load here next."}
-            </strong>
-          </div>
-        </div>
+        <EmergencySection ka={ka} />
 
         <div
           style={{
