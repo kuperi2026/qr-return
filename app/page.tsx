@@ -1,540 +1,59 @@
 "use client";
 
-type Props = {
-  language?: "ka" | "en";
-  isLoggedIn?: boolean;
-  isAdmin?: boolean;
-  onLanguageChange?: (
-    language: "ka" | "en"
-  ) => void;
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type Lang = "ka" | "en";
+
+const copy = {
+  ka: {
+    navHow: "როგორ მუშაობს", navProducts: "პროფილები", navEmergency: "Emergency", signIn: "შესვლა", create: "ანგარიშის შექმნა", account: "ჩემი ანგარიში", admin: "Admin Panel",
+    eyebrow: "ერთი სკანი. პირდაპირი კავშირი.", title: "დაკარგული ნივთი არ უნდა დარჩეს დაკარგული.", subtitle: "QR RETURN გაკავშირებს მპოვნელთან — უსაფრთხოდ, სწრაფად და აპის ჩამოტვირთვის გარეშე.", primary: "დაიცავი შენი ნივთი", secondary: "როგორ მუშაობს",
+    scan: "იპოვეს", scanText: "მპოვნელი ხედავს შენს QR კოდს.", connect: "დაგიკავშირდნენ", connectText: "იწყება Live Chat პირადი ნომრის გამოჩენის გარეშე.", return: "დაბრუნდა", returnText: "კავშირის შემდეგ დაბრუნება მარტივდება.",
+    pathsEyebrow: "ორი რამ, ერთი ანგარიში", pathsTitle: "აირჩიე, რის დაცვას იწყებ.", lostTitle: "Lost & Found", lostText: "ძაღლი, კატა, გასაღებები, ჩანთა ან ნებისმიერი ნივთი — შექმენი პროფილი და QR მიაბი.", lostButton: "პროდუქტის დამატება", emergencyTitle: "Emergency Bracelet", emergencyText: "ადამიანებისთვის შექმნილი ცალკე უსაფრთხოების პროფილი, საგანგებო კონტაქტებითა და ლოკაციის გაზიარებით.", emergencyButton: "Emergency-ის დამატება",
+    featureEyebrow: "შენ აკონტროლებ", featureTitle: "მპოვნელისთვის მარტივი. შენთვის — დაცული.", f1: "Live Chat", f1t: "პირდაპირი კავშირი მპოვნელსა და მფლობელს შორის.", f2: "Privacy Control", f2t: "შენ წყვეტ, რა ინფორმაცია გამოჩნდება QR-ის სკანირებისას.", f3: "Lost Mode", f3t: "ჩართე დაკარგვის რეჟიმი ერთი მოქმედებით.", f4: "ერთი ანგარიში", f4t: "მართე ნივთები, ცხოველები და Emergency პროფილები ერთი სივრციდან.",
+    ctaTitle: "დაიწყე შენი პირველი QR პროფილით.", ctaText: "შექმენი ანგარიში და ყველაფერი ერთ dashboard-ში მოაწესრიგე.", ctaButton: "დაიწყე ახლა", footerText: "დაკარგული ნივთებისა და ადამიანების უსაფრთხოდ დასაკავშირებელი პლატფორმა.", rights: "ყველა უფლება დაცულია."
+  },
+  en: {
+    navHow: "How it works", navProducts: "Profiles", navEmergency: "Emergency", signIn: "Sign in", create: "Create account", account: "My account", admin: "Admin Panel", eyebrow: "One scan. Direct connection.", title: "Lost should not mean gone forever.", subtitle: "QR RETURN connects you with the finder — safely, quickly, without an app download.", primary: "Protect your item", secondary: "How it works", scan: "Found", scanText: "The finder sees your QR code.", connect: "Connected", connectText: "A private Live Chat starts instantly.", return: "Returned", returnText: "Getting it back becomes simple.", pathsEyebrow: "Two paths, one account", pathsTitle: "Choose what you want to protect.", lostTitle: "Lost & Found", lostText: "Dogs, cats, keys, bags or anything you care about — create a profile and attach a QR code.", lostButton: "Add a profile", emergencyTitle: "Emergency Bracelet", emergencyText: "A separate safety profile for people, with emergency contacts and location sharing.", emergencyButton: "Add Emergency", featureEyebrow: "You stay in control", featureTitle: "Simple for the finder. Private for you.", f1: "Live Chat", f1t: "A direct line between finder and owner.", f2: "Privacy Control", f2t: "You decide what appears after a scan.", f3: "Lost Mode", f3t: "Turn lost mode on in one action.", f4: "One account", f4t: "Manage items, pets and Emergency profiles in one place.", ctaTitle: "Start with your first QR profile.", ctaText: "Create an account and manage everything from one dashboard.", ctaButton: "Get started", footerText: "A safer way to reconnect lost things and people.", rights: "All rights reserved." }
 };
 
-export default function HomeHeader({
-  language = "ka",
-  isLoggedIn = false,
-  isAdmin = false,
-  onLanguageChange,
-}: Props) {
-  const ka = language === "ka";
+export default function HomePage() {
+  const [lang, setLang] = useState<Lang>("ka");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const t = copy[lang];
+
+  useEffect(() => {
+    async function loadSession() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setLoggedIn(Boolean(user));
+      if (user) {
+        const { data } = await supabase.from("owner_admins").select("id").eq("owner_id", user.id).eq("active", true).maybeSingle();
+        setIsAdmin(Boolean(data));
+      }
+    }
+    void loadSession();
+  }, []);
 
   return (
-    <header className="header">
-      <div className="headerInner">
-        <a
-          href="/"
-          className="brand"
-          aria-label="QR RETURN"
-        >
-          <span className="brandMark">
-            <QRIcon />
-          </span>
+    <main className="page">
+      <header className="header"><div className="headerInner"><a href="/" className="brand"><span className="brandMark"><span /> <span /> <span /></span><span><b>QR RETURN</b><small>LOST &amp; FOUND / EMERGENCY</small></span></a><nav className="nav"><a href="#how">{t.navHow}</a><a href="#paths">{t.navProducts}</a><a href="#emergency">{t.navEmergency}</a></nav><div className="actions"><div className="language"><button className={lang === "ka" ? "active" : ""} onClick={() => setLang("ka")}>GEO</button><button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")}>ENG</button></div>{isAdmin && <a href="/admin" className="admin">{t.admin}</a>}{loggedIn ? <a href="/account" className="account">{t.account} <span>↗</span></a> : <><a href="/login" className="signin">{t.signIn}</a><a href="/signup" className="button small">{t.create} <span>↗</span></a></>}</div></div></header>
 
-          <strong className="brandName">
-            QR RETURN
-          </strong>
-        </a>
+      <section className="hero"><div className="heroInner"><div className="heroCopy"><div className="eyebrow"><i /> {t.eyebrow}</div><h1>{t.title}</h1><p>{t.subtitle}</p><div className="heroActions"><a href={loggedIn ? "/account" : "/signup"} className="button">{t.primary} <span>↗</span></a><a href="#how" className="textButton">{t.secondary} <span>↓</span></a></div><div className="proof"><div className="avatars"><span>🐶</span><span>🔑</span><span>❤️</span></div><div><b>QR RETURN</b><small>{lang === "ka" ? "ერთი ანგარიში. ყველა მნიშვნელოვანი რამ." : "One account. Everything that matters."}</small></div></div></div><div className="heroVisual"><div className="glow" /><div className="qrCard"><div className="cardTop"><span className="status"><i /> {lang === "ka" ? "აქტიური პროფილი" : "Active profile"}</span><span className="dots">•••</span></div><div className="petPhoto">🐕<div className="scanRing" /></div><div className="profileName">Milo <span>✓</span></div><div className="profileMeta">{lang === "ka" ? "ძაღლი · Lost & Found" : "Dog · Lost & Found"}</div><div className="scanLine"><span className="miniQr">▦</span><span>{lang === "ka" ? "დაასკანერე დასაკავშირებლად" : "Scan to connect"}</span><b>↗</b></div></div><div className="floating chatFloat"><span>●</span><div><b>Live Chat</b><small>{lang === "ka" ? "ახალი შეტყობინება" : "New message"}</small></div><em>1</em></div><div className="floating modeFloat"><span>✓</span><div><b>Lost Mode</b><small>{lang === "ka" ? "ჩართულია" : "Active"}</small></div></div></div></div></section>
 
-        <div className="actions">
-          {isAdmin && (
-            <a
-              href="/admin"
-              className="adminButton"
-            >
-              Admin Panel
-            </a>
-          )}
+      <section id="paths" className="paths section"><div className="sectionIntro"><div className="eyebrow">{t.pathsEyebrow}</div><h2>{t.pathsTitle}</h2></div><div className="pathGrid"><a href={loggedIn ? "/account" : "/signup"} className="pathCard lost"><div className="pathIcon">⌁</div><div className="pathNumber">01</div><h3>{t.lostTitle}</h3><p>{t.lostText}</p><span className="pathLink">{t.lostButton} ↗</span><div className="pathDecor">🐕　🔑　🎒</div></a><a id="emergency" href={loggedIn ? "/account" : "/signup"} className="pathCard emergency"><div className="pathIcon">✚</div><div className="pathNumber">02</div><h3>{t.emergencyTitle}</h3><p>{t.emergencyText}</p><span className="pathLink">{t.emergencyButton} ↗</span><div className="pathDecor">✚　♡　◉</div></a></div></section>
 
-          <div
-            className="languageSwitcher"
-            aria-label="Language"
-          >
-            <button
-              type="button"
-              className={
-                ka ? "active" : ""
-              }
-              onClick={() =>
-                onLanguageChange?.("ka")
-              }
-            >
-              GEO
-            </button>
+      <section id="how" className="steps section"><div className="sectionIntro"><div className="eyebrow">{lang === "ka" ? "როგორ მუშაობს" : "HOW IT WORKS"}</div><h2>{lang === "ka" ? "ოთხი ნაბიჯი დაბრუნებამდე." : "Four steps back to you."}</h2></div><div className="stepGrid"><div className="step"><b>01</b><span>⌁</span><h3>{t.scan}</h3><p>{t.scanText}</p></div><div className="step"><b>02</b><span>◌</span><h3>{lang === "ka" ? "დაასკანერეს" : "Scanned"}</h3><p>{lang === "ka" ? "აპის ჩამოტვირთვა საჭირო არ არის." : "No app download required."}</p></div><div className="step"><b>03</b><span>↗</span><h3>{t.connect}</h3><p>{t.connectText}</p></div><div className="step"><b>04</b><span>✓</span><h3>{t.return}</h3><p>{t.returnText}</p></div></div></section>
 
-            <button
-              type="button"
-              className={
-                !ka ? "active" : ""
-              }
-              onClick={() =>
-                onLanguageChange?.("en")
-              }
-            >
-              ENG
-            </button>
-          </div>
+      <section className="features section"><div className="featureHeading"><div className="eyebrow">{t.featureEyebrow}</div><h2>{t.featureTitle}</h2></div><div className="featureGrid"><Feature icon="◌" title={t.f1} text={t.f1t} /><Feature icon="⌁" title={t.f2} text={t.f2t} /><Feature icon="◉" title={t.f3} text={t.f3t} /><Feature icon="▦" title={t.f4} text={t.f4t} /></div></section>
 
-          {isLoggedIn ? (
-            <a
-              href="/account"
-              className="primaryButton"
-            >
-              {ka
-                ? "ჩემი ანგარიში"
-                : "My Account"}
+      <section className="cta"><div><div className="eyebrow">QR RETURN</div><h2>{t.ctaTitle}</h2><p>{t.ctaText}</p></div><a href={loggedIn ? "/account" : "/signup"} className="button light">{t.ctaButton} <span>↗</span></a></section>
+      <footer className="footer"><div className="footerBrand"><span className="brandMark"><span /> <span /> <span /></span><div><b>QR RETURN</b><p>{t.footerText}</p></div></div><div className="footerLinks"><a href="/login">{t.signIn}</a><a href="/signup">{t.create}</a><a href="/store">{lang === "ka" ? "მაღაზია" : "Store"}</a><a href="/support">{lang === "ka" ? "დახმარება" : "Support"}</a></div><div className="copyright">© 2026 QR RETURN · {t.rights}</div></footer>
 
-              <ArrowIcon />
-            </a>
-          ) : (
-            <>
-              <a
-                href="/login"
-                className="loginButton"
-              >
-                {ka
-                  ? "შესვლა"
-                  : "Sign in"}
-              </a>
-
-              <a
-                href="/signup"
-                className="primaryButton"
-              >
-                {ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create account"}
-
-                <ArrowIcon />
-              </a>
-            </>
-          )}
-        </div>
-      </div>
-
-      <style jsx>{`
-        .header {
-          width: 100%;
-          position: relative;
-          z-index: 100;
-
-          background:
-            rgba(
-              250,
-              252,
-              255,
-              0.94
-            );
-
-          border-bottom:
-            1px solid
-            rgba(
-              40,
-              72,
-              120,
-              0.1
-            );
-
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-        }
-
-        .headerInner {
-          width: calc(100% - 64px);
-          max-width: 1320px;
-          min-height: 86px;
-
-          margin: 0 auto;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          gap: 28px;
-        }
-
-        .brand {
-          display: inline-flex;
-          align-items: center;
-          gap: 13px;
-
-          flex-shrink: 0;
-
-          text-decoration: none;
-        }
-
-        .brandMark {
-          width: 46px;
-          height: 46px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 15px;
-
-          color: white;
-
-          background:
-            linear-gradient(
-              135deg,
-              #3568e8 0%,
-              #5967e9 52%,
-              #705ce7 100%
-            );
-
-          box-shadow:
-            0 10px 28px
-            rgba(
-              72,
-              97,
-              220,
-              0.22
-            );
-        }
-
-        .brandMark :global(svg) {
-          width: 22px;
-          height: 22px;
-        }
-
-        .brandName {
-          color: #18233a;
-
-          font-size: 21px;
-          font-weight: 800;
-
-          letter-spacing: -0.65px;
-
-          white-space: nowrap;
-        }
-
-        .actions {
-          display: flex;
-          align-items: center;
-
-          gap: 9px;
-        }
-
-        .languageSwitcher {
-          margin-right: 4px;
-
-          padding: 4px;
-
-          display: flex;
-          align-items: center;
-
-          gap: 3px;
-
-          border:
-            1px solid
-            rgba(
-              60,
-              83,
-              126,
-              0.11
-            );
-
-          border-radius: 12px;
-
-          background:
-            rgba(
-              237,
-              242,
-              250,
-              0.78
-            );
-        }
-
-        .languageSwitcher button {
-          min-width: 49px;
-          height: 37px;
-
-          padding: 0 10px;
-
-          border: 0;
-          border-radius: 9px;
-
-          color: #778398;
-          background: transparent;
-
-          cursor: pointer;
-
-          font-size: 13px;
-          font-weight: 750;
-
-          letter-spacing: 0.15px;
-
-          transition:
-            color 160ms ease,
-            background 160ms ease,
-            box-shadow 160ms ease;
-        }
-
-        .languageSwitcher button.active {
-          color: #315fd2;
-
-          background: white;
-
-          box-shadow:
-            0 3px 10px
-            rgba(
-              31,
-              48,
-              82,
-              0.08
-            );
-        }
-
-        .loginButton,
-        .primaryButton,
-        .adminButton {
-          min-height: 44px;
-
-          padding: 0 17px;
-
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-
-          border-radius: 11px;
-
-          text-decoration: none;
-
-          font-size: 14px;
-          font-weight: 700;
-
-          transition:
-            transform 160ms ease,
-            box-shadow 160ms ease,
-            border-color 160ms ease;
-        }
-
-        .loginButton {
-          color: #344157;
-
-          border:
-            1px solid
-            rgba(
-              55,
-              75,
-              108,
-              0.14
-            );
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.88
-            );
-        }
-
-        .loginButton:hover {
-          border-color:
-            rgba(
-              63,
-              96,
-              190,
-              0.3
-            );
-
-          box-shadow:
-            0 7px 20px
-            rgba(
-              37,
-              54,
-              90,
-              0.07
-            );
-
-          transform: translateY(-1px);
-        }
-
-        .primaryButton {
-          gap: 10px;
-
-          color: white;
-
-          border:
-            1px solid
-            transparent;
-
-          background:
-            linear-gradient(
-              135deg,
-              #3467e8,
-              #6264e8
-            );
-
-          box-shadow:
-            0 9px 24px
-            rgba(
-              62,
-              91,
-              218,
-              0.2
-            );
-        }
-
-        .primaryButton:hover {
-          transform: translateY(-1px);
-
-          box-shadow:
-            0 13px 30px
-            rgba(
-              62,
-              91,
-              218,
-              0.27
-            );
-        }
-
-        .primaryButton :global(svg) {
-          width: 15px;
-          height: 15px;
-        }
-
-        .adminButton {
-          color: #6b55c7;
-
-          border:
-            1px solid
-            rgba(
-              109,
-              88,
-              202,
-              0.15
-            );
-
-          background: #f6f3ff;
-        }
-
-        @media (max-width: 760px) {
-          .headerInner {
-            width: calc(100% - 28px);
-            min-height: 78px;
-          }
-
-          .brandName {
-            font-size: 19px;
-          }
-
-          .brandMark {
-            width: 43px;
-            height: 43px;
-          }
-
-          .adminButton {
-            display: none;
-          }
-
-          .loginButton,
-          .primaryButton {
-            padding: 0 13px;
-            font-size: 13px;
-          }
-        }
-
-        @media (max-width: 560px) {
-          .headerInner {
-            gap: 12px;
-          }
-
-          .brand {
-            gap: 9px;
-          }
-
-          .brandMark {
-            width: 40px;
-            height: 40px;
-
-            border-radius: 12px;
-          }
-
-          .brandName {
-            font-size: 17px;
-          }
-
-          .languageSwitcher {
-            display: none;
-          }
-
-          .loginButton {
-            display: none;
-          }
-
-          .primaryButton {
-            min-height: 41px;
-
-            padding: 0 12px;
-
-            font-size: 12px;
-          }
-
-          .primaryButton :global(svg) {
-            display: none;
-          }
-        }
-      `}</style>
-    </header>
+      <style jsx>{`*{box-sizing:border-box}.page{min-height:100vh;color:#18233a;background:#f8fafb;font-family:Inter,Arial,sans-serif;overflow:hidden}.header{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(24,35,58,.08);background:rgba(248,250,251,.84);backdrop-filter:blur(18px)}.headerInner{max-width:1240px;min-height:78px;margin:auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;color:#18233a;text-decoration:none}.brandMark{width:43px;height:43px;position:relative;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#3769ed,#6c5be8);box-shadow:0 10px 25px rgba(70,92,218,.2)}.brandMark span{position:absolute;width:6px;height:6px;border-radius:1px;background:#fff}.brandMark span:nth-child(1){transform:translate(-9px,-9px)}.brandMark span:nth-child(2){transform:translate(9px,9px)}.brandMark span:nth-child(3){width:18px;height:18px;border:3px solid #fff;background:transparent;transform:rotate(45deg)}.brand b{display:block;font-size:17px;letter-spacing:.3px}.brand small{display:block;margin-top:3px;color:#7b8799;font-size:8px;letter-spacing:1.2px}.nav{display:flex;gap:26px;margin-left:auto}.nav a,.signin{color:#66758a;text-decoration:none;font-size:12px;font-weight:700}.nav a:hover,.signin:hover{color:#3568e8}.actions{display:flex;align-items:center;gap:10px}.language{padding:3px;display:flex;border:1px solid #e2e7ee;border-radius:9px;background:#fff}.language button{padding:6px 7px;border:0;border-radius:6px;background:transparent;color:#8793a5;cursor:pointer;font-size:9px;font-weight:900}.language button.active{color:#fff;background:#18233a}.button{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 19px;border-radius:12px;color:white;background:#18233a;box-shadow:0 10px 24px rgba(24,35,58,.13);text-decoration:none;font-size:12px;font-weight:900}.button span{font-size:16px}.button.small{padding:10px 13px;font-size:11px}.button.light{color:#18233a;background:#fff;box-shadow:none}.account,.admin{padding:10px 12px;border-radius:10px;color:#18233a;background:#e9eef8;text-decoration:none;font-size:11px;font-weight:900}.admin{color:#975627;background:#fff0df}.hero{background:radial-gradient(circle at 78% 18%,rgba(114,99,235,.15),transparent 30%),linear-gradient(180deg,#f8fafb,#eef4fa)}.heroInner{max-width:1240px;min-height:650px;margin:auto;padding:80px 28px 70px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:45px}.eyebrow{display:flex;align-items:center;gap:8px;color:#6c5be8;font-size:10px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}.eyebrow i{width:7px;height:7px;border-radius:50%;background:#ff9467}.hero h1{max-width:650px;margin:20px 0 22px;color:#18233a;font-size:clamp(45px,6vw,78px);line-height:.98;letter-spacing:-4px}.heroCopy>p{max-width:520px;margin:0;color:#66758a;font-size:17px;line-height:1.7}.heroActions{display:flex;align-items:center;gap:20px;margin-top:30px}.textButton{color:#53637a;text-decoration:none;font-size:12px;font-weight:900}.textButton span{margin-left:5px;color:#6c5be8}.proof{display:flex;align-items:center;gap:12px;margin-top:42px}.avatars{display:flex}.avatars span{width:29px;height:29px;display:grid;place-items:center;margin-left:-5px;border:3px solid #f5f8fb;border-radius:50%;background:#fff;font-size:13px}.avatars span:first-child{margin-left:0}.proof b,.proof small{display:block}.proof b{font-size:10px;letter-spacing:1px}.proof small{margin-top:3px;color:#8a96a7;font-size:10px}.heroVisual{position:relative;min-height:470px;display:grid;place-items:center}.glow{position:absolute;width:370px;height:370px;border-radius:50%;background:linear-gradient(135deg,rgba(82,110,232,.2),rgba(247,153,111,.15));filter:blur(5px)}.qrCard{position:relative;width:285px;padding:18px;border:1px solid rgba(255,255,255,.8);border-radius:25px;background:rgba(255,255,255,.78);box-shadow:0 28px 70px rgba(44,66,112,.17);transform:rotate(3deg)}.cardTop{display:flex;justify-content:space-between;align-items:center}.status{color:#1b8d67;font-size:9px;font-weight:900}.status i{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#3ac896}.dots{color:#9aa6b5;letter-spacing:3px}.petPhoto{height:210px;margin:16px 0 13px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:19px;background:linear-gradient(145deg,#e4edff,#d5e8e0);font-size:98px}.scanRing{position:absolute;width:160px;height:160px;border:1px solid rgba(255,255,255,.9);border-radius:50%}.profileName{font-size:24px;font-weight:900}.profileName span{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:white;background:#3c72e8;font-size:11px}.profileMeta{margin-top:4px;color:#7d8b9d;font-size:11px}.scanLine{margin-top:17px;padding:12px;display:flex;align-items:center;gap:9px;border-radius:12px;background:#eff3fb;color:#52657e;font-size:10px;font-weight:800}.scanLine b{margin-left:auto;color:#526fe5;font-size:15px}.miniQr{font-size:20px;color:#536fe0}.floating{position:absolute;display:flex;align-items:center;gap:9px;padding:12px 14px;border:1px solid rgba(255,255,255,.9);border-radius:13px;background:rgba(255,255,255,.85);box-shadow:0 16px 35px rgba(48,67,108,.13)}.floating>span{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;color:white;background:#6c5be8;font-size:11px}.floating b,.floating small{display:block}.floating b{font-size:10px}.floating small{margin-top:2px;color:#8a96a7;font-size:9px}.floating em{display:grid;place-items:center;width:17px;height:17px;margin-left:6px;border-radius:50%;color:white;background:#ff856b;font-size:9px;font-style:normal;font-weight:900}.chatFloat{top:14%;right:1%}.modeFloat{bottom:13%;left:1%}.modeFloat>span{background:#38a87d}.section{max-width:1184px;margin:auto;padding:105px 28px}.sectionIntro h2,.featureHeading h2{max-width:610px;margin:14px 0 0;font-size:clamp(32px,4vw,50px);line-height:1.05;letter-spacing:-2.2px}.pathGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:45px}.pathCard{position:relative;min-height:340px;padding:31px;border-radius:24px;overflow:hidden;color:#18233a;text-decoration:none}.pathCard.lost{background:#e5edff}.pathCard.emergency{color:#fff1e7;background:#2b2024}.pathIcon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;color:#fff;background:#536fe0;font-size:23px;font-weight:900}.emergency .pathIcon{color:#2b2024;background:#ffad70}.pathNumber{position:absolute;top:33px;right:32px;color:rgba(24,35,58,.35);font-size:11px;font-weight:900;letter-spacing:1px}.emergency .pathNumber{color:rgba(255,241,231,.4)}.pathCard h3{margin:55px 0 10px;font-size:28px;letter-spacing:-1px}.pathCard p{max-width:420px;margin:0;color:#64748a;font-size:13px;line-height:1.7}.emergency p{color:#ceb6aa}.pathLink{position:absolute;left:31px;bottom:31px;font-size:12px;font-weight:900}.pathDecor{position:absolute;right:22px;bottom:12px;color:rgba(82,111,224,.3);font-size:40px;letter-spacing:-12px;transform:rotate(-8deg)}.emergency .pathDecor{color:rgba(255,173,112,.24)}.steps{padding-top:40px}.stepGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:45px}.step{padding:23px;border-top:2px solid #d9e2ee}.step>b{color:#8b99aa;font-size:10px}.step>span{display:block;margin:38px 0 20px;color:#526fe0;font-size:29px}.step h3{margin:0 0 8px;font-size:16px}.step p{margin:0;color:#77879a;font-size:12px;line-height:1.65}.features{display:grid;grid-template-columns:.7fr 1.3fr;gap:70px;padding-top:48px}.featureGrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.feature{padding:23px;border:1px solid #e2e8f0;border-radius:18px;background:#fff}.featureIcon{color:#526fe0;font-size:23px}.feature h3{margin:25px 0 8px;font-size:15px}.feature p{margin:0;color:#7a899a;font-size:11px;line-height:1.6}.cta{max-width:1184px;margin:0 auto 90px;padding:45px 50px;display:flex;align-items:center;justify-content:space-between;gap:30px;border-radius:25px;color:#fff;background:#18233a}.cta .eyebrow{color:#ffad70}.cta h2{max-width:580px;margin:12px 0 9px;font-size:36px;line-height:1.05;letter-spacing:-1.5px}.cta p{margin:0;color:#b6c1d3;font-size:13px}.footer{max-width:1184px;margin:auto;padding:0 28px 35px;display:grid;grid-template-columns:1.5fr 1fr auto;align-items:end;gap:30px;border-top:1px solid #dfe6ee;padding-top:28px}.footerBrand{display:flex;gap:11px}.footerBrand .brandMark{width:38px;height:38px}.footerBrand b{font-size:13px}.footerBrand p{max-width:270px;margin:7px 0 0;color:#8390a0;font-size:10px;line-height:1.5}.footerLinks{display:flex;gap:18px}.footerLinks a{color:#708095;text-decoration:none;font-size:10px;font-weight:700}.copyright{color:#a0aab6;font-size:9px}@media(max-width:900px){.nav{display:none}.heroInner{grid-template-columns:1fr;padding-top:60px}.heroVisual{min-height:430px}.features{grid-template-columns:1fr;gap:35px}.footer{grid-template-columns:1fr 1fr}.copyright{grid-column:1/-1}}@media(max-width:620px){.headerInner{padding:0 16px}.header .actions{gap:5px}.actions .signin,.actions .admin{display:none}.brand small{display:none}.button.small{padding:9px}.heroInner{padding:46px 18px}.hero h1{font-size:48px;letter-spacing:-2.5px}.heroCopy>p{font-size:15px}.heroActions{align-items:flex-start;flex-direction:column;gap:17px}.qrCard{width:255px}.chatFloat{right:-4%}.modeFloat{left:-4%}.section{padding:70px 18px}.pathGrid,.featureGrid{grid-template-columns:1fr}.pathCard{min-height:320px}.stepGrid{grid-template-columns:1fr 1fr;gap:24px}.cta{margin:0 18px 60px;padding:30px 24px;align-items:flex-start;flex-direction:column}.cta h2{font-size:29px}.footer{margin:0 18px;padding:25px 0 32px;grid-template-columns:1fr}.footerLinks{flex-wrap:wrap}.copyright{grid-column:auto}}`}</style>
+    </main>
   );
 }
 
-function QRIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="15"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="3"
-        y="15"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <path d="M15 15h2v2h-2z" />
-      <path d="M19 15h2v6h-6v-2" />
-      <path d="M15 19v2" />
-      <path d="M19 19h2" />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
-    </svg>
-  );
-}
+function Feature({ icon, title, text }: { icon: string; title: string; text: string }) { return <div className="feature"><div className="featureIcon">{icon}</div><h3>{title}</h3><p>{text}</p></div>; }
