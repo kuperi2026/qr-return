@@ -15,9 +15,7 @@ export default function HomePage() {
         onLanguageChange={setLanguage}
       />
 
-      <main>
-        {/* შემდეგ კომპონენტებს აქ თითო-თითოდ დავამატებთ */}
-      </main>
+      <main />
     </>
   );
 }
