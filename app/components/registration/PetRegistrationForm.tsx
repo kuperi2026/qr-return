@@ -2,6 +2,11 @@
 
 import { FormEvent, useState } from "react";
 
+import OwnerInformationSection from "./OwnerInformationSection";
+import AdminAccessSection, {
+  type AdminPermissions,
+} from "./AdminAccessSection";
+
 import PetBasicInfo from "./PetBasicInfo";
 import PetHealthSection from "./PetHealthSection";
 import FinderVisibilitySection from "./FinderVisibilitySection";
@@ -11,39 +16,177 @@ type PetRegistrationFormProps = {
   type: "dog" | "cat";
 };
 
+const initialPermissions: AdminPermissions = {
+  viewProfiles: true,
+  editProfiles: false,
+  editFinderSettings: false,
+  editLiveChat: false,
+  viewMessages: false,
+  replyMessages: false,
+  markLostFound: false,
+  addProfiles: false,
+};
+
 export default function PetRegistrationForm({
   type,
 }: PetRegistrationFormProps) {
-  const [itemName, setItemName] = useState("");
-  const [colour, setColour] = useState("");
-  const [sex, setSex] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [weight, setWeight] = useState("");
-  const [photo, setPhoto] = useState("");
+  /* ================= OWNER ================= */
 
-  const [medicalInfo, setMedicalInfo] = useState("");
-  const [behaviourNote, setBehaviourNote] = useState("");
-  const [description, setDescription] = useState("");
-  const [finderMessage, setFinderMessage] = useState("");
+  const [ownerFirstName] = useState("Owner");
+  const [ownerLastName] = useState("Account");
+  const [ownerPhone] = useState("—");
+  const [ownerEmail] = useState("—");
 
-  const [showEmail, setShowEmail] = useState(false);
-  const [showAddress, setShowAddress] = useState(false);
-  const [showPetPhoto, setShowPetPhoto] = useState(true);
-  const [showMedicalInfo, setShowMedicalInfo] = useState(false);
-  const [showBehaviourNote, setShowBehaviourNote] = useState(false);
-  const [showDescription, setShowDescription] = useState(true);
-  const [showFinderMessage, setShowFinderMessage] = useState(true);
+  /* ================= ADMIN ================= */
 
-  const [liveChatEnabled, setLiveChatEnabled] = useState(true);
+  const [adminEnabled, setAdminEnabled] =
+    useState(false);
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [adminEmail, setAdminEmail] =
+    useState("");
+
+  const [permissions, setPermissions] =
+    useState<AdminPermissions>(
+      initialPermissions
+    );
+
+  /* ================= PET ================= */
+
+  const [itemName, setItemName] =
+    useState("");
+
+  const [colour, setColour] =
+    useState("");
+
+  const [sex, setSex] =
+    useState("");
+
+  const [dateOfBirth, setDateOfBirth] =
+    useState("");
+
+  const [weight, setWeight] =
+    useState("");
+
+  const [photo, setPhoto] =
+    useState("");
+
+  const [medicalInfo, setMedicalInfo] =
+    useState("");
+
+  const [
+    behaviourNote,
+    setBehaviourNote,
+  ] = useState("");
+
+  const [description, setDescription] =
+    useState("");
+
+  const [
+    finderMessage,
+    setFinderMessage,
+  ] = useState("");
+
+  /* ================= FINDER VIEW ================= */
+
+  const [showEmail, setShowEmail] =
+    useState(false);
+
+  const [
+    showAddress,
+    setShowAddress,
+  ] = useState(false);
+
+  const [
+    showPetPhoto,
+    setShowPetPhoto,
+  ] = useState(true);
+
+  const [
+    showMedicalInfo,
+    setShowMedicalInfo,
+  ] = useState(false);
+
+  const [
+    showBehaviourNote,
+    setShowBehaviourNote,
+  ] = useState(false);
+
+  const [
+    showDescription,
+    setShowDescription,
+  ] = useState(true);
+
+  const [
+    showFinderMessage,
+    setShowFinderMessage,
+  ] = useState(true);
+
+  /* ================= CONTACT ================= */
+
+  const [
+    liveChatEnabled,
+    setLiveChatEnabled,
+  ] = useState(true);
+
+  /* ================= STATUS ================= */
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] = useState("");
+
+  const [saving, setSaving] =
+    useState(false);
 
   const petLabel =
     type === "dog"
       ? "ძაღლი"
       : "კატა";
+
+  function validateForm() {
+    if (!itemName.trim()) {
+      return "ცხოველის სახელი სავალდებულოა.";
+    }
+
+    if (
+      adminEnabled &&
+      !adminEmail.trim()
+    ) {
+      return "თუ Secondary Admin ჩართულია, Admin-ის ელფოსტა სავალდებულოა.";
+    }
+
+    if (adminEnabled) {
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (
+        !emailPattern.test(
+          adminEmail.trim()
+        )
+      ) {
+        return "გთხოვთ მიუთითოთ Secondary Admin-ის სწორი ელფოსტა.";
+      }
+
+      if (
+        ownerEmail !== "—" &&
+        adminEmail
+          .trim()
+          .toLowerCase() ===
+          ownerEmail
+            .trim()
+            .toLowerCase()
+      ) {
+        return "Owner და Secondary Admin ერთი და იგივე ელფოსტა ვერ იქნება.";
+      }
+    }
+
+    return "";
+  }
 
   function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -53,9 +196,12 @@ export default function PetRegistrationForm({
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!itemName.trim()) {
+    const validationError =
+      validateForm();
+
+    if (validationError) {
       setErrorMessage(
-        "ცხოველის სახელი სავალდებულოა."
+        validationError
       );
 
       window.scrollTo({
@@ -70,48 +216,159 @@ export default function PetRegistrationForm({
 
     try {
       const payload = {
+        /* OWNER */
+
+        owner: {
+          first_name:
+            ownerFirstName,
+          last_name:
+            ownerLastName,
+          phone:
+            ownerPhone,
+          email:
+            ownerEmail,
+        },
+
+        /* OPTIONAL SECONDARY ADMIN */
+
+        secondary_admin:
+          adminEnabled
+            ? {
+                enabled: true,
+                email:
+                  adminEmail
+                    .trim()
+                    .toLowerCase(),
+
+                permissions: {
+                  view_profiles:
+                    permissions
+                      .viewProfiles,
+
+                  edit_profiles:
+                    permissions
+                      .editProfiles,
+
+                  edit_finder_settings:
+                    permissions
+                      .editFinderSettings,
+
+                  edit_live_chat:
+                    permissions
+                      .editLiveChat,
+
+                  view_messages:
+                    permissions
+                      .viewMessages,
+
+                  reply_messages:
+                    permissions
+                      .replyMessages,
+
+                  mark_lost_found:
+                    permissions
+                      .markLostFound,
+
+                  add_profiles:
+                    permissions
+                      .addProfiles,
+
+                  add_admin:
+                    false,
+
+                  change_owner:
+                    false,
+
+                  change_account_security:
+                    false,
+
+                  delete_owner_account:
+                    false,
+
+                  change_category:
+                    false,
+
+                  change_own_permissions:
+                    false,
+                },
+              }
+            : {
+                enabled: false,
+              },
+
+        /* LOCKED PROFILE CATEGORY */
+
         item_type: type,
         pet_type: type,
 
-        item_name: itemName.trim(),
+        /* PET DATA */
 
-        colour: colour.trim() || null,
-        sex: sex || null,
+        item_name:
+          itemName.trim(),
+
+        colour:
+          colour.trim() ||
+          null,
+
+        sex:
+          sex || null,
+
         date_of_birth:
           dateOfBirth || null,
+
         weight:
           weight || null,
+
         photo:
-          photo.trim() || null,
+          photo.trim() ||
+          null,
 
         medical_info:
-          medicalInfo.trim() || null,
+          medicalInfo.trim() ||
+          null,
 
         behaviour_note:
-          behaviourNote.trim() || null,
+          behaviourNote.trim() ||
+          null,
 
         description:
-          description.trim() || null,
+          description.trim() ||
+          null,
 
         finder_message:
-          finderMessage.trim() || null,
+          finderMessage.trim() ||
+          null,
+
+        /* FINDER VISIBILITY */
 
         show_owner_name: true,
         show_owner_phone: true,
 
-        show_email: showEmail,
-        show_address: showAddress,
-        show_pet_photo: showPetPhoto,
+        show_email:
+          showEmail,
+
+        show_address:
+          showAddress,
+
+        show_pet_photo:
+          showPetPhoto,
+
         show_medical_info:
           showMedicalInfo,
+
         show_behaviour_note:
           showBehaviourNote,
+
         show_description:
           showDescription,
+
         show_finder_message:
           showFinderMessage,
 
+        /* CONTACT */
+
         phone_enabled: true,
+
         live_chat_enabled:
           liveChatEnabled,
       };
@@ -122,10 +379,13 @@ export default function PetRegistrationForm({
       );
 
       setSuccessMessage(
-        `${petLabel} პროფილის ფორმა მზადაა. შემდეგ ეტაპზე ამ მონაცემებს Supabase-ში შევინახავთ.`
+        `${petLabel} პროფილის ფორმა მზადაა. Owner, Secondary Admin, უფლებები და პროფილის მონაცემები წარმატებით შეიკრიბა. შემდეგ ეტაპზე ამას Supabase-ს დავუკავშირებთ.`
       );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Profile form error:",
+        error
+      );
 
       setErrorMessage(
         "პროფილის დამუშავებისას მოხდა შეცდომა."
@@ -179,44 +439,134 @@ export default function PetRegistrationForm({
           </div>
         )}
 
-        <PetBasicInfo
-          itemName={itemName}
-          setItemName={setItemName}
-          colour={colour}
-          setColour={setColour}
-          sex={sex}
-          setSex={setSex}
-          dateOfBirth={dateOfBirth}
-          setDateOfBirth={setDateOfBirth}
-          weight={weight}
-          setWeight={setWeight}
-          photo={photo}
-          setPhoto={setPhoto}
+        {/* ================= OWNER ================= */}
+
+        <OwnerInformationSection
+          firstName={
+            ownerFirstName
+          }
+          lastName={
+            ownerLastName
+          }
+          phone={
+            ownerPhone
+          }
+          email={
+            ownerEmail
+          }
         />
 
+        {/* ================= ADMIN ================= */}
+
+        <AdminAccessSection
+          adminEnabled={
+            adminEnabled
+          }
+          setAdminEnabled={
+            setAdminEnabled
+          }
+          adminEmail={
+            adminEmail
+          }
+          setAdminEmail={
+            setAdminEmail
+          }
+          permissions={
+            permissions
+          }
+          setPermissions={
+            setPermissions
+          }
+        />
+
+        {/* ================= PET BASIC INFO ================= */}
+
+        <PetBasicInfo
+          itemName={
+            itemName
+          }
+          setItemName={
+            setItemName
+          }
+          colour={
+            colour
+          }
+          setColour={
+            setColour
+          }
+          sex={
+            sex
+          }
+          setSex={
+            setSex
+          }
+          dateOfBirth={
+            dateOfBirth
+          }
+          setDateOfBirth={
+            setDateOfBirth
+          }
+          weight={
+            weight
+          }
+          setWeight={
+            setWeight
+          }
+          photo={
+            photo
+          }
+          setPhoto={
+            setPhoto
+          }
+        />
+
+        {/* ================= HEALTH ================= */}
+
         <PetHealthSection
-          medicalInfo={medicalInfo}
-          setMedicalInfo={setMedicalInfo}
-          behaviourNote={behaviourNote}
+          medicalInfo={
+            medicalInfo
+          }
+          setMedicalInfo={
+            setMedicalInfo
+          }
+          behaviourNote={
+            behaviourNote
+          }
           setBehaviourNote={
             setBehaviourNote
           }
-          description={description}
-          setDescription={setDescription}
-          finderMessage={finderMessage}
+          description={
+            description
+          }
+          setDescription={
+            setDescription
+          }
+          finderMessage={
+            finderMessage
+          }
           setFinderMessage={
             setFinderMessage
           }
         />
 
+        {/* ================= FINDER VIEW ================= */}
+
         <FinderVisibilitySection
-          showEmail={showEmail}
-          setShowEmail={setShowEmail}
-          showAddress={showAddress}
+          showEmail={
+            showEmail
+          }
+          setShowEmail={
+            setShowEmail
+          }
+          showAddress={
+            showAddress
+          }
           setShowAddress={
             setShowAddress
           }
-          showPetPhoto={showPetPhoto}
+          showPetPhoto={
+            showPetPhoto
+          }
           setShowPetPhoto={
             setShowPetPhoto
           }
@@ -246,6 +596,8 @@ export default function PetRegistrationForm({
           }
         />
 
+        {/* ================= CONTACT ================= */}
+
         <ContactOptionsSection
           liveChatEnabled={
             liveChatEnabled
@@ -254,6 +606,8 @@ export default function PetRegistrationForm({
             setLiveChatEnabled
           }
         />
+
+        {/* ================= SAVE ================= */}
 
         <section className="saveCard">
           <div className="saveText">
@@ -266,16 +620,18 @@ export default function PetRegistrationForm({
             </h3>
 
             <p>
-              შექმნის შემდეგ კატეგორია
+              ამ QR პროფილის
+              კატეგორია იქნება
               <strong>
                 {" "}
                 {petLabel}
               </strong>
-              -ზე დაფიქსირდება და სხვა
-              კატეგორიად ვეღარ შეიცვლება.
-              პროფილის სხვა მონაცემების
-              რედაქტირება მოგვიანებით
-              შესაძლებელი იქნება.
+              . შექმნის შემდეგ
+              კატეგორიის შეცვლა
+              შეუძლებელი იქნება,
+              თუმცა პროფილის სხვა
+              მონაცემები მოგვიანებით
+              შეგიძლიათ შეცვალოთ.
             </p>
           </div>
 
@@ -362,6 +718,7 @@ export default function PetRegistrationForm({
 
         .error > span {
           background: #fce4e6;
+
           color: #bb3c47;
         }
 
@@ -376,6 +733,7 @@ export default function PetRegistrationForm({
 
         .success > span {
           background: #e1f2e8;
+
           color: #386f56;
         }
 
