@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 import OwnerInformationSection from "./OwnerInformationSection";
 import AdminAccessSection, {
@@ -14,6 +21,13 @@ import ContactOptionsSection from "./ContactOptionsSection";
 
 type PetRegistrationFormProps = {
   type: "dog" | "cat";
+};
+
+type OwnerData = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
 };
 
 const initialPermissions: AdminPermissions = {
@@ -30,14 +44,20 @@ const initialPermissions: AdminPermissions = {
 export default function PetRegistrationForm({
   type,
 }: PetRegistrationFormProps) {
-  /* ================= OWNER ================= */
+  const router = useRouter();
 
-  const [ownerFirstName] = useState("Owner");
-  const [ownerLastName] = useState("Account");
-  const [ownerPhone] = useState("—");
-  const [ownerEmail] = useState("—");
+  const [authLoading, setAuthLoading] =
+    useState(true);
 
-  /* ================= ADMIN ================= */
+  const [owner, setOwner] =
+    useState<OwnerData>({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+    });
+
+  /* ADMIN */
 
   const [adminEnabled, setAdminEnabled] =
     useState(false);
@@ -50,7 +70,7 @@ export default function PetRegistrationForm({
       initialPermissions
     );
 
-  /* ================= PET ================= */
+  /* PET */
 
   const [itemName, setItemName] =
     useState("");
@@ -86,20 +106,16 @@ export default function PetRegistrationForm({
     setFinderMessage,
   ] = useState("");
 
-  /* ================= FINDER VIEW ================= */
+  /* FINDER */
 
   const [showEmail, setShowEmail] =
     useState(false);
 
-  const [
-    showAddress,
-    setShowAddress,
-  ] = useState(false);
+  const [showAddress, setShowAddress] =
+    useState(false);
 
-  const [
-    showPetPhoto,
-    setShowPetPhoto,
-  ] = useState(true);
+  const [showPetPhoto, setShowPetPhoto] =
+    useState(true);
 
   const [
     showMedicalInfo,
@@ -121,14 +137,14 @@ export default function PetRegistrationForm({
     setShowFinderMessage,
   ] = useState(true);
 
-  /* ================= CONTACT ================= */
+  /* CONTACT */
 
   const [
     liveChatEnabled,
     setLiveChatEnabled,
   ] = useState(true);
 
-  /* ================= STATUS ================= */
+  /* STATUS */
 
   const [
     errorMessage,
@@ -148,7 +164,96 @@ export default function PetRegistrationForm({
       ? "ძაღლი"
       : "კატა";
 
+  useEffect(() => {
+    async function loadOwner() {
+      try {
+        const supabaseUrl =
+          process.env
+            .NEXT_PUBLIC_SUPABASE_URL;
+
+        const supabaseKey =
+          process.env
+            .NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+          process.env
+            .NEXT_PUBLIC_SUPABASE_KEY;
+
+        if (
+          !supabaseUrl ||
+          !supabaseKey
+        ) {
+          setErrorMessage(
+            "Supabase კავშირი არ არის კონფიგურირებული."
+          );
+
+          setAuthLoading(false);
+          return;
+        }
+
+        const supabase =
+          createClient(
+            supabaseUrl,
+            supabaseKey
+          );
+
+        const {
+          data: {
+            user,
+          },
+          error,
+        } =
+          await supabase.auth.getUser();
+
+        if (error || !user) {
+          router.replace("/login");
+          return;
+        }
+
+        setOwner({
+          firstName:
+            user.user_metadata
+              ?.first_name || "",
+
+          lastName:
+            user.user_metadata
+              ?.last_name || "",
+
+          phone:
+            user.user_metadata
+              ?.phone || "",
+
+          email:
+            user.email || "",
+        });
+      } catch (error) {
+        console.error(
+          "Load owner error:",
+          error
+        );
+
+        setErrorMessage(
+          "Owner ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
+        );
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    loadOwner();
+  }, [router]);
+
   function validateForm() {
+    if (!owner.firstName) {
+      return "Owner-ის სახელი ვერ მოიძებნა.";
+    }
+
+    if (!owner.lastName) {
+      return "Owner-ის გვარი ვერ მოიძებნა.";
+    }
+
+    if (!owner.phone) {
+      return "Owner-ის ტელეფონის ნომერი ვერ მოიძებნა.";
+    }
+
     if (!itemName.trim()) {
       return "ცხოველის სახელი სავალდებულოა.";
     }
@@ -173,13 +278,12 @@ export default function PetRegistrationForm({
       }
 
       if (
-        ownerEmail !== "—" &&
         adminEmail
           .trim()
           .toLowerCase() ===
-          ownerEmail
-            .trim()
-            .toLowerCase()
+        owner.email
+          .trim()
+          .toLowerCase()
       ) {
         return "Owner და Secondary Admin ერთი და იგივე ელფოსტა ვერ იქნება.";
       }
@@ -216,20 +320,7 @@ export default function PetRegistrationForm({
 
     try {
       const payload = {
-        /* OWNER */
-
-        owner: {
-          first_name:
-            ownerFirstName,
-          last_name:
-            ownerLastName,
-          phone:
-            ownerPhone,
-          email:
-            ownerEmail,
-        },
-
-        /* OPTIONAL SECONDARY ADMIN */
+        owner,
 
         secondary_admin:
           adminEnabled
@@ -273,21 +364,14 @@ export default function PetRegistrationForm({
                     permissions
                       .addProfiles,
 
-                  add_admin:
-                    false,
-
-                  change_owner:
-                    false,
-
+                  add_admin: false,
+                  change_owner: false,
                   change_account_security:
                     false,
-
                   delete_owner_account:
                     false,
-
                   change_category:
                     false,
-
                   change_own_permissions:
                     false,
                 },
@@ -296,19 +380,14 @@ export default function PetRegistrationForm({
                 enabled: false,
               },
 
-        /* LOCKED PROFILE CATEGORY */
-
         item_type: type,
         pet_type: type,
-
-        /* PET DATA */
 
         item_name:
           itemName.trim(),
 
         colour:
-          colour.trim() ||
-          null,
+          colour.trim() || null,
 
         sex:
           sex || null,
@@ -320,8 +399,7 @@ export default function PetRegistrationForm({
           weight || null,
 
         photo:
-          photo.trim() ||
-          null,
+          photo.trim() || null,
 
         medical_info:
           medicalInfo.trim() ||
@@ -338,8 +416,6 @@ export default function PetRegistrationForm({
         finder_message:
           finderMessage.trim() ||
           null,
-
-        /* FINDER VISIBILITY */
 
         show_owner_name: true,
         show_owner_phone: true,
@@ -365,8 +441,6 @@ export default function PetRegistrationForm({
         show_finder_message:
           showFinderMessage,
 
-        /* CONTACT */
-
         phone_enabled: true,
 
         live_chat_enabled:
@@ -379,11 +453,11 @@ export default function PetRegistrationForm({
       );
 
       setSuccessMessage(
-        `${petLabel} პროფილის ფორმა მზადაა. Owner, Secondary Admin, უფლებები და პროფილის მონაცემები წარმატებით შეიკრიბა. შემდეგ ეტაპზე ამას Supabase-ს დავუკავშირებთ.`
+        `${petLabel} პროფილის მონაცემები მზადაა. Owner account-იც სწორად არის მიბმული. შემდეგ ეტაპზე Supabase-ში შენახვას დავამატებთ.`
       );
     } catch (error) {
       console.error(
-        "Profile form error:",
+        "Profile error:",
         error
       );
 
@@ -395,499 +469,255 @@ export default function PetRegistrationForm({
     }
   }
 
-  return (
-    <>
-      <form
-        className="petForm"
-        onSubmit={handleSubmit}
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          minHeight: "300px",
+          display: "grid",
+          placeItems: "center",
+          color: "#718095",
+          fontSize: "11px",
+        }}
       >
-        {errorMessage && (
-          <div
-            className="topMessage error"
-            role="alert"
-          >
-            <span>!</span>
+        Owner account იტვირთება...
+      </div>
+    );
+  }
 
-            <div>
-              <strong>
-                მონაცემები გადაამოწმეთ
-              </strong>
+  return (
+    <form
+      onSubmit={handleSubmit}
+    >
+      {errorMessage && (
+        <div
+          style={{
+            marginBottom: "16px",
+            padding: "14px",
+            border:
+              "1px solid #f0c8cc",
+            borderRadius: "12px",
+            background: "#fff7f8",
+            color: "#a13e47",
+            fontSize: "10px",
+          }}
+        >
+          {errorMessage}
+        </div>
+      )}
 
-              <p>
-                {errorMessage}
-              </p>
-            </div>
-          </div>
-        )}
+      {successMessage && (
+        <div
+          style={{
+            marginBottom: "16px",
+            padding: "14px",
+            border:
+              "1px solid #c6dfd1",
+            borderRadius: "12px",
+            background: "#f6fbf8",
+            color: "#386f56",
+            fontSize: "10px",
+          }}
+        >
+          {successMessage}
+        </div>
+      )}
 
-        {successMessage && (
-          <div
-            className="topMessage success"
-            role="status"
-          >
-            <span>✓</span>
+      <OwnerInformationSection
+        firstName={owner.firstName}
+        lastName={owner.lastName}
+        phone={owner.phone}
+        email={owner.email}
+      />
 
-            <div>
-              <strong>
-                ფორმა მზადაა
-              </strong>
+      <AdminAccessSection
+        adminEnabled={
+          adminEnabled
+        }
+        setAdminEnabled={
+          setAdminEnabled
+        }
+        adminEmail={
+          adminEmail
+        }
+        setAdminEmail={
+          setAdminEmail
+        }
+        permissions={
+          permissions
+        }
+        setPermissions={
+          setPermissions
+        }
+      />
 
-              <p>
-                {successMessage}
-              </p>
-            </div>
-          </div>
-        )}
+      <PetBasicInfo
+        itemName={itemName}
+        setItemName={setItemName}
+        colour={colour}
+        setColour={setColour}
+        sex={sex}
+        setSex={setSex}
+        dateOfBirth={dateOfBirth}
+        setDateOfBirth={
+          setDateOfBirth
+        }
+        weight={weight}
+        setWeight={setWeight}
+        photo={photo}
+        setPhoto={setPhoto}
+      />
 
-        {/* ================= OWNER ================= */}
+      <PetHealthSection
+        medicalInfo={
+          medicalInfo
+        }
+        setMedicalInfo={
+          setMedicalInfo
+        }
+        behaviourNote={
+          behaviourNote
+        }
+        setBehaviourNote={
+          setBehaviourNote
+        }
+        description={
+          description
+        }
+        setDescription={
+          setDescription
+        }
+        finderMessage={
+          finderMessage
+        }
+        setFinderMessage={
+          setFinderMessage
+        }
+      />
 
-        <OwnerInformationSection
-          firstName={
-            ownerFirstName
-          }
-          lastName={
-            ownerLastName
-          }
-          phone={
-            ownerPhone
-          }
-          email={
-            ownerEmail
-          }
-        />
+      <FinderVisibilitySection
+        showEmail={showEmail}
+        setShowEmail={setShowEmail}
+        showAddress={
+          showAddress
+        }
+        setShowAddress={
+          setShowAddress
+        }
+        showPetPhoto={
+          showPetPhoto
+        }
+        setShowPetPhoto={
+          setShowPetPhoto
+        }
+        showMedicalInfo={
+          showMedicalInfo
+        }
+        setShowMedicalInfo={
+          setShowMedicalInfo
+        }
+        showBehaviourNote={
+          showBehaviourNote
+        }
+        setShowBehaviourNote={
+          setShowBehaviourNote
+        }
+        showDescription={
+          showDescription
+        }
+        setShowDescription={
+          setShowDescription
+        }
+        showFinderMessage={
+          showFinderMessage
+        }
+        setShowFinderMessage={
+          setShowFinderMessage
+        }
+      />
 
-        {/* ================= ADMIN ================= */}
+      <ContactOptionsSection
+        liveChatEnabled={
+          liveChatEnabled
+        }
+        setLiveChatEnabled={
+          setLiveChatEnabled
+        }
+      />
 
-        <AdminAccessSection
-          adminEnabled={
-            adminEnabled
-          }
-          setAdminEnabled={
-            setAdminEnabled
-          }
-          adminEmail={
-            adminEmail
-          }
-          setAdminEmail={
-            setAdminEmail
-          }
-          permissions={
-            permissions
-          }
-          setPermissions={
-            setPermissions
-          }
-        />
-
-        {/* ================= PET BASIC INFO ================= */}
-
-        <PetBasicInfo
-          itemName={
-            itemName
-          }
-          setItemName={
-            setItemName
-          }
-          colour={
-            colour
-          }
-          setColour={
-            setColour
-          }
-          sex={
-            sex
-          }
-          setSex={
-            setSex
-          }
-          dateOfBirth={
-            dateOfBirth
-          }
-          setDateOfBirth={
-            setDateOfBirth
-          }
-          weight={
-            weight
-          }
-          setWeight={
-            setWeight
-          }
-          photo={
-            photo
-          }
-          setPhoto={
-            setPhoto
-          }
-        />
-
-        {/* ================= HEALTH ================= */}
-
-        <PetHealthSection
-          medicalInfo={
-            medicalInfo
-          }
-          setMedicalInfo={
-            setMedicalInfo
-          }
-          behaviourNote={
-            behaviourNote
-          }
-          setBehaviourNote={
-            setBehaviourNote
-          }
-          description={
-            description
-          }
-          setDescription={
-            setDescription
-          }
-          finderMessage={
-            finderMessage
-          }
-          setFinderMessage={
-            setFinderMessage
-          }
-        />
-
-        {/* ================= FINDER VIEW ================= */}
-
-        <FinderVisibilitySection
-          showEmail={
-            showEmail
-          }
-          setShowEmail={
-            setShowEmail
-          }
-          showAddress={
-            showAddress
-          }
-          setShowAddress={
-            setShowAddress
-          }
-          showPetPhoto={
-            showPetPhoto
-          }
-          setShowPetPhoto={
-            setShowPetPhoto
-          }
-          showMedicalInfo={
-            showMedicalInfo
-          }
-          setShowMedicalInfo={
-            setShowMedicalInfo
-          }
-          showBehaviourNote={
-            showBehaviourNote
-          }
-          setShowBehaviourNote={
-            setShowBehaviourNote
-          }
-          showDescription={
-            showDescription
-          }
-          setShowDescription={
-            setShowDescription
-          }
-          showFinderMessage={
-            showFinderMessage
-          }
-          setShowFinderMessage={
-            setShowFinderMessage
-          }
-        />
-
-        {/* ================= CONTACT ================= */}
-
-        <ContactOptionsSection
-          liveChatEnabled={
-            liveChatEnabled
-          }
-          setLiveChatEnabled={
-            setLiveChatEnabled
-          }
-        />
-
-        {/* ================= SAVE ================= */}
-
-        <section className="saveCard">
-          <div className="saveText">
-            <span>
+      <section
+        style={{
+          marginTop: "16px",
+          padding: "23px 25px",
+          border:
+            "1px solid #cddff5",
+          borderRadius: "16px",
+          background:
+            "linear-gradient(135deg,#f7faff 0%,#edf5ff 100%)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            gap: "20px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <span
+              style={{
+                color: "#1266e9",
+                fontSize: "8px",
+                fontWeight: 900,
+              }}
+            >
               FINAL STEP
             </span>
 
-            <h3>
+            <h3
+              style={{
+                margin: "6px 0 0",
+                color: "#233b55",
+                fontSize: "17px",
+              }}
+            >
               პროფილის შექმნა
             </h3>
 
-            <p>
-              ამ QR პროფილის
-              კატეგორია იქნება
-              <strong>
-                {" "}
-                {petLabel}
-              </strong>
-              . შექმნის შემდეგ
-              კატეგორიის შეცვლა
-              შეუძლებელი იქნება,
-              თუმცა პროფილის სხვა
-              მონაცემები მოგვიანებით
-              შეგიძლიათ შეცვალოთ.
+            <p
+              style={{
+                margin: "7px 0 0",
+                color: "#7c8a9a",
+                fontSize: "9px",
+              }}
+            >
+              კატეგორია შექმნის შემდეგ აღარ შეიცვლება.
             </p>
           </div>
 
-          <div className="saveActions">
-            <a
-              href="/register"
-              className="cancelButton"
-            >
-              უკან
-            </a>
-
-            <button
-              type="submit"
-              className="saveButton"
-              disabled={saving}
-            >
-              {saving
-                ? "ინახება..."
-                : "პროფილის შექმნა"}
-
-              {!saving && (
-                <span>→</span>
-              )}
-            </button>
-          </div>
-        </section>
-      </form>
-
-      <style jsx>{`
-        .petForm {
-          width: 100%;
-        }
-
-        .topMessage {
-          margin-bottom: 16px;
-
-          padding: 14px 15px;
-
-          display: flex;
-          align-items: flex-start;
-
-          gap: 10px;
-
-          border-radius: 12px;
-        }
-
-        .topMessage > span {
-          width: 25px;
-          height: 25px;
-
-          flex: 0 0 25px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-
-          font-size: 9px;
-          font-weight: 950;
-        }
-
-        .topMessage strong {
-          display: block;
-
-          font-size: 10px;
-          font-weight: 900;
-        }
-
-        .topMessage p {
-          margin: 4px 0 0;
-
-          font-size: 9px;
-          line-height: 1.5;
-        }
-
-        .error {
-          border:
-            1px solid #f0c8cc;
-
-          background: #fff7f8;
-
-          color: #a13e47;
-        }
-
-        .error > span {
-          background: #fce4e6;
-
-          color: #bb3c47;
-        }
-
-        .success {
-          border:
-            1px solid #c6dfd1;
-
-          background: #f6fbf8;
-
-          color: #386f56;
-        }
-
-        .success > span {
-          background: #e1f2e8;
-
-          color: #386f56;
-        }
-
-        .saveCard {
-          margin-top: 16px;
-
-          padding: 23px 25px;
-
-          display: flex;
-
-          justify-content:
-            space-between;
-
-          align-items: center;
-
-          gap: 25px;
-
-          border:
-            1px solid #cddff5;
-
-          border-radius: 16px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #f7faff 0%,
-              #edf5ff 100%
-            );
-
-          box-shadow:
-            0 12px 30px
-            rgba(30,70,120,.05);
-        }
-
-        .saveText {
-          max-width: 470px;
-        }
-
-        .saveText > span {
-          color: #1266e9;
-
-          font-size: 8px;
-          font-weight: 900;
-
-          letter-spacing: 1.2px;
-        }
-
-        .saveText h3 {
-          margin: 6px 0 0;
-
-          color: #233b55;
-
-          font-size: 17px;
-        }
-
-        .saveText p {
-          margin: 7px 0 0;
-
-          color: #7c8a9a;
-
-          font-size: 9px;
-          line-height: 1.6;
-        }
-
-        .saveText p strong {
-          color: #1266e9;
-        }
-
-        .saveActions {
-          flex: 0 0 auto;
-
-          display: flex;
-          align-items: center;
-
-          gap: 8px;
-        }
-
-        .cancelButton,
-        .saveButton {
-          min-height: 46px;
-
-          padding: 0 16px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border-radius: 10px;
-
-          font-family: inherit;
-
-          font-size: 9px;
-          font-weight: 900;
-
-          text-decoration: none;
-        }
-
-        .cancelButton {
-          border:
-            1px solid #ccdae9;
-
-          background: #ffffff;
-
-          color: #61758a;
-        }
-
-        .saveButton {
-          min-width: 150px;
-
-          gap: 8px;
-
-          border:
-            1px solid #1266e9;
-
-          background: #1266e9;
-
-          color: #ffffff;
-
-          cursor: pointer;
-
-          box-shadow:
-            0 10px 20px
-            rgba(18,102,233,.16);
-        }
-
-        .saveButton span {
-          font-size: 14px;
-        }
-
-        .saveButton:disabled {
-          opacity: .65;
-
-          cursor: wait;
-        }
-
-        @media (max-width: 650px) {
-          .saveCard {
-            padding: 19px;
-
-            flex-direction: column;
-
-            align-items: stretch;
-          }
-
-          .saveActions {
-            width: 100%;
-          }
-
-          .cancelButton,
-          .saveButton {
-            flex: 1;
-          }
-        }
-      `}</style>
-    </>
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              minHeight: "46px",
+              padding: "0 18px",
+              border: 0,
+              borderRadius: "10px",
+              background: "#1266e9",
+              color: "#ffffff",
+              fontWeight: 900,
+              cursor: "pointer",
+            }}
+          >
+            {saving
+              ? "ინახება..."
+              : "პროფილის შექმნა"}
+          </button>
+        </div>
+      </section>
+    </form>
   );
 }
