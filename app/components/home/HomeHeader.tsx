@@ -30,208 +30,433 @@ export default function HomeHeader({
   const ka = language === "ka";
 
   return (
-    <header
-      style={{
-        background: "#ffffff",
-        borderBottom: "1px solid #e6ebf1",
-        position: "relative",
-        zIndex: 100,
-      }}
-    >
-      <div
-        style={{
-          width: "calc(100% - 90px)",
-          maxWidth: "1380px",
-          minHeight: "78px",
-          margin: "auto",
-          display: "grid",
-          gridTemplateColumns: "210px 1fr auto",
-          alignItems: "center",
-          gap: "25px",
-        }}
-      >
-        <a
-          href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            textDecoration: "none",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              display: "grid",
-              placeItems: "center",
-              borderRadius: "10px",
-              background: "#1266e9",
-              color: "#ffffff",
-            }}
-          >
-            <QRIcon size={23} />
-          </div>
+    <>
+      <header className="homeHeader">
+        <div className="homeHeaderInner">
 
-          <div>
-            <strong
-              style={{
-                display: "block",
-                color: "#172b43",
-                fontSize: "16px",
-                fontWeight: 900,
-              }}
+          <a href="/" className="homeBrand">
+            <div className="homeBrandLogo">
+              <QRIcon size={23} />
+            </div>
+
+            <div>
+              <strong>QR RETURN</strong>
+              <span>SMART LOST &amp; FOUND</span>
+            </div>
+          </a>
+
+          <nav className="homeNav">
+
+            <button
+              onClick={() => toggleMenu("about")}
             >
-              QR RETURN
-            </strong>
+              {ka ? "ჩვენ შესახებ" : "About"}
+              <Chevron open={openMenu === "about"} />
+            </button>
 
-            <span
-              style={{
-                display: "block",
-                marginTop: "3px",
-                color: "#8995a4",
-                fontSize: "7px",
-                fontWeight: 800,
-                letterSpacing: "1.3px",
-              }}
+            <button
+              onClick={() => toggleMenu("shop")}
             >
-              SMART LOST &amp; FOUND
-            </span>
+              {ka ? "ონლაინ შეძენა" : "Shop"}
+              <Chevron open={openMenu === "shop"} />
+            </button>
+
+            <button
+              onClick={() => toggleMenu("faq")}
+            >
+              {ka
+                ? "ხშირად დასმული კითხვები"
+                : "FAQ"}
+            </button>
+
+            <button
+              onClick={() => toggleMenu("contact")}
+            >
+              {ka ? "კონტაქტი" : "Contact"}
+            </button>
+
+          </nav>
+
+          <div className="homeActions">
+
+            <div className="homeLanguages">
+
+              <button
+                className={
+                  language === "ka"
+                    ? "activeLanguage"
+                    : ""
+                }
+                onClick={() => setLanguage("ka")}
+              >
+                GEO
+              </button>
+
+              <span />
+
+              <button
+                className={
+                  language === "en"
+                    ? "activeLanguage"
+                    : ""
+                }
+                onClick={() => setLanguage("en")}
+              >
+                ENG
+              </button>
+
+            </div>
+
+            <a
+              href="/admin"
+              className="homeAdmin"
+            >
+              {ka ? "ადმინ პანელი" : "Admin"}
+            </a>
+
+            <a
+              href="/login"
+              className="homeAuth"
+            >
+              {ka ? "შესვლა" : "Sign in"}
+            </a>
+
+            <a
+              href="/signup"
+              className="homeAuth"
+            >
+              {ka ? "რეგისტრაცია" : "Register"}
+            </a>
+
           </div>
-        </a>
-
-        <nav
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "28px",
-          }}
-        >
-          <button
-            onClick={() => toggleMenu("about")}
-            style={navButtonStyle}
-          >
-            {ka ? "ჩვენ შესახებ" : "About"}
-            <Chevron open={openMenu === "about"} />
-          </button>
-
-          <button
-            onClick={() => toggleMenu("shop")}
-            style={navButtonStyle}
-          >
-            {ka ? "ონლაინ შეძენა" : "Shop"}
-            <Chevron open={openMenu === "shop"} />
-          </button>
-
-          <button
-            onClick={() => toggleMenu("faq")}
-            style={navButtonStyle}
-          >
-            {ka ? "ხშირად დასმული კითხვები" : "FAQ"}
-          </button>
-
-          <button
-            onClick={() => toggleMenu("contact")}
-            style={navButtonStyle}
-          >
-            {ka ? "კონტაქტი" : "Contact"}
-          </button>
-        </nav>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "7px",
-          }}
-        >
-          <button
-            onClick={() => setLanguage("ka")}
-            style={{
-              ...languageButtonStyle,
-              color: language === "ka" ? "#1266e9" : "#7b8796",
-            }}
-          >
-            GEO
-          </button>
-
-          <span
-            style={{
-              width: "1px",
-              height: "14px",
-              background: "#d9e0e8",
-            }}
-          />
-
-          <button
-            onClick={() => setLanguage("en")}
-            style={{
-              ...languageButtonStyle,
-              color: language === "en" ? "#1266e9" : "#7b8796",
-            }}
-          >
-            ENG
-          </button>
-
-          <a href="/admin" style={secondaryButtonStyle}>
-            {ka ? "ადმინ პანელი" : "Admin"}
-          </a>
-
-          <a href="/login" style={primaryButtonStyle}>
-            {ka ? "შესვლა" : "Sign in"}
-          </a>
-
-          <a href="/signup" style={primaryButtonStyle}>
-            {ka ? "რეგისტრაცია" : "Register"}
-          </a>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <style jsx>{`
+
+        .homeHeader {
+          position: relative;
+          z-index: 100;
+
+          background: #ffffff;
+
+          border-bottom: 1px solid #e6ebf1;
+        }
+
+        .homeHeaderInner {
+          width: calc(100% - 90px);
+          max-width: 1380px;
+          min-height: 78px;
+
+          margin: auto;
+
+          display: grid;
+          grid-template-columns: 210px 1fr auto;
+
+          align-items: center;
+
+          gap: 25px;
+        }
+
+
+        /* BRAND */
+
+        .homeBrand {
+          display: flex;
+          align-items: center;
+
+          gap: 10px;
+
+          text-decoration: none;
+        }
+
+        .homeBrandLogo {
+          width: 40px;
+          height: 40px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 10px;
+
+          background: #1266e9;
+          color: #ffffff;
+        }
+
+        .homeBrand strong,
+        .homeBrand span {
+          display: block;
+        }
+
+        .homeBrand strong {
+          color: #172b43;
+
+          font-size: 16px;
+          font-weight: 900;
+        }
+
+        .homeBrand span {
+          margin-top: 3px;
+
+          color: #8995a4;
+
+          font-size: 7px;
+          font-weight: 800;
+
+          letter-spacing: 1.3px;
+        }
+
+
+        /* NAV */
+
+        .homeNav {
+          display: flex;
+          align-items: center;
+
+          gap: 28px;
+        }
+
+        .homeNav button {
+          padding: 28px 0;
+
+          display: flex;
+          align-items: center;
+
+          gap: 5px;
+
+          border: 0;
+
+          background: transparent;
+
+          color: #1266e9;
+
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 800;
+
+          cursor: pointer;
+
+          white-space: nowrap;
+        }
+
+
+        /* ACTIONS */
+
+        .homeActions {
+          display: flex;
+          align-items: center;
+
+          gap: 7px;
+
+          padding-right: 25px;
+        }
+
+        .homeLanguages {
+          margin-right: 9px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 7px;
+        }
+
+        .homeLanguages button {
+          padding: 4px 1px;
+
+          border: 0;
+
+          background: transparent;
+
+          color: #7b8796;
+
+          font-size: 11px;
+          font-weight: 900;
+
+          cursor: pointer;
+        }
+
+        .homeLanguages button.activeLanguage {
+          color: #1266e9;
+        }
+
+        .homeLanguages span {
+          width: 1px;
+          height: 14px;
+
+          background: #d9e0e8;
+        }
+
+
+        /* AUTH */
+
+        .homeAuth,
+        .homeAdmin {
+          min-height: 38px;
+
+          padding: 0 13px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 9px;
+
+          font-size: 10px;
+          font-weight: 800;
+
+          text-decoration: none;
+
+          white-space: nowrap;
+        }
+
+        .homeAuth {
+          color: #ffffff;
+
+          background: #1266e9;
+
+          border: 1px solid #1266e9;
+        }
+
+        .homeAdmin {
+          color: #1266e9;
+
+          background: #ffffff;
+
+          border: 1px solid #cdddf4;
+        }
+
+
+        /* TABLET */
+
+        @media (max-width: 1050px) {
+
+          .homeHeaderInner {
+            width: calc(100% - 35px);
+
+            grid-template-columns:
+              180px 1fr auto;
+
+            gap: 15px;
+          }
+
+          .homeNav {
+            gap: 14px;
+          }
+
+          .homeNav button {
+            font-size: 10px;
+          }
+
+          .homeActions {
+            padding-right: 0;
+          }
+
+          .homeAuth,
+          .homeAdmin {
+            padding: 0 9px;
+
+            font-size: 9px;
+          }
+
+        }
+
+
+        /* SMALL TABLET */
+
+        @media (max-width: 850px) {
+
+          .homeNav {
+            display: none;
+          }
+
+          .homeHeaderInner {
+            grid-template-columns:
+              auto 1fr;
+          }
+
+          .homeActions {
+            justify-self: end;
+          }
+
+          .homeAdmin {
+            display: none;
+          }
+
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+
+          .homeHeaderInner {
+            width: calc(100% - 20px);
+
+            min-height: 68px;
+          }
+
+          .homeBrand span {
+            display: none;
+          }
+
+          .homeBrandLogo {
+            width: 36px;
+            height: 36px;
+          }
+
+          .homeBrand strong {
+            font-size: 13px;
+          }
+
+          .homeActions {
+            gap: 5px;
+          }
+
+          .homeLanguages {
+            margin-right: 2px;
+
+            gap: 5px;
+          }
+
+          .homeLanguages button {
+            font-size: 9px;
+          }
+
+          .homeAuth {
+            min-height: 34px;
+
+            padding: 0 8px;
+
+            font-size: 8px;
+          }
+
+        }
+
+
+        /* VERY SMALL MOBILE */
+
+        @media (max-width: 430px) {
+
+          .homeBrand strong {
+            font-size: 11px;
+          }
+
+          .homeBrandLogo {
+            width: 32px;
+            height: 32px;
+          }
+
+          .homeLanguages {
+            display: none;
+          }
+
+          .homeAuth {
+            padding: 0 7px;
+          }
+
+        }
+
+      `}</style>
+    </>
   );
 }
-
-const navButtonStyle = {
-  padding: "28px 0",
-  display: "flex",
-  alignItems: "center",
-  gap: "5px",
-  border: 0,
-  background: "transparent",
-  color: "#1266e9",
-  fontSize: "12px",
-  fontWeight: 800,
-  cursor: "pointer",
-  whiteSpace: "nowrap" as const,
-};
-
-const languageButtonStyle = {
-  padding: "4px 1px",
-  border: 0,
-  background: "transparent",
-  fontSize: "11px",
-  fontWeight: 900,
-  cursor: "pointer",
-};
-
-const primaryButtonStyle = {
-  minHeight: "38px",
-  padding: "0 13px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: "9px",
-  background: "#1266e9",
-  color: "#ffffff",
-  border: "1px solid #1266e9",
-  fontSize: "10px",
-  fontWeight: 800,
-  textDecoration: "none",
-  whiteSpace: "nowrap" as const,
-};
-
-const secondaryButtonStyle = {
-  ...primaryButtonStyle,
-  background: "#ffffff",
-  color: "#1266e9",
-  border: "1px solid #cdddf4",
-};
