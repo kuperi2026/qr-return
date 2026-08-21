@@ -459,9 +459,7 @@ export default function PetRegistrationForm({
       return;
     }
 
-    const {
-      error,
-    } = await client
+    const { error } = await client
       .from("secondary_admins")
       .upsert(
         {
@@ -554,6 +552,8 @@ export default function PetRegistrationForm({
           .trim()
           .toUpperCase();
 
+      /* ================= CHECK QR ================= */
+
       const {
         data: existingTag,
         error: tagCheckError,
@@ -579,13 +579,22 @@ export default function PetRegistrationForm({
           `QR კოდი ${cleanTagCode} უკვე დარეგისტრირებულია.`
         );
 
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+
         return;
       }
+
+      /* ================= SAVE ADMIN ================= */
 
       await saveSecondaryAdmin(
         supabase,
         currentUser.id
       );
+
+      /* ================= SAVE PROFILE ================= */
 
       const {
         data: createdProfile,
@@ -593,11 +602,21 @@ export default function PetRegistrationForm({
       } = await supabase
         .from("item")
         .insert({
+          /* QR */
+
           tag_code:
             cleanTagCode,
 
+          /* OWNER */
+
           owner_id:
             currentUser.id,
+
+          owner_first_name:
+            owner.firstName.trim(),
+
+          owner_last_name:
+            owner.lastName.trim(),
 
           owner_phone:
             owner.phone.trim(),
@@ -605,11 +624,15 @@ export default function PetRegistrationForm({
           owner_email:
             owner.email.trim(),
 
+          /* LOCKED CATEGORY */
+
           item_type:
             type,
 
           pet_type:
             type,
+
+          /* PET */
 
           item_name:
             itemName.trim(),
@@ -650,6 +673,8 @@ export default function PetRegistrationForm({
             finderMessage.trim() ||
             null,
 
+          /* FINDER VISIBILITY */
+
           show_owner_name:
             true,
 
@@ -677,11 +702,15 @@ export default function PetRegistrationForm({
           show_finder_message:
             showFinderMessage,
 
+          /* CONTACT */
+
           phone_enabled:
             true,
 
           live_chat_enabled:
             liveChatEnabled,
+
+          /* STATUS */
 
           active:
             true,
@@ -692,6 +721,25 @@ export default function PetRegistrationForm({
         .single();
 
       if (insertError) {
+        const lowerMessage =
+          insertError.message
+            .toLowerCase();
+
+        if (
+          lowerMessage.includes(
+            "duplicate"
+          ) ||
+          lowerMessage.includes(
+            "unique"
+          )
+        ) {
+          setErrorMessage(
+            "ეს QR კოდი უკვე გამოყენებულია."
+          );
+
+          return;
+        }
+
         throw new Error(
           insertError.message
         );
@@ -723,10 +771,17 @@ export default function PetRegistrationForm({
           ? `შენახვა ვერ მოხერხდა: ${error.message}`
           : "შენახვა ვერ მოხერხდა."
       );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     } finally {
       setSaving(false);
     }
   }
+
+  /* ================= LOADING ================= */
 
   if (authLoading) {
     return (
@@ -746,6 +801,8 @@ export default function PetRegistrationForm({
       </div>
     );
   }
+
+  /* ================= FORM ================= */
 
   return (
     <>
@@ -775,6 +832,7 @@ export default function PetRegistrationForm({
         {successMessage && (
           <div
             className="message success"
+            role="status"
           >
             <span>✓</span>
 
@@ -790,6 +848,8 @@ export default function PetRegistrationForm({
           </div>
         )}
 
+        {/* OWNER */}
+
         <OwnerInformationSection
           firstName={
             owner.firstName
@@ -804,6 +864,8 @@ export default function PetRegistrationForm({
             owner.email
           }
         />
+
+        {/* ADMIN */}
 
         <AdminAccessSection
           adminEnabled={
@@ -825,6 +887,8 @@ export default function PetRegistrationForm({
             setPermissions
           }
         />
+
+        {/* PET BASIC */}
 
         <PetBasicInfo
           tagCode={
@@ -871,6 +935,8 @@ export default function PetRegistrationForm({
           }
         />
 
+        {/* HEALTH */}
+
         <PetHealthSection
           medicalInfo={
             medicalInfo
@@ -897,6 +963,8 @@ export default function PetRegistrationForm({
             setFinderMessage
           }
         />
+
+        {/* FINDER VIEW */}
 
         <FinderVisibilitySection
           showEmail={
@@ -943,6 +1011,8 @@ export default function PetRegistrationForm({
           }
         />
 
+        {/* CONTACT */}
+
         <ContactOptionsSection
           liveChatEnabled={
             liveChatEnabled
@@ -951,6 +1021,8 @@ export default function PetRegistrationForm({
             setLiveChatEnabled
           }
         />
+
+        {/* SAVE */}
 
         <section className="saveCard">
           <div>
@@ -1000,6 +1072,7 @@ export default function PetRegistrationForm({
           padding: 14px;
 
           display: flex;
+          align-items: flex-start;
 
           gap: 10px;
 
@@ -1132,6 +1205,15 @@ export default function PetRegistrationForm({
           font-weight: 900;
 
           cursor: pointer;
+
+          box-shadow:
+            0 10px 20px
+            rgba(
+              18,
+              102,
+              233,
+              0.16
+            );
         }
 
         .saveCard button:disabled {
