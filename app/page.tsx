@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import HomeHeader from "@/components/home/HomeHeader";
+import HomeHeader from "./components/home/HomeHeader";
 
 type Lang = "ka" | "en";
 
@@ -16,7 +16,7 @@ export default function HomePage() {
       />
 
       <main>
-        {/* შემდეგ კომპონენტს აქ დავამატებთ */}
+        {/* შემდეგ კომპონენტებს აქ თითო-თითოდ დავამატებთ */}
       </main>
     </>
   );
