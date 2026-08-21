@@ -1,393 +1,901 @@
 "use client";
 
 import { useState } from "react";
-import HomeHeader from "./components/home/HomeHeader";
 
 type Lang = "ka" | "en";
 
 export default function HomePage() {
-  const [language, setLanguage] = useState<Lang>("ka");
+  const [language, setLanguage] =
+    useState<Lang>("ka");
 
   const ka = language === "ka";
 
   return (
-    <>
-      <HomeHeader
-        language={language}
-        onLanguageChange={setLanguage}
-      />
+    <main className="page">
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
-      <main>
-        <section className="protectSection">
-          <div className="protectInner">
+      <header className="header">
+        <div className="headerInner">
+          {/* BRAND */}
 
-            {/* LEFT — EMERGENCY */}
-            <div className="emergencySide">
-              <div className="sectionLabel">
-                <span className="labelLine" />
-                <span>EMERGENCY</span>
-              </div>
-
-              <h1>
-                {ka
-                  ? "საჭირო ინფორმაცია მაშინ, როცა ყოველი წამი მნიშვნელოვანია."
-                  : "Essential information when every second matters."}
-              </h1>
-
-              <p className="introText">
-                {ka
-                  ? "QR RETURN Emergency პროფილი საშუალებას აძლევს დამხმარე ადამიანს ერთი სკანირებით ნახოს თქვენ მიერ წინასწარ არჩეული მნიშვნელოვანი ინფორმაცია."
-                  : "A QR RETURN Emergency profile lets a helper access the important information you choose to share with one scan."}
-              </p>
-
-              <div className="emergencyCard">
-                <div className="medicalIcon">
-                  <MedicalIcon />
-                </div>
-
-                <div>
-                  <span className="smallLabel">
-                    QR RETURN
-                  </span>
-
-                  <h3>
-                    {ka
-                      ? "Emergency პროფილი"
-                      : "Emergency Profile"}
-                  </h3>
-
-                  <p>
-                    {ka
-                      ? "საკონტაქტო პირი და აუცილებელი ინფორმაცია ხელმისაწვდომია ერთი QR სკანირებით."
-                      : "Emergency contacts and essential information available with one QR scan."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="emergencyActions">
-                <a href="/store" className="primaryButton">
-                  {ka
-                    ? "Emergency პროდუქტის ნახვა"
-                    : "View Emergency Product"}
-                </a>
-
-                <a href="#how-it-works" className="textButton">
-                  {ka ? "როგორ მუშაობს" : "How it works"}
-                  <span>→</span>
-                </a>
-              </div>
-
-              <div className="miniFeatures">
-                <div>
-                  <CheckIcon />
-                  <span>
-                    {ka ? "სწრაფი წვდომა" : "Fast access"}
-                  </span>
-                </div>
-
-                <div>
-                  <CheckIcon />
-                  <span>
-                    {ka ? "თქვენი კონტროლი" : "Your control"}
-                  </span>
-                </div>
-
-                <div>
-                  <CheckIcon />
-                  <span>
-                    {ka ? "აპლიკაციის გარეშე" : "No app required"}
-                  </span>
-                </div>
-              </div>
+          <a href="/" className="brand">
+            <div className="logoMark">
+              <QRLogoIcon />
             </div>
 
-            {/* RIGHT — QR CIRCLE */}
-            <div className="qrSide">
-              <div className="productCircle">
+            <div className="brandText">
+              <strong>
+                QR RETURN
+              </strong>
 
-                <div className="orbit orbitOne" />
-                <div className="orbit orbitTwo" />
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
+            </div>
+          </a>
 
-                {/* CENTER */}
-                <div className="qrCenter">
-                  <div className="qrIcon">
-                    <QRIcon />
-                  </div>
+          {/* NAVIGATION */}
 
-                  <strong>QR RETURN</strong>
+          <nav className="navigation">
+            <a href="#about">
+              {ka
+                ? "ჩვენ შესახებ"
+                : "About"}
+            </a>
 
-                  <span>
-                    {ka
-                      ? "ერთი სკანირება"
-                      : "ONE SCAN"}
-                  </span>
-                </div>
+            <a href="/store">
+              {ka
+                ? "ონლაინ შეძენა"
+                : "Shop Online"}
+            </a>
 
-                {/* DOG */}
-                <div className="product productDog">
-                  <div className="productIcon">
-                    <DogIcon />
-                  </div>
-                  <span>{ka ? "ძაღლი" : "Dog"}</span>
-                </div>
+            <a href="#faq">
+              {ka
+                ? "ხშირად დასმული კითხვები"
+                : "FAQ"}
+            </a>
 
-                {/* CAT */}
-                <div className="product productCat">
-                  <div className="productIcon">
-                    <CatIcon />
-                  </div>
-                  <span>{ka ? "კატა" : "Cat"}</span>
-                </div>
+            <a href="/support">
+              {ka
+                ? "კონტაქტი"
+                : "Contact"}
+            </a>
+          </nav>
 
-                {/* WALLET */}
-                <div className="product productWallet">
-                  <div className="productIcon">
-                    <WalletIcon />
-                  </div>
-                  <span>{ka ? "საფულე" : "Wallet"}</span>
-                </div>
+          {/* RIGHT */}
 
-                {/* KEYS */}
-                <div className="product productKeys">
-                  <div className="productIcon">
-                    <KeyIcon />
-                  </div>
-                  <span>{ka ? "გასაღები" : "Keys"}</span>
-                </div>
+          <div className="headerActions">
+            {/* LANGUAGE */}
 
-                {/* BAG */}
-                <div className="product productBag">
-                  <div className="productIcon">
-                    <BagIcon />
-                  </div>
-                  <span>{ka ? "ჩანთა" : "Bag"}</span>
-                </div>
+            <div className="languages">
+              <button
+                type="button"
+                className={
+                  language === "ka"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setLanguage("ka")
+                }
+              >
+                GEO
+              </button>
 
-                {/* SUITCASE */}
-                <div className="product productSuitcase">
-                  <div className="productIcon">
-                    <SuitcaseIcon />
-                  </div>
-                  <span>{ka ? "ჩემოდანი" : "Suitcase"}</span>
-                </div>
+              <span />
 
-              </div>
-
-              <p className="circleCaption">
-                {ka
-                  ? "ერთი სისტემა თქვენი მნიშვნელოვანი ნივთებისა და საყვარელი ცხოველებისთვის."
-                  : "One system for your important belongings and pets."}
-              </p>
+              <button
+                type="button"
+                className={
+                  language === "en"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setLanguage("en")
+                }
+              >
+                ENG
+              </button>
             </div>
 
+            {/* LOGIN */}
+
+            <a
+              href="/login"
+              className="headerButton"
+            >
+              {ka
+                ? "შესვლა"
+                : "Sign In"}
+            </a>
+
+            {/* REGISTER */}
+
+            <a
+              href="/signup"
+              className="headerButton"
+            >
+              {ka
+                ? "რეგისტრაცია"
+                : "Register"}
+            </a>
+
+            {/* ADMIN — ახლა ტესტირებისთვის ჩანს */}
+
+            <a
+              href="/admin"
+              className="adminButton"
+            >
+              {ka
+                ? "ადმინ პანელი"
+                : "Admin Panel"}
+            </a>
           </div>
-        </section>
-      </main>
+        </div>
+      </header>
+
+      {/* =====================================================
+          HERO
+      ====================================================== */}
+
+      <section className="hero">
+        <div className="heroInner">
+          {/* =================================================
+              LEFT — EMERGENCY
+          ================================================== */}
+
+          <div className="left">
+            <div className="sectionLabel">
+              <span className="labelLine" />
+
+              <span>
+                EMERGENCY
+              </span>
+            </div>
+
+            <h1>
+              {ka
+                ? "მნიშვნელოვანი ინფორმაცია მაშინ, როცა ის ყველაზე მეტად გჭირდებათ."
+                : "Important information when you need it most."}
+            </h1>
+
+            <p className="lead">
+              {ka
+                ? "QR RETURN Emergency პროფილი საშუალებას აძლევს დამხმარე ადამიანს ერთი QR სკანირებით ნახოს თქვენ მიერ წინასწარ არჩეული მნიშვნელოვანი ინფორმაცია და საგანგებო საკონტაქტო პირი."
+                : "A QR RETURN Emergency profile allows a helper to access the important information and emergency contact you have chosen to share with one QR scan."}
+            </p>
+
+            {/* EMERGENCY UI CARD */}
+
+            <div className="emergencyCard">
+              <div className="emergencyIcon">
+                <MedicalIcon />
+              </div>
+
+              <div className="emergencyContent">
+                <small>
+                  QR RETURN
+                </small>
+
+                <h2>
+                  {ka
+                    ? "Emergency პროფილი"
+                    : "Emergency Profile"}
+                </h2>
+
+                <p>
+                  {ka
+                    ? "საჭირო ინფორმაცია, საგანგებო კონტაქტი და თქვენ მიერ არჩეული მონაცემები — ერთ პროფილში."
+                    : "Important information, emergency contacts and the details you choose to share — in one profile."}
+                </p>
+              </div>
+            </div>
+
+            {/* ACTIONS */}
+
+            <div className="actions">
+              <a
+                href="/emergency"
+                className="primaryButton"
+              >
+                {ka
+                  ? "Emergency პროფილი"
+                  : "Emergency Profile"}
+
+                <ArrowIcon />
+              </a>
+
+              <a
+                href="/store"
+                className="secondaryButton"
+              >
+                {ka
+                  ? "პროდუქტების ნახვა"
+                  : "View Products"}
+              </a>
+            </div>
+
+            {/* MINI POINTS */}
+
+            <div className="miniPoints">
+              <div>
+                <CheckIcon />
+
+                <span>
+                  {ka
+                    ? "სწრაფი წვდომა"
+                    : "Fast access"}
+                </span>
+              </div>
+
+              <div>
+                <CheckIcon />
+
+                <span>
+                  {ka
+                    ? "თქვენი კონტროლი"
+                    : "Your control"}
+                </span>
+              </div>
+
+              <div>
+                <CheckIcon />
+
+                <span>
+                  {ka
+                    ? "აპლიკაციის გარეშე"
+                    : "No app required"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* =================================================
+              RIGHT — QR CIRCLE
+          ================================================== */}
+
+          <div className="right">
+            <div className="circle">
+              {/* ORBITS */}
+
+              <div className="orbit orbitOuter" />
+              <div className="orbit orbitInner" />
+
+              {/* CENTER */}
+
+              <div className="centerQR">
+                <div className="qrBox">
+                  <QRIcon />
+                </div>
+
+                <strong>
+                  QR RETURN
+                </strong>
+
+                <span>
+                  {ka
+                    ? "ერთი სკანირება"
+                    : "ONE SCAN"}
+                </span>
+              </div>
+
+              {/* DOG */}
+
+              <ProductNode
+                className="dog"
+                label={
+                  ka ? "ძაღლი" : "Dog"
+                }
+              >
+                <DogIcon />
+              </ProductNode>
+
+              {/* CAT */}
+
+              <ProductNode
+                className="cat"
+                label={
+                  ka ? "კატა" : "Cat"
+                }
+              >
+                <CatIcon />
+              </ProductNode>
+
+              {/* WALLET */}
+
+              <ProductNode
+                className="wallet"
+                label={
+                  ka
+                    ? "საფულე"
+                    : "Wallet"
+                }
+              >
+                <WalletIcon />
+              </ProductNode>
+
+              {/* KEYS */}
+
+              <ProductNode
+                className="keys"
+                label={
+                  ka
+                    ? "გასაღები"
+                    : "Keys"
+                }
+              >
+                <KeyIcon />
+              </ProductNode>
+
+              {/* BAG */}
+
+              <ProductNode
+                className="bag"
+                label={
+                  ka
+                    ? "ჩანთა"
+                    : "Bag"
+                }
+              >
+                <BagIcon />
+              </ProductNode>
+
+              {/* SUITCASE */}
+
+              <ProductNode
+                className="suitcase"
+                label={
+                  ka
+                    ? "ჩემოდანი"
+                    : "Suitcase"
+                }
+              >
+                <SuitcaseIcon />
+              </ProductNode>
+            </div>
+
+            <p className="circleText">
+              {ka
+                ? "ერთი QR RETURN სისტემა თქვენი ნივთებისა და საყვარელი ცხოველებისთვის."
+                : "One QR RETURN system for your belongings and pets."}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          BOTTOM MINI BAR
+      ====================================================== */}
+
+      <section className="benefits">
+        <div className="benefitsInner">
+          <div className="benefit">
+            <ShieldIcon />
+
+            <div>
+              <strong>
+                {ka
+                  ? "უსაფრთხო"
+                  : "Secure"}
+              </strong>
+
+              <span>
+                {ka
+                  ? "თქვენ აკონტროლებთ ინფორმაციას"
+                  : "You control your information"}
+              </span>
+            </div>
+          </div>
+
+          <div className="benefit">
+            <SmallQRIcon />
+
+            <div>
+              <strong>
+                {ka
+                  ? "ერთი QR კოდი"
+                  : "One QR Code"}
+              </strong>
+
+              <span>
+                {ka
+                  ? "ერთი მარტივი სკანირება"
+                  : "One simple scan"}
+              </span>
+            </div>
+          </div>
+
+          <div className="benefit">
+            <UserControlIcon />
+
+            <div>
+              <strong>
+                {ka
+                  ? "თქვენი კონტროლი"
+                  : "Your Control"}
+              </strong>
+
+              <span>
+                {ka
+                  ? "თავად ირჩევთ რა გამოჩნდება"
+                  : "Choose what others can see"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          STYLE
+      ====================================================== */}
 
       <style jsx>{`
         * {
           box-sizing: border-box;
         }
 
-        .protectSection {
-          width: 100%;
-          overflow: hidden;
+        .page {
+          min-height: 100vh;
+
+          color: #172b43;
+
           background: #ffffff;
-          border-bottom: 1px solid #edf1f5;
         }
 
-        .protectInner {
-          width: calc(100% - 80px);
-          max-width: 1240px;
-          min-height: 650px;
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+          position: relative;
+          z-index: 100;
+
+          width: 100%;
+
+          background: #ffffff;
+
+          border-bottom:
+            1px solid #e9edf2;
+        }
+
+        .headerInner {
+          width:
+            calc(100% - 110px);
+
+          max-width: 1380px;
+          min-height: 78px;
+
           margin: 0 auto;
-          padding: 75px 0 80px;
 
           display: grid;
-          grid-template-columns: 0.92fr 1.08fr;
+
+          grid-template-columns:
+            205px 1fr auto;
+
           align-items: center;
-          gap: 85px;
+
+          gap: 22px;
         }
 
-        /* LEFT */
+        .brand {
+          display: flex;
+          align-items: center;
 
-        .emergencySide {
-          max-width: 520px;
+          gap: 10px;
+
+          text-decoration: none;
+        }
+
+        .logoMark {
+          width: 39px;
+          height: 39px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 10px;
+
+          color: #ffffff;
+
+          background: #172b43;
+        }
+
+        .brandText strong,
+        .brandText span {
+          display: block;
+        }
+
+        .brandText strong {
+          color: #172b43;
+
+          font-size: 16px;
+          font-weight: 900;
+
+          letter-spacing: -0.4px;
+        }
+
+        .brandText span {
+          margin-top: 3px;
+
+          color: #9aa4b0;
+
+          font-size: 7px;
+          font-weight: 850;
+
+          letter-spacing: 1.35px;
+        }
+
+        .navigation {
+          display: flex;
+          align-items: center;
+
+          gap: 27px;
+        }
+
+        .navigation a {
+          color: #44566b;
+
+          text-decoration: none;
+
+          white-space: nowrap;
+
+          font-size: 12px;
+          font-weight: 750;
+        }
+
+        .navigation a:hover {
+          color: #1266e9;
+        }
+
+        .headerActions {
+          padding-right: 22px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 7px;
+        }
+
+        /* LANGUAGE */
+
+        .languages {
+          margin-right: 8px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 7px;
+        }
+
+        .languages button {
+          padding: 5px 2px;
+
+          border: 0;
+
+          color: #7c8998;
+
+          background: transparent;
+
+          cursor: pointer;
+
+          font-family: inherit;
+
+          font-size: 11px;
+          font-weight: 900;
+        }
+
+        .languages button.active {
+          color: #1266e9;
+        }
+
+        .languages span {
+          width: 1px;
+          height: 14px;
+
+          background: #d8dee5;
+        }
+
+        /* HEADER BUTTONS */
+
+        .headerButton,
+        .adminButton {
+          min-height: 38px;
+
+          padding: 0 13px;
+
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 9px;
+
+          text-decoration: none;
+
+          white-space: nowrap;
+
+          font-size: 10.5px;
+          font-weight: 850;
+        }
+
+        .headerButton {
+          color: #ffffff;
+
+          border:
+            1px solid #1266e9;
+
+          background: #1266e9;
+        }
+
+        .adminButton {
+          color: #172b43;
+
+          border:
+            1px solid #d8e0e9;
+
+          background: #ffffff;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+          width: 100%;
+
+          overflow: hidden;
+
+          background:
+            radial-gradient(
+              circle at 78% 44%,
+              rgba(
+                18,
+                102,
+                233,
+                0.06
+              ),
+              transparent 34%
+            ),
+            #ffffff;
+        }
+
+        .heroInner {
+          width:
+            calc(100% - 80px);
+
+          max-width: 1240px;
+          min-height: 650px;
+
+          margin: 0 auto;
+
+          padding: 70px 0 76px;
+
+          display: grid;
+
+          grid-template-columns:
+            0.93fr 1.07fr;
+
+          align-items: center;
+
+          gap: 72px;
+        }
+
+        /* =========================
+           LEFT
+        ========================= */
+
+        .left {
+          max-width: 530px;
         }
 
         .sectionLabel {
           display: flex;
           align-items: center;
+
           gap: 10px;
 
           color: #1266e9;
 
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: 1.2px;
+
+          letter-spacing: 1.3px;
         }
 
         .labelLine {
-          width: 28px;
+          width: 26px;
           height: 1px;
+
           background: #1266e9;
         }
 
-        h1 {
-          margin: 18px 0 0;
+        .left h1 {
+          margin: 17px 0 0;
 
           color: #172b43;
 
-          font-size: clamp(38px, 4vw, 52px);
-          font-weight: 780;
+          font-size:
+            clamp(
+              38px,
+              4vw,
+              50px
+            );
+
           line-height: 1.08;
-          letter-spacing: -1.9px;
+
+          letter-spacing:
+            -1.8px;
+
+          font-weight: 790;
         }
 
-        .introText {
+        .lead {
           max-width: 500px;
-          margin: 21px 0 0;
 
-          color: #6a788a;
+          margin: 20px 0 0;
 
-          font-size: 15px;
+          color: #69788b;
+
+          font-size: 14px;
+
           line-height: 1.75;
         }
 
         /* EMERGENCY CARD */
 
         .emergencyCard {
-          margin-top: 29px;
-          padding: 19px;
+          margin-top: 27px;
+
+          padding: 18px;
 
           display: grid;
-          grid-template-columns: 48px 1fr;
-          gap: 15px;
+
+          grid-template-columns:
+            46px 1fr;
+
           align-items: start;
 
-          border: 1px solid #e0e8f2;
-          border-radius: 14px;
+          gap: 14px;
+
+          border:
+            1px solid #e0e8f2;
+
+          border-radius: 13px;
 
           background: #f9fbfe;
         }
 
-        .medicalIcon {
-          width: 48px;
-          height: 48px;
+        .emergencyIcon {
+          width: 46px;
+          height: 46px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
           color: #1266e9;
+
           background: #eaf3ff;
         }
 
-        .smallLabel {
+        .emergencyContent small {
           color: #1266e9;
 
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
-        .emergencyCard h3 {
-          margin: 5px 0 0;
+        .emergencyContent h2 {
+          margin: 4px 0 0;
 
           color: #263b53;
 
           font-size: 15px;
-          font-weight: 800;
         }
 
-        .emergencyCard p {
+        .emergencyContent p {
           max-width: 380px;
-          margin: 7px 0 0;
 
-          color: #758397;
+          margin: 6px 0 0;
 
-          font-size: 12px;
+          color: #748397;
+
+          font-size: 11px;
+
           line-height: 1.6;
         }
 
-        /* BUTTONS */
+        /* ACTIONS */
 
-        .emergencyActions {
-          margin-top: 22px;
+        .actions {
+          margin-top: 21px;
 
           display: flex;
           align-items: center;
-          gap: 19px;
+
+          gap: 9px;
         }
 
-        .primaryButton {
-          min-height: 45px;
-          padding: 0 17px;
+        .primaryButton,
+        .secondaryButton {
+          min-height: 44px;
+
+          padding: 0 16px;
 
           display: inline-flex;
           align-items: center;
+          justify-content: center;
+
+          gap: 8px;
 
           border-radius: 9px;
 
-          color: #ffffff;
-          background: #1266e9;
-
           text-decoration: none;
 
-          font-size: 11px;
+          font-size: 10.5px;
           font-weight: 850;
         }
 
-        .textButton {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
+        .primaryButton {
+          color: #ffffff;
 
-          color: #53657a;
+          border:
+            1px solid #1266e9;
 
-          text-decoration: none;
-
-          font-size: 11px;
-          font-weight: 800;
+          background: #1266e9;
         }
 
-        .textButton span {
-          color: #1266e9;
+        .secondaryButton {
+          color: #42556b;
+
+          border:
+            1px solid #dae3ed;
+
+          background: #ffffff;
         }
 
-        /* MINI FEATURES */
+        /* MINI POINTS */
 
-        .miniFeatures {
-          margin-top: 27px;
+        .miniPoints {
+          margin-top: 25px;
 
           display: flex;
           flex-wrap: wrap;
-          gap: 16px;
+
+          gap: 14px;
         }
 
-        .miniFeatures div {
+        .miniPoints div {
           display: flex;
           align-items: center;
+
           gap: 6px;
 
-          color: #718095;
+          color: #738195;
 
-          font-size: 10px;
+          font-size: 9.5px;
+
           font-weight: 700;
         }
 
-        /* RIGHT */
+        /* =========================
+           RIGHT
+        ========================= */
 
-        .qrSide {
+        .right {
           display: flex;
           flex-direction: column;
           align-items: center;
         }
 
-        .productCircle {
-          width: 510px;
-          height: 510px;
+        .circle {
+          width: 500px;
+          height: 500px;
 
           position: relative;
 
@@ -396,283 +904,580 @@ export default function HomePage() {
           background:
             radial-gradient(
               circle at center,
-              #f4f8ff 0%,
-              #ffffff 64%
+              #f5f9ff 0%,
+              #ffffff 66%
             );
         }
 
         .orbit {
           position: absolute;
+
           border-radius: 50%;
-          border: 1px solid #dce9fa;
+
+          border:
+            1px solid #dae8fa;
         }
 
-        .orbitOne {
-          inset: 52px;
+        .orbitOuter {
+          inset: 50px;
         }
 
-        .orbitTwo {
-          inset: 100px;
-          border-color: #edf3fb;
+        .orbitInner {
+          inset: 103px;
+
+          border-color:
+            #edf3fa;
         }
 
-        /* CENTER QR */
+        /* CENTER */
 
-        .qrCenter {
-          width: 150px;
-          height: 150px;
+        .centerQR {
+          width: 148px;
+          height: 148px;
 
           position: absolute;
-          z-index: 4;
+
+          z-index: 5;
 
           top: 50%;
           left: 50%;
 
-          transform: translate(-50%, -50%);
+          transform:
+            translate(
+              -50%,
+              -50%
+            );
 
           display: flex;
           flex-direction: column;
+
           align-items: center;
           justify-content: center;
 
-          border: 1px solid #cfe0f7;
+          border:
+            1px solid #d0e0f6;
+
           border-radius: 50%;
 
           background: #ffffff;
 
           box-shadow:
-            0 14px 35px
-            rgba(32, 79, 140, 0.09);
+            0 12px 32px
+            rgba(
+              31,
+              77,
+              135,
+              0.09
+            );
         }
 
-        .qrIcon {
+        .qrBox {
           color: #1266e9;
         }
 
-        .qrCenter strong {
-          margin-top: 8px;
+        .centerQR strong {
+          margin-top: 5px;
 
-          color: #20364f;
+          color: #263b53;
 
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 900;
         }
 
-        .qrCenter span {
+        .centerQR span {
           margin-top: 3px;
 
-          color: #8a97a6;
+          color: #919ba7;
 
-          font-size: 7px;
+          font-size: 6.5px;
+
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
         /* PRODUCTS */
 
-        .product {
-          width: 86px;
+        .circle :global(.productNode) {
+          width: 82px;
 
           position: absolute;
-          z-index: 5;
+
+          z-index: 6;
 
           display: flex;
           flex-direction: column;
+
           align-items: center;
 
           text-align: center;
         }
 
-        .productIcon {
-          width: 64px;
-          height: 64px;
+        .circle :global(.nodeIcon) {
+          width: 61px;
+          height: 61px;
 
           display: grid;
           place-items: center;
 
-          border: 1px solid #dce7f5;
+          border:
+            1px solid #dce7f5;
+
           border-radius: 50%;
 
           color: #1266e9;
+
           background: #ffffff;
 
           box-shadow:
-            0 8px 20px
-            rgba(31, 73, 125, 0.07);
+            0 7px 18px
+            rgba(
+              31,
+              73,
+              125,
+              0.06
+            );
         }
 
-        .product span {
-          margin-top: 7px;
+        .circle :global(.nodeLabel) {
+          margin-top: 6px;
 
-          color: #516276;
+          color: #526377;
 
-          font-size: 9px;
+          font-size: 8.5px;
+
           font-weight: 800;
         }
 
-        .productDog {
-          top: 5px;
-          left: 137px;
+        .circle :global(.dog) {
+          top: 4px;
+          left: 132px;
         }
 
-        .productCat {
-          top: 5px;
-          right: 137px;
+        .circle :global(.cat) {
+          top: 4px;
+          right: 132px;
         }
 
-        .productWallet {
-          top: 195px;
+        .circle :global(.wallet) {
+          top: 192px;
           right: 0;
         }
 
-        .productKeys {
-          bottom: 15px;
-          right: 95px;
+        .circle :global(.keys) {
+          right: 92px;
+          bottom: 14px;
         }
 
-        .productBag {
-          bottom: 15px;
-          left: 95px;
+        .circle :global(.bag) {
+          left: 92px;
+          bottom: 14px;
         }
 
-        .productSuitcase {
-          top: 195px;
+        .circle :global(.suitcase) {
+          top: 192px;
           left: 0;
         }
 
-        .circleCaption {
-          max-width: 420px;
-          margin: 9px auto 0;
+        .circleText {
+          max-width: 410px;
 
-          color: #8793a1;
+          margin: 7px 0 0;
+
+          color: #8b97a5;
 
           text-align: center;
 
-          font-size: 10px;
+          font-size: 9.5px;
+
           line-height: 1.55;
         }
 
-        /* RESPONSIVE */
+        /* =========================
+           BENEFITS
+        ========================= */
 
-        @media (max-width: 1000px) {
-          .protectInner {
-            grid-template-columns: 1fr;
+        .benefits {
+          width: 100%;
+
+          border-top:
+            1px solid #edf1f5;
+
+          border-bottom:
+            1px solid #edf1f5;
+
+          background: #fbfcfe;
+        }
+
+        .benefitsInner {
+          width:
+            calc(100% - 80px);
+
+          max-width: 1180px;
+
+          margin: auto;
+
+          padding: 22px 0;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(3, 1fr);
+
+          gap: 0;
+        }
+
+        .benefit {
+          padding: 0 30px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 12px;
+
+          border-right:
+            1px solid #e3e8ee;
+        }
+
+        .benefit:first-child {
+          padding-left: 0;
+        }
+
+        .benefit:last-child {
+          border-right: 0;
+        }
+
+        .benefit :global(svg) {
+          flex: 0 0 auto;
+
+          color: #1266e9;
+        }
+
+        .benefit strong,
+        .benefit span {
+          display: block;
+        }
+
+        .benefit strong {
+          color: #293d55;
+
+          font-size: 11px;
+        }
+
+        .benefit span {
+          margin-top: 3px;
+
+          color: #7f8b9a;
+
+          font-size: 8.5px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (
+          max-width: 1100px
+        ) {
+          .navigation {
+            gap: 15px;
+          }
+
+          .navigation a {
+            font-size: 10px;
+          }
+
+          .headerInner {
+            width:
+              calc(100% - 40px);
+          }
+
+          .headerActions {
+            padding-right: 0;
+          }
+        }
+
+        @media (
+          max-width: 960px
+        ) {
+          .navigation {
+            display: none;
+          }
+
+          .headerInner {
+            grid-template-columns:
+              auto 1fr;
+          }
+
+          .headerActions {
+            justify-self: end;
+          }
+
+          .heroInner {
+            grid-template-columns:
+              1fr;
+
             gap: 55px;
           }
 
-          .emergencySide {
+          .left {
             max-width: 650px;
-            margin: 0 auto;
+
+            margin: auto;
+
             text-align: center;
           }
 
           .sectionLabel,
-          .emergencyActions,
-          .miniFeatures {
+          .actions,
+          .miniPoints {
             justify-content: center;
           }
 
           .emergencyCard {
+            max-width: 540px;
+
+            margin-left: auto;
+            margin-right: auto;
+
             text-align: left;
+          }
+
+          .benefitsInner {
+            grid-template-columns:
+              1fr;
+          }
+
+          .benefit {
+            padding: 15px 0;
+
+            border-right: 0;
+
+            border-bottom:
+              1px solid #e3e8ee;
+          }
+
+          .benefit:last-child {
+            border-bottom: 0;
           }
         }
 
-        @media (max-width: 620px) {
-          .protectInner {
-            width: calc(100% - 28px);
+        @media (
+          max-width: 620px
+        ) {
+          .headerInner {
+            width:
+              calc(100% - 20px);
+
+            min-height: 70px;
+          }
+
+          .brandText span,
+          .adminButton {
+            display: none;
+          }
+
+          .languages {
+            margin-right: 2px;
+          }
+
+          .languages button {
+            font-size: 9px;
+          }
+
+          .headerButton {
+            min-height: 34px;
+
+            padding: 0 8px;
+
+            font-size: 8.5px;
+          }
+
+          .heroInner {
+            width:
+              calc(100% - 28px);
+
             padding: 55px 0 65px;
           }
 
-          h1 {
-            font-size: 38px;
-            letter-spacing: -1.4px;
+          .left h1 {
+            font-size: 36px;
+
+            letter-spacing:
+              -1.3px;
           }
 
-          .introText {
-            font-size: 14px;
+          .lead {
+            font-size: 13px;
           }
 
-          .productCircle {
+          .circle {
             width: 350px;
             height: 350px;
           }
 
-          .orbitOne {
-            inset: 38px;
+          .orbitOuter {
+            inset: 37px;
           }
 
-          .orbitTwo {
-            inset: 75px;
+          .orbitInner {
+            inset: 74px;
           }
 
-          .qrCenter {
-            width: 112px;
-            height: 112px;
+          .centerQR {
+            width: 108px;
+            height: 108px;
           }
 
-          .product {
-            width: 65px;
+          .circle :global(.productNode) {
+            width: 63px;
           }
 
-          .productIcon {
-            width: 48px;
-            height: 48px;
+          .circle :global(.nodeIcon) {
+            width: 47px;
+            height: 47px;
           }
 
-          .productDog {
+          .circle :global(.dog) {
             top: 0;
-            left: 92px;
+            left: 91px;
           }
 
-          .productCat {
+          .circle :global(.cat) {
             top: 0;
-            right: 92px;
+            right: 91px;
           }
 
-          .productWallet {
-            top: 132px;
+          .circle :global(.wallet) {
+            top: 131px;
             right: 0;
           }
 
-          .productKeys {
-            right: 63px;
-            bottom: 5px;
+          .circle :global(.keys) {
+            right: 61px;
+            bottom: 3px;
           }
 
-          .productBag {
-            left: 63px;
-            bottom: 5px;
+          .circle :global(.bag) {
+            left: 61px;
+            bottom: 3px;
           }
 
-          .productSuitcase {
-            top: 132px;
+          .circle :global(.suitcase) {
+            top: 131px;
             left: 0;
-          }
-
-          .emergencyActions {
-            flex-direction: column;
           }
         }
       `}</style>
-    </>
+    </main>
   );
 }
 
-/* ICONS */
+/* =========================================================
+   PRODUCT NODE
+========================================================= */
+
+function ProductNode({
+  className,
+  label,
+  children,
+}: {
+  className: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`productNode ${className}`}
+    >
+      <div className="nodeIcon">
+        {children}
+      </div>
+
+      <span className="nodeLabel">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/* =========================================================
+   ICONS
+========================================================= */
+
+function QRLogoIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <path d="M14 14h3v3h4M14 21v-4M18 18h3v3" />
+    </svg>
+  );
+}
 
 function QRIcon() {
   return (
     <svg
-      width="43"
-      height="43"
+      width="40"
+      height="40"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
     >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+        rx="1"
+      />
+
       <path d="M14 14h3v3h4M14 21v-4M18 18h3v3" />
     </svg>
   );
@@ -681,14 +1486,30 @@ function QRIcon() {
 function MedicalIcon() {
   return (
     <svg
-      width="23"
-      height="23"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.7"
     >
       <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M5 12h14" />
+      <path d="m14 7 5 5-5 5" />
     </svg>
   );
 }
@@ -703,7 +1524,12 @@ function CheckIcon() {
       stroke="#1266e9"
       strokeWidth="2"
     >
-      <circle cx="12" cy="12" r="9" />
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+      />
+
       <path d="m8 12 2.5 2.5L16 9" />
     </svg>
   );
@@ -722,9 +1548,18 @@ function DogIcon() {
       <path d="M6 8 3 5v7l3 3" />
       <path d="m18 8 3-3v7l-3 3" />
       <path d="M6 8c1-2 3-3 6-3s5 1 6 3v7c0 3-2 5-6 5s-6-2-6-5V8Z" />
-      <circle cx="9" cy="12" r=".7" fill="currentColor" />
-      <circle cx="15" cy="12" r=".7" fill="currentColor" />
-      <path d="M10 16h4" />
+      <circle
+        cx="9"
+        cy="12"
+        r=".7"
+        fill="currentColor"
+      />
+      <circle
+        cx="15"
+        cy="12"
+        r=".7"
+        fill="currentColor"
+      />
     </svg>
   );
 }
@@ -742,9 +1577,18 @@ function CatIcon() {
       <path d="m6 8-2-5 5 3" />
       <path d="m18 8 2-5-5 3" />
       <path d="M6 8c1-2 3-3 6-3s5 1 6 3v7c0 3-2 5-6 5s-6-2-6-5V8Z" />
-      <circle cx="9" cy="12" r=".7" fill="currentColor" />
-      <circle cx="15" cy="12" r=".7" fill="currentColor" />
-      <path d="m11 15 1 1 1-1" />
+      <circle
+        cx="9"
+        cy="12"
+        r=".7"
+        fill="currentColor"
+      />
+      <circle
+        cx="15"
+        cy="12"
+        r=".7"
+        fill="currentColor"
+      />
     </svg>
   );
 }
@@ -759,8 +1603,16 @@ function WalletIcon() {
       stroke="currentColor"
       strokeWidth="1.6"
     >
-      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <rect
+        x="3"
+        y="6"
+        width="18"
+        height="13"
+        rx="2"
+      />
+
       <path d="M3 9h18" />
+
       <path d="M16 12h5v4h-5a2 2 0 0 1 0-4Z" />
     </svg>
   );
@@ -776,7 +1628,12 @@ function KeyIcon() {
       stroke="currentColor"
       strokeWidth="1.6"
     >
-      <circle cx="8" cy="12" r="4" />
+      <circle
+        cx="8"
+        cy="12"
+        r="4"
+      />
+
       <path d="M12 12h9M18 12v3M15 12v2" />
     </svg>
   );
@@ -808,9 +1665,89 @@ function SuitcaseIcon() {
       stroke="currentColor"
       strokeWidth="1.6"
     >
-      <rect x="5" y="6" width="14" height="14" rx="2" />
+      <rect
+        x="5"
+        y="6"
+        width="14"
+        height="14"
+        rx="2"
+      />
+
       <path d="M9 6V4h6v2M9 10v6M15 10v6" />
-      <path d="M8 22h1M15 22h1" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function SmallQRIcon() {
+  return (
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <rect
+        x="3"
+        y="3"
+        width="6"
+        height="6"
+      />
+
+      <rect
+        x="15"
+        y="3"
+        width="6"
+        height="6"
+      />
+
+      <rect
+        x="3"
+        y="15"
+        width="6"
+        height="6"
+      />
+
+      <path d="M15 15h2v2h-2zM19 15h2v6h-6v-2" />
+    </svg>
+  );
+}
+
+function UserControlIcon() {
+  return (
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <circle
+        cx="12"
+        cy="8"
+        r="4"
+      />
+
+      <path d="M5 21c0-4 3-6 7-6s7 2 7 6" />
+      <path d="M18 5h3M19.5 3.5v3" />
     </svg>
   );
 }
