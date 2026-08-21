@@ -1,520 +1,306 @@
 "use client";
 
-type Props = {
-  language?: "ka" | "en";
-  isLoggedIn?: boolean;
-  isAdmin?: boolean;
-  onLanguageChange?: (
-    language: "ka" | "en"
-  ) => void;
-};
+import { useState } from "react";
+import Link from "next/link";
 
-export default function HomeHeader({
-  language = "ka",
-  isLoggedIn = false,
-  isAdmin = false,
-  onLanguageChange,
-}: Props) {
-  const ka = language === "ka";
+type Language = "ka" | "en";
+
+export default function Header() {
+  const [language, setLanguage] = useState<Language>("ka");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isKa = language === "ka";
 
   return (
     <header className="header">
       <div className="headerInner">
         {/* BRAND */}
-
-        <a
-          href="/"
-          className="brand"
-          aria-label="QR RETURN"
-        >
-          <span className="brandMark">
+        <Link href="/" className="brand" aria-label="QR Return Home">
+          <div className="brandMark">
             <QRIcon />
-          </span>
+          </div>
+          <span className="brandName">QR RETURN</span>
+        </Link>
 
-          <strong className="brandName">
-            QR RETURN
-          </strong>
-        </a>
-
-        {/* ACTIONS */}
-
-        <div className="actions">
-          {isAdmin && (
-            <a
-              href="/admin"
-              className="adminButton"
-            >
-              Admin Panel
-            </a>
-          )}
-
-          <div
-            className="languageSwitcher"
-            aria-label="Language"
-          >
+        {/* DESKTOP RIGHT SIDE */}
+        <div className="rightSide">
+          {/* LANGUAGE SWITCHER */}
+          <div className="languageSwitcher" role="group" aria-label="Language Switcher">
             <button
               type="button"
-              className={
-                ka ? "active" : ""
-              }
-              onClick={() =>
-                onLanguageChange?.("ka")
-              }
+              className={isKa ? "active" : ""}
+              onClick={() => setLanguage("ka")}
+              aria-pressed={isKa}
             >
               GEO
             </button>
-
             <button
               type="button"
-              className={
-                !ka ? "active" : ""
-              }
-              onClick={() =>
-                onLanguageChange?.("en")
-              }
+              className={!isKa ? "active" : ""}
+              onClick={() => setLanguage("en")}
+              aria-pressed={!isKa}
             >
               ENG
             </button>
           </div>
 
-          {isLoggedIn ? (
-            <a
-              href="/account"
-              className="primaryButton"
-            >
-              {ka
-                ? "ჩემი ანგარიში"
-                : "My Account"}
+          {/* LOGIN */}
+          <Link href="/login" className="loginButton">
+            {isKa ? "შესვლა" : "Log in"}
+          </Link>
 
-              <ArrowIcon />
-            </a>
-          ) : (
-            <>
-              <a
-                href="/login"
-                className="loginButton"
-              >
-                {ka
-                  ? "შესვლა"
-                  : "Sign in"}
-              </a>
+          {/* CREATE ACCOUNT */}
+          <Link href="/signup" className="signupButton">
+            {isKa ? "ანგარიშის შექმნა" : "Create account"}
+          </Link>
 
-              <a
-                href="/signup"
-                className="primaryButton"
-              >
-                {ka
-                  ? "ანგარიშის შექმნა"
-                  : "Create account"}
-
-                <ArrowIcon />
-              </a>
-            </>
-          )}
+          {/* MOBILE TOGGLE BUTTON */}
+          <button
+            type="button"
+            className="mobileMenuBtn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
         </div>
       </div>
 
+      {/* MOBILE MENU DROPDOWN */}
+      {mobileMenuOpen && (
+        <div className="mobileMenu">
+          <div className="mobileLanguageSwitcher">
+            <button
+              type="button"
+              className={isKa ? "active" : ""}
+              onClick={() => setLanguage("ka")}
+            >
+              GEO
+            </button>
+            <button
+              type="button"
+              className={!isKa ? "active" : ""}
+              onClick={() => setLanguage("en")}
+            >
+              ENG
+            </button>
+          </div>
+          <Link
+            href="/login"
+            className="loginButton mobileLink"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {isKa ? "შესვლა" : "Log in"}
+          </Link>
+        </div>
+      )}
+
       <style jsx>{`
         .header {
-          width: 100%;
-
-          position: relative;
+          position: sticky;
+          top: 0;
           z-index: 100;
-
-          background:
-            rgba(
-              250,
-              252,
-              255,
-              0.92
-            );
-
-          border-bottom:
-            1px solid
-            rgba(
-              40,
-              72,
-              120,
-              0.1
-            );
-
-          backdrop-filter:
-            blur(18px);
-          -webkit-backdrop-filter:
-            blur(18px);
+          width: 100%;
+          background: rgba(255, 255, 255, 0.96);
+          border-bottom: 1px solid #e8ebef;
+          backdrop-filter: blur(16px);
         }
 
         .headerInner {
-          width:
-            calc(100% - 64px);
-
-          max-width: 1320px;
-          min-height: 86px;
-
+          width: calc(100% - 48px);
+          max-width: 1280px;
+          min-height: 82px;
           margin: 0 auto;
-
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           gap: 28px;
         }
 
         /* BRAND */
-
         .brand {
           display: inline-flex;
           align-items: center;
-
-          gap: 13px;
-
-          flex-shrink: 0;
-
+          gap: 12px;
           text-decoration: none;
         }
 
         .brandMark {
-          width: 46px;
-          height: 46px;
-
+          width: 44px;
+          height: 44px;
           display: grid;
           place-items: center;
-
-          border-radius: 15px;
-
+          border-radius: 13px;
           color: white;
-
-          background:
-            linear-gradient(
-              135deg,
-              #3568e8 0%,
-              #5967e9 52%,
-              #705ce7 100%
-            );
-
-          box-shadow:
-            0 10px 28px
-            rgba(
-              72,
-              97,
-              220,
-              0.22
-            );
+          background: linear-gradient(135deg, #0f5ce8, #6548e8);
+          box-shadow: 0 8px 24px rgba(42, 91, 220, 0.2);
         }
 
-        .brandMark
-          :global(svg) {
-          width: 22px;
-          height: 22px;
+        .brandMark :global(svg) {
+          width: 21px;
+          height: 21px;
         }
 
         .brandName {
-          color: #18233a;
-
-          font-size: 21px;
+          color: #172033;
+          font-size: 20px;
           font-weight: 800;
-
-          letter-spacing: -0.65px;
-
-          white-space: nowrap;
+          letter-spacing: -0.6px;
         }
 
-        /* ACTIONS */
-
-        .actions {
+        /* RIGHT SIDE */
+        .rightSide {
           display: flex;
           align-items: center;
-
-          gap: 9px;
+          gap: 10px;
         }
 
-        /* LANGUAGE */
-
+        /* LANGUAGE SWITCHER */
         .languageSwitcher {
-          margin-right: 4px;
-
           padding: 4px;
-
           display: flex;
           align-items: center;
-
           gap: 3px;
-
-          border:
-            1px solid
-            rgba(
-              60,
-              83,
-              126,
-              0.11
-            );
-
-          border-radius: 12px;
-
-          background:
-            rgba(
-              237,
-              242,
-              250,
-              0.75
-            );
+          border: 1px solid #e3e7ec;
+          border-radius: 11px;
+          background: #f6f8fa;
         }
 
-        .languageSwitcher
-          button {
-          min-width: 49px;
-          height: 37px;
-
+        .languageSwitcher button {
+          min-width: 48px;
+          height: 36px;
           padding: 0 10px;
-
           border: 0;
-          border-radius: 9px;
-
-          color: #778398;
+          border-radius: 8px;
+          color: #7a8491;
           background: transparent;
-
           cursor: pointer;
-
           font-size: 13px;
           font-weight: 750;
-
-          letter-spacing: 0.15px;
-
-          transition:
-            color 160ms ease,
-            background 160ms ease,
-            box-shadow 160ms ease;
+          transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
         }
 
-        .languageSwitcher
-          button.active {
-          color: #315fd2;
-
+        .languageSwitcher button.active {
+          color: #172033;
           background: white;
-
-          box-shadow:
-            0 3px 10px
-            rgba(
-              31,
-              48,
-              82,
-              0.08
-            );
+          box-shadow: 0 2px 8px rgba(19, 32, 51, 0.08);
         }
 
-        /* LOGIN */
-
+        /* BUTTONS */
         .loginButton,
-        .primaryButton,
-        .adminButton {
-          min-height: 44px;
-
-          padding: 0 17px;
-
+        .signupButton {
+          min-height: 42px;
+          padding: 0 16px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
-          border-radius: 11px;
-
+          border-radius: 10px;
           text-decoration: none;
-
           font-size: 14px;
           font-weight: 700;
-
-          transition:
-            transform 160ms ease,
-            box-shadow 160ms ease,
-            border-color 160ms ease;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
 
         .loginButton {
-          color: #344157;
-
-          border:
-            1px solid
-            rgba(
-              55,
-              75,
-              108,
-              0.14
-            );
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.85
-            );
+          color: #263244;
+          border: 1px solid #dfe4e9;
+          background: white;
         }
 
-        .loginButton:hover {
-          border-color:
-            rgba(
-              63,
-              96,
-              190,
-              0.3
-            );
-
-          box-shadow:
-            0 7px 20px
-            rgba(
-              37,
-              54,
-              90,
-              0.07
-            );
-
-          transform:
-            translateY(-1px);
-        }
-
-        /* MAIN CTA */
-
-        .primaryButton {
-          gap: 10px;
-
+        .signupButton {
           color: white;
-
-          border:
-            1px solid
-            transparent;
-
-          background:
-            linear-gradient(
-              135deg,
-              #3467e8,
-              #6264e8
-            );
-
-          box-shadow:
-            0 9px 24px
-            rgba(
-              62,
-              91,
-              218,
-              0.2
-            );
+          border: 1px solid #172033;
+          background: #172033;
+          box-shadow: 0 7px 18px rgba(23, 32, 51, 0.12);
         }
 
-        .primaryButton:hover {
-          transform:
-            translateY(-1px);
-
-          box-shadow:
-            0 13px 30px
-            rgba(
-              62,
-              91,
-              218,
-              0.27
-            );
+        .loginButton:hover,
+        .signupButton:hover {
+          transform: translateY(-1px);
         }
 
-        .primaryButton
-          :global(svg) {
-          width: 15px;
-          height: 15px;
+        .mobileMenuBtn {
+          display: none;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          color: #172033;
         }
 
-        /* ADMIN */
-
-        .adminButton {
-          color: #6b55c7;
-
-          border:
-            1px solid
-            rgba(
-              109,
-              88,
-              202,
-              0.15
-            );
-
-          background: #f6f3ff;
+        .mobileMenu {
+          display: none;
         }
 
-        /* TABLET */
-
-        @media (
-          max-width: 760px
-        ) {
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 650px) {
           .headerInner {
-            width:
-              calc(
-                100% - 28px
-              );
-
-            min-height: 78px;
-          }
-
-          .brandName {
-            font-size: 19px;
-          }
-
-          .brandMark {
-            width: 43px;
-            height: 43px;
-          }
-
-          .adminButton {
-            display: none;
-          }
-
-          .loginButton,
-          .primaryButton {
-            padding: 0 13px;
-
-            font-size: 13px;
-          }
-        }
-
-        /* MOBILE */
-
-        @media (
-          max-width: 560px
-        ) {
-          .headerInner {
+            width: calc(100% - 24px);
+            min-height: 72px;
             gap: 12px;
-          }
-
-          .brand {
-            gap: 9px;
           }
 
           .brandMark {
             width: 40px;
             height: 40px;
-
-            border-radius: 12px;
           }
 
           .brandName {
             font-size: 17px;
           }
 
-          .languageSwitcher {
-            display: none;
-          }
-
+          .languageSwitcher,
           .loginButton {
             display: none;
           }
 
-          .primaryButton {
-            min-height: 41px;
-
-            padding: 0 12px;
-
-            font-size: 12px;
+          .mobileMenuBtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
 
-          .primaryButton
-            :global(svg) {
-            display: none;
+          .signupButton {
+            min-height: 40px;
+            padding: 0 12px;
+            font-size: 13px;
+          }
+
+          .mobileMenu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid #e8ebef;
+            background: white;
+          }
+
+          .mobileLanguageSwitcher {
+            display: flex;
+            gap: 8px;
+          }
+
+          .mobileLanguageSwitcher button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e3e7ec;
+            border-radius: 8px;
+            background: #f6f8fa;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .mobileLanguageSwitcher button.active {
+            background: #172033;
+            color: white;
+            border-color: #172033;
+          }
+
+          .mobileLink {
+            display: flex;
+            width: 100%;
+            text-align: center;
           }
         }
       `}</style>
@@ -528,35 +314,13 @@ function QRIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.9"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden="true"
     >
-      <rect
-        x="3"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="15"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="3"
-        y="15"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <rect x="15" y="3" width="6" height="6" rx="1" />
+      <rect x="3" y="15" width="6" height="6" rx="1" />
       <path d="M15 15h2v2h-2z" />
       <path d="M19 15h2v6h-6v-2" />
       <path d="M15 19v2" />
@@ -565,19 +329,21 @@ function QRIcon() {
   );
 }
 
-function ArrowIcon() {
+function MenuIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" x2="20" y1="12" y2="12" />
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="4" x2="20" y1="18" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
     </svg>
   );
 }
