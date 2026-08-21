@@ -1,24 +1,7 @@
 "use client";
 
-function QRIcon({ size = 24 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M14 14h3v3h4" />
-      <path d="M14 21v-4" />
-      <path d="M18 18h3v3" />
-    </svg>
-  );
-}
+import type { CSSProperties } from "react";
+import { QRIcon } from "./HomeIcons";
 
 function Product({
   emoji,
@@ -27,7 +10,7 @@ function Product({
 }: {
   emoji: string;
   name: string;
-  position: React.CSSProperties;
+  position: CSSProperties;
 }) {
   return (
     <div
