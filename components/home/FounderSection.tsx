@@ -1,12 +1,12 @@
 "use client";
 
-type Props = {
+interface FounderSectionProps {
   language?: "ka" | "en";
-};
+}
 
 export default function FounderSection({
   language = "ka",
-}: Props) {
+}: FounderSectionProps) {
   const ka = language === "ka";
 
   return (
@@ -16,9 +16,7 @@ export default function FounderSection({
           <span className="number">01</span>
 
           <span className="eyebrow">
-            {ka
-              ? "დამფუძნებლისგან"
-              : "FROM THE FOUNDER"}
+            {ka ? "დამფუძნებლისგან" : "FROM THE FOUNDER"}
           </span>
 
           <h2>
@@ -35,15 +33,15 @@ export default function FounderSection({
                 QR RETURN-ის იდეა ერთი მარტივი შეკითხვიდან გაჩნდა:
                 რა ხდება მაშინ, როდესაც ადამიანი კარგავს მისთვის
                 მნიშვნელოვან ნივთს, საყვარელ ცხოველს, ან როდესაც
-                გადაუდებელ სიტუაციაში მის შესახებ აუცილებელი
-                ინფორმაცია ხელმისაწვდომი არ არის?
+                გადაუდებელ სიტუაციაში მის შესახებ აუცილებელი ინფორმაცია
+                ხელმისაწვდომი არ არის?
               </p>
 
               <p>
-                ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ არ
-                იცის, ვის დაუკავშირდეს. დაკარგულ ცხოველს არ შეუძლია
-                პატრონის ვინაობის თქმა, ნივთზე კი ხშირად არ არსებობს
-                ინფორმაცია, რომელიც მის დაბრუნებას გაამარტივებს.
+                ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ არ იცის,
+                ვის დაუკავშირდეს. დაკარგულ ცხოველს არ შეუძლია პატრონის
+                ვინაობის თქმა, ნივთზე კი ხშირად არ არსებობს ინფორმაცია,
+                რომელიც მის დაბრუნებას გაამარტივებს.
               </p>
 
               <p>
@@ -65,16 +63,15 @@ export default function FounderSection({
 
               <p>
                 QR RETURN აერთიანებს სამ მნიშვნელოვან მიმართულებას:
-                დაკარგული ნივთების დაბრუნებას, საყვარელი ცხოველების
-                დაცვას და ადამიანებისთვის განკუთვნილ Emergency
-                პროფილებს.
+                დაკარგული ნივთების დაბრუნებას, საყვარელი ცხოველების დაცვას
+                და ადამიანებისთვის განკუთვნილ Emergency პროფილებს.
               </p>
 
               <p>
-                QR კოდის დასკანერებით მპოვნელს ან დამხმარე ადამიანს
-                შეუძლია ნახოს მხოლოდ ის ინფორმაცია, რომლის გაზიარებაც
-                მომხმარებელმა წინასწარ აირჩია, და დაუკავშირდეს
-                მფლობელს, ოჯახის წევრს ან საგანგებო საკონტაქტო პირს.
+                QR კოდის დასკანერებით მპოვნელს ან დამხმარე ადამიანს შეუძლია
+                ნახოს მხოლოდ ის ინფორმაცია, რომლის გაზიარებაც მომხმარებელმა
+                წინასწარ აირჩია, და დაუკავშირდეს მფლობელს, ოჯახის წევრს ან
+                საგანგებო საკონტაქტო პირს.
               </p>
 
               <p>
@@ -88,18 +85,18 @@ export default function FounderSection({
               <p>
                 ჩემთვის განსაკუთრებით მნიშვნელოვანია, რომ მომხმარებელი
                 თავად აკონტროლებდეს საკუთარ ინფორმაციას — რას აზიარებს,
-                ვის აჩვენებს და როგორ შეიძლება მასთან დაკავშირება.
-                ამიტომ QR RETURN-ის საფუძველია სიმარტივე, უსაფრთხოება,
+                ვის აჩვენებს და როგორ შეიძლება მასთან დაკავშირება. ამიტომ
+                QR RETURN-ის საფუძველია სიმარტივე, უსაფრთხოება,
                 კონფიდენციალურობა და ნდობა.
               </p>
 
               <p>
                 QR RETURN ჩემთვის უბრალოდ პროდუქტი ან ტექნოლოგიური
-                პლატფორმა არ არის. ჩემი მიზანია, ის გახდეს პატარა,
-                მაგრამ მნიშვნელოვანი დამცავი რგოლი ადამიანებს, მათ
-                საყვარელ ცხოველებსა და მათთვის ძვირფას ნივთებს შორის —
-                რადგან ზოგჯერ დასაბრუნებლად ან დასახმარებლად მხოლოდ ერთი
-                სწორი კავშირია საჭირო.
+                პლატფორმა არ არის. ჩემი მიზანია, ის გახდეს პატარა, მაგრამ
+                მნიშვნელოვანი დამცავი რგოლი ადამიანებს, მათ საყვარელ
+                ცხოველებსა და მათთვის ძვირფას ნივთებს შორის — რადგან ზოგჯერ
+                დასაბრუნებლად ან დასახმარებლად მხოლოდ ერთი სწორი კავშირია
+                საჭირო.
               </p>
 
               <p className="thanks">
@@ -116,41 +113,39 @@ export default function FounderSection({
               </p>
 
               <p>
-                QR RETURN was created to make that connection faster,
-                simpler and safer.
+                Often, the finder genuinely wants to help but does not
+                know whom to contact. A lost pet cannot identify its
+                owner, and a lost item usually carries no information
+                that makes its return easier.
               </p>
 
               <p>
-                The system brings together lost belongings, pet
+                QR RETURN was created as a simple and secure system that
+                helps establish the right connection at the moment it is
+                needed most.
+              </p>
+
+              <p>
+                The platform brings together lost belongings, pet
                 protection and Emergency profiles while allowing users
-                to control what information is shared.
+                to control exactly what information they choose to share.
               </p>
 
               <p>
-                Its value is not simply in the QR code itself, but in
-                creating the right connection at the moment it matters
-                most.
+                Its value is not simply the QR code itself. Its value is
+                the connection it can create when time, safety and the
+                right information matter most.
               </p>
             </>
           )}
 
           <footer className="signature">
-            <div className="signatureMark">
-              NK
-            </div>
+            <div className="signatureMark">NK</div>
 
             <div>
-              <strong>
-                Nino Kuprava
-              </strong>
-
-              <span>
-                Founder &amp; CEO
-              </span>
-
-              <small>
-                QR RETURN
-              </small>
+              <strong>Nino Kuprava</strong>
+              <span>Founder &amp; CEO</span>
+              <small>QR RETURN</small>
             </div>
           </footer>
         </article>
@@ -158,24 +153,24 @@ export default function FounderSection({
 
       <style jsx>{`
         .founder {
-          padding: 110px 0;
+          padding: 96px 0;
           background: #ffffff;
         }
 
         .inner {
           width: calc(100% - 56px);
           max-width: 1180px;
-          margin: auto;
+          margin: 0 auto;
 
           display: grid;
           grid-template-columns: 0.78fr 1.22fr;
-          gap: 90px;
+          gap: 82px;
           align-items: start;
         }
 
         .intro {
           position: sticky;
-          top: 120px;
+          top: 110px;
         }
 
         .number {
@@ -187,12 +182,12 @@ export default function FounderSection({
 
         .eyebrow {
           display: block;
-          margin-top: 22px;
+          margin-top: 21px;
 
-          color: #7a8796;
+          color: #788595;
           font-size: 11px;
           font-weight: 850;
-          letter-spacing: 1.7px;
+          letter-spacing: 1.6px;
         }
 
         h2 {
@@ -200,52 +195,53 @@ export default function FounderSection({
           margin: 14px 0 0;
 
           color: #142338;
-          font-size: clamp(38px, 4vw, 54px);
+          font-size: clamp(38px, 4vw, 53px);
           line-height: 1.06;
-          letter-spacing: -2.5px;
+          letter-spacing: -2.4px;
         }
 
         .letter {
-          padding-left: 42px;
+          padding-left: 40px;
           border-left: 1px solid #e2e7ed;
         }
 
         p {
-          margin: 0 0 21px;
-
+          margin: 0 0 19px;
           color: #667487;
-          font-size: 15px;
-          line-height: 1.83;
+
+          font-size: 14px;
+          line-height: 1.82;
         }
 
         .lead {
-          color: #27384d;
-          font-size: 17px;
+          color: #29394d;
+          font-size: 16px;
           line-height: 1.78;
         }
 
         p strong {
-          color: #27384d;
+          color: #26374b;
+          font-weight: 750;
         }
 
         .statement {
-          margin: 34px 0;
-          padding: 26px 28px;
+          margin: 31px 0;
+          padding: 25px 27px;
 
-          border-radius: 17px;
+          border: 1px solid #e2e9f6;
+          border-radius: 16px;
 
-          background:
-            linear-gradient(
-              135deg,
-              #f4f8ff,
-              #f7f5ff
-            );
+          background: linear-gradient(
+            135deg,
+            #f4f8ff 0%,
+            #f8f7ff 100%
+          );
         }
 
         .statement span {
           display: block;
-
           color: #1266e9;
+
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.5px;
@@ -253,23 +249,22 @@ export default function FounderSection({
 
         .statement strong {
           display: block;
-
           margin-top: 9px;
 
           color: #25364b;
-          font-size: 19px;
-          line-height: 1.55;
+          font-size: 18px;
+          line-height: 1.52;
         }
 
         .thanks {
-          margin-top: 30px;
+          margin-top: 28px;
           color: #293a4f;
-          font-weight: 700;
+          font-weight: 750;
         }
 
         .signature {
-          margin-top: 44px;
-          padding-top: 28px;
+          margin-top: 40px;
+          padding-top: 27px;
 
           display: flex;
           align-items: center;
@@ -287,14 +282,8 @@ export default function FounderSection({
 
           border-radius: 50%;
 
-          color: white;
-
-          background:
-            linear-gradient(
-              135deg,
-              #1266e9,
-              #7255f5
-            );
+          color: #ffffff;
+          background: linear-gradient(135deg, #1266e9, #7255f5);
 
           font-size: 13px;
           font-weight: 900;
@@ -320,6 +309,7 @@ export default function FounderSection({
         .signature small {
           margin-top: 2px;
           color: #1266e9;
+
           font-size: 9px;
           font-weight: 850;
           letter-spacing: 1px;
@@ -328,7 +318,7 @@ export default function FounderSection({
         @media (max-width: 850px) {
           .inner {
             grid-template-columns: 1fr;
-            gap: 42px;
+            gap: 40px;
           }
 
           .intro {
@@ -343,7 +333,7 @@ export default function FounderSection({
 
         @media (max-width: 650px) {
           .founder {
-            padding: 75px 0;
+            padding: 70px 0;
           }
 
           .inner {
@@ -351,7 +341,7 @@ export default function FounderSection({
           }
 
           h2 {
-            font-size: 38px;
+            font-size: 37px;
           }
 
           p {
@@ -359,11 +349,11 @@ export default function FounderSection({
           }
 
           .lead {
-            font-size: 16px;
+            font-size: 15px;
           }
 
           .statement {
-            padding: 22px;
+            padding: 21px;
           }
 
           .statement strong {
