@@ -1,6 +1,7 @@
 "use client";
 
-import type { Lang, Menu } from "./types";
+type Lang = "ka" | "en";
+type Menu = "about" | "shop" | "faq" | "contact" | null;
 
 type Props = {
   language: Lang;
@@ -17,19 +18,19 @@ export default function HomeHeader({
 }: Props) {
   const ka = language === "ka";
 
-  function toggleMenu(menu: Exclude<Menu, null>) {
+  const toggleMenu = (menu: Exclude<Menu, null>) => {
     onMenuChange(openMenu === menu ? null : menu);
-  }
+  };
 
   return (
     <header className="header">
-      <div className="inner">
+      <div className="headerInner">
         <a href="/" className="brand">
-          <div className="logo">
-            <QRIcon />
+          <div className="brandLogo">
+            <QRIcon size={23} />
           </div>
 
-          <div className="brandText">
+          <div>
             <strong>QR RETURN</strong>
             <span>SMART LOST &amp; FOUND</span>
           </div>
@@ -39,7 +40,6 @@ export default function HomeHeader({
           <button
             type="button"
             onClick={() => toggleMenu("about")}
-            className={openMenu === "about" ? "active" : ""}
           >
             {ka ? "ჩვენ შესახებ" : "About"}
             <Chevron open={openMenu === "about"} />
@@ -48,7 +48,6 @@ export default function HomeHeader({
           <button
             type="button"
             onClick={() => toggleMenu("shop")}
-            className={openMenu === "shop" ? "active" : ""}
           >
             {ka ? "ონლაინ შეძენა" : "Shop"}
             <Chevron open={openMenu === "shop"} />
@@ -57,7 +56,6 @@ export default function HomeHeader({
           <button
             type="button"
             onClick={() => toggleMenu("faq")}
-            className={openMenu === "faq" ? "active" : ""}
           >
             {ka ? "ხშირად დასმული კითხვები" : "FAQ"}
           </button>
@@ -65,7 +63,6 @@ export default function HomeHeader({
           <button
             type="button"
             onClick={() => toggleMenu("contact")}
-            className={openMenu === "contact" ? "active" : ""}
           >
             {ka ? "კონტაქტი" : "Contact"}
           </button>
@@ -75,7 +72,7 @@ export default function HomeHeader({
           <div className="languages">
             <button
               type="button"
-              className={language === "ka" ? "selected" : ""}
+              className={language === "ka" ? "activeLang" : ""}
               onClick={() => onLanguageChange("ka")}
             >
               GEO
@@ -85,19 +82,20 @@ export default function HomeHeader({
 
             <button
               type="button"
-              className={language === "en" ? "selected" : ""}
+              className={language === "en" ? "activeLang" : ""}
               onClick={() => onLanguageChange("en")}
             >
               ENG
             </button>
           </div>
 
+          {/* დროებით ჩანს მხოლოდ დიზაინის სანახავად */}
           <a href="/admin" className="admin">
             {ka ? "ადმინ პანელი" : "Admin"}
           </a>
 
           <a href="/login" className="auth">
-            {ka ? "შესვლა" : "Sign In"}
+            {ka ? "შესვლა" : "Sign in"}
           </a>
 
           <a href="/signup" className="auth">
@@ -114,16 +112,16 @@ export default function HomeHeader({
           border-bottom: 1px solid #e6ebf1;
         }
 
-        .inner {
+        .headerInner {
           width: calc(100% - 90px);
           max-width: 1380px;
           min-height: 78px;
-          margin: 0 auto;
+          margin: auto;
 
           display: grid;
           grid-template-columns: 210px 1fr auto;
           align-items: center;
-          gap: 24px;
+          gap: 25px;
         }
 
         .brand {
@@ -133,30 +131,35 @@ export default function HomeHeader({
           text-decoration: none;
         }
 
-        .logo {
+        .brandLogo {
           width: 40px;
           height: 40px;
+
           display: grid;
           place-items: center;
+
           border-radius: 10px;
-          color: #ffffff;
+
           background: #1266e9;
+          color: white;
         }
 
-        .brandText strong,
-        .brandText span {
+        .brand strong,
+        .brand span {
           display: block;
         }
 
-        .brandText strong {
+        .brand strong {
           color: #172b43;
           font-size: 16px;
           font-weight: 900;
         }
 
-        .brandText span {
+        .brand span {
           margin-top: 3px;
+
           color: #8995a4;
+
           font-size: 7px;
           font-weight: 800;
           letter-spacing: 1.3px;
@@ -170,34 +173,35 @@ export default function HomeHeader({
 
         .nav button {
           padding: 28px 0;
+
           display: flex;
           align-items: center;
           gap: 5px;
 
           border: 0;
           background: transparent;
+
           color: #1266e9;
 
-          cursor: pointer;
           font-family: inherit;
           font-size: 12px;
           font-weight: 800;
-          white-space: nowrap;
-        }
 
-        .nav button.active {
-          color: #084eaf;
+          cursor: pointer;
+          white-space: nowrap;
         }
 
         .actions {
           display: flex;
           align-items: center;
           gap: 7px;
-          padding-right: 20px;
+
+          padding-right: 25px;
         }
 
         .languages {
           margin-right: 9px;
+
           display: flex;
           align-items: center;
           gap: 7px;
@@ -205,15 +209,19 @@ export default function HomeHeader({
 
         .languages button {
           padding: 4px 1px;
+
           border: 0;
           background: transparent;
+
           color: #7b8796;
-          cursor: pointer;
+
           font-size: 11px;
           font-weight: 900;
+
+          cursor: pointer;
         }
 
-        .languages button.selected {
+        .languages .activeLang {
           color: #1266e9;
         }
 
@@ -228,19 +236,21 @@ export default function HomeHeader({
           min-height: 38px;
           padding: 0 13px;
 
-          display: inline-flex;
+          display: flex;
           align-items: center;
           justify-content: center;
 
           border-radius: 9px;
-          text-decoration: none;
-          white-space: nowrap;
+
           font-size: 10px;
           font-weight: 850;
+
+          text-decoration: none;
+          white-space: nowrap;
         }
 
         .auth {
-          color: #ffffff;
+          color: white;
           background: #1266e9;
           border: 1px solid #1266e9;
         }
@@ -251,18 +261,58 @@ export default function HomeHeader({
           border: 1px solid #cdddf4;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1050px) {
+          .headerInner {
+            width: calc(100% - 35px);
+          }
+
+          .nav {
+            gap: 14px;
+          }
+
+          .nav button {
+            font-size: 10px;
+          }
+
+          .actions {
+            padding-right: 0;
+          }
+        }
+
+        @media (max-width: 800px) {
           .nav {
             display: none;
           }
 
-          .inner {
+          .headerInner {
             grid-template-columns: auto 1fr;
           }
 
           .actions {
             justify-self: end;
-            padding-right: 0;
+          }
+
+          .admin {
+            display: none;
+          }
+        }
+
+        @media (max-width: 650px) {
+          .headerInner {
+            width: calc(100% - 20px);
+          }
+
+          .brand span {
+            display: none;
+          }
+
+          .auth {
+            padding: 0 8px;
+            font-size: 8px;
+          }
+
+          .languages button {
+            font-size: 9px;
           }
         }
       `}</style>
@@ -270,11 +320,11 @@ export default function HomeHeader({
   );
 }
 
-function QRIcon() {
+function QRIcon({ size = 24 }: { size?: number }) {
   return (
     <svg
-      width="23"
-      height="23"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -283,7 +333,9 @@ function QRIcon() {
       <rect x="3" y="3" width="6" height="6" rx="1" />
       <rect x="15" y="3" width="6" height="6" rx="1" />
       <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M14 14h3v3h4M14 21v-4M18 18h3v3" />
+      <path d="M14 14h3v3h4" />
+      <path d="M14 21v-4" />
+      <path d="M18 18h3v3" />
     </svg>
   );
 }
@@ -298,7 +350,7 @@ function Chevron({ open }: { open: boolean }) {
       stroke="currentColor"
       strokeWidth="2"
       style={{
-        transform: open ? "rotate(180deg)" : "rotate(0deg)",
+        transform: open ? "rotate(180deg)" : "rotate(0)",
       }}
     >
       <path d="m6 9 6 6 6-6" />
