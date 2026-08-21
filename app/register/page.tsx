@@ -99,6 +99,15 @@ export default function RegisterPage() {
             ))}
           </div>
         </div>
+      <div className="emergencyBanner">
+        <div className="emergencyIcon">✚</div>
+        <div>
+          <div className="emergencyEyebrow">QR RETURN EMERGENCY</div>
+          <h2>Emergency Bracelet ადამიანებისთვის</h2>
+          <p>ცალკე უსაფრთხოების პროფილი, საგანგებო კონტაქტები და ლოკაციის გაზიარება.</p>
+        </div>
+        <a href="/emergency/register" className="emergencyButton">რეგისტრაცია →</a>
+      </div>
       </section>
 
       <style jsx>{`
@@ -117,6 +126,62 @@ export default function RegisterPage() {
             "Segoe UI",
             Arial,
             sans-serif;
+        }
+
+        .emergencyBanner {
+          max-width: 1132px;
+          margin: 0 auto 32px;
+          padding: 20px 24px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          border: 1px solid rgba(255, 151, 80, 0.35);
+          border-radius: 20px;
+          background: linear-gradient(135deg, #32191b, #1d1720);
+        }
+
+        .emergencyIcon {
+          width: 44px;
+          height: 44px;
+          flex: 0 0 auto;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          color: #2a1715;
+          background: #ffb36b;
+          font-size: 22px;
+          font-weight: 900;
+        }
+
+        .emergencyEyebrow {
+          color: #ffb36b;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.5px;
+        }
+
+        .emergencyBanner h2 {
+          margin: 5px 0 0;
+          color: #fff7ed;
+          font-size: 18px;
+        }
+
+        .emergencyBanner p {
+          margin: 5px 0 0;
+          color: #e9cfc3;
+          font-size: 12px;
+        }
+
+        .emergencyButton {
+          margin-left: auto;
+          flex: 0 0 auto;
+          padding: 12px 16px;
+          border-radius: 11px;
+          color: #2a1715;
+          background: #ffb36b;
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 900;
         }
 
         .header {
