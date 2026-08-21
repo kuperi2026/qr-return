@@ -16,6 +16,7 @@ export default function HomeHeader({
   onLanguageChange,
 }: Props) {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
 
   const ka = language === "ka";
 
@@ -35,15 +36,18 @@ export default function HomeHeader({
           </div>
         </a>
 
-        {/* NAVIGATION */}
+        {/* MAIN NAVIGATION */}
         <nav className="navigation">
 
-          {/* ABOUT DROPDOWN */}
+          {/* ABOUT */}
           <div className="dropdown">
             <button
               type="button"
-              className="dropdownButton"
-              onClick={() => setAboutOpen(!aboutOpen)}
+              className="navButton"
+              onClick={() => {
+                setAboutOpen(!aboutOpen);
+                setShopOpen(false);
+              }}
             >
               {ka ? "ჩვენ შესახებ" : "About"}
               <ChevronIcon open={aboutOpen} />
@@ -80,38 +84,66 @@ export default function HomeHeader({
                     ? "ჩვენი ხედვა"
                     : "Our Vision"}
                 </a>
+              </div>
+            )}
+          </div>
 
+          {/* ONLINE SHOP */}
+          <div className="dropdown">
+            <button
+              type="button"
+              className="navButton"
+              onClick={() => {
+                setShopOpen(!shopOpen);
+                setAboutOpen(false);
+              }}
+            >
+              {ka ? "ონლაინ შეძენა" : "Shop Online"}
+              <ChevronIcon open={shopOpen} />
+            </button>
+
+            {shopOpen && (
+              <div className="dropdownMenu shopMenu">
                 <a
                   href="#how-to-order"
-                  onClick={() => setAboutOpen(false)}
+                  onClick={() => setShopOpen(false)}
                 >
-                  <span>04</span>
+                  <span>01</span>
                   {ka
                     ? "როგორ შევუკვეთო"
                     : "How to Order"}
                 </a>
 
                 <a
-                  href="#faq"
-                  onClick={() => setAboutOpen(false)}
+                  href="/store"
+                  onClick={() => setShopOpen(false)}
                 >
-                  <span>05</span>
+                  <span>02</span>
                   {ka
-                    ? "ხშირად დასმული კითხვები"
-                    : "Frequently Asked Questions"}
+                    ? "მაღაზია"
+                    : "Store"}
                 </a>
               </div>
             )}
           </div>
 
-          <a href="/store" className="storeLink">
-            {ka ? "ონლაინ შეძენა" : "Shop Online"}
+          {/* FAQ */}
+          <a href="#faq" className="navLink">
+            {ka
+              ? "ხშირად დასმული კითხვები"
+              : "FAQ"}
+          </a>
+
+          {/* CONTACT */}
+          <a href="#contact" className="navLink">
+            {ka
+              ? "კონტაქტი"
+              : "Contact"}
           </a>
         </nav>
 
-        {/* RIGHT SIDE */}
+        {/* ACCOUNT / LANGUAGE */}
         <div className="actions">
-
           {isAdmin && (
             <a href="/admin" className="adminButton">
               Admin Panel
@@ -119,8 +151,10 @@ export default function HomeHeader({
           )}
 
           {isLoggedIn ? (
-            <a href="/account" className="registerButton">
-              {ka ? "ჩემი ანგარიში" : "My Account"}
+            <a href="/account" className="accountButton">
+              {ka
+                ? "ჩემი ანგარიში"
+                : "My Account"}
             </a>
           ) : (
             <>
@@ -129,12 +163,13 @@ export default function HomeHeader({
               </a>
 
               <a href="/signup" className="registerButton">
-                {ka ? "რეგისტრაცია" : "Register"}
+                {ka
+                  ? "რეგისტრაცია"
+                  : "Register"}
               </a>
             </>
           )}
 
-          {/* LANGUAGE */}
           <div className="language">
             <button
               type="button"
@@ -144,7 +179,7 @@ export default function HomeHeader({
               GEO
             </button>
 
-            <span className="divider" />
+            <span />
 
             <button
               type="button"
@@ -163,22 +198,22 @@ export default function HomeHeader({
           position: relative;
           z-index: 100;
 
-          background: rgba(255, 255, 255, 0.96);
+          background: rgba(255, 255, 255, 0.97);
           border-bottom: 1px solid #e7ecf2;
 
           backdrop-filter: blur(18px);
         }
 
         .inner {
-          width: calc(100% - 56px);
-          max-width: 1280px;
+          width: calc(100% - 40px);
+          max-width: 1380px;
           min-height: 80px;
           margin: 0 auto;
 
           display: grid;
           grid-template-columns: auto 1fr auto;
           align-items: center;
-          gap: 34px;
+          gap: 25px;
         }
 
         /* BRAND */
@@ -186,30 +221,29 @@ export default function HomeHeader({
         .brand {
           display: flex;
           align-items: center;
-          gap: 11px;
+          gap: 10px;
 
           color: inherit;
           text-decoration: none;
+          white-space: nowrap;
         }
 
         .logo {
-          width: 42px;
-          height: 42px;
+          width: 40px;
+          height: 40px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 12px;
+          border-radius: 11px;
 
           color: #ffffff;
 
           background: linear-gradient(
             135deg,
             #1266e9,
-            #6359ef
+            #6257ef
           );
-
-          box-shadow: 0 9px 25px rgba(18, 102, 233, 0.18);
         }
 
         .brandText strong,
@@ -219,20 +253,18 @@ export default function HomeHeader({
 
         .brandText strong {
           color: #16253a;
-
-          font-size: 17px;
+          font-size: 16px;
           font-weight: 900;
-          letter-spacing: -0.5px;
+          letter-spacing: -0.4px;
         }
 
         .brandText span {
-          margin-top: 3px;
+          margin-top: 2px;
 
           color: #929ca8;
-
-          font-size: 7px;
+          font-size: 6px;
           font-weight: 850;
-          letter-spacing: 1.55px;
+          letter-spacing: 1.45px;
         }
 
         /* NAVIGATION */
@@ -241,85 +273,82 @@ export default function HomeHeader({
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 29px;
+          gap: 24px;
         }
-
-        .storeLink,
-        .dropdownButton {
-          border: 0;
-
-          color: #566579;
-          background: transparent;
-
-          text-decoration: none;
-
-          font-family: inherit;
-          font-size: 13px;
-          font-weight: 700;
-
-          cursor: pointer;
-
-          transition: color 0.2s ease;
-        }
-
-        .storeLink:hover,
-        .dropdownButton:hover {
-          color: #1266e9;
-        }
-
-        /* DROPDOWN */
 
         .dropdown {
           position: relative;
         }
 
-        .dropdownButton {
-          padding: 20px 0;
+        .navButton,
+        .navLink {
+          color: #536276;
+          background: transparent;
+          border: 0;
+
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 750;
+
+          text-decoration: none;
+          white-space: nowrap;
+
+          cursor: pointer;
+        }
+
+        .navButton {
+          padding: 25px 0;
 
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
         }
 
+        .navButton:hover,
+        .navLink:hover {
+          color: #1266e9;
+        }
+
+        /* DROPDOWN */
+
         .dropdownMenu {
-          width: 300px;
+          width: 285px;
 
           position: absolute;
-          top: calc(100% + 5px);
-          left: -20px;
+          top: calc(100% + 3px);
+          left: -18px;
 
-          padding: 10px;
+          padding: 9px;
 
-          border: 1px solid #e5eaf0;
-          border-radius: 16px;
+          border: 1px solid #e4eaf0;
+          border-radius: 15px;
 
-          background: rgba(255, 255, 255, 0.98);
+          background: #ffffff;
 
           box-shadow:
-            0 20px 55px rgba(26, 42, 66, 0.13);
+            0 20px 55px
+            rgba(23, 40, 64, 0.14);
+        }
 
-          backdrop-filter: blur(18px);
+        .shopMenu {
+          width: 235px;
         }
 
         .dropdownMenu a {
-          min-height: 50px;
-          padding: 0 13px;
+          min-height: 48px;
+          padding: 0 12px;
 
           display: grid;
-          grid-template-columns: 32px 1fr;
+          grid-template-columns: 31px 1fr;
           align-items: center;
 
-          border-radius: 10px;
+          border-radius: 9px;
 
-          color: #35465b;
+          color: #35465a;
           text-decoration: none;
 
-          font-size: 13px;
-          font-weight: 650;
-
-          transition:
-            background 0.18s ease,
-            color 0.18s ease;
+          font-size: 12px;
+          font-weight: 700;
         }
 
         .dropdownMenu a:hover {
@@ -328,9 +357,8 @@ export default function HomeHeader({
         }
 
         .dropdownMenu a span {
-          color: #9ba6b2;
-
-          font-size: 9px;
+          color: #a0aab5;
+          font-size: 8px;
           font-weight: 900;
         }
 
@@ -339,26 +367,27 @@ export default function HomeHeader({
         .actions {
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 6px;
         }
 
         .loginButton,
         .registerButton,
+        .accountButton,
         .adminButton {
-          min-height: 39px;
-          padding: 0 14px;
+          min-height: 38px;
+          padding: 0 12px;
 
           display: inline-flex;
           align-items: center;
           justify-content: center;
 
-          border-radius: 10px;
+          border-radius: 9px;
 
           text-decoration: none;
-
-          font-size: 12px;
-          font-weight: 800;
           white-space: nowrap;
+
+          font-size: 11px;
+          font-weight: 800;
         }
 
         .loginButton {
@@ -367,7 +396,8 @@ export default function HomeHeader({
           border: 1px solid #1266e9;
         }
 
-        .registerButton {
+        .registerButton,
+        .accountButton {
           color: #ffffff;
 
           background: linear-gradient(
@@ -380,33 +410,33 @@ export default function HomeHeader({
         }
 
         .adminButton {
-          color: #7a4248;
+          color: #87464c;
 
-          border: 1px solid #ead8da;
           background: #fff8f8;
+          border: 1px solid #ead8da;
         }
 
         /* LANGUAGE */
 
         .language {
-          margin-left: 5px;
+          margin-left: 3px;
 
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
         }
 
         .language button {
-          padding: 5px 2px;
+          padding: 5px 1px;
 
           border: 0;
 
-          color: #9aa4af;
+          color: #9ba5b0;
           background: transparent;
 
           cursor: pointer;
 
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 900;
         }
 
@@ -414,11 +444,23 @@ export default function HomeHeader({
           color: #1266e9;
         }
 
-        .divider {
+        .language span {
           width: 1px;
-          height: 13px;
+          height: 12px;
+          background: #d8dee5;
+        }
 
-          background: #d9dfe5;
+        /* RESPONSIVE */
+
+        @media (max-width: 1150px) {
+          .navigation {
+            gap: 15px;
+          }
+
+          .navButton,
+          .navLink {
+            font-size: 11px;
+          }
         }
 
         @media (max-width: 1000px) {
@@ -437,22 +479,12 @@ export default function HomeHeader({
 
         @media (max-width: 680px) {
           .inner {
-            width: calc(100% - 24px);
+            width: calc(100% - 22px);
             min-height: 70px;
-            gap: 12px;
           }
 
           .brandText span {
             display: none;
-          }
-
-          .logo {
-            width: 38px;
-            height: 38px;
-          }
-
-          .brandText strong {
-            font-size: 15px;
           }
 
           .adminButton,
@@ -461,10 +493,10 @@ export default function HomeHeader({
           }
 
           .loginButton,
-          .registerButton {
-            min-height: 36px;
-            padding: 0 9px;
-
+          .registerButton,
+          .accountButton {
+            min-height: 35px;
+            padding: 0 8px;
             font-size: 10px;
           }
         }
@@ -479,23 +511,17 @@ export default function HomeHeader({
   );
 }
 
-function ChevronIcon({
-  open,
-}: {
-  open: boolean;
-}) {
+function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
-      width="13"
-      height="13"
+      width="12"
+      height="12"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       style={{
-        transform: open
-          ? "rotate(180deg)"
-          : "rotate(0deg)",
+        transform: open ? "rotate(180deg)" : "rotate(0deg)",
         transition: "transform 0.2s ease",
       }}
     >
@@ -507,8 +533,8 @@ function ChevronIcon({
 function QRIcon() {
   return (
     <svg
-      width="21"
-      height="21"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
