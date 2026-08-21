@@ -15,10 +15,13 @@ import {
 
 type PublicProfile = {
   id: string;
+
   tag_code: string;
   item_type: string;
   item_name: string | null;
 
+  owner_first_name: string | null;
+  owner_last_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
 
@@ -27,6 +30,9 @@ type PublicProfile = {
   behaviour_note: string | null;
   description: string | null;
   finder_message: string | null;
+
+  show_owner_name: boolean | null;
+  show_owner_phone: boolean | null;
 
   show_email: boolean | null;
   show_pet_photo: boolean | null;
@@ -164,21 +170,31 @@ export default function PublicProfilePage() {
               tag_code,
               item_type,
               item_name,
+
+              owner_first_name,
+              owner_last_name,
               owner_phone,
               owner_email,
+
               photo,
               medical_info,
               behaviour_note,
               description,
               finder_message,
+
+              show_owner_name,
+              show_owner_phone,
+
               show_email,
               show_pet_photo,
               show_medical_info,
               show_behaviour_note,
               show_description,
               show_finder_message,
+
               phone_enabled,
               live_chat_enabled,
+
               active
             `
           )
@@ -215,7 +231,7 @@ export default function PublicProfilePage() {
         );
       } catch (error) {
         console.error(
-          "Public profile error:",
+          "Public profile load error:",
           error
         );
 
@@ -235,7 +251,15 @@ export default function PublicProfilePage() {
   if (loading) {
     return (
       <main className="statePage">
-        QR პროფილი იტვირთება...
+        <div className="loadingBox">
+          <div className="loadingMark">
+            QR
+          </div>
+
+          <strong>
+            QR პროფილი იტვირთება...
+          </strong>
+        </div>
 
         <style jsx>{`
           .statePage {
@@ -247,10 +271,34 @@ export default function PublicProfilePage() {
             padding: 25px;
 
             background: #f7faff;
+          }
+
+          .loadingBox {
+            text-align: center;
 
             color: #718095;
 
-            font-size: 11px;
+            font-size: 10px;
+          }
+
+          .loadingMark {
+            width: 52px;
+            height: 52px;
+
+            margin:
+              0 auto 14px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 14px;
+
+            background: #1266e9;
+
+            color: #ffffff;
+
+            font-size: 10px;
+            font-weight: 950;
           }
         `}</style>
       </main>
@@ -302,7 +350,9 @@ export default function PublicProfilePage() {
 
             text-align: center;
 
-            border: 1px solid #dce6f1;
+            border:
+              1px solid #dce6f1;
+
             border-radius: 18px;
 
             background: #ffffff;
@@ -348,6 +398,7 @@ export default function PublicProfilePage() {
             display: inline-flex;
 
             margin-top: 20px;
+
             padding: 11px 15px;
 
             border-radius: 9px;
@@ -375,6 +426,14 @@ export default function PublicProfilePage() {
       emoji: "QR",
     };
 
+  const ownerFullName =
+    [
+      profile.owner_first_name,
+      profile.owner_last_name,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
   const phoneHref =
     profile.owner_phone
       ? `tel:${profile.owner_phone}`
@@ -384,6 +443,9 @@ export default function PublicProfilePage() {
     <>
       <main className="page">
         <div className="container">
+
+          {/* HEADER */}
+
           <header className="header">
             <a
               href="/"
@@ -409,6 +471,8 @@ export default function PublicProfilePage() {
             </div>
           </header>
 
+          {/* PROFILE HERO */}
+
           <section className="profileHero">
             <div className="categoryIcon">
               {meta.emoji}
@@ -426,12 +490,88 @@ export default function PublicProfilePage() {
 
               <p>
                 თქვენ დაასკანერეთ QR RETURN
-                პროფილი. გამოიყენეთ ქვემოთ
-                მოცემული ინფორმაცია
-                მფლობელთან დასაკავშირებლად.
+                პროფილი. ქვემოთ მოცემული
+                ინფორმაცია დაგეხმარებათ
+                მფლობელთან სწრაფად
+                დაკავშირებაში.
               </p>
             </div>
           </section>
+
+          {/* OWNER */}
+
+          <section className="ownerCard">
+            <div className="sectionTitle">
+              <span>
+                OWNER INFORMATION
+              </span>
+
+              <h2>
+                მფლობელის ინფორმაცია
+              </h2>
+            </div>
+
+            <div className="ownerIdentity">
+              <div className="avatar">
+                {profile.owner_first_name
+                  ?.charAt(0)
+                  .toUpperCase() ||
+                  "O"}
+              </div>
+
+              <div>
+                <span>
+                  OWNER
+                </span>
+
+                <strong>
+                  {ownerFullName ||
+                    "QR RETURN Owner"}
+                </strong>
+              </div>
+            </div>
+
+            <div className="alwaysVisible">
+              <div>
+                <span>
+                  სახელი
+                </span>
+
+                <strong>
+                  {profile.owner_first_name ||
+                    "—"}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  გვარი
+                </span>
+
+                <strong>
+                  {profile.owner_last_name ||
+                    "—"}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  ტელეფონი
+                </span>
+
+                <strong>
+                  {profile.owner_phone ||
+                    "—"}
+                </strong>
+              </div>
+            </div>
+
+            <div className="requiredInfo">
+              ✓ სახელი, გვარი და ტელეფონის ნომერი ყოველთვის ხილულია.
+            </div>
+          </section>
+
+          {/* PHOTO */}
 
           {profile.show_pet_photo &&
             profile.photo && (
@@ -446,6 +586,8 @@ export default function PublicProfilePage() {
               </section>
             )}
 
+          {/* OWNER MESSAGE */}
+
           {profile.show_finder_message &&
             profile.finder_message && (
               <section className="finderMessage">
@@ -459,6 +601,8 @@ export default function PublicProfilePage() {
               </section>
             )}
 
+          {/* CONTACT */}
+
           <section className="contactCard">
             <div className="sectionTitle">
               <span>
@@ -470,12 +614,14 @@ export default function PublicProfilePage() {
               </h2>
 
               <p>
-                აირჩიეთ თქვენთვის მოსახერხებელი
-                დაკავშირების გზა.
+                გამოიყენეთ თქვენთვის
+                მოსახერხებელი დაკავშირების
+                გზა.
               </p>
             </div>
 
             <div className="contactActions">
+
               {profile.owner_phone && (
                 <a
                   href={phoneHref}
@@ -502,7 +648,7 @@ export default function PublicProfilePage() {
                 >
                   <div>
                     <strong>
-                      ◌ Live Chat
+                      ◌ QR RETURN Live Chat
                     </strong>
 
                     <span>
@@ -513,14 +659,21 @@ export default function PublicProfilePage() {
                   <b>→</b>
                 </a>
               )}
+
             </div>
 
             {profile.show_email &&
               profile.owner_email && (
                 <div className="emailRow">
-                  <span>
-                    EMAIL
-                  </span>
+                  <div>
+                    <span>
+                      EMAIL
+                    </span>
+
+                    <strong>
+                      სურვილისამებრ ხილული
+                    </strong>
+                  </div>
 
                   <a
                     href={`mailto:${profile.owner_email}`}
@@ -530,6 +683,8 @@ export default function PublicProfilePage() {
                 </div>
               )}
           </section>
+
+          {/* ADDITIONAL INFORMATION */}
 
           {(profile.show_medical_info &&
             profile.medical_info) ||
@@ -549,6 +704,7 @@ export default function PublicProfilePage() {
               </div>
 
               <div className="detailsList">
+
                 {profile.show_medical_info &&
                   profile.medical_info && (
                     <InfoRow
@@ -562,7 +718,7 @@ export default function PublicProfilePage() {
                 {profile.show_behaviour_note &&
                   profile.behaviour_note && (
                     <InfoRow
-                      title="ქცევის შესახებ"
+                      title="ქცევის შესახებ ინფორმაცია"
                       text={
                         profile.behaviour_note
                       }
@@ -578,23 +734,33 @@ export default function PublicProfilePage() {
                       }
                     />
                   )}
+
               </div>
             </section>
           ) : null}
 
+          {/* QR INFO */}
+
           <section className="qrInfo">
-            <span>
-              QR CODE
-            </span>
+            <div className="qrSmall">
+              QR
+            </div>
 
-            <strong>
-              {profile.tag_code}
-            </strong>
+            <div>
+              <span>
+                QR CODE
+              </span>
 
-            <p>
-              QR RETURN · Smart Lost &amp; Found
-            </p>
+              <strong>
+                {profile.tag_code}
+              </strong>
+
+              <p>
+                QR RETURN · Smart Lost &amp; Found
+              </p>
+            </div>
           </section>
+
         </div>
       </main>
 
@@ -698,6 +864,7 @@ export default function PublicProfilePage() {
           border-radius: 999px;
 
           background: #eaf2ff;
+
           color: #1266e9;
 
           font-size: 6px;
@@ -707,7 +874,7 @@ export default function PublicProfilePage() {
         }
 
         .profileHero {
-          padding: 45px 0 30px;
+          padding: 45px 0 28px;
 
           display: flex;
           align-items: center;
@@ -735,7 +902,12 @@ export default function PublicProfilePage() {
 
           box-shadow:
             0 10px 25px
-            rgba(30,70,120,.05);
+            rgba(
+              30,
+              70,
+              120,
+              .05
+            );
         }
 
         .profileIntro > span {
@@ -767,7 +939,173 @@ export default function PublicProfilePage() {
           line-height: 1.6;
         }
 
+        .ownerCard,
+        .contactCard,
+        .detailsCard {
+          margin-top: 14px;
+
+          padding: 22px;
+
+          border:
+            1px solid #dce6f1;
+
+          border-radius: 16px;
+
+          background: #ffffff;
+
+          box-shadow:
+            0 12px 28px
+            rgba(
+              30,
+              70,
+              120,
+              .045
+            );
+        }
+
+        .sectionTitle > span {
+          color: #1266e9;
+
+          font-size: 7px;
+          font-weight: 900;
+
+          letter-spacing: 1.1px;
+        }
+
+        .sectionTitle h2 {
+          margin: 6px 0 0;
+
+          color: #29415b;
+
+          font-size: 17px;
+        }
+
+        .sectionTitle p {
+          margin: 5px 0 0;
+
+          color: #8492a1;
+
+          font-size: 8px;
+        }
+
+        .ownerIdentity {
+          margin-top: 18px;
+
+          display: flex;
+          align-items: center;
+
+          gap: 11px;
+        }
+
+        .avatar {
+          width: 46px;
+          height: 46px;
+
+          flex: 0 0 46px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 13px;
+
+          background: #1266e9;
+
+          color: #ffffff;
+
+          font-size: 16px;
+          font-weight: 950;
+        }
+
+        .ownerIdentity span,
+        .ownerIdentity strong {
+          display: block;
+        }
+
+        .ownerIdentity span {
+          color: #9aa5b2;
+
+          font-size: 7px;
+          font-weight: 900;
+
+          letter-spacing: 1px;
+        }
+
+        .ownerIdentity strong {
+          margin-top: 4px;
+
+          color: #2d455f;
+
+          font-size: 14px;
+        }
+
+        .alwaysVisible {
+          margin-top: 18px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              3,
+              minmax(0, 1fr)
+            );
+
+          gap: 8px;
+        }
+
+        .alwaysVisible > div {
+          min-height: 70px;
+
+          padding: 12px;
+
+          border:
+            1px solid #dae5f1;
+
+          border-radius: 10px;
+
+          background: #fafcff;
+        }
+
+        .alwaysVisible span,
+        .alwaysVisible strong {
+          display: block;
+        }
+
+        .alwaysVisible span {
+          color: #95a1af;
+
+          font-size: 7px;
+          font-weight: 850;
+        }
+
+        .alwaysVisible strong {
+          margin-top: 7px;
+
+          color: #344c66;
+
+          font-size: 9px;
+
+          word-break:
+            break-word;
+        }
+
+        .requiredInfo {
+          margin-top: 11px;
+
+          padding: 10px 11px;
+
+          border-radius: 9px;
+
+          background: #edf4ff;
+
+          color: #1266e9;
+
+          font-size: 7px;
+          font-weight: 800;
+        }
+
         .photoCard {
+          margin-top: 14px;
+
           overflow: hidden;
 
           border:
@@ -823,49 +1161,6 @@ export default function PublicProfilePage() {
           line-height: 1.65;
         }
 
-        .contactCard,
-        .detailsCard {
-          margin-top: 14px;
-
-          padding: 22px;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius: 16px;
-
-          background: #ffffff;
-
-          box-shadow:
-            0 12px 28px
-            rgba(30,70,120,.045);
-        }
-
-        .sectionTitle > span {
-          color: #1266e9;
-
-          font-size: 7px;
-          font-weight: 900;
-
-          letter-spacing: 1.1px;
-        }
-
-        .sectionTitle h2 {
-          margin: 6px 0 0;
-
-          color: #29415b;
-
-          font-size: 17px;
-        }
-
-        .sectionTitle p {
-          margin: 5px 0 0;
-
-          color: #8492a1;
-
-          font-size: 8px;
-        }
-
         .contactActions {
           margin-top: 17px;
 
@@ -919,7 +1214,12 @@ export default function PublicProfilePage() {
 
         .primaryAction span {
           color:
-            rgba(255,255,255,.75);
+            rgba(
+              255,
+              255,
+              255,
+              .75
+            );
         }
 
         .secondaryAction {
@@ -955,11 +1255,24 @@ export default function PublicProfilePage() {
           background: #fbfcfe;
         }
 
+        .emailRow span,
+        .emailRow strong {
+          display: block;
+        }
+
         .emailRow span {
           color: #99a4b1;
 
           font-size: 7px;
           font-weight: 900;
+        }
+
+        .emailRow strong {
+          margin-top: 3px;
+
+          color: #6f8195;
+
+          font-size: 7px;
         }
 
         .emailRow a {
@@ -970,7 +1283,8 @@ export default function PublicProfilePage() {
 
           text-decoration: none;
 
-          word-break: break-all;
+          word-break:
+            break-all;
         }
 
         .detailsList {
@@ -983,9 +1297,12 @@ export default function PublicProfilePage() {
         .qrInfo {
           margin-top: 14px;
 
-          padding: 18px;
+          padding: 17px;
 
-          text-align: center;
+          display: flex;
+          align-items: center;
+
+          gap: 12px;
 
           border:
             1px solid #dce6f1;
@@ -993,6 +1310,25 @@ export default function PublicProfilePage() {
           border-radius: 14px;
 
           background: #ffffff;
+        }
+
+        .qrSmall {
+          width: 42px;
+          height: 42px;
+
+          flex: 0 0 42px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 10px;
+
+          background: #1266e9;
+
+          color: #ffffff;
+
+          font-size: 8px;
+          font-weight: 950;
         }
 
         .qrInfo span,
@@ -1011,24 +1347,27 @@ export default function PublicProfilePage() {
         }
 
         .qrInfo strong {
-          margin-top: 6px;
+          margin-top: 4px;
 
           color: #324c68;
 
-          font-size: 11px;
+          font-size: 10px;
 
-          word-break: break-all;
+          word-break:
+            break-all;
         }
 
         .qrInfo p {
-          margin: 7px 0 0;
+          margin: 4px 0 0;
 
           color: #9aa5b2;
 
           font-size: 7px;
         }
 
-        @media (max-width: 550px) {
+        @media (
+          max-width: 550px
+        ) {
           .profileHero {
             align-items:
               flex-start;
@@ -1046,6 +1385,19 @@ export default function PublicProfilePage() {
           .profileIntro h1 {
             font-size: 26px;
           }
+
+          .alwaysVisible {
+            grid-template-columns:
+              1fr;
+          }
+
+          .emailRow {
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
         }
       `}</style>
     </>
@@ -1062,8 +1414,7 @@ function InfoRow({
   return (
     <div
       style={{
-        padding:
-          "14px 2px",
+        padding: "14px 2px",
 
         borderBottom:
           "1px solid #e4eaf1",
