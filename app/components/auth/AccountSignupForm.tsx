@@ -1,15 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  ReactNode,
+  useState,
+} from "react";
+
 import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(
-  supabaseUrl,
-  supabaseAnonKey
-);
 
 type FormState = {
   firstName: string;
@@ -30,9 +27,11 @@ const initialForm: FormState = {
 };
 
 export default function AccountSignupForm() {
-  const [form, setForm] = useState<FormState>(initialForm);
+  const [form, setForm] =
+    useState<FormState>(initialForm);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
   const [errorMessage, setErrorMessage] =
     useState("");
@@ -52,6 +51,10 @@ export default function AccountSignupForm() {
     if (errorMessage) {
       setErrorMessage("");
     }
+
+    if (successMessage) {
+      setSuccessMessage("");
+    }
   }
 
   async function handleSubmit(
@@ -62,12 +65,17 @@ export default function AccountSignupForm() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    const firstName = form.firstName.trim();
-    const lastName = form.lastName.trim();
-    const phone = form.phone.trim();
-    const email = form.email
-      .trim()
-      .toLowerCase();
+    const firstName =
+      form.firstName.trim();
+
+    const lastName =
+      form.lastName.trim();
+
+    const phone =
+      form.phone.trim();
+
+    const email =
+      form.email.trim().toLowerCase();
 
     if (
       !firstName ||
@@ -84,10 +92,10 @@ export default function AccountSignupForm() {
       return;
     }
 
-    if (
-      !email.includes("@") ||
-      !email.includes(".")
-    ) {
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
       setErrorMessage(
         "გთხოვთ მიუთითოთ სწორი ელფოსტა."
       );
@@ -128,6 +136,33 @@ export default function AccountSignupForm() {
     try {
       setLoading(true);
 
+      const supabaseUrl =
+        process.env
+          .NEXT_PUBLIC_SUPABASE_URL;
+
+      const supabaseKey =
+        process.env
+          .NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env
+          .NEXT_PUBLIC_SUPABASE_KEY;
+
+      if (
+        !supabaseUrl ||
+        !supabaseKey
+      ) {
+        setErrorMessage(
+          "Supabase კავშირი არ არის კონფიგურირებული. შეამოწმეთ Vercel Environment Variables."
+        );
+
+        return;
+      }
+
+      const supabase =
+        createClient(
+          supabaseUrl,
+          supabaseKey
+        );
+
       const {
         data,
         error,
@@ -139,7 +174,7 @@ export default function AccountSignupForm() {
           data: {
             first_name: firstName,
             last_name: lastName,
-            phone,
+            phone: phone,
           },
 
           emailRedirectTo:
@@ -163,7 +198,7 @@ export default function AccountSignupForm() {
           )
         ) {
           setErrorMessage(
-            "ამ ელფოსტით ანგარიში უკვე არსებობს. გამოიყენეთ შესვლის გვერდი."
+            "ამ ელფოსტით ანგარიში უკვე არსებობს. გთხოვთ გამოიყენოთ შესვლის გვერდი."
           );
         } else {
           setErrorMessage(
@@ -187,7 +222,12 @@ export default function AccountSignupForm() {
       );
 
       setForm(initialForm);
-    } catch {
+    } catch (error) {
+      console.error(
+        "Signup error:",
+        error
+      );
+
       setErrorMessage(
         "დაფიქსირდა ტექნიკური შეცდომა. გთხოვთ სცადოთ თავიდან."
       );
@@ -203,7 +243,6 @@ export default function AccountSignupForm() {
         onSubmit={handleSubmit}
       >
         <div className="nameGrid">
-
           <Field
             label="სახელი"
             required
@@ -239,13 +278,12 @@ export default function AccountSignupForm() {
               }
             />
           </Field>
-
         </div>
 
         <Field
           label="ტელეფონის ნომერი"
           required
-          hint="ეს ნომერი გამოყენებული იქნება თქვენს QR პროფილებთან დასაკავშირებლად."
+          hint="ტელეფონის ნომერი თქვენი მფლობელის პროფილის ძირითადი საკონტაქტო ინფორმაციაა."
         >
           <input
             type="tel"
@@ -261,27 +299,28 @@ export default function AccountSignupForm() {
           />
         </Field>
 
-        <Field
-          label="ელფოსტა"
-          required
-          hint="ერთი ელფოსტით შესაძლებელია მხოლოდ ერთი QR RETURN ანგარიშის შექმნა."
-        >
-          <input
-            type="email"
-            autoComplete="email"
-            placeholder="name@example.com"
-            value={form.email}
-            onChange={(event) =>
-              updateField(
-                "email",
-                event.target.value
-              )
-            }
-          />
-        </Field>
+        <div className="fieldSpace">
+          <Field
+            label="ელფოსტა"
+            required
+            hint="ერთი ელფოსტით შესაძლებელია მხოლოდ ერთი QR RETURN ანგარიშის შექმნა."
+          >
+            <input
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              value={form.email}
+              onChange={(event) =>
+                updateField(
+                  "email",
+                  event.target.value
+                )
+              }
+            />
+          </Field>
+        </div>
 
         <div className="passwordGrid">
-
           <Field
             label="პაროლი"
             required
@@ -319,7 +358,6 @@ export default function AccountSignupForm() {
               }
             />
           </Field>
-
         </div>
 
         {errorMessage && (
@@ -327,9 +365,7 @@ export default function AccountSignupForm() {
             className="message error"
             role="alert"
           >
-            <div className="messageIcon">
-              !
-            </div>
+            <span>!</span>
 
             <p>{errorMessage}</p>
           </div>
@@ -340,9 +376,7 @@ export default function AccountSignupForm() {
             className="message success"
             role="status"
           >
-            <div className="messageIcon">
-              ✓
-            </div>
+            <span>✓</span>
 
             <p>{successMessage}</p>
           </div>
@@ -357,9 +391,7 @@ export default function AccountSignupForm() {
             ? "ანგარიში იქმნება..."
             : "ანგარიშის შექმნა"}
 
-          {!loading && (
-            <span>→</span>
-          )}
+          {!loading && <b>→</b>}
         </button>
 
         <div className="loginLink">
@@ -372,11 +404,10 @@ export default function AccountSignupForm() {
           </a>
         </div>
 
-        <p className="requiredNote">
+        <div className="requiredNote">
           <span>*</span>
           სავალდებულო ველი
-        </p>
-
+        </div>
       </form>
 
       <style jsx>{`
@@ -393,8 +424,8 @@ export default function AccountSignupForm() {
           gap: 14px;
         }
 
-        .nameGrid {
-          margin-bottom: 17px;
+        .fieldSpace {
+          margin-top: 17px;
         }
 
         .passwordGrid {
@@ -423,18 +454,12 @@ export default function AccountSignupForm() {
 
           transition:
             border-color .2s ease,
-            box-shadow .2s ease,
-            background .2s ease;
+            box-shadow .2s ease;
         }
 
         .signupForm
           :global(input::placeholder) {
           color: #a8b2bf;
-        }
-
-        .signupForm
-          :global(input:hover) {
-          border-color: #bfcddd;
         }
 
         .signupForm
@@ -444,8 +469,6 @@ export default function AccountSignupForm() {
           box-shadow:
             0 0 0 4px
             rgba(18,102,233,.09);
-
-          background: #ffffff;
         }
 
         .message {
@@ -461,7 +484,7 @@ export default function AccountSignupForm() {
           border-radius: 11px;
         }
 
-        .messageIcon {
+        .message > span {
           width: 23px;
           height: 23px;
 
@@ -492,7 +515,7 @@ export default function AccountSignupForm() {
           color: #a33943;
         }
 
-        .error .messageIcon {
+        .error > span {
           background: #fde3e5;
           color: #c33e49;
         }
@@ -506,7 +529,7 @@ export default function AccountSignupForm() {
           color: #347055;
         }
 
-        .success .messageIcon {
+        .success > span {
           background: #dff3e7;
           color: #347055;
         }
@@ -516,8 +539,6 @@ export default function AccountSignupForm() {
           min-height: 54px;
 
           margin-top: 22px;
-
-          padding: 0 18px;
 
           display: flex;
           align-items: center;
@@ -541,24 +562,6 @@ export default function AccountSignupForm() {
           box-shadow:
             0 13px 25px
             rgba(18,102,233,.18);
-
-          transition:
-            transform .15s ease,
-            background .15s ease,
-            box-shadow .15s ease;
-        }
-
-        .submitButton:hover:not(
-          :disabled
-        ) {
-          background: #0d5dd9;
-
-          box-shadow:
-            0 16px 28px
-            rgba(18,102,233,.24);
-
-          transform:
-            translateY(-1px);
         }
 
         .submitButton:disabled {
@@ -566,9 +569,8 @@ export default function AccountSignupForm() {
           cursor: wait;
         }
 
-        .submitButton span {
+        .submitButton b {
           font-size: 16px;
-          line-height: 1;
         }
 
         .loginLink {
@@ -576,7 +578,6 @@ export default function AccountSignupForm() {
 
           display: flex;
           justify-content: center;
-          align-items: center;
 
           gap: 6px;
 
@@ -594,7 +595,7 @@ export default function AccountSignupForm() {
         }
 
         .requiredNote {
-          margin: 22px 0 0;
+          margin-top: 22px;
 
           text-align: center;
 
@@ -604,12 +605,12 @@ export default function AccountSignupForm() {
         }
 
         .requiredNote span {
+          margin-right: 3px;
+
           color: #1266e9;
         }
 
-        @media (
-          max-width: 600px
-        ) {
+        @media (max-width: 600px) {
           .nameGrid,
           .passwordGrid {
             grid-template-columns: 1fr;
@@ -619,8 +620,6 @@ export default function AccountSignupForm() {
 
           .signupForm
             :global(input) {
-            min-height: 50px;
-
             font-size: 16px;
           }
         }
@@ -638,7 +637,7 @@ function Field({
   label: string;
   required?: boolean;
   hint?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="field">
@@ -657,10 +656,6 @@ function Field({
       )}
 
       <style jsx>{`
-        .field + .field {
-          margin-top: 17px;
-        }
-
         label {
           display: block;
 
@@ -669,26 +664,4 @@ function Field({
           color: #334961;
 
           font-size: 10px;
-          font-weight: 850;
-        }
-
-        label span {
-          margin-left: 3px;
-
-          color: #1266e9;
-        }
-
-        small {
-          display: block;
-
-          margin-top: 6px;
-
-          color: #929eac;
-
-          font-size: 8px;
-          line-height: 1.45;
-        }
-      `}</style>
-    </div>
-  );
-}
+          font-weight
