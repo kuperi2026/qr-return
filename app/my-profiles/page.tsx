@@ -1,414 +1,199 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
-import { supabase } from "@/lib/supabase";
-
-import AccountHeader from "@/components/account/AccountHeader";
-
-import ProfileCard, {
-  type ProfileCardItem,
-} from "@/components/account/ProfileCard";
-
-type ItemRow = {
+type Profile = {
   id: string;
-
-  owner_id: string | null;
-
-  tag_code: string | null;
-
-  item_type: string | null;
-  pet_type: string | null;
-
+  tag_code: string;
+  item_type: string;
   item_name: string | null;
-
   photo: string | null;
-
   active: boolean | null;
-
-  scan_count: number | null;
-
-  lost_message: string | null;
-
-  lost_seen_location: string | null;
-
-  created_at?: string | null;
 };
 
-type Lang = "ka" | "en";
+function createSupabaseClient() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-type ChatThreadCountRow = {
-  unread_count?: number | null;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return null;
+  }
+
+  return createClient(
+    supabaseUrl,
+    supabaseKey
+  );
+}
+
+const CATEGORY_META: Record<
+  string,
+  {
+    label: string;
+    emoji: string;
+  }
+> = {
+  dog: {
+    label: "ძაღლი",
+    emoji: "🐶",
+  },
+
+  cat: {
+    label: "კატა",
+    emoji: "🐱",
+  },
+
+  keys: {
+    label: "გასაღები",
+    emoji: "🔑",
+  },
+
+  wallet: {
+    label: "საფულე",
+    emoji: "👛",
+  },
+
+  suitcase: {
+    label: "ჩემოდანი",
+    emoji: "🧳",
+  },
+
+  bag: {
+    label: "ჩანთა",
+    emoji: "👜",
+  },
 };
 
 export default function MyProfilesPage() {
   const router = useRouter();
 
-  const [lang, setLang] =
-    useState<Lang>("ka");
-
-  const [email, setEmail] =
-    useState("");
-
-  const [items, setItems] =
-    useState<ItemRow[]>([]);
-
-  const [
-    notificationCount,
-    setNotificationCount,
-  ] = useState(0);
-
-  const [
-    unreadChatCount,
-    setUnreadChatCount,
-  ] = useState(0);
+  const [profiles, setProfiles] =
+    useState<Profile[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [error, setError] =
+  const [errorMessage, setErrorMessage] =
     useState("");
-
-  const [search, setSearch] =
-    useState("");
-
-  const [filter, setFilter] =
-    useState("all");
-
-  const ka = lang === "ka";
 
   useEffect(() => {
-    void loadAccount();
-  }, []);
-
-  async function loadAccount() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const {
-        data: { user },
-        error: userError,
-      } =
-        await supabase.auth.getUser();
-
-      if (userError) {
-        throw userError;
-      }
-
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      setEmail(
-        user.email || ""
-      );
-
-      /*
-        NOTIFICATIONS COUNT
-      */
-
-      const {
-        count: unreadNotifications,
-        error: notificationError,
-      } = await supabase
-        .from("notifications")
-        .select("id", {
-          count: "exact",
-          head: true,
-        })
-        .eq(
-          "user_id",
-          user.id
-        )
-        .eq(
-          "read",
-          false
-        );
-
-      if (notificationError) {
-        console.error(
-          "Unread notification count error:",
-          notificationError
-        );
-      } else {
-        setNotificationCount(
-          unreadNotifications || 0
-        );
-      }
-
-      /*
-        LIVE CHAT UNREAD COUNT
-      */
-
+    async function loadProfiles() {
       try {
+        const supabase =
+          createSupabaseClient();
+
+        if (!supabase) {
+          setErrorMessage(
+            "Supabase კავშირი არ არის კონფიგურირებული."
+          );
+
+          setLoading(false);
+          return;
+        }
+
         const {
-          data: chatThreads,
-          error: chatError,
-        } = await supabase.rpc(
-          "owner_get_all_chat_threads"
-        );
+          data: {
+            user,
+          },
+          error: userError,
+        } =
+          await supabase.auth.getUser();
 
-        if (chatError) {
-          console.error(
-            "Unread chat count error:",
-            chatError
-          );
-        } else {
-          const rows =
-            (chatThreads ||
-              []) as ChatThreadCountRow[];
-
-          const totalUnread =
-            rows.reduce(
-              (
-                total,
-                thread
-              ) =>
-                total +
-                Number(
-                  thread.unread_count ||
-                    0
-                ),
-              0
-            );
-
-          setUnreadChatCount(
-            totalUnread
-          );
+        if (
+          userError ||
+          !user
+        ) {
+          router.replace("/login");
+          return;
         }
-      } catch (
-        chatCountError
-      ) {
+
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("item")
+          .select(
+            `
+              id,
+              tag_code,
+              item_type,
+              item_name,
+              photo,
+              active
+            `
+          )
+          .eq(
+            "owner_id",
+            user.id
+          )
+          .order(
+            "id",
+            {
+              ascending: false,
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        setProfiles(
+          data || []
+        );
+      } catch (error) {
         console.error(
-          "Unread chat count failed:",
-          chatCountError
-        );
-      }
-
-      /*
-        OWNER QR PROFILES
-      */
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("item")
-        .select(`
-          id,
-          owner_id,
-          tag_code,
-          item_type,
-          pet_type,
-          item_name,
-          photo,
-          active,
-          scan_count,
-          lost_message,
-          lost_seen_location,
-          created_at
-        `)
-        .eq(
-          "owner_id",
-          user.id
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
+          "Load profiles error:",
+          error
         );
 
-      if (error) {
-        throw error;
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "პროფილების ჩატვირთვა ვერ მოხერხდა."
+        );
+      } finally {
+        setLoading(false);
       }
-
-      setItems(
-        (data || []) as ItemRow[]
-      );
-    } catch (err) {
-      console.error(
-        "My Profiles error:",
-        err
-      );
-
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "პროფილების ჩატვირთვა ვერ მოხერხდა."
-          : "Could not load profiles."
-      );
-    } finally {
-      setLoading(false);
     }
-  }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-
-    window.location.href =
-      "/login";
-  }
-
-  const filteredItems =
-    useMemo(() => {
-      const q =
-        search
-          .trim()
-          .toLowerCase();
-
-      return items.filter(
-        (item) => {
-          const type =
-            getProfileType(
-              item
-            );
-
-          const filterMatch =
-            filter === "all"
-              ? true
-              : filter ===
-                "emergency"
-              ? type ===
-                "emergency"
-              : filter ===
-                "return"
-              ? Boolean(
-                  item.lost_message ||
-                    item
-                      .lost_seen_location
-                )
-              : type ===
-                filter;
-
-          const searchableText =
-            [
-              item.tag_code,
-              item.item_name,
-              item.item_type,
-              item.pet_type,
-            ]
-              .filter(
-                Boolean
-              )
-              .join(" ")
-              .toLowerCase();
-
-          const searchMatch =
-            !q ||
-            searchableText.includes(
-              q
-            );
-
-          return (
-            filterMatch &&
-            searchMatch
-          );
-        }
-      );
-    }, [
-      items,
-      search,
-      filter,
-    ]);
-
-  const emergencyCount =
-    items.filter(
-      (item) =>
-        getProfileType(
-          item
-        ) === "emergency"
-    ).length;
-
-  const returnCount =
-    items.filter(
-      (item) =>
-        Boolean(
-          item.lost_message ||
-            item
-              .lost_seen_location
-        )
-    ).length;
-
-  const activeCount =
-    items.filter(
-      (item) =>
-        item.active === true
-    ).length;
+    loadProfiles();
+  }, [router]);
 
   if (loading) {
     return (
-      <main className="loading">
-        <div className="loadingLogo">
-          QR
+      <main className="loadingPage">
+        <div className="loaderCard">
+          თქვენი პროფილები იტვირთება...
         </div>
 
-        <strong>
-          QR RETURN
-        </strong>
-
-        <span>
-          {ka
-            ? "QR პროფილები იტვირთება..."
-            : "Loading QR profiles..."}
-        </span>
-
         <style jsx>{`
-          .loading {
+          .loadingPage {
             min-height: 100vh;
 
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 8px;
-
-            color: #687481;
-
-            background: #f5f7f8;
-          }
-
-          .loadingLogo {
-            width: 50px;
-            height: 50px;
-
             display: grid;
-
             place-items: center;
 
+            padding: 30px;
+
+            background: #f7faff;
+          }
+
+          .loaderCard {
+            padding: 22px 28px;
+
+            border: 1px solid #dce6f1;
             border-radius: 14px;
 
-            color: white;
+            background: #ffffff;
 
-            background:
-              linear-gradient(
-                135deg,
-                #1465e8,
-                #7655f7
-              );
+            color: #718095;
 
-            font-weight: 900;
-          }
-
-          strong {
-            color: #1465e8;
-          }
-
-          span {
-            font-size: 10px;
+            font-size: 11px;
           }
         `}</style>
       </main>
@@ -416,1082 +201,731 @@ export default function MyProfilesPage() {
   }
 
   return (
-    <main className="page">
-      <AccountHeader
-        email={email}
-        notificationCount={
-          notificationCount
-        }
-        unreadChatCount={
-          unreadChatCount
-        }
-        onLogout={() =>
-          void handleLogout()
-        }
-      />
+    <>
+      <main className="page">
+        <header className="header">
+          <a
+            href="/"
+            className="brand"
+          >
+            <div className="brandMark">
+              QR
+            </div>
 
-      <div className="language">
-        <button
-          type="button"
-          className={
-            ka
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("ka")
-          }
-        >
-          GEO
-        </button>
+            <div>
+              <strong>
+                QR RETURN
+              </strong>
 
-        <button
-          type="button"
-          className={
-            !ka
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("en")
-          }
-        >
-          ENG
-        </button>
-      </div>
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
+            </div>
+          </a>
 
-      <div className="shell">
-        <header className="hero">
-          <div>
-            <span className="eyebrow">
-              QR RETURN ACCOUNT
-            </span>
-
-            <h1>
-              {ka
-                ? "ჩემი QR პროფილები"
-                : "My QR Profiles"}
-            </h1>
-
-            <p>
-              {ka
-                ? "მართეთ თქვენი ნივთები, შინაური ცხოველები და Emergency ID ერთი ანგარიშიდან."
-                : "Manage your belongings, pets, and Emergency ID from one account."}
-            </p>
-          </div>
-
-          <div className="addArea">
-            <Link
-              href="/account/register"
-              className="addButton"
+          <div className="headerActions">
+            <a
+              href="/register"
+              className="addTop"
             >
-              +{" "}
-              {ka
-                ? "QR პროფილის დამატება"
-                : "Add QR Profile"}
-            </Link>
-
-            <Link
-              href="/emergency/register"
-              className="emergencyButton"
-            >
-              + Emergency ID
-            </Link>
+              + ახალი პროფილი
+            </a>
           </div>
         </header>
 
-        <section className="accountAlerts">
-          <Link
-            href="/account/notifications"
-            className="alertCard"
-          >
-            <div className="alertIcon">
-              🔔
-            </div>
+        <section className="hero">
+          <span>
+            OWNER DASHBOARD
+          </span>
 
-            <div>
-              <span>
-                {ka
-                  ? "შეტყობინებები"
-                  : "Notifications"}
-              </span>
+          <h1>
+            ჩემი QR პროფილები
+          </h1>
 
-              <strong>
-                {notificationCount}
-              </strong>
-            </div>
-
-            <i>
-              →
-            </i>
-          </Link>
-
-          <Link
-            href="/account/messages"
-            className="alertCard"
-          >
-            <div className="alertIcon chat">
-              💬
-            </div>
-
-            <div>
-              <span>
-                Live Chat
-              </span>
-
-              <strong>
-                {unreadChatCount}
-              </strong>
-            </div>
-
-            <i>
-              →
-            </i>
-          </Link>
+          <p>
+            აქ შეგიძლიათ მართოთ
+            თქვენი ყველა QR RETURN
+            პროფილი ერთი ანგარიშიდან.
+          </p>
         </section>
 
-        <section className="stats">
-          <Stat
-            label={
-              ka
-                ? "ყველა პროფილი"
-                : "All Profiles"
-            }
-            value={
-              items.length
-            }
-          />
-
-          <Stat
-            label={
-              ka
-                ? "აქტიური"
-                : "Active"
-            }
-            value={
-              activeCount
-            }
-          />
-
-          <Stat
-            label="Emergency ID"
-            value={
-              emergencyCount
-            }
-          />
-
-          <Stat
-            label="Return Cases"
-            value={
-              returnCount
-            }
-          />
-        </section>
-
-        <section className="toolbar">
-          <div className="searchBox">
-            <SearchIcon />
-
-            <input
-              value={search}
-              onChange={(
-                event
-              ) =>
-                setSearch(
-                  event.target
-                    .value
-                )
-              }
-              placeholder={
-                ka
-                  ? "მოძებნეთ სახელი ან Tag Code..."
-                  : "Search name or Tag Code..."
-              }
-            />
-
-            {search && (
-              <button
-                type="button"
-                onClick={() =>
-                  setSearch("")
-                }
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          <div className="filters">
-            <FilterButton
-              active={
-                filter === "all"
-              }
-              onClick={() =>
-                setFilter(
-                  "all"
-                )
-              }
-            >
-              {ka
-                ? "ყველა"
-                : "All"}
-            </FilterButton>
-
-            <FilterButton
-              active={
-                filter === "dog"
-              }
-              onClick={() =>
-                setFilter(
-                  "dog"
-                )
-              }
-            >
-              🐕{" "}
-              {ka
-                ? "ძაღლი"
-                : "Dog"}
-            </FilterButton>
-
-            <FilterButton
-              active={
-                filter === "cat"
-              }
-              onClick={() =>
-                setFilter(
-                  "cat"
-                )
-              }
-            >
-              🐈{" "}
-              {ka
-                ? "კატა"
-                : "Cat"}
-            </FilterButton>
-
-            <FilterButton
-              active={
-                filter ===
-                "emergency"
-              }
-              onClick={() =>
-                setFilter(
-                  "emergency"
-                )
-              }
-            >
-              🚑 Emergency
-            </FilterButton>
-
-            <FilterButton
-              active={
-                filter ===
-                "return"
-              }
-              onClick={() =>
-                setFilter(
-                  "return"
-                )
-              }
-            >
-              📍 Return Cases
-            </FilterButton>
-          </div>
-        </section>
-
-        {error && (
-          <div className="error">
-            ⚠ {error}
+        {errorMessage && (
+          <div className="errorBox">
+            {errorMessage}
           </div>
         )}
 
-        {!error &&
-          filteredItems.length ===
-            0 && (
-            <section className="empty">
-              <div className="emptyIcon">
-                <QRIcon />
+        {profiles.length === 0 ? (
+          <section className="emptyState">
+            <div className="emptyIcon">
+              QR
+            </div>
+
+            <h2>
+              ჯერ არცერთი პროფილი არ გაქვთ
+            </h2>
+
+            <p>
+              დაამატეთ პირველი QR პროფილი
+              ძაღლისთვის, კატისთვის ან
+              თქვენი ნივთისთვის.
+            </p>
+
+            <a
+              href="/register"
+              className="primaryButton"
+            >
+              პირველი პროფილის დამატება
+            </a>
+          </section>
+        ) : (
+          <>
+            <section className="summary">
+              <div>
+                <span>
+                  TOTAL PROFILES
+                </span>
+
+                <strong>
+                  {profiles.length}
+                </strong>
               </div>
 
-              <h2>
-                {items.length ===
-                0
-                  ? ka
-                    ? "ჯერ QR პროფილი არ გაქვთ"
-                    : "You don't have a QR profile yet"
-                  : ka
-                  ? "პროფილი ვერ მოიძებნა"
-                  : "No matching profile"}
-              </h2>
-
-              <p>
-                {items.length ===
-                0
-                  ? ka
-                    ? "დაარეგისტრირეთ თქვენი პირველი ნივთი, შინაური ცხოველი ან Emergency ID."
-                    : "Register your first item, pet, or Emergency ID."
-                  : ka
-                  ? "შეცვალეთ ძებნა ან ფილტრი."
-                  : "Try another search or filter."}
-              </p>
-
-              {items.length ===
-                0 && (
-                <div className="emptyActions">
-                  <Link href="/account/register">
-                    {ka
-                      ? "QR პროფილის შექმნა"
-                      : "Create QR Profile"}
-                  </Link>
-
-                  <Link href="/emergency/register">
-                    Emergency ID
-                  </Link>
-                </div>
-              )}
+              <a href="/register">
+                + ახალი პროფილის დამატება
+              </a>
             </section>
-          )}
 
-        {!error &&
-          filteredItems.length >
-            0 && (
-            <section className="profiles">
-              {filteredItems.map(
-                (item) => {
-                  const type =
-                    getProfileType(
-                      item
-                    );
-
-                  const profile:
-                    ProfileCardItem =
-                    {
-                      id:
-                        item.id,
-
-                      tagCode:
-                        item.tag_code,
-
-                      type:
-                        item.item_type,
-
-                      petType:
-                        item.pet_type,
-
-                      name:
-                        item.item_name,
-
-                      photo:
-                        item.photo,
-
-                      active:
-                        item.active,
-
-                      scanCount:
-                        item.scan_count,
-
-                      lostMessage:
-                        item.lost_message,
-
-                      lostLocation:
-                        item
-                          .lost_seen_location,
+            <section className="grid">
+              {profiles.map(
+                (profile) => {
+                  const meta =
+                    CATEGORY_META[
+                      profile.item_type
+                    ] || {
+                      label:
+                        profile.item_type,
+                      emoji: "QR",
                     };
 
-                  if (
-                    type ===
-                    "emergency"
-                  ) {
-                    return (
-                      <EmergencyProfileCard
-                        key={
-                          item.id
-                        }
-                        item={
-                          item
-                        }
-                        language={
-                          lang
-                        }
-                      />
-                    );
-                  }
-
                   return (
-                    <ProfileCard
-                      key={
-                        item.id
-                      }
-                      item={
-                        profile
-                      }
-                    />
+                    <article
+                      key={profile.id}
+                      className="card"
+                    >
+                      <div className="cardTop">
+                        <div className="categoryIcon">
+                          {meta.emoji}
+                        </div>
+
+                        <div
+                          className={
+                            profile.active !== false
+                              ? "status active"
+                              : "status"
+                          }
+                        >
+                          {profile.active !== false
+                            ? "ACTIVE"
+                            : "INACTIVE"}
+                        </div>
+                      </div>
+
+                      <div className="category">
+                        {meta.label}
+                      </div>
+
+                      <h2>
+                        {profile.item_name ||
+                          meta.label}
+                      </h2>
+
+                      <div className="tag">
+                        <span>
+                          QR CODE
+                        </span>
+
+                        <strong>
+                          {profile.tag_code}
+                        </strong>
+                      </div>
+
+                      <div className="actions">
+                        <a
+                          href={`/profile/${profile.tag_code}`}
+                          className="viewButton"
+                        >
+                          ნახვა
+                        </a>
+
+                        <a
+                          href={`/edit-profile/${profile.id}`}
+                          className="editButton"
+                        >
+                          რედაქტირება
+                        </a>
+                      </div>
+                    </article>
                   );
                 }
               )}
             </section>
-          )}
-
-        <section className="quickActions">
-          <div>
-            <span>
-              QR RETURN ACCOUNT
-            </span>
-
-            <h2>
-              {ka
-                ? "სწრაფი მოქმედებები"
-                : "Quick Actions"}
-            </h2>
-          </div>
-
-          <div className="quickGrid">
-            <QuickLink
-              href="/account/register"
-              icon="🏷️"
-              title={
-                ka
-                  ? "ახალი QR"
-                  : "New QR"
-              }
-            />
-
-            <QuickLink
-              href="/emergency/register"
-              icon="🚑"
-              title="Emergency ID"
-            />
-
-            <QuickLink
-              href="/account/notifications"
-              icon="🔔"
-              title={
-                notificationCount >
-                0
-                  ? ka
-                    ? `შეტყობინებები (${notificationCount})`
-                    : `Notifications (${notificationCount})`
-                  : ka
-                  ? "შეტყობინებები"
-                  : "Notifications"
-              }
-            />
-
-            <QuickLink
-              href="/account/messages"
-              icon="💬"
-              title={
-                unreadChatCount >
-                0
-                  ? `Live Chat (${unreadChatCount})`
-                  : "Live Chat"
-              }
-            />
-
-            <QuickLink
-              href="/account"
-              icon="👤"
-              title={
-                ka
-                  ? "ანგარიში"
-                  : "Account"
-              }
-            />
-
-            <QuickLink
-              href="/"
-              icon="⌂"
-              title={
-                ka
-                  ? "მთავარი"
-                  : "Home"
-              }
-            />
-          </div>
-        </section>
-      </div>
+          </>
+        )}
+      </main>
 
       <style jsx>{`
+        * {
+          box-sizing: border-box;
+        }
+
         .page {
           min-height: 100vh;
 
-          position: relative;
+          padding-bottom: 80px;
 
-          background: #f5f7f8;
-        }
-
-        .shell {
-          width:
-            calc(
-              100% - 40px
+          background:
+            radial-gradient(
+              circle at 100% 0%,
+              rgba(18,102,233,.07),
+              transparent 26%
+            ),
+            linear-gradient(
+              180deg,
+              #ffffff 0%,
+              #f6f9fe 100%
             );
-
-          max-width: 1180px;
-
-          margin: 0 auto;
-
-          padding:
-            52px 0 90px;
         }
 
-        .language {
-          position: absolute;
+        .header {
+          width:
+            calc(100% - 60px);
 
-          top: 82px;
-          right: 22px;
+          max-width: 1200px;
 
-          z-index: 10;
+          min-height: 80px;
+
+          margin: auto;
 
           display: flex;
 
-          gap: 4px;
-
-          padding: 4px;
-
-          border:
-            1px solid #e0e5e8;
-
-          border-radius: 999px;
-
-          background: white;
-        }
-
-        .language button {
-          min-width: 38px;
-          height: 27px;
-
-          border: 0;
-
-          border-radius:
-            999px;
-
-          color: #89939d;
-
-          background:
-            transparent;
-
-          cursor: pointer;
-
-          font-size: 7px;
-
-          font-weight: 900;
-        }
-
-        .language
-          button.active {
-          color: white;
-
-          background:
-            #202b37;
-        }
-
-        .hero {
-          display: flex;
-
-          align-items:
-            flex-end;
+          align-items: center;
 
           justify-content:
             space-between;
 
-          gap: 30px;
+          gap: 20px;
+
+          border-bottom:
+            1px solid #e5ebf2;
         }
 
-        .eyebrow {
-          color: #c84a50;
-
-          font-size: 8px;
-
-          font-weight: 900;
-
-          letter-spacing:
-            1.4px;
-        }
-
-        h1 {
-          margin:
-            8px 0 0;
-
-          color: #202b37;
-
-          font-size:
-            clamp(
-              36px,
-              4vw,
-              48px
-            );
-
-          font-weight: 760;
-
-          letter-spacing:
-            -2px;
-        }
-
-        .hero p {
-          max-width: 650px;
-
-          margin:
-            10px 0 0;
-
-          color: #78838e;
-
-          font-size: 10px;
-
-          line-height: 1.7;
-        }
-
-        .addArea {
+        .brand {
           display: flex;
-
-          flex-wrap: wrap;
-
-          gap: 7px;
-        }
-
-        .addArea
-          :global(a) {
-          min-height: 42px;
-
-          padding:
-            0 13px;
-
-          display: flex;
-
-          align-items:
-            center;
-
-          border-radius:
-            9px;
-
-          text-decoration:
-            none;
-
-          font-size: 8px;
-
-          font-weight: 850;
-        }
-
-        .addButton {
-          color: white;
-
-          background:
-            #202b37;
-        }
-
-        .emergencyButton {
-          color: #a13f45;
-
-          border:
-            1px solid
-            #ecd4d6;
-
-          background:
-            #fff6f6;
-        }
-
-        .accountAlerts {
-          margin-top: 25px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-          gap: 9px;
-        }
-
-        .alertCard {
-          min-height: 76px;
-
-          padding: 13px;
-
-          display: grid;
-
-          grid-template-columns:
-            auto
-            1fr
-            auto;
 
           align-items: center;
 
           gap: 10px;
 
-          border:
-            1px solid
-            #e0e5e8;
-
-          border-radius: 12px;
-
-          color: #35414c;
-
-          background: white;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
-        .alertIcon {
+        .brandMark {
           width: 42px;
           height: 42px;
 
           display: grid;
 
-          place-items:
-            center;
+          place-items: center;
 
           border-radius: 11px;
 
-          background:
-            #fff1f1;
+          background: #1266e9;
 
-          font-size: 18px;
+          color: #ffffff;
+
+          font-size: 10px;
+
+          font-weight: 950;
         }
 
-        .alertIcon.chat {
-          background:
-            #eef4ff;
-        }
-
-        .alertCard span,
-        .alertCard strong {
+        .brand strong,
+        .brand span {
           display: block;
         }
 
-        .alertCard span {
-          color: #838e98;
+        .brand strong {
+          color: #172b43;
+
+          font-size: 15px;
+
+          font-weight: 950;
+        }
+
+        .brand span {
+          margin-top: 3px;
+
+          color: #8b97a5;
 
           font-size: 7px;
 
           font-weight: 850;
+
+          letter-spacing: 1.3px;
         }
 
-        .alertCard strong {
-          margin-top: 4px;
+        .addTop {
+          min-height: 42px;
 
-          color: #35414c;
+          padding: 0 14px;
 
-          font-size: 17px;
-        }
-
-        .alertCard i {
-          color: #929ca5;
-
-          font-size: 15px;
-
-          font-style: normal;
-        }
-
-        .stats {
-          margin-top: 18px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              4,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-          gap: 10px;
-        }
-
-        .toolbar {
-          margin-top: 25px;
-
-          display: grid;
-
-          gap: 11px;
-        }
-
-        .searchBox {
-          min-height: 50px;
-
-          padding:
-            0 14px;
-
-          display: grid;
-
-          grid-template-columns:
-            auto
-            minmax(
-              0,
-              1fr
-            )
-            auto;
+          display: inline-flex;
 
           align-items: center;
 
-          gap: 10px;
+          border-radius: 10px;
+
+          background: #1266e9;
+
+          color: #ffffff;
+
+          font-size: 9px;
+
+          font-weight: 900;
+
+          text-decoration: none;
+        }
+
+        .hero {
+          width:
+            calc(100% - 60px);
+
+          max-width: 1200px;
+
+          margin:
+            60px auto 0;
+        }
+
+        .hero > span {
+          color: #1266e9;
+
+          font-size: 8px;
+
+          font-weight: 900;
+
+          letter-spacing: 1.5px;
+        }
+
+        .hero h1 {
+          margin: 9px 0 0;
+
+          color: #172b43;
+
+          font-size: 40px;
+
+          line-height: 1.08;
+
+          letter-spacing: -1.4px;
+        }
+
+        .hero p {
+          max-width: 560px;
+
+          margin: 12px 0 0;
+
+          color: #77869a;
+
+          font-size: 11px;
+
+          line-height: 1.65;
+        }
+
+        .errorBox {
+          width:
+            calc(100% - 60px);
+
+          max-width: 1200px;
+
+          margin:
+            24px auto 0;
+
+          padding: 14px;
 
           border:
-            1px solid
-            #dfe4e8;
+            1px solid #efc7cb;
 
           border-radius: 12px;
 
-          background: white;
-        }
+          background: #fff7f8;
 
-        .searchBox
-          :global(svg) {
-          width: 17px;
-
-          height: 17px;
-
-          color: #8d969f;
-        }
-
-        .searchBox input {
-          width: 100%;
-
-          border: 0;
-
-          outline: 0;
-
-          background:
-            transparent;
+          color: #a3434c;
 
           font-size: 10px;
         }
 
-        .searchBox button {
-          border: 0;
+        .summary {
+          width:
+            calc(100% - 60px);
 
-          color: #8d969f;
+          max-width: 1200px;
 
-          background:
-            transparent;
+          margin:
+            34px auto 0;
 
-          cursor: pointer;
+          padding: 16px 18px;
 
-          font-size: 18px;
-        }
-
-        .filters {
           display: flex;
 
-          flex-wrap: wrap;
+          align-items: center;
 
-          gap: 6px;
+          justify-content:
+            space-between;
+
+          gap: 20px;
+
+          border:
+            1px solid #dce6f1;
+
+          border-radius: 14px;
+
+          background: #ffffff;
         }
 
-        .profiles {
-          margin-top: 30px;
+        .summary span {
+          display: block;
+
+          color: #8a97a6;
+
+          font-size: 7px;
+
+          font-weight: 900;
+
+          letter-spacing: 1px;
+        }
+
+        .summary strong {
+          display: block;
+
+          margin-top: 4px;
+
+          color: #172b43;
+
+          font-size: 22px;
+        }
+
+        .summary a {
+          color: #1266e9;
+
+          font-size: 9px;
+
+          font-weight: 900;
+
+          text-decoration: none;
+        }
+
+        .grid {
+          width:
+            calc(100% - 60px);
+
+          max-width: 1200px;
+
+          margin:
+            18px auto 0;
 
           display: grid;
 
           grid-template-columns:
             repeat(
               3,
-              minmax(
-                0,
-                1fr
-              )
+              minmax(0, 1fr)
             );
 
-          gap: 13px;
+          gap: 15px;
         }
 
-        .error {
-          margin-top: 25px;
+        .card {
+          min-height: 285px;
 
-          padding: 15px;
+          padding: 20px;
 
-          border:
-            1px solid
-            #eed3d5;
+          display: flex;
 
-          border-radius: 11px;
-
-          color: #9c4045;
-
-          background:
-            #fff6f6;
-
-          font-size: 9px;
-        }
-
-        .empty {
-          margin-top: 30px;
-
-          padding:
-            65px 20px;
+          flex-direction: column;
 
           border:
-            1px solid
-            #e0e5e8;
+            1px solid #dce6f1;
 
           border-radius: 16px;
 
-          background: white;
+          background: #ffffff;
+
+          box-shadow:
+            0 12px 28px
+            rgba(
+              30,
+              70,
+              120,
+              .055
+            );
+        }
+
+        .cardTop {
+          display: flex;
+
+          align-items: center;
+
+          justify-content:
+            space-between;
+
+          gap: 10px;
+        }
+
+        .categoryIcon {
+          width: 48px;
+          height: 48px;
+
+          display: grid;
+
+          place-items: center;
+
+          border-radius: 13px;
+
+          background: #f0f5fd;
+
+          font-size: 24px;
+        }
+
+        .status {
+          padding: 5px 8px;
+
+          border-radius: 999px;
+
+          background: #edf0f4;
+
+          color: #8b97a5;
+
+          font-size: 6px;
+
+          font-weight: 900;
+        }
+
+        .status.active {
+          background: #eaf2ff;
+
+          color: #1266e9;
+        }
+
+        .category {
+          margin-top: 22px;
+
+          color: #1266e9;
+
+          font-size: 8px;
+
+          font-weight: 900;
+
+          letter-spacing: 1px;
+
+          text-transform: uppercase;
+        }
+
+        .card h2 {
+          margin: 7px 0 0;
+
+          color: #263e57;
+
+          font-size: 19px;
+        }
+
+        .tag {
+          margin-top: 18px;
+
+          padding: 12px;
+
+          border:
+            1px solid #e1e8f0;
+
+          border-radius: 10px;
+
+          background: #fafcff;
+        }
+
+        .tag span,
+        .tag strong {
+          display: block;
+        }
+
+        .tag span {
+          color: #9aa6b4;
+
+          font-size: 7px;
+
+          font-weight: 900;
+
+          letter-spacing: 1px;
+        }
+
+        .tag strong {
+          margin-top: 5px;
+
+          color: #536980;
+
+          font-size: 10px;
+
+          word-break:
+            break-all;
+        }
+
+        .actions {
+          margin-top: auto;
+
+          padding-top: 20px;
+
+          display: grid;
+
+          grid-template-columns:
+            1fr 1fr;
+
+          gap: 8px;
+        }
+
+        .actions a {
+          min-height: 40px;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          border-radius: 9px;
+
+          font-size: 8px;
+
+          font-weight: 900;
+
+          text-decoration: none;
+        }
+
+        .viewButton {
+          background: #1266e9;
+
+          color: #ffffff;
+        }
+
+        .editButton {
+          border:
+            1px solid #ccdae9;
+
+          background: #ffffff;
+
+          color: #61758a;
+        }
+
+        .emptyState {
+          width:
+            calc(100% - 60px);
+
+          max-width: 620px;
+
+          margin:
+            60px auto 0;
+
+          padding: 50px 30px;
 
           text-align: center;
+
+          border:
+            1px solid #dce6f1;
+
+          border-radius: 18px;
+
+          background: #ffffff;
+
+          box-shadow:
+            0 15px 35px
+            rgba(
+              30,
+              70,
+              120,
+              .06
+            );
         }
 
         .emptyIcon {
-          width: 55px;
-
-          height: 55px;
+          width: 60px;
+          height: 60px;
 
           margin: auto;
 
           display: grid;
 
-          place-items:
-            center;
+          place-items: center;
 
-          border-radius: 14px;
+          border-radius: 16px;
 
-          color: #7d8791;
+          background: #edf4ff;
 
-          background:
-            #f0f3f5;
+          color: #1266e9;
+
+          font-size: 12px;
+
+          font-weight: 950;
         }
 
-        .emptyIcon
-          :global(svg) {
-          width: 24px;
+        .emptyState h2 {
+          margin: 20px 0 0;
+
+          color: #263e57;
+
+          font-size: 22px;
         }
 
-        .empty h2 {
+        .emptyState p {
+          max-width: 430px;
+
           margin:
-            15px 0 0;
+            10px auto 0;
 
-          color: #35414c;
+          color: #7e8da0;
 
-          font-size: 16px;
+          font-size: 10px;
+
+          line-height: 1.6;
         }
 
-        .empty p {
-          margin:
-            7px 0 0;
+        .primaryButton {
+          min-height: 44px;
 
-          color: #89939d;
+          margin-top: 22px;
+
+          padding: 0 17px;
+
+          display: inline-flex;
+
+          align-items: center;
+
+          border-radius: 10px;
+
+          background: #1266e9;
+
+          color: #ffffff;
 
           font-size: 9px;
-        }
-
-        .emptyActions {
-          margin-top: 18px;
-
-          display: flex;
-
-          justify-content:
-            center;
-
-          flex-wrap: wrap;
-
-          gap: 7px;
-        }
-
-        .emptyActions
-          :global(a) {
-          min-height: 37px;
-
-          padding:
-            0 11px;
-
-          display: flex;
-
-          align-items:
-            center;
-
-          border:
-            1px solid
-            #dce2e6;
-
-          border-radius: 8px;
-
-          color: #53606c;
-
-          background: white;
-
-          text-decoration:
-            none;
-
-          font-size: 8px;
-
-          font-weight: 850;
-        }
-
-        .quickActions {
-          margin-top: 50px;
-
-          padding-top: 27px;
-
-          border-top:
-            1px solid
-            #dfe4e8;
-        }
-
-        .quickActions >
-          div:first-child
-          span {
-          color: #c84a50;
-
-          font-size: 7px;
 
           font-weight: 900;
-        }
 
-        .quickActions h2 {
-          margin:
-            5px 0 0;
-
-          color: #35414c;
-
-          font-size: 18px;
-        }
-
-        .quickGrid {
-          margin-top: 15px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              3,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-          gap: 9px;
+          text-decoration: none;
         }
 
         @media (
           max-width: 900px
         ) {
-          .profiles {
+          .grid {
             grid-template-columns:
               repeat(
                 2,
-                minmax(
-                  0,
-                  1fr
-                )
-              );
-          }
-
-          .stats,
-          .quickGrid {
-            grid-template-columns:
-              repeat(
-                2,
-                minmax(
-                  0,
-                  1fr
-                )
+                minmax(0, 1fr)
               );
           }
         }
@@ -1499,593 +933,50 @@ export default function MyProfilesPage() {
         @media (
           max-width: 600px
         ) {
-          .shell {
+          .header,
+          .hero,
+          .summary,
+          .grid,
+          .errorBox,
+          .emptyState {
             width:
               calc(
-                100% - 24px
+                100% - 30px
               );
-
-            padding-top:
-              40px;
           }
 
-          .language {
-            top: 75px;
-
-            right: 10px;
+          .header {
+            min-height: 70px;
           }
 
           .hero {
+            margin-top: 42px;
+          }
+
+          .hero h1 {
+            font-size: 31px;
+          }
+
+          .grid {
+            grid-template-columns:
+              1fr;
+          }
+
+          .summary {
             align-items:
-              stretch;
+              flex-start;
 
             flex-direction:
               column;
           }
 
-          .addArea {
-            display: grid;
-          }
+          .addTop {
+            padding: 0 10px;
 
-          .accountAlerts,
-          .profiles,
-          .stats,
-          .quickGrid {
-            grid-template-columns:
-              1fr;
+            font-size: 7px;
           }
         }
       `}</style>
-    </main>
-  );
-}
-
-function EmergencyProfileCard({
-  item,
-  language,
-}: {
-  item: ItemRow;
-  language: Lang;
-}) {
-  const ka =
-    language === "ka";
-
-  return (
-    <article className="card">
-      <div className="visual">
-        {item.photo ? (
-          <img
-            src={
-              item.photo
-            }
-            alt="Emergency ID"
-          />
-        ) : (
-          <div className="placeholder">
-            🚑
-          </div>
-        )}
-
-        <span className="badge">
-          EMERGENCY ID
-        </span>
-      </div>
-
-      <div className="content">
-        <span className="type">
-          QR RETURN EMERGENCY
-        </span>
-
-        <h3>
-          {item.item_name ||
-            "Emergency ID"}
-        </h3>
-
-        <div className="stats">
-          <div>
-            <span>
-              SCANS
-            </span>
-
-            <strong>
-              {item.scan_count ||
-                0}
-            </strong>
-          </div>
-
-          <div>
-            <span>
-              STATUS
-            </span>
-
-            <strong>
-              {item.active
-                ? "ACTIVE"
-                : "INACTIVE"}
-            </strong>
-          </div>
-        </div>
-
-        <div className="actions">
-          <Link
-            href={`/emergency/edit/${item.id}`}
-          >
-            {ka
-              ? "რედაქტირება"
-              : "Edit"}
-          </Link>
-
-          {item.tag_code && (
-            <Link
-              href={`/profile/${item.tag_code}`}
-              target="_blank"
-            >
-              Emergency View ↗
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <style jsx>{`
-        .card {
-          overflow: hidden;
-
-          border:
-            1px solid
-            #ead7d9;
-
-          border-radius: 15px;
-
-          background: white;
-        }
-
-        .visual {
-          height: 170px;
-
-          position: relative;
-
-          overflow: hidden;
-
-          background:
-            linear-gradient(
-              145deg,
-              #fff3f3,
-              #f8f9f8
-            );
-        }
-
-        .visual img {
-          width: 100%;
-
-          height: 100%;
-
-          object-fit: cover;
-        }
-
-        .placeholder {
-          width: 100%;
-
-          height: 100%;
-
-          display: grid;
-
-          place-items:
-            center;
-
-          font-size: 43px;
-        }
-
-        .badge {
-          position: absolute;
-
-          right: 10px;
-
-          bottom: 10px;
-
-          padding:
-            6px 8px;
-
-          border-radius:
-            999px;
-
-          color: white;
-
-          background:
-            #c84a50;
-
-          font-size: 6px;
-
-          font-weight: 900;
-        }
-
-        .content {
-          padding: 15px;
-        }
-
-        .type {
-          color: #c84a50;
-
-          font-size: 6px;
-
-          font-weight: 900;
-        }
-
-        h3 {
-          margin:
-            5px 0 0;
-
-          color: #303c47;
-
-          font-size: 13px;
-        }
-
-        .stats {
-          margin-top: 16px;
-
-          padding-top: 12px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(
-                0,
-                1fr
-              )
-            );
-
-          gap: 10px;
-
-          border-top:
-            1px solid
-            #eee4e5;
-        }
-
-        .stats span,
-        .stats strong {
-          display: block;
-        }
-
-        .stats span {
-          color: #9aa2aa;
-
-          font-size: 6px;
-
-          font-weight: 900;
-        }
-
-        .stats strong {
-          margin-top: 4px;
-
-          color: #56626d;
-
-          font-size: 8px;
-        }
-
-        .actions {
-          margin-top: 15px;
-
-          display: flex;
-
-          flex-wrap: wrap;
-
-          gap: 6px;
-        }
-
-        .actions
-          :global(a) {
-          min-height: 33px;
-
-          padding:
-            0 10px;
-
-          display: flex;
-
-          align-items:
-            center;
-
-          border:
-            1px solid
-            #dfdfe2;
-
-          border-radius: 8px;
-
-          color: #53606c;
-
-          background: white;
-
-          text-decoration:
-            none;
-
-          font-size: 7px;
-
-          font-weight: 850;
-        }
-      `}</style>
-    </article>
-  );
-}
-
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-
-  value: number;
-}) {
-  return (
-    <div className="stat">
-      <span>
-        {label}
-      </span>
-
-      <strong>
-        {value}
-      </strong>
-
-      <style jsx>{`
-        .stat {
-          min-height: 94px;
-
-          padding: 15px;
-
-          border:
-            1px solid
-            #e0e5e8;
-
-          border-radius: 12px;
-
-          background: white;
-        }
-
-        span {
-          color: #929ca5;
-
-          font-size: 7px;
-
-          font-weight: 900;
-        }
-
-        strong {
-          display: block;
-
-          margin-top: 16px;
-
-          color: #293540;
-
-          font-size: 23px;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function FilterButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-
-  onClick: () => void;
-
-  children:
-    React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      className={
-        active
-          ? "filter active"
-          : "filter"
-      }
-      onClick={
-        onClick
-      }
-    >
-      {children}
-
-      <style jsx>{`
-        .filter {
-          min-height: 31px;
-
-          padding:
-            0 10px;
-
-          border:
-            1px solid
-            #dce2e6;
-
-          border-radius:
-            999px;
-
-          color: #66727d;
-
-          background: white;
-
-          cursor: pointer;
-
-          font-size: 7px;
-
-          font-weight: 850;
-        }
-
-        .active {
-          color: white;
-
-          border-color:
-            #202b37;
-
-          background:
-            #202b37;
-        }
-      `}</style>
-    </button>
-  );
-}
-
-function QuickLink({
-  href,
-  icon,
-  title,
-}: {
-  href: string;
-
-  icon: string;
-
-  title: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="quick"
-    >
-      <span>
-        {icon}
-      </span>
-
-      <strong>
-        {title}
-      </strong>
-
-      <i>
-        →
-      </i>
-
-      <style jsx>{`
-        .quick {
-          min-height: 80px;
-
-          padding: 14px;
-
-          display: grid;
-
-          grid-template-columns:
-            auto
-            1fr
-            auto;
-
-          align-items:
-            center;
-
-          gap: 9px;
-
-          border:
-            1px solid
-            #e0e5e8;
-
-          border-radius: 11px;
-
-          color: #35414c;
-
-          background: white;
-
-          text-decoration:
-            none;
-        }
-
-        span {
-          font-size: 18px;
-        }
-
-        strong {
-          font-size: 9px;
-        }
-
-        i {
-          color: #929ca5;
-
-          font-size: 13px;
-
-          font-style: normal;
-        }
-      `}</style>
-    </Link>
-  );
-}
-
-function getProfileType(
-  item: ItemRow
-) {
-  if (
-    item.item_type ===
-    "emergency"
-  ) {
-    return "emergency";
-  }
-
-  if (
-    item.item_type ===
-    "pet"
-  ) {
-    return (
-      item.pet_type ||
-      "pet"
-    );
-  }
-
-  return (
-    item.item_type ||
-    item.pet_type ||
-    "other"
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
-      <circle
-        cx="10.5"
-        cy="10.5"
-        r="6"
-      />
-
-      <path d="m15 15 5 5" />
-    </svg>
-  );
-}
-
-function QRIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="15"
-        y="3"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <rect
-        x="3"
-        y="15"
-        width="6"
-        height="6"
-        rx="1"
-      />
-
-      <path d="M14 14h3v3h3v4h-6z" />
-    </svg>
+    </>
   );
 }
