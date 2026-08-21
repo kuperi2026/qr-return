@@ -1,6 +1,13 @@
 "use client";
 
-import type { Lang, Menu } from "./types";
+type Lang = "ka" | "en";
+
+type Menu =
+  | "about"
+  | "shop"
+  | "faq"
+  | "contact"
+  | null;
 
 type Props = {
   language: Lang;
