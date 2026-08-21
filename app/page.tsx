@@ -1,349 +1,71 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import HomeHeader from "@/components/home/HomeHeader";
+import { supabase } from "@/lib/supabase";
 
 type Language = "ka" | "en";
 
-export default function Header() {
-  const [language, setLanguage] = useState<Language>("ka");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export default function HomePage() {
+  const [language, setLanguage] =
+    useState<Language>("ka");
 
-  const isKa = language === "ka";
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
+
+  useEffect(() => {
+    async function loadUser() {
+      const {
+        data: { user },
+      } =
+        await supabase.auth.getUser();
+
+      if (!user) {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsLoggedIn(true);
+
+      const { data } =
+        await supabase
+          .from("admin_users")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+      setIsAdmin(Boolean(data));
+    }
+
+    void loadUser();
+
+    const { data } =
+      supabase.auth.onAuthStateChange(
+        () => {
+          void loadUser();
+        }
+      );
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
-    <header className="header">
-      <div className="headerInner">
-        {/* BRAND */}
-        <Link href="/" className="brand" aria-label="QR Return Home">
-          <div className="brandMark">
-            <QRIcon />
-          </div>
-          <span className="brandName">QR RETURN</span>
-        </Link>
-
-        {/* DESKTOP RIGHT SIDE */}
-        <div className="rightSide">
-          {/* LANGUAGE SWITCHER */}
-          <div className="languageSwitcher" role="group" aria-label="Language Switcher">
-            <button
-              type="button"
-              className={isKa ? "active" : ""}
-              onClick={() => setLanguage("ka")}
-              aria-pressed={isKa}
-            >
-              GEO
-            </button>
-            <button
-              type="button"
-              className={!isKa ? "active" : ""}
-              onClick={() => setLanguage("en")}
-              aria-pressed={!isKa}
-            >
-              ENG
-            </button>
-          </div>
-
-          {/* LOGIN */}
-          <Link href="/login" className="loginButton">
-            {isKa ? "შესვლა" : "Log in"}
-          </Link>
-
-          {/* CREATE ACCOUNT */}
-          <Link href="/signup" className="signupButton">
-            {isKa ? "ანგარიშის შექმნა" : "Create account"}
-          </Link>
-
-          {/* MOBILE TOGGLE BUTTON */}
-          <button
-            type="button"
-            className="mobileMenuBtn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle Menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
-        </div>
-      </div>
-
-      {/* MOBILE MENU DROPDOWN */}
-      {mobileMenuOpen && (
-        <div className="mobileMenu">
-          <div className="mobileLanguageSwitcher">
-            <button
-              type="button"
-              className={isKa ? "active" : ""}
-              onClick={() => setLanguage("ka")}
-            >
-              GEO
-            </button>
-            <button
-              type="button"
-              className={!isKa ? "active" : ""}
-              onClick={() => setLanguage("en")}
-            >
-              ENG
-            </button>
-          </div>
-          <Link
-            href="/login"
-            className="loginButton mobileLink"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            {isKa ? "შესვლა" : "Log in"}
-          </Link>
-        </div>
-      )}
-
-      <style jsx>{`
-        .header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          width: 100%;
-          background: rgba(255, 255, 255, 0.96);
-          border-bottom: 1px solid #e8ebef;
-          backdrop-filter: blur(16px);
+    <main>
+      <HomeHeader
+        language={language}
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        onLanguageChange={
+          setLanguage
         }
-
-        .headerInner {
-          width: calc(100% - 48px);
-          max-width: 1280px;
-          min-height: 82px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 28px;
-        }
-
-        /* BRAND */
-        .brand {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-        }
-
-        .brandMark {
-          width: 44px;
-          height: 44px;
-          display: grid;
-          place-items: center;
-          border-radius: 13px;
-          color: white;
-          background: linear-gradient(135deg, #0f5ce8, #6548e8);
-          box-shadow: 0 8px 24px rgba(42, 91, 220, 0.2);
-        }
-
-        .brandMark :global(svg) {
-          width: 21px;
-          height: 21px;
-        }
-
-        .brandName {
-          color: #172033;
-          font-size: 20px;
-          font-weight: 800;
-          letter-spacing: -0.6px;
-        }
-
-        /* RIGHT SIDE */
-        .rightSide {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        /* LANGUAGE SWITCHER */
-        .languageSwitcher {
-          padding: 4px;
-          display: flex;
-          align-items: center;
-          gap: 3px;
-          border: 1px solid #e3e7ec;
-          border-radius: 11px;
-          background: #f6f8fa;
-        }
-
-        .languageSwitcher button {
-          min-width: 48px;
-          height: 36px;
-          padding: 0 10px;
-          border: 0;
-          border-radius: 8px;
-          color: #7a8491;
-          background: transparent;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 750;
-          transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .languageSwitcher button.active {
-          color: #172033;
-          background: white;
-          box-shadow: 0 2px 8px rgba(19, 32, 51, 0.08);
-        }
-
-        /* BUTTONS */
-        .loginButton,
-        .signupButton {
-          min-height: 42px;
-          padding: 0 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 700;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-        }
-
-        .loginButton {
-          color: #263244;
-          border: 1px solid #dfe4e9;
-          background: white;
-        }
-
-        .signupButton {
-          color: white;
-          border: 1px solid #172033;
-          background: #172033;
-          box-shadow: 0 7px 18px rgba(23, 32, 51, 0.12);
-        }
-
-        .loginButton:hover,
-        .signupButton:hover {
-          transform: translateY(-1px);
-        }
-
-        .mobileMenuBtn {
-          display: none;
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          padding: 8px;
-          color: #172033;
-        }
-
-        .mobileMenu {
-          display: none;
-        }
-
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 650px) {
-          .headerInner {
-            width: calc(100% - 24px);
-            min-height: 72px;
-            gap: 12px;
-          }
-
-          .brandMark {
-            width: 40px;
-            height: 40px;
-          }
-
-          .brandName {
-            font-size: 17px;
-          }
-
-          .languageSwitcher,
-          .loginButton {
-            display: none;
-          }
-
-          .mobileMenuBtn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .signupButton {
-            min-height: 40px;
-            padding: 0 12px;
-            font-size: 13px;
-          }
-
-          .mobileMenu {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 16px 24px;
-            border-top: 1px solid #e8ebef;
-            background: white;
-          }
-
-          .mobileLanguageSwitcher {
-            display: flex;
-            gap: 8px;
-          }
-
-          .mobileLanguageSwitcher button {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #e3e7ec;
-            border-radius: 8px;
-            background: #f6f8fa;
-            font-weight: 700;
-            cursor: pointer;
-          }
-
-          .mobileLanguageSwitcher button.active {
-            background: #172033;
-            color: white;
-            border-color: #172033;
-          }
-
-          .mobileLink {
-            display: flex;
-            width: 100%;
-            text-align: center;
-          }
-        }
-      `}</style>
-    </header>
-  );
-}
-
-function QRIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <rect x="15" y="3" width="6" height="6" rx="1" />
-      <rect x="3" y="15" width="6" height="6" rx="1" />
-      <path d="M15 15h2v2h-2z" />
-      <path d="M19 15h2v6h-6v-2" />
-      <path d="M15 19v2" />
-      <path d="M19 19h2" />
-    </svg>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
+      />
+    </main>
   );
 }
