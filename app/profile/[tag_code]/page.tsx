@@ -45,6 +45,10 @@ type PublicProfile = {
   live_chat_enabled: boolean | null;
 
   active: boolean | null;
+
+  lost: boolean | null;
+  lost_at: string | null;
+  lost_message: string | null;
 };
 
 const CATEGORY_META: Record<
@@ -93,7 +97,10 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (
+    !supabaseUrl ||
+    !supabaseKey
+  ) {
     return null;
   }
 
@@ -210,7 +217,11 @@ export default function PublicProfilePage() {
               phone_enabled,
               live_chat_enabled,
 
-              active
+              active,
+
+              lost,
+              lost_at,
+              lost_message
             `
           )
           .ilike(
@@ -276,8 +287,7 @@ export default function PublicProfilePage() {
     }
 
     if (
-      typeof navigator ===
-        "undefined" ||
+      typeof navigator === "undefined" ||
       !navigator.geolocation
     ) {
       setLocationError(
@@ -399,14 +409,9 @@ export default function PublicProfilePage() {
       },
 
       {
-        enableHighAccuracy:
-          true,
-
-        timeout:
-          12000,
-
-        maximumAge:
-          0,
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0,
       }
     );
   }
@@ -427,39 +432,27 @@ export default function PublicProfilePage() {
         <style jsx>{`
           .statePage {
             min-height: 100vh;
-
             display: grid;
             place-items: center;
-
             padding: 25px;
-
             background: #f7faff;
           }
 
           .loadingBox {
             text-align: center;
-
             color: #718095;
-
             font-size: 10px;
           }
 
           .loadingMark {
             width: 52px;
             height: 52px;
-
-            margin:
-              0 auto 14px;
-
+            margin: 0 auto 14px;
             display: grid;
             place-items: center;
-
             border-radius: 14px;
-
             background: #1266e9;
-
             color: #ffffff;
-
             font-size: 10px;
             font-weight: 950;
           }
@@ -496,83 +489,57 @@ export default function PublicProfilePage() {
         <style jsx>{`
           .statePage {
             min-height: 100vh;
-
             display: grid;
             place-items: center;
-
             padding: 25px;
-
             background: #f7faff;
           }
 
           .errorCard {
             width: 100%;
             max-width: 450px;
-
             padding: 35px;
-
             text-align: center;
-
-            border:
-              1px solid #dce6f1;
-
+            border: 1px solid #dce6f1;
             border-radius: 18px;
-
             background: #ffffff;
           }
 
           .errorIcon {
             width: 58px;
             height: 58px;
-
             margin: auto;
-
             display: grid;
             place-items: center;
-
             border-radius: 15px;
-
             background: #edf4ff;
-
             color: #1266e9;
-
             font-size: 11px;
             font-weight: 950;
           }
 
           h1 {
             margin: 20px 0 0;
-
             color: #253e58;
-
             font-size: 22px;
           }
 
           p {
             margin: 9px 0 0;
-
             color: #7d8b9c;
-
             font-size: 10px;
             line-height: 1.55;
           }
 
           a {
             display: inline-flex;
-
             margin-top: 20px;
-
             padding: 11px 15px;
-
             border-radius: 9px;
-
             background: #1266e9;
-
             color: #ffffff;
-
             font-size: 9px;
             font-weight: 900;
-
             text-decoration: none;
           }
         `}</style>
@@ -648,14 +615,45 @@ export default function PublicProfilePage() {
               </h1>
 
               <p>
-                თქვენ დაასკანერეთ QR RETURN
-                პროფილი. ქვემოთ მოცემული
-                ინფორმაცია დაგეხმარებათ
-                მფლობელთან სწრაფად
-                დაკავშირებაში.
+                თქვენ დაასკანერეთ QR RETURN პროფილი.
+                ქვემოთ მოცემული ინფორმაცია დაგეხმარებათ
+                მფლობელთან სწრაფად დაკავშირებაში.
               </p>
             </div>
           </section>
+
+          {profile.lost === true && (
+            <section className="lostAlert">
+              <div className="lostIcon">
+                !
+              </div>
+
+              <div>
+                <span>
+                  LOST PROFILE
+                </span>
+
+                <h2>
+                  ეს პროფილი დაკარგულად არის მონიშნული
+                </h2>
+
+                {profile.lost_message && (
+                  <p>
+                    {profile.lost_message}
+                  </p>
+                )}
+
+                {profile.lost_at && (
+                  <small>
+                    დაკარგვის სტატუსი ჩართულია:{" "}
+                    {new Date(
+                      profile.lost_at
+                    ).toLocaleString()}
+                  </small>
+                )}
+              </div>
+            </section>
+          )}
 
           <section className="ownerCard">
             <div className="sectionTitle">
@@ -769,11 +767,10 @@ export default function PublicProfilePage() {
               </h2>
 
               <p>
-                სურვილის შემთხვევაში შეგიძლიათ
-                ერთი ღილაკით გაუზიაროთ თქვენი
-                მიმდინარე მდებარეობა მფლობელს.
-                ბრაუზერი ჯერ მოგთხოვთ
-                ნებართვას.
+                სურვილის შემთხვევაში შეგიძლიათ ერთი
+                ღილაკით გაუზიაროთ თქვენი მიმდინარე
+                მდებარეობა მფლობელს. ბრაუზერი ჯერ
+                მოგთხოვთ ნებართვას.
               </p>
 
               <button
@@ -815,9 +812,8 @@ export default function PublicProfilePage() {
               </h2>
 
               <p>
-                გამოიყენეთ თქვენთვის
-                მოსახერხებელი დაკავშირების
-                გზა.
+                გამოიყენეთ თქვენთვის მოსახერხებელი
+                დაკავშირების გზა.
               </p>
             </div>
 
@@ -878,9 +874,7 @@ export default function PublicProfilePage() {
                   <a
                     href={`mailto:${profile.owner_email}`}
                   >
-                    {
-                      profile.owner_email
-                    }
+                    {profile.owner_email}
                   </a>
                 </div>
               )}
@@ -888,8 +882,7 @@ export default function PublicProfilePage() {
 
           {(profile.show_medical_info &&
             profile.medical_info) ||
-          (profile
-            .show_behaviour_note &&
+          (profile.show_behaviour_note &&
             profile.behaviour_note) ||
           (profile.show_description &&
             profile.description) ? (
@@ -973,7 +966,6 @@ export default function PublicProfilePage() {
 
         .page {
           min-height: 100vh;
-
           padding-bottom: 60px;
 
           background:
@@ -1040,30 +1032,23 @@ export default function PublicProfilePage() {
 
         .brand strong {
           color: #213a54;
-
           font-size: 13px;
           font-weight: 950;
         }
 
         .brand span {
           margin-top: 2px;
-
           color: #8c98a7;
-
           font-size: 6px;
           font-weight: 850;
-
           letter-spacing: 1px;
         }
 
         .verified {
           padding: 6px 9px;
-
           border-radius: 999px;
-
           background: #eaf2ff;
           color: #1266e9;
-
           font-size: 6px;
           font-weight: 900;
         }
@@ -1087,39 +1072,94 @@ export default function PublicProfilePage() {
           place-items: center;
 
           border-radius: 18px;
-
-          border:
-            1px solid #d8e4f2;
-
+          border: 1px solid #d8e4f2;
           background: #ffffff;
-
           font-size: 35px;
         }
 
         .profileIntro > span {
           color: #1266e9;
-
           font-size: 8px;
           font-weight: 900;
         }
 
         .profileIntro h1 {
           margin: 6px 0 0;
-
           color: #1f3852;
-
           font-size: 31px;
         }
 
         .profileIntro p {
           max-width: 480px;
-
           margin: 8px 0 0;
-
           color: #7b8b9d;
-
           font-size: 9px;
           line-height: 1.6;
+        }
+
+        .lostAlert {
+          margin-top: 14px;
+          padding: 18px;
+
+          display: flex;
+          align-items: flex-start;
+
+          gap: 12px;
+
+          border: 1px solid #efc5c9;
+          border-radius: 14px;
+
+          background:
+            linear-gradient(
+              135deg,
+              #fff8f8,
+              #fff2f3
+            );
+        }
+
+        .lostIcon {
+          width: 38px;
+          height: 38px;
+
+          flex: 0 0 38px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 10px;
+
+          background: #c94d57;
+          color: #ffffff;
+
+          font-size: 15px;
+          font-weight: 950;
+        }
+
+        .lostAlert span {
+          color: #b7444e;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .lostAlert h2 {
+          margin: 5px 0 0;
+          color: #7d343b;
+          font-size: 16px;
+        }
+
+        .lostAlert p {
+          margin: 7px 0 0;
+          color: #6e4a4e;
+          font-size: 9px;
+          line-height: 1.6;
+        }
+
+        .lostAlert small {
+          display: block;
+          margin-top: 8px;
+          color: #9a6a6f;
+          font-size: 7px;
         }
 
         .ownerCard,
@@ -1127,42 +1167,31 @@ export default function PublicProfilePage() {
         .contactCard,
         .detailsCard {
           margin-top: 14px;
-
           padding: 22px;
-
-          border:
-            1px solid #dce6f1;
-
+          border: 1px solid #dce6f1;
           border-radius: 16px;
-
           background: #ffffff;
         }
 
         .sectionTitle > span,
         .locationContent > span {
           color: #1266e9;
-
           font-size: 7px;
           font-weight: 900;
-
           letter-spacing: 1.1px;
         }
 
         .sectionTitle h2,
         .locationContent h2 {
           margin: 6px 0 0;
-
           color: #29415b;
-
           font-size: 17px;
         }
 
         .sectionTitle p,
         .locationContent p {
           margin: 5px 0 0;
-
           color: #8492a1;
-
           font-size: 8px;
           line-height: 1.55;
         }
@@ -1186,7 +1215,6 @@ export default function PublicProfilePage() {
           border-radius: 13px;
 
           background: #1266e9;
-
           color: #ffffff;
 
           font-size: 16px;
@@ -1200,15 +1228,12 @@ export default function PublicProfilePage() {
 
         .ownerIdentity span {
           color: #9aa5b2;
-
           font-size: 7px;
         }
 
         .ownerIdentity strong {
           margin-top: 4px;
-
           color: #2d455f;
-
           font-size: 14px;
         }
 
@@ -1228,14 +1253,9 @@ export default function PublicProfilePage() {
 
         .alwaysVisible > div {
           min-height: 70px;
-
           padding: 12px;
-
-          border:
-            1px solid #dae5f1;
-
+          border: 1px solid #dae5f1;
           border-radius: 10px;
-
           background: #fafcff;
         }
 
@@ -1246,61 +1266,43 @@ export default function PublicProfilePage() {
 
         .alwaysVisible span {
           color: #95a1af;
-
           font-size: 7px;
         }
 
         .alwaysVisible strong {
           margin-top: 7px;
-
           color: #344c66;
-
           font-size: 9px;
         }
 
         .requiredInfo {
           margin-top: 11px;
-
           padding: 10px 11px;
-
           border-radius: 9px;
-
           background: #edf4ff;
-
           color: #1266e9;
-
           font-size: 7px;
           font-weight: 800;
         }
 
         .photoCard {
           margin-top: 14px;
-
           overflow: hidden;
-
-          border:
-            1px solid #dbe5f0;
-
+          border: 1px solid #dbe5f0;
           border-radius: 16px;
         }
 
         .photoCard img {
           width: 100%;
           max-height: 420px;
-
           display: block;
-
           object-fit: cover;
         }
 
         .finderMessage {
           margin-top: 14px;
-
           padding: 20px;
-
-          border:
-            1px solid #cddff5;
-
+          border: 1px solid #cddff5;
           border-radius: 15px;
 
           background:
@@ -1313,16 +1315,13 @@ export default function PublicProfilePage() {
 
         .finderMessage span {
           color: #1266e9;
-
           font-size: 7px;
           font-weight: 900;
         }
 
         .finderMessage p {
           margin: 8px 0 0;
-
           color: #405972;
-
           font-size: 11px;
           line-height: 1.65;
         }
@@ -1330,7 +1329,6 @@ export default function PublicProfilePage() {
         .locationCard {
           display: flex;
           align-items: flex-start;
-
           gap: 14px;
 
           border-color: #cfe0f6;
@@ -1346,16 +1344,11 @@ export default function PublicProfilePage() {
         .locationIcon {
           width: 46px;
           height: 46px;
-
           flex: 0 0 46px;
-
           display: grid;
           place-items: center;
-
           border-radius: 13px;
-
           background: #edf4ff;
-
           font-size: 21px;
         }
 
@@ -1365,77 +1358,57 @@ export default function PublicProfilePage() {
 
         .locationContent button {
           min-height: 44px;
-
           margin-top: 14px;
-
           padding: 0 15px;
-
           border: 0;
           border-radius: 10px;
-
           background: #1266e9;
-
           color: #ffffff;
-
           font-family: inherit;
-
           font-size: 9px;
           font-weight: 900;
-
           cursor: pointer;
         }
 
         .locationContent button:disabled {
           opacity: .6;
-
           cursor: wait;
         }
 
         .locationSuccess,
         .locationError {
           margin-top: 10px;
-
           padding: 10px 11px;
-
           border-radius: 9px;
-
           font-size: 8px;
-
           line-height: 1.5;
         }
 
         .locationSuccess {
           background: #eef9f2;
-
           color: #357357;
         }
 
         .locationError {
           background: #fff4f5;
-
           color: #a34750;
         }
 
         .contactActions {
           margin-top: 17px;
-
           display: grid;
-
           gap: 9px;
         }
 
         .contactActions a {
           min-height: 65px;
-
           padding: 13px 15px;
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           border-radius: 12px;
-
           text-decoration: none;
         }
 
@@ -1450,40 +1423,31 @@ export default function PublicProfilePage() {
 
         .contactActions span {
           margin-top: 4px;
-
           font-size: 8px;
         }
 
         .primaryAction {
           background: #1266e9;
-
           color: #ffffff;
         }
 
         .secondaryAction {
-          border:
-            1px solid #d2e0f1;
-
+          border: 1px solid #d2e0f1;
           background: #f7faff;
-
           color: #35506c;
         }
 
         .emailRow {
           margin-top: 13px;
-
           padding: 12px;
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 12px;
 
-          border:
-            1px solid #e1e8f0;
-
+          border: 1px solid #e1e8f0;
           border-radius: 10px;
         }
 
@@ -1494,36 +1458,28 @@ export default function PublicProfilePage() {
 
         .emailRow span {
           color: #99a4b1;
-
           font-size: 7px;
         }
 
         .emailRow strong {
           margin-top: 3px;
-
           color: #6f8195;
-
           font-size: 7px;
         }
 
         .emailRow a {
           color: #1266e9;
-
           font-size: 9px;
-
           text-decoration: none;
         }
 
         .detailsList {
           margin-top: 15px;
-
-          border-top:
-            1px solid #e4eaf1;
+          border-top: 1px solid #e4eaf1;
         }
 
         .qrInfo {
           margin-top: 14px;
-
           padding: 17px;
 
           display: flex;
@@ -1531,9 +1487,7 @@ export default function PublicProfilePage() {
 
           gap: 12px;
 
-          border:
-            1px solid #dce6f1;
-
+          border: 1px solid #dce6f1;
           border-radius: 14px;
 
           background: #ffffff;
@@ -1549,7 +1503,6 @@ export default function PublicProfilePage() {
           border-radius: 10px;
 
           background: #1266e9;
-
           color: #ffffff;
 
           font-size: 8px;
@@ -1564,23 +1517,18 @@ export default function PublicProfilePage() {
 
         .qrInfo span {
           color: #9aa5b2;
-
           font-size: 7px;
         }
 
         .qrInfo strong {
           margin-top: 4px;
-
           color: #324c68;
-
           font-size: 10px;
         }
 
         .qrInfo p {
           margin: 4px 0 0;
-
           color: #9aa5b2;
-
           font-size: 7px;
         }
 
@@ -1590,8 +1538,7 @@ export default function PublicProfilePage() {
           }
 
           .alwaysVisible {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .locationCard {
@@ -1600,7 +1547,6 @@ export default function PublicProfilePage() {
 
           .emailRow {
             flex-direction: column;
-
             align-items: flex-start;
           }
 
@@ -1623,9 +1569,7 @@ function InfoRow({
   return (
     <div
       style={{
-        padding:
-          "14px 2px",
-
+        padding: "14px 2px",
         borderBottom:
           "1px solid #e4eaf1",
       }}
@@ -1633,9 +1577,7 @@ function InfoRow({
       <strong
         style={{
           display: "block",
-
           color: "#39516a",
-
           fontSize: "9px",
         }}
       >
@@ -1644,13 +1586,9 @@ function InfoRow({
 
       <p
         style={{
-          margin:
-            "6px 0 0",
-
+          margin: "6px 0 0",
           color: "#7f8e9f",
-
           fontSize: "9px",
-
           lineHeight: 1.6,
         }}
       >
