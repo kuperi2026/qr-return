@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  FormEvent,
-  ReactNode,
-  useState,
-} from "react";
-
+import { FormEvent, ReactNode, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 type FormState = {
@@ -26,23 +21,40 @@ const initialForm: FormState = {
   confirmPassword: "",
 };
 
+type FieldProps = {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: ReactNode;
+};
+
+function Field({
+  label,
+  required = false,
+  hint,
+  children,
+}: FieldProps) {
+  return (
+    <div className="field">
+      <label>
+        {label}
+        {required && <span className="required">*</span>}
+      </label>
+
+      {children}
+
+      {hint && <small>{hint}</small>}
+    </div>
+  );
+}
+
 export default function AccountSignupForm() {
-  const [form, setForm] =
-    useState<FormState>(initialForm);
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
-
-  const [successMessage, setSuccessMessage] =
-    useState("");
-
-  function updateField(
-    field: keyof FormState,
-    value: string
-  ) {
+  function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({
       ...current,
       [field]: value,
@@ -52,25 +64,16 @@ export default function AccountSignupForm() {
     setSuccessMessage("");
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setErrorMessage("");
     setSuccessMessage("");
 
-    const firstName =
-      form.firstName.trim();
-
-    const lastName =
-      form.lastName.trim();
-
-    const phone =
-      form.phone.trim();
-
-    const email =
-      form.email.trim().toLowerCase();
+    const firstName = form.firstName.trim();
+    const lastName = form.lastName.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim().toLowerCase();
 
     if (
       !firstName ||
@@ -80,79 +83,53 @@ export default function AccountSignupForm() {
       !form.password ||
       !form.confirmPassword
     ) {
-      setErrorMessage(
-        "გთხოვთ შეავსოთ ყველა სავალდებულო ველი."
-      );
+      setErrorMessage("გთხოვთ შეავსოთ ყველა სავალდებულო ველი.");
       return;
     }
 
-    const emailPattern =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
-      setErrorMessage(
-        "გთხოვთ მიუთითოთ სწორი ელფოსტა."
-      );
+      setErrorMessage("გთხოვთ მიუთითოთ სწორი ელფოსტა.");
       return;
     }
 
-    const phoneDigits =
-      phone.replace(/\D/g, "");
+    const phoneDigits = phone.replace(/\D/g, "");
 
     if (phoneDigits.length < 7) {
-      setErrorMessage(
-        "გთხოვთ მიუთითოთ სწორი ტელეფონის ნომერი."
-      );
+      setErrorMessage("გთხოვთ მიუთითოთ სწორი ტელეფონის ნომერი.");
       return;
     }
 
     if (form.password.length < 8) {
-      setErrorMessage(
-        "პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს."
-      );
+      setErrorMessage("პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს.");
       return;
     }
 
-    if (
-      form.password !==
-      form.confirmPassword
-    ) {
-      setErrorMessage(
-        "პაროლები ერთმანეთს არ ემთხვევა."
-      );
+    if (form.password !== form.confirmPassword) {
+      setErrorMessage("პაროლები ერთმანეთს არ ემთხვევა.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const supabaseUrl =
-        process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
       const supabaseKey =
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
         process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-      if (
-        !supabaseUrl ||
-        !supabaseKey
-      ) {
+      if (!supabaseUrl || !supabaseKey) {
         setErrorMessage(
           "Supabase კავშირი არ არის კონფიგურირებული."
         );
         return;
       }
 
-      const supabase =
-        createClient(
-          supabaseUrl,
-          supabaseKey
-        );
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
-      const {
-        data,
-        error,
-      } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password: form.password,
         options: {
@@ -161,14 +138,12 @@ export default function AccountSignupForm() {
             last_name: lastName,
             phone,
           },
-          emailRedirectTo:
-            `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
 
       if (error) {
-        const message =
-          error.message.toLowerCase();
+        const message = error.message.toLowerCase();
 
         if (
           message.includes("already registered") ||
@@ -187,24 +162,21 @@ export default function AccountSignupForm() {
 
       if (!data.user) {
         setErrorMessage(
-          "ანგარიშის შექმნა ვერ მოხერხდა."
+          "ანგარიშის შექმნა ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან."
         );
         return;
       }
 
       setSuccessMessage(
-        "ანგარიში წარმატებით შეიქმნა. შეამოწმეთ ელფოსტა დასადასტურებლად."
+        "ანგარიში წარმატებით შეიქმნა. შეამოწმეთ ელფოსტა ანგარიშის დასადასტურებლად."
       );
 
       setForm(initialForm);
     } catch (error) {
-      console.error(
-        "Signup error:",
-        error
-      );
+      console.error("Signup error:", error);
 
       setErrorMessage(
-        "დაფიქსირდა ტექნიკური შეცდომა."
+        "დაფიქსირდა ტექნიკური შეცდომა. გთხოვთ სცადოთ თავიდან."
       );
     } finally {
       setLoading(false);
@@ -213,11 +185,8 @@ export default function AccountSignupForm() {
 
   return (
     <>
-      <form
-        className="signupForm"
-        onSubmit={handleSubmit}
-      >
-        <div className="nameGrid">
+      <form className="signupForm" onSubmit={handleSubmit}>
+        <div className="twoColumns">
           <Field label="სახელი" required>
             <input
               type="text"
@@ -225,10 +194,7 @@ export default function AccountSignupForm() {
               placeholder="თქვენი სახელი"
               value={form.firstName}
               onChange={(event) =>
-                updateField(
-                  "firstName",
-                  event.target.value
-                )
+                updateField("firstName", event.target.value)
               }
             />
           </Field>
@@ -240,16 +206,13 @@ export default function AccountSignupForm() {
               placeholder="თქვენი გვარი"
               value={form.lastName}
               onChange={(event) =>
-                updateField(
-                  "lastName",
-                  event.target.value
-                )
+                updateField("lastName", event.target.value)
               }
             />
           </Field>
         </div>
 
-        <div className="fieldSpace">
+        <div className="sectionSpace">
           <Field
             label="ტელეფონის ნომერი"
             required
@@ -261,16 +224,13 @@ export default function AccountSignupForm() {
               placeholder="+1 555 000 0000"
               value={form.phone}
               onChange={(event) =>
-                updateField(
-                  "phone",
-                  event.target.value
-                )
+                updateField("phone", event.target.value)
               }
             />
           </Field>
         </div>
 
-        <div className="fieldSpace">
+        <div className="sectionSpace">
           <Field
             label="ელფოსტა"
             required
@@ -282,68 +242,47 @@ export default function AccountSignupForm() {
               placeholder="name@example.com"
               value={form.email}
               onChange={(event) =>
-                updateField(
-                  "email",
-                  event.target.value
-                )
+                updateField("email", event.target.value)
               }
             />
           </Field>
         </div>
 
-        <div className="passwordGrid">
-          <Field
-            label="პაროლი"
-            required
-          >
+        <div className="twoColumns passwordRow">
+          <Field label="პაროლი" required>
             <input
               type="password"
               autoComplete="new-password"
               placeholder="მინიმუმ 8 სიმბოლო"
               value={form.password}
               onChange={(event) =>
-                updateField(
-                  "password",
-                  event.target.value
-                )
+                updateField("password", event.target.value)
               }
             />
           </Field>
 
-          <Field
-            label="გაიმეორეთ პაროლი"
-            required
-          >
+          <Field label="გაიმეორეთ პაროლი" required>
             <input
               type="password"
               autoComplete="new-password"
               placeholder="გაიმეორეთ პაროლი"
               value={form.confirmPassword}
               onChange={(event) =>
-                updateField(
-                  "confirmPassword",
-                  event.target.value
-                )
+                updateField("confirmPassword", event.target.value)
               }
             />
           </Field>
         </div>
 
         {errorMessage && (
-          <div
-            className="message error"
-            role="alert"
-          >
+          <div className="message error" role="alert">
             <span>!</span>
             <p>{errorMessage}</p>
           </div>
         )}
 
         {successMessage && (
-          <div
-            className="message success"
-            role="status"
-          >
+          <div className="message success" role="status">
             <span>✓</span>
             <p>{successMessage}</p>
           </div>
@@ -354,27 +293,19 @@ export default function AccountSignupForm() {
           className="submitButton"
           disabled={loading}
         >
-          {loading
-            ? "ანგარიში იქმნება..."
-            : "ანგარიშის შექმნა"}
+          {loading ? "ანგარიში იქმნება..." : "ანგარიშის შექმნა"}
 
           {!loading && <b>→</b>}
         </button>
 
         <div className="loginLink">
-          <span>
-            უკვე გაქვთ ანგარიში?
-          </span>
-
-          <a href="/login">
-            შესვლა
-          </a>
+          <span>უკვე გაქვთ ანგარიში?</span>
+          <a href="/login">შესვლა</a>
         </div>
 
-        <div className="requiredNote">
-          <span>*</span>
-          სავალდებულო ველი
-        </div>
+        <p className="requiredNote">
+          <span>*</span> სავალდებულო ველი
+        </p>
       </form>
 
       <style jsx>{`
@@ -382,19 +313,18 @@ export default function AccountSignupForm() {
           width: 100%;
         }
 
-        .nameGrid,
-        .passwordGrid {
+        .twoColumns {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 14px;
         }
 
-        .fieldSpace,
-        .passwordGrid {
+        .sectionSpace,
+        .passwordRow {
           margin-top: 17px;
         }
 
-        .field label {
+        .signupForm :global(.field label) {
           display: block;
           margin-bottom: 7px;
           color: #334961;
@@ -402,12 +332,12 @@ export default function AccountSignupForm() {
           font-weight: 850;
         }
 
-        .field label span {
+        .signupForm :global(.required) {
           margin-left: 3px;
           color: #1266e9;
         }
 
-        .field small {
+        .signupForm :global(.field small) {
           display: block;
           margin-top: 6px;
           color: #929eac;
@@ -419,16 +349,16 @@ export default function AccountSignupForm() {
           width: 100%;
           min-height: 52px;
           padding: 0 15px;
+          box-sizing: border-box;
 
           border: 1px solid #d7e1ec;
           border-radius: 11px;
-
           outline: none;
 
           background: #ffffff;
           color: #172b43;
 
-          font-family: inherit;
+          font: inherit;
           font-size: 13px;
 
           transition:
@@ -442,9 +372,7 @@ export default function AccountSignupForm() {
 
         .signupForm :global(input:focus) {
           border-color: #1266e9;
-          box-shadow:
-            0 0 0 4px
-            rgba(18, 102, 233, 0.09);
+          box-shadow: 0 0 0 4px rgba(18, 102, 233, 0.09);
         }
 
         .message {
@@ -467,9 +395,8 @@ export default function AccountSignupForm() {
           place-items: center;
 
           border-radius: 50%;
-
           font-size: 10px;
-          font-weight: 950;
+          font-weight: 900;
         }
 
         .message p {
@@ -516,15 +443,17 @@ export default function AccountSignupForm() {
           background: #1266e9;
           color: #ffffff;
 
-          font-family: inherit;
+          font: inherit;
           font-size: 12px;
           font-weight: 850;
 
           cursor: pointer;
 
-          box-shadow:
-            0 13px 25px
-            rgba(18, 102, 233, 0.18);
+          box-shadow: 0 13px 25px rgba(18, 102, 233, 0.18);
+        }
+
+        .submitButton:hover:not(:disabled) {
+          background: #0d5dd9;
         }
 
         .submitButton:disabled {
@@ -541,6 +470,7 @@ export default function AccountSignupForm() {
 
           display: flex;
           justify-content: center;
+          align-items: center;
           gap: 6px;
 
           color: #8290a0;
@@ -554,20 +484,18 @@ export default function AccountSignupForm() {
         }
 
         .requiredNote {
-          margin-top: 22px;
+          margin: 22px 0 0;
           text-align: center;
           color: #9aa6b4;
           font-size: 8px;
         }
 
         .requiredNote span {
-          margin-right: 3px;
           color: #1266e9;
         }
 
         @media (max-width: 600px) {
-          .nameGrid,
-          .passwordGrid {
+          .twoColumns {
             grid-template-columns: 1fr;
             gap: 17px;
           }
@@ -578,30 +506,5 @@ export default function AccountSignupForm() {
         }
       `}</style>
     </>
-  );
-}
-
-function Field({
-  label,
-  required = false,
-  hint,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  hint?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="field">
-      <label>
-        {label}
-        {required && <span>*</span>}
-      </label>
-
-      {children}
-
-      {hint && <small>{hint}</small>}
-    </div>
   );
 }
