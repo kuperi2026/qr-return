@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+
 import HomeHeader from "./components/home/HomeHeader";
+import AboutMenu from "./components/home/AboutMenu";
+import ShopMenu from "./components/home/ShopMenu";
 
 type Lang = "ka" | "en";
 
@@ -35,6 +38,14 @@ export default function HomePage() {
         setLanguage={setLanguage}
         toggleMenu={toggleMenu}
       />
+
+      {openMenu === "about" && (
+        <AboutMenu ka={language === "ka"} />
+      )}
+
+      {openMenu === "shop" && (
+        <ShopMenu ka={language === "ka"} />
+      )}
 
       <section
         style={{
