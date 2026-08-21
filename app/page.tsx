@@ -1,27 +1,71 @@
 "use client";
 
+import { useState } from "react";
+import HomeHeader from "./components/home/HomeHeader";
+
+type Lang = "ka" | "en";
+
+type Menu =
+  | "about"
+  | "shop"
+  | "faq"
+  | "contact"
+  | null;
+
 export default function HomePage() {
+  const [language, setLanguage] = useState<Lang>("ka");
+  const [openMenu, setOpenMenu] = useState<Menu>(null);
+
+  const toggleMenu = (menu: Exclude<Menu, null>) => {
+    setOpenMenu((current) =>
+      current === menu ? null : menu
+    );
+  };
+
   return (
     <main
       style={{
         minHeight: "100vh",
         background: "#1266e9",
-        color: "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ textAlign: "center" }}>
-        <h1 style={{ fontSize: "48px", marginBottom: "10px" }}>
-          QR RETURN
-        </h1>
+      <HomeHeader
+        language={language}
+        openMenu={openMenu}
+        setLanguage={setLanguage}
+        toggleMenu={toggleMenu}
+      />
 
-        <p style={{ fontSize: "14px", letterSpacing: "2px" }}>
-          SMART LOST &amp; FOUND
-        </p>
-      </div>
+      <section
+        style={{
+          minHeight: "650px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "48px",
+            }}
+          >
+            QR RETURN
+          </h1>
+
+          <p
+            style={{
+              marginTop: "10px",
+              fontSize: "13px",
+              letterSpacing: "2px",
+            }}
+          >
+            SMART LOST &amp; FOUND
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
