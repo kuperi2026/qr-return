@@ -11,7 +11,9 @@ function getSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (!url || !key) return null;
+  if (!url || !key) {
+    throw new Error("Supabase კავშირი ვერ მოიძებნა.");
+  }
 
   return createClient(url, key);
 }
@@ -71,84 +73,125 @@ export default function SignupPage() {
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("პაროლები ერთმანეთს არ ემთხვევა.");
-      return;
-    }
-
-    const supabase = getSupabase();
-
-    if (!supabase) {
-      setErrorMessage("Supabase კავშირი ვერ მოიძებნა.");
+      setErrorMessage(
+        "პაროლები ერთმანეთს არ ემთხვევა."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
+      const supabase = getSupabase();
 
-        options: {
-          data: {
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-            phone: phone.trim(),
-            code_word: codeWord.trim(),
-          },
-        },
-      });
+      const cleanEmail =
+        email.trim().toLowerCase();
 
-      if (error) throw error;
+      const { data, error } =
+        await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
 
-      if (!data.user) {
-        throw new Error("ანგარიშის შექმნა ვერ მოხერხდა.");
-      }
-
-      try {
-        const { error: ownerError } = await supabase
-          .from("owner_accounts")
-          .upsert(
-            {
-              id: data.user.id,
+          options: {
+            data: {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
-              email: email.trim().toLowerCase(),
               phone: phone.trim(),
+              code_word: codeWord.trim(),
             },
-            {
-              onConflict: "id",
-            }
-          );
+          },
+        });
 
-        if (ownerError) {
-          console.error("Owner account save:", ownerError);
-        }
-      } catch (ownerError) {
-        console.error("Owner account save:", ownerError);
+      if (error) {
+        throw error;
       }
 
+      if (!data.user) {
+        throw new Error(
+          "ანგარიშის შექმნა ვერ მოხერხდა."
+        );
+      }
+
+      /*
+       * OWNER ACCOUNT
+       */
+
+      try {
+        const { error: ownerError } =
+          await supabase
+            .from("owner_accounts")
+            .upsert(
+              {
+                id: data.user.id,
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                email: cleanEmail,
+                phone: phone.trim(),
+              },
+              {
+                onConflict: "id",
+              }
+            );
+
+        if (ownerError) {
+          console.error(
+            "Owner save:",
+            ownerError
+          );
+        }
+      } catch (ownerError) {
+        console.error(
+          "Owner save:",
+          ownerError
+        );
+      }
+
+      /*
+       * მთავარი ცვლილება:
+       *
+       * თუ მომხმარებელი უკვე შესულია,
+       * პირდაპირ 6 პროდუქტის არჩევაზე გადავა.
+       */
+
       if (data.session) {
-        window.location.assign("/account");
+        window.location.assign("/register");
         return;
       }
 
+      /*
+       * თუ Supabase Email Confirmation ჩართულია,
+       * ჯერ Login-ზე გადავა.
+       *
+       * registered=1 პარამეტრით შეგვიძლია
+       * Login-ზე შესაბამისი შეტყობინება ვაჩვენოთ.
+       */
+
       window.location.assign(
         `/login?registered=1&email=${encodeURIComponent(
-          email.trim().toLowerCase()
-        )}`
+          cleanEmail
+        )}&next=${encodeURIComponent("/register")}`
       );
     } catch (error) {
+      console.error(
+        "Signup error:",
+        error
+      );
+
       const message =
         error instanceof Error
           ? error.message
           : "ანგარიშის შექმნა ვერ მოხერხდა.";
 
-      const lower = message.toLowerCase();
+      const lower =
+        message.toLowerCase();
 
       if (
-        lower.includes("already registered") ||
-        lower.includes("already been registered")
+        lower.includes(
+          "already registered"
+        ) ||
+        lower.includes(
+          "already been registered"
+        )
       ) {
         setErrorMessage(
           "ამ ელფოსტით ანგარიში უკვე არსებობს."
@@ -164,56 +207,68 @@ export default function SignupPage() {
   return (
     <>
       <main className="page">
-        <div className="decor decor1">QR</div>
-        <div className="decor decor2">QR</div>
-        <div className="decor decor3">QR</div>
+        <div className="decor decor1">
+          QR
+        </div>
 
-        {/* HEADER */}
+        <div className="decor decor2">
+          QR
+        </div>
+
+        <div className="decor decor3">
+          QR
+        </div>
 
         <header className="header">
           <a href="/" className="brand">
-            <span className="brandIcon">QR</span>
+            <span className="brandIcon">
+              QR
+            </span>
 
             <span>
-              <strong>QR RETURN</strong>
-              <small>SMART QR CONNECTION</small>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <small>
+                SMART QR CONNECTION
+              </small>
             </span>
           </a>
 
-          <a href="/login" className="loginButton">
+          <a
+            href="/login"
+            className="loginButton"
+          >
             შესვლა
           </a>
         </header>
 
-        {/* MAIN */}
-
         <div className="layout">
-          {/* LEFT */}
+          {/* LEFT MESSAGE */}
 
           <section className="intro">
             <div className="introCard">
               <div className="introIcon">
-                <span>QR</span>
+                QR
               </div>
 
-              <div className="introText">
-                <h1>
-                  ყველაფერი იწყება
-                  <br />
-                  თქვენი ანგარიშით.
-                </h1>
+              <h1>
+                ყველაფერი იწყება
+                <br />
+                თქვენი ანგარიშით.
+              </h1>
 
-                <div className="line" />
+              <div className="line" />
 
-                <p>
-                  რეგისტრაციის შემდეგ შეძლებთ{" "}
-                  <strong>
-                    ძაღლის, კატის, გასაღების, საფულის,
-                    ჩანთისა და ჩემოდნის
-                  </strong>{" "}
-                  QR პროფილების დამატებას.
-                </p>
-              </div>
+              <p>
+                რეგისტრაციის შემდეგ შეძლებთ{" "}
+                <strong>
+                  ძაღლის, კატის, გასაღების,
+                  საფულის, ჩანთისა და ჩემოდნის
+                </strong>{" "}
+                QR პროფილების დამატებას.
+              </p>
             </div>
           </section>
 
@@ -221,25 +276,31 @@ export default function SignupPage() {
 
           <section className="card">
             <div className="cardHeader">
-              <span>CREATE ACCOUNT</span>
+              <span>
+                CREATE ACCOUNT
+              </span>
 
-              <h2>მფლობელის რეგისტრაცია</h2>
+              <h2>
+                მფლობელის რეგისტრაცია
+              </h2>
 
               <p>
-                შეიყვანეთ თქვენი ძირითადი ინფორმაცია.
+                შეიყვანეთ თქვენი ძირითადი
+                ინფორმაცია.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="error" role="alert">
+              <div
+                className="error"
+                role="alert"
+              >
                 {errorMessage}
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
               <div className="grid">
-                {/* FIRST NAME */}
-
                 <div className="field">
                   <label htmlFor="firstName">
                     სახელი <b>*</b>
@@ -250,13 +311,13 @@ export default function SignupPage() {
                     type="text"
                     value={firstName}
                     onChange={(e) =>
-                      setFirstName(e.target.value)
+                      setFirstName(
+                        e.target.value
+                      )
                     }
                     autoComplete="given-name"
                   />
                 </div>
-
-                {/* LAST NAME */}
 
                 <div className="field">
                   <label htmlFor="lastName">
@@ -268,13 +329,13 @@ export default function SignupPage() {
                     type="text"
                     value={lastName}
                     onChange={(e) =>
-                      setLastName(e.target.value)
+                      setLastName(
+                        e.target.value
+                      )
                     }
                     autoComplete="family-name"
                   />
                 </div>
-
-                {/* EMAIL */}
 
                 <div className="field">
                   <label htmlFor="email">
@@ -286,13 +347,13 @@ export default function SignupPage() {
                     type="email"
                     value={email}
                     onChange={(e) =>
-                      setEmail(e.target.value)
+                      setEmail(
+                        e.target.value
+                      )
                     }
                     autoComplete="email"
                   />
                 </div>
-
-                {/* PHONE */}
 
                 <div className="field">
                   <label htmlFor="phone">
@@ -304,13 +365,13 @@ export default function SignupPage() {
                     type="tel"
                     value={phone}
                     onChange={(e) =>
-                      setPhone(e.target.value)
+                      setPhone(
+                        e.target.value
+                      )
                     }
                     autoComplete="tel"
                   />
                 </div>
-
-                {/* CODE WORD */}
 
                 <div className="field full">
                   <label htmlFor="codeWord">
@@ -322,7 +383,9 @@ export default function SignupPage() {
                     type="text"
                     value={codeWord}
                     onChange={(e) =>
-                      setCodeWord(e.target.value)
+                      setCodeWord(
+                        e.target.value
+                      )
                     }
                     autoComplete="off"
                   />
@@ -333,8 +396,6 @@ export default function SignupPage() {
                   </span>
                 </div>
 
-                {/* PASSWORD */}
-
                 <div className="field">
                   <label htmlFor="password">
                     პაროლი <b>*</b>
@@ -344,11 +405,15 @@ export default function SignupPage() {
                     <input
                       id="password"
                       type={
-                        showPassword ? "text" : "password"
+                        showPassword
+                          ? "text"
+                          : "password"
                       }
                       value={password}
                       onChange={(e) =>
-                        setPassword(e.target.value)
+                        setPassword(
+                          e.target.value
+                        )
                       }
                       autoComplete="new-password"
                     />
@@ -371,8 +436,6 @@ export default function SignupPage() {
                     მინიმუმ 8 სიმბოლო
                   </span>
                 </div>
-
-                {/* CONFIRM PASSWORD */}
 
                 <div className="field">
                   <label htmlFor="confirmPassword">
@@ -425,7 +488,10 @@ export default function SignupPage() {
 
             <div className="bottom">
               უკვე გაქვთ ანგარიში?
-              <a href="/login">შესვლა</a>
+
+              <a href="/login">
+                შესვლა
+              </a>
             </div>
           </section>
         </div>
@@ -441,7 +507,8 @@ export default function SignupPage() {
           min-height: 100vh;
           overflow: hidden;
 
-          padding: 0 24px 30px;
+          padding:
+            0 24px 30px;
 
           background:
             radial-gradient(
@@ -461,6 +528,7 @@ export default function SignupPage() {
 
         .decor {
           position: fixed;
+
           pointer-events: none;
           user-select: none;
 
@@ -474,18 +542,21 @@ export default function SignupPage() {
         .decor1 {
           top: 12%;
           left: 3%;
+
           transform: rotate(-15deg);
         }
 
         .decor2 {
           top: 15%;
           right: 4%;
+
           transform: rotate(13deg);
         }
 
         .decor3 {
           bottom: 2%;
           left: 30%;
+
           transform: rotate(8deg);
         }
 
@@ -532,10 +603,6 @@ export default function SignupPage() {
 
           font-size: 12px;
           font-weight: 950;
-
-          box-shadow:
-            0 8px 20px
-            rgba(0, 20, 70, 0.15);
         }
 
         .brand strong,
@@ -584,9 +651,7 @@ export default function SignupPage() {
           text-decoration: none;
         }
 
-        /* MAIN
-           ნაკლები ზედა სივრცე = ბარათი უფრო მაღლა
-        */
+        /* LAYOUT */
 
         .layout {
           position: relative;
@@ -611,12 +676,7 @@ export default function SignupPage() {
           gap: 42px;
         }
 
-        /* LEFT CARD */
-
-        .intro {
-          display: flex;
-          align-items: center;
-        }
+        /* LEFT */
 
         .introCard {
           position: relative;
@@ -643,25 +703,6 @@ export default function SignupPage() {
           box-shadow:
             0 18px 42px
             rgba(0, 25, 85, 0.14);
-
-          backdrop-filter: blur(8px);
-        }
-
-        .introCard::after {
-          content: "";
-
-          position: absolute;
-
-          width: 130px;
-          height: 130px;
-
-          top: -80px;
-          right: -65px;
-
-          border-radius: 50%;
-
-          background:
-            rgba(255, 255, 255, 0.08);
         }
 
         .introIcon {
@@ -681,16 +722,14 @@ export default function SignupPage() {
 
           background:
             rgba(255, 255, 255, 0.12);
-        }
 
-        .introIcon span {
           color: #ffffff;
 
           font-size: 11px;
           font-weight: 950;
         }
 
-        .introText h1 {
+        .introCard h1 {
           margin: 0;
 
           color: #ffffff;
@@ -699,7 +738,6 @@ export default function SignupPage() {
           font-weight: 900;
 
           line-height: 1.22;
-
           letter-spacing: -0.4px;
         }
 
@@ -715,7 +753,7 @@ export default function SignupPage() {
             rgba(255, 255, 255, 0.9);
         }
 
-        .introText p {
+        .introCard p {
           margin: 0;
 
           color:
@@ -725,22 +763,19 @@ export default function SignupPage() {
           line-height: 1.62;
         }
 
-        .introText p strong {
+        .introCard p strong {
           color: #ffffff;
-
           font-weight: 850;
         }
 
-        /* FORM CARD
-           თვითონ ბარათი დაპატარავებულია.
-           INPUT HEIGHT უცვლელია.
-        */
+        /* CARD */
 
         .card {
           width: 100%;
           max-width: 680px;
 
-          padding: 22px 25px 20px;
+          padding:
+            22px 25px 20px;
 
           border:
             1px solid
@@ -770,7 +805,6 @@ export default function SignupPage() {
           color: #263e57;
 
           font-size: 23px;
-
           line-height: 1.25;
         }
 
@@ -780,7 +814,6 @@ export default function SignupPage() {
           color: #7a8998;
 
           font-size: 12px;
-
           line-height: 1.5;
         }
 
@@ -806,20 +839,20 @@ export default function SignupPage() {
         }
 
         .field.full {
-          grid-column: 1 / -1;
+          grid-column:
+            1 / -1;
         }
 
         .field label {
           display: block;
 
-          margin: 0 0 7px 2px;
+          margin:
+            0 0 7px 2px;
 
           color: #42576b;
 
           font-size: 13px;
           font-weight: 850;
-
-          line-height: 1.3;
         }
 
         .field label b {
@@ -827,14 +860,11 @@ export default function SignupPage() {
         }
 
         /*
-          INPUT:
-          56PX სიმაღლე უცვლელია.
-        */
+         * INPUT SIZE REMAINS 56PX
+         */
 
         .field input,
         .passwordField input {
-          box-sizing: border-box !important;
-
           display: block !important;
 
           width: 100% !important;
@@ -867,32 +897,11 @@ export default function SignupPage() {
           font-size:
             15px !important;
 
-          font-weight:
-            500 !important;
-
-          line-height:
-            normal !important;
-
           outline:
             none !important;
 
-          appearance: none;
-
-          -webkit-appearance: none;
-
-          transition:
-            border-color 0.17s ease,
-            box-shadow 0.17s ease,
-            background 0.17s ease;
-        }
-
-        .field input:hover,
-        .passwordField input:hover {
-          border-color:
-            #b9c9d8 !important;
-
-          background:
-            #ffffff !important;
+          box-sizing:
+            border-box !important;
         }
 
         .field input:focus,
@@ -916,12 +925,12 @@ export default function SignupPage() {
         .help {
           display: block;
 
-          margin: 5px 0 0 2px;
+          margin:
+            5px 0 0 2px;
 
           color: #8593a0;
 
           font-size: 10px;
-
           line-height: 1.35;
         }
 
@@ -966,29 +975,24 @@ export default function SignupPage() {
           cursor: pointer;
         }
 
-        .passwordField button:hover {
-          background: #e2edff;
-        }
-
         /* ERROR */
 
         .error {
           margin-top: 13px;
 
-          padding: 10px 12px;
+          padding:
+            10px 12px;
 
           border:
-            1px solid #f0ced2;
+            1px solid
+            #f0ced2;
 
           border-radius: 9px;
 
           background: #fff3f4;
-
           color: #a3424a;
 
           font-size: 12px;
-
-          line-height: 1.4;
         }
 
         /* SUBMIT */
@@ -1011,19 +1015,10 @@ export default function SignupPage() {
           font-weight: 900;
 
           cursor: pointer;
-
-          box-shadow:
-            0 8px 19px
-            rgba(6, 71, 200, 0.18);
-        }
-
-        .submit:hover:not(:disabled) {
-          background: #0754dc;
         }
 
         .submit:disabled {
           opacity: 0.65;
-
           cursor: not-allowed;
         }
 
@@ -1035,7 +1030,6 @@ export default function SignupPage() {
           padding-top: 13px;
 
           display: flex;
-
           justify-content: center;
 
           gap: 5px;
@@ -1052,17 +1046,17 @@ export default function SignupPage() {
           color: #0647c8;
 
           font-weight: 850;
-
           text-decoration: none;
         }
 
-        /* TABLET */
+        /* MOBILE */
 
         @media (max-width: 850px) {
           .layout {
             max-width: 680px;
 
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
 
             gap: 20px;
           }
@@ -1071,26 +1065,12 @@ export default function SignupPage() {
             max-width: 480px;
 
             margin: auto;
-
-            text-align: center;
-          }
-
-          .introIcon {
-            margin-left: auto;
-            margin-right: auto;
-          }
-
-          .line {
-            margin-left: auto;
-            margin-right: auto;
           }
 
           .card {
             margin: auto;
           }
         }
-
-        /* MOBILE */
 
         @media (max-width: 650px) {
           .page {
@@ -1106,24 +1086,16 @@ export default function SignupPage() {
             padding-top: 18px;
           }
 
-          .introCard {
-            padding: 21px 18px;
-          }
-
-          .introText h1 {
-            font-size: 22px;
-          }
-
           .card {
-            width: 100%;
-
-            padding: 21px 18px;
+            padding:
+              21px 18px;
 
             border-radius: 16px;
           }
 
           .grid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
 
             row-gap: 15px;
           }
@@ -1134,11 +1106,17 @@ export default function SignupPage() {
 
           .field input,
           .passwordField input {
-            height: 54px !important;
-            min-height: 54px !important;
-            max-height: 54px !important;
+            height:
+              54px !important;
 
-            font-size: 16px !important;
+            min-height:
+              54px !important;
+
+            max-height:
+              54px !important;
+
+            font-size:
+              16px !important;
           }
 
           .bottom {
