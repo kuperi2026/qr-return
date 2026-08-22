@@ -11,7 +11,11 @@ import {
 import FinderVisibilitySection from "./FinderVisibilitySection";
 import ContactOptionsSection from "./ContactOptionsSection";
 
-type ItemType = "keys" | "wallet" | "bag" | "suitcase";
+type ItemType =
+  | "keys"
+  | "wallet"
+  | "bag"
+  | "suitcase";
 
 type ItemRegistrationFormProps = {
   type: ItemType;
@@ -69,7 +73,10 @@ function createSupabaseClient() {
     return null;
   }
 
-  return createClient(supabaseUrl, supabaseKey);
+  return createClient(
+    supabaseUrl,
+    supabaseKey
+  );
 }
 
 export default function ItemRegistrationForm({
@@ -87,67 +94,133 @@ export default function ItemRegistrationForm({
   const [authLoading, setAuthLoading] =
     useState(true);
 
-  const [owner, setOwner] = useState<OwnerData>({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-  });
+  const [owner, setOwner] =
+    useState<OwnerData>({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+    });
 
-  /* PRODUCT */
-
-  const [tagCode, setTagCode] = useState("");
-  const [itemName, setItemName] = useState("");
-  const [description, setDescription] = useState("");
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [colour, setColour] = useState("");
-  const [size, setSize] = useState("");
-  const [material, setMaterial] = useState("");
-  const [distinctiveFeatures, setDistinctiveFeatures] =
+  const [tagCode, setTagCode] =
     useState("");
-  const [finderMessage, setFinderMessage] = useState("");
-  const [photo, setPhoto] = useState("");
 
-  /* FINDER VISIBILITY */
+  const [itemName, setItemName] =
+    useState("");
 
-  const [showEmail, setShowEmail] = useState(false);
-  const [showAddress, setShowAddress] = useState(false);
-  const [showPhoto, setShowPhoto] = useState(true);
-  const [showDescription, setShowDescription] =
-    useState(true);
-  const [showFinderMessage, setShowFinderMessage] =
-    useState(true);
+  const [description, setDescription] =
+    useState("");
 
-  /*
-    FinderVisibilitySection ამ props-საც იყენებს.
-    ნივთებისთვის ისინი გამორთული რჩება.
-  */
+  const [brand, setBrand] =
+    useState("");
 
-  const [showMedicalInfo, setShowMedicalInfo] =
+  const [model, setModel] =
+    useState("");
+
+  const [colour, setColour] =
+    useState("");
+
+  const [size, setSize] =
+    useState("");
+
+  const [material, setMaterial] =
+    useState("");
+
+  const [
+    distinctiveFeatures,
+    setDistinctiveFeatures,
+  ] = useState("");
+
+  const [
+    finderMessage,
+    setFinderMessage,
+  ] = useState("");
+
+  const [photo, setPhoto] =
+    useState("");
+
+  const [showEmail, setShowEmail] =
     useState(false);
 
-  const [showBehaviourNote, setShowBehaviourNote] =
+  const [showAddress, setShowAddress] =
     useState(false);
 
-  /* CONTACT */
-
-  const [liveChatEnabled, setLiveChatEnabled] =
+  const [showPhoto, setShowPhoto] =
     useState(true);
 
-  /* STATUS */
+  const [
+    showDescription,
+    setShowDescription,
+  ] = useState(true);
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] =
-    useState("");
-  const [saving, setSaving] = useState(false);
+  const [
+    showFinderMessage,
+    setShowFinderMessage,
+  ] = useState(true);
 
-  /* LOAD OWNER SILENTLY */
+  const [
+    showMedicalInfo,
+    setShowMedicalInfo,
+  ] = useState(false);
+
+  const [
+    showBehaviourNote,
+    setShowBehaviourNote,
+  ] = useState(false);
+
+  const [
+    liveChatEnabled,
+    setLiveChatEnabled,
+  ] = useState(true);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] = useState("");
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const isKeys =
+    type === "keys";
+
+  const isWallet =
+    type === "wallet";
+
+  const isBag =
+    type === "bag";
+
+  const isSuitcase =
+    type === "suitcase";
+
+  const showBrand =
+    isWallet ||
+    isBag ||
+    isSuitcase;
+
+  const showModel =
+    isBag ||
+    isSuitcase;
+
+  const showSize =
+    isBag ||
+    isSuitcase;
+
+  const showMaterial =
+    isWallet ||
+    isBag ||
+    isSuitcase;
 
   useEffect(() => {
     async function loadAccount() {
       try {
-        const client = createSupabaseClient();
+        const client =
+          createSupabaseClient();
 
         if (!client) {
           setErrorMessage(
@@ -161,9 +234,13 @@ export default function ItemRegistrationForm({
         const {
           data: { user },
           error,
-        } = await client.auth.getUser();
+        } =
+          await client.auth.getUser();
 
-        if (error || !user) {
+        if (
+          error ||
+          !user
+        ) {
           router.replace("/login");
           return;
         }
@@ -171,24 +248,36 @@ export default function ItemRegistrationForm({
         setCurrentUser(user);
 
         setOwner({
-          firstName: String(
-            user.user_metadata?.first_name || ""
-          ),
+          firstName:
+            String(
+              user.user_metadata
+                ?.first_name || ""
+            ),
 
-          lastName: String(
-            user.user_metadata?.last_name || ""
-          ),
+          lastName:
+            String(
+              user.user_metadata
+                ?.last_name || ""
+            ),
 
-          phone: String(
-            user.user_metadata?.phone ||
-              user.phone ||
-              ""
-          ),
+          phone:
+            String(
+              user.user_metadata
+                ?.phone ||
+                user.phone ||
+                ""
+            ),
 
-          email: String(user.email || ""),
+          email:
+            String(
+              user.email || ""
+            ),
         });
       } catch (error) {
-        console.error("Account load error:", error);
+        console.error(
+          "Account load error:",
+          error
+        );
 
         setErrorMessage(
           "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
@@ -233,10 +322,13 @@ export default function ItemRegistrationForm({
     setErrorMessage("");
     setSuccessMessage("");
 
-    const validationError = validateForm();
+    const validationError =
+      validateForm();
 
     if (validationError) {
-      setErrorMessage(validationError);
+      setErrorMessage(
+        validationError
+      );
 
       window.scrollTo({
         top: 0,
@@ -246,19 +338,24 @@ export default function ItemRegistrationForm({
       return;
     }
 
-    if (!supabase || !currentUser) {
+    if (
+      !supabase ||
+      !currentUser
+    ) {
       setErrorMessage(
         "ანგარიშთან კავშირი ვერ მოიძებნა."
       );
+
       return;
     }
 
     setSaving(true);
 
     try {
-      const cleanTagCode = tagCode
-        .trim()
-        .toUpperCase();
+      const cleanTagCode =
+        tagCode
+          .trim()
+          .toUpperCase();
 
       const {
         data: existingTag,
@@ -266,22 +363,22 @@ export default function ItemRegistrationForm({
       } = await supabase
         .from("item")
         .select("tag_code")
-        .ilike("tag_code", cleanTagCode)
+        .ilike(
+          "tag_code",
+          cleanTagCode
+        )
         .maybeSingle();
 
       if (tagCheckError) {
-        throw new Error(tagCheckError.message);
+        throw new Error(
+          tagCheckError.message
+        );
       }
 
       if (existingTag) {
         setErrorMessage(
           `QR კოდი ${cleanTagCode} უკვე დარეგისტრირებულია.`
         );
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
 
         return;
       }
@@ -292,70 +389,115 @@ export default function ItemRegistrationForm({
       } = await supabase
         .from("item")
         .insert({
-          tag_code: cleanTagCode,
+          tag_code:
+            cleanTagCode,
 
-          owner_id: currentUser.id,
+          owner_id:
+            currentUser.id,
 
-          owner_first_name: owner.firstName.trim(),
-          owner_last_name: owner.lastName.trim(),
-          owner_phone: owner.phone.trim(),
-          owner_email: owner.email.trim(),
+          owner_first_name:
+            owner.firstName.trim(),
 
-          item_type: type,
-          pet_type: null,
+          owner_last_name:
+            owner.lastName.trim(),
 
-          item_name: itemName.trim(),
+          owner_phone:
+            owner.phone.trim(),
+
+          owner_email:
+            owner.email.trim(),
+
+          item_type:
+            type,
+
+          pet_type:
+            null,
+
+          item_name:
+            itemName.trim(),
 
           description:
-            description.trim() || null,
+            description.trim() ||
+            null,
 
           brand:
-            brand.trim() || null,
+            showBrand &&
+            brand.trim()
+              ? brand.trim()
+              : null,
 
           model:
-            model.trim() || null,
+            showModel &&
+            model.trim()
+              ? model.trim()
+              : null,
 
           colour:
-            colour.trim() || null,
+            colour.trim() ||
+            null,
 
           size:
-            size.trim() || null,
+            showSize &&
+            size.trim()
+              ? size.trim()
+              : null,
 
           material:
-            material.trim() || null,
+            showMaterial &&
+            material.trim()
+              ? material.trim()
+              : null,
 
           distinctive_features:
-            distinctiveFeatures.trim() || null,
+            distinctiveFeatures.trim() ||
+            null,
 
           finder_message:
-            finderMessage.trim() || null,
+            finderMessage.trim() ||
+            null,
 
           photo:
-            photo.trim() || null,
+            photo.trim() ||
+            null,
 
-          show_owner_name: true,
-          show_owner_phone: true,
+          show_owner_name:
+            true,
 
-          show_email: showEmail,
-          show_address: showAddress,
+          show_owner_phone:
+            true,
 
-          show_pet_photo: showPhoto,
+          show_email:
+            showEmail,
 
-          show_medical_info: false,
-          show_behaviour_note: false,
+          show_address:
+            showAddress,
 
-          show_description: showDescription,
+          show_pet_photo:
+            showPhoto,
+
+          show_medical_info:
+            false,
+
+          show_behaviour_note:
+            false,
+
+          show_description:
+            showDescription,
 
           show_finder_message:
             showFinderMessage,
 
-          phone_enabled: true,
+          phone_enabled:
+            true,
 
           live_chat_enabled:
             liveChatEnabled,
 
-          active: true,
-          lost: false,
+          active:
+            true,
+
+          lost:
+            false,
         })
         .select(
           "id, tag_code, item_type, item_name"
@@ -363,20 +505,9 @@ export default function ItemRegistrationForm({
         .single();
 
       if (insertError) {
-        const lowerMessage =
-          insertError.message.toLowerCase();
-
-        if (
-          lowerMessage.includes("duplicate") ||
-          lowerMessage.includes("unique")
-        ) {
-          setErrorMessage(
-            "ეს QR კოდი უკვე გამოყენებულია."
-          );
-          return;
-        }
-
-        throw new Error(insertError.message);
+        throw new Error(
+          insertError.message
+        );
       }
 
       if (!createdProfile) {
@@ -390,21 +521,21 @@ export default function ItemRegistrationForm({
       );
 
       setTimeout(() => {
-        router.push("/my-profiles");
+        router.push(
+          "/my-profiles"
+        );
       }, 900);
     } catch (error) {
-      console.error("Item save error:", error);
+      console.error(
+        "Item save error:",
+        error
+      );
 
       setErrorMessage(
         error instanceof Error
           ? `შენახვა ვერ მოხერხდა: ${error.message}`
           : "შენახვა ვერ მოხერხდა."
       );
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
     } finally {
       setSaving(false);
     }
@@ -418,12 +549,19 @@ export default function ItemRegistrationForm({
         <style jsx>{`
           .loading {
             min-height: 250px;
+
             display: grid;
             place-items: center;
-            border: 1px solid #dce6f1;
+
+            border:
+              1px solid #dce6f1;
+
             border-radius: 16px;
+
             background: #ffffff;
+
             color: #718095;
+
             font-size: 11px;
           }
         `}</style>
@@ -443,7 +581,9 @@ export default function ItemRegistrationForm({
               მონაცემები გადაამოწმეთ
             </strong>
 
-            <p>{errorMessage}</p>
+            <p>
+              {errorMessage}
+            </p>
           </div>
         )}
 
@@ -453,7 +593,9 @@ export default function ItemRegistrationForm({
               ✓ პროფილი შეიქმნა
             </strong>
 
-            <p>{successMessage}</p>
+            <p>
+              {successMessage}
+            </p>
           </div>
         )}
 
@@ -473,9 +615,8 @@ export default function ItemRegistrationForm({
               </h2>
 
               <p>
-                მფლობელის ეტაპი დასრულებულია.
-                ახლა შეავსეთ მხოლოდ პროდუქტის
-                ინფორმაცია.
+                შეავსეთ მხოლოდ ამ კატეგორიისთვის
+                საჭირო ინფორმაცია.
               </p>
             </div>
           </div>
@@ -498,8 +639,8 @@ export default function ItemRegistrationForm({
             />
 
             <small>
-              თითოეული QR კოდი შეიძლება
-              დარეგისტრირდეს მხოლოდ ერთხელ.
+              QR კოდი რეგისტრაციის შემდეგ
+              ამ კატეგორიაზე ჩაიკეტება.
             </small>
           </div>
 
@@ -511,61 +652,83 @@ export default function ItemRegistrationForm({
               <input
                 value={itemName}
                 onChange={(event) =>
-                  setItemName(event.target.value)
+                  setItemName(
+                    event.target.value
+                  )
                 }
-                placeholder={meta.placeholder}
+                placeholder={
+                  meta.placeholder
+                }
               />
             </Field>
 
-            <Field label="ბრენდი">
-              <input
-                value={brand}
-                onChange={(event) =>
-                  setBrand(event.target.value)
-                }
-                placeholder="Brand"
-              />
-            </Field>
+            {showBrand && (
+              <Field label="ბრენდი">
+                <input
+                  value={brand}
+                  onChange={(event) =>
+                    setBrand(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Brand"
+                />
+              </Field>
+            )}
 
-            <Field label="მოდელი">
-              <input
-                value={model}
-                onChange={(event) =>
-                  setModel(event.target.value)
-                }
-                placeholder="Model"
-              />
-            </Field>
+            {showModel && (
+              <Field label="მოდელი">
+                <input
+                  value={model}
+                  onChange={(event) =>
+                    setModel(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Model"
+                />
+              </Field>
+            )}
 
             <Field label="ფერი">
               <input
                 value={colour}
                 onChange={(event) =>
-                  setColour(event.target.value)
+                  setColour(
+                    event.target.value
+                  )
                 }
-                placeholder="Colour"
+                placeholder="ფერი"
               />
             </Field>
 
-            <Field label="ზომა">
-              <input
-                value={size}
-                onChange={(event) =>
-                  setSize(event.target.value)
-                }
-                placeholder="Size"
-              />
-            </Field>
+            {showSize && (
+              <Field label="ზომა">
+                <input
+                  value={size}
+                  onChange={(event) =>
+                    setSize(
+                      event.target.value
+                    )
+                  }
+                  placeholder="ზომა"
+                />
+              </Field>
+            )}
 
-            <Field label="მასალა">
-              <input
-                value={material}
-                onChange={(event) =>
-                  setMaterial(event.target.value)
-                }
-                placeholder="Material"
-              />
-            </Field>
+            {showMaterial && (
+              <Field label="მასალა">
+                <input
+                  value={material}
+                  onChange={(event) =>
+                    setMaterial(
+                      event.target.value
+                    )
+                  }
+                  placeholder="მასალა"
+                />
+              </Field>
+            )}
 
             <Field
               label="ფოტოს URL"
@@ -575,7 +738,9 @@ export default function ItemRegistrationForm({
                 type="url"
                 value={photo}
                 onChange={(event) =>
-                  setPhoto(event.target.value)
+                  setPhoto(
+                    event.target.value
+                  )
                 }
                 placeholder="https://..."
               />
@@ -589,9 +754,15 @@ export default function ItemRegistrationForm({
                 rows={4}
                 value={description}
                 onChange={(event) =>
-                  setDescription(event.target.value)
+                  setDescription(
+                    event.target.value
+                  )
                 }
-                placeholder="აღწერეთ ნივთი..."
+                placeholder={
+                  isKeys
+                    ? "მაგ. 3 გასაღები შავ რგოლზე..."
+                    : "აღწერეთ ნივთი..."
+                }
               />
             </Field>
 
@@ -601,13 +772,21 @@ export default function ItemRegistrationForm({
             >
               <textarea
                 rows={4}
-                value={distinctiveFeatures}
+                value={
+                  distinctiveFeatures
+                }
                 onChange={(event) =>
                   setDistinctiveFeatures(
                     event.target.value
                   )
                 }
-                placeholder="მაგ. სტიკერი, ნაკაწრი, ინიციალები..."
+                placeholder={
+                  isKeys
+                    ? "მაგ. წითელი გასაღების საკიდი..."
+                    : isWallet
+                    ? "მაგ. ინიციალები, ნაკაწრი, კონკრეტული დეტალი..."
+                    : "მაგ. სტიკერი, ნაკაწრი, ინიციალები..."
+                }
               />
             </Field>
 
@@ -617,7 +796,9 @@ export default function ItemRegistrationForm({
             >
               <textarea
                 rows={4}
-                value={finderMessage}
+                value={
+                  finderMessage
+                }
                 onChange={(event) =>
                   setFinderMessage(
                     event.target.value
@@ -653,8 +834,12 @@ export default function ItemRegistrationForm({
         />
 
         <ContactOptionsSection
-          liveChatEnabled={liveChatEnabled}
-          setLiveChatEnabled={setLiveChatEnabled}
+          liveChatEnabled={
+            liveChatEnabled
+          }
+          setLiveChatEnabled={
+            setLiveChatEnabled
+          }
         />
 
         <section className="saveCard">
@@ -664,17 +849,21 @@ export default function ItemRegistrationForm({
             </span>
 
             <h3>
-              {meta.emoji} {meta.label}ს პროფილის შექმნა
+              {meta.emoji}{" "}
+              {meta.label}ს პროფილის შექმნა
             </h3>
 
             <p>
-              ამ QR კოდის კატეგორია შექმნის
-              შემდეგ აღარ შეიცვლება.
+              კატეგორია შექმნის შემდეგ აღარ
+              შეიცვლება, მონაცემების რედაქტირება
+              კი შესაძლებელი იქნება.
             </p>
           </div>
 
           <div className="actions">
-            <a href={`/register-item/${type}`}>
+            <a
+              href={`/register-item/${type}`}
+            >
               ← უკან
             </a>
 
@@ -697,48 +886,71 @@ export default function ItemRegistrationForm({
 
         .message {
           margin-bottom: 16px;
+
           padding: 14px;
+
           border-radius: 12px;
         }
 
         .message strong {
           display: block;
+
           font-size: 10px;
         }
 
         .message p {
           margin: 4px 0 0;
+
           font-size: 9px;
         }
 
         .error {
-          border: 1px solid #efc7cb;
-          background: #fff7f8;
-          color: #a3434c;
+          border:
+            1px solid #efc7cb;
+
+          background:
+            #fff7f8;
+
+          color:
+            #a3434c;
         }
 
         .success {
-          border: 1px solid #c5dfd1;
-          background: #f5fbf7;
-          color: #397057;
+          border:
+            1px solid #c5dfd1;
+
+          background:
+            #f5fbf7;
+
+          color:
+            #397057;
         }
 
         .card {
           padding: 25px;
 
-          border: 1px solid #dce6f1;
+          border:
+            1px solid #dce6f1;
+
           border-radius: 16px;
 
           background: #ffffff;
 
           box-shadow:
             0 12px 30px
-            rgba(30, 70, 120, 0.05);
+            rgba(
+              30,
+              70,
+              120,
+              .05
+            );
         }
 
         .cardHeader {
           display: flex;
+
           align-items: center;
+
           gap: 13px;
 
           padding-bottom: 20px;
@@ -754,6 +966,7 @@ export default function ItemRegistrationForm({
           flex: 0 0 52px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 14px;
@@ -765,28 +978,38 @@ export default function ItemRegistrationForm({
 
         .cardHeader span {
           color: #1266e9;
+
           font-size: 7px;
+
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
         .cardHeader h2 {
           margin: 5px 0 0;
+
           color: #223951;
+
           font-size: 18px;
         }
 
         .cardHeader p {
           margin: 6px 0 0;
+
           color: #8290a1;
+
           font-size: 9px;
         }
 
         .qrBox {
           margin-top: 22px;
+
           padding: 17px;
 
-          border: 1px solid #cfe0f6;
+          border:
+            1px solid #cfe0f6;
+
           border-radius: 13px;
 
           background: #f7faff;
@@ -794,20 +1017,26 @@ export default function ItemRegistrationForm({
 
         .qrBox label {
           display: block;
+
           margin-bottom: 7px;
 
           color: #344a62;
 
           font-size: 10px;
+
           font-weight: 850;
         }
 
         .qrBox input {
           width: 100%;
+
           min-height: 48px;
+
           padding: 0 13px;
 
-          border: 1px solid #d5e0eb;
+          border:
+            1px solid #d5e0eb;
+
           border-radius: 10px;
 
           outline: none;
@@ -815,6 +1044,7 @@ export default function ItemRegistrationForm({
 
         .qrBox small {
           display: block;
+
           margin-top: 6px;
 
           color: #8a98a8;
@@ -828,7 +1058,10 @@ export default function ItemRegistrationForm({
           display: grid;
 
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
 
           gap: 16px 14px;
         }
@@ -837,7 +1070,9 @@ export default function ItemRegistrationForm({
         textarea {
           width: 100%;
 
-          border: 1px solid #d5e0eb;
+          border:
+            1px solid #d5e0eb;
+
           border-radius: 10px;
 
           outline: none;
@@ -847,11 +1082,13 @@ export default function ItemRegistrationForm({
           color: #263e57;
 
           font-family: inherit;
+
           font-size: 11px;
         }
 
         input {
           min-height: 48px;
+
           padding: 0 13px;
         }
 
@@ -869,20 +1106,31 @@ export default function ItemRegistrationForm({
 
           box-shadow:
             0 0 0 4px
-            rgba(18, 102, 233, 0.08);
+            rgba(
+              18,
+              102,
+              233,
+              .08
+            );
         }
 
         .saveCard {
           margin-top: 16px;
+
           padding: 23px 25px;
 
           display: flex;
+
           align-items: center;
-          justify-content: space-between;
+
+          justify-content:
+            space-between;
 
           gap: 20px;
 
-          border: 1px solid #cddff5;
+          border:
+            1px solid #cddff5;
+
           border-radius: 16px;
 
           background:
@@ -893,12 +1141,14 @@ export default function ItemRegistrationForm({
             );
         }
 
-        .saveCard > div > span {
+        .saveCard
+          > div
+          > span {
           color: #1266e9;
 
           font-size: 8px;
+
           font-weight: 900;
-          letter-spacing: 1px;
         }
 
         .saveCard h3 {
@@ -919,6 +1169,7 @@ export default function ItemRegistrationForm({
 
         .actions {
           display: flex;
+
           align-items: center;
 
           gap: 8px;
@@ -931,20 +1182,25 @@ export default function ItemRegistrationForm({
           padding: 0 15px;
 
           display: flex;
+
           align-items: center;
+
           justify-content: center;
 
           border-radius: 10px;
 
           font-family: inherit;
+
           font-size: 9px;
+
           font-weight: 900;
 
           text-decoration: none;
         }
 
         .actions a {
-          border: 1px solid #ccd9e7;
+          border:
+            1px solid #ccd9e7;
 
           background: #ffffff;
 
@@ -964,7 +1220,7 @@ export default function ItemRegistrationForm({
         }
 
         .actions button:disabled {
-          opacity: 0.6;
+          opacity: .6;
         }
 
         @media (max-width: 650px) {
@@ -974,6 +1230,7 @@ export default function ItemRegistrationForm({
 
           .saveCard {
             flex-direction: column;
+
             align-items: stretch;
           }
 
@@ -1003,9 +1260,10 @@ function Field({
   return (
     <div
       style={{
-        gridColumn: full
-          ? "1 / -1"
-          : undefined,
+        gridColumn:
+          full
+            ? "1 / -1"
+            : undefined,
       }}
     >
       <label
