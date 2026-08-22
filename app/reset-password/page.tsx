@@ -73,25 +73,52 @@ export default function ResetPasswordPage() {
   ] = useState(false);
 
   useEffect(() => {
-    const supabase =
-      getSupabase();
+    let mounted = true;
 
-    if (!supabase) {
+    const client = getSupabase();
+
+    if (!client) {
       setErrorMessage(
         "Supabase კავშირი ვერ მოიძებნა."
       );
 
       setCheckingSession(false);
+
       return;
     }
 
-    let mounted = true;
+    const {
+      data: {
+        subscription,
+      },
+    } =
+      client.auth.onAuthStateChange(
+        (
+          event,
+          session
+        ) => {
+          if (!mounted) {
+            return;
+          }
+
+          if (
+            event ===
+              "PASSWORD_RECOVERY" ||
+            session?.user
+          ) {
+            setRecoveryReady(
+              true
+            );
+
+            setCheckingSession(
+              false
+            );
+          }
+        }
+      );
 
     async function prepareRecovery() {
       try {
-        /*
-         * 1. PKCE recovery links may arrive with ?code=
-         */
         const params =
           new URLSearchParams(
             window.location.search
@@ -100,12 +127,15 @@ export default function ResetPasswordPage() {
         const code =
           params.get("code");
 
+        /*
+         * Supabase PKCE recovery flow
+         */
         if (code) {
           const {
             error:
               exchangeError,
           } =
-            await supabase.auth
+            await client.auth
               .exchangeCodeForSession(
                 code
               );
@@ -119,65 +149,37 @@ export default function ResetPasswordPage() {
         }
 
         /*
-         * 2. Check whether Supabase now has
-         *    a valid authenticated recovery session.
+         * Check current session
          */
         const {
           data: {
             session,
           },
         } =
-          await supabase.auth
+          await client.auth
             .getSession();
 
+        if (!mounted) {
+          return;
+        }
+
         if (
-          mounted &&
           session?.user
         ) {
-          setRecoveryReady(true);
-          setCheckingSession(false);
+          setRecoveryReady(
+            true
+          );
+
+          setCheckingSession(
+            false
+          );
+
           return;
         }
 
         /*
-         * 3. Listen for PASSWORD_RECOVERY.
-         *    This also supports Supabase links
-         *    that establish the session from URL hash.
-         */
-        const {
-          data: {
-            subscription,
-          },
-        } =
-          supabase.auth
-            .onAuthStateChange(
-              (
-                event,
-                session
-              ) => {
-                if (!mounted) {
-                  return;
-                }
-
-                if (
-                  event ===
-                    "PASSWORD_RECOVERY" ||
-                  session?.user
-                ) {
-                  setRecoveryReady(
-                    true
-                  );
-
-                  setCheckingSession(
-                    false
-                  );
-                }
-              }
-            );
-
-        /*
-         * Give Supabase a short moment to process
-         * the URL/session before showing an error.
+         * Give Supabase a moment
+         * to process recovery URL.
          */
         window.setTimeout(
           async () => {
@@ -185,37 +187,48 @@ export default function ResetPasswordPage() {
               return;
             }
 
-            const {
-              data: {
-                session:
-                  finalSession,
-              },
-            } =
-              await supabase.auth
-                .getSession();
+            try {
+              const {
+                data: {
+                  session:
+                    finalSession,
+                },
+              } =
+                await client.auth
+                  .getSession();
 
-            if (
-              finalSession?.user
+              if (!mounted) {
+                return;
+              }
+
+              setRecoveryReady(
+                Boolean(
+                  finalSession?.user
+                )
+              );
+            } catch (
+              sessionError
             ) {
-              setRecoveryReady(
-                true
+              console.error(
+                "Final session check:",
+                sessionError
               );
-            } else {
-              setRecoveryReady(
-                false
-              );
-            }
 
-            setCheckingSession(
-              false
-            );
+              if (mounted) {
+                setRecoveryReady(
+                  false
+                );
+              }
+            } finally {
+              if (mounted) {
+                setCheckingSession(
+                  false
+                );
+              }
+            }
           },
           900
         );
-
-        return () => {
-          subscription.unsubscribe();
-        };
       } catch (error) {
         console.error(
           "Recovery preparation:",
@@ -234,10 +247,12 @@ export default function ResetPasswordPage() {
       }
     }
 
-    prepareRecovery();
+    void prepareRecovery();
 
     return () => {
       mounted = false;
+
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -270,10 +285,10 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    const supabase =
+    const client =
       getSupabase();
 
-    if (!supabase) {
+    if (!client) {
       setErrorMessage(
         "Supabase კავშირი ვერ მოიძებნა."
       );
@@ -288,20 +303,26 @@ export default function ResetPasswordPage() {
         data: {
           session,
         },
+        error:
+          sessionError,
       } =
-        await supabase.auth
+        await client.auth
           .getSession();
+
+      if (sessionError) {
+        throw sessionError;
+      }
 
       if (!session?.user) {
         throw new Error(
-          "პაროლის აღდგენის ბმული არ არის აქტიური. გთხოვთ გამოაგზავნოთ ახალი ბმული."
+          "პაროლის აღდგენის ბმული აღარ არის აქტიური. გთხოვთ მოითხოვოთ ახალი ბმული."
         );
       }
 
       const {
         error,
       } =
-        await supabase.auth
+        await client.auth
           .updateUser({
             password,
           });
@@ -312,7 +333,7 @@ export default function ResetPasswordPage() {
 
       setSuccess(true);
 
-      await supabase.auth
+      await client.auth
         .signOut();
     } catch (error) {
       console.error(
@@ -379,7 +400,7 @@ export default function ResetPasswordPage() {
                 </strong>
               </div>
             ) : success ? (
-              <>
+              <div className="successView">
                 <div className="successIcon">
                   ✓
                 </div>
@@ -388,25 +409,15 @@ export default function ResetPasswordPage() {
                   პაროლი შეიცვალა
                 </h1>
 
-                <p className="lead">
-                  ახალი პაროლით უკვე
-                  შეგიძლიათ ანგარიშში
-                  შესვლა.
-                </p>
-
                 <a
                   href="/login"
                   className="primaryLink"
                 >
                   შესვლა →
                 </a>
-              </>
+              </div>
             ) : recoveryReady ? (
               <>
-                <span className="eyebrow">
-                  PASSWORD RESET
-                </span>
-
                 <h1>
                   ახალი პაროლი
                 </h1>
@@ -529,13 +540,13 @@ export default function ResetPasswordPage() {
                 </form>
               </>
             ) : (
-              <>
+              <div className="expiredView">
                 <h1>
                   ბმული აღარ არის აქტიური
                 </h1>
 
-                <p className="lead">
-                  გამოაგზავნეთ პაროლის
+                <p>
+                  მოითხოვეთ პაროლის
                   აღდგენის ახალი ბმული.
                 </p>
 
@@ -545,7 +556,7 @@ export default function ResetPasswordPage() {
                 >
                   Login-ზე დაბრუნება
                 </a>
-              </>
+              </div>
             )}
           </section>
         </section>
@@ -553,7 +564,8 @@ export default function ResetPasswordPage() {
 
       <style jsx>{`
         * {
-          box-sizing: border-box;
+          box-sizing:
+            border-box;
         }
 
         .page {
@@ -564,7 +576,7 @@ export default function ResetPasswordPage() {
           overflow: hidden;
 
           padding:
-            0 20px 30px;
+            0 18px 30px;
 
           background:
             #0647c8;
@@ -596,8 +608,8 @@ export default function ResetPasswordPage() {
         }
 
         .decor1 {
-          top: 15%;
-          left: 7%;
+          top: 14%;
+          left: 6%;
 
           transform:
             rotate(-14deg);
@@ -620,7 +632,7 @@ export default function ResetPasswordPage() {
 
           max-width: 1080px;
 
-          min-height: 74px;
+          height: 70px;
 
           margin: auto;
 
@@ -649,9 +661,9 @@ export default function ResetPasswordPage() {
         }
 
         .brandIcon {
-          width: 43px;
+          width: 42px;
 
-          height: 43px;
+          height: 42px;
 
           display: grid;
 
@@ -679,7 +691,7 @@ export default function ResetPasswordPage() {
           color:
             #ffffff;
 
-          font-size: 18px;
+          font-size: 17px;
         }
 
         .brand small {
@@ -706,7 +718,7 @@ export default function ResetPasswordPage() {
           min-height:
             calc(
               100vh -
-              105px
+              100px
             );
 
           display: grid;
@@ -714,24 +726,25 @@ export default function ResetPasswordPage() {
           place-items: center;
 
           padding:
-            35px 0;
+            25px 0 45px;
         }
 
         .card {
           width: 100%;
 
-          max-width: 470px;
+          max-width: 440px;
 
           padding:
-            31px 32px;
+            30px 30px 27px;
 
-          border-radius: 20px;
+          border-radius:
+            19px;
 
           background:
             #ffffff;
 
           box-shadow:
-            0 26px 65px
+            0 24px 60px
             rgba(
               0,
               24,
@@ -740,48 +753,23 @@ export default function ResetPasswordPage() {
             );
         }
 
-        .eyebrow {
-          color:
-            #0647c8;
-
-          font-size: 10px;
-
-          font-weight: 900;
-
-          letter-spacing:
-            1px;
-        }
-
         h1 {
-          margin:
-            6px 0 0;
+          margin: 0;
 
           color:
             #203a55;
 
-          font-size: 27px;
+          font-size: 25px;
 
           line-height: 1.25;
         }
 
-        .lead {
-          margin:
-            8px 0 0;
-
-          color:
-            #78899a;
-
-          font-size: 13px;
-
-          line-height: 1.55;
-        }
-
         form {
-          margin-top: 24px;
+          margin-top: 25px;
 
           display: grid;
 
-          gap: 18px;
+          gap: 19px;
         }
 
         .field label {
@@ -799,7 +787,8 @@ export default function ResetPasswordPage() {
         }
 
         .passwordField {
-          position: relative;
+          position:
+            relative;
 
           width: 100%;
         }
@@ -829,7 +818,8 @@ export default function ResetPasswordPage() {
           font-family:
             inherit;
 
-          font-size: 15px;
+          font-size:
+            15px;
 
           outline: none;
         }
@@ -893,13 +883,15 @@ export default function ResetPasswordPage() {
         .primaryLink {
           width: 100%;
 
-          min-height: 52px;
+          min-height:
+            52px;
 
           display: flex;
 
           align-items: center;
 
-          justify-content: center;
+          justify-content:
+            center;
 
           border: 0;
 
@@ -919,7 +911,8 @@ export default function ResetPasswordPage() {
 
           font-weight: 900;
 
-          text-decoration: none;
+          text-decoration:
+            none;
 
           cursor: pointer;
         }
@@ -956,7 +949,8 @@ export default function ResetPasswordPage() {
         }
 
         .status {
-          min-height: 160px;
+          min-height:
+            130px;
 
           display: flex;
 
@@ -976,9 +970,9 @@ export default function ResetPasswordPage() {
         }
 
         .loader {
-          width: 31px;
+          width: 30px;
 
-          height: 31px;
+          height: 30px;
 
           border:
             3px solid
@@ -987,12 +981,18 @@ export default function ResetPasswordPage() {
           border-top-color:
             #0647c8;
 
-          border-radius:
-            50%;
+          border-radius: 50%;
 
           animation:
-            spin 0.8s
-            linear infinite;
+            spin
+            0.8s
+            linear
+            infinite;
+        }
+
+        .successView,
+        .expiredView {
+          text-align: center;
         }
 
         .successIcon {
@@ -1000,16 +1000,14 @@ export default function ResetPasswordPage() {
 
           height: 48px;
 
-          margin-bottom:
-            13px;
+          margin:
+            0 auto 14px;
 
           display: grid;
 
-          place-items:
-            center;
+          place-items: center;
 
-          border-radius:
-            50%;
+          border-radius: 50%;
 
           background:
             #eaf3ff;
@@ -1020,6 +1018,18 @@ export default function ResetPasswordPage() {
           font-size: 20px;
 
           font-weight: 950;
+        }
+
+        .expiredView p {
+          margin:
+            9px 0 0;
+
+          color:
+            #78899a;
+
+          font-size: 13px;
+
+          line-height: 1.5;
         }
 
         .primaryLink {
@@ -1042,14 +1052,14 @@ export default function ResetPasswordPage() {
 
           .card {
             padding:
-              26px 20px;
+              25px 19px;
 
             border-radius:
               17px;
           }
 
           h1 {
-            font-size: 24px;
+            font-size: 23px;
           }
 
           input {
