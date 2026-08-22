@@ -57,7 +57,8 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
-  const pet = isPetType(type);
+  const pet =
+    isPetType(type);
 
   const showBrand =
     showBrandField(type);
@@ -74,7 +75,9 @@ export default function ProductStep({
   return (
     <>
       <div className="stepTitle">
-        <span>STEP 2 OF 3</span>
+        <span>
+          STEP 2 OF 3
+        </span>
 
         <h1>
           <span className="productEmoji">
@@ -88,10 +91,6 @@ export default function ProductStep({
           {getProductFormText(type)}
         </p>
       </div>
-
-      {/* =========================
-          01 — BASIC INFORMATION
-      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
@@ -296,10 +295,6 @@ export default function ProductStep({
         </div>
       </section>
 
-      {/* =========================
-          02 — PHOTO
-      ========================== */}
-
       <section className="formSection">
         <div className="sectionHeader">
           <span>02</span>
@@ -328,10 +323,6 @@ export default function ProductStep({
           }
         />
       </section>
-
-      {/* =========================
-          03 — ADDITIONAL INFO
-      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
@@ -457,10 +448,6 @@ export default function ProductStep({
           </Field>
         </div>
       </section>
-
-      {/* =========================
-          04 — FINDER VIEW
-      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
@@ -612,10 +599,6 @@ export default function ProductStep({
         </div>
       </section>
 
-      {/* =========================
-          ACTIONS
-      ========================== */}
-
       <div className="actions">
         <button
           type="button"
@@ -636,16 +619,9 @@ export default function ProductStep({
         </button>
       </div>
 
-      {/* IMPORTANT:
-          GLOBAL იმიტომაა გამოყენებული,
-          რომ Field child component-ის
-          input-ებზეც გავრცელდეს.
-      */}
-
       <style jsx global>{`
         .stepTitle > span {
           color: #0647c8;
-
           font-size: 12px;
           font-weight: 900;
           letter-spacing: 0.8px;
@@ -662,7 +638,6 @@ export default function ProductStep({
           color: #203a55;
 
           font-size: 27px;
-          font-weight: 900;
           line-height: 1.2;
         }
 
@@ -681,36 +656,34 @@ export default function ProductStep({
           line-height: 1.55;
         }
 
-        /* SECTIONS */
-
         .formSection {
-          margin-top: 24px;
+          margin-top: 20px;
 
-          padding-top: 21px;
+          padding-top: 18px;
 
           border-top:
             1px solid #e4ebf3;
         }
 
         .sectionHeader {
-          margin-bottom: 19px;
+          margin-bottom: 14px;
 
           display: flex;
           align-items: flex-start;
 
-          gap: 11px;
+          gap: 10px;
         }
 
         .sectionHeader > span {
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
 
-          flex: 0 0 32px;
+          flex: 0 0 30px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 9px;
+          border-radius: 8px;
 
           background: #edf4ff;
 
@@ -727,23 +700,18 @@ export default function ProductStep({
 
           font-size: 15px;
           font-weight: 850;
-          line-height: 1.35;
         }
 
         .sectionHeader p {
           max-width: 620px;
 
-          margin: 4px 0 0;
+          margin: 3px 0 0;
 
           color: #8190a0;
 
           font-size: 12px;
-          line-height: 1.5;
+          line-height: 1.45;
         }
-
-        /* =========================
-           PREMIUM FORM GRID
-        ========================== */
 
         .formGrid {
           width: 100%;
@@ -757,7 +725,7 @@ export default function ProductStep({
             );
 
           column-gap: 22px;
-          row-gap: 21px;
+          row-gap: 20px;
 
           align-items: start;
         }
@@ -770,15 +738,14 @@ export default function ProductStep({
         }
 
         .field.full {
-          grid-column: 1 / -1;
+          grid-column:
+            1 / -1;
         }
-
-        /* LABELS */
 
         .field label {
           display: block;
 
-          min-height: 20px;
+          min-height: 19px;
 
           margin:
             0 0 9px 2px;
@@ -787,10 +754,8 @@ export default function ProductStep({
 
           font-size: 13px;
           font-weight: 800;
-          line-height: 20px;
+          line-height: 19px;
         }
-
-        /* ALL FORM CONTROLS */
 
         .field input,
         .field select,
@@ -825,43 +790,31 @@ export default function ProductStep({
             background 0.18s ease;
         }
 
-        /* INPUT + SELECT */
-
         .field input,
         .field select {
-          height: 58px;
-          min-height: 58px;
+          height: 56px;
+          min-height: 56px;
 
           padding:
-            0 17px;
+            0 16px;
         }
-
-        .field select {
-          cursor: pointer;
-        }
-
-        /* TEXTAREA */
 
         .field textarea {
-          min-height: 122px;
+          min-height: 118px;
 
           padding:
-            15px 17px;
-
-          line-height: 1.55;
+            14px 16px;
 
           resize: vertical;
-        }
 
-        /* HOVER */
+          line-height: 1.55;
+        }
 
         .field input:hover,
         .field select:hover,
         .field textarea:hover {
-          border-color: #bfcddd;
+          border-color: #bdccda;
         }
-
-        /* FOCUS */
 
         .field input:focus,
         .field select:focus,
@@ -880,22 +833,11 @@ export default function ProductStep({
             );
         }
 
-        /* PLACEHOLDER */
-
         .field input::placeholder,
         .field textarea::placeholder {
-          color: #9aa8b6;
+          color: #9ba9b7;
           opacity: 1;
         }
-
-        /* DATE / NUMBER NORMALIZATION */
-
-        .field input[type="date"],
-        .field input[type="number"] {
-          min-width: 0;
-        }
-
-        /* VISIBILITY */
 
         .visibilityGrid {
           display: grid;
@@ -906,13 +848,11 @@ export default function ProductStep({
               minmax(0, 1fr)
             );
 
-          gap: 12px;
+          gap: 10px;
         }
 
-        /* ACTIONS */
-
         .actions {
-          margin-top: 27px;
+          margin-top: 23px;
 
           display: flex;
           align-items: center;
@@ -924,18 +864,17 @@ export default function ProductStep({
 
         .backButton,
         .primaryButton {
-          min-height: 49px;
+          min-height: 47px;
 
           padding:
-            0 19px;
+            0 18px;
 
           display: inline-flex;
           align-items: center;
-          justify-content: center;
+          justify-content:
+            center;
 
           gap: 8px;
-
-          box-sizing: border-box;
 
           border-radius: 10px;
 
@@ -973,37 +912,23 @@ export default function ProductStep({
             );
         }
 
-        .primaryButton:hover {
-          background: #053faf;
-        }
-
         .primaryButton span {
           font-size: 17px;
         }
 
-        /* TABLET */
-
-        @media (
-          max-width: 700px
-        ) {
+        @media (max-width: 700px) {
           .visibilityGrid {
             grid-template-columns: 1fr;
           }
         }
 
-        /* MOBILE */
-
-        @media (
-          max-width: 650px
-        ) {
+        @media (max-width: 650px) {
           .stepTitle h1 {
             font-size: 23px;
           }
 
           .formGrid {
             grid-template-columns: 1fr;
-
-            row-gap: 18px;
           }
 
           .field.full {
