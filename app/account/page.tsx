@@ -1,1594 +1,2165 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-type Lang = "ka" | "en";
+import {
+  createClient,
+  type User,
+} from "@supabase/supabase-js";
 
-type OwnerAccount = {
-  user_id: string;
+type ItemProfile = {
+  id: string;
+  tag_code: string | null;
+  item_type: string | null;
+  item_name: string | null;
+  photo: string | null;
+  active: boolean | null;
+  scan_count: number | null;
+  created_at?: string | null;
+};
+
+type OwnerData = {
   first_name: string;
   last_name: string;
   email: string;
   phone: string;
-  address: string | null;
-  photo: string | null;
 };
 
-type QrProfile = {
-  id: string;
-  item_name: string | null;
-  item_type: string | null;
-  pet_type: string | null;
-  tag_code: string | null;
-  active: boolean | null;
-};
+function createSupabase() {
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-type AdminRecord = {
-  id: number;
-  admin_email: string;
-  active: boolean;
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase კავშირი ვერ მოიძებნა."
+    );
+  }
+
+  return createClient(url, key);
+}
+
+const productMeta: Record<
+  string,
+  {
+    label: string;
+    emoji: string;
+  }
+> = {
+  dog: {
+    label: "ძაღლი",
+    emoji: "🐶",
+  },
+
+  cat: {
+    label: "კატა",
+    emoji: "🐱",
+  },
+
+  keys: {
+    label: "გასაღები",
+    emoji: "🔑",
+  },
+
+  wallet: {
+    label: "საფულე",
+    emoji: "👛",
+  },
+
+  bag: {
+    label: "ჩანთა",
+    emoji: "👜",
+  },
+
+  suitcase: {
+    label: "ჩემოდანი",
+    emoji: "🧳",
+  },
 };
 
 export default function AccountPage() {
-  const [lang, setLang] = useState<Lang>("ka");
-  const [owner, setOwner] = useState<OwnerAccount | null>(null);
-  const [profiles, setProfiles] = useState<QrProfile[]>([]);
-  const [admin, setAdmin] = useState<AdminRecord | null>(null);
+  const [user, setUser] =
+    useState<User | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [missingOwner, setMissingOwner] = useState(false);
-  const [error, setError] = useState("");
-  const [errorStage, setErrorStage] = useState("");
+  const [owner, setOwner] =
+    useState<OwnerData | null>(null);
 
-  const ka = lang === "ka";
+  const [profiles, setProfiles] =
+    useState<ItemProfile[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  const displayName = useMemo(() => {
+    if (owner) {
+      return `${owner.first_name} ${owner.last_name}`.trim();
+    }
+
+    const firstName =
+      user?.user_metadata
+        ?.first_name || "";
+
+    const lastName =
+      user?.user_metadata
+        ?.last_name || "";
+
+    const full =
+      `${firstName} ${lastName}`.trim();
+
+    return full || "მფლობელი";
+  }, [owner, user]);
 
   useEffect(() => {
+    let mounted = true;
+
+    async function loadAccount() {
+      try {
+        const supabase =
+          createSupabase();
+
+        const {
+          data: {
+            session,
+          },
+          error:
+            sessionError,
+        } =
+          await supabase.auth
+            .getSession();
+
+        if (sessionError) {
+          throw sessionError;
+        }
+
+        if (!session?.user) {
+          window.location.replace(
+            "/login"
+          );
+
+          return;
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setUser(
+          session.user
+        );
+
+        const currentUser =
+          session.user;
+
+        /*
+         * OWNER DATA
+         */
+
+        try {
+          const {
+            data:
+              ownerData,
+            error:
+              ownerError,
+          } =
+            await supabase
+              .from(
+                "owner_accounts"
+              )
+              .select(
+                "first_name,last_name,email,phone"
+              )
+              .eq(
+                "id",
+                currentUser.id
+              )
+              .maybeSingle();
+
+          if (
+            ownerError
+          ) {
+            console.error(
+              "Owner load:",
+              ownerError
+            );
+          }
+
+          if (
+            mounted &&
+            ownerData
+          ) {
+            setOwner({
+              first_name:
+                ownerData.first_name ||
+                "",
+
+              last_name:
+                ownerData.last_name ||
+                "",
+
+              email:
+                ownerData.email ||
+                currentUser.email ||
+                "",
+
+              phone:
+                ownerData.phone ||
+                "",
+            });
+          } else if (
+            mounted
+          ) {
+            setOwner({
+              first_name:
+                currentUser
+                  .user_metadata
+                  ?.first_name ||
+                "",
+
+              last_name:
+                currentUser
+                  .user_metadata
+                  ?.last_name ||
+                "",
+
+              email:
+                currentUser.email ||
+                "",
+
+              phone:
+                currentUser
+                  .user_metadata
+                  ?.phone ||
+                "",
+            });
+          }
+        } catch (
+          ownerLoadError
+        ) {
+          console.error(
+            "Owner load:",
+            ownerLoadError
+          );
+        }
+
+        /*
+         * USER QR PROFILES
+         *
+         * First try owner_id because
+         * this is the intended relation.
+         */
+
+        const {
+          data:
+            profileData,
+          error:
+            profileError,
+        } =
+          await supabase
+            .from("item")
+            .select(
+              "id,tag_code,item_type,item_name,photo,active,scan_count,created_at"
+            )
+            .eq(
+              "owner_id",
+              currentUser.id
+            )
+            .order(
+              "created_at",
+              {
+                ascending:
+                  false,
+              }
+            );
+
+        if (
+          profileError
+        ) {
+          console.error(
+            "Profile load:",
+            profileError
+          );
+
+          /*
+           * Dashboard itself still
+           * loads even if profile query
+           * needs schema adjustment.
+           */
+
+          if (mounted) {
+            setProfiles(
+              []
+            );
+          }
+        } else if (
+          mounted
+        ) {
+          setProfiles(
+            (profileData ||
+              []) as ItemProfile[]
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Account load:",
+          error
+        );
+
+        if (mounted) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "ანგარიშის ჩატვირთვა ვერ მოხერხდა."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoading(
+            false
+          );
+        }
+      }
+    }
+
     void loadAccount();
+
+    return () => {
+      mounted =
+        false;
+    };
   }, []);
 
-  async function loadAccount() {
-    setLoading(true);
-    setError("");
-    setErrorStage("");
-    setMissingOwner(false);
-
+  async function signOut() {
     try {
-      // AUTH
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      const supabase =
+        createSupabase();
 
-      if (userError) {
-        setErrorStage("AUTH");
-        throw new Error(userError.message);
-      }
-
-      if (!user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      // OWNER
-      const { data: ownerData, error: ownerError } = await supabase
-        .from("owner_accounts")
-        .select(
-          "user_id, first_name, last_name, email, phone, address, photo"
-        )
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (ownerError) {
-        setErrorStage("OWNER");
-        throw new Error(ownerError.message);
-      }
-
-      if (!ownerData) {
-        setMissingOwner(true);
-        return;
-      }
-
-      setOwner(ownerData as OwnerAccount);
-
-      // ITEMS
-      // IMPORTANT: item.photo does NOT exist,
-      // so we do not request it.
-      const { data: profileData, error: profileError } = await supabase
-        .from("item")
-        .select(
-          "id, item_name, item_type, pet_type, tag_code, active"
-        )
-        .eq("owner_id", user.id);
-
-      if (profileError) {
-        setErrorStage("ITEM");
-        throw new Error(profileError.message);
-      }
-
-      setProfiles((profileData ?? []) as QrProfile[]);
-
-      // ADMIN
-      const { data: adminData, error: adminError } = await supabase
-        .from("owner_admins")
-        .select("id, admin_email, active")
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (adminError) {
-        setErrorStage("ADMIN");
-        throw new Error(adminError.message);
-      }
-
-      setAdmin((adminData ?? null) as AdminRecord | null);
-    } catch (err) {
-      console.error("ACCOUNT LOAD ERROR:", err);
-
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unknown account loading error"
-      );
+      await supabase.auth
+        .signOut();
     } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
-  }
-
-  function getType(profile: QrProfile) {
-    if (profile.pet_type === "dog") {
-      return {
-        icon: "🐶",
-        label: ka ? "ძაღლი" : "Dog",
-      };
-    }
-
-    if (profile.pet_type === "cat") {
-      return {
-        icon: "🐱",
-        label: ka ? "კატა" : "Cat",
-      };
-    }
-
-    switch (profile.item_type) {
-      case "keys":
-        return {
-          icon: "🔑",
-          label: ka ? "გასაღები" : "Keys",
-        };
-
-      case "wallet":
-        return {
-          icon: "👛",
-          label: ka ? "საფულე" : "Wallet",
-        };
-
-      case "bag":
-        return {
-          icon: "👜",
-          label: ka ? "ჩანთა" : "Bag",
-        };
-
-      case "suitcase":
-        return {
-          icon: "🧳",
-          label: ka ? "ჩემოდანი" : "Suitcase",
-        };
-
-      default:
-        return {
-          icon: "🏷️",
-          label: ka ? "QR პროფილი" : "QR Profile",
-        };
+      window.location.replace(
+        "/login"
+      );
     }
   }
 
   if (loading) {
     return (
-      <main className="statePage">
-        <div className="stateLogo">QR</div>
-        <strong>QR RETURN</strong>
-        <p>{ka ? "ანგარიში იტვირთება..." : "Loading account..."}</p>
-        <Styles />
-      </main>
-    );
-  }
+      <>
+        <main className="loadingPage">
+          <div className="loadingBox">
+            <div className="loader" />
 
-  if (error) {
-    return (
-      <main className="errorPage">
-        <header className="header">
-          <a href="/" className="brand">
-            <div className="logo">QR</div>
-            <div>
-              <strong>QR RETURN</strong>
-              <small>OWNER ACCOUNT</small>
-            </div>
-          </a>
-
-          <div className="languages">
-            <button
-              type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
-            >
-              GEO
-            </button>
-
-            <button
-              type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
-            >
-              ENG
-            </button>
+            <strong>
+              ანგარიში იტვირთება...
+            </strong>
           </div>
-        </header>
+        </main>
 
-        <section className="errorWrap">
-          <div className="diagnosticCard">
-            <div className="diagnosticIcon">⚠️</div>
+        <style jsx>{`
+          .loadingPage {
+            min-height: 100vh;
 
-            <div className="eyebrow">QR RETURN DIAGNOSTIC</div>
+            display: grid;
 
-            <h1>
-              {ka
-                ? "ანგარიშის ჩატვირთვის შეცდომა"
-                : "Account loading error"}
-            </h1>
+            place-items: center;
 
-            <div className="errorStageBox">
-              <span>{ka ? "შეცდომის ეტაპი" : "Error stage"}</span>
-              <strong>{errorStage || "UNKNOWN"}</strong>
-            </div>
+            background:
+              #0647c8;
 
-            <div className="realError">
-              <span>{ka ? "Supabase პასუხი" : "Supabase response"}</span>
-              <code>{error}</code>
-            </div>
+            font-family:
+              Arial,
+              Helvetica,
+              sans-serif;
+          }
 
-            <p>
-              {ka
-                ? "თუ შეცდომა ისევ გამოჩნდა, გამომიგზავნეთ Error stage და Supabase პასუხი."
-                : "If an error still appears, send the Error stage and Supabase response."}
-            </p>
+          .loadingBox {
+            display: grid;
 
-            <div className="diagnosticActions">
-              <button
-                type="button"
-                className="primaryAction"
-                onClick={() => void loadAccount()}
-              >
-                ↻ {ka ? "თავიდან ცდა" : "Try again"}
-              </button>
+            justify-items:
+              center;
 
-              <button
-                type="button"
-                className="secondaryAction"
-                onClick={handleLogout}
-              >
-                {ka ? "გასვლა" : "Sign out"}
-              </button>
-            </div>
-          </div>
-        </section>
+            gap: 13px;
 
-        <Styles />
-      </main>
-    );
-  }
+            color: white;
 
-  if (missingOwner) {
-    return (
-      <main className="missingPage">
-        <header className="header">
-          <a href="/" className="brand">
-            <div className="logo">QR</div>
-            <div>
-              <strong>QR RETURN</strong>
-              <small>OWNER ACCOUNT</small>
-            </div>
-          </a>
+            font-size: 14px;
+          }
 
-          <div className="languages">
-            <button
-              type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
-            >
-              GEO
-            </button>
+          .loader {
+            width: 32px;
+            height: 32px;
 
-            <button
-              type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
-            >
-              ENG
-            </button>
-          </div>
-        </header>
+            border:
+              3px solid
+              rgba(
+                255,
+                255,
+                255,
+                0.25
+              );
 
-        <section className="missingWrap">
-          <div className="missingCard">
-            <div className="missingIcon">👤</div>
+            border-top-color:
+              white;
 
-            <div className="eyebrow">OWNER PROFILE</div>
+            border-radius:
+              50%;
 
-            <h1>
-              {ka
-                ? "დაასრულეთ მფლობელის პროფილი"
-                : "Complete your Owner Profile"}
-            </h1>
+            animation:
+              spin
+              0.8s
+              linear
+              infinite;
+          }
 
-            <p>
-              {ka
-                ? "თქვენი Login ანგარიში არსებობს, მაგრამ Owner Profile ჯერ არ არის შენახული."
-                : "Your Login account exists, but the Owner Profile has not been saved yet."}
-            </p>
-
-            <div className="missingNotice">
-              <span>🔒</span>
-              <div>
-                <strong>
-                  {ka
-                    ? "Login ანგარიში შენარჩუნებულია"
-                    : "Your login account is safe"}
-                </strong>
-
-                <p>
-                  {ka
-                    ? "ახალი Auth მომხმარებელი არ შექმნათ."
-                    : "Do not create another Auth user."}
-                </p>
-              </div>
-            </div>
-
-            <div className="missingActions">
-              <a href="/account/register" className="primaryButton">
-                {ka
-                  ? "მფლობელის პროფილის დასრულება"
-                  : "Complete Owner Profile"}{" "}
-                →
-              </a>
-
-              <button
-                type="button"
-                className="logoutSecondary"
-                onClick={handleLogout}
-              >
-                {ka ? "გასვლა" : "Sign out"}
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <Styles />
-      </main>
-    );
-  }
-
-  if (!owner) {
-    return (
-      <main className="statePage">
-        <div className="stateLogo">QR</div>
-        <strong>QR RETURN</strong>
-        <p>
-          {ka
-            ? "მფლობელის პროფილი ვერ მოიძებნა."
-            : "Owner profile not found."}
-        </p>
-        <Styles />
-      </main>
+          @keyframes spin {
+            to {
+              transform:
+                rotate(
+                  360deg
+                );
+            }
+          }
+        `}</style>
+      </>
     );
   }
 
   return (
-    <main className="page">
-      <header className="header">
-        <a href="/" className="brand">
-          <div className="logo">QR</div>
+    <>
+      <main className="page">
+        <div
+          className="backgroundQr qr1"
+          aria-hidden="true"
+        >
+          QR
+        </div>
 
-          <div>
-            <strong>QR RETURN</strong>
-            <small>OWNER DASHBOARD</small>
-          </div>
-        </a>
+        <div
+          className="backgroundQr qr2"
+          aria-hidden="true"
+        >
+          QR
+        </div>
 
-        <div className="headerRight">
-          <div className="languages">
-            <button
-              type="button"
-              className={ka ? "active" : ""}
-              onClick={() => setLang("ka")}
-            >
-              GEO
-            </button>
+        {/* HEADER */}
 
-            <button
-              type="button"
-              className={!ka ? "active" : ""}
-              onClick={() => setLang("en")}
-            >
-              ENG
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="logoutButton"
-            onClick={handleLogout}
+        <header className="header">
+          <a
+            href="/"
+            className="brand"
           >
-            {ka ? "გასვლა" : "Sign out"}
-          </button>
-        </div>
-      </header>
-
-      <section className="container">
-        <div className="welcome">
-          <div>
-            <div className="eyebrow">
-              {ka ? "მფლობელის ანგარიში" : "OWNER ACCOUNT"}
+            <div className="brandMark">
+              QR
             </div>
 
-            <h1>
-              {ka
-                ? `გამარჯობა, ${owner.first_name}`
-                : `Hello, ${owner.first_name}`}
-            </h1>
-
-            <p>
-              {ka
-                ? "აქედან მართავთ თქვენს პროფილს, უსაფრთხოებას, ადმინისტრატორს, Live Chat-ს და ყველა QR პროფილს."
-                : "Manage your profile, security, administrator, Live Chat and all QR profiles from here."}
-            </p>
-          </div>
-
-          <div className="welcomeActions">
-            <a href="/account/chat" className="messagesButton">
-              <span className="messagesIcon">💬</span>
-
-              <div>
-                <small>LIVE CHAT</small>
-                <strong>{ka ? "შეტყობინებები" : "Messages"}</strong>
-              </div>
-            </a>
-
-            <a href="/add-profile" className="primaryButton">
-              + {ka ? "QR პროფილის დამატება" : "Add QR profile"}
-            </a>
-          </div>
-        </div>
-
-        <div className="topGrid">
-          <section className="panel">
-            <div className="panelHeader">
-              <div className="panelTitle">
-                <div className="panelIcon">👤</div>
-
-                <div>
-                  <span>{ka ? "მფლობელი" : "OWNER"}</span>
-                  <h2>
-                    {owner.first_name} {owner.last_name}
-                  </h2>
-                </div>
-              </div>
-
-              <a href="/account/profile" className="smallButton">
-                ✏️ {ka ? "რედაქტირება" : "Edit"}
-              </a>
-            </div>
-
-            <div className="ownerBody">
-              <div className="avatar">
-                {owner.photo ? (
-                  <img src={owner.photo} alt="" />
-                ) : (
-                  <div className="avatarPlaceholder">👤</div>
-                )}
-              </div>
-
-              <div className="ownerData">
-                <div>
-                  <span>{ka ? "ელფოსტა" : "Email"}</span>
-                  <strong>{owner.email}</strong>
-                </div>
-
-                <div>
-                  <span>{ka ? "ტელეფონი" : "Phone"}</span>
-                  <strong>{owner.phone}</strong>
-                </div>
-
-                <div>
-                  <span>{ka ? "მისამართი" : "Address"}</span>
-                  <strong>
-                    {owner.address ||
-                      (ka ? "არ არის მითითებული" : "Not provided")}
-                  </strong>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="panel">
-            <div className="panelHeader">
-              <div className="panelTitle">
-                <div className="panelIcon">🔐</div>
-
-                <div>
-                  <span>{ka ? "უსაფრთხოება" : "SECURITY"}</span>
-
-                  <h2>
-                    {ka
-                      ? "ანგარიშის უსაფრთხოება"
-                      : "Account security"}
-                  </h2>
-                </div>
-              </div>
-
-              <a href="/account/security" className="smallButton">
-                {ka ? "მართვა" : "Manage"} →
-              </a>
-            </div>
-
-            <div className="securityText">
-              <p>
-                {ka
-                  ? "კოდური სიტყვა და პირადი ნომერი დაცულია და მპოვნელისთვის არასდროს გამოჩნდება."
-                  : "Your code word and personal ID remain private and are never shown to finders."}
-              </p>
-            </div>
-          </section>
-        </div>
-
-        <section className="panel">
-          <div className="panelHeader">
-            <div className="panelTitle">
-              <div className="panelIcon">💬</div>
-
-              <div>
-                <span>LIVE CHAT</span>
-                <h2>
-                  {ka
-                    ? "მპოვნელების შეტყობინებები"
-                    : "Finder messages"}
-                </h2>
-              </div>
-            </div>
-
-            <a href="/account/chat" className="smallButton">
-              {ka ? "Inbox-ის გახსნა" : "Open Inbox"} →
-            </a>
-          </div>
-
-          <div className="chatPanelBody">
             <div>
-              <strong>QR RETURN Live Chat</strong>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <small>
+                MY ACCOUNT
+              </small>
+            </div>
+          </a>
+
+          <div className="headerActions">
+            <a
+              href="/"
+              className="homeButton"
+            >
+              მთავარი
+            </a>
+
+            <button
+              type="button"
+              className="logoutButton"
+              onClick={
+                signOut
+              }
+            >
+              გასვლა
+            </button>
+          </div>
+        </header>
+
+        <section className="shell">
+          {/* WELCOME */}
+
+          <section className="welcome">
+            <div>
+              <span className="eyebrow">
+                MY QR RETURN
+              </span>
+
+              <h1>
+                გამარჯობა,{" "}
+                {displayName}
+              </h1>
 
               <p>
-                {ka
-                  ? "როდესაც მპოვნელი თქვენი QR კოდიდან Live Chat-ს გამოიყენებს, საუბარი აქ გამოჩნდება."
-                  : "When a finder uses Live Chat from your QR code, the conversation will appear here."}
+                აქ შეგიძლიათ
+                მართოთ თქვენი
+                ყველა QR პროფილი.
               </p>
             </div>
 
-            <a href="/account/chat" className="openChatButton">
-              💬 {ka ? "შეტყობინებები" : "Messages"}
-            </a>
-          </div>
-        </section>
+            <a
+              href="/register"
+              className="addButton"
+            >
+              <span className="plus">
+                +
+              </span>
 
-        <section className="panel">
-          <div className="panelHeader">
-            <div className="panelTitle">
-              <div className="panelIcon">👥</div>
+              ახალი QR პროფილი
+            </a>
+          </section>
+
+          {errorMessage && (
+            <div className="error">
+              {errorMessage}
+            </div>
+          )}
+
+          {/* OWNER INFO */}
+
+          <section className="ownerCard">
+            <div className="ownerAvatar">
+              {displayName
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+
+            <div className="ownerMain">
+              <span>
+                მფლობელი
+              </span>
+
+              <strong>
+                {displayName}
+              </strong>
+            </div>
+
+            <div className="ownerDetails">
+              <div>
+                <span>
+                  ელფოსტა
+                </span>
+
+                <strong>
+                  {owner?.email ||
+                    user?.email ||
+                    "—"}
+                </strong>
+              </div>
 
               <div>
                 <span>
-                  {ka ? "ადმინისტრატორი" : "ADMINISTRATOR"}
+                  ტელეფონი
+                </span>
+
+                <strong>
+                  {owner?.phone ||
+                    "—"}
+                </strong>
+              </div>
+            </div>
+
+            <a
+              href="/account/profile"
+              className="editOwner"
+            >
+              რედაქტირება
+            </a>
+          </section>
+
+          {/* PROFILES */}
+
+          <section className="profilesSection">
+            <div className="sectionHeader">
+              <div>
+                <span className="sectionEyebrow">
+                  QR PROFILES
                 </span>
 
                 <h2>
-                  {admin
-                    ? ka
-                      ? "დამატებული Admin"
-                      : "Secondary Admin"
-                    : ka
-                    ? "Admin ჯერ არ არის დამატებული"
-                    : "No Admin added yet"}
+                  ჩემი პროფილები
                 </h2>
               </div>
-            </div>
 
-            <a href="/account/admin" className="smallButton">
-              {ka ? "მართვა" : "Manage"} →
-            </a>
-          </div>
-
-          {admin ? (
-            <div className="adminStatus">
-              <div>
-                <strong>{admin.admin_email}</strong>
-
-                <p>
-                  {ka
-                    ? "Owner თავად განსაზღვრავს მის თითოეულ უფლებას."
-                    : "The Owner controls each permission separately."}
-                </p>
-              </div>
-
-              <span
-                className={`statusBadge ${
-                  admin.active ? "active" : "inactive"
-                }`}
-              >
-                {admin.active
-                  ? ka
-                    ? "აქტიურია"
-                    : "Active"
-                  : ka
-                    ? "გათიშულია"
-                    : "Disabled"}
+              <span className="count">
+                {profiles.length} პროფილი
               </span>
             </div>
-          ) : (
-            <div className="emptyAdmin">
-              <p>
-                {ka
-                  ? "შეგიძლიათ დაამატოთ მაქსიმუმ ერთი Admin."
-                  : "You can add one secondary Admin."}
-              </p>
 
-              <a href="/account/admin">
-                + {ka ? "Admin-ის დამატება" : "Add Admin"}
-              </a>
-            </div>
-          )}
-        </section>
+            {profiles.length === 0 ? (
+              <section className="emptyState">
+                <div className="emptyIcon">
+                  QR
+                </div>
 
-        <section className="profilesSection">
-          <div className="profilesHeader">
-            <div>
-              <div className="eyebrow">
-                {ka ? "ჩემი QR პროფილები" : "MY QR PROFILES"}
-              </div>
+                <h3>
+                  ჯერ QR პროფილი
+                  არ გაქვთ
+                </h3>
 
-              <h2>
-                {ka ? "ცხოველები და ნივთები" : "Pets and items"}
-              </h2>
+                <p>
+                  აირჩიეთ პროდუქტი და
+                  შექმენით თქვენი პირველი
+                  QR RETURN პროფილი.
+                </p>
 
-              <p>
-                {ka
-                  ? "ერთ Owner Account-ზე შეგიძლიათ რამდენიც გსურთ იმდენი QR პროფილი შექმნათ."
-                  : "Create as many QR profiles as you need under one Owner Account."}
-              </p>
-            </div>
+                <a
+                  href="/register"
+                  className="emptyButton"
+                >
+                  <span>
+                    +
+                  </span>
 
-            <a href="/add-profile" className="primaryButton">
-              + {ka ? "დამატება" : "Add profile"}
-            </a>
-          </div>
+                  პროფილის დამატება
+                </a>
 
-          {profiles.length === 0 ? (
-            <div className="emptyProfiles">
-              <div className="bigIcon">🏷️</div>
+                <div className="products">
+                  <span>
+                    🐶
+                  </span>
 
-              <h3>
-                {ka
-                  ? "ჯერ QR პროფილი არ გაქვთ"
-                  : "No QR profiles yet"}
-              </h3>
+                  <span>
+                    🐱
+                  </span>
 
-              <p>
-                {ka
-                  ? "აირჩიეთ ძაღლი, კატა, გასაღები, საფულე, ჩანთა ან ჩემოდანი."
-                  : "Choose a dog, cat, keys, wallet, bag or suitcase."}
-              </p>
+                  <span>
+                    🔑
+                  </span>
 
-              <a href="/add-profile">
-                +{" "}
-                {ka
-                  ? "პირველი პროფილის შექმნა"
-                  : "Create first profile"}
-              </a>
-            </div>
-          ) : (
-            <div className="profilesGrid">
-              {profiles.map((profile) => {
-                const type = getType(profile);
+                  <span>
+                    👛
+                  </span>
 
-                return (
-                  <article className="profileCard" key={profile.id}>
-                    <div className="visual">
-                      <div className="visualPlaceholder">
-                        {type.icon}
-                      </div>
+                  <span>
+                    👜
+                  </span>
 
-                      <span
-                        className={`lostStatus ${
-                          profile.active ? "lost" : "safe"
-                        }`}
+                  <span>
+                    🧳
+                  </span>
+                </div>
+              </section>
+            ) : (
+              <div className="profileGrid">
+                {profiles.map(
+                  (
+                    profile
+                  ) => {
+                    const type =
+                      profile.item_type ||
+                      "";
+
+                    const meta =
+                      productMeta[
+                        type
+                      ] || {
+                        label:
+                          type ||
+                          "QR პროფილი",
+
+                        emoji:
+                          "QR",
+                      };
+
+                    return (
+                      <article
+                        className="profileCard"
+                        key={
+                          profile.id
+                        }
                       >
-                        {profile.active
-                          ? ka
-                            ? "დაკარგულია"
-                            : "Lost"
-                          : ka
-                            ? "უსაფრთხოდ"
-                            : "Safe"}
-                      </span>
-                    </div>
+                        <div className="photoArea">
+                          {profile.photo ? (
+                            <img
+                              src={
+                                profile.photo
+                              }
+                              alt={
+                                profile.item_name ||
+                                meta.label
+                              }
+                            />
+                          ) : (
+                            <div className="placeholder">
+                              {
+                                meta.emoji
+                              }
+                            </div>
+                          )}
 
-                    <div className="profileContent">
-                      <span className="profileType">{type.label}</span>
-
-                      <h3>
-                        {profile.item_name ||
-                          (ka
-                            ? "უსახელო პროფილი"
-                            : "Unnamed profile")}
-                      </h3>
-
-                      {profile.tag_code && (
-                        <p className="tagCode">
-                          QR · {profile.tag_code}
-                        </p>
-                      )}
-
-                      <div className="profileActions">
-                        <a href={`/edit-profile/${profile.id}`}>
-                          ✏️ {ka ? "რედაქტირება" : "Edit"}
-                        </a>
-
-                        {profile.tag_code && (
-                          <a
-                            href={`/profile/${profile.tag_code}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <span
+                            className={
+                              profile.active
+                                ? "status active"
+                                : "status"
+                            }
                           >
-                            👁{" "}
-                            {ka
-                              ? "მპოვნელის ხედვა"
-                              : "Finder view"}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
+                            <i />
+
+                            {profile.active
+                              ? "აქტიური"
+                              : "შენახული"}
+                          </span>
+                        </div>
+
+                        <div className="profileContent">
+                          <span className="type">
+                            {
+                              meta.emoji
+                            }{" "}
+                            {
+                              meta.label
+                            }
+                          </span>
+
+                          <h3>
+                            {profile.item_name ||
+                              meta.label}
+                          </h3>
+
+                          <div className="tag">
+                            <span>
+                              QR CODE
+                            </span>
+
+                            <strong>
+                              {profile.tag_code ||
+                                "—"}
+                            </strong>
+                          </div>
+
+                          <div className="stats">
+                            <div>
+                              <span>
+                                სკანირება
+                              </span>
+
+                              <strong>
+                                {profile.scan_count ||
+                                  0}
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div className="profileActions">
+                            {profile.tag_code && (
+                              <a
+                                href={`/profile/${encodeURIComponent(
+                                  profile.tag_code
+                                )}`}
+                                className="viewButton"
+                              >
+                                პროფილის ნახვა
+                              </a>
+                            )}
+
+                            <a
+                              href={`/edit-profile/${profile.id}`}
+                              className="editButton"
+                            >
+                              რედაქტირება
+                            </a>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  }
+                )}
+
+                <a
+                  href="/register"
+                  className="addProfileCard"
+                >
+                  <div>
+                    +
+                  </div>
+
+                  <strong>
+                    ახალი პროფილი
+                  </strong>
+
+                  <span>
+                    დაამატეთ კიდევ
+                    ერთი QR პროფილი
+                  </span>
+                </a>
+              </div>
+            )}
+          </section>
         </section>
-      </section>
-
-      <Styles />
-    </main>
-  );
-}
-
-function Styles() {
-  return (
-    <style jsx global>{`
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        background: #f7f9fc;
-        color: #101828;
-        font-family: Inter, Arial, sans-serif;
-      }
-
-      button {
-        font: inherit;
-      }
-
-      .page,
-      .missingPage,
-      .errorPage {
-        min-height: 100vh;
-        background:
-          radial-gradient(
-            circle at 8% 10%,
-            rgba(20, 101, 232, 0.07),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 94% 8%,
-            rgba(118, 85, 247, 0.07),
-            transparent 28%
-          ),
-          #f7f9fc;
-      }
-
-      .statePage {
-        min-height: 100vh;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: #667085;
-        text-align: center;
-      }
-
-      .stateLogo,
-      .logo {
-        width: 50px;
-        height: 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
-        color: white;
-        font-weight: 900;
-      }
-
-      .stateLogo {
-        margin-bottom: 10px;
-      }
-
-      .statePage > strong {
-        color: #1465e8;
-        font-size: 20px;
-      }
-
-      .header {
-        width: calc(100% - 36px);
-        max-width: 1120px;
-        min-height: 86px;
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-      }
-
-      .brand strong,
-      .brand small {
-        display: block;
-      }
-
-      .brand strong {
-        color: #1465e8;
-        font-size: 21px;
-        font-weight: 900;
-      }
-
-      .brand small {
-        margin-top: 3px;
-        color: #7655f7;
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1.6px;
-      }
-
-      .headerRight {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .languages {
-        padding: 4px;
-        display: flex;
-        border-radius: 10px;
-        background: #eaecf0;
-      }
-
-      .languages button {
-        padding: 8px 10px;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        color: #667085;
-        font-size: 11px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .languages button.active {
-        background: white;
-        color: #1465e8;
-      }
-
-      .logoutButton,
-      .logoutSecondary {
-        min-height: 40px;
-        padding: 0 14px;
-        border: 1px solid #d0d5dd;
-        border-radius: 9px;
-        background: white;
-        color: #475467;
-        font-size: 11px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .container {
-        width: calc(100% - 36px);
-        max-width: 1080px;
-        margin: auto;
-        padding: 58px 0 90px;
-      }
-
-      .welcome {
-        margin-bottom: 28px;
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 30px;
-      }
-
-      .eyebrow {
-        color: #7655f7;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 1.5px;
-      }
-
-      .welcome h1 {
-        margin: 8px 0;
-        font-size: clamp(40px, 5vw, 52px);
-        letter-spacing: -2px;
-      }
-
-      .welcome p,
-      .profilesHeader p {
-        margin: 0;
-        max-width: 650px;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      .welcomeActions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .messagesButton {
-        min-height: 48px;
-        padding: 0 16px;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        border: 1px solid #dbe7ff;
-        border-radius: 10px;
-        background: white;
-        text-decoration: none;
-      }
-
-      .messagesIcon {
-        width: 31px;
-        height: 31px;
-        display: grid;
-        place-items: center;
-        border-radius: 9px;
-        background: #eef4ff;
-      }
-
-      .messagesButton small,
-      .messagesButton strong {
-        display: block;
-      }
-
-      .messagesButton small {
-        color: #7655f7;
-        font-size: 7px;
-        font-weight: 900;
-      }
-
-      .messagesButton strong {
-        color: #1465e8;
-        font-size: 10px;
-        font-weight: 900;
-      }
-
-      .primaryButton {
-        min-height: 48px;
-        padding: 0 17px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 0;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
-        color: white;
-        font-size: 11px;
-        font-weight: 900;
-        text-decoration: none;
-        white-space: nowrap;
-      }
-
-      .topGrid {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 20px;
-      }
-
-      .panel,
-      .profilesSection {
-        margin-top: 20px;
-        padding: 25px;
-        border: 1px solid #e4e7ec;
-        border-radius: 20px;
-        background: white;
-        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
-      }
-
-      .panelHeader {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-      }
-
-      .panelTitle {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .panelIcon {
-        width: 48px;
-        height: 48px;
-        display: grid;
-        place-items: center;
-        border-radius: 13px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
-        font-size: 23px;
-      }
-
-      .panelTitle span {
-        color: #7655f7;
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1.3px;
-      }
-
-      .panelTitle h2 {
-        margin: 4px 0 0;
-        font-size: 20px;
-      }
-
-      .smallButton {
-        min-height: 40px;
-        padding: 0 13px;
-        display: inline-flex;
-        align-items: center;
-        border: 1px solid #dbe7ff;
-        border-radius: 9px;
-        background: #f5f9ff;
-        color: #1465e8;
-        font-size: 10px;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .ownerBody {
-        margin-top: 22px;
-        display: flex;
-        gap: 16px;
-      }
-
-      .avatar {
-        width: 85px;
-        height: 85px;
-        flex: 0 0 85px;
-        overflow: hidden;
-        border-radius: 20px;
-      }
-
-      .avatar img,
-      .avatarPlaceholder {
-        width: 100%;
-        height: 100%;
-      }
-
-      .avatar img {
-        object-fit: cover;
-      }
-
-      .avatarPlaceholder {
-        display: grid;
-        place-items: center;
-        background: #eef4ff;
-        font-size: 34px;
-      }
-
-      .ownerData {
-        flex: 1;
-        display: grid;
-        gap: 10px;
-      }
-
-      .ownerData span {
-        display: block;
-        margin-bottom: 3px;
-        color: #98a2b3;
-        font-size: 9px;
-        font-weight: 900;
-        text-transform: uppercase;
-      }
-
-      .ownerData strong {
-        color: #344054;
-        font-size: 12px;
-      }
-
-      .securityText {
-        margin-top: 22px;
-        padding: 15px;
-        border-radius: 12px;
-        background: #f7f9fc;
-      }
-
-      .securityText p {
-        margin: 0;
-        color: #667085;
-        font-size: 11px;
-        line-height: 1.6;
-      }
-
-      .chatPanelBody {
-        margin-top: 20px;
-        padding: 17px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        border: 1px solid #dbe7ff;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #f5f9ff, #faf8ff);
-      }
-
-      .chatPanelBody strong {
-        font-size: 13px;
-      }
-
-      .chatPanelBody p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 10px;
-        line-height: 1.6;
-      }
-
-      .openChatButton {
-        min-height: 42px;
-        padding: 0 15px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #1465e8, #7655f7);
-        color: white;
-        font-size: 10px;
-        font-weight: 900;
-        text-decoration: none;
-        white-space: nowrap;
-      }
-
-      .adminStatus {
-        margin-top: 20px;
-        padding: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        border-radius: 13px;
-        background: #f7f9fc;
-      }
-
-      .adminStatus p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 10px;
-      }
-
-      .statusBadge {
-        padding: 6px 9px;
-        border-radius: 999px;
-        font-size: 9px;
-        font-weight: 900;
-      }
-
-      .statusBadge.active {
-        background: #ecfdf3;
-        color: #027a48;
-      }
-
-      .statusBadge.inactive {
-        background: #f2f4f7;
-        color: #667085;
-      }
-
-      .emptyAdmin {
-        margin-top: 18px;
-        padding: 15px;
-        border-radius: 12px;
-        background: #f7f9fc;
-      }
-
-      .emptyAdmin p {
-        margin: 0 0 9px;
-        color: #667085;
-        font-size: 11px;
-      }
-
-      .emptyAdmin a {
-        color: #1465e8;
-        font-size: 10px;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .profilesHeader {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 25px;
-      }
-
-      .profilesHeader h2 {
-        margin: 7px 0;
-        font-size: 25px;
-      }
-
-      .emptyProfiles {
-        margin-top: 22px;
-        padding: 55px 25px;
-        text-align: center;
-        border: 1px dashed #cfd8e8;
-        border-radius: 17px;
-        background: #fafbfc;
-      }
-
-      .bigIcon {
-        width: 64px;
-        height: 64px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border-radius: 18px;
-        background: #eef4ff;
-        font-size: 30px;
-      }
-
-      .emptyProfiles h3 {
-        margin: 15px 0 7px;
-      }
-
-      .emptyProfiles p {
-        margin: 0 auto 16px;
-        color: #667085;
-        font-size: 11px;
-      }
-
-      .emptyProfiles a {
-        display: inline-flex;
-        padding: 11px 14px;
-        border-radius: 9px;
-        background: #1465e8;
-        color: white;
-        font-size: 10px;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .profilesGrid {
-        margin-top: 22px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 17px;
-      }
-
-      .profileCard {
-        overflow: hidden;
-        border: 1px solid #e4e7ec;
-        border-radius: 17px;
-        background: white;
-      }
-
-      .visual {
-        height: 165px;
-        position: relative;
-        background: #eef4ff;
-      }
-
-      .visualPlaceholder {
-        width: 100%;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
-        font-size: 50px;
-      }
-
-      .lostStatus {
-        position: absolute;
-        top: 11px;
-        right: 11px;
-        padding: 6px 8px;
-        border-radius: 999px;
-        font-size: 9px;
-        font-weight: 900;
-      }
-
-      .lostStatus.safe {
-        background: #ecfdf3;
-        color: #027a48;
-      }
-
-      .lostStatus.lost {
-        background: #fff1f0;
-        color: #b42318;
-      }
-
-      .profileContent {
-        padding: 16px;
-      }
-
-      .profileType {
-        color: #7655f7;
-        font-size: 9px;
-        font-weight: 900;
-        text-transform: uppercase;
-      }
-
-      .profileContent h3 {
-        margin: 5px 0 7px;
-        font-size: 19px;
-      }
-
-      .tagCode {
-        margin: 0;
-        color: #98a2b3;
-        font-size: 9px;
-      }
-
-      .profileActions {
-        margin-top: 14px;
-        padding-top: 12px;
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        border-top: 1px solid #eaecf0;
-      }
-
-      .profileActions a {
-        color: #1465e8;
-        font-size: 9px;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .missingWrap,
-      .errorWrap {
-        width: calc(100% - 30px);
-        max-width: 620px;
-        min-height: calc(100vh - 86px);
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 50px 0;
-      }
-
-      .missingCard,
-      .diagnosticCard {
-        width: 100%;
-        padding: 38px;
-        text-align: center;
-        border: 1px solid #e4e7ec;
-        border-radius: 24px;
-        background: white;
-        box-shadow: 0 25px 65px rgba(16, 24, 40, 0.09);
-      }
-
-      .missingIcon,
-      .diagnosticIcon {
-        width: 70px;
-        height: 70px;
-        margin: 0 auto 18px;
-        display: grid;
-        place-items: center;
-        border-radius: 19px;
-        background: linear-gradient(135deg, #eef4ff, #f0edff);
-        font-size: 32px;
-      }
-
-      .diagnosticIcon {
-        background: #fff1f0;
-      }
-
-      .missingCard h1,
-      .diagnosticCard h1 {
-        margin: 8px 0 12px;
-        font-size: 32px;
-      }
-
-      .missingCard > p,
-      .diagnosticCard > p {
-        margin: 16px auto 0;
-        max-width: 500px;
-        color: #667085;
-        font-size: 12px;
-        line-height: 1.7;
-      }
-
-      .missingNotice {
-        margin-top: 22px;
-        padding: 14px;
-        display: flex;
-        gap: 11px;
-        text-align: left;
-        border: 1px solid #dbe7ff;
-        border-radius: 13px;
-        background: #f5f9ff;
-      }
-
-      .missingNotice strong {
-        font-size: 11px;
-      }
-
-      .missingNotice p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 9px;
-      }
-
-      .missingActions,
-      .diagnosticActions {
-        margin-top: 22px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      .errorStageBox {
-        margin-top: 20px;
-        padding: 14px;
-        border-radius: 12px;
-        background: #fff7ed;
-        text-align: left;
-      }
-
-      .errorStageBox span,
-      .realError span {
-        display: block;
-        margin-bottom: 5px;
-        color: #98a2b3;
-        font-size: 9px;
-        font-weight: 900;
-        text-transform: uppercase;
-      }
-
-      .errorStageBox strong {
-        color: #b54708;
-        font-size: 15px;
-      }
-
-      .realError {
-        margin-top: 10px;
-        padding: 14px;
-        border: 1px solid #fecdca;
-        border-radius: 12px;
-        background: #fff1f0;
-        text-align: left;
-      }
-
-      .realError code {
-        display: block;
-        overflow-wrap: anywhere;
-        color: #b42318;
-        font-family: monospace;
-        font-size: 11px;
-        line-height: 1.6;
-      }
-
-      .primaryAction,
-      .secondaryAction {
-        min-height: 43px;
-        padding: 0 15px;
-        border-radius: 9px;
-        font-size: 10px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .primaryAction {
-        border: 0;
-        background: #1465e8;
-        color: white;
-      }
-
-      .secondaryAction {
-        border: 1px solid #d0d5dd;
-        background: white;
-        color: #475467;
-      }
-
-      @media (max-width: 850px) {
-        .topGrid {
-          grid-template-columns: 1fr;
+      </main>
+
+      <style jsx>{`
+        * {
+          box-sizing:
+            border-box;
         }
 
-        .profilesGrid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
+        .page {
+          position:
+            relative;
 
-      @media (max-width: 650px) {
-        .welcome,
-        .profilesHeader {
-          align-items: stretch;
-          flex-direction: column;
+          min-height:
+            100vh;
+
+          overflow:
+            hidden;
+
+          padding-bottom:
+            55px;
+
+          background:
+            #f4f7fb;
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
         }
 
-        .welcomeActions,
-        .missingActions,
-        .diagnosticActions {
+        .backgroundQr {
+          position:
+            fixed;
+
+          z-index: 0;
+
+          color:
+            rgba(
+              6,
+              71,
+              200,
+              0.025
+            );
+
+          font-size:
+            220px;
+
+          font-weight:
+            950;
+
+          pointer-events:
+            none;
+
+          user-select:
+            none;
+        }
+
+        .qr1 {
+          left: -20px;
+          bottom: 5%;
+        }
+
+        .qr2 {
+          right: -30px;
+          top: 18%;
+        }
+
+        /* HEADER */
+
+        .header {
+          position:
+            relative;
+
+          z-index: 5;
+
           width: 100%;
-          flex-direction: column;
-          align-items: stretch;
+
+          min-height:
+            72px;
+
+          padding:
+            0 34px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          background:
+            #0647c8;
+
+          box-shadow:
+            0 6px 22px
+            rgba(
+              15,
+              56,
+              110,
+              0.13
+            );
         }
 
-        .messagesButton,
-        .primaryButton,
-        .logoutSecondary,
-        .primaryAction,
-        .secondaryAction {
+        .brand {
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 10px;
+
+          text-decoration:
+            none;
+        }
+
+        .brandMark {
+          width: 42px;
+          height: 42px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            11px;
+
+          background:
+            #ffffff;
+
+          color:
+            #0647c8;
+
+          font-size:
+            12px;
+
+          font-weight:
+            950;
+        }
+
+        .brand strong,
+        .brand small {
+          display:
+            block;
+        }
+
+        .brand strong {
+          color:
+            #ffffff;
+
+          font-size:
+            17px;
+        }
+
+        .brand small {
+          margin-top:
+            2px;
+
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.66
+            );
+
+          font-size:
+            9px;
+
+          font-weight:
+            800;
+
+          letter-spacing:
+            0.8px;
+        }
+
+        .headerActions {
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 9px;
+        }
+
+        .homeButton,
+        .logoutButton {
+          min-height:
+            39px;
+
+          padding:
+            0 14px;
+
+          display:
+            inline-flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius:
+            9px;
+
+          font-family:
+            inherit;
+
+          font-size:
+            12px;
+
+          font-weight:
+            800;
+
+          cursor:
+            pointer;
+
+          text-decoration:
+            none;
+        }
+
+        .homeButton {
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.24
+            );
+
+          color:
+            #ffffff;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.07
+            );
+        }
+
+        .logoutButton {
+          border: 0;
+
+          background:
+            #ffffff;
+
+          color:
+            #0647c8;
+        }
+
+        /* SHELL */
+
+        .shell {
+          position:
+            relative;
+
+          z-index: 2;
+
           width: 100%;
-          justify-content: center;
+
+          max-width:
+            1180px;
+
+          margin:
+            0 auto;
+
+          padding:
+            42px
+            24px 0;
         }
 
-        .ownerBody {
-          flex-direction: column;
+        /* WELCOME */
+
+        .welcome {
+          display: flex;
+
+          align-items:
+            flex-end;
+
+          justify-content:
+            space-between;
+
+          gap: 30px;
         }
 
-        .profilesGrid {
-          grid-template-columns: 1fr;
+        .eyebrow,
+        .sectionEyebrow {
+          color:
+            #0647c8;
+
+          font-size:
+            10px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1.1px;
         }
 
-        .panelHeader {
-          align-items: flex-start;
-          flex-direction: column;
+        .welcome h1 {
+          margin:
+            7px 0 0;
+
+          color:
+            #203a55;
+
+          font-size:
+            31px;
+
+          line-height:
+            1.2;
+
+          letter-spacing:
+            -0.5px;
         }
 
-        .smallButton {
-          width: 100%;
-          justify-content: center;
+        .welcome p {
+          margin:
+            7px 0 0;
+
+          color:
+            #718397;
+
+          font-size:
+            14px;
+
+          line-height:
+            1.5;
         }
 
-        .chatPanelBody {
-          align-items: stretch;
-          flex-direction: column;
+        .addButton {
+          min-height:
+            49px;
+
+          padding:
+            0 18px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 9px;
+
+          border-radius:
+            11px;
+
+          background:
+            #0647c8;
+
+          color:
+            #ffffff;
+
+          font-size:
+            13px;
+
+          font-weight:
+            900;
+
+          text-decoration:
+            none;
+
+          box-shadow:
+            0 9px 20px
+            rgba(
+              6,
+              71,
+              200,
+              0.18
+            );
         }
 
-        .openChatButton {
-          width: 100%;
+        .plus {
+          width: 25px;
+          height: 25px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            7px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.15
+            );
+
+          font-size:
+            18px;
         }
-      }
-    `}</style>
+
+        /* ERROR */
+
+        .error {
+          margin-top:
+            20px;
+
+          padding:
+            12px 14px;
+
+          border:
+            1px solid
+            #f0ced2;
+
+          border-radius:
+            10px;
+
+          background:
+            #fff3f4;
+
+          color:
+            #a3424a;
+
+          font-size:
+            12px;
+        }
+
+        /* OWNER CARD */
+
+        .ownerCard {
+          margin-top:
+            28px;
+
+          padding:
+            19px 21px;
+
+          display: grid;
+
+          grid-template-columns:
+            auto
+            minmax(
+              150px,
+              1fr
+            )
+            minmax(
+              280px,
+              1.4fr
+            )
+            auto;
+
+          align-items:
+            center;
+
+          gap: 17px;
+
+          border:
+            1px solid
+            #e0e8f0;
+
+          border-radius:
+            15px;
+
+          background:
+            #ffffff;
+
+          box-shadow:
+            0 9px 26px
+            rgba(
+              30,
+              60,
+              100,
+              0.05
+            );
+        }
+
+        .ownerAvatar {
+          width: 48px;
+          height: 48px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            13px;
+
+          background:
+            #eaf2ff;
+
+          color:
+            #0647c8;
+
+          font-size:
+            19px;
+
+          font-weight:
+            950;
+        }
+
+        .ownerMain span,
+        .ownerDetails span {
+          display:
+            block;
+
+          color:
+            #8a98a7;
+
+          font-size:
+            10px;
+
+          font-weight:
+            800;
+
+          text-transform:
+            uppercase;
+
+          letter-spacing:
+            0.5px;
+        }
+
+        .ownerMain strong {
+          display:
+            block;
+
+          margin-top:
+            5px;
+
+          color:
+            #2c465f;
+
+          font-size:
+            15px;
+        }
+
+        .ownerDetails {
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          gap: 20px;
+        }
+
+        .ownerDetails strong {
+          display:
+            block;
+
+          margin-top:
+            5px;
+
+          overflow:
+            hidden;
+
+          color:
+            #425a71;
+
+          font-size:
+            12px;
+
+          font-weight:
+            750;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+        .editOwner {
+          min-height:
+            38px;
+
+          padding:
+            0 13px;
+
+          display:
+            inline-flex;
+
+          align-items:
+            center;
+
+          border:
+            1px solid
+            #dce5ee;
+
+          border-radius:
+            9px;
+
+          color:
+            #526a81;
+
+          font-size:
+            11px;
+
+          font-weight:
+            850;
+
+          text-decoration:
+            none;
+        }
+
+        /* PROFILES */
+
+        .profilesSection {
+          margin-top:
+            40px;
+        }
+
+        .sectionHeader {
+          display: flex;
+
+          align-items:
+            flex-end;
+
+          justify-content:
+            space-between;
+
+          gap: 20px;
+
+          margin-bottom:
+            17px;
+        }
+
+        .sectionHeader h2 {
+          margin:
+            5px 0 0;
+
+          color:
+            #243f59;
+
+          font-size:
+            23px;
+        }
+
+        .count {
+          color:
+            #78899a;
+
+          font-size:
+            12px;
+
+          font-weight:
+            750;
+        }
+
+        /* EMPTY */
+
+        .emptyState {
+          min-height:
+            315px;
+
+          padding:
+            38px 25px;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border:
+            1px solid
+            #dde6ef;
+
+          border-radius:
+            17px;
+
+          background:
+            #ffffff;
+
+          box-shadow:
+            0 10px 30px
+            rgba(
+              30,
+              60,
+              100,
+              0.05
+            );
+
+          text-align:
+            center;
+        }
+
+        .emptyIcon {
+          width: 55px;
+          height: 55px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            15px;
+
+          background:
+            #eaf2ff;
+
+          color:
+            #0647c8;
+
+          font-size:
+            13px;
+
+          font-weight:
+            950;
+        }
+
+        .emptyState h3 {
+          margin:
+            16px 0 0;
+
+          color:
+            #29445e;
+
+          font-size:
+            19px;
+        }
+
+        .emptyState p {
+          max-width:
+            400px;
+
+          margin:
+            8px 0 0;
+
+          color:
+            #78899a;
+
+          font-size:
+            13px;
+
+          line-height:
+            1.55;
+        }
+
+        .emptyButton {
+          min-height:
+            46px;
+
+          margin-top:
+            19px;
+
+          padding:
+            0 17px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 8px;
+
+          border-radius:
+            10px;
+
+          background:
+            #0647c8;
+
+          color:
+            #ffffff;
+
+          font-size:
+            12px;
+
+          font-weight:
+            900;
+
+          text-decoration:
+            none;
+        }
+
+        .emptyButton span {
+          font-size:
+            18px;
+        }
+
+        .products {
+          margin-top:
+            19px;
+
+          display: flex;
+
+          gap: 8px;
+        }
+
+        .products span {
+          width: 33px;
+          height: 33px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border:
+            1px solid
+            #e1e8ef;
+
+          border-radius:
+            9px;
+
+          background:
+            #f7f9fc;
+
+          font-size:
+            17px;
+        }
+
+        /* PROFILE GRID */
+
+        .profileGrid {
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              3,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          gap: 17px;
+        }
+
+        .profileCard {
+          overflow:
+            hidden;
+
+          border:
+            1px solid
+            #dfe7ef;
+
+          border-radius:
+            16px;
+
+          background:
+            #ffffff;
+
+          box-shadow:
+            0 9px 25px
+            rgba(
+              30,
+              60,
+              100,
+              0.055
+            );
+        }
+
+        .photoArea {
+          position:
+            relative;
+
+          height:
+            150px;
+
+          overflow:
+            hidden;
+
+          background:
+            #edf3fb;
+        }
+
+        .photoArea img {
+          width:
+            100%;
+
+          height:
+            100%;
+
+          object-fit:
+            cover;
+        }
+
+        .placeholder {
+          width:
+            100%;
+
+          height:
+            100%;
+
+          display:
+            grid;
+
+          place-items:
+            center;
+
+          font-size:
+            46px;
+        }
+
+        .status {
+          position:
+            absolute;
+
+          top: 11px;
+          right: 11px;
+
+          padding:
+            6px 8px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 5px;
+
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.6
+            );
+
+          border-radius:
+            999px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.9
+            );
+
+          color:
+            #6e7f8f;
+
+          font-size:
+            9px;
+
+          font-weight:
+            850;
+        }
+
+        .status i {
+          width: 6px;
+          height: 6px;
+
+          border-radius:
+            50%;
+
+          background:
+            #a3afba;
+        }
+
+        .status.active {
+          color:
+            #177445;
+        }
+
+        .status.active i {
+          background:
+            #25a864;
+        }
+
+        .profileContent {
+          padding:
+            17px;
+        }
+
+        .type {
+          color:
+            #0647c8;
+
+          font-size:
+            10px;
+
+          font-weight:
+            900;
+        }
+
+        .profileContent h3 {
+          margin:
+            6px 0 0;
+
+          overflow:
+            hidden;
+
+          color:
+            #29445e;
+
+          font-size:
+            18px;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+        .tag {
+          margin-top:
+            15px;
+
+          padding:
+            10px 11px;
+
+          border-radius:
+            9px;
+
+          background:
+            #f4f7fb;
+        }
+
+        .tag span {
+          display:
+            block;
+
+          color:
+            #98a5b2;
+
+          font-size:
+            8px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            0.7px;
+        }
+
+        .tag strong {
+          display:
+            block;
+
+          margin-top:
+            4px;
+
+          color:
+            #405970;
+
+          font-size:
+            12px;
+        }
+
+        .stats {
+          margin-top:
+            13px;
+
+          padding-top:
+            12px;
+
+          border-top:
+            1px solid
+            #edf1f5;
+        }
+
+        .stats span {
+          color:
+            #8b99a7;
+
+          font-size:
+            9px;
+        }
+
+        .stats strong {
+          margin-left:
+            5px;
+
+          color:
+            #42596f;
+
+          font-size:
+            12px;
+        }
+
+        .profileActions {
+          margin-top:
+            15px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(
+                0,
+                1fr
+              )
+            );
+
+          gap: 8px;
+        }
+
+        .viewButton,
+        .editButton {
+          min-height:
+            38px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius:
+            9px;
+
+          font-size:
+            10px;
+
+          font-weight:
+            850;
+
+          text-decoration:
+            none;
+        }
+
+        .viewButton {
+          background:
+            #0647c8;
+
+          color:
+            #ffffff;
+        }
+
+        .editButton {
+          border:
+            1px solid
+            #dce5ee;
+
+          color:
+            #52697f;
+        }
+
+        /* ADD PROFILE CARD */
+
+        .addProfileCard {
+          min-height:
+            360px;
+
+          display: flex;
+
+          flex-direction:
+            column;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border:
+            1.5px dashed
+            #cbd8e6;
+
+          border-radius:
+            16px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.58
+            );
+
+          color:
+            #5e7489;
+
+          text-align:
+            center;
+
+          text-decoration:
+            none;
+        }
+
+        .addProfileCard > div {
+          width: 45px;
+          height: 45px;
+
+          display: grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            12px;
+
+          background:
+            #eaf2ff;
+
+          color:
+            #0647c8;
+
+          font-size:
+            25px;
+        }
+
+        .addProfileCard strong {
+          margin-top:
+            12px;
+
+          color:
+            #345069;
+
+          font-size:
+            14px;
+        }
+
+        .addProfileCard span {
+          margin-top:
+            5px;
+
+          color:
+            #8997a5;
+
+          font-size:
+            11px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (
+          max-width:
+            900px
+        ) {
+          .profileGrid {
+            grid-template-columns:
+              repeat(
+                2,
+                minmax(
+                  0,
+                  1fr
+                )
+              );
+          }
+
+          .ownerCard {
+            grid-template-columns:
+              auto
+              1fr
+              auto;
+          }
+
+          .ownerDetails {
+            grid-column:
+              1 / -1;
+
+            padding-top:
+              12px;
+
+            border-top:
+              1px solid
+              #edf1f5;
+          }
+        }
+
+        @media (
+          max-width:
+            620px
+        ) {
+          .header {
+            padding:
+              0 14px;
+          }
+
+          .brand small {
+            display:
+              none;
+          }
+
+          .shell {
+            padding:
+              28px
+              14px 0;
+          }
+
+          .welcome {
+            align-items:
+              stretch;
+
+            flex-direction:
+              column;
+          }
+
+          .welcome h1 {
+            font-size:
+              26px;
+          }
+
+          .addButton {
+            width:
+              100%;
+
+            justify-content:
+              center;
+          }
+
+          .ownerCard {
+            grid-template-columns:
+              auto
+              1fr;
+
+            padding:
+              16px;
+          }
+
+          .ownerDetails {
+            grid-template-columns:
+              1fr;
+          }
+
+          .editOwner {
+            grid-column:
+              1 / -1;
+
+            justify-content:
+              center;
+          }
+
+          .sectionHeader {
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
+
+          .profileGrid {
+            grid-template-columns:
+              1fr;
+          }
+
+          .addProfileCard {
+            min-height:
+              180px;
+          }
+        }
+      `}</style>
+    </>
   );
 }
