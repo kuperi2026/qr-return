@@ -185,28 +185,33 @@ export default function SignupPage() {
 
         <section className="content">
           <div className="intro">
-            <span className="eyebrow">QR RETURN ACCOUNT</span>
+            <span className="eyebrow">
+              QR RETURN ACCOUNT
+            </span>
 
             <h1>შექმენით ანგარიში</h1>
 
             <p className="introLead">
-              ერთი ანგარიში — თქვენი ყველა QR პროფილი ერთ სივრცეში.
+              ერთი ანგარიში — თქვენი ყველა QR პროფილი
+              ერთ სივრცეში.
             </p>
 
             <div className="infoBox">
               <strong>
-                მარტივად მართეთ ის, რაც თქვენთვის მნიშვნელოვანია.
+                მარტივად მართეთ ის, რაც თქვენთვის
+                მნიშვნელოვანია.
               </strong>
 
               <p>
-                ანგარიშის შექმნის შემდეგ დაამატეთ და მართეთ თქვენი
-                QR პროფილები ერთი პირადი სივრციდან.
+                ანგარიშის შექმნის შემდეგ დაამატეთ და მართეთ
+                თქვენი QR პროფილები ერთი პირადი სივრციდან.
               </p>
             </div>
 
-            <p className="slogan">
-              ერთი სკანირება შეიძლება იყოს პირველი ნაბიჯი დაბრუნებამდე.
-            </p>
+            <div className="slogan">
+              ერთი სკანირება შეიძლება იყოს პირველი ნაბიჯი
+              დაბრუნებამდე.
+            </div>
           </div>
 
           <section className="formCard">
@@ -273,20 +278,22 @@ export default function SignupPage() {
                   />
                 </Field>
 
-                <Field label="კოდური სიტყვა" required>
-                  <input
-                    type="text"
-                    value={codeWord}
-                    onChange={(event) =>
-                      setCodeWord(event.target.value)
-                    }
-                    autoComplete="off"
-                  />
+                <div className="fullWidth">
+                  <Field label="კოდური სიტყვა" required>
+                    <input
+                      type="text"
+                      value={codeWord}
+                      onChange={(event) =>
+                        setCodeWord(event.target.value)
+                      }
+                      autoComplete="off"
+                    />
 
-                  <small className="fieldHelp">
-                    გამოიყენება ანგარიშის იდენტიფიკაციისთვის.
-                  </small>
-                </Field>
+                    <small className="fieldHelp">
+                      გამოიყენება ანგარიშის იდენტიფიკაციისთვის.
+                    </small>
+                  </Field>
+                </div>
 
                 <Field label="პაროლი" required>
                   <div className="passwordWrap">
@@ -340,7 +347,6 @@ export default function SignupPage() {
 
             <div className="bottomLogin">
               <span>უკვე გაქვთ ანგარიში?</span>
-
               <a href="/login">შესვლა</a>
             </div>
           </section>
@@ -356,7 +362,7 @@ export default function SignupPage() {
           position: relative;
           min-height: 100vh;
           overflow: hidden;
-          padding: 0 28px 45px;
+          padding: 0 32px 45px;
           background: #0647c8;
           font-family: Arial, Helvetica, sans-serif;
         }
@@ -373,32 +379,32 @@ export default function SignupPage() {
         .qr {
           position: absolute;
           color: rgba(255, 255, 255, 0.045);
-          font-size: 125px;
+          font-size: 130px;
           font-weight: 950;
           user-select: none;
         }
 
         .qr1 {
           top: 10%;
-          left: 4%;
+          left: 3%;
           transform: rotate(-14deg);
         }
 
         .qr2 {
-          top: 15%;
-          right: 5%;
+          top: 13%;
+          right: 4%;
           transform: rotate(13deg);
         }
 
         .qr3 {
-          bottom: 5%;
-          left: 8%;
+          bottom: 4%;
+          left: 7%;
           transform: rotate(10deg);
         }
 
         .qr4 {
-          bottom: 5%;
-          right: 7%;
+          bottom: 4%;
+          right: 6%;
           transform: rotate(-12deg);
         }
 
@@ -409,7 +415,7 @@ export default function SignupPage() {
           z-index: 2;
 
           width: 100%;
-          max-width: 1200px;
+          max-width: 1400px;
           min-height: 78px;
 
           margin: 0 auto;
@@ -417,9 +423,9 @@ export default function SignupPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 20px;
 
-          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+          border-bottom:
+            1px solid rgba(255, 255, 255, 0.2);
         }
 
         .brand {
@@ -444,7 +450,8 @@ export default function SignupPage() {
           font-size: 13px;
           font-weight: 950;
 
-          box-shadow: 0 8px 22px rgba(0, 25, 80, 0.16);
+          box-shadow:
+            0 8px 22px rgba(0, 25, 80, 0.16);
         }
 
         .brandText strong,
@@ -460,7 +467,9 @@ export default function SignupPage() {
 
         .brandText small {
           margin-top: 2px;
+
           color: rgba(255, 255, 255, 0.7);
+
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.6px;
@@ -468,35 +477,37 @@ export default function SignupPage() {
 
         .loginTop {
           min-height: 44px;
-          padding: 0 19px;
+          padding: 0 20px;
 
           display: inline-flex;
           align-items: center;
           justify-content: center;
 
-          border: 1px solid rgba(255, 255, 255, 0.38);
+          border:
+            1px solid rgba(255, 255, 255, 0.38);
+
           border-radius: 11px;
 
           color: #ffffff;
+
           font-size: 14px;
           font-weight: 850;
 
           text-decoration: none;
-          transition: background 0.18s ease;
         }
 
         .loginTop:hover {
           background: rgba(255, 255, 255, 0.1);
         }
 
-        /* LAYOUT */
+        /* MAIN LAYOUT */
 
         .content {
           position: relative;
           z-index: 2;
 
           width: 100%;
-          max-width: 1200px;
+          max-width: 1400px;
 
           margin: 0 auto;
           padding-top: 48px;
@@ -504,11 +515,12 @@ export default function SignupPage() {
           display: grid;
 
           grid-template-columns:
-            minmax(340px, 0.82fr)
-            minmax(560px, 1.18fr);
+            minmax(310px, 0.55fr)
+            minmax(760px, 1.45fr);
 
           align-items: center;
-          gap: 80px;
+
+          gap: 75px;
         }
 
         /* LEFT */
@@ -518,7 +530,7 @@ export default function SignupPage() {
         }
 
         .eyebrow {
-          color: rgba(255, 255, 255, 0.73);
+          color: rgba(255, 255, 255, 0.72);
 
           font-size: 12px;
           font-weight: 900;
@@ -530,13 +542,13 @@ export default function SignupPage() {
 
           color: #ffffff;
 
-          font-size: 41px;
+          font-size: 40px;
           line-height: 1.12;
           letter-spacing: -0.7px;
         }
 
         .introLead {
-          max-width: 440px;
+          max-width: 430px;
 
           margin: 15px 0 0;
 
@@ -547,16 +559,18 @@ export default function SignupPage() {
         }
 
         .infoBox {
-          max-width: 470px;
+          max-width: 450px;
 
-          margin-top: 30px;
-          padding: 21px 22px;
+          margin-top: 29px;
+          padding: 20px 21px;
 
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          border-radius: 16px;
+          border:
+            1px solid rgba(255, 255, 255, 0.18);
 
-          background: rgba(255, 255, 255, 0.075);
-          backdrop-filter: blur(5px);
+          border-radius: 15px;
+
+          background:
+            rgba(255, 255, 255, 0.075);
         }
 
         .infoBox strong {
@@ -571,17 +585,17 @@ export default function SignupPage() {
         .infoBox p {
           margin: 9px 0 0;
 
-          color: rgba(255, 255, 255, 0.77);
+          color: rgba(255, 255, 255, 0.76);
 
           font-size: 14px;
           line-height: 1.6;
         }
 
         .slogan {
-          max-width: 450px;
+          max-width: 440px;
 
-          margin: 22px 0 0;
-          padding-left: 16px;
+          margin-top: 21px;
+          padding-left: 15px;
 
           border-left: 3px solid #ffffff;
 
@@ -591,18 +605,20 @@ export default function SignupPage() {
           line-height: 1.6;
         }
 
-        /* FORM CARD */
+        /* LARGE REGISTRATION PANEL */
 
         .formCard {
           width: 100%;
-          max-width: 620px;
+          max-width: 900px;
 
           margin-left: auto;
 
-          padding: 35px 40px 32px;
+          padding: 36px 42px 32px;
 
-          border: 1px solid rgba(255, 255, 255, 0.75);
-          border-radius: 25px;
+          border:
+            1px solid rgba(255, 255, 255, 0.8);
+
+          border-radius: 24px;
 
           background: #ffffff;
 
@@ -611,7 +627,7 @@ export default function SignupPage() {
             0 4px 15px rgba(0, 25, 80, 0.08);
         }
 
-        /* FORM HEADER */
+        /* HEADER */
 
         .formHeader > span {
           color: #0647c8;
@@ -632,7 +648,7 @@ export default function SignupPage() {
         }
 
         .formHeader p {
-          margin: 9px 0 0;
+          margin: 8px 0 0;
 
           color: #74869a;
 
@@ -653,28 +669,40 @@ export default function SignupPage() {
           color: #a23e49;
 
           font-size: 14px;
-          line-height: 1.5;
         }
 
-        /* FORM */
+        /* FORM GRID */
 
         .grid {
+          width: 100%;
+
           margin-top: 29px;
 
           display: grid;
-          grid-template-columns: 1fr;
 
-          gap: 23px;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+          column-gap: 28px;
+          row-gap: 23px;
+        }
+
+        .fullWidth {
+          grid-column: 1 / -1;
+          width: 100%;
         }
 
         .field {
           width: 100%;
+          min-width: 0;
         }
+
+        /* LABEL */
 
         .field label {
           display: block;
 
-          margin: 0 0 11px 2px;
+          margin: 0 0 10px 2px;
 
           color: #2f4963;
 
@@ -688,18 +716,19 @@ export default function SignupPage() {
           color: #0647c8;
         }
 
-        /* LARGE PREMIUM INPUT */
+        /* INPUT */
 
         .field input {
           display: block;
 
           width: 100%;
-          height: 62px;
+          min-width: 0;
+          height: 58px;
 
-          padding: 0 19px;
+          padding: 0 18px;
 
           border: 1.5px solid #d6e1ec;
-          border-radius: 14px;
+          border-radius: 13px;
 
           background: #ffffff;
           color: #203a55;
@@ -712,18 +741,15 @@ export default function SignupPage() {
 
           transition:
             border-color 0.18s ease,
-            box-shadow 0.18s ease,
-            background 0.18s ease;
+            box-shadow 0.18s ease;
         }
 
         .field input:hover {
-          border-color: #b9cbdc;
+          border-color: #b8cadb;
         }
 
         .field input:focus {
           border-color: #1266e9;
-
-          background: #ffffff;
 
           box-shadow:
             0 0 0 4px rgba(18, 102, 233, 0.1);
@@ -748,24 +774,24 @@ export default function SignupPage() {
         }
 
         .passwordWrap input {
-          padding-right: 96px;
+          padding-right: 95px;
         }
 
         .passwordWrap button {
           position: absolute;
 
           top: 50%;
-          right: 11px;
+          right: 10px;
 
           transform: translateY(-50%);
 
-          min-width: 68px;
-          height: 39px;
+          min-width: 69px;
+          height: 38px;
 
           padding: 0 12px;
 
           border: 0;
-          border-radius: 10px;
+          border-radius: 9px;
 
           background: #edf4ff;
           color: #0647c8;
@@ -775,8 +801,6 @@ export default function SignupPage() {
           font-weight: 850;
 
           cursor: pointer;
-
-          transition: background 0.18s ease;
         }
 
         .passwordWrap button:hover {
@@ -787,18 +811,17 @@ export default function SignupPage() {
 
         .submitButton {
           width: 100%;
-          height: 62px;
+          height: 58px;
 
-          margin-top: 30px;
-          padding: 0 22px;
+          margin-top: 29px;
 
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 11px;
+          gap: 10px;
 
           border: 0;
-          border-radius: 14px;
+          border-radius: 13px;
 
           background: #0647c8;
           color: #ffffff;
@@ -809,19 +832,12 @@ export default function SignupPage() {
 
           cursor: pointer;
 
-          box-shadow: 0 12px 27px rgba(6, 71, 200, 0.22);
-
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease,
-            background 0.18s ease;
+          box-shadow:
+            0 12px 27px rgba(6, 71, 200, 0.22);
         }
 
         .submitButton:hover:not(:disabled) {
           background: #0754df;
-          transform: translateY(-1px);
-
-          box-shadow: 0 16px 32px rgba(6, 71, 200, 0.27);
         }
 
         .submitButton span {
@@ -833,11 +849,11 @@ export default function SignupPage() {
           cursor: not-allowed;
         }
 
-        /* LOGIN */
+        /* BOTTOM */
 
         .bottomLogin {
-          margin-top: 24px;
-          padding-top: 21px;
+          margin-top: 23px;
+          padding-top: 20px;
 
           display: flex;
           align-items: center;
@@ -853,16 +869,15 @@ export default function SignupPage() {
 
         .bottomLogin a {
           color: #0647c8;
-
           font-weight: 850;
           text-decoration: none;
         }
 
-        /* TABLET */
+        /* RESPONSIVE */
 
-        @media (max-width: 980px) {
+        @media (max-width: 1100px) {
           .content {
-            max-width: 680px;
+            max-width: 850px;
 
             grid-template-columns: 1fr;
 
@@ -889,9 +904,7 @@ export default function SignupPage() {
           }
         }
 
-        /* MOBILE */
-
-        @media (max-width: 620px) {
+        @media (max-width: 700px) {
           .page {
             padding: 0 14px 30px;
           }
@@ -904,65 +917,34 @@ export default function SignupPage() {
             display: none;
           }
 
-          .brandText strong {
-            font-size: 17px;
-          }
-
           .content {
-            padding-top: 31px;
+            padding-top: 30px;
           }
 
           .intro h1 {
             font-size: 32px;
           }
 
-          .introLead {
-            font-size: 16px;
-          }
-
           .formCard {
-            max-width: 100%;
-
-            padding: 27px 21px 25px;
-
+            padding: 27px 20px 25px;
             border-radius: 20px;
           }
 
-          .formHeader h2 {
-            font-size: 24px;
-          }
-
           .grid {
-            margin-top: 25px;
+            grid-template-columns: 1fr;
             gap: 20px;
           }
 
-          .field label {
-            margin-bottom: 9px;
-            font-size: 14px;
+          .fullWidth {
+            grid-column: auto;
           }
 
           .field input {
             height: 58px;
-
-            padding: 0 16px;
-
-            border-radius: 12px;
-
-            font-size: 16px;
-          }
-
-          .passwordWrap input {
-            padding-right: 90px;
           }
 
           .submitButton {
             height: 58px;
-            margin-top: 25px;
-          }
-
-          .bottomLogin {
-            flex-wrap: wrap;
           }
         }
       `}</style>
