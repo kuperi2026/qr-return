@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  FormEvent,
-  useState,
-} from "react";
+import { FormEvent, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
-import {
-  createClient,
-} from "@supabase/supabase-js";
-
-function createSupabaseClient() {
-  const url =
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+function createSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -19,65 +13,34 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
   if (!url || !key) {
-    return null;
+    throw new Error("Supabase კავშირი ვერ მოიძებნა.");
   }
 
-  return createClient(
-    url,
-    key
-  );
+  return createClient(url, key);
 }
 
 export default function LoginPage() {
-  const [
-    email,
-    setEmail,
-  ] = useState("");
+  const router = useRouter();
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleLogin(
-    event:
-      FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
     setErrorMessage("");
 
-    if (
-      !email.trim() ||
-      !password
-    ) {
-      setErrorMessage(
-        "გთხოვთ შეავსოთ ელფოსტა და პაროლი."
-      );
-      return;
-    }
+    const cleanEmail = email.trim().toLowerCase();
 
-    const supabase =
-      createSupabaseClient();
-
-    if (!supabase) {
+    if (!cleanEmail || !password) {
       setErrorMessage(
-        "Supabase კავშირი ვერ მოიძებნა."
+        "შეიყვანეთ ელფოსტა და პაროლი."
       );
       return;
     }
@@ -85,34 +48,40 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const {
-        error,
-      } =
-        await supabase.auth
-          .signInWithPassword({
-            email:
-              email
-                .trim()
-                .toLowerCase(),
+      const supabase = createSupabase();
 
-            password,
-          });
+      const { error } =
+        await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
 
       if (error) {
         throw error;
       }
 
-      window.location.assign(
-        "/account"
-      );
+      router.push("/account");
+      router.refresh();
     } catch (error) {
-      console.error(
-        error
-      );
+      console.error("Login error:", error);
 
-      setErrorMessage(
-        "ელფოსტა ან პაროლი არასწორია."
-      );
+      const message =
+        error instanceof Error
+          ? error.message
+          : "";
+
+      if (
+        message.toLowerCase().includes("invalid login")
+      ) {
+        setErrorMessage(
+          "ელფოსტა ან პაროლი არასწორია."
+        );
+      } else {
+        setErrorMessage(
+          message ||
+            "ანგარიშში შესვლა ვერ მოხერხდა."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -122,167 +91,152 @@ export default function LoginPage() {
     <>
       <main className="page">
         <div
-          className="backgroundPattern"
+          className="decor decorOne"
           aria-hidden="true"
         >
-          <span>QR</span>
-          <span>QR</span>
-          <span>QR</span>
-          <span>QR</span>
+          QR
+        </div>
+
+        <div
+          className="decor decorTwo"
+          aria-hidden="true"
+        >
+          QR
         </div>
 
         <header className="header">
-          <a
-            href="/"
-            className="brand"
-          >
-            <span className="brandMark">
+          <a href="/" className="brand">
+            <span className="brandIcon">
               QR
             </span>
 
-            <span>
-              <strong>
-                QR RETURN
-              </strong>
-
+            <span className="brandText">
+              <strong>QR RETURN</strong>
               <small>
                 SMART QR CONNECTION
               </small>
             </span>
           </a>
-
-          <a
-            href="/signup"
-            className="topButton"
-          >
-            რეგისტრაცია
-          </a>
         </header>
 
-        <section className="loginArea">
-          <section className="loginCard">
-            <div className="icon">
-              QR
-            </div>
-
+        <section className="center">
+          <div className="card">
             <span className="eyebrow">
-              WELCOME BACK
+              QR RETURN ანგარიში
             </span>
 
             <h1>
-              შესვლა
+              შედით თქვენს ანგარიშში
             </h1>
 
-            <p>
-              შედით თქვენს QR RETURN
-              ანგარიშში და მართეთ თქვენი
-              QR პროფილები.
+            <p className="description">
+              ერთი ანგარიშიდან მართეთ თქვენი
+              ყველა QR პროფილი.
             </p>
 
             {errorMessage && (
-              <div className="errorBox">
+              <div
+                className="error"
+                role="alert"
+              >
                 {errorMessage}
               </div>
             )}
 
-            <form
-              onSubmit={
-                handleLogin
-              }
-            >
-              <label>
-                ელფოსტა
-              </label>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(
-                  event
-                ) =>
-                  setEmail(
-                    event.target
-                      .value
-                  )
-                }
-                placeholder="name@example.com"
-                autoComplete="email"
-              />
-
-              <div className="passwordLabel">
-                <label>
-                  პაროლი
+            <form onSubmit={handleLogin}>
+              <div className="field">
+                <label htmlFor="email">
+                  ელფოსტა
                 </label>
 
-                <a href="/reset-password">
-                  დაგავიწყდათ პაროლი?
-                </a>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) =>
+                    setEmail(
+                      event.target.value
+                    )
+                  }
+                  autoComplete="email"
+                  required
+                />
               </div>
 
-              <div className="passwordWrap">
-                <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  value={
-                    password
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    setPassword(
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder="თქვენი პაროლი"
-                  autoComplete="current-password"
-                />
+              <div className="field">
+                <div className="passwordLabel">
+                  <label htmlFor="password">
+                    პაროლი
+                  </label>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      (
-                        current
-                      ) =>
-                        !current
-                    )
-                  }
-                >
-                  {showPassword
-                    ? "დამალვა"
-                    : "ნახვა"}
-                </button>
+                  <a
+                    href="/forgot-password"
+                    className="forgot"
+                  >
+                    დაგავიწყდათ პაროლი?
+                  </a>
+                </div>
+
+                <div className="passwordBox">
+                  <input
+                    id="password"
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
+                    value={password}
+                    onChange={(event) =>
+                      setPassword(
+                        event.target.value
+                      )
+                    }
+                    autoComplete="current-password"
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    className="showButton"
+                    onClick={() =>
+                      setShowPassword(
+                        (current) =>
+                          !current
+                      )
+                    }
+                  >
+                    {showPassword
+                      ? "დამალვა"
+                      : "ნახვა"}
+                  </button>
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="submitButton"
+                className="submit"
                 disabled={loading}
               >
                 {loading
                   ? "შესვლა..."
-                  : "შესვლა →"}
+                  : "შესვლა"}
               </button>
             </form>
 
+            <div className="divider">
+              <span />
+            </div>
+
             <div className="signup">
-              არ გაქვთ ანგარიში?
+              <span>
+                არ გაქვთ ანგარიში?
+              </span>
 
               <a href="/signup">
-                შექმენით ანგარიში
+                რეგისტრაცია
               </a>
             </div>
-          </section>
-
-          <p className="slogan">
-            ერთი ანგარიში.
-            ყველა მნიშვნელოვანი პროფილი
-            ერთ სივრცეში.
-          </p>
+          </div>
         </section>
       </main>
 
@@ -293,58 +247,50 @@ export default function LoginPage() {
 
         .page {
           position: relative;
-
           min-height: 100vh;
-
           overflow: hidden;
 
-          padding:
-            0 20px 30px;
+          padding: 0 20px 30px;
 
           background:
+            radial-gradient(
+              circle at 15% 20%,
+              rgba(255, 255, 255, 0.08),
+              transparent 26%
+            ),
             #0647c8;
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
         }
 
-        .backgroundPattern {
+        .decor {
           position: fixed;
-          inset: 0;
-
-          pointer-events: none;
-        }
-
-        .backgroundPattern span {
-          position: absolute;
 
           color:
-            rgba(
-              255,
-              255,
-              255,
-              0.045
-            );
+            rgba(255, 255, 255, 0.04);
 
-          font-size: 120px;
+          font-size: 150px;
           font-weight: 950;
+
+          pointer-events: none;
+          user-select: none;
         }
 
-        .backgroundPattern span:nth-child(1) {
-          top: 9%;
-          left: 7%;
+        .decorOne {
+          top: 15%;
+          left: 6%;
+
+          transform: rotate(-14deg);
         }
 
-        .backgroundPattern span:nth-child(2) {
-          top: 18%;
+        .decorTwo {
           right: 7%;
-        }
+          bottom: 8%;
 
-        .backgroundPattern span:nth-child(3) {
-          bottom: 7%;
-          left: 10%;
-        }
-
-        .backgroundPattern span:nth-child(4) {
-          bottom: 9%;
-          right: 8%;
+          transform: rotate(14deg);
         }
 
         .header {
@@ -352,440 +298,345 @@ export default function LoginPage() {
           z-index: 2;
 
           width: 100%;
-          max-width: 1080px;
-
-          min-height: 74px;
+          max-width: 1060px;
+          height: 68px;
 
           margin: auto;
 
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
 
           border-bottom:
             1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.2
-            );
+            rgba(255, 255, 255, 0.18);
         }
 
         .brand {
           display: flex;
           align-items: center;
-
           gap: 10px;
 
           text-decoration: none;
         }
 
-        .brandMark {
-          width: 43px;
-          height: 43px;
+        .brandIcon {
+          width: 41px;
+          height: 41px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
-          background:
-            #ffffff;
+          background: #ffffff;
+          color: #0647c8;
 
-          color:
-            #0647c8;
-
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 950;
         }
 
-        .brand strong,
-        .brand small {
+        .brandText strong,
+        .brandText small {
           display: block;
         }
 
-        .brand strong {
-          color:
-            #ffffff;
+        .brandText strong {
+          color: #ffffff;
 
-          font-size: 18px;
+          font-size: 17px;
+          font-weight: 900;
         }
 
-        .brand small {
+        .brandText small {
           margin-top: 2px;
 
           color:
-            rgba(
-              255,
-              255,
-              255,
-              0.7
-            );
+            rgba(255, 255, 255, 0.67);
 
-          font-size: 10px;
+          font-size: 9px;
+          font-weight: 800;
+
+          letter-spacing: 0.6px;
         }
 
-        .topButton {
-          padding:
-            10px 15px;
+        .center {
+          position: relative;
+          z-index: 2;
 
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.32
-            );
+          min-height:
+            calc(100vh - 90px);
 
-          border-radius: 9px;
+          display: grid;
+          place-items: center;
 
-          color:
-            #ffffff;
+          padding: 20px 0 35px;
+        }
 
-          font-size: 14px;
+        .card {
+          width: 100%;
+          max-width: 430px;
+
+          padding: 29px 30px 27px;
+
+          border-radius: 18px;
+
+          background: #ffffff;
+
+          box-shadow:
+            0 24px 58px
+            rgba(0, 24, 78, 0.3);
+        }
+
+        .eyebrow {
+          display: block;
+
+          margin-bottom: 6px;
+
+          color: #0647c8;
+
+          font-size: 10px;
+          font-weight: 900;
+
+          letter-spacing: 0.7px;
+        }
+
+        h1 {
+          margin: 0;
+
+          color: #203a55;
+
+          font-size: 24px;
+          font-weight: 900;
+
+          line-height: 1.25;
+        }
+
+        .description {
+          margin: 8px 0 0;
+
+          color: #78899a;
+
+          font-size: 13px;
+          line-height: 1.55;
+        }
+
+        form {
+          margin-top: 23px;
+
+          display: grid;
+          gap: 18px;
+        }
+
+        .field label {
+          display: block;
+
+          color: #42576b;
+
+          font-size: 13px;
           font-weight: 850;
+        }
+
+        .field > label {
+          margin-bottom: 8px;
+        }
+
+        .passwordLabel {
+          margin-bottom: 8px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          gap: 15px;
+        }
+
+        .forgot {
+          color: #0647c8;
+
+          font-size: 11px;
+          font-weight: 800;
 
           text-decoration: none;
         }
 
-        .loginArea {
-          position: relative;
-          z-index: 2;
-
-          width: 100%;
-
-          min-height:
-            calc(
-              100vh -
-              104px
-            );
-
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-
-          padding:
-            35px 0;
-        }
-
-        .loginCard {
-          width: 100%;
-          max-width: 460px;
-
-          padding:
-            31px 32px;
-
-          border-radius: 20px;
-
-          background:
-            #ffffff;
-
-          box-shadow:
-            0 26px 65px
-            rgba(
-              0,
-              24,
-              78,
-              0.3
-            );
-        }
-
-        .icon {
-          width: 52px;
-          height: 52px;
-
-          margin-bottom: 16px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 14px;
-
-          background:
-            #0647c8;
-
-          color:
-            #ffffff;
-
-          font-size: 13px;
-          font-weight: 950;
-        }
-
-        .eyebrow {
-          color:
-            #0647c8;
-
-          font-size: 11px;
-          font-weight: 900;
-
-          letter-spacing:
-            0.8px;
-        }
-
-        .loginCard h1 {
-          margin:
-            5px 0 0;
-
-          color:
-            #203a55;
-
-          font-size: 28px;
-        }
-
-        .loginCard > p {
-          margin:
-            7px 0 0;
-
-          color:
-            #74869a;
-
-          font-size: 14px;
-
-          line-height: 1.55;
-        }
-
-        .errorBox {
-          margin-top: 17px;
-
-          padding:
-            12px;
-
-          border-radius: 9px;
-
-          background:
-            #fff0f2;
-
-          color:
-            #a23e49;
-
-          font-size: 13px;
-        }
-
-        form {
-          margin-top: 21px;
-        }
-
-        label {
-          display: block;
-
-          margin-bottom: 7px;
-
-          color:
-            #344e68;
-
-          font-size: 14px;
-
-          font-weight: 800;
+        .forgot:hover {
+          text-decoration: underline;
         }
 
         input {
+          display: block;
+
           width: 100%;
+          height: 56px;
 
-          height: 52px;
-
-          padding:
-            0 14px;
+          padding: 0 16px;
 
           border:
-            1px solid
-            #d4e0eb;
+            1.5px solid #d5e0ea;
 
-          border-radius: 10px;
+          border-radius: 11px;
 
-          background:
-            #ffffff;
+          background: #fbfdff;
+          color: #263f59;
 
-          color:
-            #263f59;
-
-          font-family:
-            inherit;
-
+          font-family: inherit;
           font-size: 15px;
 
           outline: none;
         }
 
         input:focus {
-          border-color:
-            #0647c8;
+          border-color: #1266e9;
+
+          background: #ffffff;
 
           box-shadow:
-            0 0 0 3px
-            rgba(
-              6,
-              71,
-              200,
-              0.08
-            );
+            0 0 0 4px
+            rgba(18, 102, 233, 0.09);
         }
 
-        .passwordLabel {
-          margin-top: 15px;
-
-          display: flex;
-          align-items: center;
-          justify-content:
-            space-between;
-
-          gap: 10px;
-        }
-
-        .passwordLabel label {
-          margin: 0;
-        }
-
-        .passwordLabel a {
-          color:
-            #0647c8;
-
-          font-size: 12px;
-
-          font-weight: 800;
-
-          text-decoration: none;
-        }
-
-        .passwordWrap {
+        .passwordBox {
           position: relative;
-
-          margin-top: 7px;
         }
 
-        .passwordWrap input {
-          padding-right:
-            68px;
+        .passwordBox input {
+          padding-right: 85px;
         }
 
-        .passwordWrap button {
+        .showButton {
           position: absolute;
 
           top: 50%;
-          right: 8px;
+          right: 9px;
 
           transform:
             translateY(-50%);
 
+          min-width: 61px;
+          height: 34px;
+
+          padding: 0 9px;
+
           border: 0;
+          border-radius: 8px;
 
-          padding:
-            7px 8px;
+          background: #edf4ff;
+          color: #0647c8;
 
-          border-radius: 7px;
-
-          background:
-            #edf4ff;
-
-          color:
-            #0647c8;
-
+          font-family: inherit;
           font-size: 10px;
           font-weight: 850;
 
           cursor: pointer;
         }
 
-        .submitButton {
+        .submit {
           width: 100%;
           height: 51px;
 
-          margin-top: 19px;
-
           border: 0;
-
           border-radius: 10px;
 
-          background:
-            #0647c8;
+          background: #0647c8;
+          color: #ffffff;
 
-          color:
-            #ffffff;
-
-          font-family:
-            inherit;
-
-          font-size: 15px;
+          font-family: inherit;
+          font-size: 13px;
           font-weight: 900;
 
           cursor: pointer;
+
+          box-shadow:
+            0 8px 19px
+            rgba(6, 71, 200, 0.18);
         }
 
-        .submitButton:disabled {
+        .submit:hover:not(:disabled) {
+          background: #0754dc;
+        }
+
+        .submit:disabled {
           opacity: 0.65;
+
+          cursor: not-allowed;
+        }
+
+        .error {
+          margin-top: 16px;
+
+          padding: 10px 12px;
+
+          border:
+            1px solid #f0ced2;
+
+          border-radius: 9px;
+
+          background: #fff3f4;
+          color: #a3424a;
+
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .divider {
+          margin: 23px 0 18px;
+        }
+
+        .divider span {
+          display: block;
+
+          height: 1px;
+
+          background: #e7edf3;
         }
 
         .signup {
-          margin-top: 19px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-          padding-top: 17px;
+          gap: 5px;
 
-          border-top:
-            1px solid
-            #e6edf4;
+          color: #718396;
 
-          color:
-            #7b8b9c;
-
-          font-size: 13px;
-
-          text-align: center;
+          font-size: 12px;
         }
 
         .signup a {
-          margin-left: 5px;
+          color: #0647c8;
 
-          color:
-            #0647c8;
-
-          font-weight: 850;
+          font-weight: 900;
 
           text-decoration: none;
         }
 
-        .slogan {
-          max-width: 480px;
-
-          margin:
-            18px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.77
-            );
-
-          font-size: 13px;
-
-          text-align: center;
+        .signup a:hover {
+          text-decoration: underline;
         }
 
-        @media (
-          max-width: 520px
-        ) {
-          .page {
-            padding:
-              0 13px 24px;
-          }
-
-          .brand small {
+        @media (max-width: 520px) {
+          .brandText small {
             display: none;
           }
 
-          .loginCard {
-            padding:
-              25px 19px;
+          .card {
+            padding: 25px 19px;
 
-            border-radius: 17px;
+            border-radius: 16px;
           }
 
-          .loginCard h1 {
-            font-size: 25px;
+          h1 {
+            font-size: 23px;
+          }
+
+          input {
+            height: 54px;
+
+            font-size: 16px;
+          }
+
+          .passwordLabel {
+            align-items: flex-end;
           }
         }
       `}</style>
