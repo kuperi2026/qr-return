@@ -1,20 +1,9 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
-  createClient,
-} from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 import ProfileCard, {
   type ProfileCardItem,
@@ -22,189 +11,93 @@ import ProfileCard, {
 
 type ItemRow = {
   id: string;
-
   tag_code: string | null;
-
   item_type: string | null;
   pet_type: string | null;
-
   item_name: string | null;
-
   photo: string | null;
-
   active: boolean | null;
-
-  scan_count: number | null;
-
-  last_scanned_at: string | null;
-
-  last_scan_latitude:
-    number | null;
-
-  last_scan_longitude:
-    number | null;
-
-  last_scan_accuracy:
-    number | null;
 };
 
-function createSupabaseClient() {
-  const url =
-    process.env
-      .NEXT_PUBLIC_SUPABASE_URL;
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const key =
-    process.env
-      .NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env
-      .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env
-      .NEXT_PUBLIC_SUPABASE_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (
-    !url ||
-    !key
-  ) {
+  if (!url || !key) {
     return null;
   }
 
-  return createClient(
-    url,
-    key
-  );
+  return createClient(url, key);
 }
 
 export default function MyProfilesPage() {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    profiles,
-    setProfiles,
-  ] =
-    useState<ItemRow[]>(
-      []
-    );
+  const [profiles, setProfiles] = useState<ItemRow[]>([]);
+  const [email, setEmail] = useState("");
 
-  const [
-    email,
-    setEmail,
-  ] =
-    useState("");
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] =
-    useState(true);
-
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] =
-    useState("");
-
-  const [
-    search,
-    setSearch,
-  ] =
-    useState("");
-
-  const [
-    filter,
-    setFilter,
-  ] =
-    useState("all");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     async function loadProfiles() {
-      try {
-        setLoading(true);
-        setErrorMessage("");
+      setLoading(true);
+      setErrorMessage("");
 
-        const supabase =
-          createSupabaseClient();
+      try {
+        const supabase = getSupabase();
 
         if (!supabase) {
-          setErrorMessage(
-            "Supabase კავშირი არ არის კონფიგურირებული."
+          throw new Error(
+            "Supabase Environment Variables ვერ მოიძებნა."
           );
-
-          return;
         }
 
         const {
-          data: {
-            user,
-          },
-          error:
-            userError,
-        } =
-          await supabase.auth
-            .getUser();
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
 
-        if (
-          userError ||
-          !user
-        ) {
-          router.replace(
-            "/login"
-          );
-
+        if (userError || !user) {
+          router.replace("/login");
           return;
         }
 
-        setEmail(
-          user.email || ""
-        );
+        setEmail(user.email || "");
 
-        const {
-          data,
-          error,
-        } =
-          await supabase
-            .from("item")
-            .select(
-              `
-                id,
-                tag_code,
-                item_type,
-                pet_type,
-                item_name,
-                photo,
-                active,
-                scan_count,
-                last_scanned_at,
-                last_scan_latitude,
-                last_scan_longitude,
-                last_scan_accuracy
-              `
-            )
-            .eq(
-              "owner_id",
-              user.id
-            )
-            .order(
-              "id",
-              {
-                ascending:
-                  false,
-              }
-            );
+        const { data, error } = await supabase
+          .from("item")
+          .select(`
+            id,
+            tag_code,
+            item_type,
+            pet_type,
+            item_name,
+            photo,
+            active
+          `)
+          .eq("owner_id", user.id);
 
         if (error) {
-          throw error;
+          console.error("ITEM QUERY ERROR:", error);
+
+          throw new Error(
+            `პროფილების ჩატვირთვა ვერ მოხერხდა: ${error.message}`
+          );
         }
 
-        setProfiles(
-          (data ||
-            []) as ItemRow[]
-        );
+        setProfiles((data || []) as ItemRow[]);
       } catch (error) {
-        console.error(
-          "Load profiles error:",
-          error
-        );
+        console.error("LOAD PROFILES ERROR:", error);
+
+        setProfiles([]);
 
         setErrorMessage(
           error instanceof Error
@@ -220,213 +113,119 @@ export default function MyProfilesPage() {
   }, [router]);
 
   async function handleLogout() {
-    const supabase =
-      createSupabaseClient();
+    const supabase = getSupabase();
 
-    if (!supabase) {
-      return;
-    }
+    if (!supabase) return;
 
-    await supabase.auth
-      .signOut();
+    await supabase.auth.signOut();
 
-    window.location.href =
-      "/login";
+    router.replace("/login");
   }
 
-  const filteredProfiles =
-    useMemo(() => {
-      const query =
-        search
-          .trim()
-          .toLowerCase();
+  const filteredProfiles = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-      return profiles.filter(
-        (profile) => {
-          const type =
-            (
-              profile.item_type ||
-              profile.pet_type ||
-              ""
-            ).toLowerCase();
+    return profiles.filter((profile) => {
+      const type = (
+        profile.item_type ||
+        profile.pet_type ||
+        ""
+      ).toLowerCase();
 
-          const matchesFilter =
-            filter === "all" ||
-            type === filter;
+      const matchesFilter =
+        filter === "all" ||
+        type === filter ||
+        profile.pet_type?.toLowerCase() === filter;
 
-          if (
-            !matchesFilter
-          ) {
-            return false;
-          }
+      if (!matchesFilter) {
+        return false;
+      }
 
-          if (!query) {
-            return true;
-          }
+      if (!query) {
+        return true;
+      }
 
-          return (
-            profile.item_name
-              ?.toLowerCase()
-              .includes(
-                query
-              ) ||
-            profile.tag_code
-              ?.toLowerCase()
-              .includes(
-                query
-              ) ||
-            type.includes(
-              query
-            )
-          );
-        }
+      return (
+        profile.item_name
+          ?.toLowerCase()
+          .includes(query) ||
+        profile.tag_code
+          ?.toLowerCase()
+          .includes(query) ||
+        type.includes(query)
       );
-    }, [
-      profiles,
-      search,
-      filter,
-    ]);
+    });
+  }, [profiles, search, filter]);
 
-  const cardProfiles:
-    ProfileCardItem[] =
-    filteredProfiles.map(
-      (profile) => ({
-        id:
-          profile.id,
+  const cards: ProfileCardItem[] =
+    filteredProfiles.map((profile) => ({
+      id: profile.id,
 
-        tagCode:
-          profile.tag_code,
+      tagCode: profile.tag_code,
 
-        type:
-          profile.item_type,
+      type: profile.item_type,
 
-        petType:
-          profile.pet_type,
+      petType: profile.pet_type,
 
-        name:
-          profile.item_name,
+      name: profile.item_name,
 
-        photo:
-          profile.photo,
+      photo: profile.photo,
 
-        active:
-          profile.active,
+      active: profile.active,
 
-        scanCount:
-          profile.scan_count,
+      scanCount: 0,
 
-        lastScannedAt:
-          profile
-            .last_scanned_at,
+      lastScannedAt: null,
 
-        lastScanLatitude:
-          profile
-            .last_scan_latitude,
+      lastScanLatitude: null,
 
-        lastScanLongitude:
-          profile
-            .last_scan_longitude,
+      lastScanLongitude: null,
 
-        lastScanAccuracy:
-          profile
-            .last_scan_accuracy,
-      })
-    );
+      lastScanAccuracy: null,
+    }));
 
   if (loading) {
     return (
       <>
         <main className="loadingPage">
-          <div className="loader">
-            <div className="logo">
-              QR
-            </div>
+          <div className="loadingLogo">QR</div>
 
-            <strong>
-              QR RETURN
-            </strong>
+          <strong>QR RETURN</strong>
 
-            <span>
-              პროფილები იტვირთება...
-            </span>
-          </div>
+          <span>პროფილები იტვირთება...</span>
         </main>
 
         <style jsx>{`
           .loadingPage {
-            min-height:
-              100vh;
-
-            display:
-              grid;
-
-            place-items:
-              center;
-
-            background:
-              #f5f8fd;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: #f5f8fd;
           }
 
-          .loader {
-            text-align:
-              center;
+          .loadingLogo {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #1266e9;
+            color: white;
+            font-size: 12px;
+            font-weight: 950;
           }
 
-          .logo {
-            width:
-              48px;
-
-            height:
-              48px;
-
-            margin:
-              0 auto 10px;
-
-            display:
-              grid;
-
-            place-items:
-              center;
-
-            border-radius:
-              12px;
-
-            background:
-              #1266e9;
-
-            color:
-              white;
-
-            font-size:
-              13px;
-
-            font-weight:
-              950;
+          strong {
+            color: #263f59;
+            font-size: 16px;
           }
 
-          .loader strong {
-            display:
-              block;
-
-            color:
-              #263f59;
-
-            font-size:
-              16px;
-          }
-
-          .loader span {
-            display:
-              block;
-
-            margin-top:
-              4px;
-
-            color:
-              #8392a2;
-
-            font-size:
-              11px;
+          span {
+            color: #8493a3;
+            font-size: 11px;
           }
         `}</style>
       </>
@@ -437,22 +236,12 @@ export default function MyProfilesPage() {
     <>
       <main className="page">
         <header className="header">
-          <Link
-            href="/"
-            className="brand"
-          >
-            <span className="brandMark">
-              QR
-            </span>
+          <Link href="/" className="brand">
+            <span className="brandMark">QR</span>
 
             <span className="brandText">
-              <strong>
-                QR RETURN
-              </strong>
-
-              <small>
-                SMART LOST &amp; FOUND
-              </small>
+              <strong>QR RETURN</strong>
+              <small>SMART LOST & FOUND</small>
             </span>
           </Link>
 
@@ -466,9 +255,7 @@ export default function MyProfilesPage() {
             <button
               type="button"
               className="logout"
-              onClick={
-                handleLogout
-              }
+              onClick={handleLogout}
             >
               გამოსვლა
             </button>
@@ -488,116 +275,69 @@ export default function MyProfilesPage() {
               OWNER DASHBOARD
             </span>
 
-            <h1>
-              ჩემი QR პროფილები
-            </h1>
+            <h1>ჩემი QR პროფილები</h1>
 
             <p>
-              მართეთ ყველა თქვენი
-              QR RETURN პროფილი ერთ
-              სივრცეში.
+              მართეთ ყველა თქვენი QR RETURN პროფილი
+              ერთ სივრცეში.
             </p>
           </div>
 
           <div className="totalBox">
-            <span>
-              TOTAL PROFILES
-            </span>
-
-            <strong>
-              {profiles.length}
-            </strong>
+            <span>TOTAL PROFILES</span>
+            <strong>{profiles.length}</strong>
           </div>
         </section>
 
         {errorMessage && (
-          <div className="errorBox">
-            {errorMessage}
-          </div>
+          <section className="errorBox">
+            <strong>პროფილების ჩატვირთვა ვერ მოხერხდა</strong>
+            <span>{errorMessage}</span>
+          </section>
         )}
 
-        {profiles.length >
-          0 && (
+        {!errorMessage && profiles.length > 0 && (
           <section className="toolbar">
             <div className="searchBox">
-              <span>
-                ⌕
-              </span>
+              <span>⌕</span>
 
               <input
                 type="search"
-                value={
-                  search
-                }
-                onChange={(
-                  event
-                ) =>
-                  setSearch(
-                    event.target.value
-                  )
+                value={search}
+                onChange={(event) =>
+                  setSearch(event.target.value)
                 }
                 placeholder="მოძებნეთ სახელი ან QR კოდი"
               />
             </div>
 
             <select
-              value={
-                filter
-              }
-              onChange={(
-                event
-              ) =>
-                setFilter(
-                  event.target.value
-                )
+              value={filter}
+              onChange={(event) =>
+                setFilter(event.target.value)
               }
             >
-              <option value="all">
-                ყველა
-              </option>
-
-              <option value="dog">
-                ძაღლი
-              </option>
-
-              <option value="cat">
-                კატა
-              </option>
-
-              <option value="keys">
-                გასაღები
-              </option>
-
-              <option value="wallet">
-                საფულე
-              </option>
-
-              <option value="bag">
-                ჩანთა
-              </option>
-
-              <option value="suitcase">
-                ჩემოდანი
-              </option>
+              <option value="all">ყველა</option>
+              <option value="dog">ძაღლი</option>
+              <option value="cat">კატა</option>
+              <option value="keys">გასაღები</option>
+              <option value="wallet">საფულე</option>
+              <option value="bag">ჩანთა</option>
+              <option value="suitcase">ჩემოდანი</option>
             </select>
           </section>
         )}
 
-        {profiles.length ===
-        0 ? (
+        {!errorMessage && profiles.length === 0 && (
           <section className="emptyState">
-            <div className="emptyIcon">
-              QR
-            </div>
+            <div className="emptyIcon">QR</div>
 
             <h2>
-              ჯერ არცერთი QR პროფილი
-              არ გაქვთ
+              ჯერ არცერთი QR პროფილი არ გაქვთ
             </h2>
 
             <p>
-              დაამატეთ პირველი
-              ცხოველი ან ნივთი თქვენს
+              დაამატეთ პირველი ცხოველი ან ნივთი თქვენს
               QR RETURN ანგარიშზე.
             </p>
 
@@ -608,40 +348,32 @@ export default function MyProfilesPage() {
               + პირველი პროფილის დამატება
             </Link>
           </section>
-        ) : cardProfiles.length ===
-          0 ? (
-          <section className="noResults">
-            <strong>
-              პროფილი ვერ მოიძებნა
-            </strong>
+        )}
 
-            <span>
-              შეცვალეთ ძიება ან
-              ფილტრი.
-            </span>
-          </section>
-        ) : (
+        {!errorMessage &&
+          profiles.length > 0 &&
+          cards.length === 0 && (
+            <section className="noResults">
+              <strong>პროფილი ვერ მოიძებნა</strong>
+              <span>შეცვალეთ ძიება ან ფილტრი.</span>
+            </section>
+          )}
+
+        {!errorMessage && cards.length > 0 && (
           <section className="profileGrid">
-            {cardProfiles.map(
-              (profile) => (
-                <ProfileCard
-                  key={
-                    profile.id
-                  }
-                  item={
-                    profile
-                  }
-                />
-              )
-            )}
+            {cards.map((profile) => (
+              <ProfileCard
+                key={profile.id}
+                item={profile}
+              />
+            ))}
           </section>
         )}
       </main>
 
       <style jsx global>{`
         * {
-          box-sizing:
-            border-box;
+          box-sizing: border-box;
         }
 
         body {
@@ -649,31 +381,19 @@ export default function MyProfilesPage() {
         }
 
         .page {
-          min-height:
-            100vh;
-
-          padding-bottom:
-            60px;
+          min-height: 100vh;
+          padding-bottom: 60px;
 
           background:
             radial-gradient(
-              circle at
-              100% 0%,
-              rgba(
-                18,
-                102,
-                233,
-                0.07
-              ),
-              transparent
-                26%
+              circle at 100% 0%,
+              rgba(18, 102, 233, 0.07),
+              transparent 26%
             ),
             linear-gradient(
               180deg,
-              #ffffff
-                0%,
-              #f5f8fd
-                100%
+              #ffffff 0%,
+              #f5f8fd 100%
             );
 
           font-family:
@@ -686,212 +406,112 @@ export default function MyProfilesPage() {
         }
 
         .header {
-          width:
-            calc(
-              100% -
-              48px
-            );
+          width: calc(100% - 48px);
+          max-width: 1120px;
+          min-height: 72px;
+          margin: 0 auto;
 
-          max-width:
-            1120px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
 
-          min-height:
-            72px;
-
-          margin:
-            0 auto;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
-
-          gap:
-            18px;
-
-          border-bottom:
-            1px solid
-            #e5ebf2;
+          border-bottom: 1px solid #e5ebf2;
         }
 
         .brand {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          gap:
-            9px;
-
-          text-decoration:
-            none;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          text-decoration: none;
         }
 
         .brandMark {
-          width:
-            40px;
+          width: 40px;
+          height: 40px;
 
-          height:
-            40px;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 10px;
 
-          place-items:
-            center;
+          background: #1266e9;
+          color: #ffffff;
 
-          border-radius:
-            10px;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          font-size:
-            11px;
-
-          font-weight:
-            950;
+          font-size: 11px;
+          font-weight: 950;
         }
 
         .brandText strong,
         .brandText small {
-          display:
-            block;
+          display: block;
         }
 
         .brandText strong {
-          color:
-            #172b43;
-
-          font-size:
-            15px;
-
-          font-weight:
-            950;
+          color: #172b43;
+          font-size: 15px;
+          font-weight: 950;
         }
 
         .brandText small {
-          margin-top:
-            2px;
-
-          color:
-            #8a98a7;
-
-          font-size:
-            7px;
-
-          font-weight:
-            850;
-
-          letter-spacing:
-            1px;
+          margin-top: 2px;
+          color: #8a98a7;
+          font-size: 7px;
+          font-weight: 850;
+          letter-spacing: 1px;
         }
 
         .headerRight {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          gap:
-            8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .email {
-          max-width:
-            190px;
+          max-width: 190px;
+          overflow: hidden;
 
-          overflow:
-            hidden;
+          color: #8391a0;
+          font-size: 9px;
 
-          color:
-            #8391a0;
-
-          font-size:
-            9px;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .logout {
-          height:
-            38px;
+          height: 38px;
+          padding: 0 12px;
 
-          padding:
-            0 12px;
+          border: 1px solid #dce5ee;
+          border-radius: 9px;
 
-          border:
-            1px solid
-            #dce5ee;
+          background: #ffffff;
+          color: #657a8e;
 
-          border-radius:
-            9px;
+          font-family: inherit;
+          font-size: 9px;
+          font-weight: 850;
 
-          background:
-            #ffffff;
-
-          color:
-            #657a8e;
-
-          font-family:
-            inherit;
-
-          font-size:
-            9px;
-
-          font-weight:
-            850;
-
-          cursor:
-            pointer;
+          cursor: pointer;
         }
 
         .addButton {
-          height:
-            40px;
+          height: 40px;
+          padding: 0 14px;
 
-          padding:
-            0 14px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
 
-          display:
-            inline-flex;
+          border-radius: 9px;
 
-          align-items:
-            center;
+          background: #1266e9;
+          color: #ffffff;
 
-          justify-content:
-            center;
+          font-size: 9px;
+          font-weight: 900;
 
-          border-radius:
-            9px;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          font-size:
-            9px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
         .hero,
@@ -900,464 +520,288 @@ export default function MyProfilesPage() {
         .errorBox,
         .emptyState,
         .noResults {
-          width:
-            calc(
-              100% -
-              48px
-            );
+          width: calc(100% - 48px);
+          max-width: 1120px;
 
-          max-width:
-            1120px;
-
-          margin-left:
-            auto;
-
-          margin-right:
-            auto;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .hero {
-          margin-top:
-            38px;
+          margin-top: 38px;
 
-          display:
-            flex;
-
-          align-items:
-            flex-end;
-
-          justify-content:
-            space-between;
-
-          gap:
-            20px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 20px;
         }
 
         .eyebrow {
-          color:
-            #1266e9;
+          color: #1266e9;
 
-          font-size:
-            8px;
+          font-size: 8px;
+          font-weight: 900;
 
-          font-weight:
-            900;
-
-          letter-spacing:
-            1.4px;
+          letter-spacing: 1.4px;
         }
 
         .hero h1 {
-          margin:
-            7px 0 0;
+          margin: 7px 0 0;
 
-          color:
-            #172b43;
+          color: #172b43;
 
-          font-size:
-            32px;
-
-          font-weight:
-            950;
+          font-size: 32px;
+          font-weight: 950;
         }
 
         .hero p {
-          margin:
-            7px 0 0;
+          margin: 7px 0 0;
 
-          color:
-            #7b8b9c;
+          color: #7b8b9c;
 
-          font-size:
-            11px;
-
-          line-height:
-            1.5;
+          font-size: 11px;
+          line-height: 1.5;
         }
 
         .totalBox {
-          min-width:
-            104px;
+          min-width: 104px;
+          padding: 11px 13px;
 
-          padding:
-            11px 13px;
+          border: 1px solid #dce6f1;
+          border-radius: 11px;
 
-          border:
-            1px solid
-            #dce6f1;
+          background: #ffffff;
 
-          border-radius:
-            11px;
-
-          background:
-            #ffffff;
-
-          text-align:
-            right;
+          text-align: right;
         }
 
         .totalBox span {
-          display:
-            block;
+          display: block;
 
-          color:
-            #8a98a7;
+          color: #8a98a7;
 
-          font-size:
-            7px;
-
-          font-weight:
-            900;
+          font-size: 7px;
+          font-weight: 900;
         }
 
         .totalBox strong {
-          display:
-            block;
+          display: block;
 
-          margin-top:
-            3px;
+          margin-top: 3px;
 
-          color:
-            #1266e9;
+          color: #1266e9;
 
-          font-size:
-            22px;
-
-          font-weight:
-            950;
+          font-size: 22px;
+          font-weight: 950;
         }
 
         .errorBox {
-          margin-top:
-            18px;
+          margin-top: 22px;
+          padding: 15px 16px;
 
-          padding:
-            11px 13px;
+          border: 1px solid #efcbd0;
+          border-radius: 11px;
 
-          border:
-            1px solid
-            #efcbd0;
+          background: #fff7f8;
+        }
 
-          border-radius:
-            10px;
+        .errorBox strong,
+        .errorBox span {
+          display: block;
+        }
 
-          background:
-            #fff7f8;
+        .errorBox strong {
+          color: #9f3844;
+          font-size: 12px;
+        }
 
-          color:
-            #a3444d;
+        .errorBox span {
+          margin-top: 5px;
 
-          font-size:
-            10px;
+          color: #a85c64;
+
+          font-size: 10px;
+          line-height: 1.45;
         }
 
         .toolbar {
-          margin-top:
-            22px;
+          margin-top: 22px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
-            minmax(
-              0,
-              1fr
-            )
+            minmax(0, 1fr)
             170px;
 
-          gap:
-            9px;
+          gap: 9px;
         }
 
         .searchBox {
-          height:
-            44px;
+          height: 44px;
 
-          display:
-            flex;
+          display: flex;
+          align-items: center;
+          gap: 8px;
 
-          align-items:
-            center;
+          padding: 0 13px;
 
-          gap:
-            8px;
+          border: 1px solid #dce5ee;
+          border-radius: 10px;
 
-          padding:
-            0 13px;
-
-          border:
-            1px solid
-            #dce5ee;
-
-          border-radius:
-            10px;
-
-          background:
-            #ffffff;
+          background: #ffffff;
         }
 
         .searchBox span {
-          color:
-            #8da0b3;
-
-          font-size:
-            17px;
+          color: #8da0b3;
+          font-size: 17px;
         }
 
         .searchBox input {
-          width:
-            100%;
+          width: 100%;
 
-          border:
-            0;
+          border: 0;
+          outline: none;
 
-          background:
-            transparent;
+          background: transparent;
 
-          color:
-            #304b66;
+          color: #304b66;
 
-          font-family:
-            inherit;
-
-          font-size:
-            11px;
-
-          outline:
-            none;
+          font-family: inherit;
+          font-size: 11px;
         }
 
         .toolbar select {
-          width:
-            100%;
+          width: 100%;
+          height: 44px;
 
-          height:
-            44px;
+          padding: 0 11px;
 
-          padding:
-            0 11px;
+          border: 1px solid #dce5ee;
+          border-radius: 10px;
 
-          border:
-            1px solid
-            #dce5ee;
+          background: #ffffff;
 
-          border-radius:
-            10px;
+          color: #536b82;
 
-          background:
-            #ffffff;
+          font-family: inherit;
+          font-size: 10px;
+          font-weight: 750;
 
-          color:
-            #536b82;
-
-          font-family:
-            inherit;
-
-          font-size:
-            10px;
-
-          font-weight:
-            750;
-
-          outline:
-            none;
+          outline: none;
         }
 
         .profileGrid {
-          margin-top:
-            14px;
+          margin-top: 14px;
 
-          display:
-            grid;
+          display: grid;
 
           grid-template-columns:
-            repeat(
-              3,
-              minmax(
-                0,
-                1fr
-              )
-            );
+            repeat(3, minmax(0, 1fr));
 
-          gap:
-            14px;
+          gap: 14px;
         }
 
         .emptyState,
         .noResults {
-          margin-top:
-            32px;
+          margin-top: 32px;
 
-          padding:
-            46px 20px;
+          padding: 46px 20px;
 
-          border:
-            1px solid
-            #dfe7ef;
+          border: 1px solid #dfe7ef;
+          border-radius: 15px;
 
-          border-radius:
-            15px;
+          background: #ffffff;
 
-          background:
-            #ffffff;
-
-          text-align:
-            center;
+          text-align: center;
 
           box-shadow:
-            0 12px
-            28px
-            rgba(
-              30,
-              70,
-              120,
-              0.04
-            );
+            0 12px 28px
+            rgba(30, 70, 120, 0.04);
         }
 
         .emptyIcon {
-          width:
-            48px;
+          width: 48px;
+          height: 48px;
 
-          height:
-            48px;
+          margin: 0 auto;
 
-          margin:
-            0 auto;
+          display: grid;
+          place-items: center;
 
-          display:
-            grid;
+          border-radius: 12px;
 
-          place-items:
-            center;
+          background: #eef5ff;
+          color: #1266e9;
 
-          border-radius:
-            12px;
-
-          background:
-            #eef5ff;
-
-          color:
-            #1266e9;
-
-          font-size:
-            11px;
-
-          font-weight:
-            950;
+          font-size: 11px;
+          font-weight: 950;
         }
 
         .emptyState h2 {
-          margin:
-            13px 0 0;
+          margin: 13px 0 0;
 
-          color:
-            #263f59;
+          color: #263f59;
 
-          font-size:
-            19px;
+          font-size: 19px;
         }
 
         .emptyState p {
-          max-width:
-            420px;
+          max-width: 420px;
 
-          margin:
-            7px auto 0;
+          margin: 7px auto 0;
 
-          color:
-            #8291a1;
+          color: #8291a1;
 
-          font-size:
-            10px;
-
-          line-height:
-            1.55;
+          font-size: 10px;
+          line-height: 1.55;
         }
 
         .emptyButton {
-          min-height:
-            41px;
+          min-height: 41px;
 
-          margin-top:
-            16px;
+          margin-top: 16px;
+          padding: 0 15px;
 
-          padding:
-            0 15px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
 
-          display:
-            inline-flex;
+          border-radius: 9px;
 
-          align-items:
-            center;
+          background: #1266e9;
+          color: #ffffff;
 
-          justify-content:
-            center;
+          font-size: 9px;
+          font-weight: 900;
 
-          border-radius:
-            9px;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          font-size:
-            9px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
         .noResults strong,
         .noResults span {
-          display:
-            block;
+          display: block;
         }
 
         .noResults strong {
-          color:
-            #304b66;
-
-          font-size:
-            14px;
+          color: #304b66;
+          font-size: 14px;
         }
 
         .noResults span {
-          margin-top:
-            4px;
+          margin-top: 4px;
 
-          color:
-            #8796a6;
-
-          font-size:
-            10px;
+          color: #8796a6;
+          font-size: 10px;
         }
 
-        @media (
-          max-width:
-            920px
-        ) {
+        @media (max-width: 920px) {
           .profileGrid {
             grid-template-columns:
-              repeat(
-                2,
-                minmax(
-                  0,
-                  1fr
-                )
-              );
+              repeat(2, minmax(0, 1fr));
           }
         }
 
-        @media (
-          max-width:
-            650px
-        ) {
+        @media (max-width: 650px) {
           .header,
           .hero,
           .toolbar,
@@ -1365,60 +809,42 @@ export default function MyProfilesPage() {
           .errorBox,
           .emptyState,
           .noResults {
-            width:
-              calc(
-                100% -
-                24px
-              );
+            width: calc(100% - 24px);
           }
 
           .header {
-            min-height:
-              66px;
+            min-height: 66px;
           }
 
           .brandText small,
-          .email {
-            display:
-              none;
-          }
-
+          .email,
           .logout {
-            display:
-              none;
+            display: none;
           }
 
           .addButton {
-            padding:
-              0 10px;
+            padding: 0 10px;
           }
 
           .hero {
-            margin-top:
-              27px;
-
-            align-items:
-              flex-start;
+            margin-top: 27px;
+            align-items: flex-start;
           }
 
           .hero h1 {
-            font-size:
-              26px;
+            font-size: 26px;
           }
 
           .totalBox {
-            min-width:
-              85px;
+            min-width: 85px;
           }
 
           .toolbar {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .profileGrid {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
