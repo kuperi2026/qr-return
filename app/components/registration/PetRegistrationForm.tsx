@@ -6,19 +6,15 @@ import {
   useState,
 } from "react";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
 
 import {
   createClient,
   type SupabaseClient,
   type User,
 } from "@supabase/supabase-js";
-
-import OwnerInformationSection from "./OwnerInformationSection";
-
-import AdminAccessSection, {
-  type AdminPermissions,
-} from "./AdminAccessSection";
 
 import PetBasicInfo from "./PetBasicInfo";
 import PetHealthSection from "./PetHealthSection";
@@ -36,17 +32,6 @@ type OwnerData = {
   email: string;
 };
 
-const initialPermissions: AdminPermissions = {
-  viewProfiles: true,
-  editProfiles: false,
-  editFinderSettings: false,
-  editLiveChat: false,
-  viewMessages: false,
-  replyMessages: false,
-  markLostFound: false,
-  addProfiles: false,
-};
-
 function createSupabaseClient() {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -55,7 +40,10 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (
+    !supabaseUrl ||
+    !supabaseKey
+  ) {
     return null;
   }
 
@@ -70,16 +58,32 @@ export default function PetRegistrationForm({
 }: PetRegistrationFormProps) {
   const router = useRouter();
 
-  const [supabase, setSupabase] =
-    useState<SupabaseClient | null>(null);
+  const [
+    supabase,
+    setSupabase,
+  ] =
+    useState<SupabaseClient | null>(
+      null
+    );
 
-  const [currentUser, setCurrentUser] =
-    useState<User | null>(null);
+  const [
+    currentUser,
+    setCurrentUser,
+  ] =
+    useState<User | null>(
+      null
+    );
 
-  const [authLoading, setAuthLoading] =
+  const [
+    authLoading,
+    setAuthLoading,
+  ] =
     useState(true);
 
-  const [owner, setOwner] =
+  const [
+    owner,
+    setOwner,
+  ] =
     useState<OwnerData>({
       firstName: "",
       lastName: "",
@@ -87,26 +91,7 @@ export default function PetRegistrationForm({
       email: "",
     });
 
-  /* ================= ADMIN ================= */
-
-  const [
-    adminEnabled,
-    setAdminEnabled,
-  ] = useState(false);
-
-  const [
-    adminEmail,
-    setAdminEmail,
-  ] = useState("");
-
-  const [
-    permissions,
-    setPermissions,
-  ] = useState<AdminPermissions>(
-    initialPermissions
-  );
-
-  /* ================= QR / PET ================= */
+  /* ================= PET ================= */
 
   const [
     tagCode,
@@ -229,7 +214,12 @@ export default function PetRegistrationForm({
       ? "ძაღლი"
       : "კატა";
 
-  /* ================= LOAD ACCOUNT ================= */
+  const petEmoji =
+    type === "dog"
+      ? "🐶"
+      : "🐱";
+
+  /* ================= LOAD OWNER SILENTLY ================= */
 
   useEffect(() => {
     async function loadAccount() {
@@ -242,14 +232,17 @@ export default function PetRegistrationForm({
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
 
-          setAuthLoading(false);
           return;
         }
 
-        setSupabase(client);
+        setSupabase(
+          client
+        );
 
         const {
-          data: { user },
+          data: {
+            user,
+          },
           error: userError,
         } =
           await client.auth.getUser();
@@ -258,11 +251,16 @@ export default function PetRegistrationForm({
           userError ||
           !user
         ) {
-          router.replace("/login");
+          router.replace(
+            "/login"
+          );
+
           return;
         }
 
-        setCurrentUser(user);
+        setCurrentUser(
+          user
+        );
 
         setOwner({
           firstName:
@@ -290,87 +288,6 @@ export default function PetRegistrationForm({
               user.email || ""
             ),
         });
-
-        const {
-          data: adminData,
-          error: adminError,
-        } = await client
-          .from("secondary_admins")
-          .select(
-            `
-              admin_email,
-              view_profiles,
-              edit_profiles,
-              edit_finder_settings,
-              edit_live_chat,
-              view_messages,
-              reply_messages,
-              mark_lost_found,
-              add_profiles
-            `
-          )
-          .eq(
-            "owner_id",
-            user.id
-          )
-          .maybeSingle();
-
-        if (adminError) {
-          console.error(
-            "Admin load error:",
-            adminError
-          );
-        }
-
-        if (adminData) {
-          setAdminEnabled(true);
-
-          setAdminEmail(
-            adminData.admin_email || ""
-          );
-
-          setPermissions({
-            viewProfiles:
-              Boolean(
-                adminData.view_profiles
-              ),
-
-            editProfiles:
-              Boolean(
-                adminData.edit_profiles
-              ),
-
-            editFinderSettings:
-              Boolean(
-                adminData.edit_finder_settings
-              ),
-
-            editLiveChat:
-              Boolean(
-                adminData.edit_live_chat
-              ),
-
-            viewMessages:
-              Boolean(
-                adminData.view_messages
-              ),
-
-            replyMessages:
-              Boolean(
-                adminData.reply_messages
-              ),
-
-            markLostFound:
-              Boolean(
-                adminData.mark_lost_found
-              ),
-
-            addProfiles:
-              Boolean(
-                adminData.add_profiles
-              ),
-          });
-        }
       } catch (error) {
         console.error(
           "Account load error:",
@@ -381,133 +298,42 @@ export default function PetRegistrationForm({
           "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
         );
       } finally {
-        setAuthLoading(false);
+        setAuthLoading(
+          false
+        );
       }
     }
 
     loadAccount();
   }, [router]);
 
-  /* ================= VALIDATION ================= */
-
   function validateForm() {
     if (!currentUser) {
       return "მომხმარებლის ანგარიში ვერ მოიძებნა.";
     }
 
-    if (!owner.firstName.trim()) {
-      return "მფლობელის სახელი ვერ მოიძებნა.";
-    }
-
-    if (!owner.lastName.trim()) {
-      return "მფლობელის გვარი ვერ მოიძებნა.";
-    }
-
-    if (!owner.phone.trim()) {
-      return "მფლობელის ტელეფონის ნომერი ვერ მოიძებნა.";
-    }
-
-    if (!tagCode.trim()) {
-      return "QR / Tag Code სავალდებულოა.";
-    }
-
-    if (!itemName.trim()) {
-      return "ცხოველის სახელი სავალდებულოა.";
+    if (
+      !owner.firstName.trim() ||
+      !owner.lastName.trim() ||
+      !owner.phone.trim()
+    ) {
+      return "მფლობელის ინფორმაცია არასრულია. დაბრუნდით პირველ ეტაპზე.";
     }
 
     if (
-      adminEnabled &&
-      !adminEmail.trim()
+      !tagCode.trim()
     ) {
-      return "Secondary Admin-ის ელფოსტა სავალდებულოა.";
+      return "QR / Tag Code სავალდებულოა.";
     }
 
-    if (adminEnabled) {
-      const emailPattern =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (
-        !emailPattern.test(
-          adminEmail.trim()
-        )
-      ) {
-        return "Secondary Admin-ის ელფოსტა არასწორია.";
-      }
-
-      if (
-        adminEmail
-          .trim()
-          .toLowerCase() ===
-        owner.email
-          .trim()
-          .toLowerCase()
-      ) {
-        return "Owner და Secondary Admin ერთი და იგივე ელფოსტა ვერ იქნება.";
-      }
+    if (
+      !itemName.trim()
+    ) {
+      return "ცხოველის სახელი სავალდებულოა.";
     }
 
     return "";
   }
-
-  /* ================= SAVE ADMIN ================= */
-
-  async function saveSecondaryAdmin(
-    client: SupabaseClient,
-    ownerId: string
-  ) {
-    if (!adminEnabled) {
-      return;
-    }
-
-    const { error } = await client
-      .from("secondary_admins")
-      .upsert(
-        {
-          owner_id:
-            ownerId,
-
-          admin_email:
-            adminEmail
-              .trim()
-              .toLowerCase(),
-
-          view_profiles:
-            permissions.viewProfiles,
-
-          edit_profiles:
-            permissions.editProfiles,
-
-          edit_finder_settings:
-            permissions.editFinderSettings,
-
-          edit_live_chat:
-            permissions.editLiveChat,
-
-          view_messages:
-            permissions.viewMessages,
-
-          reply_messages:
-            permissions.replyMessages,
-
-          mark_lost_found:
-            permissions.markLostFound,
-
-          add_profiles:
-            permissions.addProfiles,
-        },
-        {
-          onConflict: "owner_id",
-        }
-      );
-
-    if (error) {
-      throw new Error(
-        `Secondary Admin ვერ შეინახა: ${error.message}`
-      );
-    }
-  }
-
-  /* ================= SAVE PROFILE ================= */
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -520,7 +346,9 @@ export default function PetRegistrationForm({
     const validationError =
       validateForm();
 
-    if (validationError) {
+    if (
+      validationError
+    ) {
       setErrorMessage(
         validationError
       );
@@ -544,7 +372,9 @@ export default function PetRegistrationForm({
       return;
     }
 
-    setSaving(true);
+    setSaving(
+      true
+    );
 
     try {
       const cleanTagCode =
@@ -557,24 +387,29 @@ export default function PetRegistrationForm({
       const {
         data: existingTag,
         error: tagCheckError,
-      } = await supabase
-        .from("item")
-        .select(
-          "tag_code, item_type"
-        )
-        .ilike(
-          "tag_code",
-          cleanTagCode
-        )
-        .maybeSingle();
+      } =
+        await supabase
+          .from("item")
+          .select(
+            "tag_code, item_type"
+          )
+          .ilike(
+            "tag_code",
+            cleanTagCode
+          )
+          .maybeSingle();
 
-      if (tagCheckError) {
+      if (
+        tagCheckError
+      ) {
         throw new Error(
           tagCheckError.message
         );
       }
 
-      if (existingTag) {
+      if (
+        existingTag
+      ) {
         setErrorMessage(
           `QR კოდი ${cleanTagCode} უკვე დარეგისტრირებულია.`
         );
@@ -587,140 +422,125 @@ export default function PetRegistrationForm({
         return;
       }
 
-      /* ================= SAVE ADMIN ================= */
-
-      await saveSecondaryAdmin(
-        supabase,
-        currentUser.id
-      );
-
-      /* ================= SAVE PROFILE ================= */
+      /* ================= CREATE PET PROFILE ================= */
 
       const {
         data: createdProfile,
         error: insertError,
-      } = await supabase
-        .from("item")
-        .insert({
-          /* QR */
+      } =
+        await supabase
+          .from("item")
+          .insert({
+            tag_code:
+              cleanTagCode,
 
-          tag_code:
-            cleanTagCode,
+            owner_id:
+              currentUser.id,
 
-          /* OWNER */
+            owner_first_name:
+              owner.firstName.trim(),
 
-          owner_id:
-            currentUser.id,
+            owner_last_name:
+              owner.lastName.trim(),
 
-          owner_first_name:
-            owner.firstName.trim(),
+            owner_phone:
+              owner.phone.trim(),
 
-          owner_last_name:
-            owner.lastName.trim(),
+            owner_email:
+              owner.email.trim(),
 
-          owner_phone:
-            owner.phone.trim(),
+            item_type:
+              type,
 
-          owner_email:
-            owner.email.trim(),
+            pet_type:
+              type,
 
-          /* LOCKED CATEGORY */
+            item_name:
+              itemName.trim(),
 
-          item_type:
-            type,
+            colour:
+              colour.trim() ||
+              null,
 
-          pet_type:
-            type,
+            sex:
+              sex || null,
 
-          /* PET */
+            date_of_birth:
+              dateOfBirth ||
+              null,
 
-          item_name:
-            itemName.trim(),
+            weight:
+              weight
+                ? Number(weight)
+                : null,
 
-          colour:
-            colour.trim() ||
-            null,
+            photo:
+              photo.trim() ||
+              null,
 
-          sex:
-            sex || null,
+            medical_info:
+              medicalInfo.trim() ||
+              null,
 
-          date_of_birth:
-            dateOfBirth ||
-            null,
+            behaviour_note:
+              behaviourNote.trim() ||
+              null,
 
-          weight:
-            weight
-              ? Number(weight)
-              : null,
+            description:
+              description.trim() ||
+              null,
 
-          photo:
-            photo.trim() ||
-            null,
+            finder_message:
+              finderMessage.trim() ||
+              null,
 
-          medical_info:
-            medicalInfo.trim() ||
-            null,
+            show_owner_name:
+              true,
 
-          behaviour_note:
-            behaviourNote.trim() ||
-            null,
+            show_owner_phone:
+              true,
 
-          description:
-            description.trim() ||
-            null,
+            show_email:
+              showEmail,
 
-          finder_message:
-            finderMessage.trim() ||
-            null,
+            show_address:
+              showAddress,
 
-          /* FINDER VISIBILITY */
+            show_pet_photo:
+              showPetPhoto,
 
-          show_owner_name:
-            true,
+            show_medical_info:
+              showMedicalInfo,
 
-          show_owner_phone:
-            true,
+            show_behaviour_note:
+              showBehaviourNote,
 
-          show_email:
-            showEmail,
+            show_description:
+              showDescription,
 
-          show_address:
-            showAddress,
+            show_finder_message:
+              showFinderMessage,
 
-          show_pet_photo:
-            showPetPhoto,
+            phone_enabled:
+              true,
 
-          show_medical_info:
-            showMedicalInfo,
+            live_chat_enabled:
+              liveChatEnabled,
 
-          show_behaviour_note:
-            showBehaviourNote,
+            active:
+              true,
 
-          show_description:
-            showDescription,
+            lost:
+              false,
+          })
+          .select(
+            "id, tag_code, item_type, item_name"
+          )
+          .single();
 
-          show_finder_message:
-            showFinderMessage,
-
-          /* CONTACT */
-
-          phone_enabled:
-            true,
-
-          live_chat_enabled:
-            liveChatEnabled,
-
-          /* STATUS */
-
-          active:
-            true,
-        })
-        .select(
-          "id, tag_code, item_type, item_name"
-        )
-        .single();
-
-      if (insertError) {
+      if (
+        insertError
+      ) {
         const lowerMessage =
           insertError.message
             .toLowerCase();
@@ -745,7 +565,9 @@ export default function PetRegistrationForm({
         );
       }
 
-      if (!createdProfile) {
+      if (
+        !createdProfile
+      ) {
         throw new Error(
           "პროფილის შექმნის შედეგი ვერ მოიძებნა."
         );
@@ -759,10 +581,10 @@ export default function PetRegistrationForm({
         router.push(
           "/my-profiles"
         );
-      }, 800);
+      }, 900);
     } catch (error) {
       console.error(
-        "Profile save error:",
+        "Pet profile save error:",
         error
       );
 
@@ -777,55 +599,66 @@ export default function PetRegistrationForm({
         behavior: "smooth",
       });
     } finally {
-      setSaving(false);
+      setSaving(
+        false
+      );
     }
   }
 
-  /* ================= LOADING ================= */
-
-  if (authLoading) {
+  if (
+    authLoading
+  ) {
     return (
-      <div
-        style={{
-          minHeight: "320px",
-          display: "grid",
-          placeItems: "center",
-          border: "1px solid #dce6f1",
-          borderRadius: "16px",
-          background: "#ffffff",
-          color: "#718095",
-          fontSize: "11px",
-        }}
-      >
-        თქვენი ანგარიში იტვირთება...
+      <div className="loading">
+        ანგარიშის ინფორმაცია იტვირთება...
+
+        <style jsx>{`
+          .loading {
+            min-height: 250px;
+
+            display: grid;
+            place-items: center;
+
+            border:
+              1px solid #dce6f1;
+
+            border-radius:
+              16px;
+
+            background:
+              #ffffff;
+
+            color:
+              #718095;
+
+            font-size:
+              11px;
+          }
+        `}</style>
       </div>
     );
   }
-
-  /* ================= FORM ================= */
 
   return (
     <>
       <form
         className="petForm"
-        onSubmit={handleSubmit}
+        onSubmit={
+          handleSubmit
+        }
       >
         {errorMessage && (
           <div
             className="message error"
             role="alert"
           >
-            <span>!</span>
+            <strong>
+              მონაცემები გადაამოწმეთ
+            </strong>
 
-            <div>
-              <strong>
-                მონაცემები გადაამოწმეთ
-              </strong>
-
-              <p>
-                {errorMessage}
-              </p>
-            </div>
+            <p>
+              {errorMessage}
+            </p>
           </div>
         )}
 
@@ -834,61 +667,37 @@ export default function PetRegistrationForm({
             className="message success"
             role="status"
           >
-            <span>✓</span>
+            <strong>
+              ✓ პროფილი შეიქმნა
+            </strong>
 
-            <div>
-              <strong>
-                პროფილი შეიქმნა
-              </strong>
-
-              <p>
-                {successMessage}
-              </p>
-            </div>
+            <p>
+              {successMessage}
+            </p>
           </div>
         )}
 
-        {/* OWNER */}
+        <section className="productIntro">
+          <div className="productIcon">
+            {petEmoji}
+          </div>
 
-        <OwnerInformationSection
-          firstName={
-            owner.firstName
-          }
-          lastName={
-            owner.lastName
-          }
-          phone={
-            owner.phone
-          }
-          email={
-            owner.email
-          }
-        />
+          <div>
+            <span>
+              STEP 02 · PRODUCT
+            </span>
 
-        {/* ADMIN */}
+            <h2>
+              {petLabel}ს პროფილი
+            </h2>
 
-        <AdminAccessSection
-          adminEnabled={
-            adminEnabled
-          }
-          setAdminEnabled={
-            setAdminEnabled
-          }
-          adminEmail={
-            adminEmail
-          }
-          setAdminEmail={
-            setAdminEmail
-          }
-          permissions={
-            permissions
-          }
-          setPermissions={
-            setPermissions
-          }
-        />
-
-        {/* PET BASIC */}
+            <p>
+              მფლობელის ეტაპი დასრულებულია.
+              ახლა შეავსეთ მხოლოდ{" "}
+              {petLabel}ს ინფორმაცია.
+            </p>
+          </div>
+        </section>
 
         <PetBasicInfo
           tagCode={
@@ -935,8 +744,6 @@ export default function PetRegistrationForm({
           }
         />
 
-        {/* HEALTH */}
-
         <PetHealthSection
           medicalInfo={
             medicalInfo
@@ -963,8 +770,6 @@ export default function PetRegistrationForm({
             setFinderMessage
           }
         />
-
-        {/* FINDER VIEW */}
 
         <FinderVisibilitySection
           showEmail={
@@ -1011,8 +816,6 @@ export default function PetRegistrationForm({
           }
         />
 
-        {/* CONTACT */}
-
         <ContactOptionsSection
           liveChatEnabled={
             liveChatEnabled
@@ -1022,8 +825,6 @@ export default function PetRegistrationForm({
           }
         />
 
-        {/* SAVE */}
-
         <section className="saveCard">
           <div>
             <span>
@@ -1031,33 +832,35 @@ export default function PetRegistrationForm({
             </span>
 
             <h3>
-              პროფილის შექმნა
+              {petEmoji}{" "}
+              {petLabel}ს პროფილის შექმნა
             </h3>
 
             <p>
-              QR კოდი{" "}
-              <strong>
-                {tagCode ||
-                  "ჯერ არ არის მითითებული"}
-              </strong>
-              {" "}დაფიქსირდება{" "}
-              <strong>
-                {petLabel}
-              </strong>
-              -ის კატეგორიაზე.
+              ამ QR კოდის კატეგორია
+              შექმნის შემდეგ აღარ
+              შეიცვლება.
             </p>
           </div>
 
-          <button
-            type="submit"
-            disabled={
-              saving
-            }
-          >
-            {saving
-              ? "ინახება..."
-              : "პროფილის შექმნა"}
-          </button>
+          <div className="actions">
+            <a
+              href={`/register-item/${type}`}
+            >
+              ← უკან
+            </a>
+
+            <button
+              type="submit"
+              disabled={
+                saving
+              }
+            >
+              {saving
+                ? "ინახება..."
+                : "პროფილის შექმნა"}
+            </button>
+          </div>
         </section>
       </form>
 
@@ -1071,83 +874,153 @@ export default function PetRegistrationForm({
 
           padding: 14px;
 
-          display: flex;
-          align-items: flex-start;
-
-          gap: 10px;
-
-          border-radius: 12px;
-        }
-
-        .message > span {
-          width: 25px;
-          height: 25px;
-
-          flex: 0 0 25px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-
-          font-size: 9px;
-          font-weight: 950;
+          border-radius:
+            12px;
         }
 
         .message strong {
           display: block;
 
-          font-size: 10px;
+          font-size:
+            10px;
         }
 
         .message p {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
-          font-size: 9px;
-          line-height: 1.5;
+          font-size:
+            9px;
         }
 
         .error {
           border:
-            1px solid #f0c8cc;
+            1px solid #efc7cb;
 
-          background: #fff7f8;
+          background:
+            #fff7f8;
 
-          color: #a13e47;
-        }
-
-        .error > span {
-          background: #fce4e6;
+          color:
+            #a3434c;
         }
 
         .success {
           border:
-            1px solid #c6dfd1;
+            1px solid #c5dfd1;
 
-          background: #f6fbf8;
+          background:
+            #f5fbf7;
 
-          color: #386f56;
+          color:
+            #397057;
         }
 
-        .success > span {
-          background: #e1f2e8;
+        .productIntro {
+          padding:
+            20px 22px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            13px;
+
+          border:
+            1px solid #dce6f1;
+
+          border-radius:
+            16px;
+
+          background:
+            #ffffff;
+        }
+
+        .productIcon {
+          width: 50px;
+          height: 50px;
+
+          flex:
+            0 0 50px;
+
+          display:
+            grid;
+
+          place-items:
+            center;
+
+          border-radius:
+            14px;
+
+          background:
+            #edf4ff;
+
+          font-size:
+            25px;
+        }
+
+        .productIntro span {
+          color:
+            #1266e9;
+
+          font-size:
+            7px;
+
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
+        }
+
+        .productIntro h2 {
+          margin:
+            5px 0 0;
+
+          color:
+            #29425d;
+
+          font-size:
+            17px;
+        }
+
+        .productIntro p {
+          margin:
+            5px 0 0;
+
+          color:
+            #7f8fa0;
+
+          font-size:
+            8px;
         }
 
         .saveCard {
-          margin-top: 16px;
+          margin-top:
+            16px;
 
-          padding: 23px 25px;
+          padding:
+            23px 25px;
 
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          display:
+            flex;
 
-          gap: 20px;
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap:
+            20px;
 
           border:
             1px solid #cddff5;
 
-          border-radius: 16px;
+          border-radius:
+            16px;
 
           background:
             linear-gradient(
@@ -1157,80 +1030,142 @@ export default function PetRegistrationForm({
             );
         }
 
-        .saveCard > div > span {
-          color: #1266e9;
+        .saveCard
+          > div
+          > span {
+          color:
+            #1266e9;
 
-          font-size: 8px;
-          font-weight: 900;
+          font-size:
+            8px;
 
-          letter-spacing: 1.2px;
+          font-weight:
+            900;
+
+          letter-spacing:
+            1px;
         }
 
         .saveCard h3 {
-          margin: 6px 0 0;
+          margin:
+            6px 0 0;
 
-          color: #233b55;
+          color:
+            #233b55;
 
-          font-size: 17px;
+          font-size:
+            17px;
         }
 
         .saveCard p {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
-          color: #7c8a9a;
+          color:
+            #7c8a9a;
 
-          font-size: 9px;
-          line-height: 1.6;
+          font-size:
+            9px;
         }
 
-        .saveCard p strong {
-          color: #1266e9;
+        .actions {
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            8px;
         }
 
-        .saveCard button {
-          min-width: 160px;
-          min-height: 46px;
+        .actions a,
+        .actions button {
+          min-height:
+            44px;
 
-          padding: 0 16px;
+          padding:
+            0 15px;
 
-          border: 0;
-          border-radius: 10px;
+          display:
+            flex;
 
-          background: #1266e9;
+          align-items:
+            center;
 
-          color: #ffffff;
+          justify-content:
+            center;
 
-          font-family: inherit;
-          font-size: 9px;
-          font-weight: 900;
+          border-radius:
+            10px;
 
-          cursor: pointer;
+          font-family:
+            inherit;
 
-          box-shadow:
-            0 10px 20px
-            rgba(
-              18,
-              102,
-              233,
-              0.16
-            );
+          font-size:
+            9px;
+
+          font-weight:
+            900;
+
+          text-decoration:
+            none;
         }
 
-        .saveCard button:disabled {
-          opacity: 0.6;
+        .actions a {
+          border:
+            1px solid #ccd9e7;
 
-          cursor: wait;
+          background:
+            #ffffff;
+
+          color:
+            #64778b;
         }
 
-        @media (max-width: 650px) {
+        .actions button {
+          min-width:
+            155px;
+
+          border:
+            0;
+
+          background:
+            #1266e9;
+
+          color:
+            #ffffff;
+
+          cursor:
+            pointer;
+        }
+
+        .actions button:disabled {
+          opacity:
+            .6;
+        }
+
+        @media (
+          max-width:
+            650px
+        ) {
           .saveCard {
-            flex-direction: column;
+            flex-direction:
+              column;
 
-            align-items: stretch;
+            align-items:
+              stretch;
           }
 
-          .saveCard button {
-            width: 100%;
+          .actions {
+            width:
+              100%;
+          }
+
+          .actions a,
+          .actions button {
+            flex:
+              1;
           }
         }
       `}</style>
