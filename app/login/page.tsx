@@ -2,10 +2,14 @@
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 function createSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -13,7 +17,9 @@ function createSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
   if (!url || !key) {
-    throw new Error("Supabase კავშირი ვერ მოიძებნა.");
+    throw new Error(
+      "Supabase კავშირი ვერ მოიძებნა."
+    );
   }
 
   return createClient(url, key);
@@ -21,13 +27,31 @@ function createSupabase() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] =
+    useState(
+      searchParams.get("email") || ""
+    );
 
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [password, setPassword] =
+    useState("");
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  const registered =
+    searchParams.get("registered") === "1";
 
   async function handleLogin(
     event: FormEvent<HTMLFormElement>
@@ -36,11 +60,19 @@ export default function LoginPage() {
 
     setErrorMessage("");
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail =
+      email.trim().toLowerCase();
 
-    if (!cleanEmail || !password) {
+    if (!cleanEmail) {
       setErrorMessage(
-        "შეიყვანეთ ელფოსტა და პაროლი."
+        "გთხოვთ შეიყვანოთ ელფოსტა."
+      );
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage(
+        "გთხოვთ შეიყვანოთ პაროლი."
       );
       return;
     }
@@ -48,33 +80,78 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const supabase = createSupabase();
+      const supabase =
+        createSupabase();
 
       const { error } =
-        await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        });
+        await supabase.auth
+          .signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
 
       if (error) {
         throw error;
       }
 
-      router.push("/account");
+      /*
+       * მთავარი ლოგიკა:
+       *
+       * ახალი რეგისტრაციის შემდეგ URL იქნება:
+       * /login?registered=1&next=/register
+       *
+       * ამიტომ პირდაპირ პროდუქტის არჩევაზე წავა.
+       *
+       * ჩვეულებრივი Login:
+       * /login
+       *
+       * წავა /account-ზე.
+       */
+
+      const requestedNext =
+        searchParams.get("next");
+
+      const safeNext =
+        requestedNext &&
+        requestedNext.startsWith("/") &&
+        !requestedNext.startsWith("//")
+          ? requestedNext
+          : "/account";
+
+      router.replace(safeNext);
       router.refresh();
     } catch (error) {
-      console.error("Login error:", error);
+      console.error(
+        "Login error:",
+        error
+      );
 
       const message =
         error instanceof Error
           ? error.message
           : "";
 
+      const lower =
+        message.toLowerCase();
+
       if (
-        message.toLowerCase().includes("invalid login")
+        lower.includes(
+          "invalid login credentials"
+        ) ||
+        lower.includes(
+          "invalid login"
+        )
       ) {
         setErrorMessage(
           "ელფოსტა ან პაროლი არასწორია."
+        );
+      } else if (
+        lower.includes(
+          "email not confirmed"
+        )
+      ) {
+        setErrorMessage(
+          "გთხოვთ ჯერ დაადასტუროთ ელფოსტა."
         );
       } else {
         setErrorMessage(
@@ -105,13 +182,19 @@ export default function LoginPage() {
         </div>
 
         <header className="header">
-          <a href="/" className="brand">
+          <a
+            href="/"
+            className="brand"
+          >
             <span className="brandIcon">
               QR
             </span>
 
             <span className="brandText">
-              <strong>QR RETURN</strong>
+              <strong>
+                QR RETURN
+              </strong>
+
               <small>
                 SMART QR CONNECTION
               </small>
@@ -130,9 +213,17 @@ export default function LoginPage() {
             </h1>
 
             <p className="description">
-              ერთი ანგარიშიდან მართეთ თქვენი
-              ყველა QR პროფილი.
+              ერთი ანგარიშიდან მართეთ
+              თქვენი ყველა QR პროფილი.
             </p>
+
+            {registered && (
+              <div className="successNotice">
+                ✓ ანგარიში შექმნილია.
+                შედით და გააგრძელეთ
+                პროდუქტის არჩევა.
+              </div>
+            )}
 
             {errorMessage && (
               <div
@@ -219,7 +310,9 @@ export default function LoginPage() {
               >
                 {loading
                   ? "შესვლა..."
-                  : "შესვლა"}
+                  : registered
+                    ? "შესვლა და გაგრძელება →"
+                    : "შესვლა"}
               </button>
             </form>
 
@@ -282,14 +375,12 @@ export default function LoginPage() {
         .decorOne {
           top: 15%;
           left: 6%;
-
           transform: rotate(-14deg);
         }
 
         .decorTwo {
           right: 7%;
           bottom: 8%;
-
           transform: rotate(14deg);
         }
 
@@ -355,7 +446,6 @@ export default function LoginPage() {
 
           font-size: 9px;
           font-weight: 800;
-
           letter-spacing: 0.6px;
         }
 
@@ -396,7 +486,6 @@ export default function LoginPage() {
 
           font-size: 10px;
           font-weight: 900;
-
           letter-spacing: 0.7px;
         }
 
@@ -418,6 +507,24 @@ export default function LoginPage() {
 
           font-size: 13px;
           line-height: 1.55;
+        }
+
+        .successNotice {
+          margin-top: 17px;
+
+          padding: 11px 13px;
+
+          border:
+            1px solid #cfe5d8;
+
+          border-radius: 9px;
+
+          background: #f1fbf5;
+          color: #24704a;
+
+          font-size: 12px;
+          font-weight: 750;
+          line-height: 1.45;
         }
 
         form {
@@ -457,10 +564,6 @@ export default function LoginPage() {
           font-weight: 800;
 
           text-decoration: none;
-        }
-
-        .forgot:hover {
-          text-decoration: underline;
         }
 
         input {
@@ -515,8 +618,6 @@ export default function LoginPage() {
           min-width: 61px;
           height: 34px;
 
-          padding: 0 9px;
-
           border: 0;
           border-radius: 8px;
 
@@ -545,19 +646,10 @@ export default function LoginPage() {
           font-weight: 900;
 
           cursor: pointer;
-
-          box-shadow:
-            0 8px 19px
-            rgba(6, 71, 200, 0.18);
-        }
-
-        .submit:hover:not(:disabled) {
-          background: #0754dc;
         }
 
         .submit:disabled {
           opacity: 0.65;
-
           cursor: not-allowed;
         }
 
@@ -584,7 +676,6 @@ export default function LoginPage() {
 
         .divider span {
           display: block;
-
           height: 1px;
 
           background: #e7edf3;
@@ -610,10 +701,6 @@ export default function LoginPage() {
           text-decoration: none;
         }
 
-        .signup a:hover {
-          text-decoration: underline;
-        }
-
         @media (max-width: 520px) {
           .brandText small {
             display: none;
@@ -621,7 +708,6 @@ export default function LoginPage() {
 
           .card {
             padding: 25px 19px;
-
             border-radius: 16px;
           }
 
@@ -631,12 +717,7 @@ export default function LoginPage() {
 
           input {
             height: 54px;
-
             font-size: 16px;
-          }
-
-          .passwordLabel {
-            align-items: flex-end;
           }
         }
       `}</style>
