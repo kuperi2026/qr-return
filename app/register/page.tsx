@@ -1,3 +1,8 @@
+ფაილი: [app/register/page.tsx — GitHub](https://github.com/kuperi2026/qr-return/blob/main/app/register/page.tsx?utm_source=chatgpt.com)
+
+**მთელი ძველი კოდი წაშალე და ეს ჩასვი.** განლაგება იგივე დავტოვე — Emergency მარცხნივ, 6 პროდუქტი მარჯვნივ 3×2. მხოლოდ შიგნით ტექსტები გავზარდე.
+
+```tsx
 "use client";
 
 const PRODUCTS = [
@@ -73,8 +78,8 @@ export default function RegisterPage() {
             <h1>აირჩიეთ პროდუქტი</h1>
 
             <p>
-              ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად
-              დაამატოთ და მართოთ ყველა თქვენი QR პროფილი.
+              ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად დაამატოთ
+              და მართოთ ყველა თქვენი QR პროფილი.
             </p>
           </div>
 
@@ -132,7 +137,7 @@ export default function RegisterPage() {
               </span>
             </a>
 
-            {/* SIX EXISTING PRODUCTS — RIGHT */}
+            {/* SIX PRODUCTS — RIGHT */}
 
             <div className="productsGrid">
               {PRODUCTS.map((product) => (
@@ -170,9 +175,9 @@ export default function RegisterPage() {
               </strong>
 
               <p>
-                Lost &amp; Found პროდუქტები და Emergency
-                Bracelet ერთი ანგარიშიდან იმართება.
-                თითოეული QR კოდი საკუთარ პროფილზე ფიქსირდება.
+                Lost &amp; Found პროდუქტები და Emergency Bracelet
+                ერთი ანგარიშიდან იმართება. თითოეული QR კოდი
+                საკუთარ პროფილზე ფიქსირდება.
               </p>
             </div>
           </div>
@@ -242,9 +247,7 @@ export default function RegisterPage() {
 
         .brand span {
           margin-top: 2px;
-
           color: rgba(255, 255, 255, 0.74);
-
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.8px;
@@ -269,7 +272,7 @@ export default function RegisterPage() {
           text-decoration: none;
         }
 
-        /* MAIN WHITE CARD */
+        /* MAIN */
 
         .mainCard {
           width: 100%;
@@ -296,28 +299,23 @@ export default function RegisterPage() {
 
         .eyebrow {
           color: #0747c9;
-
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 900;
           letter-spacing: 1px;
         }
 
         .intro h1 {
           margin: 4px 0 0;
-
           color: #17324f;
-
-          font-size: 29px;
+          font-size: 31px;
           line-height: 1.1;
         }
 
         .intro p {
           max-width: 680px;
-          margin: 6px auto 0;
-
+          margin: 7px auto 0;
           color: #667b92;
-
-          font-size: 13px;
+          font-size: 14px;
           line-height: 1.45;
         }
 
@@ -375,7 +373,6 @@ export default function RegisterPage() {
         .emergencyCard:hover {
           transform: translateY(-3px);
           background: #063fae;
-
           box-shadow: 0 16px 28px rgba(7, 71, 201, 0.22);
         }
 
@@ -393,13 +390,11 @@ export default function RegisterPage() {
           place-items: center;
 
           border-radius: 13px;
-
           background: #ffffff;
         }
 
         .medicalCross {
           color: #0747c9;
-
           font-size: 30px;
           font-weight: 500;
           line-height: 1;
@@ -418,7 +413,6 @@ export default function RegisterPage() {
           background: rgba(255, 255, 255, 0.14);
 
           color: #ffffff;
-
           font-size: 17px;
           font-weight: 900;
         }
@@ -428,39 +422,30 @@ export default function RegisterPage() {
         }
 
         .emergencyEyebrow {
-          color: rgba(255, 255, 255, 0.7);
-
-          font-size: 9px;
+          color: rgba(255, 255, 255, 0.75);
+          font-size: 11px;
           font-weight: 900;
-
           letter-spacing: 1.4px;
         }
 
         .emergencyCard h2 {
           margin: 6px 0 0;
-
           color: #ffffff;
-
-          font-size: 27px;
-          line-height: 1.02;
-
+          font-size: 30px;
+          line-height: 1.05;
           letter-spacing: -0.5px;
         }
 
         .emergencyCard p {
           margin: 10px 0 0;
-
           max-width: 250px;
-
-          color: rgba(255, 255, 255, 0.82);
-
-          font-size: 12px;
-          line-height: 1.45;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 14px;
+          line-height: 1.5;
         }
 
         .featureList {
           margin-top: 17px;
-
           display: grid;
           gap: 8px;
         }
@@ -470,17 +455,16 @@ export default function RegisterPage() {
           align-items: center;
           gap: 7px;
 
-          color: rgba(255, 255, 255, 0.9);
-
-          font-size: 11px;
+          color: rgba(255, 255, 255, 0.94);
+          font-size: 13px;
           font-weight: 700;
         }
 
         .check {
-          width: 19px;
-          height: 19px;
+          width: 20px;
+          height: 20px;
 
-          flex: 0 0 19px;
+          flex: 0 0 20px;
 
           display: grid;
           place-items: center;
@@ -491,8 +475,7 @@ export default function RegisterPage() {
           border: 1px solid rgba(255, 255, 255, 0.25);
 
           color: #ffffff;
-
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 900;
         }
 
@@ -501,12 +484,11 @@ export default function RegisterPage() {
           padding-top: 12px;
 
           color: #ffffff;
-
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 850;
         }
 
-        /* SIX PRODUCT GRID */
+        /* SIX PRODUCTS */
 
         .productsGrid {
           min-width: 0;
@@ -550,9 +532,7 @@ export default function RegisterPage() {
 
         .productCard:hover {
           transform: translateY(-3px);
-
           background: #063fae;
-
           box-shadow: 0 13px 24px rgba(7, 71, 201, 0.2);
         }
 
@@ -570,7 +550,6 @@ export default function RegisterPage() {
           place-items: center;
 
           border-radius: 11px;
-
           background: #ffffff;
 
           font-size: 21px;
@@ -586,11 +565,9 @@ export default function RegisterPage() {
           border-radius: 50%;
 
           background: rgba(255, 255, 255, 0.14);
-
           border: 1px solid rgba(255, 255, 255, 0.3);
 
           color: #ffffff;
-
           font-size: 14px;
           font-weight: 900;
         }
@@ -600,17 +577,18 @@ export default function RegisterPage() {
 
           color: #ffffff;
 
-          font-size: 17px;
+          font-size: 20px;
           line-height: 1.15;
+          font-weight: 850;
         }
 
         .productCard p {
-          margin: 5px 0 0;
+          margin: 6px 0 0;
 
-          color: rgba(255, 255, 255, 0.82);
+          color: rgba(255, 255, 255, 0.9);
 
-          font-size: 10px;
-          line-height: 1.4;
+          font-size: 12px;
+          line-height: 1.45;
         }
 
         .start {
@@ -619,24 +597,23 @@ export default function RegisterPage() {
 
           color: #ffffff;
 
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 850;
         }
 
-        /* INFO */
+        /* BOTTOM INFO */
 
         .bottomInfo {
           flex: 0 0 auto;
 
           margin-top: 12px;
 
-          min-height: 56px;
+          min-height: 60px;
 
           padding: 9px 13px;
 
           display: flex;
           align-items: center;
-
           gap: 10px;
 
           border: 1px solid #cbdcf4;
@@ -657,10 +634,9 @@ export default function RegisterPage() {
           border-radius: 50%;
 
           background: #0747c9;
-
           color: #ffffff;
 
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 900;
         }
 
@@ -669,16 +645,17 @@ export default function RegisterPage() {
 
           color: #29445f;
 
-          font-size: 12px;
+          font-size: 14px;
+          font-weight: 850;
         }
 
         .bottomInfo p {
-          margin: 2px 0 0;
+          margin: 3px 0 0;
 
           color: #6b7e92;
 
-          font-size: 10px;
-          line-height: 1.35;
+          font-size: 12px;
+          line-height: 1.4;
         }
 
         /* TABLET */
@@ -687,7 +664,6 @@ export default function RegisterPage() {
           .page {
             height: auto;
             min-height: 100vh;
-
             overflow: auto;
           }
 
@@ -700,7 +676,7 @@ export default function RegisterPage() {
           }
 
           .emergencyCard {
-            min-height: 270px;
+            min-height: 300px;
           }
 
           .productsGrid {
@@ -711,7 +687,7 @@ export default function RegisterPage() {
           }
 
           .productCard {
-            min-height: 190px;
+            min-height: 200px;
           }
         }
 
@@ -753,7 +729,7 @@ export default function RegisterPage() {
           }
 
           .emergencyCard {
-            min-height: 300px;
+            min-height: 320px;
           }
 
           .productsGrid {
@@ -761,10 +737,27 @@ export default function RegisterPage() {
           }
 
           .productCard {
-            min-height: 175px;
+            min-height: 185px;
+          }
+
+          .productCard h2 {
+            font-size: 21px;
+          }
+
+          .productCard p {
+            font-size: 13px;
+          }
+
+          .start {
+            font-size: 13px;
           }
         }
       `}</style>
     </>
   );
 }
+```
+
+შენახვისა და Vercel deployment-ის შემდეგ ტესტი აქ:
+
+[QR RETURN — Register Test](https://qr-return.vercel.app/register?utm_source=chatgpt.com)
