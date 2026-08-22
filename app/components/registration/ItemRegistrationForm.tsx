@@ -360,14 +360,15 @@ export default function ItemRegistrationForm({
       const {
         data: existingTag,
         error: tagCheckError,
-      } = await supabase
-        .from("item")
-        .select("tag_code")
-        .ilike(
-          "tag_code",
-          cleanTagCode
-        )
-        .maybeSingle();
+      } =
+        await supabase
+          .from("item")
+          .select("tag_code")
+          .ilike(
+            "tag_code",
+            cleanTagCode
+          )
+          .maybeSingle();
 
       if (tagCheckError) {
         throw new Error(
@@ -380,131 +381,151 @@ export default function ItemRegistrationForm({
           `QR კოდი ${cleanTagCode} უკვე დარეგისტრირებულია.`
         );
 
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+
         return;
       }
 
       const {
         data: createdProfile,
         error: insertError,
-      } = await supabase
-        .from("item")
-        .insert({
-          tag_code:
-            cleanTagCode,
+      } =
+        await supabase
+          .from("item")
+          .insert({
+            tag_code:
+              cleanTagCode,
 
-          owner_id:
-            currentUser.id,
+            owner_id:
+              currentUser.id,
 
-          owner_first_name:
-            owner.firstName.trim(),
+            owner_first_name:
+              owner.firstName.trim(),
 
-          owner_last_name:
-            owner.lastName.trim(),
+            owner_last_name:
+              owner.lastName.trim(),
 
-          owner_phone:
-            owner.phone.trim(),
+            owner_phone:
+              owner.phone.trim(),
 
-          owner_email:
-            owner.email.trim(),
+            owner_email:
+              owner.email.trim(),
 
-          item_type:
-            type,
+            item_type:
+              type,
 
-          pet_type:
-            null,
+            pet_type:
+              null,
 
-          item_name:
-            itemName.trim(),
+            item_name:
+              itemName.trim(),
 
-          description:
-            description.trim() ||
-            null,
+            description:
+              description.trim() ||
+              null,
 
-          brand:
-            showBrand &&
-            brand.trim()
-              ? brand.trim()
-              : null,
+            brand:
+              showBrand &&
+              brand.trim()
+                ? brand.trim()
+                : null,
 
-          model:
-            showModel &&
-            model.trim()
-              ? model.trim()
-              : null,
+            model:
+              showModel &&
+              model.trim()
+                ? model.trim()
+                : null,
 
-          colour:
-            colour.trim() ||
-            null,
+            colour:
+              colour.trim() ||
+              null,
 
-          size:
-            showSize &&
-            size.trim()
-              ? size.trim()
-              : null,
+            size:
+              showSize &&
+              size.trim()
+                ? size.trim()
+                : null,
 
-          material:
-            showMaterial &&
-            material.trim()
-              ? material.trim()
-              : null,
+            material:
+              showMaterial &&
+              material.trim()
+                ? material.trim()
+                : null,
 
-          distinctive_features:
-            distinctiveFeatures.trim() ||
-            null,
+            distinctive_features:
+              distinctiveFeatures.trim() ||
+              null,
 
-          finder_message:
-            finderMessage.trim() ||
-            null,
+            finder_message:
+              finderMessage.trim() ||
+              null,
 
-          photo:
-            photo.trim() ||
-            null,
+            photo:
+              photo.trim() ||
+              null,
 
-          show_owner_name:
-            true,
+            show_owner_name:
+              true,
 
-          show_owner_phone:
-            true,
+            show_owner_phone:
+              true,
 
-          show_email:
-            showEmail,
+            show_email:
+              showEmail,
 
-          show_address:
-            showAddress,
+            show_address:
+              showAddress,
 
-          show_pet_photo:
-            showPhoto,
+            show_pet_photo:
+              showPhoto,
 
-          show_medical_info:
-            false,
+            show_medical_info:
+              false,
 
-          show_behaviour_note:
-            false,
+            show_behaviour_note:
+              false,
 
-          show_description:
-            showDescription,
+            show_description:
+              showDescription,
 
-          show_finder_message:
-            showFinderMessage,
+            show_finder_message:
+              showFinderMessage,
 
-          phone_enabled:
-            true,
+            phone_enabled:
+              true,
 
-          live_chat_enabled:
-            liveChatEnabled,
+            live_chat_enabled:
+              liveChatEnabled,
 
-          active:
-            true,
+            active:
+              true,
 
-          lost:
-            false,
-        })
-        .select(
-          "id, tag_code, item_type, item_name"
-        )
-        .single();
+            lost:
+              false,
+          })
+          .select(
+            "id, tag_code, item_type, item_name"
+          )
+          .single();
 
       if (insertError) {
+        const lowerMessage =
+          insertError.message
+            .toLowerCase();
+
+        if (
+          lowerMessage.includes("duplicate") ||
+          lowerMessage.includes("unique")
+        ) {
+          setErrorMessage(
+            "ეს QR კოდი უკვე გამოყენებულია."
+          );
+          return;
+        }
+
         throw new Error(
           insertError.message
         );
@@ -522,9 +543,11 @@ export default function ItemRegistrationForm({
 
       setTimeout(() => {
         router.push(
-          "/my-profiles"
+          `/registration-success?type=${type}&tag=${encodeURIComponent(
+            createdProfile.tag_code
+          )}`
         );
-      }, 900);
+      }, 700);
     } catch (error) {
       console.error(
         "Item save error:",
@@ -536,6 +559,11 @@ export default function ItemRegistrationForm({
           ? `შენახვა ვერ მოხერხდა: ${error.message}`
           : "შენახვა ვერ მოხერხდა."
       );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     } finally {
       setSaving(false);
     }
@@ -549,19 +577,12 @@ export default function ItemRegistrationForm({
         <style jsx>{`
           .loading {
             min-height: 250px;
-
             display: grid;
             place-items: center;
-
-            border:
-              1px solid #dce6f1;
-
+            border: 1px solid #dce6f1;
             border-radius: 16px;
-
             background: #ffffff;
-
             color: #718095;
-
             font-size: 11px;
           }
         `}</style>
@@ -772,9 +793,7 @@ export default function ItemRegistrationForm({
             >
               <textarea
                 rows={4}
-                value={
-                  distinctiveFeatures
-                }
+                value={distinctiveFeatures}
                 onChange={(event) =>
                   setDistinctiveFeatures(
                     event.target.value
@@ -796,9 +815,7 @@ export default function ItemRegistrationForm({
             >
               <textarea
                 rows={4}
-                value={
-                  finderMessage
-                }
+                value={finderMessage}
                 onChange={(event) =>
                   setFinderMessage(
                     event.target.value
@@ -813,33 +830,23 @@ export default function ItemRegistrationForm({
         <FinderVisibilitySection
           showEmail={showEmail}
           setShowEmail={setShowEmail}
-
           showAddress={showAddress}
           setShowAddress={setShowAddress}
-
           showPetPhoto={showPhoto}
           setShowPetPhoto={setShowPhoto}
-
           showMedicalInfo={showMedicalInfo}
           setShowMedicalInfo={setShowMedicalInfo}
-
           showBehaviourNote={showBehaviourNote}
           setShowBehaviourNote={setShowBehaviourNote}
-
           showDescription={showDescription}
           setShowDescription={setShowDescription}
-
           showFinderMessage={showFinderMessage}
           setShowFinderMessage={setShowFinderMessage}
         />
 
         <ContactOptionsSection
-          liveChatEnabled={
-            liveChatEnabled
-          }
-          setLiveChatEnabled={
-            setLiveChatEnabled
-          }
+          liveChatEnabled={liveChatEnabled}
+          setLiveChatEnabled={setLiveChatEnabled}
         />
 
         <section className="saveCard">
@@ -886,71 +893,46 @@ export default function ItemRegistrationForm({
 
         .message {
           margin-bottom: 16px;
-
           padding: 14px;
-
           border-radius: 12px;
         }
 
         .message strong {
           display: block;
-
           font-size: 10px;
         }
 
         .message p {
           margin: 4px 0 0;
-
           font-size: 9px;
         }
 
         .error {
-          border:
-            1px solid #efc7cb;
-
-          background:
-            #fff7f8;
-
-          color:
-            #a3434c;
+          border: 1px solid #efc7cb;
+          background: #fff7f8;
+          color: #a3434c;
         }
 
         .success {
-          border:
-            1px solid #c5dfd1;
-
-          background:
-            #f5fbf7;
-
-          color:
-            #397057;
+          border: 1px solid #c5dfd1;
+          background: #f5fbf7;
+          color: #397057;
         }
 
         .card {
           padding: 25px;
-
-          border:
-            1px solid #dce6f1;
-
+          border: 1px solid #dce6f1;
           border-radius: 16px;
-
           background: #ffffff;
 
           box-shadow:
             0 12px 30px
-            rgba(
-              30,
-              70,
-              120,
-              .05
-            );
+            rgba(30,70,120,.05);
         }
 
         .cardHeader {
           display: flex;
-
           align-items: center;
-
           gap: 13px;
 
           padding-bottom: 20px;
@@ -962,11 +944,9 @@ export default function ItemRegistrationForm({
         .icon {
           width: 52px;
           height: 52px;
-
           flex: 0 0 52px;
 
           display: grid;
-
           place-items: center;
 
           border-radius: 14px;
@@ -978,38 +958,28 @@ export default function ItemRegistrationForm({
 
         .cardHeader span {
           color: #1266e9;
-
           font-size: 7px;
-
           font-weight: 900;
-
           letter-spacing: 1px;
         }
 
         .cardHeader h2 {
           margin: 5px 0 0;
-
           color: #223951;
-
           font-size: 18px;
         }
 
         .cardHeader p {
           margin: 6px 0 0;
-
           color: #8290a1;
-
           font-size: 9px;
         }
 
         .qrBox {
           margin-top: 22px;
-
           padding: 17px;
 
-          border:
-            1px solid #cfe0f6;
-
+          border: 1px solid #cfe0f6;
           border-radius: 13px;
 
           background: #f7faff;
@@ -1017,26 +987,21 @@ export default function ItemRegistrationForm({
 
         .qrBox label {
           display: block;
-
           margin-bottom: 7px;
 
           color: #344a62;
 
           font-size: 10px;
-
           font-weight: 850;
         }
 
         .qrBox input {
           width: 100%;
-
           min-height: 48px;
 
           padding: 0 13px;
 
-          border:
-            1px solid #d5e0eb;
-
+          border: 1px solid #d5e0eb;
           border-radius: 10px;
 
           outline: none;
@@ -1070,33 +1035,26 @@ export default function ItemRegistrationForm({
         textarea {
           width: 100%;
 
-          border:
-            1px solid #d5e0eb;
-
+          border: 1px solid #d5e0eb;
           border-radius: 10px;
 
           outline: none;
 
           background: #ffffff;
-
           color: #263e57;
 
           font-family: inherit;
-
           font-size: 11px;
         }
 
         input {
           min-height: 48px;
-
           padding: 0 13px;
         }
 
         textarea {
           padding: 12px 13px;
-
           resize: vertical;
-
           line-height: 1.5;
         }
 
@@ -1106,31 +1064,20 @@ export default function ItemRegistrationForm({
 
           box-shadow:
             0 0 0 4px
-            rgba(
-              18,
-              102,
-              233,
-              .08
-            );
+            rgba(18,102,233,.08);
         }
 
         .saveCard {
           margin-top: 16px;
-
           padding: 23px 25px;
 
           display: flex;
-
           align-items: center;
-
-          justify-content:
-            space-between;
+          justify-content: space-between;
 
           gap: 20px;
 
-          border:
-            1px solid #cddff5;
-
+          border: 1px solid #cddff5;
           border-radius: 16px;
 
           background:
@@ -1141,81 +1088,59 @@ export default function ItemRegistrationForm({
             );
         }
 
-        .saveCard
-          > div
-          > span {
+        .saveCard > div > span {
           color: #1266e9;
-
           font-size: 8px;
-
           font-weight: 900;
         }
 
         .saveCard h3 {
           margin: 6px 0 0;
-
           color: #233b55;
-
           font-size: 17px;
         }
 
         .saveCard p {
           margin: 7px 0 0;
-
           color: #7c8a9a;
-
           font-size: 9px;
         }
 
         .actions {
           display: flex;
-
           align-items: center;
-
           gap: 8px;
         }
 
         .actions a,
         .actions button {
           min-height: 44px;
-
           padding: 0 15px;
 
           display: flex;
-
           align-items: center;
-
           justify-content: center;
 
           border-radius: 10px;
 
           font-family: inherit;
-
           font-size: 9px;
-
           font-weight: 900;
 
           text-decoration: none;
         }
 
         .actions a {
-          border:
-            1px solid #ccd9e7;
-
+          border: 1px solid #ccd9e7;
           background: #ffffff;
-
           color: #64778b;
         }
 
         .actions button {
           min-width: 155px;
-
           border: 0;
-
           background: #1266e9;
-
           color: #ffffff;
-
           cursor: pointer;
         }
 
@@ -1230,7 +1155,6 @@ export default function ItemRegistrationForm({
 
           .saveCard {
             flex-direction: column;
-
             align-items: stretch;
           }
 
