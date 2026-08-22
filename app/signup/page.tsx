@@ -176,8 +176,6 @@ export default function SignupPage() {
         <div className="decor decor2">QR</div>
         <div className="decor decor3">QR</div>
 
-        {/* HEADER */}
-
         <header className="header">
           <a href="/" className="brand">
             <span className="brandIcon">QR</span>
@@ -193,12 +191,7 @@ export default function SignupPage() {
           </a>
         </header>
 
-        {/* MAIN */}
-
         <div className="layout">
-
-          {/* LEFT SIDE */}
-
           <section className="intro">
             <div className="introCard">
               <div className="introIcon">
@@ -217,16 +210,15 @@ export default function SignupPage() {
                 <p>
                   რეგისტრაციის შემდეგ შეძლებთ
                   <strong>
-                    {" "}ძაღლის, კატის, გასაღების,
-                    საფულის, ჩანთისა და ჩემოდნის{" "}
+                    {" "}
+                    ძაღლის, კატის, გასაღების, საფულის,
+                    ჩანთისა და ჩემოდნის{" "}
                   </strong>
                   QR პროფილების დამატებას.
                 </p>
               </div>
             </div>
           </section>
-
-          {/* REGISTRATION FORM */}
 
           <section className="card">
             <div className="cardHeader">
@@ -247,9 +239,6 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="grid">
-
-                {/* FIRST NAME */}
-
                 <div className="field">
                   <label htmlFor="firstName">
                     სახელი <b>*</b>
@@ -265,8 +254,6 @@ export default function SignupPage() {
                     autoComplete="given-name"
                   />
                 </div>
-
-                {/* LAST NAME */}
 
                 <div className="field">
                   <label htmlFor="lastName">
@@ -284,8 +271,6 @@ export default function SignupPage() {
                   />
                 </div>
 
-                {/* EMAIL */}
-
                 <div className="field">
                   <label htmlFor="email">
                     ელფოსტა <b>*</b>
@@ -302,8 +287,6 @@ export default function SignupPage() {
                   />
                 </div>
 
-                {/* PHONE */}
-
                 <div className="field">
                   <label htmlFor="phone">
                     ტელეფონის ნომერი <b>*</b>
@@ -319,8 +302,6 @@ export default function SignupPage() {
                     autoComplete="tel"
                   />
                 </div>
-
-                {/* CODE WORD */}
 
                 <div className="field full">
                   <label htmlFor="codeWord">
@@ -342,8 +323,6 @@ export default function SignupPage() {
                     იდენტიფიკაციისთვის.
                   </span>
                 </div>
-
-                {/* PASSWORD */}
 
                 <div className="field">
                   <label htmlFor="password">
@@ -383,8 +362,6 @@ export default function SignupPage() {
                     მინიმუმ 8 სიმბოლო
                   </span>
                 </div>
-
-                {/* CONFIRM PASSWORD */}
 
                 <div className="field">
                   <label htmlFor="confirmPassword">
@@ -450,13 +427,11 @@ export default function SignupPage() {
 
         .page {
           position: relative;
-
           min-height: 100vh;
-
           overflow: hidden;
 
           padding:
-            0 28px 42px;
+            0 26px 36px;
 
           background:
             radial-gradient(
@@ -478,14 +453,12 @@ export default function SignupPage() {
           position: fixed;
 
           pointer-events: none;
-
           user-select: none;
 
           color:
             rgba(255, 255, 255, 0.035);
 
-          font-size: 150px;
-
+          font-size: 145px;
           font-weight: 950;
         }
 
@@ -493,45 +466,39 @@ export default function SignupPage() {
           top: 12%;
           left: 3%;
 
-          transform:
-            rotate(-15deg);
+          transform: rotate(-15deg);
         }
 
         .decor2 {
           top: 15%;
           right: 4%;
 
-          transform:
-            rotate(13deg);
+          transform: rotate(13deg);
         }
 
         .decor3 {
           bottom: 2%;
           left: 30%;
 
-          transform:
-            rotate(8deg);
+          transform: rotate(8deg);
         }
 
         /* HEADER */
 
         .header {
           position: relative;
-
           z-index: 5;
 
           width: 100%;
+          max-width: 1240px;
 
-          max-width: 1360px;
-
-          height: 76px;
+          height: 72px;
 
           margin: auto;
 
           display: flex;
 
           align-items: center;
-
           justify-content: space-between;
 
           border-bottom:
@@ -544,28 +511,26 @@ export default function SignupPage() {
 
           align-items: center;
 
-          gap: 11px;
+          gap: 10px;
 
           text-decoration: none;
         }
 
         .brandIcon {
-          width: 45px;
-
-          height: 45px;
+          width: 43px;
+          height: 43px;
 
           display: grid;
 
           place-items: center;
 
-          border-radius: 12px;
+          border-radius: 11px;
 
           background: white;
 
           color: #0647c8;
 
-          font-size: 13px;
-
+          font-size: 12px;
           font-weight: 950;
 
           box-shadow:
@@ -581,7 +546,7 @@ export default function SignupPage() {
         .brand strong {
           color: white;
 
-          font-size: 18px;
+          font-size: 17px;
 
           font-weight: 900;
         }
@@ -600,9 +565,9 @@ export default function SignupPage() {
         }
 
         .loginButton {
-          min-width: 88px;
+          min-width: 84px;
 
-          height: 42px;
+          height: 40px;
 
           display: flex;
 
@@ -614,7 +579,7 @@ export default function SignupPage() {
             1px solid
             rgba(255, 255, 255, 0.35);
 
-          border-radius: 10px;
+          border-radius: 9px;
 
           color: white;
 
@@ -634,27 +599,26 @@ export default function SignupPage() {
 
           width: 100%;
 
-          max-width: 1360px;
+          max-width: 1180px;
 
           margin: auto;
 
-          padding-top: 42px;
+          padding-top: 34px;
 
           display: grid;
 
           grid-template-columns:
-            350px
-            minmax(0, 880px);
+            310px
+            740px;
 
-          justify-content:
-            space-between;
+          justify-content: center;
 
           align-items: center;
 
-          gap: 65px;
+          gap: 48px;
         }
 
-        /* LEFT PREMIUM MESSAGE */
+        /* LEFT CARD */
 
         .intro {
           display: flex;
@@ -668,7 +632,7 @@ export default function SignupPage() {
           width: 100%;
 
           padding:
-            31px 28px 30px;
+            27px 24px;
 
           overflow: hidden;
 
@@ -676,7 +640,7 @@ export default function SignupPage() {
             1px solid
             rgba(255, 255, 255, 0.2);
 
-          border-radius: 22px;
+          border-radius: 19px;
 
           background:
             linear-gradient(
@@ -686,8 +650,8 @@ export default function SignupPage() {
             );
 
           box-shadow:
-            0 22px 55px
-            rgba(0, 25, 85, 0.17);
+            0 20px 48px
+            rgba(0, 25, 85, 0.15);
 
           backdrop-filter:
             blur(8px);
@@ -698,11 +662,13 @@ export default function SignupPage() {
 
           position: absolute;
 
-          width: 150px;
-          height: 150px;
+          width: 140px;
+
+          height: 140px;
 
           top: -85px;
-          right: -65px;
+
+          right: -70px;
 
           border-radius: 50%;
 
@@ -711,11 +677,11 @@ export default function SignupPage() {
         }
 
         .introIcon {
-          width: 48px;
+          width: 44px;
 
-          height: 48px;
+          height: 44px;
 
-          margin-bottom: 22px;
+          margin-bottom: 19px;
 
           display: grid;
 
@@ -725,24 +691,18 @@ export default function SignupPage() {
             1px solid
             rgba(255, 255, 255, 0.25);
 
-          border-radius: 13px;
+          border-radius: 12px;
 
           background:
             rgba(255, 255, 255, 0.12);
-
-          box-shadow:
-            inset 0 1px 0
-            rgba(255, 255, 255, 0.16);
         }
 
         .introIcon span {
           color: white;
 
-          font-size: 12px;
+          font-size: 11px;
 
           font-weight: 950;
-
-          letter-spacing: 0.5px;
         }
 
         .introText h1 {
@@ -750,22 +710,22 @@ export default function SignupPage() {
 
           color: #ffffff;
 
-          font-size: 29px;
+          font-size: 26px;
 
           font-weight: 900;
 
           line-height: 1.22;
 
-          letter-spacing: -0.45px;
+          letter-spacing: -0.4px;
         }
 
         .line {
-          width: 42px;
+          width: 39px;
 
           height: 3px;
 
           margin:
-            19px 0 18px;
+            17px 0 16px;
 
           border-radius: 999px;
 
@@ -779,9 +739,9 @@ export default function SignupPage() {
           color:
             rgba(255, 255, 255, 0.78);
 
-          font-size: 14px;
+          font-size: 13px;
 
-          line-height: 1.72;
+          line-height: 1.65;
         }
 
         .introText p strong {
@@ -790,25 +750,27 @@ export default function SignupPage() {
           font-weight: 850;
         }
 
-        /* FORM CARD */
+        /* FORM CARD — SMALLER */
 
         .card {
           width: 100%;
 
+          max-width: 740px;
+
           padding:
-            32px 36px 29px;
+            27px 30px 25px;
 
           border:
             1px solid
             rgba(255, 255, 255, 0.7);
 
-          border-radius: 22px;
+          border-radius: 19px;
 
           background: #ffffff;
 
           box-shadow:
-            0 28px 70px
-            rgba(0, 25, 80, 0.3);
+            0 24px 58px
+            rgba(0, 25, 80, 0.27);
         }
 
         .cardHeader > span {
@@ -823,30 +785,30 @@ export default function SignupPage() {
 
         .cardHeader h2 {
           margin:
-            6px 0 0;
+            5px 0 0;
 
           color: #263e57;
 
-          font-size: 26px;
+          font-size: 24px;
 
           line-height: 1.25;
         }
 
         .cardHeader p {
           margin:
-            7px 0 0;
+            6px 0 0;
 
           color: #7a8998;
 
-          font-size: 13px;
+          font-size: 12px;
 
           line-height: 1.5;
         }
 
-        /* FORM GRID */
+        /* FORM */
 
         .grid {
-          margin-top: 25px;
+          margin-top: 21px;
 
           display: grid;
 
@@ -856,9 +818,9 @@ export default function SignupPage() {
               minmax(0, 1fr)
             );
 
-          column-gap: 22px;
+          column-gap: 18px;
 
-          row-gap: 20px;
+          row-gap: 17px;
         }
 
         .field {
@@ -874,7 +836,7 @@ export default function SignupPage() {
           display: block;
 
           margin:
-            0 0 9px 2px;
+            0 0 8px 2px;
 
           color: #42576b;
 
@@ -889,7 +851,7 @@ export default function SignupPage() {
           color: #0647c8;
         }
 
-        /* INPUT — 56PX */
+        /* INPUT HEIGHT STAYS 56PX */
 
         .field input,
         .passwordField input {
@@ -915,7 +877,7 @@ export default function SignupPage() {
             0 !important;
 
           padding:
-            0 17px !important;
+            0 16px !important;
 
           border:
             1.5px solid
@@ -990,11 +952,11 @@ export default function SignupPage() {
           display: block;
 
           margin:
-            7px 0 0 2px;
+            6px 0 0 2px;
 
           color: #8593a0;
 
-          font-size: 11px;
+          font-size: 10px;
 
           line-height: 1.4;
         }
@@ -1009,7 +971,7 @@ export default function SignupPage() {
 
         .passwordField input {
           padding-right:
-            90px !important;
+            85px !important;
         }
 
         .passwordField button {
@@ -1022,12 +984,12 @@ export default function SignupPage() {
           transform:
             translateY(-50%);
 
-          min-width: 65px;
+          min-width: 62px;
 
-          height: 35px;
+          height: 34px;
 
           padding:
-            0 10px;
+            0 9px;
 
           border: 0;
 
@@ -1038,10 +1000,9 @@ export default function SignupPage() {
 
           color: #0647c8;
 
-          font-family:
-            inherit;
+          font-family: inherit;
 
-          font-size: 11px;
+          font-size: 10px;
 
           font-weight: 850;
 
@@ -1056,10 +1017,10 @@ export default function SignupPage() {
         /* ERROR */
 
         .error {
-          margin-top: 17px;
+          margin-top: 15px;
 
           padding:
-            12px 14px;
+            11px 13px;
 
           border:
             1px solid
@@ -1073,8 +1034,6 @@ export default function SignupPage() {
           color: #a3424a;
 
           font-size: 12px;
-
-          line-height: 1.45;
         }
 
         /* SUBMIT */
@@ -1082,13 +1041,13 @@ export default function SignupPage() {
         .submit {
           width: 100%;
 
-          height: 54px;
+          height: 51px;
 
-          margin-top: 25px;
+          margin-top: 21px;
 
           border: 0;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
           background: #0647c8;
 
@@ -1096,15 +1055,15 @@ export default function SignupPage() {
 
           font-family: inherit;
 
-          font-size: 14px;
+          font-size: 13px;
 
           font-weight: 900;
 
           cursor: pointer;
 
           box-shadow:
-            0 10px 23px
-            rgba(6, 71, 200, 0.2);
+            0 9px 21px
+            rgba(6, 71, 200, 0.19);
         }
 
         .submit:hover:not(:disabled) {
@@ -1120,15 +1079,15 @@ export default function SignupPage() {
         /* BOTTOM */
 
         .bottom {
-          margin-top: 19px;
+          margin-top: 16px;
 
-          padding-top: 17px;
+          padding-top: 15px;
 
           display: flex;
 
           justify-content: center;
 
-          gap: 6px;
+          gap: 5px;
 
           border-top:
             1px solid #e7edf3;
@@ -1149,19 +1108,19 @@ export default function SignupPage() {
         /* TABLET */
 
         @media (
-          max-width: 1050px
+          max-width: 900px
         ) {
           .layout {
-            max-width: 850px;
+            max-width: 740px;
 
             grid-template-columns:
               1fr;
 
-            gap: 28px;
+            gap: 24px;
           }
 
           .introCard {
-            max-width: 600px;
+            max-width: 520px;
 
             margin: auto;
 
@@ -1179,6 +1138,10 @@ export default function SignupPage() {
 
             margin-right: auto;
           }
+
+          .card {
+            margin: auto;
+          }
         }
 
         /* MOBILE */
@@ -1188,7 +1151,7 @@ export default function SignupPage() {
         ) {
           .page {
             padding:
-              0 14px 28px;
+              0 13px 25px;
           }
 
           .brand small {
@@ -1196,28 +1159,32 @@ export default function SignupPage() {
           }
 
           .layout {
-            padding-top: 28px;
+            padding-top: 24px;
           }
 
           .introCard {
             padding:
-              25px 21px;
+              23px 19px;
           }
 
           .introText h1 {
-            font-size: 25px;
+            font-size: 23px;
           }
 
           .card {
+            width: 100%;
+
             padding:
-              25px 20px;
+              23px 18px;
+
+            border-radius: 17px;
           }
 
           .grid {
             grid-template-columns:
               1fr;
 
-            row-gap: 18px;
+            row-gap: 16px;
           }
 
           .field.full {
