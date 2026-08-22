@@ -25,9 +25,7 @@ import type {
 
 type ProductStepProps = {
   type: ProductType;
-
   meta: ProductMeta;
-
   draft: RegistrationDraft;
 
   update: <
@@ -44,9 +42,7 @@ type ProductStepProps = {
   ) => void;
 
   onPhotoRemove: () => void;
-
   onBack: () => void;
-
   onNext: () => void;
 };
 
@@ -61,8 +57,7 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
-  const pet =
-    isPetType(type);
+  const pet = isPetType(type);
 
   const showBrand =
     showBrandField(type);
@@ -79,9 +74,7 @@ export default function ProductStep({
   return (
     <>
       <div className="stepTitle">
-        <span>
-          STEP 2 OF 3
-        </span>
+        <span>STEP 2 OF 3</span>
 
         <h1>
           <span className="productEmoji">
@@ -92,19 +85,17 @@ export default function ProductStep({
         </h1>
 
         <p>
-          {getProductFormText(
-            type
-          )}
+          {getProductFormText(type)}
         </p>
       </div>
 
-      {/* BASIC INFO */}
+      {/* =========================
+          01 — BASIC INFORMATION
+      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
-          <span>
-            01
-          </span>
+          <span>01</span>
 
           <div>
             <strong>
@@ -126,20 +117,13 @@ export default function ProductStep({
           >
             <input
               type="text"
-              value={
-                draft.tagCode
-              }
-              onChange={(
-                event
-              ) =>
+              value={draft.tagCode}
+              onChange={(event) =>
                 update(
                   "tagCode",
                   event.target.value
                     .toUpperCase()
-                    .replace(
-                      /\s/g,
-                      ""
-                    )
+                    .replace(/\s/g, "")
                 )
               }
               placeholder="მაგ. QR-000123"
@@ -156,12 +140,8 @@ export default function ProductStep({
           >
             <input
               type="text"
-              value={
-                draft.itemName
-              }
-              onChange={(
-                event
-              ) =>
+              value={draft.itemName}
+              onChange={(event) =>
                 update(
                   "itemName",
                   event.target.value
@@ -171,8 +151,8 @@ export default function ProductStep({
                 type === "dog"
                   ? "მაგ. Max"
                   : type === "cat"
-                  ? "მაგ. Luna"
-                  : "მაგ. ჩემი ნივთი"
+                    ? "მაგ. Luna"
+                    : "მაგ. ჩემი ნივთი"
               }
             />
           </Field>
@@ -180,12 +160,8 @@ export default function ProductStep({
           <Field label="ფერი">
             <input
               type="text"
-              value={
-                draft.colour
-              }
-              onChange={(
-                event
-              ) =>
+              value={draft.colour}
+              onChange={(event) =>
                 update(
                   "colour",
                   event.target.value
@@ -199,12 +175,8 @@ export default function ProductStep({
             <>
               <Field label="სქესი">
                 <select
-                  value={
-                    draft.sex
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={draft.sex}
+                  onChange={(event) =>
                     update(
                       "sex",
                       event.target.value
@@ -231,9 +203,7 @@ export default function ProductStep({
                   value={
                     draft.dateOfBirth
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     update(
                       "dateOfBirth",
                       event.target.value
@@ -247,12 +217,8 @@ export default function ProductStep({
                   type="number"
                   min="0"
                   step="0.1"
-                  value={
-                    draft.weight
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={draft.weight}
+                  onChange={(event) =>
                     update(
                       "weight",
                       event.target.value
@@ -268,12 +234,8 @@ export default function ProductStep({
             <Field label="ბრენდი">
               <input
                 type="text"
-                value={
-                  draft.brand
-                }
-                onChange={(
-                  event
-                ) =>
+                value={draft.brand}
+                onChange={(event) =>
                   update(
                     "brand",
                     event.target.value
@@ -288,12 +250,8 @@ export default function ProductStep({
             <Field label="მოდელი">
               <input
                 type="text"
-                value={
-                  draft.model
-                }
-                onChange={(
-                  event
-                ) =>
+                value={draft.model}
+                onChange={(event) =>
                   update(
                     "model",
                     event.target.value
@@ -308,12 +266,8 @@ export default function ProductStep({
             <Field label="ზომა">
               <input
                 type="text"
-                value={
-                  draft.size
-                }
-                onChange={(
-                  event
-                ) =>
+                value={draft.size}
+                onChange={(event) =>
                   update(
                     "size",
                     event.target.value
@@ -328,12 +282,8 @@ export default function ProductStep({
             <Field label="მასალა">
               <input
                 type="text"
-                value={
-                  draft.material
-                }
-                onChange={(
-                  event
-                ) =>
+                value={draft.material}
+                onChange={(event) =>
                   update(
                     "material",
                     event.target.value
@@ -346,18 +296,16 @@ export default function ProductStep({
         </div>
       </section>
 
-      {/* PHOTO */}
+      {/* =========================
+          02 — PHOTO
+      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
-          <span>
-            02
-          </span>
+          <span>02</span>
 
           <div>
-            <strong>
-              ფოტო
-            </strong>
+            <strong>ფოტო</strong>
 
             <p>
               კარგი ფოტო მპოვნელისთვის
@@ -368,21 +316,11 @@ export default function ProductStep({
         </div>
 
         <PhotoUploader
-          preview={
-            photoPreview
-          }
-          showPhoto={
-            draft.showPhoto
-          }
-          onChange={
-            onPhotoChange
-          }
-          onRemove={
-            onPhotoRemove
-          }
-          onVisibilityChange={(
-            value
-          ) =>
+          preview={photoPreview}
+          showPhoto={draft.showPhoto}
+          onChange={onPhotoChange}
+          onRemove={onPhotoRemove}
+          onVisibilityChange={(value) =>
             update(
               "showPhoto",
               value
@@ -391,13 +329,13 @@ export default function ProductStep({
         />
       </section>
 
-      {/* ADDITIONAL INFO */}
+      {/* =========================
+          03 — ADDITIONAL INFO
+      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
-          <span>
-            03
-          </span>
+          <span>03</span>
 
           <div>
             <strong>
@@ -416,12 +354,8 @@ export default function ProductStep({
           <Field label="აღწერა">
             <textarea
               rows={3}
-              value={
-                draft.description
-              }
-              onChange={(
-                event
-              ) =>
+              value={draft.description}
+              onChange={(event) =>
                 update(
                   "description",
                   event.target.value
@@ -442,9 +376,7 @@ export default function ProductStep({
                 value={
                   draft.behaviourNote
                 }
-                onChange={(
-                  event
-                ) =>
+                onChange={(event) =>
                   update(
                     "behaviourNote",
                     event.target.value
@@ -460,9 +392,7 @@ export default function ProductStep({
                 value={
                   draft.distinctiveFeatures
                 }
-                onChange={(
-                  event
-                ) =>
+                onChange={(event) =>
                   update(
                     "distinctiveFeatures",
                     event.target.value
@@ -480,9 +410,7 @@ export default function ProductStep({
                 value={
                   draft.medicalInfo
                 }
-                onChange={(
-                  event
-                ) =>
+                onChange={(event) =>
                   update(
                     "medicalInfo",
                     event.target.value
@@ -499,9 +427,7 @@ export default function ProductStep({
               value={
                 draft.lostLocation
               }
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 update(
                   "lostLocation",
                   event.target.value
@@ -520,9 +446,7 @@ export default function ProductStep({
               value={
                 draft.finderMessage
               }
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 update(
                   "finderMessage",
                   event.target.value
@@ -534,13 +458,13 @@ export default function ProductStep({
         </div>
       </section>
 
-      {/* FINDER VIEW */}
+      {/* =========================
+          04 — FINDER VIEW
+      ========================== */}
 
       <section className="formSection">
         <div className="sectionHeader">
-          <span>
-            04
-          </span>
+          <span>04</span>
 
           <div>
             <strong>
@@ -577,12 +501,8 @@ export default function ProductStep({
           <VisibilityToggle
             label="ელფოსტა"
             description="აჩვენეთ თქვენი ელფოსტა მპოვნელისთვის."
-            value={
-              draft.showEmail
-            }
-            onChange={(
-              value
-            ) =>
+            value={draft.showEmail}
+            onChange={(value) =>
               update(
                 "showEmail",
                 value
@@ -593,12 +513,8 @@ export default function ProductStep({
           <VisibilityToggle
             label="ფოტო"
             description="აჩვენეთ დამატებული ფოტო Finder View-ში."
-            value={
-              draft.showPhoto
-            }
-            onChange={(
-              value
-            ) =>
+            value={draft.showPhoto}
+            onChange={(value) =>
               update(
                 "showPhoto",
                 value
@@ -612,9 +528,7 @@ export default function ProductStep({
             value={
               draft.showDescription
             }
-            onChange={(
-              value
-            ) =>
+            onChange={(value) =>
               update(
                 "showDescription",
                 value
@@ -630,9 +544,7 @@ export default function ProductStep({
                 value={
                   draft.showMedicalInfo
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   update(
                     "showMedicalInfo",
                     value
@@ -646,9 +558,7 @@ export default function ProductStep({
                 value={
                   draft.showBehaviourNote
                 }
-                onChange={(
-                  value
-                ) =>
+                onChange={(value) =>
                   update(
                     "showBehaviourNote",
                     value
@@ -664,9 +574,7 @@ export default function ProductStep({
             value={
               draft.showLostLocation
             }
-            onChange={(
-              value
-            ) =>
+            onChange={(value) =>
               update(
                 "showLostLocation",
                 value
@@ -680,9 +588,7 @@ export default function ProductStep({
             value={
               draft.showFinderMessage
             }
-            onChange={(
-              value
-            ) =>
+            onChange={(value) =>
               update(
                 "showFinderMessage",
                 value
@@ -696,9 +602,7 @@ export default function ProductStep({
             value={
               draft.liveChatEnabled
             }
-            onChange={(
-              value
-            ) =>
+            onChange={(value) =>
               update(
                 "liveChatEnabled",
                 value
@@ -708,15 +612,15 @@ export default function ProductStep({
         </div>
       </section>
 
-      {/* ACTIONS */}
+      {/* =========================
+          ACTIONS
+      ========================== */}
 
       <div className="actions">
         <button
           type="button"
           className="backButton"
-          onClick={
-            onBack
-          }
+          onClick={onBack}
         >
           ← უკან
         </button>
@@ -724,25 +628,26 @@ export default function ProductStep({
         <button
           type="button"
           className="primaryButton"
-          onClick={
-            onNext
-          }
+          onClick={onNext}
         >
           შემოწმება
 
-          <span>
-            →
-          </span>
+          <span>→</span>
         </button>
       </div>
 
-      <style jsx>{`
+      {/* IMPORTANT:
+          GLOBAL იმიტომაა გამოყენებული,
+          რომ Field child component-ის
+          input-ებზეც გავრცელდეს.
+      */}
+
+      <style jsx global>{`
         .stepTitle > span {
           color: #0647c8;
 
           font-size: 12px;
           font-weight: 900;
-
           letter-spacing: 0.8px;
         }
 
@@ -757,6 +662,7 @@ export default function ProductStep({
           color: #203a55;
 
           font-size: 27px;
+          font-weight: 900;
           line-height: 1.2;
         }
 
@@ -775,34 +681,36 @@ export default function ProductStep({
           line-height: 1.55;
         }
 
-        .formSection {
-          margin-top: 20px;
+        /* SECTIONS */
 
-          padding-top: 18px;
+        .formSection {
+          margin-top: 24px;
+
+          padding-top: 21px;
 
           border-top:
             1px solid #e4ebf3;
         }
 
         .sectionHeader {
-          margin-bottom: 14px;
+          margin-bottom: 19px;
 
           display: flex;
           align-items: flex-start;
 
-          gap: 10px;
+          gap: 11px;
         }
 
         .sectionHeader > span {
-          width: 30px;
-          height: 30px;
+          width: 32px;
+          height: 32px;
 
-          flex: 0 0 30px;
+          flex: 0 0 32px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 8px;
+          border-radius: 9px;
 
           background: #edf4ff;
 
@@ -819,21 +727,27 @@ export default function ProductStep({
 
           font-size: 15px;
           font-weight: 850;
+          line-height: 1.35;
         }
 
         .sectionHeader p {
           max-width: 620px;
 
-          margin: 3px 0 0;
+          margin: 4px 0 0;
 
           color: #8190a0;
 
           font-size: 12px;
-          line-height: 1.45;
+          line-height: 1.5;
         }
+
+        /* =========================
+           PREMIUM FORM GRID
+        ========================== */
 
         .formGrid {
           width: 100%;
+
           display: grid;
 
           grid-template-columns:
@@ -843,7 +757,7 @@ export default function ProductStep({
             );
 
           column-gap: 22px;
-          row-gap: 20px;
+          row-gap: 21px;
 
           align-items: start;
         }
@@ -851,26 +765,32 @@ export default function ProductStep({
         .field {
           width: 100%;
           min-width: 0;
+
           box-sizing: border-box;
         }
 
         .field.full {
-          grid-column:
-            1 / -1;
+          grid-column: 1 / -1;
         }
+
+        /* LABELS */
 
         .field label {
           display: block;
 
-          min-height: 19px;
-          margin: 0 0 9px 2px;
+          min-height: 20px;
+
+          margin:
+            0 0 9px 2px;
 
           color: #344e68;
 
           font-size: 13px;
           font-weight: 800;
-          line-height: 19px;
+          line-height: 20px;
         }
+
+        /* ALL FORM CONTROLS */
 
         .field input,
         .field select,
@@ -879,6 +799,7 @@ export default function ProductStep({
 
           width: 100%;
           max-width: none;
+
           margin: 0;
 
           box-sizing: border-box;
@@ -899,42 +820,58 @@ export default function ProductStep({
           outline: none;
 
           transition:
-            border-color
-              0.18s ease,
-            box-shadow
-              0.18s ease,
-            background
-              0.18s ease;
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease;
         }
+
+        /* INPUT + SELECT */
 
         .field input,
         .field select {
-          height: 56px;
-          min-height: 56px;
+          height: 58px;
+          min-height: 58px;
 
           padding:
-            0 16px;
+            0 17px;
         }
+
+        .field select {
+          cursor: pointer;
+        }
+
+        /* TEXTAREA */
 
         .field textarea {
-          min-height: 118px;
+          min-height: 122px;
 
           padding:
-            14px 16px;
-
-          resize: vertical;
+            15px 17px;
 
           line-height: 1.55;
+
+          resize: vertical;
         }
+
+        /* HOVER */
+
+        .field input:hover,
+        .field select:hover,
+        .field textarea:hover {
+          border-color: #bfcddd;
+        }
+
+        /* FOCUS */
 
         .field input:focus,
         .field select:focus,
         .field textarea:focus {
-          border-color:
-            #0647c8;
+          border-color: #0647c8;
+
+          background: #ffffff;
 
           box-shadow:
-            0 0 0 3px
+            0 0 0 4px
             rgba(
               6,
               71,
@@ -942,6 +879,23 @@ export default function ProductStep({
               0.08
             );
         }
+
+        /* PLACEHOLDER */
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+          color: #9aa8b6;
+          opacity: 1;
+        }
+
+        /* DATE / NUMBER NORMALIZATION */
+
+        .field input[type="date"],
+        .field input[type="number"] {
+          min-width: 0;
+        }
+
+        /* VISIBILITY */
 
         .visibilityGrid {
           display: grid;
@@ -952,11 +906,13 @@ export default function ProductStep({
               minmax(0, 1fr)
             );
 
-          gap: 10px;
+          gap: 12px;
         }
 
+        /* ACTIONS */
+
         .actions {
-          margin-top: 23px;
+          margin-top: 27px;
 
           display: flex;
           align-items: center;
@@ -968,17 +924,18 @@ export default function ProductStep({
 
         .backButton,
         .primaryButton {
-          min-height: 47px;
+          min-height: 49px;
 
           padding:
-            0 18px;
+            0 19px;
 
           display: inline-flex;
           align-items: center;
-          justify-content:
-            center;
+          justify-content: center;
 
           gap: 8px;
+
+          box-sizing: border-box;
 
           border-radius: 10px;
 
@@ -994,21 +951,17 @@ export default function ProductStep({
           border:
             1px solid #d6e1ec;
 
-          background:
-            #ffffff;
+          background: #ffffff;
 
-          color:
-            #64788d;
+          color: #64788d;
         }
 
         .primaryButton {
           border: 0;
 
-          background:
-            #0647c8;
+          background: #0647c8;
 
-          color:
-            #ffffff;
+          color: #ffffff;
 
           box-shadow:
             0 9px 20px
@@ -1020,18 +973,25 @@ export default function ProductStep({
             );
         }
 
+        .primaryButton:hover {
+          background: #053faf;
+        }
+
         .primaryButton span {
           font-size: 17px;
         }
+
+        /* TABLET */
 
         @media (
           max-width: 700px
         ) {
           .visibilityGrid {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
         }
+
+        /* MOBILE */
 
         @media (
           max-width: 650px
@@ -1041,13 +1001,27 @@ export default function ProductStep({
           }
 
           .formGrid {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
+
+            row-gap: 18px;
           }
 
           .field.full {
-            grid-column:
-              auto;
+            grid-column: auto;
+          }
+
+          .field input,
+          .field select {
+            height: 56px;
+            min-height: 56px;
+
+            font-size: 16px;
+          }
+
+          .field textarea {
+            min-height: 115px;
+
+            font-size: 16px;
           }
 
           .actions {
@@ -1071,9 +1045,7 @@ function Field({
   full = false,
 }: {
   label: string;
-
   children: ReactNode;
-
   full?: boolean;
 }) {
   return (
