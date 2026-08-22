@@ -11,7 +11,6 @@ import { useParams } from "next/navigation";
 import {
   createClient,
   type SupabaseClient,
-  type User,
 } from "@supabase/supabase-js";
 
 type ProductType =
@@ -22,6 +21,8 @@ type ProductType =
   | "bag"
   | "suitcase";
 
+type Step = 1 | 2 | 3;
+
 type Draft = {
   ownerFirstName: string;
   ownerLastName: string;
@@ -30,8 +31,8 @@ type Draft = {
 
   tagCode: string;
   itemName: string;
-
   colour: string;
+
   sex: string;
   dateOfBirth: string;
   weight: string;
@@ -50,7 +51,6 @@ type Draft = {
   finderMessage: string;
 
   showEmail: boolean;
-  showPhoto: boolean;
   showDescription: boolean;
   showMedicalInfo: boolean;
   showBehaviourNote: boolean;
@@ -58,70 +58,6 @@ type Draft = {
   showFinderMessage: boolean;
 
   liveChatEnabled: boolean;
-};
-
-const PRODUCT_META: Record<
-  ProductType,
-  {
-    label: string;
-    emoji: string;
-    slogan: string;
-    secondSlogan: string;
-  }
-> = {
-  dog: {
-    label: "ძაღლი",
-    emoji: "🐶",
-    slogan:
-      "ერთი სკანირება შეიძლება იყოს გზა სახლში დაბრუნებამდე.",
-    secondSlogan:
-      "ნუ დაკარგავთ იმედს — გაამარტივეთ მპოვნელთან დაკავშირება.",
-  },
-
-  cat: {
-    label: "კატა",
-    emoji: "🐱",
-    slogan:
-      "როცა სიტყვებით ვერ გეტყვის სად არის, QR პროფილს შეუძლია დაეხმაროს.",
-    secondSlogan:
-      "ერთი პატარა QR — უფრო სწრაფი გზა პატრონამდე.",
-  },
-
-  keys: {
-    label: "გასაღები",
-    emoji: "🔑",
-    slogan:
-      "დაკარგული გასაღები ყოველთვის არ ნიშნავს დაკარგულ დღეს.",
-    secondSlogan:
-      "მპოვნელს მიეცით მარტივი გზა თქვენთან დასაკავშირებლად.",
-  },
-
-  wallet: {
-    label: "საფულე",
-    emoji: "👛",
-    slogan:
-      "პირადი ნივთის დაბრუნება ერთი სწორი კონტაქტით შეიძლება დაიწყოს.",
-    secondSlogan:
-      "QR RETURN ამარტივებს პირველ და ყველაზე მნიშვნელოვან ნაბიჯს — დაკავშირებას.",
-  },
-
-  bag: {
-    label: "ჩანთა",
-    emoji: "👜",
-    slogan:
-      "რაც თქვენთვის მნიშვნელოვანია, მპოვნელისთვის ადვილად დასაბრუნებელი გახადეთ.",
-    secondSlogan:
-      "ნაკლები გაურკვევლობა. უფრო სწრაფი კონტაქტი.",
-  },
-
-  suitcase: {
-    label: "ჩემოდანი",
-    emoji: "🧳",
-    slogan:
-      "მოგზაურობა შეიძლება გაგრძელდეს — დაკარგული ჩემოდანი კი დაბრუნდეს.",
-    secondSlogan:
-      "ერთი სკანირება მპოვნელიდან მფლობელამდე.",
-  },
 };
 
 const INITIAL_DRAFT: Draft = {
@@ -132,8 +68,8 @@ const INITIAL_DRAFT: Draft = {
 
   tagCode: "",
   itemName: "",
-
   colour: "",
+
   sex: "",
   dateOfBirth: "",
   weight: "",
@@ -152,7 +88,6 @@ const INITIAL_DRAFT: Draft = {
   finderMessage: "",
 
   showEmail: false,
-  showPhoto: true,
   showDescription: true,
   showMedicalInfo: false,
   showBehaviourNote: false,
@@ -160,6 +95,70 @@ const INITIAL_DRAFT: Draft = {
   showFinderMessage: true,
 
   liveChatEnabled: true,
+};
+
+const PRODUCT_META: Record<
+  ProductType,
+  {
+    label: string;
+    emoji: string;
+    slogan: string;
+    subline: string;
+  }
+> = {
+  dog: {
+    label: "ძაღლი",
+    emoji: "🐶",
+    slogan:
+      "ერთი სკანირება შეიძლება იყოს გზა სახლში დაბრუნებამდე.",
+    subline:
+      "ნუ ინერვიულებთ წინასწარ — მპოვნელს თქვენთან დაკავშირება მაქსიმალურად გავუმარტივოთ.",
+  },
+
+  cat: {
+    label: "კატა",
+    emoji: "🐱",
+    slogan:
+      "ერთი პატარა QR შეიძლება გახდეს ყველაზე მოკლე გზა პატრონამდე.",
+    subline:
+      "რაც უფრო მარტივია დაკავშირება, მით მეტია სწრაფად დაბრუნების შესაძლებლობა.",
+  },
+
+  keys: {
+    label: "გასაღები",
+    emoji: "🔑",
+    slogan:
+      "დაკარგული გასაღები ყოველთვის არ ნიშნავს დაკარგულ დღეს.",
+    subline:
+      "მპოვნელს მხოლოდ ერთი სკანირება სჭირდება თქვენთან დასაკავშირებლად.",
+  },
+
+  wallet: {
+    label: "საფულე",
+    emoji: "👛",
+    slogan:
+      "დაბრუნება იწყება ერთი სწორი კონტაქტით.",
+    subline:
+      "QR RETURN ამარტივებს მპოვნელსა და მფლობელს შორის პირველ ნაბიჯს.",
+  },
+
+  bag: {
+    label: "ჩანთა",
+    emoji: "👜",
+    slogan:
+      "რაც თქვენთვის მნიშვნელოვანია, ადვილად დასაბრუნებელი გახადეთ.",
+    subline:
+      "ნაკლები გაურკვევლობა, უფრო სწრაფი დაკავშირება.",
+  },
+
+  suitcase: {
+    label: "ჩემოდანი",
+    emoji: "🧳",
+    slogan:
+      "მოგზაურობა შეიძლება გაგრძელდეს — დაკარგული ჩემოდანი კი დაბრუნდეს.",
+    subline:
+      "ერთი QR მპოვნელიდან მფლობელამდე.",
+  },
 };
 
 function createSupabaseClient() {
@@ -198,34 +197,12 @@ export default function RegisterItemPage() {
       ? params.type.toLowerCase()
       : "";
 
-  const [step, setStep] =
-    useState<1 | 2 | 3>(1);
-
-  const [draft, setDraft] =
-    useState<Draft>(INITIAL_DRAFT);
-
-  const [user, setUser] =
-    useState<User | null>(null);
-
-  const [supabase, setSupabase] =
-    useState<SupabaseClient | null>(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
   const type: ProductType =
     isProductType(rawType)
       ? rawType
       : "dog";
 
-  const meta =
-    PRODUCT_META[type];
+  const meta = PRODUCT_META[type];
 
   const isPet =
     type === "dog" ||
@@ -243,23 +220,57 @@ export default function RegisterItemPage() {
   const isSuitcase =
     type === "suitcase";
 
-  const backgroundEmojis =
+  const [step, setStep] =
+    useState<Step>(1);
+
+  const [draft, setDraft] =
+    useState<Draft>(
+      INITIAL_DRAFT
+    );
+
+  const [
+    supabase,
+    setSupabase,
+  ] =
+    useState<SupabaseClient | null>(
+      null
+    );
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(true);
+
+  const [
+    saving,
+    setSaving,
+  ] =
+    useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState("");
+
+  const backgroundItems =
     useMemo(
       () =>
         Array.from({
-          length: 18,
+          length: 20,
         }),
       []
     );
 
   useEffect(() => {
-    async function loadUser() {
+    async function loadAccount() {
       try {
         const client =
           createSupabaseClient();
 
         if (!client) {
-          setError(
+          setErrorMessage(
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
 
@@ -274,7 +285,10 @@ export default function RegisterItemPage() {
         } =
           await client.auth.getUser();
 
-        if (error || !user) {
+        if (
+          error ||
+          !user
+        ) {
           window.location.assign(
             "/login"
           );
@@ -282,91 +296,196 @@ export default function RegisterItemPage() {
           return;
         }
 
-        setUser(user);
+        /*
+          პირველ რიგში auth metadata-ს ვიყენებთ.
+          თუ owner_accounts-შიც გაქვთ მონაცემები,
+          ქვემოთ ასევე ვცდილობთ იქიდან წამოღებას.
+        */
 
-        setDraft((current) => ({
-          ...current,
+        let firstName =
+          String(
+            user.user_metadata
+              ?.first_name ||
+              ""
+          );
 
-          ownerFirstName:
-            String(
-              user.user_metadata
-                ?.first_name || ""
-            ),
+        let lastName =
+          String(
+            user.user_metadata
+              ?.last_name ||
+              ""
+          );
 
-          ownerLastName:
-            String(
-              user.user_metadata
-                ?.last_name || ""
-            ),
+        let phone =
+          String(
+            user.user_metadata
+              ?.phone ||
+              user.phone ||
+              ""
+          );
 
-          ownerPhone:
-            String(
-              user.user_metadata
-                ?.phone ||
-                user.phone ||
-                ""
-            ),
+        const email =
+          String(
+            user.email || ""
+          );
 
-          ownerEmail:
-            String(
-              user.email || ""
-            ),
-        }));
+        const {
+          data: ownerAccount,
+        } =
+          await client
+            .from(
+              "owner_accounts"
+            )
+            .select(
+              "first_name,last_name,phone,email"
+            )
+            .eq(
+              "id",
+              user.id
+            )
+            .maybeSingle();
+
+        if (ownerAccount) {
+          firstName =
+            ownerAccount
+              .first_name ||
+            firstName;
+
+          lastName =
+            ownerAccount
+              .last_name ||
+            lastName;
+
+          phone =
+            ownerAccount
+              .phone ||
+            phone;
+        }
+
+        setDraft(
+          (current) => ({
+            ...current,
+
+            ownerFirstName:
+              firstName,
+
+            ownerLastName:
+              lastName,
+
+            ownerPhone:
+              phone,
+
+            ownerEmail:
+              ownerAccount
+                ?.email ||
+              email,
+          })
+        );
+      } catch (error) {
+        console.error(
+          "Account load error:",
+          error
+        );
+
+        setErrorMessage(
+          "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
+        );
       } finally {
         setLoading(false);
       }
     }
 
-    loadUser();
+    loadAccount();
   }, []);
 
-  function update<K extends keyof Draft>(
+  function updateDraft<
+    K extends keyof Draft
+  >(
     key: K,
     value: Draft[K]
   ) {
-    setDraft((current) => ({
-      ...current,
-      [key]: value,
-    }));
+    setDraft(
+      (current) => ({
+        ...current,
+        [key]: value,
+      })
+    );
   }
 
-  async function continueOwner() {
-    setError("");
+  async function goToStepTwo() {
+    setErrorMessage("");
 
-    if (!draft.ownerFirstName.trim()) {
-      setError(
-        "მფლობელის სახელი მიუთითეთ."
+    if (
+      !draft.ownerFirstName.trim()
+    ) {
+      setErrorMessage(
+        "გთხოვთ მიუთითოთ სახელი."
       );
+
       return;
     }
 
-    if (!draft.ownerLastName.trim()) {
-      setError(
-        "მფლობელის გვარი მიუთითეთ."
+    if (
+      !draft.ownerLastName.trim()
+    ) {
+      setErrorMessage(
+        "გთხოვთ მიუთითოთ გვარი."
       );
+
       return;
     }
 
-    if (!draft.ownerPhone.trim()) {
-      setError(
-        "ტელეფონის ნომერი მიუთითეთ."
+    if (
+      !draft.ownerPhone.trim()
+    ) {
+      setErrorMessage(
+        "გთხოვთ მიუთითოთ ტელეფონის ნომერი."
       );
+
       return;
     }
+
+    if (
+      !draft.ownerEmail.trim()
+    ) {
+      setErrorMessage(
+        "გთხოვთ მიუთითოთ ელფოსტა."
+      );
+
+      return;
+    }
+
+    /*
+      Owner ინფორმაცია ინახება auth metadata-ში,
+      რათა მომავალ რეგისტრაციაზეც მზად დახვდეს.
+    */
 
     if (supabase) {
-      await supabase.auth.updateUser({
-        data: {
-          first_name:
-            draft.ownerFirstName.trim(),
+      const {
+        error,
+      } =
+        await supabase.auth.updateUser({
+          data: {
+            first_name:
+              draft.ownerFirstName.trim(),
 
-          last_name:
-            draft.ownerLastName.trim(),
+            last_name:
+              draft.ownerLastName.trim(),
 
-          phone:
-            draft.ownerPhone.trim(),
-        },
-      });
+            phone:
+              draft.ownerPhone.trim(),
+
+            contact_email:
+              draft.ownerEmail.trim(),
+          },
+        });
+
+      if (error) {
+        console.error(
+          "Owner metadata update:",
+          error
+        );
+      }
     }
 
     setStep(2);
@@ -377,22 +496,38 @@ export default function RegisterItemPage() {
     });
   }
 
-  function continueProduct() {
-    setError("");
+  function goToPreview() {
+    setErrorMessage("");
 
-    if (!draft.tagCode.trim()) {
-      setError(
+    if (
+      !draft.tagCode.trim()
+    ) {
+      setErrorMessage(
         "QR / Tag Code სავალდებულოა."
       );
+
       return;
     }
 
-    if (!draft.itemName.trim()) {
-      setError(
-        isPet
-          ? "ცხოველის სახელი მიუთითეთ."
-          : "პროფილის სახელი მიუთითეთ."
-      );
+    if (
+      !draft.itemName.trim()
+    ) {
+      if (type === "cat") {
+        setErrorMessage(
+          "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
+        );
+      } else if (
+        type === "dog"
+      ) {
+        setErrorMessage(
+          "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია."
+        );
+      } else {
+        setErrorMessage(
+          `გთხოვთ შეავსოთ ${meta.label}ს შესახებ ინფორმაცია.`
+        );
+      }
+
       return;
     }
 
@@ -404,22 +539,43 @@ export default function RegisterItemPage() {
     });
   }
 
-  async function confirmProfile() {
-    setError("");
-
-    if (
-      !supabase ||
-      !user
-    ) {
-      setError(
-        "ანგარიშთან კავშირი ვერ მოიძებნა."
-      );
-      return;
-    }
-
+  async function createProfile() {
+    setErrorMessage("");
     setSaving(true);
 
     try {
+      const client =
+        supabase ||
+        createSupabaseClient();
+
+      if (!client) {
+        throw new Error(
+          "Supabase კავშირი ვერ მოიძებნა."
+        );
+      }
+
+      /*
+        მნიშვნელოვანია:
+        საბოლოო ღილაკზე ხელახლა ვამოწმებთ session-ს.
+      */
+
+      const {
+        data: {
+          user,
+        },
+        error: userError,
+      } =
+        await client.auth.getUser();
+
+      if (
+        userError ||
+        !user
+      ) {
+        throw new Error(
+          "სესია დასრულებულია. გთხოვთ ხელახლა შეხვიდეთ ანგარიშში."
+        );
+      }
+
       const cleanTag =
         draft.tagCode
           .trim()
@@ -429,7 +585,7 @@ export default function RegisterItemPage() {
         data: existing,
         error: checkError,
       } =
-        await supabase
+        await client
           .from("item")
           .select("id")
           .ilike(
@@ -448,165 +604,158 @@ export default function RegisterItemPage() {
         );
       }
 
+      /*
+        აქ ვიყენებთ უკვე არსებულ item ველებს.
+      */
+
+      const payload = {
+        owner_id:
+          user.id,
+
+        owner_phone:
+          draft.ownerPhone.trim(),
+
+        owner_email:
+          draft.ownerEmail.trim(),
+
+        tag_code:
+          cleanTag,
+
+        item_type:
+          type,
+
+        pet_type:
+          isPet
+            ? type
+            : null,
+
+        item_name:
+          draft.itemName.trim(),
+
+        colour:
+          draft.colour.trim() ||
+          null,
+
+        sex:
+          isPet
+            ? draft.sex ||
+              null
+            : null,
+
+        date_of_birth:
+          isPet
+            ? draft.dateOfBirth ||
+              null
+            : null,
+
+        weight:
+          isPet &&
+          draft.weight
+            ? Number(
+                draft.weight
+              )
+            : null,
+
+        brand:
+          !isPet &&
+          !isKeys &&
+          draft.brand.trim()
+            ? draft.brand.trim()
+            : null,
+
+        model:
+          (isBag ||
+            isSuitcase) &&
+          draft.model.trim()
+            ? draft.model.trim()
+            : null,
+
+        size:
+          (isBag ||
+            isSuitcase) &&
+          draft.size.trim()
+            ? draft.size.trim()
+            : null,
+
+        material:
+          !isPet &&
+          !isKeys &&
+          draft.material.trim()
+            ? draft.material.trim()
+            : null,
+
+        description:
+          draft.description.trim() ||
+          null,
+
+        medical_info:
+          isPet
+            ? draft.medicalInfo.trim() ||
+              null
+            : null,
+
+        behaviour_note:
+          isPet
+            ? draft.behaviourNote.trim() ||
+              null
+            : null,
+
+        distinctive_features:
+          !isPet
+            ? draft.distinctiveFeatures.trim() ||
+              null
+            : null,
+
+        lost_seen_location:
+          draft.lostLocation.trim() ||
+          null,
+
+        finder_message:
+          draft.finderMessage.trim() ||
+          null,
+
+        /*
+          არსებული ON/OFF ლოგიკა
+        */
+
+        show_email:
+          draft.showEmail,
+
+        show_description:
+          draft.showDescription,
+
+        show_medical_info:
+          isPet
+            ? draft.showMedicalInfo
+            : false,
+
+        show_behaviour_note:
+          isPet
+            ? draft.showBehaviourNote
+            : false,
+
+        show_finder_message:
+          draft.showFinderMessage,
+
+        phone_enabled:
+          true,
+
+        live_chat_enabled:
+          draft.liveChatEnabled,
+
+        active:
+          true,
+      };
+
       const {
         data: created,
         error: insertError,
       } =
-        await supabase
+        await client
           .from("item")
-          .insert({
-            owner_id:
-              user.id,
-
-            owner_first_name:
-              draft.ownerFirstName.trim(),
-
-            owner_last_name:
-              draft.ownerLastName.trim(),
-
-            owner_phone:
-              draft.ownerPhone.trim(),
-
-            owner_email:
-              draft.ownerEmail.trim(),
-
-            tag_code:
-              cleanTag,
-
-            item_type:
-              type,
-
-            pet_type:
-              isPet
-                ? type
-                : null,
-
-            item_name:
-              draft.itemName.trim(),
-
-            colour:
-              draft.colour.trim() ||
-              null,
-
-            sex:
-              isPet
-                ? draft.sex || null
-                : null,
-
-            date_of_birth:
-              isPet
-                ? draft.dateOfBirth ||
-                  null
-                : null,
-
-            weight:
-              isPet &&
-              draft.weight
-                ? Number(
-                    draft.weight
-                  )
-                : null,
-
-            brand:
-              !isPet &&
-              !isKeys &&
-              draft.brand.trim()
-                ? draft.brand.trim()
-                : null,
-
-            model:
-              (isBag ||
-                isSuitcase) &&
-              draft.model.trim()
-                ? draft.model.trim()
-                : null,
-
-            size:
-              (isBag ||
-                isSuitcase) &&
-              draft.size.trim()
-                ? draft.size.trim()
-                : null,
-
-            material:
-              !isPet &&
-              !isKeys &&
-              draft.material.trim()
-                ? draft.material.trim()
-                : null,
-
-            description:
-              draft.description.trim() ||
-              null,
-
-            medical_info:
-              isPet
-                ? draft.medicalInfo.trim() ||
-                  null
-                : null,
-
-            behaviour_note:
-              isPet
-                ? draft.behaviourNote.trim() ||
-                  null
-                : null,
-
-            distinctive_features:
-              !isPet
-                ? draft.distinctiveFeatures.trim() ||
-                  null
-                : null,
-
-            finder_message:
-              draft.finderMessage.trim() ||
-              null,
-
-            lost_seen_location:
-              draft.lostLocation.trim() ||
-              null,
-
-            show_owner_name:
-              true,
-
-            show_owner_phone:
-              true,
-
-            show_email:
-              draft.showEmail,
-
-            show_pet_photo:
-              draft.showPhoto,
-
-            show_description:
-              draft.showDescription,
-
-            show_medical_info:
-              isPet
-                ? draft.showMedicalInfo
-                : false,
-
-            show_behaviour_note:
-              isPet
-                ? draft.showBehaviourNote
-                : false,
-
-            show_finder_message:
-              draft.showFinderMessage,
-
-            phone_enabled:
-              true,
-
-            live_chat_enabled:
-              draft.liveChatEnabled,
-
-            active:
-              true,
-
-            lost:
-              false,
-          })
+          .insert(payload)
           .select(
-            "tag_code"
+            "id,tag_code"
           )
           .single();
 
@@ -619,10 +768,15 @@ export default function RegisterItemPage() {
           created.tag_code
         )}`
       );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
+    } catch (error) {
+      console.error(
+        "Create profile error:",
+        error
+      );
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
           : "პროფილის შექმნა ვერ მოხერხდა."
       );
     } finally {
@@ -633,7 +787,41 @@ export default function RegisterItemPage() {
   if (loading) {
     return (
       <main className="loadingPage">
-        იტვირთება...
+        <div className="loader">
+          <div>
+            {meta.emoji}
+          </div>
+
+          <span>
+            იტვირთება...
+          </span>
+        </div>
+
+        <style jsx>{`
+          .loadingPage {
+            min-height: 100vh;
+
+            display: grid;
+            place-items: center;
+
+            background:
+              #0647c8;
+          }
+
+          .loader {
+            text-align: center;
+
+            color: white;
+
+            font-size: 15px;
+          }
+
+          .loader div {
+            font-size: 42px;
+
+            margin-bottom: 10px;
+          }
+        `}</style>
       </main>
     );
   }
@@ -641,22 +829,24 @@ export default function RegisterItemPage() {
   return (
     <>
       <main className="page">
-        <div className="emojiBackground">
-          {backgroundEmojis.map(
+        <div className="emojiLayer">
+          {backgroundItems.map(
             (_, index) => (
               <span
                 key={index}
                 style={{
                   left: `${
-                    (index * 23) %
+                    (index * 31) %
                     100
                   }%`,
+
                   top: `${
-                    (index * 37) %
+                    (index * 43) %
                     100
                   }%`,
+
                   transform: `rotate(${
-                    index * 17
+                    index * 18
                   }deg)`,
                 }}
               >
@@ -671,7 +861,7 @@ export default function RegisterItemPage() {
             href="/"
             className="brand"
           >
-            <div className="logo">
+            <div className="brandMark">
               QR
             </div>
 
@@ -694,52 +884,14 @@ export default function RegisterItemPage() {
           </a>
         </header>
 
-        <section className="progress">
-          <div
-            className={
-              step >= 1
-                ? "progressItem active"
-                : "progressItem"
-            }
-          >
-            <b>1</b>
-            <span>
-              მფლობელი
-            </span>
-          </div>
+        <Progress
+          step={step}
+          productLabel={
+            meta.label
+          }
+        />
 
-          <div className="progressLine" />
-
-          <div
-            className={
-              step >= 2
-                ? "progressItem active"
-                : "progressItem"
-            }
-          >
-            <b>2</b>
-            <span>
-              {meta.label}
-            </span>
-          </div>
-
-          <div className="progressLine" />
-
-          <div
-            className={
-              step >= 3
-                ? "progressItem active"
-                : "progressItem"
-            }
-          >
-            <b>3</b>
-            <span>
-              შემოწმება
-            </span>
-          </div>
-        </section>
-
-        <section className="slogan">
+        <section className="marketingLine">
           <span>
             {meta.emoji}
           </span>
@@ -750,24 +902,29 @@ export default function RegisterItemPage() {
             </strong>
 
             <p>
-              {meta.secondSlogan}
+              {meta.subline}
             </p>
           </div>
         </section>
 
-        <section className="formCard">
-          {error && (
-            <div className="error">
-              {error}
+        <section className="card">
+          {errorMessage && (
+            <div
+              className="errorBox"
+              role="alert"
+            >
+              {errorMessage}
             </div>
           )}
 
           {step === 1 && (
             <OwnerStep
               draft={draft}
-              update={update}
-              onNext={
-                continueOwner
+              update={
+                updateDraft
+              }
+              next={
+                goToStepTwo
               }
             />
           )}
@@ -777,12 +934,14 @@ export default function RegisterItemPage() {
               type={type}
               meta={meta}
               draft={draft}
-              update={update}
-              onBack={() =>
+              update={
+                updateDraft
+              }
+              back={() =>
                 setStep(1)
               }
-              onNext={
-                continueProduct
+              next={
+                goToPreview
               }
             />
           )}
@@ -792,11 +951,11 @@ export default function RegisterItemPage() {
               type={type}
               meta={meta}
               draft={draft}
-              onBack={() =>
+              back={() =>
                 setStep(2)
               }
-              onConfirm={
-                confirmProfile
+              confirm={
+                createProfile
               }
               saving={saving}
             />
@@ -804,388 +963,120 @@ export default function RegisterItemPage() {
         </section>
       </main>
 
-      <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
-
-        .page {
-          position: relative;
-
-          min-height: 100vh;
-
-          overflow: hidden;
-
-          padding:
-            0 24px 55px;
-
-          background:
-            #0747c9;
-        }
-
-        .emojiBackground {
-          position: fixed;
-          inset: 0;
-
-          overflow: hidden;
-
-          pointer-events: none;
-        }
-
-        .emojiBackground span {
-          position: absolute;
-
-          opacity: .055;
-
-          font-size: 70px;
-
-          filter:
-            grayscale(1)
-            brightness(4);
-        }
-
-        .header {
-          position: relative;
-          z-index: 2;
-
-          width: 100%;
-          max-width: 980px;
-
-          min-height: 76px;
-
-          margin: auto;
-
-          display: flex;
-          align-items: center;
-          justify-content:
-            space-between;
-
-          border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .2
-            );
-        }
-
-        .brand {
-          display: flex;
-          align-items: center;
-
-          gap: 10px;
-
-          text-decoration: none;
-        }
-
-        .logo {
-          width: 44px;
-          height: 44px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 12px;
-
-          background: white;
-
-          color: #0747c9;
-
-          font-size: 13px;
-          font-weight: 950;
-        }
-
-        .brand strong,
-        .brand small {
-          display: block;
-        }
-
-        .brand strong {
-          color: white;
-
-          font-size: 18px;
-        }
-
-        .brand small {
-          margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .72
-            );
-
-          font-size: 11px;
-        }
-
-        .changeProduct {
-          padding:
-            11px 15px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .32
-            );
-
-          border-radius: 10px;
-
-          color: white;
-
-          font-size: 14px;
-          font-weight: 800;
-
-          text-decoration: none;
-        }
-
-        .progress {
-          position: relative;
-          z-index: 2;
-
-          width: 100%;
-          max-width: 680px;
-
-          margin:
-            28px auto 0;
-
-          display: flex;
-          align-items: center;
-        }
-
-        .progressItem {
-          display: flex;
-          align-items: center;
-
-          gap: 8px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .6
-            );
-
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        .progressItem b {
-          width: 32px;
-          height: 32px;
-
-          display: grid;
-          place-items: center;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              .35
-            );
-
-          border-radius: 50%;
-        }
-
-        .progressItem.active {
-          color: white;
-        }
-
-        .progressItem.active b {
-          background: white;
-
-          color: #0747c9;
-        }
-
-        .progressLine {
-          flex: 1;
-
-          height: 1px;
-
-          margin: 0 12px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              .3
-            );
-        }
-
-        .slogan {
-          position: relative;
-          z-index: 2;
-
-          width: 100%;
-          max-width: 880px;
-
-          margin:
-            28px auto 18px;
-
-          display: flex;
-          align-items: center;
-
-          gap: 14px;
-
-          color: white;
-
-          text-align: center;
-
-          justify-content: center;
-        }
-
-        .slogan > span {
-          font-size: 38px;
-        }
-
-        .slogan strong {
-          display: block;
-
-          font-size: 17px;
-        }
-
-        .slogan p {
-          margin: 4px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              .75
-            );
-
-          font-size: 14px;
-        }
-
-        .formCard {
-          position: relative;
-          z-index: 2;
-
-          width: 100%;
-          max-width: 900px;
-
-          margin: auto;
-
-          padding: 30px;
-
-          border-radius: 22px;
-
-          background: white;
-
-          box-shadow:
-            0 25px 60px
-            rgba(
-              0,
-              26,
-              82,
-              .28
-            );
-        }
-
-        .error {
-          margin-bottom: 18px;
-
-          padding: 14px;
-
-          border-radius: 11px;
-
-          background: #fff1f2;
-
-          color: #a53d48;
-
-          font-size: 14px;
-          font-weight: 700;
-        }
-
-        .loadingPage {
-          min-height: 100vh;
-
-          display: grid;
-          place-items: center;
-
-          background: #0747c9;
-
-          color: white;
-
-          font-size: 16px;
-        }
-
-        @media (
-          max-width: 650px
-        ) {
-          .page {
-            padding:
-              0 14px 30px;
-          }
-
-          .brand small {
-            display: none;
-          }
-
-          .changeProduct {
-            font-size: 12px;
-          }
-
-          .progressItem span {
-            display: none;
-          }
-
-          .formCard {
-            padding: 20px;
-          }
-
-          .slogan {
-            align-items:
-              flex-start;
-
-            text-align: left;
-          }
-        }
-      `}</style>
+      <PageStyles />
     </>
+  );
+}
+
+function Progress({
+  step,
+  productLabel,
+}: {
+  step: Step;
+  productLabel: string;
+}) {
+  const steps = [
+    {
+      number: 1,
+      label: "მფლობელი",
+    },
+    {
+      number: 2,
+      label: productLabel,
+    },
+    {
+      number: 3,
+      label: "შემოწმება",
+    },
+  ];
+
+  return (
+    <section className="progress">
+      {steps.map(
+        (
+          item,
+          index
+        ) => {
+          const completed =
+            step >
+            item.number;
+
+          const active =
+            step ===
+            item.number;
+
+          return (
+            <div
+              className="progressPart"
+              key={
+                item.number
+              }
+            >
+              <div
+                className={`progressStep ${
+                  completed
+                    ? "completed"
+                    : ""
+                } ${
+                  active
+                    ? "active"
+                    : ""
+                }`}
+              >
+                <div className="stepCircle">
+                  {completed
+                    ? "✓"
+                    : item.number}
+                </div>
+
+                <span>
+                  {item.label}
+                </span>
+              </div>
+
+              {index < 2 && (
+                <div
+                  className={`line ${
+                    step >
+                    item.number
+                      ? "filled"
+                      : ""
+                  }`}
+                />
+              )}
+            </div>
+          );
+        }
+      )}
+    </section>
   );
 }
 
 function OwnerStep({
   draft,
   update,
-  onNext,
+  next,
 }: {
   draft: Draft;
-  update: <K extends keyof Draft>(
+
+  update: <
+    K extends keyof Draft
+  >(
     key: K,
     value: Draft[K]
   ) => void;
-  onNext: () => void;
+
+  next: () => void;
 }) {
   return (
     <>
-      <div className="title">
-        <span>
-          STEP 1 OF 3
-        </span>
+      <StepTitle
+        eyebrow="STEP 1 OF 3"
+        title="მფლობელის ინფორმაცია"
+        description="გადაამოწმეთ ან განაახლეთ თქვენი საკონტაქტო ინფორმაცია."
+      />
 
-        <h1>
-          მფლობელის ინფორმაცია
-        </h1>
-
-        <p>
-          გადაამოწმეთ თქვენი
-          საკონტაქტო ინფორმაცია.
-        </p>
-      </div>
-
-      <div className="grid">
+      <div className="formGrid">
         <Field label="სახელი *">
           <input
             value={
@@ -1228,33 +1119,37 @@ function OwnerStep({
           />
         </Field>
 
-        <Field label="ელფოსტა">
+        <Field label="ელფოსტა *">
           <input
+            type="email"
             value={
               draft.ownerEmail
             }
-            disabled
+            onChange={(e) =>
+              update(
+                "ownerEmail",
+                e.target.value
+              )
+            }
           />
         </Field>
       </div>
 
-      <div className="tip">
+      <div className="smallNotice">
         სახელი, გვარი და ტელეფონი
         მპოვნელისთვის ყოველთვის
         ხილული იქნება.
       </div>
 
-      <div className="buttons end">
+      <div className="actions right">
         <button
           type="button"
-          onClick={onNext}
-          className="primary"
+          className="primaryButton"
+          onClick={next}
         >
           გაგრძელება →
         </button>
       </div>
-
-      <CommonStyles />
     </>
   );
 }
@@ -1264,23 +1159,29 @@ function ProductStep({
   meta,
   draft,
   update,
-  onBack,
-  onNext,
+  back,
+  next,
 }: {
   type: ProductType;
+
   meta: {
     label: string;
     emoji: string;
   };
+
   draft: Draft;
-  update: <K extends keyof Draft>(
+
+  update: <
+    K extends keyof Draft
+  >(
     key: K,
     value: Draft[K]
   ) => void;
-  onBack: () => void;
-  onNext: () => void;
+
+  back: () => void;
+  next: () => void;
 }) {
-  const pet =
+  const isPet =
     type === "dog" ||
     type === "cat";
 
@@ -1302,233 +1203,239 @@ function ProductStep({
     type === "bag" ||
     type === "suitcase";
 
+  const descriptionText =
+    type === "cat"
+      ? "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
+      : type === "dog"
+      ? "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია."
+      : `გთხოვთ შეავსოთ ${meta.label}ს შესახებ ინფორმაცია.`;
+
   return (
     <>
-      <div className="title">
-        <span>
-          STEP 2 OF 3
-        </span>
+      <StepTitle
+        eyebrow="STEP 2 OF 3"
+        title={`${meta.emoji} ${meta.label}`}
+        description={
+          descriptionText
+        }
+      />
 
-        <h1>
-          {meta.emoji}{" "}
-          {meta.label}ს ინფორმაცია
-        </h1>
+      <div className="compactSection">
+        <h2>
+          ძირითადი ინფორმაცია
+        </h2>
 
-        <p>
-          შეავსეთ მხოლოდ ყველაზე
-          საჭირო ინფორმაცია.
-        </p>
+        <div className="formGrid three">
+          <Field
+            label="QR / Tag Code *"
+            full
+          >
+            <input
+              value={
+                draft.tagCode
+              }
+              onChange={(e) =>
+                update(
+                  "tagCode",
+                  e.target.value
+                    .toUpperCase()
+                    .replace(
+                      /\s/g,
+                      ""
+                    )
+                )
+              }
+              placeholder="QR-000123"
+            />
+          </Field>
+
+          <Field
+            label={
+              isPet
+                ? "სახელი *"
+                : "პროფილის სახელი *"
+            }
+          >
+            <input
+              value={
+                draft.itemName
+              }
+              onChange={(e) =>
+                update(
+                  "itemName",
+                  e.target.value
+                )
+              }
+            />
+          </Field>
+
+          <Field label="ფერი">
+            <input
+              value={
+                draft.colour
+              }
+              onChange={(e) =>
+                update(
+                  "colour",
+                  e.target.value
+                )
+              }
+            />
+          </Field>
+
+          {isPet && (
+            <>
+              <Field label="სქესი">
+                <select
+                  value={
+                    draft.sex
+                  }
+                  onChange={(e) =>
+                    update(
+                      "sex",
+                      e.target.value
+                    )
+                  }
+                >
+                  <option value="">
+                    აირჩიეთ
+                  </option>
+
+                  <option value="male">
+                    მამრი
+                  </option>
+
+                  <option value="female">
+                    მდედრი
+                  </option>
+                </select>
+              </Field>
+
+              <Field label="დაბადების თარიღი">
+                <input
+                  type="date"
+                  value={
+                    draft.dateOfBirth
+                  }
+                  onChange={(e) =>
+                    update(
+                      "dateOfBirth",
+                      e.target.value
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="წონა">
+                <input
+                  type="number"
+                  step="0.1"
+                  value={
+                    draft.weight
+                  }
+                  onChange={(e) =>
+                    update(
+                      "weight",
+                      e.target.value
+                    )
+                  }
+                  placeholder="kg"
+                />
+              </Field>
+            </>
+          )}
+
+          {showBrand && (
+            <Field label="ბრენდი">
+              <input
+                value={
+                  draft.brand
+                }
+                onChange={(e) =>
+                  update(
+                    "brand",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          {showModel && (
+            <Field label="მოდელი">
+              <input
+                value={
+                  draft.model
+                }
+                onChange={(e) =>
+                  update(
+                    "model",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          {showSize && (
+            <Field label="ზომა">
+              <input
+                value={
+                  draft.size
+                }
+                onChange={(e) =>
+                  update(
+                    "size",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          {showMaterial && (
+            <Field label="მასალა">
+              <input
+                value={
+                  draft.material
+                }
+                onChange={(e) =>
+                  update(
+                    "material",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+        </div>
       </div>
 
-      <div className="grid">
-        <Field
-          label="QR / Tag Code *"
-          full
-        >
-          <input
-            value={draft.tagCode}
-            onChange={(e) =>
-              update(
-                "tagCode",
-                e.target.value
-                  .toUpperCase()
-                  .replace(
-                    /\s/g,
-                    ""
-                  )
-              )
-            }
-            placeholder="QR-000123"
-          />
-        </Field>
+      <div className="compactSection">
+        <h2>
+          დამატებითი ინფორმაცია
+        </h2>
 
-        <Field
-          label={
-            pet
-              ? "სახელი *"
-              : "პროფილის სახელი *"
-          }
-        >
-          <input
-            value={draft.itemName}
-            onChange={(e) =>
-              update(
-                "itemName",
-                e.target.value
-              )
-            }
-          />
-        </Field>
-
-        <Field label="ფერი">
-          <input
-            value={draft.colour}
-            onChange={(e) =>
-              update(
-                "colour",
-                e.target.value
-              )
-            }
-          />
-        </Field>
-
-        {pet && (
-          <>
-            <Field label="სქესი">
-              <select
-                value={draft.sex}
-                onChange={(e) =>
-                  update(
-                    "sex",
-                    e.target.value
-                  )
-                }
-              >
-                <option value="">
-                  აირჩიეთ
-                </option>
-
-                <option value="male">
-                  მამრი
-                </option>
-
-                <option value="female">
-                  მდედრი
-                </option>
-              </select>
-            </Field>
-
-            <Field label="დაბადების თარიღი">
-              <input
-                type="date"
-                value={
-                  draft.dateOfBirth
-                }
-                onChange={(e) =>
-                  update(
-                    "dateOfBirth",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="წონა">
-              <input
-                type="number"
-                step="0.1"
-                value={draft.weight}
-                onChange={(e) =>
-                  update(
-                    "weight",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-          </>
-        )}
-
-        {showBrand && (
-          <Field label="ბრენდი">
-            <input
-              value={draft.brand}
+        <div className="formGrid">
+          <Field label="აღწერა">
+            <textarea
+              rows={2}
+              value={
+                draft.description
+              }
               onChange={(e) =>
                 update(
-                  "brand",
+                  "description",
                   e.target.value
                 )
               }
             />
           </Field>
-        )}
 
-        {showModel && (
-          <Field label="მოდელი">
-            <input
-              value={draft.model}
-              onChange={(e) =>
-                update(
-                  "model",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
-
-        {showSize && (
-          <Field label="ზომა">
-            <input
-              value={draft.size}
-              onChange={(e) =>
-                update(
-                  "size",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
-
-        {showMaterial && (
-          <Field label="მასალა">
-            <input
-              value={draft.material}
-              onChange={(e) =>
-                update(
-                  "material",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
-
-        <Field
-          label="აღწერა"
-          full
-        >
-          <textarea
-            rows={3}
-            value={
-              draft.description
-            }
-            onChange={(e) =>
-              update(
-                "description",
-                e.target.value
-              )
-            }
-          />
-        </Field>
-
-        {pet && (
-          <>
-            <Field
-              label="სამედიცინო ინფორმაცია"
-              full
-            >
+          {isPet ? (
+            <Field label="ქცევის შესახებ ინფორმაცია">
               <textarea
-                rows={3}
-                value={
-                  draft.medicalInfo
-                }
-                onChange={(e) =>
-                  update(
-                    "medicalInfo",
-                    e.target.value
-                  )
-                }
-              />
-            </Field>
-
-            <Field
-              label="ქცევის ინფორმაცია"
-              full
-            >
-              <textarea
-                rows={3}
+                rows={2}
                 value={
                   draft.behaviourNote
                 }
@@ -1540,83 +1447,97 @@ function ProductStep({
                 }
               />
             </Field>
-          </>
-        )}
+          ) : (
+            <Field label="განმასხვავებელი ნიშნები">
+              <textarea
+                rows={2}
+                value={
+                  draft.distinctiveFeatures
+                }
+                onChange={(e) =>
+                  update(
+                    "distinctiveFeatures",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
 
-        {!pet && (
-          <Field
-            label="განმასხვავებელი ნიშნები"
-            full
-          >
-            <textarea
-              rows={3}
+          {isPet && (
+            <Field label="სამედიცინო ინფორმაცია">
+              <textarea
+                rows={2}
+                value={
+                  draft.medicalInfo
+                }
+                onChange={(e) =>
+                  update(
+                    "medicalInfo",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          <Field label="დაკარგვის ადგილი">
+            <input
               value={
-                draft.distinctiveFeatures
+                draft.lostLocation
               }
               onChange={(e) =>
                 update(
-                  "distinctiveFeatures",
+                  "lostLocation",
                   e.target.value
                 )
               }
+              placeholder="მაგ. Central Park, New York"
             />
           </Field>
-        )}
 
-        <Field
-          label="დაკარგვის ადგილი"
-          full
-        >
-          <input
-            value={
-              draft.lostLocation
-            }
-            onChange={(e) =>
-              update(
-                "lostLocation",
-                e.target.value
-              )
-            }
-            placeholder="მაგ. Central Park, New York"
-          />
-        </Field>
-
-        <Field
-          label="შეტყობინება მპოვნელისთვის"
-          full
-        >
-          <textarea
-            rows={3}
-            value={
-              draft.finderMessage
-            }
-            onChange={(e) =>
-              update(
-                "finderMessage",
-                e.target.value
-              )
-            }
-            placeholder="გთხოვთ დამიკავშირდეთ..."
-          />
-        </Field>
+          <Field
+            label="შეტყობინება მპოვნელისთვის"
+            full
+          >
+            <textarea
+              rows={2}
+              value={
+                draft.finderMessage
+              }
+              onChange={(e) =>
+                update(
+                  "finderMessage",
+                  e.target.value
+                )
+              }
+              placeholder="გთხოვთ დამიკავშირდეთ..."
+            />
+          </Field>
+        </div>
       </div>
 
-      <div className="visibility">
+      <div className="compactSection">
         <h2>
-          რას გსურთ რომ დაინახოს
-          მპოვნელმა?
+          რას დაინახავს მპოვნელი
         </h2>
 
-        <div className="toggles">
+        <p className="sectionDescription">
+          სახელი, გვარი და ტელეფონი
+          ყოველთვის ხილულია. დანარჩენი
+          თქვენ აკონტროლებთ.
+        </p>
+
+        <div className="toggleGrid">
           <Toggle
             label="ელფოსტა"
             checked={
               draft.showEmail
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showEmail",
-                v
+                value
               )
             }
           />
@@ -1626,38 +1547,38 @@ function ProductStep({
             checked={
               draft.showDescription
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showDescription",
-                v
+                value
               )
             }
           />
 
-          {pet && (
+          {isPet && (
             <>
               <Toggle
                 label="სამედიცინო ინფორმაცია"
                 checked={
                   draft.showMedicalInfo
                 }
-                onChange={(v) =>
+                onChange={(value) =>
                   update(
                     "showMedicalInfo",
-                    v
+                    value
                   )
                 }
               />
 
               <Toggle
-                label="ქცევის ინფორმაცია"
+                label="ქცევის შესახებ ინფორმაცია"
                 checked={
                   draft.showBehaviourNote
                 }
-                onChange={(v) =>
+                onChange={(value) =>
                   update(
                     "showBehaviourNote",
-                    v
+                    value
                   )
                 }
               />
@@ -1669,10 +1590,10 @@ function ProductStep({
             checked={
               draft.showLostLocation
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showLostLocation",
-                v
+                value
               )
             }
           />
@@ -1682,10 +1603,10 @@ function ProductStep({
             checked={
               draft.showFinderMessage
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showFinderMessage",
-                v
+                value
               )
             }
           />
@@ -1695,35 +1616,33 @@ function ProductStep({
             checked={
               draft.liveChatEnabled
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "liveChatEnabled",
-                v
+                value
               )
             }
           />
         </div>
       </div>
 
-      <div className="buttons">
+      <div className="actions">
         <button
           type="button"
-          onClick={onBack}
-          className="secondary"
+          className="secondaryButton"
+          onClick={back}
         >
           ← უკან
         </button>
 
         <button
           type="button"
-          onClick={onNext}
-          className="primary"
+          className="primaryButton"
+          onClick={next}
         >
-          Preview →
+          შემოწმება →
         </button>
       </div>
-
-      <CommonStyles />
     </>
   );
 }
@@ -1732,50 +1651,47 @@ function PreviewStep({
   type,
   meta,
   draft,
-  onBack,
-  onConfirm,
+  back,
+  confirm,
   saving,
 }: {
   type: ProductType;
+
   meta: {
     label: string;
     emoji: string;
   };
+
   draft: Draft;
-  onBack: () => void;
-  onConfirm: () => void;
+
+  back: () => void;
+
+  confirm: () => void;
+
   saving: boolean;
 }) {
-  const pet =
+  const isPet =
     type === "dog" ||
     type === "cat";
 
   return (
     <>
-      <div className="title center">
-        <span>
-          STEP 3 OF 3
-        </span>
+      <StepTitle
+        eyebrow="STEP 3 OF 3"
+        title="რას ნახავს მპოვნელი"
+        description="ეს არის საბოლოო Preview. თუ ყველაფერი სწორია, დაადასტურეთ პროფილის შექმნა."
+        center
+      />
 
-        <h1>
-          რას ნახავს მპოვნელი
-        </h1>
-
-        <p>
-          გადაამოწმეთ ინფორმაცია
-          საბოლოო დადასტურებამდე.
-        </p>
-      </div>
-
-      <div className="finderPreview">
-        <div className="previewHero">
-          <div className="bigEmoji">
+      <section className="finderPreview">
+        <div className="previewHeader">
+          <div className="previewEmoji">
             {meta.emoji}
           </div>
 
           <div>
             <span>
-              QR RETURN PROFILE
+              QR RETURN
             </span>
 
             <h2>
@@ -1784,51 +1700,33 @@ function PreviewStep({
             </h2>
 
             <p>
-              ნაპოვნია? დაუკავშირდით
+              იპოვეთ? დაუკავშირდით
               მფლობელს.
             </p>
           </div>
         </div>
 
         <div className="ownerPreview">
-          <div>
-            <span>
-              მფლობელი
-            </span>
+          <PreviewItem
+            label="მფლობელი"
+            value={`${draft.ownerFirstName} ${draft.ownerLastName}`}
+          />
 
-            <strong>
-              {
-                draft.ownerFirstName
-              }{" "}
-              {
-                draft.ownerLastName
-              }
-            </strong>
-          </div>
-
-          <div>
-            <span>
-              ტელეფონი
-            </span>
-
-            <strong>
-              {draft.ownerPhone}
-            </strong>
-          </div>
+          <PreviewItem
+            label="ტელეფონი"
+            value={
+              draft.ownerPhone
+            }
+          />
 
           {draft.showEmail &&
             draft.ownerEmail && (
-              <div>
-                <span>
-                  ელფოსტა
-                </span>
-
-                <strong>
-                  {
-                    draft.ownerEmail
-                  }
-                </strong>
-              </div>
+              <PreviewItem
+                label="ელფოსტა"
+                value={
+                  draft.ownerEmail
+                }
+              />
             )}
         </div>
 
@@ -1836,29 +1734,29 @@ function PreviewStep({
           draft.description && (
             <PreviewBlock
               title="აღწერა"
-              value={
+              text={
                 draft.description
               }
             />
           )}
 
-        {pet &&
+        {isPet &&
           draft.showMedicalInfo &&
           draft.medicalInfo && (
             <PreviewBlock
               title="სამედიცინო ინფორმაცია"
-              value={
+              text={
                 draft.medicalInfo
               }
             />
           )}
 
-        {pet &&
+        {isPet &&
           draft.showBehaviourNote &&
           draft.behaviourNote && (
             <PreviewBlock
-              title="ქცევის ინფორმაცია"
-              value={
+              title="ქცევის შესახებ ინფორმაცია"
+              text={
                 draft.behaviourNote
               }
             />
@@ -1868,7 +1766,7 @@ function PreviewStep({
           draft.lostLocation && (
             <PreviewBlock
               title="📍 დაკარგვის ადგილი"
-              value={
+              text={
                 draft.lostLocation
               }
             />
@@ -1878,13 +1776,13 @@ function PreviewStep({
           draft.finderMessage && (
             <PreviewBlock
               title="მფლობელის შეტყობინება"
-              value={
+              text={
                 draft.finderMessage
               }
             />
           )}
 
-        <div className="contactPreview">
+        <div className="previewContacts">
           <button type="button">
             ☎ დარეკვა
           </button>
@@ -1895,228 +1793,61 @@ function PreviewStep({
             </button>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="confirmation">
-        ეს არის ინფორმაცია,
-        რომელსაც QR კოდის
-        მპოვნელი დაინახავს.
-      </div>
-
-      <div className="buttons">
+      <div className="actions">
         <button
           type="button"
-          onClick={onBack}
-          className="secondary"
+          className="secondaryButton"
+          onClick={back}
         >
           ← რედაქტირება
         </button>
 
         <button
           type="button"
-          onClick={onConfirm}
+          className="primaryButton"
+          onClick={confirm}
           disabled={saving}
-          className="primary"
         >
           {saving
             ? "იქმნება..."
             : "✓ ვადასტურებ და ვქმნი პროფილს"}
         </button>
       </div>
-
-      <CommonStyles />
-
-      <style jsx>{`
-        .finderPreview {
-          max-width: 650px;
-
-          margin: 25px auto 0;
-
-          overflow: hidden;
-
-          border:
-            1px solid #d6e2ef;
-
-          border-radius: 18px;
-
-          background: #fff;
-        }
-
-        .previewHero {
-          padding: 22px;
-
-          display: flex;
-          align-items: center;
-
-          gap: 14px;
-
-          background: #f2f6fc;
-        }
-
-        .bigEmoji {
-          width: 58px;
-          height: 58px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 15px;
-
-          background: #0747c9;
-
-          font-size: 29px;
-        }
-
-        .previewHero span {
-          color: #0747c9;
-
-          font-size: 11px;
-          font-weight: 900;
-        }
-
-        .previewHero h2 {
-          margin: 4px 0 0;
-
-          color: #253e58;
-
-          font-size: 22px;
-        }
-
-        .previewHero p {
-          margin: 4px 0 0;
-
-          color: #75869a;
-
-          font-size: 13px;
-        }
-
-        .ownerPreview {
-          padding: 18px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-
-          gap: 10px;
-        }
-
-        .ownerPreview > div {
-          padding: 13px;
-
-          border-radius: 10px;
-
-          background: #f7faff;
-        }
-
-        .ownerPreview span,
-        .ownerPreview strong {
-          display: block;
-        }
-
-        .ownerPreview span {
-          color: #8190a1;
-
-          font-size: 12px;
-        }
-
-        .ownerPreview strong {
-          margin-top: 5px;
-
-          color: #304b66;
-
-          font-size: 14px;
-        }
-
-        .contactPreview {
-          padding: 18px;
-
-          display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 9px;
-        }
-
-        .contactPreview button {
-          min-height: 45px;
-
-          border: 0;
-          border-radius: 10px;
-
-          background: #0747c9;
-
-          color: white;
-
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .confirmation {
-          max-width: 650px;
-
-          margin: 14px auto 0;
-
-          padding: 12px;
-
-          border-radius: 10px;
-
-          background: #edf4ff;
-
-          color: #0747c9;
-
-          font-size: 13px;
-
-          text-align: center;
-
-          font-weight: 750;
-        }
-      `}</style>
     </>
   );
 }
 
-function PreviewBlock({
+function StepTitle({
+  eyebrow,
   title,
-  value,
+  description,
+  center = false,
 }: {
+  eyebrow: string;
   title: string;
-  value: string;
+  description: string;
+  center?: boolean;
 }) {
   return (
     <div
-      style={{
-        margin:
-          "0 18px 10px",
-        padding: "14px",
-        borderRadius: "10px",
-        background: "#f7faff",
-      }}
+      className={
+        center
+          ? "stepTitle center"
+          : "stepTitle"
+      }
     >
-      <strong
-        style={{
-          display: "block",
-          color: "#304b66",
-          fontSize: "14px",
-        }}
-      >
-        {title}
-      </strong>
+      <span>
+        {eyebrow}
+      </span>
 
-      <p
-        style={{
-          margin:
-            "6px 0 0",
-          color: "#718397",
-          fontSize: "13px",
-          lineHeight: 1.55,
-        }}
-      >
-        {value}
+      <h1>
+        {title}
+      </h1>
+
+      <p>
+        {description}
       </p>
     </div>
   );
@@ -2134,22 +1865,13 @@ function Field({
 }) {
   return (
     <div
-      style={{
-        gridColumn:
-          full
-            ? "1 / -1"
-            : undefined,
-      }}
+      className={
+        full
+          ? "field full"
+          : "field"
+      }
     >
-      <label
-        style={{
-          display: "block",
-          marginBottom: "7px",
-          color: "#344e69",
-          fontSize: "14px",
-          fontWeight: 800,
-        }}
-      >
+      <label>
         {label}
       </label>
 
@@ -2171,62 +1893,364 @@ function Toggle({
   return (
     <button
       type="button"
+      className="toggle"
       onClick={() =>
         onChange(!checked)
       }
-      style={{
-        minHeight: "54px",
-        padding: "0 14px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent:
-          "space-between",
-        gap: "10px",
-        border:
-          "1px solid #dbe5ef",
-        borderRadius:
-          "10px",
-        background: "#fff",
-        color: "#405972",
-        fontSize: "13px",
-        fontWeight: 750,
-        cursor: "pointer",
-      }}
     >
-      {label}
+      <span>
+        {label}
+      </span>
 
-      <span
-        style={{
-          padding:
-            "5px 9px",
-          borderRadius:
-            "999px",
-          background:
-            checked
-              ? "#0747c9"
-              : "#e5ebf2",
-          color:
-            checked
-              ? "#fff"
-              : "#738397",
-          fontSize:
-            "11px",
-          fontWeight: 900,
-        }}
+      <b
+        className={
+          checked
+            ? "toggleState on"
+            : "toggleState"
+        }
       >
         {checked
           ? "ON"
           : "OFF"}
-      </span>
+      </b>
     </button>
   );
 }
 
-function CommonStyles() {
+function PreviewItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+function PreviewBlock({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="previewBlock">
+      <strong>
+        {title}
+      </strong>
+
+      <p>
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function PageStyles() {
   return (
     <style jsx global>{`
-      .title > span {
-        color: #0747c9;
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .page {
+        position: relative;
+
+        min-height: 100vh;
+
+        overflow: hidden;
+
+        padding:
+          0 20px 50px;
+
+        background: #0647c8;
+      }
+
+      .emojiLayer {
+        position: fixed;
+        inset: 0;
+
+        overflow: hidden;
+
+        pointer-events: none;
+      }
+
+      .emojiLayer span {
+        position: absolute;
+
+        opacity: .055;
+
+        font-size: 72px;
+
+        filter:
+          grayscale(1)
+          brightness(5);
+      }
+
+      .header {
+        position: relative;
+        z-index: 2;
+
+        width: 100%;
+        max-width: 960px;
+
+        min-height: 72px;
+
+        margin: auto;
+
+        display: flex;
+        align-items: center;
+        justify-content:
+          space-between;
+
+        border-bottom:
+          1px solid
+          rgba(255,255,255,.2);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+
+        gap: 10px;
+
+        text-decoration: none;
+      }
+
+      .brandMark {
+        width: 43px;
+        height: 43px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 11px;
+
+        background: #fff;
+
+        color: #0647c8;
+
+        font-size: 13px;
+        font-weight: 950;
+      }
+
+      .brand strong,
+      .brand small {
+        display: block;
+      }
+
+      .brand strong {
+        color: white;
+
+        font-size: 18px;
+      }
+
+      .brand small {
+        margin-top: 2px;
+
+        color:
+          rgba(255,255,255,.7);
+
+        font-size: 11px;
+      }
+
+      .changeProduct {
+        padding: 10px 14px;
+
+        border:
+          1px solid
+          rgba(255,255,255,.3);
+
+        border-radius: 9px;
+
+        color: white;
+
+        font-size: 13px;
+        font-weight: 800;
+
+        text-decoration: none;
+      }
+
+      .progress {
+        position: relative;
+        z-index: 2;
+
+        width: 100%;
+        max-width: 650px;
+
+        margin: 25px auto 0;
+
+        display: flex;
+        align-items: center;
+      }
+
+      .progressPart {
+        flex: 1;
+
+        display: flex;
+        align-items: center;
+      }
+
+      .progressPart:last-child {
+        flex: 0 0 auto;
+      }
+
+      .progressStep {
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        color:
+          rgba(255,255,255,.52);
+
+        font-size: 13px;
+        font-weight: 800;
+
+        white-space: nowrap;
+      }
+
+      .stepCircle {
+        width: 32px;
+        height: 32px;
+
+        display: grid;
+        place-items: center;
+
+        border:
+          1px solid
+          rgba(255,255,255,.35);
+
+        border-radius: 50%;
+
+        font-size: 12px;
+      }
+
+      .progressStep.active,
+      .progressStep.completed {
+        color: white;
+      }
+
+      .progressStep.active
+        .stepCircle {
+        background: white;
+
+        color: #0647c8;
+      }
+
+      .progressStep.completed
+        .stepCircle {
+        background: #ffffff;
+
+        color: #0647c8;
+      }
+
+      .line {
+        flex: 1;
+
+        height: 2px;
+
+        margin: 0 11px;
+
+        background:
+          rgba(255,255,255,.22);
+      }
+
+      .line.filled {
+        background: white;
+      }
+
+      .marketingLine {
+        position: relative;
+        z-index: 2;
+
+        width: 100%;
+        max-width: 830px;
+
+        margin: 22px auto 16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 12px;
+
+        text-align: center;
+
+        color: white;
+      }
+
+      .marketingLine > span {
+        font-size: 35px;
+      }
+
+      .marketingLine strong {
+        display: block;
+
+        font-size: 16px;
+      }
+
+      .marketingLine p {
+        margin: 4px 0 0;
+
+        color:
+          rgba(255,255,255,.72);
+
+        font-size: 13px;
+      }
+
+      .card {
+        position: relative;
+        z-index: 2;
+
+        width: 100%;
+        max-width: 880px;
+
+        margin: auto;
+
+        padding: 26px;
+
+        border-radius: 20px;
+
+        background: #ffffff;
+
+        box-shadow:
+          0 25px 60px
+          rgba(0,24,77,.28);
+      }
+
+      .errorBox {
+        margin-bottom: 17px;
+
+        padding: 13px 14px;
+
+        border-radius: 10px;
+
+        background: #fff0f2;
+
+        color: #a53e49;
+
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .stepTitle > span {
+        color: #0647c8;
 
         font-size: 12px;
         font-weight: 900;
@@ -2234,206 +2258,470 @@ function CommonStyles() {
         letter-spacing: .8px;
       }
 
-      .title h1 {
-        margin: 6px 0 0;
+      .stepTitle h1 {
+        margin: 5px 0 0;
 
         color: #203a55;
 
         font-size: 27px;
       }
 
-      .title p {
-        margin: 7px 0 0;
+      .stepTitle p {
+        margin: 6px 0 0;
 
-        color: #74869a;
+        color: #718397;
 
         font-size: 14px;
-      }
-
-      .title.center {
-        text-align: center;
-      }
-
-      .grid {
-        margin-top: 24px;
-
-        display: grid;
-
-        grid-template-columns:
-          repeat(
-            2,
-            minmax(
-              0,
-              1fr
-            )
-          );
-
-        gap: 15px;
-      }
-
-      .grid input,
-      .grid select,
-      .grid textarea {
-        width: 100%;
-
-        border:
-          1px solid #d6e1ec;
-
-        border-radius: 10px;
-
-        background: #fff;
-
-        color: #243e59;
-
-        font-family: inherit;
-
-        font-size: 15px;
-
-        outline: none;
-      }
-
-      .grid input,
-      .grid select {
-        min-height: 48px;
-
-        padding: 0 13px;
-      }
-
-      .grid textarea {
-        padding: 12px 13px;
-
-        resize: vertical;
-
         line-height: 1.5;
       }
 
-      .grid input:focus,
-      .grid select:focus,
-      .grid textarea:focus {
-        border-color: #0747c9;
-
-        box-shadow:
-          0 0 0 3px
-          rgba(
-            7,
-            71,
-            201,
-            .08
-          );
+      .stepTitle.center {
+        text-align: center;
       }
 
-      .tip {
-        margin-top: 18px;
+      .compactSection {
+        margin-top: 20px;
 
-        padding: 12px 14px;
-
-        border-radius: 10px;
-
-        background: #eef5ff;
-
-        color: #476681;
-
-        font-size: 13px;
-      }
-
-      .visibility {
-        margin-top: 22px;
-
-        padding-top: 20px;
+        padding-top: 18px;
 
         border-top:
-          1px solid #e5ebf2;
+          1px solid #e4ebf3;
       }
 
-      .visibility h2 {
+      .compactSection h2 {
         margin: 0;
 
-        color: #29445f;
+        color: #2b4661;
 
         font-size: 18px;
       }
 
-      .toggles {
-        margin-top: 14px;
+      .sectionDescription {
+        margin: 5px 0 0;
+
+        color: #75869a;
+
+        font-size: 13px;
+      }
+
+      .formGrid {
+        margin-top: 15px;
 
         display: grid;
 
         grid-template-columns:
           repeat(
             2,
-            minmax(
-              0,
-              1fr
-            )
+            minmax(0,1fr)
           );
 
-        gap: 9px;
+        gap: 12px;
       }
 
-      .buttons {
-        margin-top: 24px;
+      .formGrid.three {
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
+      }
+
+      .field.full {
+        grid-column:
+          1 / -1;
+      }
+
+      .field label {
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: #344e68;
+
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+
+        border:
+          1px solid #d5e0eb;
+
+        border-radius: 9px;
+
+        background: #fff;
+
+        color: #263f59;
+
+        font-family: inherit;
+
+        font-size: 14px;
+
+        outline: none;
+      }
+
+      .field input,
+      .field select {
+        min-height: 44px;
+
+        padding: 0 12px;
+      }
+
+      .field textarea {
+        padding: 10px 12px;
+
+        resize: vertical;
+
+        line-height: 1.45;
+      }
+
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        border-color: #0647c8;
+
+        box-shadow:
+          0 0 0 3px
+          rgba(6,71,200,.08);
+      }
+
+      .smallNotice {
+        margin-top: 16px;
+
+        padding: 11px 13px;
+
+        border-radius: 9px;
+
+        background: #eef5ff;
+
+        color: #4b6782;
+
+        font-size: 13px;
+      }
+
+      .toggleGrid {
+        margin-top: 13px;
+
+        display: grid;
+
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
+
+        gap: 8px;
+      }
+
+      .toggle {
+        min-height: 50px;
+
+        padding: 0 12px;
 
         display: flex;
+        align-items: center;
+        justify-content:
+          space-between;
+
+        gap: 8px;
+
+        border:
+          1px solid #dce5ef;
+
+        border-radius: 9px;
+
+        background: white;
+
+        color: #405972;
+
+        font-family: inherit;
+
+        font-size: 13px;
+        font-weight: 750;
+
+        text-align: left;
+
+        cursor: pointer;
+      }
+
+      .toggleState {
+        padding: 5px 8px;
+
+        border-radius: 999px;
+
+        background: #e5ebf2;
+
+        color: #748599;
+
+        font-size: 10px;
+
+        white-space: nowrap;
+      }
+
+      .toggleState.on {
+        background: #0647c8;
+
+        color: white;
+      }
+
+      .actions {
+        margin-top: 22px;
+
+        display: flex;
+        align-items: center;
         justify-content:
           space-between;
 
         gap: 10px;
       }
 
-      .buttons.end {
+      .actions.right {
         justify-content:
           flex-end;
       }
 
-      .buttons button {
-        min-height: 48px;
+      .actions button {
+        min-height: 46px;
 
         padding: 0 18px;
 
-        border-radius: 10px;
+        border-radius: 9px;
 
         font-family: inherit;
 
         font-size: 14px;
-
         font-weight: 850;
 
         cursor: pointer;
       }
 
-      .buttons .primary {
+      .primaryButton {
         border: 0;
 
-        background: #0747c9;
+        background: #0647c8;
 
         color: white;
       }
 
-      .buttons .secondary {
+      .secondaryButton {
         border:
-          1px solid #cad8e6;
+          1px solid #cad7e5;
 
         background: white;
 
-        color: #60748a;
+        color: #607489;
+      }
+
+      .finderPreview {
+        max-width: 640px;
+
+        margin: 22px auto 0;
+
+        overflow: hidden;
+
+        border:
+          1px solid #d6e2ee;
+
+        border-radius: 16px;
+
+        background: #fff;
+      }
+
+      .previewHeader {
+        padding: 18px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 13px;
+
+        background: #f2f6fc;
+      }
+
+      .previewEmoji {
+        width: 54px;
+        height: 54px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 13px;
+
+        background: #0647c8;
+
+        font-size: 28px;
+      }
+
+      .previewHeader span {
+        color: #0647c8;
+
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .previewHeader h2 {
+        margin: 3px 0 0;
+
+        color: #29445f;
+
+        font-size: 21px;
+      }
+
+      .previewHeader p {
+        margin: 3px 0 0;
+
+        color: #75869a;
+
+        font-size: 13px;
+      }
+
+      .ownerPreview {
+        padding: 15px;
+
+        display: grid;
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
+        gap: 8px;
+      }
+
+      .ownerPreview > div {
+        padding: 11px;
+
+        border-radius: 9px;
+
+        background: #f7faff;
+      }
+
+      .ownerPreview span,
+      .ownerPreview strong {
+        display: block;
+      }
+
+      .ownerPreview span {
+        color: #8190a1;
+
+        font-size: 11px;
+      }
+
+      .ownerPreview strong {
+        margin-top: 4px;
+
+        color: #314b66;
+
+        font-size: 13px;
+      }
+
+      .previewBlock {
+        margin: 0 15px 9px;
+
+        padding: 12px;
+
+        border-radius: 9px;
+
+        background: #f7faff;
+      }
+
+      .previewBlock strong {
+        display: block;
+
+        color: #314b66;
+
+        font-size: 13px;
+      }
+
+      .previewBlock p {
+        margin: 5px 0 0;
+
+        color: #718397;
+
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .previewContacts {
+        padding: 15px;
+
+        display: grid;
+
+        grid-template-columns:
+          1fr 1fr;
+
+        gap: 8px;
+      }
+
+      .previewContacts button {
+        min-height: 43px;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        background: #0647c8;
+
+        color: white;
+
+        font-size: 13px;
+        font-weight: 800;
       }
 
       @media (
-        max-width:
-          650px
+        max-width: 760px
       ) {
-        .grid,
-        .toggles {
+        .formGrid.three,
+        .toggleGrid {
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0,1fr)
+            );
+        }
+      }
+
+      @media (
+        max-width: 600px
+      ) {
+        .page {
+          padding:
+            0 13px 28px;
+        }
+
+        .brand small {
+          display: none;
+        }
+
+        .progressStep span {
+          display: none;
+        }
+
+        .card {
+          padding: 19px;
+        }
+
+        .formGrid,
+        .formGrid.three,
+        .toggleGrid {
           grid-template-columns:
             1fr;
         }
 
-        .buttons {
+        .stepTitle h1 {
+          font-size: 23px;
+        }
+
+        .actions {
           flex-direction:
             column;
         }
 
-        .buttons button {
+        .actions button {
           width: 100%;
         }
       }
