@@ -6,42 +6,42 @@ const PRODUCTS = [
     label: "ძაღლი",
     emoji: "🐶",
     description:
-      "დაარეგისტრირეთ თქვენი ძაღლის QR პროფილი და მიუთითეთ მნიშვნელოვანი ინფორმაცია.",
+      "შექმენით თქვენი ძაღლის QR პროფილი და დაამატეთ მნიშვნელოვანი ინფორმაცია.",
   },
   {
     type: "cat",
     label: "კატა",
     emoji: "🐱",
     description:
-      "შექმენით კატის QR პროფილი და მართეთ საკონტაქტო და უსაფრთხოების ინფორმაცია.",
+      "დაარეგისტრირეთ კატის QR პროფილი და მართეთ ინფორმაცია ერთ სივრცეში.",
   },
   {
     type: "keys",
     label: "გასაღები",
     emoji: "🔑",
     description:
-      "დაარეგისტრირეთ გასაღების QR კოდი და დაეხმარეთ მპოვნელს თქვენთან დაკავშირებაში.",
+      "მიაბით QR კოდი თქვენს გასაღებს და გაამარტივეთ მპოვნელთან დაკავშირება.",
   },
   {
     type: "wallet",
     label: "საფულე",
     emoji: "👛",
     description:
-      "შექმენით საფულის პროფილი და დაამატეთ მფლობელის საკონტაქტო ინფორმაცია.",
+      "შექმენით საფულის პროფილი საკონტაქტო და განმასხვავებელი ინფორმაციით.",
   },
   {
     type: "bag",
     label: "ჩანთა",
     emoji: "👜",
     description:
-      "დაარეგისტრირეთ ჩანთა და დაამატეთ აღწერა, ფოტო და განმასხვავებელი ნიშნები.",
+      "დაამატეთ ჩანთის ფოტო, აღწერა და საჭირო ინფორმაცია მპოვნელისთვის.",
   },
   {
     type: "suitcase",
     label: "ჩემოდანი",
     emoji: "🧳",
     description:
-      "დაარეგისტრირეთ ჩემოდნის QR პროფილი მოგზაურობისას უფრო სწრაფი დაბრუნებისთვის.",
+      "დაარეგისტრირეთ სამგზავრო ჩემოდანი და გაამარტივეთ მისი დაბრუნება.",
   },
 ] as const;
 
@@ -51,89 +51,143 @@ export default function RegisterPage() {
       <main className="page">
         <header className="header">
           <a href="/" className="brand">
-            <div className="brandMark">QR</div>
+            <div className="brandMark">
+              QR
+            </div>
 
-            <div>
-              <strong>QR RETURN</strong>
-              <span>SMART LOST &amp; FOUND</span>
+            <div className="brandText">
+              <strong>
+                QR RETURN
+              </strong>
+
+              <span>
+                SMART LOST &amp; FOUND
+              </span>
             </div>
           </a>
 
-          <a href="/my-profiles" className="profilesLink">
-            ჩემი პროფილები
-          </a>
+          <div className="headerActions">
+            <a
+              href="/my-profiles"
+              className="profilesButton"
+            >
+              ჩემი პროფილები
+            </a>
+          </div>
         </header>
 
         <section className="hero">
-          <span>REGISTER PRODUCT</span>
+          <div className="heroBadge">
+            PRODUCT REGISTRATION
+          </div>
 
           <h1>
-            აირჩიეთ პროდუქტი
+            რომელი პროფილის დამატება გსურთ?
           </h1>
 
           <p>
-            ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად მართოთ
-            სხვადასხვა QR პროფილი. აირჩიეთ კატეგორია და დაიწყეთ
-            რეგისტრაცია.
+            ერთი QR RETURN ანგარიშიდან შეგიძლიათ
+            შეუზღუდავად დაამატოთ და მართოთ სხვადასხვა
+            ნივთისა და ცხოველის პროფილი.
           </p>
+
+          <div className="accountNote">
+            <span>✓</span>
+
+            <p>
+              თუ ანგარიში უკვე გაქვთ, ახალი ანგარიშის
+              შექმნა აღარ გჭირდებათ — უბრალოდ აირჩიეთ
+              ახალი პროდუქტი.
+            </p>
+          </div>
         </section>
 
-        <section className="productsGrid">
-          {PRODUCTS.map((product) => (
-            <a
-              key={product.type}
-              href={`/register-item/${product.type}`}
-              className="productCard"
-            >
-              <div className="top">
-                <div className="icon">
-                  {product.emoji}
-                </div>
-
-                <span className="arrow">
-                  →
-                </span>
-              </div>
-
-              <span className="category">
-                QR PROFILE
+        <section className="productsSection">
+          <div className="sectionTop">
+            <div>
+              <span>
+                6 CATEGORIES
               </span>
 
               <h2>
-                {product.label}
+                აირჩიეთ პროდუქტი
               </h2>
-
-              <p>
-                {product.description}
-              </p>
-
-              <div className="bottom">
-                <span>
-                  რეგისტრაციის დაწყება
-                </span>
-
-                <b>→</b>
-              </div>
-            </a>
-          ))}
-        </section>
-
-        <section className="infoCard">
-          <div className="infoIcon">
-            i
-          </div>
-
-          <div>
-            <strong>
-              ერთი Owner Account — რამდენიმე QR პროფილი
-            </strong>
+            </div>
 
             <p>
-              თითოეული QR კოდი ერთ კატეგორიაზე ფიქსირდება.
-              პროფილის მონაცემების შეცვლა მოგვიანებით შეგიძლიათ,
-              მაგრამ კატეგორია აღარ შეიცვლება.
+              თითოეული QR კოდი ერთ კატეგორიაზე
+              ფიქსირდება. კატეგორია შექმნის შემდეგ
+              აღარ შეიცვლება.
             </p>
           </div>
+
+          <div className="productsGrid">
+            {PRODUCTS.map((product) => (
+              <a
+                key={product.type}
+                href={`/register-item/${product.type}`}
+                className="productCard"
+              >
+                <div className="cardTop">
+                  <div className="productIcon">
+                    {product.emoji}
+                  </div>
+
+                  <div className="arrow">
+                    →
+                  </div>
+                </div>
+
+                <div className="productType">
+                  QR PROFILE
+                </div>
+
+                <h3>
+                  {product.label}
+                </h3>
+
+                <p>
+                  {product.description}
+                </p>
+
+                <div className="registerLink">
+                  <span>
+                    რეგისტრაციის დაწყება
+                  </span>
+
+                  <strong>
+                    →
+                  </strong>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="bottomCard">
+          <div className="bottomIcon">
+            +
+          </div>
+
+          <div className="bottomText">
+            <span>
+              ONE ACCOUNT
+            </span>
+
+            <h2>
+              შეუზღუდავი პროფილების დამატება
+            </h2>
+
+            <p>
+              შეგიძლიათ გქონდეთ რამდენიმე ძაღლი,
+              კატა, გასაღები, საფულე, ჩანთა ან
+              ჩემოდანი ერთ ანგარიშზე.
+            </p>
+          </div>
+
+          <a href="/my-profiles">
+            არსებული პროფილების ნახვა
+          </a>
         </section>
       </main>
 
@@ -144,26 +198,24 @@ export default function RegisterPage() {
 
         .page {
           min-height: 100vh;
-          padding-bottom: 70px;
+          padding-bottom: 80px;
 
           background:
-            radial-gradient(
-              circle at 100% 0%,
-              rgba(18, 102, 233, 0.08),
-              transparent 28%
-            ),
             linear-gradient(
               180deg,
-              #ffffff 0%,
-              #f5f9ff 100%
+              #0f5fd7 0px,
+              #1266e9 360px,
+              #f4f8fd 360px,
+              #f4f8fd 100%
             );
         }
 
         .header {
-          width: calc(100% - 60px);
+          width: calc(100% - 64px);
           max-width: 1180px;
-          min-height: 80px;
-          margin: auto;
+          min-height: 82px;
+
+          margin: 0 auto;
 
           display: flex;
           align-items: center;
@@ -171,133 +223,254 @@ export default function RegisterPage() {
 
           gap: 20px;
 
-          border-bottom: 1px solid #e3eaf2;
+          border-bottom:
+            1px solid rgba(255,255,255,.18);
         }
 
         .brand {
           display: flex;
           align-items: center;
 
-          gap: 10px;
+          gap: 11px;
 
           text-decoration: none;
         }
 
         .brandMark {
-          width: 42px;
-          height: 42px;
+          width: 44px;
+          height: 44px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 12px;
 
-          background: #1266e9;
-          color: #ffffff;
+          background: #ffffff;
 
-          font-size: 10px;
-          font-weight: 950;
+          color: #1266e9;
+
+          font-size: 13px;
+          font-weight: 900;
         }
 
-        .brand strong,
-        .brand span {
+        .brandText strong,
+        .brandText span {
           display: block;
         }
 
-        .brand strong {
-          color: #1d3650;
-          font-size: 14px;
-          font-weight: 950;
+        .brandText strong {
+          color: #ffffff;
+
+          font-size: 18px;
+          font-weight: 900;
         }
 
-        .brand span {
+        .brandText span {
           margin-top: 3px;
 
-          color: #8c98a7;
+          color:
+            rgba(255,255,255,.72);
 
-          font-size: 6px;
-          font-weight: 850;
+          font-size: 11px;
+          font-weight: 700;
 
-          letter-spacing: 1.2px;
+          letter-spacing: .8px;
         }
 
-        .profilesLink {
-          min-height: 42px;
+        .profilesButton {
+          min-height: 44px;
 
-          padding: 0 14px;
+          padding: 0 18px;
 
           display: inline-flex;
           align-items: center;
           justify-content: center;
 
-          border: 1px solid #ccdae9;
+          border:
+            1px solid rgba(255,255,255,.35);
+
           border-radius: 10px;
 
-          background: #ffffff;
+          background:
+            rgba(255,255,255,.10);
 
-          color: #526b84;
+          color: #ffffff;
 
-          font-size: 9px;
-          font-weight: 900;
+          font-size: 14px;
+          font-weight: 800;
 
           text-decoration: none;
         }
 
         .hero {
-          width: calc(100% - 60px);
+          width: calc(100% - 64px);
           max-width: 1180px;
 
-          margin: 65px auto 0;
+          margin: 0 auto;
 
-          text-align: center;
+          padding: 55px 0 72px;
+
+          color: #ffffff;
         }
 
-        .hero > span {
-          color: #1266e9;
+        .heroBadge {
+          display: inline-flex;
 
-          font-size: 8px;
-          font-weight: 900;
+          padding: 8px 12px;
 
-          letter-spacing: 1.4px;
+          border:
+            1px solid rgba(255,255,255,.25);
+
+          border-radius: 999px;
+
+          background:
+            rgba(255,255,255,.10);
+
+          font-size: 12px;
+          font-weight: 800;
+
+          letter-spacing: .8px;
         }
 
         .hero h1 {
-          margin: 10px 0 0;
+          max-width: 760px;
 
-          color: #1f3852;
+          margin: 18px 0 0;
 
-          font-size: 42px;
+          font-size: 44px;
           line-height: 1.08;
 
           letter-spacing: -1px;
         }
 
-        .hero p {
-          max-width: 650px;
+        .hero > p {
+          max-width: 680px;
 
-          margin: 13px auto 0;
+          margin: 18px 0 0;
 
-          color: #78889b;
+          color:
+            rgba(255,255,255,.82);
 
-          font-size: 11px;
+          font-size: 16px;
           line-height: 1.7;
         }
 
-        .productsGrid {
-          width: calc(100% - 60px);
-          max-width: 1180px;
+        .accountNote {
+          max-width: 650px;
 
-          margin: 40px auto 0;
+          margin-top: 22px;
+
+          padding: 14px 16px;
+
+          display: flex;
+          align-items: flex-start;
+
+          gap: 10px;
+
+          border:
+            1px solid rgba(255,255,255,.22);
+
+          border-radius: 12px;
+
+          background:
+            rgba(255,255,255,.10);
+        }
+
+        .accountNote span {
+          width: 24px;
+          height: 24px;
+
+          flex: 0 0 24px;
 
           display: grid;
+          place-items: center;
+
+          border-radius: 50%;
+
+          background: #ffffff;
+
+          color: #1266e9;
+
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .accountNote p {
+          margin: 1px 0 0;
+
+          color:
+            rgba(255,255,255,.9);
+
+          font-size: 14px;
+          line-height: 1.55;
+        }
+
+        .productsSection {
+          width: calc(100% - 64px);
+          max-width: 1180px;
+
+          margin: -34px auto 0;
+
+          padding: 30px;
+
+          border-radius: 22px;
+
+          background: #ffffff;
+
+          box-shadow:
+            0 20px 55px
+            rgba(26,61,102,.12);
+        }
+
+        .sectionTop {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+
+          gap: 30px;
+
+          margin-bottom: 24px;
+        }
+
+        .sectionTop span {
+          color: #1266e9;
+
+          font-size: 12px;
+          font-weight: 900;
+
+          letter-spacing: 1px;
+        }
+
+        .sectionTop h2 {
+          margin: 6px 0 0;
+
+          color: #20384f;
+
+          font-size: 28px;
+        }
+
+        .sectionTop > p {
+          max-width: 430px;
+
+          margin: 0;
+
+          color: #748498;
+
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .productsGrid {
+          display: grid;
+
           grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+            repeat(3, minmax(0,1fr));
 
           gap: 15px;
         }
 
         .productCard {
-          min-height: 285px;
+          min-height: 290px;
 
           padding: 22px;
 
@@ -305,41 +478,45 @@ export default function RegisterPage() {
           flex-direction: column;
 
           border: 1px solid #dce6f1;
-          border-radius: 17px;
 
-          background: #ffffff;
+          border-radius: 16px;
+
+          background:
+            linear-gradient(
+              180deg,
+              #ffffff,
+              #f9fbfe
+            );
 
           text-decoration: none;
 
-          box-shadow:
-            0 12px 30px
-            rgba(30, 70, 120, 0.05);
-
           transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease,
-            border-color 0.2s ease;
+            transform .2s ease,
+            box-shadow .2s ease,
+            border-color .2s ease;
         }
 
         .productCard:hover {
-          transform: translateY(-3px);
+          transform:
+            translateY(-4px);
 
-          border-color: #bfd4ef;
+          border-color:
+            #a9c8f3;
 
           box-shadow:
-            0 18px 38px
-            rgba(30, 70, 120, 0.09);
+            0 15px 32px
+            rgba(18,102,233,.11);
         }
 
-        .top {
+        .cardTop {
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        .icon {
-          width: 56px;
-          height: 56px;
+        .productIcon {
+          width: 58px;
+          height: 58px;
 
           display: grid;
           place-items: center;
@@ -348,96 +525,12 @@ export default function RegisterPage() {
 
           background: #edf4ff;
 
-          font-size: 28px;
+          font-size: 29px;
         }
 
         .arrow {
-          width: 32px;
-          height: 32px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-
-          background: #f1f5fa;
-
-          color: #1266e9;
-
-          font-size: 14px;
-          font-weight: 900;
-        }
-
-        .category {
-          margin-top: 24px;
-
-          color: #1266e9;
-
-          font-size: 7px;
-          font-weight: 900;
-
-          letter-spacing: 1.2px;
-        }
-
-        .productCard h2 {
-          margin: 7px 0 0;
-
-          color: #263e57;
-
-          font-size: 20px;
-        }
-
-        .productCard p {
-          margin: 8px 0 0;
-
-          color: #7e8da0;
-
-          font-size: 9px;
-          line-height: 1.6;
-        }
-
-        .bottom {
-          margin-top: auto;
-          padding-top: 20px;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          color: #1266e9;
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .bottom b {
-          font-size: 14px;
-        }
-
-        .infoCard {
-          width: calc(100% - 60px);
-          max-width: 1180px;
-
-          margin: 18px auto 0;
-
-          padding: 17px;
-
-          display: flex;
-          align-items: flex-start;
-
-          gap: 11px;
-
-          border: 1px solid #cfe0f6;
-          border-radius: 14px;
-
-          background: #f7faff;
-        }
-
-        .infoIcon {
-          width: 28px;
-          height: 28px;
-
-          flex: 0 0 28px;
+          width: 36px;
+          height: 36px;
 
           display: grid;
           place-items: center;
@@ -448,57 +541,214 @@ export default function RegisterPage() {
 
           color: #ffffff;
 
-          font-size: 9px;
-          font-weight: 950;
+          font-size: 18px;
+          font-weight: 900;
         }
 
-        .infoCard strong {
-          display: block;
+        .productType {
+          margin-top: 23px;
 
-          color: #405a74;
+          color: #1266e9;
 
-          font-size: 10px;
+          font-size: 11px;
+          font-weight: 900;
+
+          letter-spacing: .8px;
         }
 
-        .infoCard p {
+        .productCard h3 {
+          margin: 7px 0 0;
+
+          color: #243c55;
+
+          font-size: 22px;
+        }
+
+        .productCard p {
+          margin: 10px 0 0;
+
+          color: #758599;
+
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .registerLink {
+          margin-top: auto;
+          padding-top: 22px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          color: #1266e9;
+
+          font-size: 14px;
+          font-weight: 850;
+        }
+
+        .registerLink strong {
+          font-size: 18px;
+        }
+
+        .bottomCard {
+          width: calc(100% - 64px);
+          max-width: 1180px;
+
+          margin: 20px auto 0;
+
+          padding: 22px 25px;
+
+          display: grid;
+
+          grid-template-columns:
+            auto 1fr auto;
+
+          align-items: center;
+
+          gap: 16px;
+
+          border: 1px solid #d6e3f2;
+
+          border-radius: 16px;
+
+          background: #ffffff;
+        }
+
+        .bottomIcon {
+          width: 48px;
+          height: 48px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 13px;
+
+          background: #edf4ff;
+
+          color: #1266e9;
+
+          font-size: 23px;
+          font-weight: 700;
+        }
+
+        .bottomText span {
+          color: #1266e9;
+
+          font-size: 11px;
+          font-weight: 900;
+
+          letter-spacing: .8px;
+        }
+
+        .bottomText h2 {
+          margin: 5px 0 0;
+
+          color: #29435d;
+
+          font-size: 18px;
+        }
+
+        .bottomText p {
           margin: 5px 0 0;
 
           color: #7d8c9d;
 
-          font-size: 8px;
-          line-height: 1.55;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .bottomCard > a {
+          min-height: 44px;
+
+          padding: 0 17px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 10px;
+
+          background: #1266e9;
+
+          color: #ffffff;
+
+          font-size: 14px;
+          font-weight: 800;
+
+          text-decoration: none;
         }
 
         @media (max-width: 900px) {
           .productsGrid {
             grid-template-columns:
-              repeat(2, minmax(0, 1fr));
+              repeat(2,minmax(0,1fr));
+          }
+
+          .sectionTop {
+            align-items: flex-start;
+            flex-direction: column;
           }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
           .header,
           .hero,
-          .productsGrid,
-          .infoCard {
-            width: calc(100% - 30px);
+          .productsSection,
+          .bottomCard {
+            width: calc(100% - 28px);
+          }
+
+          .header {
+            min-height: 72px;
+          }
+
+          .brandText span {
+            display: none;
+          }
+
+          .profilesButton {
+            padding: 0 11px;
+            font-size: 12px;
           }
 
           .hero {
-            margin-top: 45px;
+            padding:
+              40px 0 62px;
           }
 
           .hero h1 {
-            font-size: 32px;
+            font-size: 34px;
+          }
+
+          .hero > p {
+            font-size: 15px;
+          }
+
+          .productsSection {
+            padding: 18px;
+
+            margin-top: -28px;
           }
 
           .productsGrid {
             grid-template-columns: 1fr;
           }
 
-          .profilesLink {
-            padding: 0 10px;
-            font-size: 7px;
+          .productCard {
+            min-height: 250px;
+          }
+
+          .bottomCard {
+            grid-template-columns:
+              auto 1fr;
+          }
+
+          .bottomCard > a {
+            grid-column:
+              1 / -1;
+
+            width: 100%;
           }
         }
       `}</style>
