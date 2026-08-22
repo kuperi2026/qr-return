@@ -833,6 +833,7 @@ export default function ProductStep({
         }
 
         .formGrid {
+          width: 100%;
           display: grid;
 
           grid-template-columns:
@@ -841,7 +842,16 @@ export default function ProductStep({
               minmax(0, 1fr)
             );
 
-          gap: 12px;
+          column-gap: 22px;
+          row-gap: 20px;
+
+          align-items: start;
+        }
+
+        .field {
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         .field.full {
@@ -852,30 +862,39 @@ export default function ProductStep({
         .field label {
           display: block;
 
-          margin-bottom: 6px;
+          min-height: 19px;
+          margin: 0 0 9px 2px;
 
           color: #344e68;
 
           font-size: 13px;
           font-weight: 800;
+          line-height: 19px;
         }
 
         .field input,
         .field select,
         .field textarea {
+          display: block;
+
           width: 100%;
+          max-width: none;
+          margin: 0;
+
+          box-sizing: border-box;
 
           border:
-            1px solid #d5e0eb;
+            1.5px solid #d5e0eb;
 
-          border-radius: 10px;
+          border-radius: 11px;
 
           background: #ffffff;
 
           color: #263f59;
 
           font-family: inherit;
-          font-size: 14px;
+          font-size: 15px;
+          font-weight: 500;
 
           outline: none;
 
@@ -883,26 +902,29 @@ export default function ProductStep({
             border-color
               0.18s ease,
             box-shadow
+              0.18s ease,
+            background
               0.18s ease;
         }
 
         .field input,
         .field select {
-          min-height: 45px;
+          height: 56px;
+          min-height: 56px;
 
           padding:
-            0 12px;
+            0 16px;
         }
 
         .field textarea {
-          min-height: 82px;
+          min-height: 118px;
 
           padding:
-            10px 12px;
+            14px 16px;
 
           resize: vertical;
 
-          line-height: 1.45;
+          line-height: 1.55;
         }
 
         .field input:focus,
