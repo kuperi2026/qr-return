@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ChangeEvent,
+  type ChangeEvent,
   useEffect,
   useMemo,
   useState,
@@ -170,7 +170,6 @@ function createSupabaseClient() {
 
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
   if (!url || !key) {
@@ -206,8 +205,7 @@ export default function RegisterItemPage() {
       ? rawType
       : "dog";
 
-  const meta =
-    PRODUCT_META[type];
+  const meta = PRODUCT_META[type];
 
   const isPet =
     type === "dog" ||
@@ -215,6 +213,9 @@ export default function RegisterItemPage() {
 
   const isKeys =
     type === "keys";
+
+  const isWallet =
+    type === "wallet";
 
   const isBag =
     type === "bag";
@@ -255,8 +256,6 @@ export default function RegisterItemPage() {
     setErrorMessage,
   ] =
     useState("");
-
-  /* PHOTO */
 
   const [
     photoFile,
@@ -303,7 +302,7 @@ export default function RegisterItemPage() {
 
         if (!client) {
           setErrorMessage(
-            "Supabase კავშირი ვერ მოიძებნა."
+            "Supabase კავშირი არ არის კონფიგურირებული."
           );
 
           return;
@@ -328,16 +327,24 @@ export default function RegisterItemPage() {
           return;
         }
 
+        /*
+          პირველ რიგში auth metadata-ს ვიყენებთ.
+          თუ owner_accounts-შიც გაქვთ მონაცემები,
+          ქვემოთ ასევე ვცდილობთ იქიდან წამოღებას.
+        */
+
         let firstName =
           String(
             user.user_metadata
-              ?.first_name || ""
+              ?.first_name ||
+              ""
           );
 
         let lastName =
           String(
             user.user_metadata
-              ?.last_name || ""
+              ?.last_name ||
+              ""
           );
 
         let phone =
@@ -348,58 +355,42 @@ export default function RegisterItemPage() {
               ""
           );
 
-        let email =
+        const email =
           String(
             user.email || ""
           );
 
-        try {
-          const {
-            data:
-              ownerAccount,
-          } =
-            await client
-              .from(
-                "owner_accounts"
-              )
-              .select(
-                "first_name,last_name,phone,email"
-              )
-              .eq(
-                "id",
-                user.id
-              )
-              .maybeSingle();
+        const {
+          data: ownerAccount,
+        } =
+          await client
+            .from(
+              "owner_accounts"
+            )
+            .select(
+              "first_name,last_name,phone,email"
+            )
+            .eq(
+              "id",
+              user.id
+            )
+            .maybeSingle();
 
-          if (
+        if (ownerAccount) {
+          firstName =
             ownerAccount
-          ) {
-            firstName =
-              ownerAccount
-                .first_name ||
-              firstName;
+              .first_name ||
+            firstName;
 
-            lastName =
-              ownerAccount
-                .last_name ||
-              lastName;
+          lastName =
+            ownerAccount
+              .last_name ||
+            lastName;
 
-            phone =
-              ownerAccount
-                .phone ||
-              phone;
-
-            email =
-              ownerAccount
-                .email ||
-              email;
-          }
-        } catch (
-          ownerError
-        ) {
-          console.log(
-            ownerError
-          );
+          phone =
+            ownerAccount
+              .phone ||
+            phone;
         }
 
         setDraft(
@@ -416,11 +407,14 @@ export default function RegisterItemPage() {
               phone,
 
             ownerEmail:
+              ownerAccount
+                ?.email ||
               email,
           })
         );
       } catch (error) {
         console.error(
+          "Account load error:",
           error
         );
 
@@ -428,9 +422,7 @@ export default function RegisterItemPage() {
           "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
         );
       } finally {
-        setLoading(
-          false
-        );
+        setLoading(false);
       }
     }
 
@@ -451,15 +443,13 @@ export default function RegisterItemPage() {
     );
   }
 
-  function selectPhoto(
-    event:
-      ChangeEvent<HTMLInputElement>
+  function handlePhotoChange(
+    event: ChangeEvent<HTMLInputElement>
   ) {
     setErrorMessage("");
 
     const file =
-      event.target
-        .files?.[0];
+      event.target.files?.[0];
 
     if (!file) {
       return;
@@ -480,9 +470,7 @@ export default function RegisterItemPage() {
         "ფოტო უნდა იყოს JPG, PNG ან WEBP ფორმატში."
       );
 
-      event.target.value =
-        "";
-
+      event.target.value = "";
       return;
     }
 
@@ -497,9 +485,7 @@ export default function RegisterItemPage() {
         "ფოტოს მაქსიმალური ზომაა 5 MB."
       );
 
-      event.target.value =
-        "";
-
+      event.target.value = "";
       return;
     }
 
@@ -513,15 +499,11 @@ export default function RegisterItemPage() {
       );
     }
 
-    const preview =
-      URL.createObjectURL(
-        file
-      );
-
     setPhotoFile(file);
     setPhotoPreview(
-      preview
+      URL.createObjectURL(file)
     );
+
     updateDraft(
       "showPhoto",
       true
@@ -558,25 +540,16 @@ export default function RegisterItemPage() {
         ?.toLowerCase() ||
       "jpg";
 
-    const safeType =
-      type.replace(
-        /[^a-z0-9-]/g,
-        ""
-      );
-
-    const fileName =
-      `${userId}/${safeType}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const filePath =
+      `${userId}/${type}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
     const {
-      error:
-        uploadError,
+      error: uploadError,
     } =
       await client.storage
-        .from(
-          "profile-photos"
-        )
+        .from("profile-photos")
         .upload(
-          fileName,
+          filePath,
           photoFile,
           {
             cacheControl:
@@ -592,19 +565,16 @@ export default function RegisterItemPage() {
     }
 
     const {
-      data:
-        publicData,
+      data: publicUrlData,
     } =
       client.storage
-        .from(
-          "profile-photos"
-        )
+        .from("profile-photos")
         .getPublicUrl(
-          fileName
+          filePath
         );
 
     return (
-      publicData
+      publicUrlData
         .publicUrl ||
       null
     );
@@ -614,47 +584,76 @@ export default function RegisterItemPage() {
     setErrorMessage("");
 
     if (
-      !draft
-        .ownerFirstName
-        .trim()
+      !draft.ownerFirstName.trim()
     ) {
       setErrorMessage(
         "გთხოვთ მიუთითოთ სახელი."
       );
+
       return;
     }
 
     if (
-      !draft
-        .ownerLastName
-        .trim()
+      !draft.ownerLastName.trim()
     ) {
       setErrorMessage(
         "გთხოვთ მიუთითოთ გვარი."
       );
+
       return;
     }
 
     if (
-      !draft
-        .ownerPhone
-        .trim()
+      !draft.ownerPhone.trim()
     ) {
       setErrorMessage(
         "გთხოვთ მიუთითოთ ტელეფონის ნომერი."
       );
+
       return;
     }
 
     if (
-      !draft
-        .ownerEmail
-        .trim()
+      !draft.ownerEmail.trim()
     ) {
       setErrorMessage(
         "გთხოვთ მიუთითოთ ელფოსტა."
       );
+
       return;
+    }
+
+    /*
+      Owner ინფორმაცია ინახება auth metadata-ში,
+      რათა მომავალ რეგისტრაციაზეც მზად დახვდეს.
+    */
+
+    if (supabase) {
+      const {
+        error,
+      } =
+        await supabase.auth.updateUser({
+          data: {
+            first_name:
+              draft.ownerFirstName.trim(),
+
+            last_name:
+              draft.ownerLastName.trim(),
+
+            phone:
+              draft.ownerPhone.trim(),
+
+            contact_email:
+              draft.ownerEmail.trim(),
+          },
+        });
+
+      if (error) {
+        console.error(
+          "Owner metadata update:",
+          error
+        );
+      }
     }
 
     setStep(2);
@@ -669,24 +668,19 @@ export default function RegisterItemPage() {
     setErrorMessage("");
 
     if (
-      !draft
-        .tagCode
-        .trim()
+      !draft.tagCode.trim()
     ) {
       setErrorMessage(
         "QR / Tag Code სავალდებულოა."
       );
+
       return;
     }
 
     if (
-      !draft
-        .itemName
-        .trim()
+      !draft.itemName.trim()
     ) {
-      if (
-        type === "cat"
-      ) {
+      if (type === "cat") {
         setErrorMessage(
           "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
         );
@@ -728,16 +722,18 @@ export default function RegisterItemPage() {
         );
       }
 
+      /*
+        მნიშვნელოვანია:
+        საბოლოო ღილაკზე ხელახლა ვამოწმებთ session-ს.
+      */
+
       const {
         data: {
           user,
         },
-        error:
-          userError,
+        error: userError,
       } =
-        await client
-          .auth
-          .getUser();
+        await client.auth.getUser();
 
       if (
         userError ||
@@ -754,10 +750,8 @@ export default function RegisterItemPage() {
           .toUpperCase();
 
       const {
-        data:
-          existing,
-        error:
-          checkError,
+        data: existing,
+        error: checkError,
       } =
         await client
           .from("item")
@@ -768,22 +762,18 @@ export default function RegisterItemPage() {
           )
           .maybeSingle();
 
-      if (
-        checkError
-      ) {
+      if (checkError) {
         throw checkError;
       }
 
-      if (
-        existing
-      ) {
+      if (existing) {
         throw new Error(
           "ეს QR კოდი უკვე დარეგისტრირებულია."
         );
       }
 
       /*
-        PHOTO UPLOAD
+        ფოტო მხოლოდ საბოლოო დადასტურებისას იტვირთება.
       */
 
       const photoUrl =
@@ -792,19 +782,19 @@ export default function RegisterItemPage() {
           user.id
         );
 
+      /*
+        აქ ვიყენებთ უკვე არსებულ item ველებს.
+      */
+
       const payload = {
         owner_id:
           user.id,
 
         owner_phone:
-          draft
-            .ownerPhone
-            .trim(),
+          draft.ownerPhone.trim(),
 
         owner_email:
-          draft
-            .ownerEmail
-            .trim(),
+          draft.ownerEmail.trim(),
 
         tag_code:
           cleanTag,
@@ -818,16 +808,13 @@ export default function RegisterItemPage() {
             : null,
 
         item_name:
-          draft
-            .itemName
-            .trim(),
+          draft.itemName.trim(),
 
         photo:
           photoUrl,
 
         colour:
-          draft.colour
-            .trim() ||
+          draft.colour.trim() ||
           null,
 
         sex:
@@ -838,8 +825,7 @@ export default function RegisterItemPage() {
 
         date_of_birth:
           isPet
-            ? draft
-                .dateOfBirth ||
+            ? draft.dateOfBirth ||
               null
             : null,
 
@@ -854,80 +840,64 @@ export default function RegisterItemPage() {
         brand:
           !isPet &&
           !isKeys &&
-          draft.brand
-            .trim()
-            ? draft.brand
-                .trim()
+          draft.brand.trim()
+            ? draft.brand.trim()
             : null,
 
         model:
           (isBag ||
             isSuitcase) &&
-          draft.model
-            .trim()
-            ? draft.model
-                .trim()
+          draft.model.trim()
+            ? draft.model.trim()
             : null,
 
         size:
           (isBag ||
             isSuitcase) &&
-          draft.size
-            .trim()
-            ? draft.size
-                .trim()
+          draft.size.trim()
+            ? draft.size.trim()
             : null,
 
         material:
           !isPet &&
           !isKeys &&
-          draft.material
-            .trim()
-            ? draft.material
-                .trim()
+          draft.material.trim()
+            ? draft.material.trim()
             : null,
 
         description:
-          draft
-            .description
-            .trim() ||
+          draft.description.trim() ||
           null,
 
         medical_info:
           isPet
-            ? draft
-                .medicalInfo
-                .trim() ||
+            ? draft.medicalInfo.trim() ||
               null
             : null,
 
         behaviour_note:
           isPet
-            ? draft
-                .behaviourNote
-                .trim() ||
+            ? draft.behaviourNote.trim() ||
               null
             : null,
 
         distinctive_features:
           !isPet
-            ? draft
-                .distinctiveFeatures
-                .trim() ||
+            ? draft.distinctiveFeatures.trim() ||
               null
             : null,
 
         lost_seen_location:
-          draft
-            .lostLocation
-            .trim() ||
+          draft.lostLocation.trim() ||
           null,
 
         finder_message:
-          draft
-            .finderMessage
-            .trim() ||
+          draft.finderMessage.trim() ||
           null,
+
+        /*
+          არსებული ON/OFF ლოგიკა
+        */
 
         show_email:
           draft.showEmail,
@@ -936,41 +906,34 @@ export default function RegisterItemPage() {
           draft.showPhoto,
 
         show_description:
-          draft
-            .showDescription,
+          draft.showDescription,
 
         show_medical_info:
           isPet
-            ? draft
-                .showMedicalInfo
+            ? draft.showMedicalInfo
             : false,
 
         show_behaviour_note:
           isPet
-            ? draft
-                .showBehaviourNote
+            ? draft.showBehaviourNote
             : false,
 
         show_finder_message:
-          draft
-            .showFinderMessage,
+          draft.showFinderMessage,
 
         phone_enabled:
           true,
 
         live_chat_enabled:
-          draft
-            .liveChatEnabled,
+          draft.liveChatEnabled,
 
         active:
           true,
       };
 
       const {
-        data:
-          created,
-        error:
-          insertError,
+        data: created,
+        error: insertError,
       } =
         await client
           .from("item")
@@ -980,9 +943,7 @@ export default function RegisterItemPage() {
           )
           .single();
 
-      if (
-        insertError
-      ) {
+      if (insertError) {
         throw insertError;
       }
 
@@ -993,6 +954,7 @@ export default function RegisterItemPage() {
       );
     } catch (error) {
       console.error(
+        "Create profile error:",
         error
       );
 
@@ -1009,25 +971,39 @@ export default function RegisterItemPage() {
   if (loading) {
     return (
       <main className="loadingPage">
-        {meta.emoji}
-        <span>
-          იტვირთება...
-        </span>
+        <div className="loader">
+          <div>
+            {meta.emoji}
+          </div>
+
+          <span>
+            იტვირთება...
+          </span>
+        </div>
 
         <style jsx>{`
           .loadingPage {
             min-height: 100vh;
+
             display: grid;
             place-items: center;
-            align-content: center;
-            gap: 12px;
-            background: #0647c8;
-            color: white;
-            font-size: 42px;
+
+            background:
+              #0647c8;
           }
 
-          .loadingPage span {
+          .loader {
+            text-align: center;
+
+            color: white;
+
             font-size: 15px;
+          }
+
+          .loader div {
+            font-size: 42px;
+
+            margin-bottom: 10px;
           }
         `}</style>
       </main>
@@ -1047,10 +1023,15 @@ export default function RegisterItemPage() {
                     (index * 31) %
                     100
                   }%`,
+
                   top: `${
                     (index * 43) %
                     100
                   }%`,
+
+                  transform: `rotate(${
+                    index * 18
+                  }deg)`,
                 }}
               >
                 {meta.emoji}
@@ -1068,9 +1049,15 @@ export default function RegisterItemPage() {
               QR
             </div>
 
-            <strong>
-              QR RETURN
-            </strong>
+            <div>
+              <strong>
+                QR RETURN
+              </strong>
+
+              <small>
+                SMART LOST &amp; FOUND
+              </small>
+            </div>
           </a>
 
           <a
@@ -1106,7 +1093,10 @@ export default function RegisterItemPage() {
 
         <section className="card">
           {errorMessage && (
-            <div className="errorBox">
+            <div
+              className="errorBox"
+              role="alert"
+            >
               {errorMessage}
             </div>
           )}
@@ -1135,7 +1125,7 @@ export default function RegisterItemPage() {
                 photoPreview
               }
               onPhotoChange={
-                selectPhoto
+                handlePhotoChange
               }
               onPhotoRemove={
                 removePhoto
@@ -1181,39 +1171,47 @@ function Progress({
   step: Step;
   productLabel: string;
 }) {
-  const list = [
-    "მფლობელი",
-    productLabel,
-    "შემოწმება",
+  const steps = [
+    {
+      number: 1,
+      label: "მფლობელი",
+    },
+    {
+      number: 2,
+      label: productLabel,
+    },
+    {
+      number: 3,
+      label: "შემოწმება",
+    },
   ];
 
   return (
-    <div className="progress">
-      {list.map(
+    <section className="progress">
+      {steps.map(
         (
-          label,
+          item,
           index
         ) => {
-          const number =
-            index + 1;
-
-          const complete =
+          const completed =
             step >
-            number;
+            item.number;
 
           const active =
             step ===
-            number;
+            item.number;
 
           return (
             <div
-              className="progressPiece"
-              key={label}
+              className="progressPart"
+              key={
+                item.number
+              }
             >
               <div
                 className={`progressStep ${
-                  complete
-                    ? "complete"
+                  completed
+                    ? "completed"
                     : ""
                 } ${
                   active
@@ -1221,23 +1219,23 @@ function Progress({
                     : ""
                 }`}
               >
-                <b>
-                  {complete
+                <div className="stepCircle">
+                  {completed
                     ? "✓"
-                    : number}
-                </b>
+                    : item.number}
+                </div>
 
                 <span>
-                  {label}
+                  {item.label}
                 </span>
               </div>
 
               {index < 2 && (
                 <div
-                  className={`progressLine ${
+                  className={`line ${
                     step >
-                    number
-                      ? "complete"
+                    item.number
+                      ? "filled"
                       : ""
                   }`}
                 />
@@ -1246,7 +1244,7 @@ function Progress({
           );
         }
       )}
-    </div>
+    </section>
   );
 }
 
@@ -1268,10 +1266,10 @@ function OwnerStep({
 }) {
   return (
     <>
-      <Title
-        step="STEP 1 OF 3"
+      <StepTitle
+        eyebrow="STEP 1 OF 3"
         title="მფლობელის ინფორმაცია"
-        text="გადაამოწმეთ ან განაახლეთ თქვენი საკონტაქტო ინფორმაცია."
+        description="გადაამოწმეთ ან განაახლეთ თქვენი საკონტაქტო ინფორმაცია."
       />
 
       <div className="formGrid">
@@ -1333,6 +1331,12 @@ function OwnerStep({
         </Field>
       </div>
 
+      <div className="smallNotice">
+        სახელი, გვარი და ტელეფონი
+        მპოვნელისთვის ყოველთვის
+        ხილული იქნება.
+      </div>
+
       <div className="actions right">
         <button
           type="button"
@@ -1381,14 +1385,12 @@ function ProductStep({
         ChangeEvent<HTMLInputElement>
     ) => void;
 
-  onPhotoRemove:
-    () => void;
+  onPhotoRemove: () => void;
 
   back: () => void;
-
   next: () => void;
 }) {
-  const pet =
+  const isPet =
     type === "dog" ||
     type === "cat";
 
@@ -1410,203 +1412,212 @@ function ProductStep({
     type === "bag" ||
     type === "suitcase";
 
+  const descriptionText =
+    type === "cat"
+      ? "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
+      : type === "dog"
+      ? "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია."
+      : `გთხოვთ შეავსოთ ${meta.label}ს შესახებ ინფორმაცია.`;
+
   return (
     <>
-      <Title
-        step="STEP 2 OF 3"
+      <StepTitle
+        eyebrow="STEP 2 OF 3"
         title={`${meta.emoji} ${meta.label}`}
-        text={
-          type === "cat"
-            ? "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
-            : type === "dog"
-            ? "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია."
-            : `გთხოვთ შეავსოთ ${meta.label}ს შესახებ ინფორმაცია.`
+        description={
+          descriptionText
         }
       />
 
-      <div className="formGrid three">
-        <Field
-          label="QR / Tag Code *"
-          full
-        >
-          <input
-            value={
-              draft.tagCode
-            }
-            onChange={(e) =>
-              update(
-                "tagCode",
-                e.target.value
-                  .toUpperCase()
-                  .replace(
-                    /\s/g,
-                    ""
-                  )
-              )
-            }
-            placeholder="QR-000123"
-          />
-        </Field>
+      <div className="compactSection">
+        <h2>
+          ძირითადი ინფორმაცია
+        </h2>
 
-        <Field
-          label={
-            pet
-              ? "სახელი *"
-              : "პროფილის სახელი *"
-          }
-        >
-          <input
-            value={
-              draft.itemName
+        <div className="formGrid three">
+          <Field
+            label="QR / Tag Code *"
+            full
+          >
+            <input
+              value={
+                draft.tagCode
+              }
+              onChange={(e) =>
+                update(
+                  "tagCode",
+                  e.target.value
+                    .toUpperCase()
+                    .replace(
+                      /\s/g,
+                      ""
+                    )
+                )
+              }
+              placeholder="QR-000123"
+            />
+          </Field>
+
+          <Field
+            label={
+              isPet
+                ? "სახელი *"
+                : "პროფილის სახელი *"
             }
-            onChange={(e) =>
-              update(
-                "itemName",
-                e.target.value
-              )
-            }
-          />
-        </Field>
+          >
+            <input
+              value={
+                draft.itemName
+              }
+              onChange={(e) =>
+                update(
+                  "itemName",
+                  e.target.value
+                )
+              }
+            />
+          </Field>
 
-        <Field label="ფერი">
-          <input
-            value={
-              draft.colour
-            }
-            onChange={(e) =>
-              update(
-                "colour",
-                e.target.value
-              )
-            }
-          />
-        </Field>
+          <Field label="ფერი">
+            <input
+              value={
+                draft.colour
+              }
+              onChange={(e) =>
+                update(
+                  "colour",
+                  e.target.value
+                )
+              }
+            />
+          </Field>
 
-        {pet && (
-          <>
-            <Field label="სქესი">
-              <select
-                value={
-                  draft.sex
-                }
-                onChange={(e) =>
-                  update(
-                    "sex",
-                    e.target.value
-                  )
-                }
-              >
-                <option value="">
-                  აირჩიეთ
-                </option>
+          {isPet && (
+            <>
+              <Field label="სქესი">
+                <select
+                  value={
+                    draft.sex
+                  }
+                  onChange={(e) =>
+                    update(
+                      "sex",
+                      e.target.value
+                    )
+                  }
+                >
+                  <option value="">
+                    აირჩიეთ
+                  </option>
 
-                <option value="male">
-                  მამრი
-                </option>
+                  <option value="male">
+                    მამრი
+                  </option>
 
-                <option value="female">
-                  მდედრი
-                </option>
-              </select>
-            </Field>
+                  <option value="female">
+                    მდედრი
+                  </option>
+                </select>
+              </Field>
 
-            <Field label="დაბადების თარიღი">
+              <Field label="დაბადების თარიღი">
+                <input
+                  type="date"
+                  value={
+                    draft.dateOfBirth
+                  }
+                  onChange={(e) =>
+                    update(
+                      "dateOfBirth",
+                      e.target.value
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="წონა">
+                <input
+                  type="number"
+                  step="0.1"
+                  value={
+                    draft.weight
+                  }
+                  onChange={(e) =>
+                    update(
+                      "weight",
+                      e.target.value
+                    )
+                  }
+                  placeholder="kg"
+                />
+              </Field>
+            </>
+          )}
+
+          {showBrand && (
+            <Field label="ბრენდი">
               <input
-                type="date"
                 value={
-                  draft.dateOfBirth
+                  draft.brand
                 }
                 onChange={(e) =>
                   update(
-                    "dateOfBirth",
+                    "brand",
                     e.target.value
                   )
                 }
               />
             </Field>
+          )}
 
-            <Field label="წონა">
+          {showModel && (
+            <Field label="მოდელი">
               <input
-                type="number"
-                step="0.1"
                 value={
-                  draft.weight
+                  draft.model
                 }
                 onChange={(e) =>
                   update(
-                    "weight",
+                    "model",
                     e.target.value
                   )
                 }
-                placeholder="kg"
               />
             </Field>
-          </>
-        )}
+          )}
 
-        {showBrand && (
-          <Field label="ბრენდი">
-            <input
-              value={
-                draft.brand
-              }
-              onChange={(e) =>
-                update(
-                  "brand",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
+          {showSize && (
+            <Field label="ზომა">
+              <input
+                value={
+                  draft.size
+                }
+                onChange={(e) =>
+                  update(
+                    "size",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
 
-        {showModel && (
-          <Field label="მოდელი">
-            <input
-              value={
-                draft.model
-              }
-              onChange={(e) =>
-                update(
-                  "model",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
-
-        {showSize && (
-          <Field label="ზომა">
-            <input
-              value={
-                draft.size
-              }
-              onChange={(e) =>
-                update(
-                  "size",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
-
-        {showMaterial && (
-          <Field label="მასალა">
-            <input
-              value={
-                draft.material
-              }
-              onChange={(e) =>
-                update(
-                  "material",
-                  e.target.value
-                )
-              }
-            />
-          </Field>
-        )}
+          {showMaterial && (
+            <Field label="მასალა">
+              <input
+                value={
+                  draft.material
+                }
+                onChange={(e) =>
+                  update(
+                    "material",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+        </div>
       </div>
 
       <PhotoUploader
@@ -1632,109 +1643,122 @@ function ProductStep({
         }
       />
 
-      <div className="formGrid">
-        <Field label="აღწერა">
-          <textarea
-            rows={2}
-            value={
-              draft.description
-            }
-            onChange={(e) =>
-              update(
-                "description",
-                e.target.value
-              )
-            }
-          />
-        </Field>
+      <div className="compactSection">
+        <h2>
+          დამატებითი ინფორმაცია
+        </h2>
 
-        {pet ? (
-          <Field label="ქცევის შესახებ ინფორმაცია">
+        <div className="formGrid">
+          <Field label="აღწერა">
             <textarea
               rows={2}
               value={
-                draft.behaviourNote
+                draft.description
               }
               onChange={(e) =>
                 update(
-                  "behaviourNote",
+                  "description",
                   e.target.value
                 )
               }
             />
           </Field>
-        ) : (
-          <Field label="განმასხვავებელი ნიშნები">
-            <textarea
-              rows={2}
+
+          {isPet ? (
+            <Field label="ქცევის შესახებ ინფორმაცია">
+              <textarea
+                rows={2}
+                value={
+                  draft.behaviourNote
+                }
+                onChange={(e) =>
+                  update(
+                    "behaviourNote",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          ) : (
+            <Field label="განმასხვავებელი ნიშნები">
+              <textarea
+                rows={2}
+                value={
+                  draft.distinctiveFeatures
+                }
+                onChange={(e) =>
+                  update(
+                    "distinctiveFeatures",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          {isPet && (
+            <Field label="სამედიცინო ინფორმაცია">
+              <textarea
+                rows={2}
+                value={
+                  draft.medicalInfo
+                }
+                onChange={(e) =>
+                  update(
+                    "medicalInfo",
+                    e.target.value
+                  )
+                }
+              />
+            </Field>
+          )}
+
+          <Field label="დაკარგვის ადგილი">
+            <input
               value={
-                draft.distinctiveFeatures
+                draft.lostLocation
               }
               onChange={(e) =>
                 update(
-                  "distinctiveFeatures",
+                  "lostLocation",
                   e.target.value
                 )
               }
+              placeholder="მაგ. Central Park, New York"
             />
           </Field>
-        )}
 
-        {pet && (
-          <Field label="სამედიცინო ინფორმაცია">
+          <Field
+            label="შეტყობინება მპოვნელისთვის"
+            full
+          >
             <textarea
               rows={2}
               value={
-                draft.medicalInfo
+                draft.finderMessage
               }
               onChange={(e) =>
                 update(
-                  "medicalInfo",
+                  "finderMessage",
                   e.target.value
                 )
               }
+              placeholder="გთხოვთ დამიკავშირდეთ..."
             />
           </Field>
-        )}
-
-        <Field label="დაკარგვის ადგილი">
-          <input
-            value={
-              draft.lostLocation
-            }
-            onChange={(e) =>
-              update(
-                "lostLocation",
-                e.target.value
-              )
-            }
-            placeholder="მაგ. Central Park, New York"
-          />
-        </Field>
-
-        <Field
-          label="შეტყობინება მპოვნელისთვის"
-          full
-        >
-          <textarea
-            rows={2}
-            value={
-              draft.finderMessage
-            }
-            onChange={(e) =>
-              update(
-                "finderMessage",
-                e.target.value
-              )
-            }
-          />
-        </Field>
+        </div>
       </div>
 
-      <div className="visibility">
+      <div className="compactSection">
         <h2>
           რას დაინახავს მპოვნელი
         </h2>
+
+        <p className="sectionDescription">
+          სახელი, გვარი და ტელეფონი
+          ყოველთვის ხილულია. დანარჩენი
+          თქვენ აკონტროლებთ.
+        </p>
 
         <div className="toggleGrid">
           <Toggle
@@ -1742,10 +1766,10 @@ function ProductStep({
             checked={
               draft.showEmail
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showEmail",
-                v
+                value
               )
             }
           />
@@ -1755,10 +1779,10 @@ function ProductStep({
             checked={
               draft.showPhoto
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showPhoto",
-                v
+                value
               )
             }
           />
@@ -1768,25 +1792,25 @@ function ProductStep({
             checked={
               draft.showDescription
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showDescription",
-                v
+                value
               )
             }
           />
 
-          {pet && (
+          {isPet && (
             <>
               <Toggle
                 label="სამედიცინო ინფორმაცია"
                 checked={
                   draft.showMedicalInfo
                 }
-                onChange={(v) =>
+                onChange={(value) =>
                   update(
                     "showMedicalInfo",
-                    v
+                    value
                   )
                 }
               />
@@ -1796,10 +1820,10 @@ function ProductStep({
                 checked={
                   draft.showBehaviourNote
                 }
-                onChange={(v) =>
+                onChange={(value) =>
                   update(
                     "showBehaviourNote",
-                    v
+                    value
                   )
                 }
               />
@@ -1811,10 +1835,10 @@ function ProductStep({
             checked={
               draft.showLostLocation
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showLostLocation",
-                v
+                value
               )
             }
           />
@@ -1824,10 +1848,10 @@ function ProductStep({
             checked={
               draft.showFinderMessage
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "showFinderMessage",
-                v
+                value
               )
             }
           />
@@ -1837,10 +1861,10 @@ function ProductStep({
             checked={
               draft.liveChatEnabled
             }
-            onChange={(v) =>
+            onChange={(value) =>
               update(
                 "liveChatEnabled",
-                v
+                value
               )
             }
           />
@@ -1876,49 +1900,42 @@ function PhotoUploader({
   onVisibilityChange,
 }: {
   preview: string;
-
   showPhoto: boolean;
-
   onChange:
     (
       event:
         ChangeEvent<HTMLInputElement>
     ) => void;
-
-  onRemove:
-    () => void;
-
+  onRemove: () => void;
   onVisibilityChange:
-    (value: boolean) =>
-      void;
+    (value: boolean) => void;
 }) {
   return (
     <section className="photoSection">
-      <div>
+      <div className="photoSectionTitle">
         <h2>
           ფოტო
         </h2>
 
         <p>
-          დაამატეთ ფოტო, რათა
-          მპოვნელმა უფრო მარტივად
-          ამოიცნოს.
+          დაამატეთ ფოტო, რათა მპოვნელმა
+          უფრო მარტივად ამოიცნოს.
         </p>
       </div>
 
       {!preview ? (
-        <label className="uploadBox">
-          <div className="uploadPlus">
+        <label className="photoUploadBox">
+          <span className="photoPlus">
             +
-          </div>
+          </span>
 
           <strong>
             ფოტოს დამატება
           </strong>
 
-          <span>
+          <small>
             JPG, PNG ან WEBP · მაქს. 5 MB
-          </span>
+          </small>
 
           <input
             type="file"
@@ -1929,13 +1946,13 @@ function PhotoUploader({
           />
         </label>
       ) : (
-        <div className="photoPreviewBox">
+        <div className="selectedPhoto">
           <img
             src={preview}
             alt="არჩეული ფოტო"
           />
 
-          <div className="photoActions">
+          <div className="selectedPhotoActions">
             <label>
               ფოტოს შეცვლა
 
@@ -1956,24 +1973,24 @@ function PhotoUploader({
             >
               წაშლა
             </button>
-          </div>
 
-          <button
-            type="button"
-            className="photoVisibility"
-            onClick={() =>
-              onVisibilityChange(
-                !showPhoto
-              )
-            }
-          >
-            მპოვნელისთვის ფოტო:
-            <b>
-              {showPhoto
-                ? " ON"
-                : " OFF"}
-            </b>
-          </button>
+            <button
+              type="button"
+              className="photoVisibilityButton"
+              onClick={() =>
+                onVisibilityChange(
+                  !showPhoto
+                )
+              }
+            >
+              მპოვნელისთვის:
+              <b>
+                {showPhoto
+                  ? " ON"
+                  : " OFF"}
+              </b>
+            </button>
+          </div>
         </div>
       )}
     </section>
@@ -2006,87 +2023,104 @@ function PreviewStep({
 
   saving: boolean;
 }) {
-  const pet =
+  const isPet =
     type === "dog" ||
     type === "cat";
 
   return (
     <>
-      <Title
-        step="STEP 3 OF 3"
+      <StepTitle
+        eyebrow="STEP 3 OF 3"
         title="რას ნახავს მპოვნელი"
-        text="თუ ყველაფერი სწორია, დაადასტურეთ პროფილის შექმნა."
+        description="ეს არის საბოლოო Preview. თუ ყველაფერი სწორია, დაადასტურეთ პროფილის შექმნა."
+        center
       />
 
-      <div className="finderPreview">
-        {draft.showPhoto &&
-        photoPreview ? (
-          <img
-            src={
-              photoPreview
-            }
-            className="finderPhoto"
-            alt=""
-          />
-        ) : (
-          <div className="finderEmoji">
-            {meta.emoji}
-          </div>
-        )}
-
-        <h2>
-          {draft.itemName}
-        </h2>
-
-        <PreviewBlock
-          title="მფლობელი"
-          value={`${draft.ownerFirstName} ${draft.ownerLastName}`}
-        />
-
-        <PreviewBlock
-          title="ტელეფონი"
-          value={
-            draft.ownerPhone
-          }
-        />
-
-        {draft.showEmail &&
-          draft.ownerEmail && (
-            <PreviewBlock
-              title="ელფოსტა"
-              value={
-                draft.ownerEmail
+      <section className="finderPreview">
+        <div className="previewHeader">
+          {draft.showPhoto &&
+          photoPreview ? (
+            <img
+              src={
+                photoPreview
               }
+              alt={`${draft.itemName || meta.label} ფოტო`}
+              className="previewPhoto"
             />
+          ) : (
+            <div className="previewEmoji">
+              {meta.emoji}
+            </div>
           )}
+
+          <div>
+            <span>
+              QR RETURN
+            </span>
+
+            <h2>
+              {draft.itemName ||
+                meta.label}
+            </h2>
+
+            <p>
+              იპოვეთ? დაუკავშირდით
+              მფლობელს.
+            </p>
+          </div>
+        </div>
+
+        <div className="ownerPreview">
+          <PreviewItem
+            label="მფლობელი"
+            value={`${draft.ownerFirstName} ${draft.ownerLastName}`}
+          />
+
+          <PreviewItem
+            label="ტელეფონი"
+            value={
+              draft.ownerPhone
+            }
+          />
+
+          {draft.showEmail &&
+            draft.ownerEmail && (
+              <PreviewItem
+                label="ელფოსტა"
+                value={
+                  draft.ownerEmail
+                }
+              />
+            )}
+        </div>
 
         {draft.showDescription &&
           draft.description && (
             <PreviewBlock
               title="აღწერა"
-              value={
+              text={
                 draft.description
               }
             />
           )}
 
-        {pet &&
+        {isPet &&
           draft.showMedicalInfo &&
           draft.medicalInfo && (
             <PreviewBlock
               title="სამედიცინო ინფორმაცია"
-              value={
+              text={
                 draft.medicalInfo
               }
             />
           )}
 
-        {pet &&
+        {isPet &&
           draft.showBehaviourNote &&
           draft.behaviourNote && (
             <PreviewBlock
               title="ქცევის შესახებ ინფორმაცია"
-              value={
+              text={
                 draft.behaviourNote
               }
             />
@@ -2096,7 +2130,7 @@ function PreviewStep({
           draft.lostLocation && (
             <PreviewBlock
               title="📍 დაკარგვის ადგილი"
-              value={
+              text={
                 draft.lostLocation
               }
             />
@@ -2106,24 +2140,24 @@ function PreviewStep({
           draft.finderMessage && (
             <PreviewBlock
               title="მფლობელის შეტყობინება"
-              value={
+              text={
                 draft.finderMessage
               }
             />
           )}
 
-        <div className="previewButtons">
-          <button>
+        <div className="previewContacts">
+          <button type="button">
             ☎ დარეკვა
           </button>
 
           {draft.liveChatEnabled && (
-            <button>
+            <button type="button">
               Live Chat
             </button>
           )}
         </div>
-      </div>
+      </section>
 
       <div className="actions">
         <button
@@ -2149,19 +2183,27 @@ function PreviewStep({
   );
 }
 
-function Title({
-  step,
+function StepTitle({
+  eyebrow,
   title,
-  text,
+  description,
+  center = false,
 }: {
-  step: string;
+  eyebrow: string;
   title: string;
-  text: string;
+  description: string;
+  center?: boolean;
 }) {
   return (
-    <div className="stepTitle">
+    <div
+      className={
+        center
+          ? "stepTitle center"
+          : "stepTitle"
+      }
+    >
       <span>
-        {step}
+        {eyebrow}
       </span>
 
       <h1>
@@ -2169,7 +2211,7 @@ function Title({
       </h1>
 
       <p>
-        {text}
+        {description}
       </p>
     </div>
   );
@@ -2210,8 +2252,7 @@ function Toggle({
   label: string;
   checked: boolean;
   onChange:
-    (value: boolean) =>
-      void;
+    (value: boolean) => void;
 }) {
   return (
     <button
@@ -2228,8 +2269,8 @@ function Toggle({
       <b
         className={
           checked
-            ? "on"
-            : ""
+            ? "toggleState on"
+            : "toggleState"
         }
       >
         {checked
@@ -2240,22 +2281,42 @@ function Toggle({
   );
 }
 
-function PreviewBlock({
-  title,
+function PreviewItem({
+  label,
   value,
 }: {
-  title: string;
+  label: string;
   value: string;
 }) {
   return (
-    <div className="previewBlock">
+    <div>
       <span>
-        {title}
+        {label}
       </span>
 
       <strong>
         {value}
       </strong>
+    </div>
+  );
+}
+
+function PreviewBlock({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="previewBlock">
+      <strong>
+        {title}
+      </strong>
+
+      <p>
+        {text}
+      </p>
     </div>
   );
 }
@@ -2273,209 +2334,374 @@ function PageStyles() {
 
       .page {
         position: relative;
+
         min-height: 100vh;
+
         overflow: hidden;
-        padding: 0 18px 50px;
+
+        padding:
+          0 20px 50px;
+
         background: #0647c8;
       }
 
       .emojiLayer {
         position: fixed;
         inset: 0;
+
+        overflow: hidden;
+
         pointer-events: none;
       }
 
       .emojiLayer span {
         position: absolute;
+
         opacity: .055;
-        font-size: 70px;
+
+        font-size: 72px;
+
+        filter:
+          grayscale(1)
+          brightness(5);
       }
 
       .header {
         position: relative;
         z-index: 2;
-        max-width: 920px;
-        min-height: 70px;
+
+        width: 100%;
+        max-width: 960px;
+
+        min-height: 72px;
+
         margin: auto;
+
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid rgba(255,255,255,.2);
+        justify-content:
+          space-between;
+
+        border-bottom:
+          1px solid
+          rgba(255,255,255,.2);
       }
 
       .brand {
         display: flex;
         align-items: center;
+
         gap: 10px;
-        color: white;
+
         text-decoration: none;
       }
 
       .brandMark {
-        width: 42px;
-        height: 42px;
+        width: 43px;
+        height: 43px;
+
         display: grid;
         place-items: center;
-        background: white;
-        color: #0647c8;
+
         border-radius: 11px;
+
+        background: #fff;
+
+        color: #0647c8;
+
+        font-size: 13px;
         font-weight: 950;
       }
 
-      .changeProduct {
+      .brand strong,
+      .brand small {
+        display: block;
+      }
+
+      .brand strong {
         color: white;
-        border: 1px solid rgba(255,255,255,.3);
+
+        font-size: 18px;
+      }
+
+      .brand small {
+        margin-top: 2px;
+
+        color:
+          rgba(255,255,255,.7);
+
+        font-size: 11px;
+      }
+
+      .changeProduct {
         padding: 10px 14px;
+
+        border:
+          1px solid
+          rgba(255,255,255,.3);
+
         border-radius: 9px;
-        text-decoration: none;
+
+        color: white;
+
         font-size: 13px;
+        font-weight: 800;
+
+        text-decoration: none;
       }
 
       .progress {
         position: relative;
         z-index: 2;
-        max-width: 620px;
-        margin: 24px auto 0;
+
+        width: 100%;
+        max-width: 650px;
+
+        margin: 25px auto 0;
+
         display: flex;
         align-items: center;
       }
 
-      .progressPiece {
+      .progressPart {
         flex: 1;
+
         display: flex;
         align-items: center;
       }
 
-      .progressPiece:last-child {
-        flex: 0;
+      .progressPart:last-child {
+        flex: 0 0 auto;
       }
 
       .progressStep {
         display: flex;
         align-items: center;
-        gap: 7px;
-        color: rgba(255,255,255,.55);
+
+        gap: 8px;
+
+        color:
+          rgba(255,255,255,.52);
+
         font-size: 13px;
         font-weight: 800;
+
         white-space: nowrap;
       }
 
-      .progressStep b {
-        width: 31px;
-        height: 31px;
+      .stepCircle {
+        width: 32px;
+        height: 32px;
+
         display: grid;
         place-items: center;
-        border: 1px solid rgba(255,255,255,.35);
+
+        border:
+          1px solid
+          rgba(255,255,255,.35);
+
         border-radius: 50%;
+
+        font-size: 12px;
       }
 
       .progressStep.active,
-      .progressStep.complete {
+      .progressStep.completed {
         color: white;
       }
 
-      .progressStep.active b,
-      .progressStep.complete b {
+      .progressStep.active
+        .stepCircle {
         background: white;
+
         color: #0647c8;
       }
 
-      .progressLine {
-        flex: 1;
-        height: 2px;
-        margin: 0 10px;
-        background: rgba(255,255,255,.2);
+      .progressStep.completed
+        .stepCircle {
+        background: #ffffff;
+
+        color: #0647c8;
       }
 
-      .progressLine.complete {
+      .line {
+        flex: 1;
+
+        height: 2px;
+
+        margin: 0 11px;
+
+        background:
+          rgba(255,255,255,.22);
+      }
+
+      .line.filled {
         background: white;
       }
 
       .marketingLine {
         position: relative;
         z-index: 2;
-        max-width: 820px;
-        margin: 20px auto 15px;
+
+        width: 100%;
+        max-width: 830px;
+
+        margin: 22px auto 16px;
+
         display: flex;
-        justify-content: center;
         align-items: center;
-        gap: 11px;
+        justify-content: center;
+
+        gap: 12px;
+
         text-align: center;
+
         color: white;
       }
 
       .marketingLine > span {
-        font-size: 34px;
+        font-size: 35px;
       }
 
       .marketingLine strong {
         display: block;
+
         font-size: 16px;
       }
 
       .marketingLine p {
         margin: 4px 0 0;
-        color: rgba(255,255,255,.72);
+
+        color:
+          rgba(255,255,255,.72);
+
         font-size: 13px;
       }
 
       .card {
         position: relative;
         z-index: 2;
+
+        width: 100%;
         max-width: 880px;
+
         margin: auto;
-        padding: 25px;
+
+        padding: 26px;
+
         border-radius: 20px;
-        background: white;
-        box-shadow: 0 25px 60px rgba(0,25,80,.28);
+
+        background: #ffffff;
+
+        box-shadow:
+          0 25px 60px
+          rgba(0,24,77,.28);
       }
 
       .errorBox {
-        margin-bottom: 15px;
-        padding: 13px;
-        border-radius: 9px;
+        margin-bottom: 17px;
+
+        padding: 13px 14px;
+
+        border-radius: 10px;
+
         background: #fff0f2;
-        color: #a33e49;
+
+        color: #a53e49;
+
         font-size: 14px;
+        font-weight: 700;
       }
 
-      .stepTitle span {
+      .stepTitle > span {
         color: #0647c8;
+
         font-size: 12px;
         font-weight: 900;
+
+        letter-spacing: .8px;
       }
 
       .stepTitle h1 {
         margin: 5px 0 0;
+
         color: #203a55;
-        font-size: 26px;
+
+        font-size: 27px;
       }
 
       .stepTitle p {
         margin: 6px 0 0;
+
         color: #718397;
+
         font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .stepTitle.center {
+        text-align: center;
+      }
+
+      .compactSection {
+        margin-top: 20px;
+
+        padding-top: 18px;
+
+        border-top:
+          1px solid #e4ebf3;
+      }
+
+      .compactSection h2 {
+        margin: 0;
+
+        color: #2b4661;
+
+        font-size: 18px;
+      }
+
+      .sectionDescription {
+        margin: 5px 0 0;
+
+        color: #75869a;
+
+        font-size: 13px;
       }
 
       .formGrid {
-        margin-top: 18px;
+        margin-top: 15px;
+
         display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
         gap: 12px;
       }
 
       .formGrid.three {
-        grid-template-columns: repeat(3,minmax(0,1fr));
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
       }
 
       .field.full {
-        grid-column: 1 / -1;
+        grid-column:
+          1 / -1;
       }
 
       .field label {
         display: block;
+
         margin-bottom: 6px;
+
         color: #344e68;
+
         font-size: 13px;
         font-weight: 800;
       }
@@ -2484,296 +2710,570 @@ function PageStyles() {
       .field select,
       .field textarea {
         width: 100%;
-        border: 1px solid #d5e0eb;
+
+        border:
+          1px solid #d5e0eb;
+
         border-radius: 9px;
-        font: inherit;
+
+        background: #fff;
+
+        color: #263f59;
+
+        font-family: inherit;
+
         font-size: 14px;
+
         outline: none;
       }
 
       .field input,
       .field select {
-        height: 44px;
+        min-height: 44px;
+
         padding: 0 12px;
       }
 
       .field textarea {
         padding: 10px 12px;
+
         resize: vertical;
+
+        line-height: 1.45;
       }
 
-      .photoSection {
-        margin-top: 18px;
-        padding-top: 18px;
-        border-top: 1px solid #e4ebf3;
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        border-color: #0647c8;
+
+        box-shadow:
+          0 0 0 3px
+          rgba(6,71,200,.08);
       }
 
-      .photoSection h2 {
-        margin: 0;
-        color: #29445f;
-        font-size: 18px;
-      }
+      .smallNotice {
+        margin-top: 16px;
 
-      .photoSection p {
-        margin: 4px 0 12px;
-        color: #74869a;
+        padding: 11px 13px;
+
+        border-radius: 9px;
+
+        background: #eef5ff;
+
+        color: #4b6782;
+
         font-size: 13px;
       }
 
-      .uploadBox {
-        min-height: 115px;
+      .photoSection {
+        margin-top: 20px;
+
+        padding-top: 18px;
+
+        border-top:
+          1px solid #e4ebf3;
+      }
+
+      .photoSectionTitle h2 {
+        margin: 0;
+
+        color: #2b4661;
+
+        font-size: 18px;
+      }
+
+      .photoSectionTitle p {
+        margin: 5px 0 12px;
+
+        color: #75869a;
+
+        font-size: 13px;
+      }
+
+      .photoUploadBox {
+        min-height: 116px;
+
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        border: 2px dashed #b9cce4;
+
+        border:
+          2px dashed #bfd0e5;
+
         border-radius: 12px;
+
         background: #f7faff;
+
         cursor: pointer;
       }
 
-      .uploadBox input,
-      .photoActions input {
+      .photoUploadBox input,
+      .selectedPhotoActions input {
         display: none;
       }
 
-      .uploadPlus {
+      .photoPlus {
         width: 36px;
         height: 36px;
+
         display: grid;
         place-items: center;
+
         border-radius: 50%;
+
         background: #0647c8;
+
         color: white;
+
         font-size: 23px;
       }
 
-      .uploadBox strong {
+      .photoUploadBox strong {
         margin-top: 7px;
+
         color: #29445f;
+
         font-size: 14px;
       }
 
-      .uploadBox span {
-        margin-top: 3px;
+      .photoUploadBox small {
+        margin-top: 4px;
+
         color: #8090a1;
+
         font-size: 12px;
       }
 
-      .photoPreviewBox {
+      .selectedPhoto {
         display: grid;
-        grid-template-columns: 130px 1fr;
+
+        grid-template-columns:
+          140px 1fr;
+
         gap: 14px;
+
         align-items: center;
       }
 
-      .photoPreviewBox img {
-        width: 130px;
-        height: 100px;
+      .selectedPhoto > img {
+        width: 140px;
+        height: 105px;
+
         object-fit: cover;
+
         border-radius: 12px;
+
+        border:
+          1px solid #d8e3ef;
       }
 
-      .photoActions {
+      .selectedPhotoActions {
         display: flex;
+        flex-wrap: wrap;
+
         gap: 8px;
       }
 
-      .photoActions label,
-      .photoActions button {
-        padding: 10px 13px;
+      .selectedPhotoActions label,
+      .selectedPhotoActions button {
+        min-height: 40px;
+
+        padding: 0 12px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
         border-radius: 9px;
-        font: inherit;
+
+        font-family: inherit;
+
         font-size: 13px;
         font-weight: 800;
+
         cursor: pointer;
       }
 
-      .photoActions label {
+      .selectedPhotoActions label {
         background: #0647c8;
+
         color: white;
       }
 
-      .photoActions button {
-        border: 1px solid #d5e0eb;
+      .selectedPhotoActions button {
+        border:
+          1px solid #d5e0eb;
+
         background: white;
+
         color: #66798e;
       }
 
-      .photoVisibility {
-        margin-top: 10px;
-        border: 0;
+      .selectedPhotoActions
+        .photoVisibilityButton {
         background: #eef5ff;
+
         color: #42627f;
-        padding: 9px 11px;
-        border-radius: 8px;
-        cursor: pointer;
       }
 
-      .visibility {
-        margin-top: 18px;
-        padding-top: 17px;
-        border-top: 1px solid #e4ebf3;
-      }
+      .selectedPhotoActions
+        .photoVisibilityButton b {
+        margin-left: 5px;
 
-      .visibility h2 {
-        margin: 0;
-        color: #29445f;
-        font-size: 18px;
+        color: #0647c8;
       }
 
       .toggleGrid {
-        margin-top: 12px;
+        margin-top: 13px;
+
         display: grid;
-        grid-template-columns: repeat(3,minmax(0,1fr));
+
+        grid-template-columns:
+          repeat(
+            3,
+            minmax(0,1fr)
+          );
+
         gap: 8px;
       }
 
       .toggle {
-        min-height: 48px;
-        padding: 0 11px;
+        min-height: 50px;
+
+        padding: 0 12px;
+
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border: 1px solid #dce5ef;
+        justify-content:
+          space-between;
+
+        gap: 8px;
+
+        border:
+          1px solid #dce5ef;
+
         border-radius: 9px;
+
         background: white;
+
         color: #405972;
-        font: inherit;
+
+        font-family: inherit;
+
         font-size: 13px;
+        font-weight: 750;
+
+        text-align: left;
+
         cursor: pointer;
       }
 
-      .toggle b {
+      .toggleState {
         padding: 5px 8px;
+
         border-radius: 999px;
+
         background: #e5ebf2;
+
         color: #748599;
+
         font-size: 10px;
+
+        white-space: nowrap;
       }
 
-      .toggle b.on {
+      .toggleState.on {
         background: #0647c8;
+
         color: white;
       }
 
       .actions {
-        margin-top: 21px;
+        margin-top: 22px;
+
         display: flex;
-        justify-content: space-between;
-        gap: 9px;
+        align-items: center;
+        justify-content:
+          space-between;
+
+        gap: 10px;
       }
 
       .actions.right {
-        justify-content: flex-end;
+        justify-content:
+          flex-end;
       }
 
       .actions button {
-        min-height: 45px;
-        padding: 0 17px;
+        min-height: 46px;
+
+        padding: 0 18px;
+
         border-radius: 9px;
-        font: inherit;
+
+        font-family: inherit;
+
         font-size: 14px;
         font-weight: 850;
+
         cursor: pointer;
       }
 
       .primaryButton {
         border: 0;
+
         background: #0647c8;
+
         color: white;
       }
 
       .secondaryButton {
-        border: 1px solid #cad7e5;
+        border:
+          1px solid #cad7e5;
+
         background: white;
+
         color: #607489;
       }
 
       .finderPreview {
-        max-width: 600px;
-        margin: 20px auto 0;
+        max-width: 640px;
+
+        margin: 22px auto 0;
+
+        overflow: hidden;
+
+        border:
+          1px solid #d6e2ee;
+
+        border-radius: 16px;
+
+        background: #fff;
+      }
+
+      .previewHeader {
         padding: 18px;
-        border: 1px solid #d6e2ee;
-        border-radius: 15px;
-        text-align: center;
+
+        display: flex;
+        align-items: center;
+
+        gap: 13px;
+
+        background: #f2f6fc;
       }
 
-      .finderPhoto {
-        width: 130px;
-        height: 130px;
-        object-fit: cover;
-        border-radius: 50%;
-      }
+      .previewEmoji {
+        width: 54px;
+        height: 54px;
 
-      .finderEmoji {
-        width: 80px;
-        height: 80px;
-        margin: auto;
         display: grid;
         place-items: center;
-        border-radius: 50%;
+
+        border-radius: 13px;
+
         background: #0647c8;
-        font-size: 38px;
+
+        font-size: 28px;
       }
 
-      .finderPreview h2 {
-        color: #29445f;
+      .previewPhoto {
+        width: 64px;
+        height: 64px;
+
+        flex: 0 0 64px;
+
+        object-fit: cover;
+
+        border-radius: 14px;
+
+        border:
+          2px solid white;
+
+        box-shadow:
+          0 6px 16px
+          rgba(0,0,0,.08);
       }
 
-      .previewBlock {
-        margin-top: 8px;
-        padding: 11px;
-        border-radius: 9px;
-        background: #f7faff;
-        text-align: left;
-      }
+      .previewHeader span {
+        color: #0647c8;
 
-      .previewBlock span,
-      .previewBlock strong {
-        display: block;
-      }
-
-      .previewBlock span {
-        color: #8190a1;
         font-size: 11px;
+        font-weight: 900;
       }
 
-      .previewBlock strong {
-        margin-top: 4px;
-        color: #314b66;
+      .previewHeader h2 {
+        margin: 3px 0 0;
+
+        color: #29445f;
+
+        font-size: 21px;
+      }
+
+      .previewHeader p {
+        margin: 3px 0 0;
+
+        color: #75869a;
+
         font-size: 13px;
       }
 
-      .previewButtons {
-        margin-top: 12px;
+      .ownerPreview {
+        padding: 15px;
+
         display: grid;
-        grid-template-columns: 1fr 1fr;
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
+
         gap: 8px;
       }
 
-      .previewButtons button {
-        min-height: 42px;
-        border: 0;
+      .ownerPreview > div {
+        padding: 11px;
+
         border-radius: 9px;
+
+        background: #f7faff;
+      }
+
+      .ownerPreview span,
+      .ownerPreview strong {
+        display: block;
+      }
+
+      .ownerPreview span {
+        color: #8190a1;
+
+        font-size: 11px;
+      }
+
+      .ownerPreview strong {
+        margin-top: 4px;
+
+        color: #314b66;
+
+        font-size: 13px;
+      }
+
+      .previewBlock {
+        margin: 0 15px 9px;
+
+        padding: 12px;
+
+        border-radius: 9px;
+
+        background: #f7faff;
+      }
+
+      .previewBlock strong {
+        display: block;
+
+        color: #314b66;
+
+        font-size: 13px;
+      }
+
+      .previewBlock p {
+        margin: 5px 0 0;
+
+        color: #718397;
+
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .previewContacts {
+        padding: 15px;
+
+        display: grid;
+
+        grid-template-columns:
+          1fr 1fr;
+
+        gap: 8px;
+      }
+
+      .previewContacts button {
+        min-height: 43px;
+
+        border: 0;
+
+        border-radius: 9px;
+
         background: #0647c8;
+
         color: white;
+
+        font-size: 13px;
         font-weight: 800;
       }
 
-      @media(max-width:700px) {
-        .formGrid,
+      @media (
+        max-width: 760px
+      ) {
         .formGrid.three,
         .toggleGrid {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0,1fr)
+            );
+        }
+      }
+
+      @media (
+        max-width: 600px
+      ) {
+        .page {
+          padding:
+            0 13px 28px;
         }
 
-        .photoPreviewBox {
-          grid-template-columns: 1fr;
+        .brand small {
+          display: none;
         }
 
         .progressStep span {
           display: none;
+        }
+
+        .card {
+          padding: 19px;
+        }
+
+        .formGrid,
+        .formGrid.three,
+        .toggleGrid {
+          grid-template-columns:
+            1fr;
+        }
+
+        .selectedPhoto {
+          grid-template-columns:
+            1fr;
+        }
+
+        .selectedPhoto > img {
+          width: 100%;
+          height: 180px;
+        }
+
+        .stepTitle h1 {
+          font-size: 23px;
+        }
+
+        .actions {
+          flex-direction:
+            column;
+        }
+
+        .actions button {
+          width: 100%;
         }
       }
     `}</style>
