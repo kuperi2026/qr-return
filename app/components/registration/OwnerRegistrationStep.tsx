@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createClient,
   type User,
@@ -136,14 +129,11 @@ export default function OwnerRegistrationStep({
           setErrorMessage(
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
-
           return;
         }
 
         const {
-          data: {
-            user,
-          },
+          data: { user },
           error,
         } =
           await supabase.auth.getUser();
@@ -155,7 +145,6 @@ export default function OwnerRegistrationStep({
           router.replace(
             "/login"
           );
-
           return;
         }
 
@@ -211,86 +200,111 @@ export default function OwnerRegistrationStep({
       setErrorMessage(
         "მომხმარებლის ანგარიში ვერ მოიძებნა."
       );
-
       return;
     }
 
-    if (
-      !owner.firstName.trim()
-    ) {
+    if (!owner.firstName.trim()) {
       setErrorMessage(
         "მფლობელის სახელი ვერ მოიძებნა."
       );
-
       return;
     }
 
-    if (
-      !owner.lastName.trim()
-    ) {
+    if (!owner.lastName.trim()) {
       setErrorMessage(
         "მფლობელის გვარი ვერ მოიძებნა."
       );
-
       return;
     }
 
-    if (
-      !owner.phone.trim()
-    ) {
+    if (!owner.phone.trim()) {
       setErrorMessage(
         "მფლობელის ტელეფონის ნომერი ვერ მოიძებნა."
       );
-
       return;
     }
 
-    router.push(
+    /*
+      window.location.assign-ს ვიყენებთ,
+      რომ Step 2-ზე გადასვლა აუცილებლად მოხდეს.
+    */
+
+    window.location.assign(
       `/register-item/${type}?step=product`
     );
   }
 
   if (loading) {
     return (
-      <div className="loading">
-        მფლობელის ინფორმაცია იტვირთება...
+      <>
+        <div className="loadingCard">
+          <div className="loadingIcon">
+            QR
+          </div>
+
+          <strong>
+            მფლობელის ინფორმაცია იტვირთება...
+          </strong>
+        </div>
 
         <style jsx>{`
-          .loading {
+          .loadingCard {
             min-height: 280px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            gap: 14px;
+
+            border: 1px solid #dce6f1;
+            border-radius: 18px;
+
+            background: #ffffff;
+
+            color: #65788d;
+
+            font-size: 15px;
+          }
+
+          .loadingIcon {
+            width: 52px;
+            height: 52px;
 
             display: grid;
             place-items: center;
 
-            border:
-              1px solid #dce6f1;
+            border-radius: 14px;
 
-            border-radius: 16px;
+            background: #1266e9;
 
-            background: #ffffff;
+            color: #ffffff;
 
-            color: #718095;
-
-            font-size: 11px;
+            font-size: 13px;
+            font-weight: 900;
           }
         `}</style>
-      </div>
+      </>
     );
   }
 
   return (
     <>
       <div className="flow">
+
+        {/* STEP PROGRESS */}
+
         <section className="progressCard">
-          <div className="progressTop">
+          <div className="progressHeader">
             <div className="step active">
-              <div className="circle">
+              <div className="stepNumber">
                 01
               </div>
 
               <div>
                 <span>
-                  STEP 01
+                  პირველი ეტაპი
                 </span>
 
                 <strong>
@@ -299,38 +313,41 @@ export default function OwnerRegistrationStep({
               </div>
             </div>
 
-            <div className="line" />
+            <div className="stepLine" />
 
             <div className="step">
-              <div className="circle">
+              <div className="stepNumber">
                 02
               </div>
 
               <div>
                 <span>
-                  STEP 02
+                  მეორე ეტაპი
                 </span>
 
                 <strong>
+                  {meta.emoji}{" "}
                   {meta.label}
                 </strong>
               </div>
             </div>
           </div>
 
-          <div className="progressBar">
-            <div />
+          <div className="progressTrack">
+            <div className="progressFill" />
           </div>
         </section>
 
-        <section className="intro">
+        {/* INTRO */}
+
+        <section className="introCard">
           <div className="productIcon">
             {meta.emoji}
           </div>
 
           <div>
-            <span>
-              PRODUCT REGISTRATION
+            <span className="eyebrow">
+              OWNER INFORMATION
             </span>
 
             <h1>
@@ -338,30 +355,40 @@ export default function OwnerRegistrationStep({
             </h1>
 
             <p>
-              ეს ინფორმაცია თქვენს ანგარიშს ეკუთვნის.
-              შემდეგ ეტაპზე შეავსებთ მხოლოდ{" "}
+              ეს ინფორმაცია აღებულია თქვენი QR RETURN
+              ანგარიშიდან. შემდეგ ეტაპზე შეავსებთ მხოლოდ{" "}
               <strong>
                 {meta.label}
               </strong>
-              -ის მონაცემებს.
+              -ის პროფილს.
             </p>
           </div>
         </section>
 
+        {/* ERROR */}
+
         {errorMessage && (
           <div
-            className="error"
+            className="errorBox"
             role="alert"
           >
-            <strong>
-              მონაცემები გადაამოწმეთ
-            </strong>
+            <div className="errorIcon">
+              !
+            </div>
 
-            <p>
-              {errorMessage}
-            </p>
+            <div>
+              <strong>
+                მონაცემები გადაამოწმეთ
+              </strong>
+
+              <p>
+                {errorMessage}
+              </p>
+            </div>
           </div>
         )}
+
+        {/* OWNER INFO */}
 
         <OwnerInformationSection
           firstName={
@@ -378,113 +405,134 @@ export default function OwnerRegistrationStep({
           }
         />
 
-        <section className="accountNote">
-          <div className="accountIcon">
+        {/* INFO NOTE */}
+
+        <section className="infoCard">
+          <div className="infoIcon">
             i
           </div>
 
           <div>
             <strong>
-              Secondary Admin
+              მფლობელის მონაცემების შეცვლა
             </strong>
 
             <p>
-              დამატებითი ადმინისტრატორის მართვა იქნება
-              თქვენი ანგარიშის პარამეტრებში და არა
-              კონკრეტული პროდუქტის რეგისტრაციაში.
+              პროფილის შექმნის შემდეგ თქვენი ანგარიშიდან
+              შეძლებთ მფლობელის ინფორმაციის განახლებას.
+              ასევე თითოეული QR პროფილი ცალკე იქნება
+              რედაქტირებადი.
             </p>
           </div>
         </section>
 
+        {/* NEXT */}
+
         <section className="continueCard">
-          <div>
+          <div className="continueText">
             <span>
               NEXT STEP
             </span>
 
             <h2>
               {meta.emoji}{" "}
-              {meta.label}ს ინფორმაცია
+              {meta.label}ს პროფილი
             </h2>
 
             <p>
-              შემდეგ გვერდზე შეიყვანთ QR კოდსა
-              და პროდუქტის მონაცემებს.
+              შემდეგ გვერდზე შეავსებთ QR კოდსა და
+              {type === "dog" || type === "cat"
+                ? " ცხოველის ინფორმაციას."
+                : " ნივთის ინფორმაციას."}
             </p>
           </div>
 
-          <div className="buttons">
-            <a href="/register">
-              უკან
+          <div className="actions">
+            <a
+              href="/register"
+              className="backButton"
+            >
+              ← უკან
             </a>
 
             <button
               type="button"
+              className="continueButton"
               onClick={
                 continueToProduct
               }
             >
-              გაგრძელება →
+              გაგრძელება
+              <span>→</span>
             </button>
           </div>
         </section>
       </div>
 
       <style jsx>{`
+        * {
+          box-sizing: border-box;
+        }
+
         .flow {
           width: 100%;
         }
 
         .progressCard {
-          margin-bottom: 16px;
-          padding: 18px 20px;
+          margin-bottom: 18px;
 
-          border: 1px solid #dce6f1;
-          border-radius: 16px;
+          padding: 22px 24px;
+
+          border: 1px solid #dbe5f0;
+          border-radius: 18px;
 
           background: #ffffff;
 
           box-shadow:
             0 10px 28px
-            rgba(30,70,120,.04);
+            rgba(30, 70, 120, 0.04);
         }
 
-        .progressTop {
+        .progressHeader {
           display: flex;
           align-items: center;
-          gap: 13px;
+
+          gap: 16px;
         }
 
         .step {
           display: flex;
           align-items: center;
-          gap: 9px;
-          opacity: .45;
+
+          gap: 11px;
+
+          opacity: 0.5;
         }
 
         .step.active {
           opacity: 1;
         }
 
-        .circle {
-          width: 35px;
-          height: 35px;
+        .stepNumber {
+          width: 42px;
+          height: 42px;
 
-          flex: 0 0 35px;
+          flex: 0 0 42px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 10px;
+          border-radius: 11px;
 
           background: #edf4ff;
+
           color: #1266e9;
 
-          font-size: 8px;
-          font-weight: 950;
+          font-size: 13px;
+          font-weight: 900;
         }
 
-        .step.active .circle {
+        .step.active .stepNumber {
           background: #1266e9;
           color: #ffffff;
         }
@@ -495,28 +543,34 @@ export default function OwnerRegistrationStep({
         }
 
         .step span {
-          color: #8795a5;
-          font-size: 6px;
-          font-weight: 900;
+          color: #8493a4;
+
+          font-size: 12px;
+          font-weight: 700;
         }
 
         .step strong {
           margin-top: 3px;
 
-          color: #334d68;
+          color: #29435d;
 
-          font-size: 9px;
+          font-size: 15px;
+          font-weight: 850;
         }
 
-        .line {
+        .stepLine {
           flex: 1;
-          height: 1px;
+
+          min-width: 35px;
+          height: 2px;
+
           background: #dce5ef;
         }
 
-        .progressBar {
-          height: 4px;
-          margin-top: 15px;
+        .progressTrack {
+          height: 5px;
+
+          margin-top: 18px;
 
           overflow: hidden;
 
@@ -525,7 +579,7 @@ export default function OwnerRegistrationStep({
           background: #edf1f6;
         }
 
-        .progressBar div {
+        .progressFill {
           width: 50%;
           height: 100%;
 
@@ -534,221 +588,267 @@ export default function OwnerRegistrationStep({
           background: #1266e9;
         }
 
-        .intro {
-          margin-bottom: 16px;
-          padding: 22px;
+        .introCard {
+          margin-bottom: 18px;
+
+          padding: 26px;
 
           display: flex;
           align-items: center;
-          gap: 14px;
 
-          border: 1px solid #dce6f1;
-          border-radius: 16px;
+          gap: 17px;
+
+          border: 1px solid #dbe5f0;
+          border-radius: 18px;
 
           background:
             linear-gradient(
               135deg,
               #ffffff,
-              #f5f9ff
+              #f3f7fd
             );
         }
 
         .productIcon {
-          width: 55px;
-          height: 55px;
+          width: 64px;
+          height: 64px;
 
-          flex: 0 0 55px;
+          flex: 0 0 64px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 15px;
+          border-radius: 17px;
 
-          background: #edf4ff;
+          background: #eaf2ff;
 
-          font-size: 27px;
+          font-size: 31px;
         }
 
-        .intro span {
+        .eyebrow {
           color: #1266e9;
-          font-size: 7px;
+
+          font-size: 12px;
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
-        .intro h1 {
-          margin: 5px 0 0;
+        .introCard h1 {
+          margin: 7px 0 0;
 
-          color: #223b55;
+          color: #20384f;
 
-          font-size: 20px;
+          font-size: 26px;
+          line-height: 1.2;
         }
 
-        .intro p {
-          margin: 6px 0 0;
+        .introCard p {
+          max-width: 650px;
 
-          color: #7c8c9e;
+          margin: 9px 0 0;
 
-          font-size: 9px;
+          color: #718296;
 
-          line-height: 1.55;
+          font-size: 15px;
+          line-height: 1.65;
         }
 
-        .intro p strong {
+        .introCard p strong {
           color: #1266e9;
         }
 
-        .error {
-          margin-bottom: 16px;
-          padding: 14px;
+        .errorBox {
+          margin-bottom: 18px;
 
-          border: 1px solid #efc7cb;
-          border-radius: 12px;
-
-          background: #fff7f8;
-          color: #a3434c;
-        }
-
-        .error strong {
-          display: block;
-          font-size: 10px;
-        }
-
-        .error p {
-          margin: 4px 0 0;
-          font-size: 9px;
-        }
-
-        .accountNote {
-          margin-top: 16px;
-
-          padding: 15px;
+          padding: 16px;
 
           display: flex;
           align-items: flex-start;
 
-          gap: 10px;
+          gap: 11px;
 
-          border: 1px solid #dce6f1;
-          border-radius: 12px;
+          border: 1px solid #efc7cb;
+          border-radius: 13px;
 
-          background: #fafcff;
+          background: #fff7f8;
+
+          color: #a3434c;
         }
 
-        .accountIcon {
-          width: 27px;
-          height: 27px;
+        .errorIcon {
+          width: 28px;
+          height: 28px;
 
-          flex: 0 0 27px;
+          flex: 0 0 28px;
 
           display: grid;
           place-items: center;
 
           border-radius: 50%;
 
-          background: #edf4ff;
-          color: #1266e9;
+          background: #f7dfe2;
 
-          font-size: 8px;
-          font-weight: 950;
+          font-size: 14px;
+          font-weight: 900;
         }
 
-        .accountNote strong {
+        .errorBox strong {
           display: block;
 
-          color: #405972;
-
-          font-size: 9px;
+          font-size: 14px;
         }
 
-        .accountNote p {
+        .errorBox p {
           margin: 4px 0 0;
 
-          color: #8492a1;
-
-          font-size: 8px;
+          font-size: 13px;
           line-height: 1.5;
         }
 
+        .infoCard {
+          margin-top: 18px;
+
+          padding: 17px 18px;
+
+          display: flex;
+          align-items: flex-start;
+
+          gap: 12px;
+
+          border: 1px solid #d9e4ef;
+          border-radius: 14px;
+
+          background: #fafcff;
+        }
+
+        .infoIcon {
+          width: 30px;
+          height: 30px;
+
+          flex: 0 0 30px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 50%;
+
+          background: #eaf2ff;
+
+          color: #1266e9;
+
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .infoCard strong {
+          display: block;
+
+          color: #344e68;
+
+          font-size: 14px;
+        }
+
+        .infoCard p {
+          max-width: 680px;
+
+          margin: 5px 0 0;
+
+          color: #718296;
+
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
         .continueCard {
-          margin-top: 16px;
-          padding: 22px 24px;
+          margin-top: 18px;
+
+          padding: 24px 26px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
-          gap: 20px;
+          gap: 22px;
 
-          border: 1px solid #cddff5;
-          border-radius: 16px;
+          border: 1px solid #c5d9f3;
+          border-radius: 18px;
 
           background:
             linear-gradient(
               135deg,
-              #f7faff,
-              #edf5ff
+              #f4f8ff,
+              #eaf3ff
             );
         }
 
-        .continueCard > div > span {
+        .continueText > span {
           color: #1266e9;
-          font-size: 7px;
+
+          font-size: 12px;
           font-weight: 900;
-          letter-spacing: 1px;
+
+          letter-spacing: .9px;
         }
 
-        .continueCard h2 {
-          margin: 5px 0 0;
+        .continueText h2 {
+          margin: 6px 0 0;
 
-          color: #29425d;
+          color: #27415b;
 
-          font-size: 16px;
+          font-size: 21px;
         }
 
-        .continueCard p {
-          margin: 5px 0 0;
+        .continueText p {
+          margin: 6px 0 0;
 
-          color: #7e8da0;
+          color: #718397;
 
-          font-size: 8px;
+          font-size: 14px;
+          line-height: 1.55;
         }
 
-        .buttons {
+        .actions {
           display: flex;
           align-items: center;
 
-          gap: 8px;
+          gap: 10px;
         }
 
-        .buttons a,
-        .buttons button {
-          min-height: 44px;
-          padding: 0 16px;
+        .backButton,
+        .continueButton {
+          min-height: 48px;
 
-          display: flex;
+          padding: 0 18px;
+
+          display: inline-flex;
           align-items: center;
           justify-content: center;
 
-          border-radius: 10px;
+          border-radius: 11px;
 
           font-family: inherit;
-          font-size: 9px;
-          font-weight: 900;
+
+          font-size: 14px;
+          font-weight: 850;
 
           text-decoration: none;
+
+          white-space: nowrap;
         }
 
-        .buttons a {
-          border: 1px solid #ccd9e7;
+        .backButton {
+          border: 1px solid #c9d6e5;
 
           background: #ffffff;
 
-          color: #64778b;
+          color: #596f86;
         }
 
-        .buttons button {
-          min-width: 140px;
+        .continueButton {
+          min-width: 155px;
+
+          gap: 10px;
 
           border: 0;
 
@@ -757,26 +857,92 @@ export default function OwnerRegistrationStep({
           color: #ffffff;
 
           cursor: pointer;
+
+          box-shadow:
+            0 10px 22px
+            rgba(18, 102, 233, .18);
         }
 
-        @media (max-width: 650px) {
-          .intro {
+        .continueButton span {
+          font-size: 18px;
+        }
+
+        .continueButton:hover {
+          background: #0e58cc;
+        }
+
+        @media (max-width: 700px) {
+          .introCard {
             align-items: flex-start;
+          }
+
+          .introCard h1 {
+            font-size: 22px;
           }
 
           .continueCard {
             flex-direction: column;
-
             align-items: stretch;
           }
 
-          .buttons {
+          .actions {
             width: 100%;
           }
 
-          .buttons a,
-          .buttons button {
+          .backButton,
+          .continueButton {
             flex: 1;
+          }
+
+          .progressHeader {
+            gap: 9px;
+          }
+
+          .stepNumber {
+            width: 36px;
+            height: 36px;
+
+            flex-basis: 36px;
+          }
+
+          .step span {
+            font-size: 10px;
+          }
+
+          .step strong {
+            font-size: 13px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .introCard {
+            padding: 20px;
+          }
+
+          .productIcon {
+            width: 52px;
+            height: 52px;
+
+            flex-basis: 52px;
+
+            font-size: 25px;
+          }
+
+          .introCard h1 {
+            font-size: 20px;
+          }
+
+          .introCard p {
+            font-size: 14px;
+          }
+
+          .actions {
+            flex-direction: column;
+          }
+
+          .backButton,
+          .continueButton {
+            width: 100%;
           }
         }
       `}</style>
