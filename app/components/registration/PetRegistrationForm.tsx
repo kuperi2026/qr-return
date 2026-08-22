@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
-
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createClient,
   type SupabaseClient,
@@ -40,10 +32,7 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (
-    !supabaseUrl ||
-    !supabaseKey
-  ) {
+  if (!supabaseUrl || !supabaseKey) {
     return null;
   }
 
@@ -58,32 +47,16 @@ export default function PetRegistrationForm({
 }: PetRegistrationFormProps) {
   const router = useRouter();
 
-  const [
-    supabase,
-    setSupabase,
-  ] =
-    useState<SupabaseClient | null>(
-      null
-    );
+  const [supabase, setSupabase] =
+    useState<SupabaseClient | null>(null);
 
-  const [
-    currentUser,
-    setCurrentUser,
-  ] =
-    useState<User | null>(
-      null
-    );
+  const [currentUser, setCurrentUser] =
+    useState<User | null>(null);
 
-  const [
-    authLoading,
-    setAuthLoading,
-  ] =
+  const [authLoading, setAuthLoading] =
     useState(true);
 
-  const [
-    owner,
-    setOwner,
-  ] =
+  const [owner, setOwner] =
     useState<OwnerData>({
       firstName: "",
       lastName: "",
@@ -91,123 +64,71 @@ export default function PetRegistrationForm({
       email: "",
     });
 
-  /* ================= PET ================= */
+  const [tagCode, setTagCode] =
+    useState("");
 
-  const [
-    tagCode,
-    setTagCode,
-  ] = useState("");
+  const [itemName, setItemName] =
+    useState("");
 
-  const [
-    itemName,
-    setItemName,
-  ] = useState("");
+  const [colour, setColour] =
+    useState("");
 
-  const [
-    colour,
-    setColour,
-  ] = useState("");
+  const [sex, setSex] =
+    useState("");
 
-  const [
-    sex,
-    setSex,
-  ] = useState("");
+  const [dateOfBirth, setDateOfBirth] =
+    useState("");
 
-  const [
-    dateOfBirth,
-    setDateOfBirth,
-  ] = useState("");
+  const [weight, setWeight] =
+    useState("");
 
-  const [
-    weight,
-    setWeight,
-  ] = useState("");
+  const [photo, setPhoto] =
+    useState("");
 
-  const [
-    photo,
-    setPhoto,
-  ] = useState("");
+  const [medicalInfo, setMedicalInfo] =
+    useState("");
 
-  const [
-    medicalInfo,
-    setMedicalInfo,
-  ] = useState("");
+  const [behaviourNote, setBehaviourNote] =
+    useState("");
 
-  const [
-    behaviourNote,
-    setBehaviourNote,
-  ] = useState("");
+  const [description, setDescription] =
+    useState("");
 
-  const [
-    description,
-    setDescription,
-  ] = useState("");
+  const [finderMessage, setFinderMessage] =
+    useState("");
 
-  const [
-    finderMessage,
-    setFinderMessage,
-  ] = useState("");
+  const [showEmail, setShowEmail] =
+    useState(false);
 
-  /* ================= FINDER VIEW ================= */
+  const [showAddress, setShowAddress] =
+    useState(false);
 
-  const [
-    showEmail,
-    setShowEmail,
-  ] = useState(false);
+  const [showPetPhoto, setShowPetPhoto] =
+    useState(true);
 
-  const [
-    showAddress,
-    setShowAddress,
-  ] = useState(false);
+  const [showMedicalInfo, setShowMedicalInfo] =
+    useState(false);
 
-  const [
-    showPetPhoto,
-    setShowPetPhoto,
-  ] = useState(true);
+  const [showBehaviourNote, setShowBehaviourNote] =
+    useState(false);
 
-  const [
-    showMedicalInfo,
-    setShowMedicalInfo,
-  ] = useState(false);
+  const [showDescription, setShowDescription] =
+    useState(true);
 
-  const [
-    showBehaviourNote,
-    setShowBehaviourNote,
-  ] = useState(false);
+  const [showFinderMessage, setShowFinderMessage] =
+    useState(true);
 
-  const [
-    showDescription,
-    setShowDescription,
-  ] = useState(true);
+  const [liveChatEnabled, setLiveChatEnabled] =
+    useState(true);
 
-  const [
-    showFinderMessage,
-    setShowFinderMessage,
-  ] = useState(true);
+  const [errorMessage, setErrorMessage] =
+    useState("");
 
-  /* ================= CONTACT ================= */
+  const [successMessage, setSuccessMessage] =
+    useState("");
 
-  const [
-    liveChatEnabled,
-    setLiveChatEnabled,
-  ] = useState(true);
-
-  /* ================= STATUS ================= */
-
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
-
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] = useState("");
-
-  const [
-    saving,
-    setSaving,
-  ] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
   const petLabel =
     type === "dog"
@@ -219,8 +140,6 @@ export default function PetRegistrationForm({
       ? "🐶"
       : "🐱";
 
-  /* ================= LOAD OWNER SILENTLY ================= */
-
   useEffect(() => {
     async function loadAccount() {
       try {
@@ -231,18 +150,13 @@ export default function PetRegistrationForm({
           setErrorMessage(
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
-
           return;
         }
 
-        setSupabase(
-          client
-        );
+        setSupabase(client);
 
         const {
-          data: {
-            user,
-          },
+          data: { user },
           error: userError,
         } =
           await client.auth.getUser();
@@ -251,16 +165,11 @@ export default function PetRegistrationForm({
           userError ||
           !user
         ) {
-          router.replace(
-            "/login"
-          );
-
+          router.replace("/login");
           return;
         }
 
-        setCurrentUser(
-          user
-        );
+        setCurrentUser(user);
 
         setOwner({
           firstName:
@@ -298,9 +207,7 @@ export default function PetRegistrationForm({
           "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
         );
       } finally {
-        setAuthLoading(
-          false
-        );
+        setAuthLoading(false);
       }
     }
 
@@ -320,15 +227,11 @@ export default function PetRegistrationForm({
       return "მფლობელის ინფორმაცია არასრულია. დაბრუნდით პირველ ეტაპზე.";
     }
 
-    if (
-      !tagCode.trim()
-    ) {
+    if (!tagCode.trim()) {
       return "QR / Tag Code სავალდებულოა.";
     }
 
-    if (
-      !itemName.trim()
-    ) {
+    if (!itemName.trim()) {
       return "ცხოველის სახელი სავალდებულოა.";
     }
 
@@ -346,9 +249,7 @@ export default function PetRegistrationForm({
     const validationError =
       validateForm();
 
-    if (
-      validationError
-    ) {
+    if (validationError) {
       setErrorMessage(
         validationError
       );
@@ -368,21 +269,16 @@ export default function PetRegistrationForm({
       setErrorMessage(
         "ანგარიშთან კავშირი ვერ მოიძებნა."
       );
-
       return;
     }
 
-    setSaving(
-      true
-    );
+    setSaving(true);
 
     try {
       const cleanTagCode =
         tagCode
           .trim()
           .toUpperCase();
-
-      /* ================= CHECK QR ================= */
 
       const {
         data: existingTag,
@@ -399,17 +295,13 @@ export default function PetRegistrationForm({
           )
           .maybeSingle();
 
-      if (
-        tagCheckError
-      ) {
+      if (tagCheckError) {
         throw new Error(
           tagCheckError.message
         );
       }
 
-      if (
-        existingTag
-      ) {
+      if (existingTag) {
         setErrorMessage(
           `QR კოდი ${cleanTagCode} უკვე დარეგისტრირებულია.`
         );
@@ -421,8 +313,6 @@ export default function PetRegistrationForm({
 
         return;
       }
-
-      /* ================= CREATE PET PROFILE ================= */
 
       const {
         data: createdProfile,
@@ -538,25 +428,18 @@ export default function PetRegistrationForm({
           )
           .single();
 
-      if (
-        insertError
-      ) {
+      if (insertError) {
         const lowerMessage =
           insertError.message
             .toLowerCase();
 
         if (
-          lowerMessage.includes(
-            "duplicate"
-          ) ||
-          lowerMessage.includes(
-            "unique"
-          )
+          lowerMessage.includes("duplicate") ||
+          lowerMessage.includes("unique")
         ) {
           setErrorMessage(
             "ეს QR კოდი უკვე გამოყენებულია."
           );
-
           return;
         }
 
@@ -565,9 +448,7 @@ export default function PetRegistrationForm({
         );
       }
 
-      if (
-        !createdProfile
-      ) {
+      if (!createdProfile) {
         throw new Error(
           "პროფილის შექმნის შედეგი ვერ მოიძებნა."
         );
@@ -579,9 +460,11 @@ export default function PetRegistrationForm({
 
       setTimeout(() => {
         router.push(
-          "/my-profiles"
+          `/registration-success?type=${type}&tag=${encodeURIComponent(
+            createdProfile.tag_code
+          )}`
         );
-      }, 900);
+      }, 700);
     } catch (error) {
       console.error(
         "Pet profile save error:",
@@ -599,15 +482,11 @@ export default function PetRegistrationForm({
         behavior: "smooth",
       });
     } finally {
-      setSaving(
-        false
-      );
+      setSaving(false);
     }
   }
 
-  if (
-    authLoading
-  ) {
+  if (authLoading) {
     return (
       <div className="loading">
         ანგარიშის ინფორმაცია იტვირთება...
@@ -615,24 +494,13 @@ export default function PetRegistrationForm({
         <style jsx>{`
           .loading {
             min-height: 250px;
-
             display: grid;
             place-items: center;
-
-            border:
-              1px solid #dce6f1;
-
-            border-radius:
-              16px;
-
-            background:
-              #ffffff;
-
-            color:
-              #718095;
-
-            font-size:
-              11px;
+            border: 1px solid #dce6f1;
+            border-radius: 16px;
+            background: #ffffff;
+            color: #718095;
+            font-size: 11px;
           }
         `}</style>
       </div>
@@ -643,9 +511,7 @@ export default function PetRegistrationForm({
     <>
       <form
         className="petForm"
-        onSubmit={
-          handleSubmit
-        }
+        onSubmit={handleSubmit}
       >
         {errorMessage && (
           <div
@@ -700,129 +566,53 @@ export default function PetRegistrationForm({
         </section>
 
         <PetBasicInfo
-          tagCode={
-            tagCode
-          }
-          setTagCode={
-            setTagCode
-          }
-          itemName={
-            itemName
-          }
-          setItemName={
-            setItemName
-          }
-          colour={
-            colour
-          }
-          setColour={
-            setColour
-          }
-          sex={
-            sex
-          }
-          setSex={
-            setSex
-          }
-          dateOfBirth={
-            dateOfBirth
-          }
-          setDateOfBirth={
-            setDateOfBirth
-          }
-          weight={
-            weight
-          }
-          setWeight={
-            setWeight
-          }
-          photo={
-            photo
-          }
-          setPhoto={
-            setPhoto
-          }
+          tagCode={tagCode}
+          setTagCode={setTagCode}
+          itemName={itemName}
+          setItemName={setItemName}
+          colour={colour}
+          setColour={setColour}
+          sex={sex}
+          setSex={setSex}
+          dateOfBirth={dateOfBirth}
+          setDateOfBirth={setDateOfBirth}
+          weight={weight}
+          setWeight={setWeight}
+          photo={photo}
+          setPhoto={setPhoto}
         />
 
         <PetHealthSection
-          medicalInfo={
-            medicalInfo
-          }
-          setMedicalInfo={
-            setMedicalInfo
-          }
-          behaviourNote={
-            behaviourNote
-          }
-          setBehaviourNote={
-            setBehaviourNote
-          }
-          description={
-            description
-          }
-          setDescription={
-            setDescription
-          }
-          finderMessage={
-            finderMessage
-          }
-          setFinderMessage={
-            setFinderMessage
-          }
+          medicalInfo={medicalInfo}
+          setMedicalInfo={setMedicalInfo}
+          behaviourNote={behaviourNote}
+          setBehaviourNote={setBehaviourNote}
+          description={description}
+          setDescription={setDescription}
+          finderMessage={finderMessage}
+          setFinderMessage={setFinderMessage}
         />
 
         <FinderVisibilitySection
-          showEmail={
-            showEmail
-          }
-          setShowEmail={
-            setShowEmail
-          }
-          showAddress={
-            showAddress
-          }
-          setShowAddress={
-            setShowAddress
-          }
-          showPetPhoto={
-            showPetPhoto
-          }
-          setShowPetPhoto={
-            setShowPetPhoto
-          }
-          showMedicalInfo={
-            showMedicalInfo
-          }
-          setShowMedicalInfo={
-            setShowMedicalInfo
-          }
-          showBehaviourNote={
-            showBehaviourNote
-          }
-          setShowBehaviourNote={
-            setShowBehaviourNote
-          }
-          showDescription={
-            showDescription
-          }
-          setShowDescription={
-            setShowDescription
-          }
-          showFinderMessage={
-            showFinderMessage
-          }
-          setShowFinderMessage={
-            setShowFinderMessage
-          }
+          showEmail={showEmail}
+          setShowEmail={setShowEmail}
+          showAddress={showAddress}
+          setShowAddress={setShowAddress}
+          showPetPhoto={showPetPhoto}
+          setShowPetPhoto={setShowPetPhoto}
+          showMedicalInfo={showMedicalInfo}
+          setShowMedicalInfo={setShowMedicalInfo}
+          showBehaviourNote={showBehaviourNote}
+          setShowBehaviourNote={setShowBehaviourNote}
+          showDescription={showDescription}
+          setShowDescription={setShowDescription}
+          showFinderMessage={showFinderMessage}
+          setShowFinderMessage={setShowFinderMessage}
         />
 
         <ContactOptionsSection
-          liveChatEnabled={
-            liveChatEnabled
-          }
-          setLiveChatEnabled={
-            setLiveChatEnabled
-          }
+          liveChatEnabled={liveChatEnabled}
+          setLiveChatEnabled={setLiveChatEnabled}
         />
 
         <section className="saveCard">
@@ -852,9 +642,7 @@ export default function PetRegistrationForm({
 
             <button
               type="submit"
-              disabled={
-                saving
-              }
+              disabled={saving}
             >
               {saving
                 ? "ინახება..."
@@ -871,156 +659,84 @@ export default function PetRegistrationForm({
 
         .message {
           margin-bottom: 16px;
-
           padding: 14px;
-
-          border-radius:
-            12px;
+          border-radius: 12px;
         }
 
         .message strong {
           display: block;
-
-          font-size:
-            10px;
+          font-size: 10px;
         }
 
         .message p {
-          margin:
-            4px 0 0;
-
-          font-size:
-            9px;
+          margin: 4px 0 0;
+          font-size: 9px;
         }
 
         .error {
-          border:
-            1px solid #efc7cb;
-
-          background:
-            #fff7f8;
-
-          color:
-            #a3434c;
+          border: 1px solid #efc7cb;
+          background: #fff7f8;
+          color: #a3434c;
         }
 
         .success {
-          border:
-            1px solid #c5dfd1;
-
-          background:
-            #f5fbf7;
-
-          color:
-            #397057;
+          border: 1px solid #c5dfd1;
+          background: #f5fbf7;
+          color: #397057;
         }
 
         .productIntro {
-          padding:
-            20px 22px;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          gap:
-            13px;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius:
-            16px;
-
-          background:
-            #ffffff;
+          padding: 20px 22px;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          border: 1px solid #dce6f1;
+          border-radius: 16px;
+          background: #ffffff;
         }
 
         .productIcon {
           width: 50px;
           height: 50px;
-
-          flex:
-            0 0 50px;
-
-          display:
-            grid;
-
-          place-items:
-            center;
-
-          border-radius:
-            14px;
-
-          background:
-            #edf4ff;
-
-          font-size:
-            25px;
+          flex: 0 0 50px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: #edf4ff;
+          font-size: 25px;
         }
 
         .productIntro span {
-          color:
-            #1266e9;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+          color: #1266e9;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .productIntro h2 {
-          margin:
-            5px 0 0;
-
-          color:
-            #29425d;
-
-          font-size:
-            17px;
+          margin: 5px 0 0;
+          color: #29425d;
+          font-size: 17px;
         }
 
         .productIntro p {
-          margin:
-            5px 0 0;
-
-          color:
-            #7f8fa0;
-
-          font-size:
-            8px;
+          margin: 5px 0 0;
+          color: #7f8fa0;
+          font-size: 8px;
         }
 
         .saveCard {
-          margin-top:
-            16px;
+          margin-top: 16px;
+          padding: 23px 25px;
 
-          padding:
-            23px 25px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-          display:
-            flex;
+          gap: 20px;
 
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
-
-          gap:
-            20px;
-
-          border:
-            1px solid #cddff5;
-
-          border-radius:
-            16px;
+          border: 1px solid #cddff5;
+          border-radius: 16px;
 
           background:
             linear-gradient(
@@ -1030,142 +746,80 @@ export default function PetRegistrationForm({
             );
         }
 
-        .saveCard
-          > div
-          > span {
-          color:
-            #1266e9;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+        .saveCard > div > span {
+          color: #1266e9;
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .saveCard h3 {
-          margin:
-            6px 0 0;
-
-          color:
-            #233b55;
-
-          font-size:
-            17px;
+          margin: 6px 0 0;
+          color: #233b55;
+          font-size: 17px;
         }
 
         .saveCard p {
-          margin:
-            7px 0 0;
-
-          color:
-            #7c8a9a;
-
-          font-size:
-            9px;
+          margin: 7px 0 0;
+          color: #7c8a9a;
+          font-size: 9px;
         }
 
         .actions {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          gap:
-            8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .actions a,
         .actions button {
-          min-height:
-            44px;
+          min-height: 44px;
+          padding: 0 15px;
 
-          padding:
-            0 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-          display:
-            flex;
+          border-radius: 10px;
 
-          align-items:
-            center;
+          font-family: inherit;
+          font-size: 9px;
+          font-weight: 900;
 
-          justify-content:
-            center;
-
-          border-radius:
-            10px;
-
-          font-family:
-            inherit;
-
-          font-size:
-            9px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
         .actions a {
-          border:
-            1px solid #ccd9e7;
-
-          background:
-            #ffffff;
-
-          color:
-            #64778b;
+          border: 1px solid #ccd9e7;
+          background: #ffffff;
+          color: #64778b;
         }
 
         .actions button {
-          min-width:
-            155px;
-
-          border:
-            0;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          cursor:
-            pointer;
+          min-width: 155px;
+          border: 0;
+          background: #1266e9;
+          color: #ffffff;
+          cursor: pointer;
         }
 
         .actions button:disabled {
-          opacity:
-            .6;
+          opacity: .6;
         }
 
-        @media (
-          max-width:
-            650px
-        ) {
+        @media (max-width: 650px) {
           .saveCard {
-            flex-direction:
-              column;
-
-            align-items:
-              stretch;
+            flex-direction: column;
+            align-items: stretch;
           }
 
           .actions {
-            width:
-              100%;
+            width: 100%;
           }
 
           .actions a,
           .actions button {
-            flex:
-              1;
+            flex: 1;
           }
         }
       `}</style>
