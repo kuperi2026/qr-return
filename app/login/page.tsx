@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import {
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+
+import { createClient } from "@supabase/supabase-js";
 
 function createSupabase() {
   const url =
@@ -26,13 +27,8 @@ function createSupabase() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   const [email, setEmail] =
-    useState(
-      searchParams.get("email") || ""
-    );
+    useState("");
 
   const [password, setPassword] =
     useState("");
@@ -42,16 +38,74 @@ export default function LoginPage() {
     setShowPassword,
   ] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
-  const registered =
-    searchParams.get("registered") === "1";
+  const [
+    registered,
+    setRegistered,
+  ] = useState(false);
+
+  const [
+    nextPath,
+    setNextPath,
+  ] = useState("/account");
+
+  /*
+   * აქ ვკითხულობთ URL პარამეტრებს
+   * useSearchParams-ის გარეშე.
+   *
+   * მაგალითად:
+   *
+   * /login?registered=1&email=test@test.com&next=/register
+   */
+
+  useEffect(() => {
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const registeredValue =
+      params.get("registered");
+
+    const emailValue =
+      params.get("email");
+
+    const requestedNext =
+      params.get("next");
+
+    setRegistered(
+      registeredValue === "1"
+    );
+
+    if (emailValue) {
+      setEmail(
+        emailValue
+      );
+    }
+
+    if (
+      requestedNext &&
+      requestedNext.startsWith("/") &&
+      !requestedNext.startsWith("//")
+    ) {
+      setNextPath(
+        requestedNext
+      );
+    } else {
+      setNextPath(
+        "/account"
+      );
+    }
+  }, []);
 
   async function handleLogin(
     event: FormEvent<HTMLFormElement>
@@ -67,6 +121,7 @@ export default function LoginPage() {
       setErrorMessage(
         "გთხოვთ შეიყვანოთ ელფოსტა."
       );
+
       return;
     }
 
@@ -74,6 +129,7 @@ export default function LoginPage() {
       setErrorMessage(
         "გთხოვთ შეიყვანოთ პაროლი."
       );
+
       return;
     }
 
@@ -83,7 +139,9 @@ export default function LoginPage() {
       const supabase =
         createSupabase();
 
-      const { error } =
+      const {
+        error,
+      } =
         await supabase.auth
           .signInWithPassword({
             email: cleanEmail,
@@ -95,31 +153,20 @@ export default function LoginPage() {
       }
 
       /*
-       * მთავარი ლოგიკა:
+       * ახალი რეგისტრაცია:
        *
-       * ახალი რეგისტრაციის შემდეგ URL იქნება:
-       * /login?registered=1&next=/register
+       * /login?...&next=/register
        *
-       * ამიტომ პირდაპირ პროდუქტის არჩევაზე წავა.
+       * => პირდაპირ 6 პროდუქტის არჩევაზე
        *
-       * ჩვეულებრივი Login:
-       * /login
+       * ჩვეულებრივი login:
        *
-       * წავა /account-ზე.
+       * => /account
        */
 
-      const requestedNext =
-        searchParams.get("next");
-
-      const safeNext =
-        requestedNext &&
-        requestedNext.startsWith("/") &&
-        !requestedNext.startsWith("//")
-          ? requestedNext
-          : "/account";
-
-      router.replace(safeNext);
-      router.refresh();
+      window.location.replace(
+        nextPath
+      );
     } catch (error) {
       console.error(
         "Login error:",
@@ -375,13 +422,17 @@ export default function LoginPage() {
         .decorOne {
           top: 15%;
           left: 6%;
-          transform: rotate(-14deg);
+
+          transform:
+            rotate(-14deg);
         }
 
         .decorTwo {
           right: 7%;
           bottom: 8%;
-          transform: rotate(14deg);
+
+          transform:
+            rotate(14deg);
         }
 
         .header {
@@ -446,6 +497,7 @@ export default function LoginPage() {
 
           font-size: 9px;
           font-weight: 800;
+
           letter-spacing: 0.6px;
         }
 
@@ -466,7 +518,8 @@ export default function LoginPage() {
           width: 100%;
           max-width: 430px;
 
-          padding: 29px 30px 27px;
+          padding:
+            29px 30px 27px;
 
           border-radius: 18px;
 
@@ -486,6 +539,7 @@ export default function LoginPage() {
 
           font-size: 10px;
           font-weight: 900;
+
           letter-spacing: 0.7px;
         }
 
@@ -506,13 +560,15 @@ export default function LoginPage() {
           color: #78899a;
 
           font-size: 13px;
+
           line-height: 1.55;
         }
 
         .successNotice {
           margin-top: 17px;
 
-          padding: 11px 13px;
+          padding:
+            11px 13px;
 
           border:
             1px solid #cfe5d8;
@@ -524,6 +580,7 @@ export default function LoginPage() {
 
           font-size: 12px;
           font-weight: 750;
+
           line-height: 1.45;
         }
 
@@ -531,6 +588,7 @@ export default function LoginPage() {
           margin-top: 23px;
 
           display: grid;
+
           gap: 18px;
         }
 
@@ -564,6 +622,10 @@ export default function LoginPage() {
           font-weight: 800;
 
           text-decoration: none;
+        }
+
+        .forgot:hover {
+          text-decoration: underline;
         }
 
         input {
@@ -646,6 +708,14 @@ export default function LoginPage() {
           font-weight: 900;
 
           cursor: pointer;
+
+          box-shadow:
+            0 8px 19px
+            rgba(6, 71, 200, 0.18);
+        }
+
+        .submit:hover:not(:disabled) {
+          background: #0754dc;
         }
 
         .submit:disabled {
@@ -656,7 +726,8 @@ export default function LoginPage() {
         .error {
           margin-top: 16px;
 
-          padding: 10px 12px;
+          padding:
+            10px 12px;
 
           border:
             1px solid #f0ced2;
@@ -667,15 +738,18 @@ export default function LoginPage() {
           color: #a3424a;
 
           font-size: 12px;
+
           line-height: 1.45;
         }
 
         .divider {
-          margin: 23px 0 18px;
+          margin:
+            23px 0 18px;
         }
 
         .divider span {
           display: block;
+
           height: 1px;
 
           background: #e7edf3;
@@ -707,7 +781,9 @@ export default function LoginPage() {
           }
 
           .card {
-            padding: 25px 19px;
+            padding:
+              25px 19px;
+
             border-radius: 16px;
           }
 
@@ -717,6 +793,7 @@ export default function LoginPage() {
 
           input {
             height: 54px;
+
             font-size: 16px;
           }
         }
