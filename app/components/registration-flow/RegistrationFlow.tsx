@@ -162,7 +162,7 @@ export default function RegistrationFlow({
     useMemo(
       () =>
         Array.from({
-          length: 20,
+          length: 18,
         }),
       []
     );
@@ -181,7 +181,9 @@ export default function RegistrationFlow({
           return;
         }
 
-        setSupabase(client);
+        setSupabase(
+          client
+        );
 
         const {
           data: {
@@ -206,28 +208,28 @@ export default function RegistrationFlow({
           String(
             user.user_metadata
               ?.first_name ||
-              ""
+            ""
           );
 
         let lastName =
           String(
             user.user_metadata
               ?.last_name ||
-              ""
+            ""
           );
 
         let phone =
           String(
             user.user_metadata
               ?.phone ||
-              user.phone ||
-              ""
+            user.phone ||
+            ""
           );
 
         let email =
           String(
             user.email ||
-              ""
+            ""
           );
 
         try {
@@ -313,7 +315,7 @@ export default function RegistrationFlow({
       }
     }
 
-    loadAccount();
+    void loadAccount();
   }, []);
 
   useEffect(() => {
@@ -445,8 +447,18 @@ export default function RegistrationFlow({
       );
     }
 
-    setPhotoFile(null);
-    setPhotoPreview("");
+    setPhotoFile(
+      null
+    );
+
+    setPhotoPreview(
+      ""
+    );
+
+    updateDraft(
+      "showPhoto",
+      false
+    );
   }
 
   async function uploadPhoto(
@@ -574,7 +586,9 @@ export default function RegistrationFlow({
       return;
     }
 
-    setStep(2);
+    setStep(
+      2
+    );
 
     goTop();
   }
@@ -603,31 +617,36 @@ export default function RegistrationFlow({
         type === "dog"
       ) {
         setErrorMessage(
-          "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია."
+          "გთხოვთ მიუთითოთ ძაღლის სახელი."
         );
       } else if (
         type === "cat"
       ) {
         setErrorMessage(
-          "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია."
+          "გთხოვთ მიუთითოთ კატის სახელი."
         );
       } else {
         setErrorMessage(
-          `გთხოვთ შეავსოთ ${meta.label}ს შესახებ ინფორმაცია.`
+          "გთხოვთ მიუთითოთ პროფილის სახელი."
         );
       }
 
       return;
     }
 
-    setStep(3);
+    setStep(
+      3
+    );
 
     goTop();
   }
 
   async function createProfile() {
-    setErrorMessage("");
+    if (saving) {
+      return;
+    }
 
+    setErrorMessage("");
     setSaving(true);
 
     try {
@@ -671,8 +690,12 @@ export default function RegistrationFlow({
           checkError,
       } =
         await client
-          .from("item")
-          .select("id")
+          .from(
+            "item"
+          )
+          .select(
+            "id"
+          )
           .ilike(
             "tag_code",
             cleanTag
@@ -778,8 +801,10 @@ export default function RegistrationFlow({
             : null,
 
         model:
-          (isBag ||
-            isSuitcase) &&
+          (
+            isBag ||
+            isSuitcase
+          ) &&
           draft.model
             .trim()
             ? draft.model
@@ -787,8 +812,10 @@ export default function RegistrationFlow({
             : null,
 
         size:
-          (isBag ||
-            isSuitcase) &&
+          (
+            isBag ||
+            isSuitcase
+          ) &&
           draft.size
             .trim()
             ? draft.size
@@ -909,9 +936,21 @@ export default function RegistrationFlow({
         throw insertError;
       }
 
+      if (
+        !created
+      ) {
+        throw new Error(
+          "პროფილის შექმნის პასუხი ვერ მივიღეთ."
+        );
+      }
+
+      const createdTag =
+        created.tag_code ||
+        cleanTag;
+
       window.location.assign(
         `/registration-success?type=${type}&tag=${encodeURIComponent(
-          created.tag_code
+          createdTag
         )}`
       );
     } catch (error) {
@@ -925,8 +964,12 @@ export default function RegistrationFlow({
           ? error.message
           : "პროფილის შექმნა ვერ მოხერხდა."
       );
+
+      goTop();
     } finally {
-      setSaving(false);
+      setSaving(
+        false
+      );
     }
   }
 
@@ -953,10 +996,11 @@ export default function RegistrationFlow({
 
             display: flex;
             flex-direction: column;
+
             align-items: center;
             justify-content: center;
 
-            gap: 9px;
+            gap: 8px;
 
             background: #0647c8;
 
@@ -964,7 +1008,7 @@ export default function RegistrationFlow({
           }
 
           .loadingEmoji {
-            font-size: 46px;
+            font-size: 44px;
           }
 
           .loadingPage strong {
@@ -972,9 +1016,9 @@ export default function RegistrationFlow({
           }
 
           .loadingPage span {
-            font-size: 14px;
+            font-size: 13px;
 
-            opacity: 0.75;
+            opacity: 0.72;
           }
         `}</style>
       </>
@@ -997,21 +1041,26 @@ export default function RegistrationFlow({
                 key={index}
                 style={{
                   left: `${
-                    (index *
-                      31) %
+                    (
+                      index *
+                      31
+                    ) %
                     100
                   }%`,
 
                   top: `${
-                    (index *
-                      43) %
+                    (
+                      index *
+                      43
+                    ) %
                     100
                   }%`,
 
-                  transform: `rotate(${
-                    index *
-                    18
-                  }deg)`,
+                  transform:
+                    `rotate(${
+                      index *
+                      18
+                    }deg)`,
                 }}
               >
                 {meta.emoji}
@@ -1111,7 +1160,9 @@ export default function RegistrationFlow({
                 handlePhotoRemove
               }
               onBack={() => {
-                setStep(1);
+                setStep(
+                  1
+                );
 
                 goTop();
               }}
@@ -1130,7 +1181,9 @@ export default function RegistrationFlow({
                 photoPreview
               }
               onBack={() => {
-                setStep(2);
+                setStep(
+                  2
+                );
 
                 goTop();
               }}
@@ -1154,9 +1207,10 @@ export default function RegistrationFlow({
           overflow: hidden;
 
           padding:
-            0 20px 50px;
+            0 20px 42px;
 
-          background: #0647c8;
+          background:
+            #0647c8;
         }
 
         .emojiBackground {
@@ -1172,9 +1226,9 @@ export default function RegistrationFlow({
         .emojiBackground span {
           position: absolute;
 
-          opacity: 0.055;
+          opacity: 0.045;
 
-          font-size: 72px;
+          font-size: 68px;
 
           filter:
             grayscale(1)
@@ -1188,9 +1242,9 @@ export default function RegistrationFlow({
 
           width: 100%;
 
-          max-width: 960px;
+          max-width: 930px;
 
-          min-height: 72px;
+          min-height: 68px;
 
           margin: 0 auto;
 
@@ -1201,7 +1255,7 @@ export default function RegistrationFlow({
           justify-content:
             space-between;
 
-          gap: 20px;
+          gap: 18px;
 
           border-bottom:
             1px solid
@@ -1209,7 +1263,7 @@ export default function RegistrationFlow({
               255,
               255,
               255,
-              0.2
+              0.18
             );
         }
 
@@ -1218,28 +1272,26 @@ export default function RegistrationFlow({
 
           align-items: center;
 
-          gap: 10px;
+          gap: 9px;
 
           text-decoration: none;
         }
 
         .brandMark {
-          width: 43px;
-
-          height: 43px;
+          width: 40px;
+          height: 40px;
 
           display: grid;
 
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 10px;
 
           background: #ffffff;
 
           color: #0647c8;
 
-          font-size: 13px;
-
+          font-size: 12px;
           font-weight: 950;
         }
 
@@ -1251,28 +1303,28 @@ export default function RegistrationFlow({
         .brandText strong {
           color: #ffffff;
 
-          font-size: 18px;
+          font-size: 17px;
 
           font-weight: 900;
         }
 
         .brandText small {
-          margin-top: 2px;
+          margin-top: 1px;
 
           color:
             rgba(
               255,
               255,
               255,
-              0.7
+              0.68
             );
 
-          font-size: 11px;
+          font-size: 10px;
         }
 
         .changeProduct {
           padding:
-            10px 14px;
+            9px 13px;
 
           border:
             1px solid
@@ -1280,14 +1332,14 @@ export default function RegistrationFlow({
               255,
               255,
               255,
-              0.3
+              0.28
             );
 
           border-radius: 9px;
 
           color: #ffffff;
 
-          font-size: 13px;
+          font-size: 12px;
 
           font-weight: 800;
 
@@ -1301,18 +1353,19 @@ export default function RegistrationFlow({
 
           width: 100%;
 
-          max-width: 830px;
+          max-width: 800px;
 
           margin:
-            22px auto 16px;
+            16px auto 12px;
 
           display: flex;
 
           align-items: center;
 
-          justify-content: center;
+          justify-content:
+            center;
 
-          gap: 12px;
+          gap: 10px;
 
           color: #ffffff;
 
@@ -1320,27 +1373,28 @@ export default function RegistrationFlow({
         }
 
         .marketingLine > span {
-          font-size: 35px;
+          font-size: 30px;
         }
 
         .marketingLine strong {
           display: block;
 
-          font-size: 16px;
+          font-size: 14px;
         }
 
         .marketingLine p {
-          margin: 4px 0 0;
+          margin:
+            2px 0 0;
 
           color:
             rgba(
               255,
               255,
               255,
-              0.72
+              0.7
             );
 
-          font-size: 13px;
+          font-size: 11px;
         }
 
         .registrationCard {
@@ -1350,41 +1404,47 @@ export default function RegistrationFlow({
 
           width: 100%;
 
-          max-width: 880px;
+          max-width: 820px;
 
           margin: 0 auto;
 
-          padding: 26px;
+          padding: 22px;
 
-          border-radius: 20px;
+          box-sizing:
+            border-box;
 
-          background: #ffffff;
+          border-radius: 17px;
+
+          background:
+            #ffffff;
 
           box-shadow:
-            0 25px 60px
+            0 20px 48px
             rgba(
               0,
               24,
               77,
-              0.28
+              0.23
             );
         }
 
         .errorBox {
-          margin-bottom: 17px;
+          margin-bottom: 14px;
 
           padding:
-            13px 14px;
+            11px 12px;
 
-          border-radius: 10px;
+          border-radius: 9px;
 
-          background: #fff0f2;
+          background:
+            #fff0f2;
 
-          color: #a53e49;
+          color:
+            #a53e49;
 
-          font-size: 14px;
+          font-size: 12px;
 
-          font-weight: 700;
+          font-weight: 750;
         }
 
         @media (
@@ -1392,7 +1452,7 @@ export default function RegistrationFlow({
         ) {
           .registrationPage {
             padding:
-              0 13px 30px;
+              0 12px 26px;
           }
 
           .brandText small {
@@ -1400,20 +1460,20 @@ export default function RegistrationFlow({
           }
 
           .brandText strong {
-            font-size: 16px;
+            font-size: 15px;
           }
 
           .changeProduct {
             padding:
-              9px 11px;
+              8px 10px;
 
-            font-size: 12px;
+            font-size: 11px;
           }
 
           .registrationCard {
-            padding: 19px;
+            padding: 17px;
 
-            border-radius: 16px;
+            border-radius: 15px;
           }
 
           .marketingLine {
@@ -1424,15 +1484,15 @@ export default function RegistrationFlow({
           }
 
           .marketingLine > span {
-            font-size: 30px;
+            font-size: 27px;
           }
 
           .marketingLine strong {
-            font-size: 14px;
+            font-size: 13px;
           }
 
           .marketingLine p {
-            font-size: 12px;
+            font-size: 11px;
           }
         }
       `}</style>
