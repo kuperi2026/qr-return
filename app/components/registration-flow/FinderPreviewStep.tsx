@@ -8,17 +8,11 @@ import type {
 
 type FinderPreviewStepProps = {
   type: ProductType;
-
   meta: ProductMeta;
-
   draft: RegistrationDraft;
-
   photoPreview: string;
-
   onBack: () => void;
-
   onConfirm: () => void;
-
   saving: boolean;
 };
 
@@ -37,30 +31,23 @@ export default function FinderPreviewStep({
 
   return (
     <>
-      <div className="stepTitle center">
-        <span>
-          STEP 3 OF 3
-        </span>
+      <div className="previewTitle">
+        <span>STEP 3 OF 3</span>
 
-        <h1>
-          რას ნახავს მპოვნელი
-        </h1>
+        <h1>რას ნახავს მპოვნელი</h1>
 
         <p>
-          გადაამოწმეთ ინფორმაცია საბოლოო
-          დადასტურებამდე. თუ ყველაფერი სწორია,
-          შექმენით პროფილი.
+          გადაამოწმეთ ინფორმაცია პროფილის შექმნამდე.
         </p>
       </div>
 
       <section className="finderPreview">
         <div className="previewHero">
           <div className="photoArea">
-            {draft.showPhoto &&
-            photoPreview ? (
+            {draft.showPhoto && photoPreview ? (
               <img
                 src={photoPreview}
-                alt={draft.itemName}
+                alt={draft.itemName || meta.label}
               />
             ) : (
               <div className="emojiFallback">
@@ -75,14 +62,11 @@ export default function FinderPreviewStep({
             </span>
 
             <h2>
-              {draft.itemName ||
-                meta.label}
+              {draft.itemName || meta.label}
             </h2>
 
             <p>
-              იპოვეთ? მფლობელთან დაკავშირება
-              შეგიძლიათ ქვემოთ მოცემული
-              საშუალებებით.
+              მპოვნელს შეუძლია აქედან დაგიკავშირდეთ.
             </p>
           </div>
         </div>
@@ -102,75 +86,63 @@ export default function FinderPreviewStep({
             draft.ownerEmail && (
               <PreviewItem
                 label="ელფოსტა"
-                value={
-                  draft.ownerEmail
-                }
+                value={draft.ownerEmail}
               />
             )}
         </div>
 
-        {draft.showDescription &&
-          draft.description && (
-            <PreviewBlock
-              title="აღწერა"
-              value={
-                draft.description
-              }
-            />
-          )}
+        <div className="detailGrid">
+          {draft.showDescription &&
+            draft.description && (
+              <PreviewBlock
+                title="აღწერა"
+                value={draft.description}
+              />
+            )}
 
-        {isPet &&
-          draft.showMedicalInfo &&
-          draft.medicalInfo && (
-            <PreviewBlock
-              title="სამედიცინო ინფორმაცია"
-              value={
-                draft.medicalInfo
-              }
-            />
-          )}
+          {isPet &&
+            draft.showMedicalInfo &&
+            draft.medicalInfo && (
+              <PreviewBlock
+                title="სამედიცინო ინფორმაცია"
+                value={draft.medicalInfo}
+              />
+            )}
 
-        {isPet &&
-          draft.showBehaviourNote &&
-          draft.behaviourNote && (
-            <PreviewBlock
-              title="ქცევის შესახებ ინფორმაცია"
-              value={
-                draft.behaviourNote
-              }
-            />
-          )}
+          {isPet &&
+            draft.showBehaviourNote &&
+            draft.behaviourNote && (
+              <PreviewBlock
+                title="ქცევის ინფორმაცია"
+                value={draft.behaviourNote}
+              />
+            )}
 
-        {!isPet &&
-          draft.distinctiveFeatures && (
-            <PreviewBlock
-              title="განმასხვავებელი ნიშნები"
-              value={
-                draft.distinctiveFeatures
-              }
-            />
-          )}
+          {!isPet &&
+            draft.distinctiveFeatures && (
+              <PreviewBlock
+                title="განმასხვავებელი ნიშნები"
+                value={draft.distinctiveFeatures}
+              />
+            )}
 
-        {draft.showLostLocation &&
-          draft.lostLocation && (
-            <PreviewBlock
-              title="📍 დაკარგვის ადგილი"
-              value={
-                draft.lostLocation
-              }
-            />
-          )}
+          {draft.showLostLocation &&
+            draft.lostLocation && (
+              <PreviewBlock
+                title="📍 დაკარგვის ადგილი"
+                value={draft.lostLocation}
+              />
+            )}
 
-        {draft.showFinderMessage &&
-          draft.finderMessage && (
-            <PreviewBlock
-              title="მფლობელის შეტყობინება"
-              value={
-                draft.finderMessage
-              }
-              highlighted
-            />
-          )}
+          {draft.showFinderMessage &&
+            draft.finderMessage && (
+              <PreviewBlock
+                title="მფლობელის შეტყობინება"
+                value={draft.finderMessage}
+                highlighted
+              />
+            )}
+        </div>
 
         <div className="contactActions">
           <button
@@ -183,7 +155,7 @@ export default function FinderPreviewStep({
           {draft.liveChatEnabled && (
             <button
               type="button"
-              className="contactButton"
+              className="contactButton secondary"
             >
               Live Chat
             </button>
@@ -202,14 +174,12 @@ export default function FinderPreviewStep({
           </strong>
 
           <p>
-            ეს არის ინფორმაცია, რომელსაც QR
-            კოდის მპოვნელი დაინახავს. თუ რამეს
-            შეცვლა გსურთ, დაბრუნდით რედაქტირებაზე.
+            ზუსტად ამ ინფორმაციას დაინახავს QR კოდის მპოვნელი.
           </p>
         </div>
       </div>
 
-      <div className="actions">
+      <div className="previewActions">
         <button
           type="button"
           className="backButton"
@@ -227,93 +197,87 @@ export default function FinderPreviewStep({
         >
           {saving
             ? "პროფილი იქმნება..."
-            : "✓ ვადასტურებ და ვქმნი პროფილს"}
+            : "✓ პროფილის შექმნა"}
         </button>
       </div>
 
       <style jsx>{`
-        .stepTitle {
-          max-width: 660px;
-
-          margin: 0 auto;
-
+        .previewTitle {
           text-align: center;
         }
 
-        .stepTitle > span {
+        .previewTitle > span {
           color: #0647c8;
 
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 900;
 
           letter-spacing: 0.8px;
         }
 
-        .stepTitle h1 {
-          margin: 6px 0 0;
+        .previewTitle h1 {
+          margin: 5px 0 0;
 
           color: #203a55;
 
-          font-size: 28px;
+          font-size: 25px;
+          font-weight: 900;
+
           line-height: 1.2;
         }
 
-        .stepTitle p {
-          margin: 7px 0 0;
+        .previewTitle p {
+          margin: 5px 0 0;
 
           color: #718397;
 
-          font-size: 14px;
-          line-height: 1.55;
+          font-size: 12px;
+          line-height: 1.45;
         }
 
         .finderPreview {
-          max-width: 650px;
+          max-width: 620px;
 
-          margin: 22px auto 0;
+          margin: 16px auto 0;
 
           overflow: hidden;
 
-          border: 1px solid #d7e2ee;
-          border-radius: 18px;
+          border: 1px solid #d9e3ee;
+
+          border-radius: 15px;
 
           background: #ffffff;
 
           box-shadow:
-            0 12px 30px
-            rgba(
-              25,
-              60,
-              100,
-              0.06
-            );
+            0 10px 26px
+            rgba(25, 60, 100, 0.05);
         }
 
         .previewHero {
-          padding: 18px;
+          padding: 13px 14px;
 
           display: flex;
           align-items: center;
 
-          gap: 15px;
+          gap: 12px;
 
           background:
             linear-gradient(
               135deg,
-              #f3f7fd,
+              #f7faff,
               #eef5ff
             );
         }
 
         .photoArea {
-          width: 82px;
-          height: 82px;
+          width: 64px;
+          height: 64px;
 
-          flex: 0 0 82px;
+          flex: 0 0 64px;
 
           overflow: hidden;
 
-          border-radius: 18px;
+          border-radius: 14px;
 
           background: #0647c8;
         }
@@ -332,11 +296,10 @@ export default function FinderPreviewStep({
           height: 100%;
 
           display: grid;
+
           place-items: center;
 
-          color: #ffffff;
-
-          font-size: 39px;
+          font-size: 30px;
         }
 
         .heroContent {
@@ -348,36 +311,37 @@ export default function FinderPreviewStep({
 
           color: #0647c8;
 
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 900;
 
-          letter-spacing: 0.8px;
+          letter-spacing: 0.7px;
         }
 
         .heroContent h2 {
-          margin: 5px 0 0;
+          margin: 3px 0 0;
 
           color: #29445f;
 
-          font-size: 23px;
+          font-size: 19px;
+          font-weight: 900;
+
           line-height: 1.2;
 
           word-break: break-word;
         }
 
         .heroContent p {
-          max-width: 430px;
-
-          margin: 5px 0 0;
+          margin: 3px 0 0;
 
           color: #738599;
 
-          font-size: 13px;
-          line-height: 1.5;
+          font-size: 11px;
+
+          line-height: 1.4;
         }
 
         .ownerGrid {
-          padding: 15px;
+          padding: 10px 12px 6px;
 
           display: grid;
 
@@ -387,13 +351,15 @@ export default function FinderPreviewStep({
               minmax(0, 1fr)
             );
 
-          gap: 9px;
+          gap: 7px;
         }
 
         .ownerItem {
-          padding: 12px;
+          min-width: 0;
 
-          border-radius: 10px;
+          padding: 9px 10px;
+
+          border-radius: 9px;
 
           background: #f7faff;
         }
@@ -406,59 +372,23 @@ export default function FinderPreviewStep({
         .ownerItem span {
           color: #8493a3;
 
-          font-size: 11px;
-          font-weight: 700;
+          font-size: 9px;
+          font-weight: 750;
         }
 
         .ownerItem strong {
-          margin-top: 4px;
+          margin-top: 2px;
 
           color: #314b66;
 
-          font-size: 14px;
-          font-weight: 800;
+          font-size: 12px;
+          font-weight: 850;
 
           word-break: break-word;
         }
 
-        .previewBlock {
-          margin: 0 15px 9px;
-
-          padding: 13px;
-
-          border-radius: 10px;
-
-          background: #f8fafc;
-        }
-
-        .previewBlock.highlighted {
-          border: 1px solid #cfe0f6;
-
-          background: #f2f7ff;
-        }
-
-        .previewBlock strong {
-          display: block;
-
-          color: #314b66;
-
-          font-size: 13px;
-          font-weight: 850;
-        }
-
-        .previewBlock p {
-          margin: 5px 0 0;
-
-          color: #718397;
-
-          font-size: 13px;
-          line-height: 1.55;
-
-          white-space: pre-wrap;
-        }
-
-        .contactActions {
-          padding: 15px;
+        .detailGrid {
+          padding: 4px 12px 10px;
 
           display: grid;
 
@@ -468,17 +398,72 @@ export default function FinderPreviewStep({
               minmax(0, 1fr)
             );
 
-          gap: 9px;
+          gap: 7px;
+        }
+
+        .previewBlock {
+          min-width: 0;
+
+          padding: 9px 10px;
+
+          border:
+            1px solid #edf1f5;
+
+          border-radius: 9px;
+
+          background: #fbfcfe;
+        }
+
+        .previewBlock.highlighted {
+          border-color: #cfe0f6;
+
+          background: #f2f7ff;
+        }
+
+        .previewBlock strong {
+          display: block;
+
+          color: #314b66;
+
+          font-size: 11px;
+          font-weight: 850;
+        }
+
+        .previewBlock p {
+          margin: 3px 0 0;
+
+          color: #718397;
+
+          font-size: 11px;
+
+          line-height: 1.4;
+
+          white-space: pre-wrap;
+        }
+
+        .contactActions {
+          padding: 10px 12px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
+
+          gap: 7px;
 
           border-top:
             1px solid #e7edf4;
         }
 
         .contactButton {
-          min-height: 44px;
+          height: 40px;
 
           border: 0;
-          border-radius: 10px;
+
+          border-radius: 9px;
 
           background: #0647c8;
 
@@ -486,37 +471,50 @@ export default function FinderPreviewStep({
 
           font-family: inherit;
 
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 850;
+        }
 
-          cursor: default;
+        .contactButton.secondary {
+          border:
+            1px solid #cbdcf2;
+
+          background: #f2f7ff;
+
+          color: #0647c8;
         }
 
         .confirmationNotice {
-          max-width: 650px;
+          max-width: 620px;
 
-          margin: 14px auto 0;
+          margin: 10px auto 0;
 
-          padding: 13px 14px;
+          padding: 10px 12px;
 
           display: flex;
-          align-items: flex-start;
 
-          gap: 10px;
+          align-items: center;
 
-          border: 1px solid #cfe0f6;
-          border-radius: 11px;
+          gap: 9px;
 
-          background: #f4f8ff;
+          box-sizing: border-box;
+
+          border:
+            1px solid #d3e2f5;
+
+          border-radius: 10px;
+
+          background: #f7faff;
         }
 
         .confirmIcon {
-          width: 28px;
-          height: 28px;
+          width: 25px;
+          height: 25px;
 
-          flex: 0 0 28px;
+          flex: 0 0 25px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 50%;
@@ -525,7 +523,7 @@ export default function FinderPreviewStep({
 
           color: #ffffff;
 
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 900;
         }
 
@@ -534,42 +532,45 @@ export default function FinderPreviewStep({
 
           color: #304b66;
 
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 850;
         }
 
         .confirmationNotice p {
-          margin: 4px 0 0;
+          margin: 2px 0 0;
 
           color: #718397;
 
-          font-size: 12px;
-          line-height: 1.5;
+          font-size: 10px;
+
+          line-height: 1.4;
         }
 
-        .actions {
-          max-width: 650px;
+        .previewActions {
+          max-width: 620px;
 
-          margin: 22px auto 0;
+          margin: 14px auto 0;
 
           display: flex;
+
           align-items: center;
+
           justify-content: space-between;
 
-          gap: 10px;
+          gap: 9px;
         }
 
         .backButton,
         .confirmButton {
-          min-height: 47px;
+          height: 45px;
 
-          padding: 0 18px;
+          padding: 0 16px;
 
-          border-radius: 10px;
+          border-radius: 9px;
 
           font-family: inherit;
 
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 850;
 
           cursor: pointer;
@@ -592,12 +593,12 @@ export default function FinderPreviewStep({
           color: #ffffff;
 
           box-shadow:
-            0 9px 20px
+            0 8px 18px
             rgba(
               6,
               71,
               200,
-              0.16
+              0.14
             );
         }
 
@@ -611,32 +612,26 @@ export default function FinderPreviewStep({
         @media (
           max-width: 620px
         ) {
-          .stepTitle h1 {
-            font-size: 24px;
+          .previewTitle h1 {
+            font-size: 23px;
           }
 
-          .previewHero {
-            align-items: flex-start;
-          }
-
-          .photoArea {
-            width: 68px;
-            height: 68px;
-
-            flex-basis: 68px;
-          }
-
-          .emojiFallback {
-            font-size: 32px;
-          }
-
-          .ownerGrid {
+          .ownerGrid,
+          .detailGrid {
             grid-template-columns:
               1fr;
           }
 
-          .actions {
-            flex-direction: column-reverse;
+          .photoArea {
+            width: 58px;
+            height: 58px;
+
+            flex-basis: 58px;
+          }
+
+          .previewActions {
+            flex-direction:
+              column-reverse;
           }
 
           .backButton,
