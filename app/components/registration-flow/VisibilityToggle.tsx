@@ -83,18 +83,20 @@ export default function VisibilityToggle({
       <style jsx>{`
         .visibilityRow {
           width: 100%;
-          min-height: 72px;
+          min-height: 56px;
 
-          padding: 13px 15px;
+          padding: 8px 10px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
-          gap: 16px;
+          gap: 10px;
 
-          border: 1px solid #dce6f0;
-          border-radius: 12px;
+          box-sizing: border-box;
+
+          border: 1px solid #dfe7ef;
+          border-radius: 10px;
 
           background: #ffffff;
         }
@@ -105,6 +107,7 @@ export default function VisibilityToggle({
 
         .visibilityText {
           min-width: 0;
+
           flex: 1;
         }
 
@@ -113,19 +116,20 @@ export default function VisibilityToggle({
           align-items: center;
           flex-wrap: wrap;
 
-          gap: 8px;
+          gap: 5px;
         }
 
         .labelLine strong {
           color: #29445f;
 
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 850;
-          line-height: 1.3;
+
+          line-height: 1.25;
         }
 
         .alwaysVisible {
-          padding: 4px 7px;
+          padding: 2px 5px;
 
           border-radius: 999px;
 
@@ -133,34 +137,40 @@ export default function VisibilityToggle({
 
           color: #0647c8;
 
-          font-size: 9px;
+          font-size: 7px;
           font-weight: 900;
-          letter-spacing: 0.35px;
+
+          letter-spacing: 0.25px;
+
+          line-height: 1.3;
         }
 
         .visibilityText p {
-          margin: 5px 0 0;
+          margin: 2px 0 0;
 
-          color: #7b8da0;
+          color: #8090a0;
 
-          font-size: 12px;
-          line-height: 1.45;
+          font-size: 10px;
+
+          line-height: 1.3;
         }
 
         .toggleButton,
         .lockedToggle {
           flex: 0 0 auto;
 
-          min-width: 91px;
-          min-height: 38px;
+          min-width: 72px;
+          height: 32px;
 
-          padding: 5px 8px;
+          padding: 4px 6px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
-          gap: 8px;
+          gap: 6px;
+
+          box-sizing: border-box;
 
           border-radius: 999px;
         }
@@ -180,7 +190,13 @@ export default function VisibilityToggle({
         }
 
         .toggleButton.on {
-          border-color: #b7cff1;
+          border-color: #bfd2ed;
+
+          background: #eef5ff;
+        }
+
+        .lockedToggle {
+          border: 1px solid #c8daf4;
 
           background: #eef5ff;
         }
@@ -189,8 +205,8 @@ export default function VisibilityToggle({
         .lockedTrack {
           position: relative;
 
-          width: 34px;
-          height: 20px;
+          width: 30px;
+          height: 18px;
 
           display: block;
 
@@ -205,17 +221,22 @@ export default function VisibilityToggle({
         }
 
         .toggleButton.on
-          .toggleTrack {
+        .toggleTrack {
+          background: #0647c8;
+        }
+
+        .lockedTrack {
           background: #0647c8;
         }
 
         .toggleDot,
         .lockedDot {
           position: absolute;
+
           top: 3px;
 
-          width: 14px;
-          height: 14px;
+          width: 12px;
+          height: 12px;
 
           border-radius: 50%;
 
@@ -223,7 +244,12 @@ export default function VisibilityToggle({
 
           box-shadow:
             0 1px 3px
-            rgba(0, 0, 0, 0.18);
+            rgba(
+              0,
+              0,
+              0,
+              0.16
+            );
         }
 
         .toggleDot {
@@ -234,65 +260,48 @@ export default function VisibilityToggle({
         }
 
         .toggleButton.on
-          .toggleDot {
+        .toggleDot {
           transform:
-            translateX(14px);
-        }
-
-        .toggleButton strong {
-          min-width: 25px;
-
-          color: #8291a1;
-
-          font-size: 10px;
-          font-weight: 900;
-        }
-
-        .toggleButton.on strong {
-          color: #0647c8;
-        }
-
-        .lockedToggle {
-          border: 1px solid #c8daf4;
-
-          background: #eef5ff;
-        }
-
-        .lockedTrack {
-          background: #0647c8;
+            translateX(12px);
         }
 
         .lockedDot {
           right: 3px;
         }
 
+        .toggleButton strong,
+        .lockedToggle strong {
+          min-width: 20px;
+
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .toggleButton strong {
+          color: #8796a5;
+        }
+
+        .toggleButton.on strong,
         .lockedToggle strong {
           color: #0647c8;
-
-          font-size: 10px;
-          font-weight: 900;
         }
 
         @media (
           max-width: 520px
         ) {
           .visibilityRow {
-            min-height: 68px;
+            min-height: 54px;
 
-            padding: 12px;
-          }
-
-          .labelLine strong {
-            font-size: 13px;
+            padding: 8px 9px;
           }
 
           .visibilityText p {
-            font-size: 11px;
+            display: none;
           }
 
           .toggleButton,
           .lockedToggle {
-            min-width: 84px;
+            min-width: 68px;
           }
         }
       `}</style>
