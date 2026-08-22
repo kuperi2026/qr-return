@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-function createSupabaseClient() {
+function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const key =
@@ -26,35 +26,40 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
+
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
     setErrorMessage("");
 
     if (!firstName.trim()) {
-      setErrorMessage("გთხოვთ მიუთითოთ სახელი.");
+      setErrorMessage("გთხოვთ შეიყვანოთ სახელი.");
       return;
     }
 
     if (!lastName.trim()) {
-      setErrorMessage("გთხოვთ მიუთითოთ გვარი.");
+      setErrorMessage("გთხოვთ შეიყვანოთ გვარი.");
       return;
     }
 
     if (!email.trim()) {
-      setErrorMessage("გთხოვთ მიუთითოთ ელფოსტა.");
+      setErrorMessage("გთხოვთ შეიყვანოთ ელფოსტა.");
       return;
     }
 
     if (!phone.trim()) {
-      setErrorMessage("გთხოვთ მიუთითოთ ტელეფონის ნომერი.");
+      setErrorMessage("გთხოვთ შეიყვანოთ ტელეფონის ნომერი.");
       return;
     }
 
     if (!codeWord.trim()) {
-      setErrorMessage("გთხოვთ მიუთითოთ კოდური სიტყვა.");
+      setErrorMessage("გთხოვთ შეიყვანოთ კოდური სიტყვა.");
       return;
     }
 
@@ -70,7 +75,7 @@ export default function SignupPage() {
       return;
     }
 
-    const supabase = createSupabaseClient();
+    const supabase = getSupabase();
 
     if (!supabase) {
       setErrorMessage("Supabase კავშირი ვერ მოიძებნა.");
@@ -83,7 +88,6 @@ export default function SignupPage() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-
         options: {
           data: {
             first_name: firstName.trim(),
@@ -97,7 +101,9 @@ export default function SignupPage() {
       if (error) throw error;
 
       if (!data.user) {
-        throw new Error("ანგარიშის შექმნა ვერ მოხერხდა.");
+        throw new Error(
+          "ანგარიშის შექმნა ვერ მოხერხდა."
+        );
       }
 
       try {
@@ -117,10 +123,16 @@ export default function SignupPage() {
           );
 
         if (ownerError) {
-          console.error("Owner account save:", ownerError);
+          console.error(
+            "Owner account save:",
+            ownerError
+          );
         }
       } catch (ownerError) {
-        console.error("Owner account save:", ownerError);
+        console.error(
+          "Owner account save:",
+          ownerError
+        );
       }
 
       if (data.session) {
@@ -134,21 +146,19 @@ export default function SignupPage() {
         )}`
       );
     } catch (error) {
-      console.error("Signup error:", error);
-
       const message =
         error instanceof Error
           ? error.message
           : "ანგარიშის შექმნა ვერ მოხერხდა.";
 
-      const lowerMessage = message.toLowerCase();
+      const lower = message.toLowerCase();
 
       if (
-        lowerMessage.includes("already registered") ||
-        lowerMessage.includes("already been registered")
+        lower.includes("already registered") ||
+        lower.includes("already been registered")
       ) {
         setErrorMessage(
-          "ამ ელფოსტით ანგარიში უკვე არსებობს. გთხოვთ შეხვიდეთ ანგარიშში."
+          "ამ ელფოსტით ანგარიში უკვე არსებობს."
         );
       } else {
         setErrorMessage(message);
@@ -161,172 +171,258 @@ export default function SignupPage() {
   return (
     <>
       <main className="page">
-        <div className="backgroundPattern" aria-hidden="true">
-          <span className="qr qr1">QR</span>
-          <span className="qr qr2">QR</span>
-          <span className="qr qr3">QR</span>
-          <span className="qr qr4">QR</span>
-        </div>
+        <div className="decor decor1">QR</div>
+        <div className="decor decor2">QR</div>
+        <div className="decor decor3">QR</div>
 
         <header className="header">
           <a href="/" className="brand">
-            <span className="brandMark">QR</span>
+            <span className="brandIcon">QR</span>
 
-            <span className="brandText">
+            <span>
               <strong>QR RETURN</strong>
               <small>SMART QR CONNECTION</small>
             </span>
           </a>
 
-          <a href="/login" className="loginTop">
+          <a href="/login" className="loginButton">
             შესვლა
           </a>
         </header>
 
-        <section className="content">
-          <div className="intro">
+        <div className="layout">
+          <section className="intro">
             <span className="eyebrow">
               QR RETURN ACCOUNT
             </span>
 
-            <h1>შექმენით ანგარიში</h1>
+            <h1>
+              თქვენი ნივთები.
+              <br />
+              ერთი ანგარიში.
+            </h1>
 
-            <p className="introLead">
-              ერთი ანგარიში — თქვენი ყველა QR პროფილი ერთ სივრცეში.
+            <p>
+              შექმენით პირადი ანგარიში და მართეთ ყველა
+              თქვენი QR პროფილი ერთი სივრციდან.
             </p>
 
-            <div className="infoBox">
+            <div className="introCard">
               <strong>
-                მარტივად მართეთ ის, რაც თქვენთვის მნიშვნელოვანია.
+                ყველაფერი იწყება თქვენი ანგარიშით.
               </strong>
 
-              <p>
-                ანგარიშის შექმნის შემდეგ დაამატეთ და მართეთ
-                თქვენი QR პროფილები ერთი პირადი სივრციდან.
-              </p>
+              <span>
+                რეგისტრაციის შემდეგ შეძლებთ ძაღლის,
+                კატის, გასაღების, საფულის, ჩანთისა და
+                ჩემოდნის QR პროფილების დამატებას.
+              </span>
             </div>
 
-            <p className="slogan">
-              ერთი სკანირება შეიძლება იყოს პირველი ნაბიჯი დაბრუნებამდე.
-            </p>
-          </div>
+            <div className="quote">
+              ერთი სკანირება შეიძლება იყოს პირველი
+              ნაბიჯი დაბრუნებამდე.
+            </div>
+          </section>
 
-          <section className="formCard">
-            <div className="formHeader">
+          <section className="card">
+            <div className="cardHeader">
               <span>CREATE ACCOUNT</span>
 
               <h2>მფლობელის რეგისტრაცია</h2>
 
               <p>
-                შეავსეთ თქვენი ძირითადი ინფორმაცია ანგარიშის
-                შესაქმნელად.
+                შეიყვანეთ თქვენი ძირითადი ინფორმაცია.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="errorBox" role="alert">
+              <div className="error">
                 {errorMessage}
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div className="formGrid">
-                <Field label="სახელი" required>
+              <div className="grid">
+                <div className="field">
+                  <label htmlFor="firstName">
+                    სახელი <b>*</b>
+                  </label>
+
                   <input
+                    id="firstName"
                     type="text"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) =>
+                      setFirstName(e.target.value)
+                    }
                     autoComplete="given-name"
                   />
-                </Field>
+                </div>
 
-                <Field label="გვარი" required>
+                <div className="field">
+                  <label htmlFor="lastName">
+                    გვარი <b>*</b>
+                  </label>
+
                   <input
+                    id="lastName"
                     type="text"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) =>
+                      setLastName(e.target.value)
+                    }
                     autoComplete="family-name"
                   />
-                </Field>
+                </div>
 
-                <Field label="ელფოსტა" required>
+                <div className="field">
+                  <label htmlFor="email">
+                    ელფოსტა <b>*</b>
+                  </label>
+
                   <input
+                    id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) =>
+                      setEmail(e.target.value)
+                    }
                     autoComplete="email"
                   />
-                </Field>
+                </div>
 
-                <Field label="ტელეფონის ნომერი" required>
+                <div className="field">
+                  <label htmlFor="phone">
+                    ტელეფონის ნომერი <b>*</b>
+                  </label>
+
                   <input
+                    id="phone"
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) =>
+                      setPhone(e.target.value)
+                    }
                     autoComplete="tel"
                   />
-                </Field>
+                </div>
 
-                <Field label="კოდური სიტყვა" required full>
+                <div className="field full">
+                  <label htmlFor="codeWord">
+                    კოდური სიტყვა <b>*</b>
+                  </label>
+
                   <input
+                    id="codeWord"
                     type="text"
                     value={codeWord}
-                    onChange={(e) => setCodeWord(e.target.value)}
+                    onChange={(e) =>
+                      setCodeWord(e.target.value)
+                    }
                     autoComplete="off"
                   />
 
-                  <small className="fieldHelp">
-                    გამოიყენება ანგარიშის იდენტიფიკაციისთვის.
-                  </small>
-                </Field>
+                  <span className="help">
+                    გამოიყენება თქვენი ანგარიშის
+                    იდენტიფიკაციისთვის.
+                  </span>
+                </div>
 
-                <Field label="პაროლი" required>
-                  <div className="passwordWrap">
+                <div className="field">
+                  <label htmlFor="password">
+                    პაროლი <b>*</b>
+                  </label>
+
+                  <div className="passwordField">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      type={
+                        showPassword
+                          ? "text"
+                          : "password"
+                      }
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) =>
+                        setPassword(e.target.value)
+                      }
                       autoComplete="new-password"
                     />
 
                     <button
                       type="button"
                       onClick={() =>
-                        setShowPassword((current) => !current)
+                        setShowPassword(
+                          (value) => !value
+                        )
                       }
                     >
-                      {showPassword ? "დამალვა" : "ნახვა"}
+                      {showPassword
+                        ? "დამალვა"
+                        : "ნახვა"}
                     </button>
                   </div>
-                </Field>
 
-                <Field label="გაიმეორეთ პაროლი" required>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) =>
-                      setConfirmPassword(e.target.value)
-                    }
-                    autoComplete="new-password"
-                  />
-                </Field>
+                  <span className="help">
+                    მინიმუმ 8 სიმბოლო
+                  </span>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="confirmPassword">
+                    გაიმეორეთ პაროლი <b>*</b>
+                  </label>
+
+                  <div className="passwordField">
+                    <input
+                      id="confirmPassword"
+                      type={
+                        showConfirmPassword
+                          ? "text"
+                          : "password"
+                      }
+                      value={confirmPassword}
+                      onChange={(e) =>
+                        setConfirmPassword(
+                          e.target.value
+                        )
+                      }
+                      autoComplete="new-password"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(
+                          (value) => !value
+                        )
+                      }
+                    >
+                      {showConfirmPassword
+                        ? "დამალვა"
+                        : "ნახვა"}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <button
+                className="submit"
                 type="submit"
-                className="submitButton"
                 disabled={loading}
               >
-                {loading ? "ანგარიში იქმნება..." : "ანგარიშის შექმნა →"}
+                {loading
+                  ? "ანგარიში იქმნება..."
+                  : "ანგარიშის შექმნა →"}
               </button>
             </form>
 
-            <div className="bottomLogin">
-              <span>უკვე გაქვთ ანგარიში?</span>
+            <div className="bottom">
+              უკვე გაქვთ ანგარიში?
               <a href="/login">შესვლა</a>
             </div>
           </section>
-        </section>
+        </div>
       </main>
 
       <style jsx>{`
@@ -338,289 +434,304 @@ export default function SignupPage() {
           position: relative;
           min-height: 100vh;
           overflow: hidden;
-          padding: 0 26px 40px;
-          background: #0647c8;
-          font-family: Arial, Helvetica, sans-serif;
+          padding: 0 28px 42px;
+
+          background:
+            radial-gradient(
+              circle at 12% 20%,
+              rgba(255, 255, 255, 0.08),
+              transparent 25%
+            ),
+            #0647c8;
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
         }
 
-        .backgroundPattern {
+        .decor {
           position: fixed;
-          inset: 0;
           pointer-events: none;
-          overflow: hidden;
-        }
-
-        .qr {
-          position: absolute;
-          color: rgba(255, 255, 255, 0.045);
-          font-size: 125px;
-          font-weight: 950;
           user-select: none;
+
+          color:
+            rgba(255, 255, 255, 0.035);
+
+          font-size: 150px;
+          font-weight: 950;
         }
 
-        .qr1 {
-          top: 10%;
-          left: 4%;
-          transform: rotate(-14deg);
+        .decor1 {
+          top: 12%;
+          left: 3%;
+          transform: rotate(-15deg);
         }
 
-        .qr2 {
-          top: 14%;
-          right: 5%;
+        .decor2 {
+          top: 15%;
+          right: 4%;
           transform: rotate(13deg);
         }
 
-        .qr3 {
-          bottom: 6%;
-          left: 8%;
-          transform: rotate(10deg);
-        }
-
-        .qr4 {
-          bottom: 4%;
-          right: 7%;
-          transform: rotate(-12deg);
+        .decor3 {
+          bottom: 2%;
+          left: 30%;
+          transform: rotate(8deg);
         }
 
         /* HEADER */
 
         .header {
           position: relative;
-          z-index: 2;
+          z-index: 5;
 
           width: 100%;
-          max-width: 1320px;
-          min-height: 74px;
+          max-width: 1360px;
+          height: 76px;
 
-          margin: 0 auto;
+          margin: auto;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
-          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+          border-bottom:
+            1px solid rgba(255, 255, 255, 0.18);
         }
 
         .brand {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 11px;
+
           text-decoration: none;
         }
 
-        .brandMark {
-          width: 43px;
-          height: 43px;
+        .brandIcon {
+          width: 45px;
+          height: 45px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius: 12px;
 
-          background: #ffffff;
+          background: white;
           color: #0647c8;
 
           font-size: 13px;
           font-weight: 950;
+
+          box-shadow:
+            0 8px 20px
+            rgba(0, 20, 70, 0.15);
         }
 
-        .brandText strong,
-        .brandText small {
+        .brand strong,
+        .brand small {
           display: block;
         }
 
-        .brandText strong {
-          color: #ffffff;
+        .brand strong {
+          color: white;
           font-size: 18px;
           font-weight: 900;
         }
 
-        .brandText small {
+        .brand small {
           margin-top: 2px;
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.55px;
+
+          color:
+            rgba(255, 255, 255, 0.67);
+
+          font-size: 9px;
+          font-weight: 800;
+
+          letter-spacing: 0.7px;
         }
 
-        .loginTop {
-          min-height: 42px;
-          padding: 0 18px;
+        .loginButton {
+          min-width: 88px;
+          height: 42px;
 
-          display: inline-flex;
+          display: flex;
           align-items: center;
           justify-content: center;
 
-          border: 1px solid rgba(255, 255, 255, 0.35);
-          border-radius: 9px;
+          border:
+            1px solid rgba(255, 255, 255, 0.35);
 
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 800;
+          border-radius: 10px;
+
+          color: white;
+
+          font-size: 13px;
+          font-weight: 850;
+
           text-decoration: none;
         }
 
         /* LAYOUT */
 
-        .content {
+        .layout {
           position: relative;
           z-index: 2;
 
           width: 100%;
-          max-width: 1320px;
+          max-width: 1360px;
 
-          margin: 0 auto;
+          margin: auto;
           padding-top: 42px;
 
           display: grid;
-          grid-template-columns: 340px minmax(0, 1fr);
 
+          grid-template-columns:
+            330px
+            minmax(0, 880px);
+
+          justify-content: space-between;
           align-items: center;
-          gap: 52px;
+
+          gap: 60px;
         }
 
         /* LEFT */
 
         .intro {
-          color: #ffffff;
+          color: white;
         }
 
         .eyebrow {
-          color: rgba(255, 255, 255, 0.72);
+          color:
+            rgba(255, 255, 255, 0.68);
+
           font-size: 11px;
           font-weight: 900;
-          letter-spacing: 1px;
+
+          letter-spacing: 1.1px;
         }
 
         .intro h1 {
-          margin: 10px 0 0;
+          margin: 11px 0 0;
 
-          color: #ffffff;
-
-          font-size: 37px;
+          font-size: 38px;
           line-height: 1.12;
-          letter-spacing: -0.6px;
+
+          letter-spacing: -0.7px;
         }
 
-        .introLead {
-          margin: 14px 0 0;
+        .intro > p {
+          margin: 15px 0 0;
 
-          color: rgba(255, 255, 255, 0.85);
+          color:
+            rgba(255, 255, 255, 0.83);
 
-          font-size: 17px;
-          line-height: 1.55;
+          font-size: 16px;
+          line-height: 1.6;
         }
 
-        .infoBox {
-          margin-top: 26px;
-          padding: 18px 19px;
+        .introCard {
+          margin-top: 27px;
+          padding: 19px;
 
-          border: 1px solid rgba(255, 255, 255, 0.18);
+          display: grid;
+          gap: 7px;
+
+          border:
+            1px solid
+            rgba(255, 255, 255, 0.17);
+
           border-radius: 14px;
 
-          background: rgba(255, 255, 255, 0.07);
+          background:
+            rgba(255, 255, 255, 0.07);
         }
 
-        .infoBox strong {
-          display: block;
-
-          color: #ffffff;
-
+        .introCard strong {
           font-size: 15px;
-          line-height: 1.4;
         }
 
-        .infoBox p {
-          margin: 7px 0 0;
-
-          color: rgba(255, 255, 255, 0.76);
+        .introCard span {
+          color:
+            rgba(255, 255, 255, 0.72);
 
           font-size: 13px;
           line-height: 1.55;
         }
 
-        .slogan {
-          margin: 19px 0 0;
+        .quote {
+          margin-top: 20px;
           padding-left: 14px;
 
-          border-left: 3px solid #ffffff;
+          border-left: 3px solid white;
 
-          color: rgba(255, 255, 255, 0.88);
+          color:
+            rgba(255, 255, 255, 0.88);
 
-          font-size: 14px;
+          font-size: 13px;
           line-height: 1.55;
         }
 
-        /* REGISTRATION CARD */
+        /* CARD */
 
-        .formCard {
+        .card {
           width: 100%;
-          max-width: 880px;
 
-          margin-left: auto;
+          padding: 32px 36px 29px;
 
-          padding: 31px 34px 28px;
+          border:
+            1px solid
+            rgba(255, 255, 255, 0.7);
 
-          border-radius: 20px;
+          border-radius: 22px;
 
           background: #ffffff;
 
           box-shadow:
-            0 25px 65px rgba(0, 24, 78, 0.3);
+            0 28px 70px
+            rgba(0, 25, 80, 0.3);
         }
 
-        .formHeader > span {
+        .cardHeader > span {
           color: #0647c8;
-          font-size: 11px;
+
+          font-size: 10px;
           font-weight: 900;
-          letter-spacing: 0.8px;
+
+          letter-spacing: 1px;
         }
 
-        .formHeader h2 {
-          margin: 5px 0 0;
-
-          color: #203a55;
-
-          font-size: 25px;
-          line-height: 1.2;
-        }
-
-        .formHeader p {
+        .cardHeader h2 {
           margin: 6px 0 0;
 
-          color: #74869a;
+          color: #263e57;
 
-          font-size: 14px;
+          font-size: 26px;
+          line-height: 1.25;
+        }
+
+        .cardHeader p {
+          margin: 7px 0 0;
+
+          color: #7a8998;
+
+          font-size: 13px;
           line-height: 1.5;
         }
 
-        .errorBox {
-          margin-top: 16px;
-          padding: 12px 13px;
+        /* FORM */
 
-          border: 1px solid #f0cdd2;
-          border-radius: 9px;
-
-          background: #fff2f4;
-          color: #a23e49;
-
-          font-size: 13px;
-        }
-
-        /*
-          EXACT SAME FIELD FORMAT
-          AS OUR PRODUCT/DOG REGISTRATION FORM
-        */
-
-        .formGrid {
-          margin-top: 22px;
+        .grid {
+          margin-top: 25px;
 
           display: grid;
 
           grid-template-columns:
             repeat(2, minmax(0, 1fr));
 
-          gap: 12px 18px;
+          column-gap: 22px;
+          row-gap: 20px;
         }
 
         .field {
@@ -634,235 +745,318 @@ export default function SignupPage() {
         .field label {
           display: block;
 
-          margin-bottom: 6px;
+          margin:
+            0 0 9px 2px;
 
-          color: #344e68;
+          color: #42576b;
 
           font-size: 13px;
-          font-weight: 800;
+          font-weight: 850;
+
+          line-height: 1.3;
         }
 
-        .required {
+        .field label b {
           color: #0647c8;
         }
 
-        .field input {
-          width: 100%;
+        /*
+          IMPORTANT:
+          ACTUAL VERTICAL SIZE
+        */
 
-          min-height: 44px;
+        .field input,
+        .passwordField input {
+          box-sizing: border-box !important;
 
-          padding: 0 12px;
+          display: block !important;
 
-          border: 1px solid #d5e0eb;
-          border-radius: 9px;
+          width: 100% !important;
 
-          background: #ffffff;
-          color: #263f59;
+          height: 68px !important;
 
-          font-family: inherit;
-          font-size: 14px;
+          min-height: 68px !important;
 
-          outline: none;
+          max-height: 68px !important;
+
+          padding:
+            0 18px !important;
+
+          margin: 0 !important;
+
+          border:
+            1.5px solid #d5e0ea !important;
+
+          border-radius:
+            12px !important;
+
+          background:
+            #fbfdff !important;
+
+          color:
+            #263f59 !important;
+
+          font-family:
+            inherit !important;
+
+          font-size:
+            15px !important;
+
+          font-weight:
+            500 !important;
+
+          line-height:
+            68px !important;
+
+          outline:
+            none !important;
+
+          appearance:
+            none;
+
+          -webkit-appearance:
+            none;
+
+          transition:
+            border-color 0.17s ease,
+            box-shadow 0.17s ease,
+            background 0.17s ease;
         }
 
-        .field input:focus {
-          border-color: #0647c8;
+        .field input:hover,
+        .passwordField input:hover {
+          border-color:
+            #b9c9d8 !important;
+
+          background:
+            #ffffff !important;
+        }
+
+        .field input:focus,
+        .passwordField input:focus {
+          border-color:
+            #1266e9 !important;
+
+          background:
+            #ffffff !important;
 
           box-shadow:
-            0 0 0 3px rgba(6, 71, 200, 0.08);
+            0 0 0 4px
+            rgba(18, 102, 233, 0.09) !important;
         }
 
-        .fieldHelp {
+        .help {
           display: block;
 
-          margin-top: 6px;
+          margin:
+            7px 0 0 2px;
 
-          color: #75869a;
+          color: #8593a0;
+
+          font-size: 11px;
+          line-height: 1.4;
+        }
+
+        /* PASSWORD */
+
+        .passwordField {
+          position: relative;
+          width: 100%;
+        }
+
+        .passwordField input {
+          padding-right:
+            90px !important;
+        }
+
+        .passwordField button {
+          position: absolute;
+
+          top: 50%;
+          right: 10px;
+
+          transform:
+            translateY(-50%);
+
+          height: 38px;
+          min-width: 66px;
+
+          padding: 0 10px;
+
+          border: 0;
+          border-radius: 8px;
+
+          background: #edf4ff;
+          color: #0647c8;
+
+          font-family: inherit;
+
+          font-size: 11px;
+          font-weight: 850;
+
+          cursor: pointer;
+        }
+
+        .passwordField button:hover {
+          background: #e2edff;
+        }
+
+        /* ERROR */
+
+        .error {
+          margin-top: 17px;
+          padding: 12px 14px;
+
+          border:
+            1px solid #f0ced2;
+
+          border-radius: 9px;
+
+          background: #fff3f4;
+          color: #a3424a;
 
           font-size: 12px;
           line-height: 1.45;
         }
 
-        /* PASSWORD */
-
-        .passwordWrap {
-          position: relative;
-          width: 100%;
-        }
-
-        .passwordWrap input {
-          width: 100%;
-          padding-right: 72px;
-        }
-
-        .passwordWrap button {
-          position: absolute;
-
-          top: 50%;
-          right: 6px;
-
-          transform: translateY(-50%);
-
-          height: 32px;
-          padding: 0 10px;
-
-          border: 0;
-          border-radius: 7px;
-
-          background: #eef5ff;
-          color: #0647c8;
-
-          font-family: inherit;
-          font-size: 11px;
-          font-weight: 800;
-
-          cursor: pointer;
-        }
-
         /* SUBMIT */
 
-        .submitButton {
+        .submit {
           width: 100%;
-          min-height: 48px;
+          height: 54px;
 
-          margin-top: 20px;
+          margin-top: 25px;
 
           border: 0;
-          border-radius: 10px;
+          border-radius: 11px;
 
           background: #0647c8;
-          color: #ffffff;
+          color: white;
 
           font-family: inherit;
+
           font-size: 14px;
           font-weight: 900;
 
           cursor: pointer;
 
           box-shadow:
-            0 9px 20px rgba(6, 71, 200, 0.17);
+            0 10px 23px
+            rgba(6, 71, 200, 0.2);
         }
 
-        .submitButton:disabled {
+        .submit:hover:not(:disabled) {
+          background: #0754dc;
+        }
+
+        .submit:disabled {
           opacity: 0.65;
           cursor: not-allowed;
         }
 
-        /* BOTTOM */
-
-        .bottomLogin {
-          margin-top: 17px;
-          padding-top: 16px;
+        .bottom {
+          margin-top: 19px;
+          padding-top: 17px;
 
           display: flex;
-          align-items: center;
           justify-content: center;
-          gap: 5px;
+          gap: 6px;
 
-          border-top: 1px solid #e6edf4;
+          border-top:
+            1px solid #e7edf3;
 
-          color: #7b8b9c;
+          color: #7c8996;
 
-          font-size: 13px;
+          font-size: 12px;
         }
 
-        .bottomLogin a {
+        .bottom a {
           color: #0647c8;
           font-weight: 850;
           text-decoration: none;
         }
 
-        /* TABLET */
+        /* RESPONSIVE */
 
-        @media (max-width: 1000px) {
-          .content {
+        @media (max-width: 1050px) {
+          .layout {
             max-width: 850px;
 
             grid-template-columns: 1fr;
 
-            gap: 28px;
+            gap: 30px;
           }
 
           .intro {
             text-align: center;
           }
 
-          .infoBox,
-          .slogan {
+          .introCard,
+          .quote {
             max-width: 500px;
+
             margin-left: auto;
             margin-right: auto;
           }
 
-          .slogan {
+          .quote {
             text-align: left;
-          }
-
-          .formCard {
-            margin: 0 auto;
           }
         }
 
-        /* MOBILE */
-
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
           .page {
-            padding: 0 13px 28px;
+            padding: 0 14px 28px;
           }
 
-          .brandText small {
+          .brand small {
             display: none;
           }
 
-          .content {
+          .layout {
             padding-top: 28px;
           }
 
           .intro h1 {
-            font-size: 30px;
+            font-size: 31px;
           }
 
-          .formCard {
-            padding: 20px;
+          .card {
+            padding: 25px 20px;
           }
 
-          .formGrid {
+          .grid {
             grid-template-columns: 1fr;
-            gap: 15px;
+
+            row-gap: 18px;
           }
 
           .field.full {
             grid-column: auto;
           }
 
-          .bottomLogin {
+          .field input,
+          .passwordField input {
+            height: 64px !important;
+
+            min-height:
+              64px !important;
+
+            max-height:
+              64px !important;
+
+            line-height:
+              64px !important;
+
+            font-size:
+              16px !important;
+          }
+
+          .bottom {
             flex-wrap: wrap;
           }
         }
       `}</style>
     </>
-  );
-}
-
-function Field({
-  label,
-  required = false,
-  full = false,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  full?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className={full ? "field full" : "field"}>
-      <label>
-        {label}
-        {required && <span className="required"> *</span>}
-      </label>
-
-      {children}
-    </div>
   );
 }
