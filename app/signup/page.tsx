@@ -88,6 +88,7 @@ export default function SignupPage() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
+
         options: {
           data: {
             first_name: firstName.trim(),
@@ -175,6 +176,8 @@ export default function SignupPage() {
         <div className="decor decor2">QR</div>
         <div className="decor decor3">QR</div>
 
+        {/* HEADER */}
+
         <header className="header">
           <a href="/" className="brand">
             <span className="brandIcon">QR</span>
@@ -190,40 +193,40 @@ export default function SignupPage() {
           </a>
         </header>
 
+        {/* MAIN */}
+
         <div className="layout">
+
+          {/* LEFT SIDE */}
+
           <section className="intro">
-            <span className="eyebrow">
-              QR RETURN ACCOUNT
-            </span>
-
-            <h1>
-              თქვენი ნივთები.
-              <br />
-              ერთი ანგარიში.
-            </h1>
-
-            <p>
-              შექმენით პირადი ანგარიში და მართეთ ყველა
-              თქვენი QR პროფილი ერთი სივრციდან.
-            </p>
-
             <div className="introCard">
-              <strong>
-                ყველაფერი იწყება თქვენი ანგარიშით.
-              </strong>
+              <div className="introIcon">
+                <span>QR</span>
+              </div>
 
-              <span>
-                რეგისტრაციის შემდეგ შეძლებთ ძაღლის,
-                კატის, გასაღების, საფულის, ჩანთისა და
-                ჩემოდნის QR პროფილების დამატებას.
-              </span>
-            </div>
+              <div className="introText">
+                <h1>
+                  ყველაფერი იწყება
+                  <br />
+                  თქვენი ანგარიშით.
+                </h1>
 
-            <div className="quote">
-              ერთი სკანირება შეიძლება იყოს პირველი
-              ნაბიჯი დაბრუნებამდე.
+                <div className="line" />
+
+                <p>
+                  რეგისტრაციის შემდეგ შეძლებთ
+                  <strong>
+                    {" "}ძაღლის, კატის, გასაღების,
+                    საფულის, ჩანთისა და ჩემოდნის{" "}
+                  </strong>
+                  QR პროფილების დამატებას.
+                </p>
+              </div>
             </div>
           </section>
+
+          {/* REGISTRATION FORM */}
 
           <section className="card">
             <div className="cardHeader">
@@ -244,6 +247,9 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="grid">
+
+                {/* FIRST NAME */}
+
                 <div className="field">
                   <label htmlFor="firstName">
                     სახელი <b>*</b>
@@ -259,6 +265,8 @@ export default function SignupPage() {
                     autoComplete="given-name"
                   />
                 </div>
+
+                {/* LAST NAME */}
 
                 <div className="field">
                   <label htmlFor="lastName">
@@ -276,6 +284,8 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* EMAIL */}
+
                 <div className="field">
                   <label htmlFor="email">
                     ელფოსტა <b>*</b>
@@ -292,6 +302,8 @@ export default function SignupPage() {
                   />
                 </div>
 
+                {/* PHONE */}
+
                 <div className="field">
                   <label htmlFor="phone">
                     ტელეფონის ნომერი <b>*</b>
@@ -307,6 +319,8 @@ export default function SignupPage() {
                     autoComplete="tel"
                   />
                 </div>
+
+                {/* CODE WORD */}
 
                 <div className="field full">
                   <label htmlFor="codeWord">
@@ -328,6 +342,8 @@ export default function SignupPage() {
                     იდენტიფიკაციისთვის.
                   </span>
                 </div>
+
+                {/* PASSWORD */}
 
                 <div className="field">
                   <label htmlFor="password">
@@ -367,6 +383,8 @@ export default function SignupPage() {
                     მინიმუმ 8 სიმბოლო
                   </span>
                 </div>
+
+                {/* CONFIRM PASSWORD */}
 
                 <div className="field">
                   <label htmlFor="confirmPassword">
@@ -432,9 +450,13 @@ export default function SignupPage() {
 
         .page {
           position: relative;
+
           min-height: 100vh;
+
           overflow: hidden;
-          padding: 0 28px 42px;
+
+          padding:
+            0 28px 42px;
 
           background:
             radial-gradient(
@@ -450,59 +472,78 @@ export default function SignupPage() {
             sans-serif;
         }
 
+        /* BACKGROUND */
+
         .decor {
           position: fixed;
+
           pointer-events: none;
+
           user-select: none;
 
           color:
             rgba(255, 255, 255, 0.035);
 
           font-size: 150px;
+
           font-weight: 950;
         }
 
         .decor1 {
           top: 12%;
           left: 3%;
-          transform: rotate(-15deg);
+
+          transform:
+            rotate(-15deg);
         }
 
         .decor2 {
           top: 15%;
           right: 4%;
-          transform: rotate(13deg);
+
+          transform:
+            rotate(13deg);
         }
 
         .decor3 {
           bottom: 2%;
           left: 30%;
-          transform: rotate(8deg);
+
+          transform:
+            rotate(8deg);
         }
 
         /* HEADER */
 
         .header {
           position: relative;
+
           z-index: 5;
 
           width: 100%;
+
           max-width: 1360px;
+
           height: 76px;
 
           margin: auto;
 
           display: flex;
+
           align-items: center;
+
           justify-content: space-between;
 
           border-bottom:
-            1px solid rgba(255, 255, 255, 0.18);
+            1px solid
+            rgba(255, 255, 255, 0.18);
         }
 
         .brand {
           display: flex;
+
           align-items: center;
+
           gap: 11px;
 
           text-decoration: none;
@@ -510,17 +551,21 @@ export default function SignupPage() {
 
         .brandIcon {
           width: 45px;
+
           height: 45px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 12px;
 
           background: white;
+
           color: #0647c8;
 
           font-size: 13px;
+
           font-weight: 950;
 
           box-shadow:
@@ -535,7 +580,9 @@ export default function SignupPage() {
 
         .brand strong {
           color: white;
+
           font-size: 18px;
+
           font-weight: 900;
         }
 
@@ -546,6 +593,7 @@ export default function SignupPage() {
             rgba(255, 255, 255, 0.67);
 
           font-size: 9px;
+
           font-weight: 800;
 
           letter-spacing: 0.7px;
@@ -553,132 +601,202 @@ export default function SignupPage() {
 
         .loginButton {
           min-width: 88px;
+
           height: 42px;
 
           display: flex;
+
           align-items: center;
+
           justify-content: center;
 
           border:
-            1px solid rgba(255, 255, 255, 0.35);
+            1px solid
+            rgba(255, 255, 255, 0.35);
 
           border-radius: 10px;
 
           color: white;
 
           font-size: 13px;
+
           font-weight: 850;
 
           text-decoration: none;
         }
 
-        /* LAYOUT */
+        /* MAIN */
 
         .layout {
           position: relative;
+
           z-index: 2;
 
           width: 100%;
+
           max-width: 1360px;
 
           margin: auto;
+
           padding-top: 42px;
 
           display: grid;
 
           grid-template-columns:
-            330px
+            350px
             minmax(0, 880px);
 
-          justify-content: space-between;
+          justify-content:
+            space-between;
+
           align-items: center;
 
-          gap: 60px;
+          gap: 65px;
         }
 
-        /* LEFT */
+        /* LEFT PREMIUM MESSAGE */
 
         .intro {
-          color: white;
-        }
+          display: flex;
 
-        .eyebrow {
-          color:
-            rgba(255, 255, 255, 0.68);
-
-          font-size: 11px;
-          font-weight: 900;
-
-          letter-spacing: 1.1px;
-        }
-
-        .intro h1 {
-          margin: 11px 0 0;
-
-          font-size: 38px;
-          line-height: 1.12;
-
-          letter-spacing: -0.7px;
-        }
-
-        .intro > p {
-          margin: 15px 0 0;
-
-          color:
-            rgba(255, 255, 255, 0.83);
-
-          font-size: 16px;
-          line-height: 1.6;
+          align-items: center;
         }
 
         .introCard {
-          margin-top: 27px;
-          padding: 19px;
+          position: relative;
 
-          display: grid;
-          gap: 7px;
+          width: 100%;
+
+          padding:
+            31px 28px 30px;
+
+          overflow: hidden;
 
           border:
             1px solid
-            rgba(255, 255, 255, 0.17);
+            rgba(255, 255, 255, 0.2);
 
-          border-radius: 14px;
+          border-radius: 22px;
 
           background:
-            rgba(255, 255, 255, 0.07);
+            linear-gradient(
+              145deg,
+              rgba(255, 255, 255, 0.13),
+              rgba(255, 255, 255, 0.055)
+            );
+
+          box-shadow:
+            0 22px 55px
+            rgba(0, 25, 85, 0.17);
+
+          backdrop-filter:
+            blur(8px);
         }
 
-        .introCard strong {
-          font-size: 15px;
+        .introCard::after {
+          content: "";
+
+          position: absolute;
+
+          width: 150px;
+          height: 150px;
+
+          top: -85px;
+          right: -65px;
+
+          border-radius: 50%;
+
+          background:
+            rgba(255, 255, 255, 0.08);
         }
 
-        .introCard span {
+        .introIcon {
+          width: 48px;
+
+          height: 48px;
+
+          margin-bottom: 22px;
+
+          display: grid;
+
+          place-items: center;
+
+          border:
+            1px solid
+            rgba(255, 255, 255, 0.25);
+
+          border-radius: 13px;
+
+          background:
+            rgba(255, 255, 255, 0.12);
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.16);
+        }
+
+        .introIcon span {
+          color: white;
+
+          font-size: 12px;
+
+          font-weight: 950;
+
+          letter-spacing: 0.5px;
+        }
+
+        .introText h1 {
+          margin: 0;
+
+          color: #ffffff;
+
+          font-size: 29px;
+
+          font-weight: 900;
+
+          line-height: 1.22;
+
+          letter-spacing: -0.45px;
+        }
+
+        .line {
+          width: 42px;
+
+          height: 3px;
+
+          margin:
+            19px 0 18px;
+
+          border-radius: 999px;
+
+          background:
+            rgba(255, 255, 255, 0.9);
+        }
+
+        .introText p {
+          margin: 0;
+
           color:
-            rgba(255, 255, 255, 0.72);
+            rgba(255, 255, 255, 0.78);
 
-          font-size: 13px;
-          line-height: 1.55;
+          font-size: 14px;
+
+          line-height: 1.72;
         }
 
-        .quote {
-          margin-top: 20px;
-          padding-left: 14px;
+        .introText p strong {
+          color: #ffffff;
 
-          border-left: 3px solid white;
-
-          color:
-            rgba(255, 255, 255, 0.88);
-
-          font-size: 13px;
-          line-height: 1.55;
+          font-weight: 850;
         }
 
-        /* CARD */
+        /* FORM CARD */
 
         .card {
           width: 100%;
 
-          padding: 32px 36px 29px;
+          padding:
+            32px 36px 29px;
 
           border:
             1px solid
@@ -697,30 +815,35 @@ export default function SignupPage() {
           color: #0647c8;
 
           font-size: 10px;
+
           font-weight: 900;
 
           letter-spacing: 1px;
         }
 
         .cardHeader h2 {
-          margin: 6px 0 0;
+          margin:
+            6px 0 0;
 
           color: #263e57;
 
           font-size: 26px;
+
           line-height: 1.25;
         }
 
         .cardHeader p {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
           color: #7a8998;
 
           font-size: 13px;
+
           line-height: 1.5;
         }
 
-        /* FORM */
+        /* FORM GRID */
 
         .grid {
           margin-top: 25px;
@@ -728,9 +851,13 @@ export default function SignupPage() {
           display: grid;
 
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
 
           column-gap: 22px;
+
           row-gap: 20px;
         }
 
@@ -739,7 +866,8 @@ export default function SignupPage() {
         }
 
         .field.full {
-          grid-column: 1 / -1;
+          grid-column:
+            1 / -1;
         }
 
         .field label {
@@ -751,6 +879,7 @@ export default function SignupPage() {
           color: #42576b;
 
           font-size: 13px;
+
           font-weight: 850;
 
           line-height: 1.3;
@@ -760,35 +889,40 @@ export default function SignupPage() {
           color: #0647c8;
         }
 
-        /*
-          IMPORTANT:
-          ACTUAL VERTICAL SIZE
-        */
+        /* INPUT — 56PX */
 
         .field input,
         .passwordField input {
-          box-sizing: border-box !important;
+          box-sizing:
+            border-box !important;
 
-          display: block !important;
+          display:
+            block !important;
 
-          width: 100% !important;
+          width:
+            100% !important;
 
-          height: 68px !important;
+          height:
+            56px !important;
 
-          min-height: 68px !important;
+          min-height:
+            56px !important;
 
-          max-height: 68px !important;
+          max-height:
+            56px !important;
+
+          margin:
+            0 !important;
 
           padding:
-            0 18px !important;
-
-          margin: 0 !important;
+            0 17px !important;
 
           border:
-            1.5px solid #d5e0ea !important;
+            1.5px solid
+            #d5e0ea !important;
 
           border-radius:
-            12px !important;
+            11px !important;
 
           background:
             #fbfdff !important;
@@ -806,21 +940,23 @@ export default function SignupPage() {
             500 !important;
 
           line-height:
-            68px !important;
+            normal !important;
 
           outline:
             none !important;
 
-          appearance:
-            none;
+          appearance: none;
 
           -webkit-appearance:
             none;
 
           transition:
-            border-color 0.17s ease,
-            box-shadow 0.17s ease,
-            background 0.17s ease;
+            border-color
+              0.17s ease,
+            box-shadow
+              0.17s ease,
+            background
+              0.17s ease;
         }
 
         .field input:hover,
@@ -842,7 +978,12 @@ export default function SignupPage() {
 
           box-shadow:
             0 0 0 4px
-            rgba(18, 102, 233, 0.09) !important;
+            rgba(
+              18,
+              102,
+              233,
+              0.09
+            ) !important;
         }
 
         .help {
@@ -854,6 +995,7 @@ export default function SignupPage() {
           color: #8593a0;
 
           font-size: 11px;
+
           line-height: 1.4;
         }
 
@@ -861,6 +1003,7 @@ export default function SignupPage() {
 
         .passwordField {
           position: relative;
+
           width: 100%;
         }
 
@@ -873,49 +1016,64 @@ export default function SignupPage() {
           position: absolute;
 
           top: 50%;
-          right: 10px;
+
+          right: 9px;
 
           transform:
             translateY(-50%);
 
-          height: 38px;
-          min-width: 66px;
+          min-width: 65px;
 
-          padding: 0 10px;
+          height: 35px;
+
+          padding:
+            0 10px;
 
           border: 0;
+
           border-radius: 8px;
 
-          background: #edf4ff;
+          background:
+            #edf4ff;
+
           color: #0647c8;
 
-          font-family: inherit;
+          font-family:
+            inherit;
 
           font-size: 11px;
+
           font-weight: 850;
 
           cursor: pointer;
         }
 
         .passwordField button:hover {
-          background: #e2edff;
+          background:
+            #e2edff;
         }
 
         /* ERROR */
 
         .error {
           margin-top: 17px;
-          padding: 12px 14px;
+
+          padding:
+            12px 14px;
 
           border:
-            1px solid #f0ced2;
+            1px solid
+            #f0ced2;
 
           border-radius: 9px;
 
-          background: #fff3f4;
+          background:
+            #fff3f4;
+
           color: #a3424a;
 
           font-size: 12px;
+
           line-height: 1.45;
         }
 
@@ -923,19 +1081,23 @@ export default function SignupPage() {
 
         .submit {
           width: 100%;
+
           height: 54px;
 
           margin-top: 25px;
 
           border: 0;
+
           border-radius: 11px;
 
           background: #0647c8;
+
           color: white;
 
           font-family: inherit;
 
           font-size: 14px;
+
           font-weight: 900;
 
           cursor: pointer;
@@ -951,15 +1113,21 @@ export default function SignupPage() {
 
         .submit:disabled {
           opacity: 0.65;
+
           cursor: not-allowed;
         }
 
+        /* BOTTOM */
+
         .bottom {
           margin-top: 19px;
+
           padding-top: 17px;
 
           display: flex;
+
           justify-content: center;
+
           gap: 6px;
 
           border-top:
@@ -972,41 +1140,55 @@ export default function SignupPage() {
 
         .bottom a {
           color: #0647c8;
+
           font-weight: 850;
+
           text-decoration: none;
         }
 
-        /* RESPONSIVE */
+        /* TABLET */
 
-        @media (max-width: 1050px) {
+        @media (
+          max-width: 1050px
+        ) {
           .layout {
             max-width: 850px;
 
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
 
-            gap: 30px;
+            gap: 28px;
           }
 
-          .intro {
+          .introCard {
+            max-width: 600px;
+
+            margin: auto;
+
             text-align: center;
           }
 
-          .introCard,
-          .quote {
-            max-width: 500px;
-
+          .introIcon {
             margin-left: auto;
+
             margin-right: auto;
           }
 
-          .quote {
-            text-align: left;
+          .line {
+            margin-left: auto;
+
+            margin-right: auto;
           }
         }
 
-        @media (max-width: 650px) {
+        /* MOBILE */
+
+        @media (
+          max-width: 650px
+        ) {
           .page {
-            padding: 0 14px 28px;
+            padding:
+              0 14px 28px;
           }
 
           .brand small {
@@ -1017,16 +1199,23 @@ export default function SignupPage() {
             padding-top: 28px;
           }
 
-          .intro h1 {
-            font-size: 31px;
+          .introCard {
+            padding:
+              25px 21px;
+          }
+
+          .introText h1 {
+            font-size: 25px;
           }
 
           .card {
-            padding: 25px 20px;
+            padding:
+              25px 20px;
           }
 
           .grid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
 
             row-gap: 18px;
           }
@@ -1037,16 +1226,14 @@ export default function SignupPage() {
 
           .field input,
           .passwordField input {
-            height: 64px !important;
+            height:
+              54px !important;
 
             min-height:
-              64px !important;
+              54px !important;
 
             max-height:
-              64px !important;
-
-            line-height:
-              64px !important;
+              54px !important;
 
             font-size:
               16px !important;
