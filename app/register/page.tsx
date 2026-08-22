@@ -6,7 +6,7 @@ const PRODUCTS = [
     label: "ძაღლი",
     emoji: "🐶",
     description:
-      "შექმენით თქვენი ძაღლის QR პროფილი და დაამატეთ მნიშვნელოვანი ინფორმაცია.",
+      "შექმენით თქვენი ძაღლის QR პროფილი და დაამატეთ საჭირო ინფორმაცია.",
   },
   {
     type: "cat",
@@ -27,21 +27,21 @@ const PRODUCTS = [
     label: "საფულე",
     emoji: "👛",
     description:
-      "შექმენით საფულის პროფილი საკონტაქტო და განმასხვავებელი ინფორმაციით.",
+      "შექმენით საფულის პროფილი და დაამატეთ აღწერა და საკონტაქტო ინფორმაცია.",
   },
   {
     type: "bag",
     label: "ჩანთა",
     emoji: "👜",
     description:
-      "დაამატეთ ჩანთის ფოტო, აღწერა და საჭირო ინფორმაცია მპოვნელისთვის.",
+      "დაარეგისტრირეთ ჩანთა და დაამატეთ ფოტო, აღწერა და განმასხვავებელი ნიშნები.",
   },
   {
     type: "suitcase",
     label: "ჩემოდანი",
     emoji: "🧳",
     description:
-      "დაარეგისტრირეთ სამგზავრო ჩემოდანი და გაამარტივეთ მისი დაბრუნება.",
+      "დაარეგისტრირეთ ჩემოდანი და გაამარტივეთ მისი უსაფრთხოდ დაბრუნება.",
   },
 ] as const;
 
@@ -49,13 +49,16 @@ export default function RegisterPage() {
   return (
     <>
       <main className="page">
+        <div className="backgroundShape shapeOne" />
+        <div className="backgroundShape shapeTwo" />
+
         <header className="header">
           <a href="/" className="brand">
             <div className="brandMark">
               QR
             </div>
 
-            <div className="brandText">
+            <div>
               <strong>
                 QR RETURN
               </strong>
@@ -66,58 +69,46 @@ export default function RegisterPage() {
             </div>
           </a>
 
-          <div className="headerActions">
-            <a
-              href="/my-profiles"
-              className="profilesButton"
-            >
-              ჩემი პროფილები
-            </a>
-          </div>
+          <a
+            href="/my-profiles"
+            className="profilesButton"
+          >
+            ჩემი პროფილები
+          </a>
         </header>
 
         <section className="hero">
-          <div className="heroBadge">
+          <span className="heroBadge">
             PRODUCT REGISTRATION
-          </div>
+          </span>
 
           <h1>
-            რომელი პროფილის დამატება გსურთ?
+            აირჩიეთ პროდუქტი
           </h1>
 
           <p>
-            ერთი QR RETURN ანგარიშიდან შეგიძლიათ
-            შეუზღუდავად დაამატოთ და მართოთ სხვადასხვა
-            ნივთისა და ცხოველის პროფილი.
+            ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად
+            დაამატოთ და მართოთ სხვადასხვა QR პროფილი.
+            აირჩიეთ სასურველი კატეგორია და დაიწყეთ რეგისტრაცია.
           </p>
-
-          <div className="accountNote">
-            <span>✓</span>
-
-            <p>
-              თუ ანგარიში უკვე გაქვთ, ახალი ანგარიშის
-              შექმნა აღარ გჭირდებათ — უბრალოდ აირჩიეთ
-              ახალი პროდუქტი.
-            </p>
-          </div>
         </section>
 
-        <section className="productsSection">
-          <div className="sectionTop">
+        <section className="selectionPanel">
+          <div className="panelHeader">
             <div>
               <span>
-                6 CATEGORIES
+                6 PRODUCTS
               </span>
 
               <h2>
-                აირჩიეთ პროდუქტი
+                რისთვის გსურთ QR პროფილის შექმნა?
               </h2>
             </div>
 
             <p>
-              თითოეული QR კოდი ერთ კატეგორიაზე
-              ფიქსირდება. კატეგორია შექმნის შემდეგ
-              აღარ შეიცვლება.
+              თითოეული QR კოდი ერთ კატეგორიაზე ფიქსირდება.
+              პროფილის მონაცემების შეცვლა მოგვიანებით
+              შეგიძლიათ, კატეგორია კი აღარ შეიცვლება.
             </p>
           </div>
 
@@ -128,8 +119,8 @@ export default function RegisterPage() {
                 href={`/register-item/${product.type}`}
                 className="productCard"
               >
-                <div className="cardTop">
-                  <div className="productIcon">
+                <div className="cardHeader">
+                  <div className="icon">
                     {product.emoji}
                   </div>
 
@@ -138,9 +129,9 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                <div className="productType">
+                <span className="productLabel">
                   QR PROFILE
-                </div>
+                </span>
 
                 <h3>
                   {product.label}
@@ -150,7 +141,7 @@ export default function RegisterPage() {
                   {product.description}
                 </p>
 
-                <div className="registerLink">
+                <div className="cardFooter">
                   <span>
                     რეგისტრაციის დაწყება
                   </span>
@@ -162,32 +153,28 @@ export default function RegisterPage() {
               </a>
             ))}
           </div>
-        </section>
 
-        <section className="bottomCard">
-          <div className="bottomIcon">
-            +
+          <div className="notice">
+            <div className="noticeIcon">
+              i
+            </div>
+
+            <div>
+              <strong>
+                ერთი ანგარიში — შეუზღუდავი პროფილები
+              </strong>
+
+              <p>
+                შეგიძლიათ ერთ ანგარიშზე გქონდეთ რამდენიმე
+                ძაღლი, კატა, გასაღები, საფულე, ჩანთა და
+                ჩემოდანი.
+              </p>
+            </div>
+
+            <a href="/my-profiles">
+              არსებული პროფილები
+            </a>
           </div>
-
-          <div className="bottomText">
-            <span>
-              ONE ACCOUNT
-            </span>
-
-            <h2>
-              შეუზღუდავი პროფილების დამატება
-            </h2>
-
-            <p>
-              შეგიძლიათ გქონდეთ რამდენიმე ძაღლი,
-              კატა, გასაღები, საფულე, ჩანთა ან
-              ჩემოდანი ერთ ანგარიშზე.
-            </p>
-          </div>
-
-          <a href="/my-profiles">
-            არსებული პროფილების ნახვა
-          </a>
         </section>
       </main>
 
@@ -197,25 +184,61 @@ export default function RegisterPage() {
         }
 
         .page {
+          position: relative;
           min-height: 100vh;
+          overflow: hidden;
           padding-bottom: 80px;
 
           background:
             linear-gradient(
-              180deg,
-              #0f5fd7 0px,
-              #1266e9 360px,
-              #f4f8fd 360px,
-              #f4f8fd 100%
+              135deg,
+              #0757d8 0%,
+              #1266e9 48%,
+              #0a4fc6 100%
             );
         }
 
+        .backgroundShape {
+          position: absolute;
+
+          border-radius: 999px;
+
+          pointer-events: none;
+        }
+
+        .shapeOne {
+          width: 560px;
+          height: 560px;
+
+          top: -270px;
+          right: -170px;
+
+          border:
+            90px solid
+            rgba(255,255,255,.05);
+        }
+
+        .shapeTwo {
+          width: 430px;
+          height: 430px;
+
+          bottom: -220px;
+          left: -180px;
+
+          border:
+            70px solid
+            rgba(255,255,255,.04);
+        }
+
         .header {
+          position: relative;
+          z-index: 2;
+
           width: calc(100% - 64px);
           max-width: 1180px;
-          min-height: 82px;
+          min-height: 84px;
 
-          margin: 0 auto;
+          margin: auto;
 
           display: flex;
           align-items: center;
@@ -237,48 +260,52 @@ export default function RegisterPage() {
         }
 
         .brandMark {
-          width: 44px;
-          height: 44px;
+          width: 46px;
+          height: 46px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 12px;
+          border-radius: 13px;
 
           background: #ffffff;
 
           color: #1266e9;
 
           font-size: 13px;
-          font-weight: 900;
+          font-weight: 950;
+
+          box-shadow:
+            0 10px 28px
+            rgba(0,0,0,.08);
         }
 
-        .brandText strong,
-        .brandText span {
+        .brand strong,
+        .brand span {
           display: block;
         }
 
-        .brandText strong {
+        .brand strong {
           color: #ffffff;
 
           font-size: 18px;
-          font-weight: 900;
+          font-weight: 950;
         }
 
-        .brandText span {
+        .brand span {
           margin-top: 3px;
 
           color:
             rgba(255,255,255,.72);
 
           font-size: 11px;
-          font-weight: 700;
+          font-weight: 750;
 
-          letter-spacing: .8px;
+          letter-spacing: .9px;
         }
 
         .profilesButton {
-          min-height: 44px;
+          min-height: 46px;
 
           padding: 0 18px;
 
@@ -287,152 +314,118 @@ export default function RegisterPage() {
           justify-content: center;
 
           border:
-            1px solid rgba(255,255,255,.35);
+            1px solid rgba(255,255,255,.28);
 
-          border-radius: 10px;
+          border-radius: 11px;
 
           background:
-            rgba(255,255,255,.10);
+            rgba(255,255,255,.12);
 
           color: #ffffff;
 
           font-size: 14px;
-          font-weight: 800;
+          font-weight: 850;
 
           text-decoration: none;
+
+          backdrop-filter: blur(8px);
         }
 
         .hero {
+          position: relative;
+          z-index: 2;
+
           width: calc(100% - 64px);
           max-width: 1180px;
 
-          margin: 0 auto;
+          margin: auto;
 
-          padding: 55px 0 72px;
+          padding: 56px 0 82px;
 
-          color: #ffffff;
+          text-align: center;
         }
 
         .heroBadge {
           display: inline-flex;
 
-          padding: 8px 12px;
+          padding: 8px 13px;
 
           border:
-            1px solid rgba(255,255,255,.25);
+            1px solid rgba(255,255,255,.28);
 
           border-radius: 999px;
 
           background:
             rgba(255,255,255,.10);
 
-          font-size: 12px;
-          font-weight: 800;
+          color: #ffffff;
 
-          letter-spacing: .8px;
+          font-size: 12px;
+          font-weight: 900;
+
+          letter-spacing: 1px;
         }
 
         .hero h1 {
-          max-width: 760px;
-
           margin: 18px 0 0;
 
-          font-size: 44px;
+          color: #ffffff;
+
+          font-size: 46px;
           line-height: 1.08;
 
-          letter-spacing: -1px;
+          letter-spacing: -1.2px;
         }
 
-        .hero > p {
-          max-width: 680px;
+        .hero p {
+          max-width: 720px;
 
-          margin: 18px 0 0;
+          margin: 16px auto 0;
 
           color:
-            rgba(255,255,255,.82);
+            rgba(255,255,255,.84);
 
           font-size: 16px;
           line-height: 1.7;
         }
 
-        .accountNote {
-          max-width: 650px;
+        .selectionPanel {
+          position: relative;
+          z-index: 3;
 
-          margin-top: 22px;
-
-          padding: 14px 16px;
-
-          display: flex;
-          align-items: flex-start;
-
-          gap: 10px;
-
-          border:
-            1px solid rgba(255,255,255,.22);
-
-          border-radius: 12px;
-
-          background:
-            rgba(255,255,255,.10);
-        }
-
-        .accountNote span {
-          width: 24px;
-          height: 24px;
-
-          flex: 0 0 24px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-
-          background: #ffffff;
-
-          color: #1266e9;
-
-          font-size: 13px;
-          font-weight: 900;
-        }
-
-        .accountNote p {
-          margin: 1px 0 0;
-
-          color:
-            rgba(255,255,255,.9);
-
-          font-size: 14px;
-          line-height: 1.55;
-        }
-
-        .productsSection {
           width: calc(100% - 64px);
           max-width: 1180px;
 
           margin: -34px auto 0;
 
-          padding: 30px;
+          padding: 32px;
 
-          border-radius: 22px;
+          border:
+            1px solid rgba(255,255,255,.9);
+
+          border-radius: 24px;
 
           background: #ffffff;
 
           box-shadow:
-            0 20px 55px
-            rgba(26,61,102,.12);
+            0 28px 70px
+            rgba(1,37,94,.25);
         }
 
-        .sectionTop {
+        .panelHeader {
+          padding-bottom: 25px;
+
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
 
           gap: 30px;
 
-          margin-bottom: 24px;
+          border-bottom:
+            1px solid #e4ebf3;
         }
 
-        .sectionTop span {
+        .panelHeader span {
           color: #1266e9;
 
           font-size: 12px;
@@ -441,96 +434,107 @@ export default function RegisterPage() {
           letter-spacing: 1px;
         }
 
-        .sectionTop h2 {
-          margin: 6px 0 0;
+        .panelHeader h2 {
+          margin: 7px 0 0;
 
-          color: #20384f;
+          color: #203a55;
 
           font-size: 28px;
+          line-height: 1.25;
         }
 
-        .sectionTop > p {
-          max-width: 430px;
+        .panelHeader > p {
+          max-width: 440px;
 
           margin: 0;
 
-          color: #748498;
+          color: #708196;
 
           font-size: 14px;
-          line-height: 1.6;
+          line-height: 1.65;
         }
 
         .productsGrid {
+          margin-top: 25px;
+
           display: grid;
 
           grid-template-columns:
             repeat(3, minmax(0,1fr));
 
-          gap: 15px;
+          gap: 16px;
         }
 
         .productCard {
-          min-height: 290px;
+          min-height: 300px;
 
-          padding: 22px;
+          padding: 23px;
 
           display: flex;
           flex-direction: column;
 
-          border: 1px solid #dce6f1;
+          border:
+            1px solid #d9e5f3;
 
-          border-radius: 16px;
+          border-radius: 18px;
 
           background:
             linear-gradient(
               180deg,
               #ffffff,
-              #f9fbfe
+              #f7faff
             );
 
           text-decoration: none;
 
+          box-shadow:
+            0 8px 24px
+            rgba(30,70,120,.04);
+
           transition:
-            transform .2s ease,
-            box-shadow .2s ease,
-            border-color .2s ease;
+            .2s ease;
         }
 
         .productCard:hover {
           transform:
-            translateY(-4px);
+            translateY(-5px);
 
           border-color:
-            #a9c8f3;
+            #1266e9;
 
           box-shadow:
-            0 15px 32px
-            rgba(18,102,233,.11);
+            0 18px 38px
+            rgba(18,102,233,.13);
         }
 
-        .cardTop {
+        .cardHeader {
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        .productIcon {
-          width: 58px;
-          height: 58px;
+        .icon {
+          width: 62px;
+          height: 62px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 15px;
+          border-radius: 17px;
 
-          background: #edf4ff;
+          background:
+            linear-gradient(
+              135deg,
+              #eaf3ff,
+              #dceaff
+            );
 
-          font-size: 29px;
+          font-size: 31px;
         }
 
         .arrow {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
 
           display: grid;
           place-items: center;
@@ -541,40 +545,42 @@ export default function RegisterPage() {
 
           color: #ffffff;
 
-          font-size: 18px;
+          font-size: 19px;
           font-weight: 900;
         }
 
-        .productType {
-          margin-top: 23px;
+        .productLabel {
+          margin-top: 24px;
 
           color: #1266e9;
 
           font-size: 11px;
           font-weight: 900;
 
-          letter-spacing: .8px;
+          letter-spacing: 1px;
         }
 
         .productCard h3 {
-          margin: 7px 0 0;
+          margin: 8px 0 0;
 
-          color: #243c55;
+          color: #243e59;
 
-          font-size: 22px;
+          font-size: 23px;
+          line-height: 1.2;
         }
 
         .productCard p {
           margin: 10px 0 0;
 
-          color: #758599;
+          color: #728398;
 
           font-size: 14px;
-          line-height: 1.6;
+          line-height: 1.65;
         }
 
-        .registerLink {
+        .cardFooter {
           margin-top: auto;
+
           padding-top: 22px;
 
           display: flex;
@@ -584,20 +590,17 @@ export default function RegisterPage() {
           color: #1266e9;
 
           font-size: 14px;
-          font-weight: 850;
+          font-weight: 900;
         }
 
-        .registerLink strong {
-          font-size: 18px;
+        .cardFooter strong {
+          font-size: 19px;
         }
 
-        .bottomCard {
-          width: calc(100% - 64px);
-          max-width: 1180px;
+        .notice {
+          margin-top: 22px;
 
-          margin: 20px auto 0;
-
-          padding: 22px 25px;
+          padding: 18px;
 
           display: grid;
 
@@ -606,59 +609,56 @@ export default function RegisterPage() {
 
           align-items: center;
 
-          gap: 16px;
+          gap: 14px;
 
-          border: 1px solid #d6e3f2;
+          border:
+            1px solid #bfd5f2;
 
-          border-radius: 16px;
+          border-radius: 15px;
 
-          background: #ffffff;
+          background:
+            linear-gradient(
+              135deg,
+              #eef5ff,
+              #f8fbff
+            );
         }
 
-        .bottomIcon {
-          width: 48px;
-          height: 48px;
+        .noticeIcon {
+          width: 40px;
+          height: 40px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 13px;
+          border-radius: 50%;
 
-          background: #edf4ff;
+          background: #1266e9;
 
-          color: #1266e9;
+          color: #ffffff;
 
-          font-size: 23px;
-          font-weight: 700;
-        }
-
-        .bottomText span {
-          color: #1266e9;
-
-          font-size: 11px;
+          font-size: 15px;
           font-weight: 900;
-
-          letter-spacing: .8px;
         }
 
-        .bottomText h2 {
-          margin: 5px 0 0;
+        .notice strong {
+          display: block;
 
-          color: #29435d;
+          color: #29445f;
 
-          font-size: 18px;
+          font-size: 15px;
         }
 
-        .bottomText p {
+        .notice p {
           margin: 5px 0 0;
 
-          color: #7d8c9d;
+          color: #718398;
 
           font-size: 13px;
-          line-height: 1.5;
+          line-height: 1.55;
         }
 
-        .bottomCard > a {
+        .notice > a {
           min-height: 44px;
 
           padding: 0 17px;
@@ -674,9 +674,11 @@ export default function RegisterPage() {
           color: #ffffff;
 
           font-size: 14px;
-          font-weight: 800;
+          font-weight: 850;
 
           text-decoration: none;
+
+          white-space: nowrap;
         }
 
         @media (max-width: 900px) {
@@ -685,17 +687,16 @@ export default function RegisterPage() {
               repeat(2,minmax(0,1fr));
           }
 
-          .sectionTop {
-            align-items: flex-start;
+          .panelHeader {
             flex-direction: column;
+            align-items: flex-start;
           }
         }
 
         @media (max-width: 650px) {
           .header,
           .hero,
-          .productsSection,
-          .bottomCard {
+          .selectionPanel {
             width: calc(100% - 28px);
           }
 
@@ -703,32 +704,47 @@ export default function RegisterPage() {
             min-height: 72px;
           }
 
-          .brandText span {
+          .brand span {
             display: none;
           }
 
+          .brand strong {
+            font-size: 16px;
+          }
+
           .profilesButton {
-            padding: 0 11px;
+            padding: 0 12px;
+
             font-size: 12px;
           }
 
           .hero {
             padding:
-              40px 0 62px;
+              42px 0 66px;
           }
 
           .hero h1 {
             font-size: 34px;
           }
 
-          .hero > p {
+          .hero p {
             font-size: 15px;
           }
 
-          .productsSection {
+          .selectionPanel {
+            margin-top: -28px;
+
             padding: 18px;
 
-            margin-top: -28px;
+            border-radius: 19px;
+          }
+
+          .panelHeader h2 {
+            font-size: 23px;
+          }
+
+          .panelHeader > p {
+            font-size: 14px;
           }
 
           .productsGrid {
@@ -736,15 +752,15 @@ export default function RegisterPage() {
           }
 
           .productCard {
-            min-height: 250px;
+            min-height: 260px;
           }
 
-          .bottomCard {
+          .notice {
             grid-template-columns:
               auto 1fr;
           }
 
-          .bottomCard > a {
+          .notice > a {
             grid-column:
               1 / -1;
 
