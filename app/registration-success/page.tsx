@@ -1,7 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
 const PRODUCT_META: Record<
   string,
   {
@@ -13,36 +9,48 @@ const PRODUCT_META: Record<
     label: "ძაღლი",
     emoji: "🐶",
   },
+
   cat: {
     label: "კატა",
     emoji: "🐱",
   },
+
   keys: {
     label: "გასაღები",
     emoji: "🔑",
   },
+
   wallet: {
     label: "საფულე",
     emoji: "👛",
   },
+
   bag: {
     label: "ჩანთა",
     emoji: "👜",
   },
+
   suitcase: {
     label: "ჩემოდანი",
     emoji: "🧳",
   },
 };
 
-export default function RegistrationSuccessPage() {
-  const searchParams = useSearchParams();
+type RegistrationSuccessPageProps = {
+  searchParams?: {
+    type?: string;
+    tag?: string;
+  };
+};
 
+export default function RegistrationSuccessPage({
+  searchParams,
+}: RegistrationSuccessPageProps) {
   const type =
-    searchParams.get("type") || "";
+    searchParams?.type || "";
 
   const tagCode =
-    searchParams.get("tag") || "";
+    searchParams?.tag || "";
 
   const meta =
     PRODUCT_META[type] || {
@@ -124,7 +132,7 @@ export default function RegistrationSuccessPage() {
         </section>
       </main>
 
-      <style jsx>{`
+      <style>{`
         * {
           box-sizing: border-box;
         }
@@ -140,7 +148,7 @@ export default function RegistrationSuccessPage() {
           background:
             radial-gradient(
               circle at 100% 0%,
-              rgba(18,102,233,.08),
+              rgba(18, 102, 233, 0.08),
               transparent 28%
             ),
             linear-gradient(
@@ -165,7 +173,7 @@ export default function RegistrationSuccessPage() {
 
           box-shadow:
             0 18px 45px
-            rgba(30,70,120,.07);
+            rgba(30, 70, 120, 0.07);
         }
 
         .successIcon {
@@ -213,8 +221,7 @@ export default function RegistrationSuccessPage() {
         .intro {
           max-width: 430px;
 
-          margin:
-            12px auto 0;
+          margin: 12px auto 0;
 
           color: #7b8a9b;
 
@@ -325,7 +332,7 @@ export default function RegistrationSuccessPage() {
 
           box-shadow:
             0 10px 22px
-            rgba(18,102,233,.17);
+            rgba(18, 102, 233, 0.17);
         }
 
         .secondary {
