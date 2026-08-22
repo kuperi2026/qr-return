@@ -11,15 +11,10 @@ import {
 
 import {
   createClient,
-  type SupabaseClient,
   type User,
 } from "@supabase/supabase-js";
 
 import OwnerInformationSection from "./OwnerInformationSection";
-
-import AdminAccessSection, {
-  type AdminPermissions,
-} from "./AdminAccessSection";
 
 type ProductType =
   | "dog"
@@ -78,17 +73,6 @@ const PRODUCT_META: Record<
   },
 };
 
-const initialPermissions: AdminPermissions = {
-  viewProfiles: true,
-  editProfiles: false,
-  editFinderSettings: false,
-  editLiveChat: false,
-  viewMessages: false,
-  replyMessages: false,
-  markLostFound: false,
-  addProfiles: false,
-};
-
 function createSupabaseClient() {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -97,10 +81,7 @@ function createSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-  if (
-    !supabaseUrl ||
-    !supabaseKey
-  ) {
+  if (!supabaseUrl || !supabaseKey) {
     return null;
   }
 
@@ -119,77 +100,39 @@ export default function OwnerRegistrationStep({
     PRODUCT_META[type];
 
   const [
-    supabase,
-    setSupabase,
-  ] =
-    useState<SupabaseClient | null>(
-      null
-    );
-
-  const [
     currentUser,
     setCurrentUser,
-  ] =
-    useState<User | null>(
-      null
-    );
+  ] = useState<User | null>(
+    null
+  );
 
   const [
     loading,
     setLoading,
-  ] =
-    useState(true);
-
-  const [
-    saving,
-    setSaving,
-  ] =
-    useState(false);
+  ] = useState(true);
 
   const [
     errorMessage,
     setErrorMessage,
-  ] =
-    useState("");
+  ] = useState("");
 
   const [
     owner,
     setOwner,
-  ] =
-    useState<OwnerData>({
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-    });
-
-  const [
-    adminEnabled,
-    setAdminEnabled,
-  ] =
-    useState(false);
-
-  const [
-    adminEmail,
-    setAdminEmail,
-  ] =
-    useState("");
-
-  const [
-    permissions,
-    setPermissions,
-  ] =
-    useState<AdminPermissions>(
-      initialPermissions
-    );
+  ] = useState<OwnerData>({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+  });
 
   useEffect(() => {
     async function loadOwner() {
       try {
-        const client =
+        const supabase =
           createSupabaseClient();
 
-        if (!client) {
+        if (!supabase) {
           setErrorMessage(
             "Supabase კავშირი არ არის კონფიგურირებული."
           );
@@ -197,18 +140,16 @@ export default function OwnerRegistrationStep({
           return;
         }
 
-        setSupabase(client);
-
         const {
           data: {
             user,
           },
-          error: userError,
+          error,
         } =
-          await client.auth.getUser();
+          await supabase.auth.getUser();
 
         if (
-          userError ||
+          error ||
           !user
         ) {
           router.replace(
@@ -218,9 +159,7 @@ export default function OwnerRegistrationStep({
           return;
         }
 
-        setCurrentUser(
-          user
-        );
+        setCurrentUser(user);
 
         setOwner({
           firstName:
@@ -248,102 +187,6 @@ export default function OwnerRegistrationStep({
               user.email || ""
             ),
         });
-
-        const {
-          data: adminData,
-          error: adminError,
-        } =
-          await client
-            .from(
-              "secondary_admins"
-            )
-            .select(
-              `
-                admin_email,
-                view_profiles,
-                edit_profiles,
-                edit_finder_settings,
-                edit_live_chat,
-                view_messages,
-                reply_messages,
-                mark_lost_found,
-                add_profiles
-              `
-            )
-            .eq(
-              "owner_id",
-              user.id
-            )
-            .maybeSingle();
-
-        if (adminError) {
-          console.error(
-            "Admin load error:",
-            adminError
-          );
-        }
-
-        if (adminData) {
-          setAdminEnabled(
-            true
-          );
-
-          setAdminEmail(
-            adminData
-              .admin_email ||
-              ""
-          );
-
-          setPermissions({
-            viewProfiles:
-              Boolean(
-                adminData
-                  .view_profiles
-              ),
-
-            editProfiles:
-              Boolean(
-                adminData
-                  .edit_profiles
-              ),
-
-            editFinderSettings:
-              Boolean(
-                adminData
-                  .edit_finder_settings
-              ),
-
-            editLiveChat:
-              Boolean(
-                adminData
-                  .edit_live_chat
-              ),
-
-            viewMessages:
-              Boolean(
-                adminData
-                  .view_messages
-              ),
-
-            replyMessages:
-              Boolean(
-                adminData
-                  .reply_messages
-              ),
-
-            markLostFound:
-              Boolean(
-                adminData
-                  .mark_lost_found
-              ),
-
-            addProfiles:
-              Boolean(
-                adminData
-                  .add_profiles
-              ),
-          });
-        }
       } catch (error) {
         console.error(
           "Owner load error:",
@@ -354,219 +197,57 @@ export default function OwnerRegistrationStep({
           "მფლობელის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
         );
       } finally {
-        setLoading(
-          false
-        );
+        setLoading(false);
       }
     }
 
     loadOwner();
   }, [router]);
 
-  function validate() {
+  function continueToProduct() {
+    setErrorMessage("");
+
     if (!currentUser) {
-      return "მომხმარებლის ანგარიში ვერ მოიძებნა.";
+      setErrorMessage(
+        "მომხმარებლის ანგარიში ვერ მოიძებნა."
+      );
+
+      return;
     }
 
     if (
       !owner.firstName.trim()
     ) {
-      return "მფლობელის სახელი ვერ მოიძებნა.";
+      setErrorMessage(
+        "მფლობელის სახელი ვერ მოიძებნა."
+      );
+
+      return;
     }
 
     if (
       !owner.lastName.trim()
     ) {
-      return "მფლობელის გვარი ვერ მოიძებნა.";
+      setErrorMessage(
+        "მფლობელის გვარი ვერ მოიძებნა."
+      );
+
+      return;
     }
 
     if (
       !owner.phone.trim()
     ) {
-      return "მფლობელის ტელეფონის ნომერი ვერ მოიძებნა.";
-    }
-
-    if (
-      adminEnabled &&
-      !adminEmail.trim()
-    ) {
-      return "Secondary Admin-ის ელფოსტა მიუთითეთ.";
-    }
-
-    if (
-      adminEnabled
-    ) {
-      const emailPattern =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (
-        !emailPattern.test(
-          adminEmail.trim()
-        )
-      ) {
-        return "Secondary Admin-ის ელფოსტა არასწორია.";
-      }
-
-      if (
-        adminEmail
-          .trim()
-          .toLowerCase() ===
-        owner.email
-          .trim()
-          .toLowerCase()
-      ) {
-        return "Owner და Secondary Admin ერთი და იგივე ელფოსტა ვერ იქნება.";
-      }
-    }
-
-    return "";
-  }
-
-  async function saveAdmin(
-    client: SupabaseClient,
-    ownerId: string
-  ) {
-    if (
-      !adminEnabled
-    ) {
-      const {
-        error,
-      } =
-        await client
-          .from(
-            "secondary_admins"
-          )
-          .delete()
-          .eq(
-            "owner_id",
-            ownerId
-          );
-
-      if (error) {
-        throw error;
-      }
+      setErrorMessage(
+        "მფლობელის ტელეფონის ნომერი ვერ მოიძებნა."
+      );
 
       return;
     }
 
-    const {
-      error,
-    } =
-      await client
-        .from(
-          "secondary_admins"
-        )
-        .upsert(
-          {
-            owner_id:
-              ownerId,
-
-            admin_email:
-              adminEmail
-                .trim()
-                .toLowerCase(),
-
-            view_profiles:
-              permissions
-                .viewProfiles,
-
-            edit_profiles:
-              permissions
-                .editProfiles,
-
-            edit_finder_settings:
-              permissions
-                .editFinderSettings,
-
-            edit_live_chat:
-              permissions
-                .editLiveChat,
-
-            view_messages:
-              permissions
-                .viewMessages,
-
-            reply_messages:
-              permissions
-                .replyMessages,
-
-            mark_lost_found:
-              permissions
-                .markLostFound,
-
-            add_profiles:
-              permissions
-                .addProfiles,
-          },
-          {
-            onConflict:
-              "owner_id",
-          }
-        );
-
-    if (error) {
-      throw error;
-    }
-  }
-
-  async function continueToProduct() {
-    setErrorMessage(
-      ""
+    router.push(
+      `/register-item/${type}?step=product`
     );
-
-    const validationError =
-      validate();
-
-    if (
-      validationError
-    ) {
-      setErrorMessage(
-        validationError
-      );
-
-      return;
-    }
-
-    if (
-      !supabase ||
-      !currentUser
-    ) {
-      setErrorMessage(
-        "ანგარიშთან კავშირი ვერ მოიძებნა."
-      );
-
-      return;
-    }
-
-    setSaving(
-      true
-    );
-
-    try {
-      await saveAdmin(
-        supabase,
-        currentUser.id
-      );
-
-      router.push(
-        `/register-item/${type}?step=product`
-      );
-    } catch (error) {
-      console.error(
-        "Owner step save error:",
-        error
-      );
-
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "ინფორმაციის შენახვა ვერ მოხერხდა."
-      );
-    } finally {
-      setSaving(
-        false
-      );
-    }
   }
 
   if (loading) {
@@ -576,7 +257,7 @@ export default function OwnerRegistrationStep({
 
         <style jsx>{`
           .loading {
-            min-height: 320px;
+            min-height: 280px;
 
             display: grid;
             place-items: center;
@@ -586,14 +267,11 @@ export default function OwnerRegistrationStep({
 
             border-radius: 16px;
 
-            background:
-              #ffffff;
+            background: #ffffff;
 
-            color:
-              #718095;
+            color: #718095;
 
-            font-size:
-              11px;
+            font-size: 11px;
           }
         `}</style>
       </div>
@@ -603,9 +281,6 @@ export default function OwnerRegistrationStep({
   return (
     <>
       <div className="flow">
-
-        {/* PROGRESS */}
-
         <section className="progressCard">
           <div className="progressTop">
             <div className="step active">
@@ -648,8 +323,6 @@ export default function OwnerRegistrationStep({
           </div>
         </section>
 
-        {/* TITLE */}
-
         <section className="intro">
           <div className="productIcon">
             {meta.emoji}
@@ -661,16 +334,16 @@ export default function OwnerRegistrationStep({
             </span>
 
             <h1>
-              ჯერ გადაამოწმეთ
-              მფლობელის ინფორმაცია
+              გადაამოწმეთ მფლობელის ინფორმაცია
             </h1>
 
             <p>
-              შემდეგ ეტაპზე შეავსებთ{" "}
+              ეს ინფორმაცია თქვენს ანგარიშს ეკუთვნის.
+              შემდეგ ეტაპზე შეავსებთ მხოლოდ{" "}
               <strong>
                 {meta.label}
               </strong>
-              -ის პროფილს.
+              -ის მონაცემებს.
             </p>
           </div>
         </section>
@@ -690,8 +363,6 @@ export default function OwnerRegistrationStep({
           </div>
         )}
 
-        {/* OWNER */}
-
         <OwnerInformationSection
           firstName={
             owner.firstName
@@ -707,30 +378,23 @@ export default function OwnerRegistrationStep({
           }
         />
 
-        {/* ADMIN */}
+        <section className="accountNote">
+          <div className="accountIcon">
+            i
+          </div>
 
-        <AdminAccessSection
-          adminEnabled={
-            adminEnabled
-          }
-          setAdminEnabled={
-            setAdminEnabled
-          }
-          adminEmail={
-            adminEmail
-          }
-          setAdminEmail={
-            setAdminEmail
-          }
-          permissions={
-            permissions
-          }
-          setPermissions={
-            setPermissions
-          }
-        />
+          <div>
+            <strong>
+              Secondary Admin
+            </strong>
 
-        {/* CONTINUE */}
+            <p>
+              დამატებითი ადმინისტრატორის მართვა იქნება
+              თქვენი ანგარიშის პარამეტრებში და არა
+              კონკრეტული პროდუქტის რეგისტრაციაში.
+            </p>
+          </div>
+        </section>
 
         <section className="continueCard">
           <div>
@@ -744,9 +408,8 @@ export default function OwnerRegistrationStep({
             </h2>
 
             <p>
-              შემდეგ გვერდზე შეიყვანთ
-              QR კოდსა და პროდუქტის
-              ინფორმაციას.
+              შემდეგ გვერდზე შეიყვანთ QR კოდსა
+              და პროდუქტის მონაცემებს.
             </p>
           </div>
 
@@ -760,13 +423,8 @@ export default function OwnerRegistrationStep({
               onClick={
                 continueToProduct
               }
-              disabled={
-                saving
-              }
             >
-              {saving
-                ? "ინახება..."
-                : "გაგრძელება →"}
+              გაგრძელება →
             </button>
           </div>
         </section>
@@ -779,43 +437,29 @@ export default function OwnerRegistrationStep({
 
         .progressCard {
           margin-bottom: 16px;
-
           padding: 18px 20px;
 
-          border:
-            1px solid #dce6f1;
-
+          border: 1px solid #dce6f1;
           border-radius: 16px;
 
-          background:
-            #ffffff;
+          background: #ffffff;
 
           box-shadow:
             0 10px 28px
-            rgba(
-              30,
-              70,
-              120,
-              0.04
-            );
+            rgba(30,70,120,.04);
         }
 
         .progressTop {
           display: flex;
-
           align-items: center;
-
           gap: 13px;
         }
 
         .step {
           display: flex;
-
           align-items: center;
-
           gap: 9px;
-
-          opacity: 0.45;
+          opacity: .45;
         }
 
         .step.active {
@@ -833,26 +477,16 @@ export default function OwnerRegistrationStep({
 
           border-radius: 10px;
 
-          background:
-            #edf4ff;
+          background: #edf4ff;
+          color: #1266e9;
 
-          color:
-            #1266e9;
-
-          font-size:
-            8px;
-
-          font-weight:
-            950;
+          font-size: 8px;
+          font-weight: 950;
         }
 
-        .step.active
-          .circle {
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
+        .step.active .circle {
+          background: #1266e9;
+          color: #ffffff;
         }
 
         .step span,
@@ -861,82 +495,55 @@ export default function OwnerRegistrationStep({
         }
 
         .step span {
-          color:
-            #8795a5;
-
-          font-size:
-            6px;
-
-          font-weight:
-            900;
+          color: #8795a5;
+          font-size: 6px;
+          font-weight: 900;
         }
 
         .step strong {
-          margin-top:
-            3px;
+          margin-top: 3px;
 
-          color:
-            #334d68;
+          color: #334d68;
 
-          font-size:
-            9px;
+          font-size: 9px;
         }
 
         .line {
           flex: 1;
-
           height: 1px;
-
-          background:
-            #dce5ef;
+          background: #dce5ef;
         }
 
         .progressBar {
           height: 4px;
-
-          margin-top:
-            15px;
+          margin-top: 15px;
 
           overflow: hidden;
 
-          border-radius:
-            999px;
+          border-radius: 999px;
 
-          background:
-            #edf1f6;
+          background: #edf1f6;
         }
 
         .progressBar div {
           width: 50%;
           height: 100%;
 
-          border-radius:
-            999px;
+          border-radius: 999px;
 
-          background:
-            #1266e9;
+          background: #1266e9;
         }
 
         .intro {
-          margin-bottom:
-            16px;
-
-          padding:
-            22px;
+          margin-bottom: 16px;
+          padding: 22px;
 
           display: flex;
+          align-items: center;
+          gap: 14px;
 
-          align-items:
-            center;
-
-          gap:
-            14px;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius:
-            16px;
+          border: 1px solid #dce6f1;
+          border-radius: 16px;
 
           background:
             linear-gradient(
@@ -955,116 +562,126 @@ export default function OwnerRegistrationStep({
           display: grid;
           place-items: center;
 
-          border-radius:
-            15px;
+          border-radius: 15px;
 
-          background:
-            #edf4ff;
+          background: #edf4ff;
 
-          font-size:
-            27px;
+          font-size: 27px;
         }
 
         .intro span {
-          color:
-            #1266e9;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+          color: #1266e9;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .intro h1 {
-          margin:
-            5px 0 0;
+          margin: 5px 0 0;
 
-          color:
-            #223b55;
+          color: #223b55;
 
-          font-size:
-            20px;
+          font-size: 20px;
         }
 
         .intro p {
-          margin:
-            6px 0 0;
+          margin: 6px 0 0;
 
-          color:
-            #7c8c9e;
+          color: #7c8c9e;
 
-          font-size:
-            9px;
+          font-size: 9px;
+
+          line-height: 1.55;
         }
 
         .intro p strong {
-          color:
-            #1266e9;
+          color: #1266e9;
         }
 
         .error {
-          margin-bottom:
-            16px;
+          margin-bottom: 16px;
+          padding: 14px;
 
-          padding:
-            14px;
+          border: 1px solid #efc7cb;
+          border-radius: 12px;
 
-          border:
-            1px solid #efc7cb;
-
-          border-radius:
-            12px;
-
-          background:
-            #fff7f8;
-
-          color:
-            #a3434c;
+          background: #fff7f8;
+          color: #a3434c;
         }
 
         .error strong {
-          display:
-            block;
-
-          font-size:
-            10px;
+          display: block;
+          font-size: 10px;
         }
 
         .error p {
-          margin:
-            4px 0 0;
+          margin: 4px 0 0;
+          font-size: 9px;
+        }
 
-          font-size:
-            9px;
+        .accountNote {
+          margin-top: 16px;
+
+          padding: 15px;
+
+          display: flex;
+          align-items: flex-start;
+
+          gap: 10px;
+
+          border: 1px solid #dce6f1;
+          border-radius: 12px;
+
+          background: #fafcff;
+        }
+
+        .accountIcon {
+          width: 27px;
+          height: 27px;
+
+          flex: 0 0 27px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 50%;
+
+          background: #edf4ff;
+          color: #1266e9;
+
+          font-size: 8px;
+          font-weight: 950;
+        }
+
+        .accountNote strong {
+          display: block;
+
+          color: #405972;
+
+          font-size: 9px;
+        }
+
+        .accountNote p {
+          margin: 4px 0 0;
+
+          color: #8492a1;
+
+          font-size: 8px;
+          line-height: 1.5;
         }
 
         .continueCard {
-          margin-top:
-            16px;
-
-          padding:
-            22px 24px;
+          margin-top: 16px;
+          padding: 22px 24px;
 
           display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-          align-items:
-            center;
+          gap: 20px;
 
-          justify-content:
-            space-between;
-
-          gap:
-            20px;
-
-          border:
-            1px solid #cddff5;
-
-          border-radius:
-            16px;
+          border: 1px solid #cddff5;
+          border-radius: 16px;
 
           background:
             linear-gradient(
@@ -1074,151 +691,92 @@ export default function OwnerRegistrationStep({
             );
         }
 
-        .continueCard
-          > div
-          > span {
-          color:
-            #1266e9;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            1px;
+        .continueCard > div > span {
+          color: #1266e9;
+          font-size: 7px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .continueCard h2 {
-          margin:
-            5px 0 0;
+          margin: 5px 0 0;
 
-          color:
-            #29425d;
+          color: #29425d;
 
-          font-size:
-            16px;
+          font-size: 16px;
         }
 
         .continueCard p {
-          margin:
-            5px 0 0;
+          margin: 5px 0 0;
 
-          color:
-            #7e8da0;
+          color: #7e8da0;
 
-          font-size:
-            8px;
+          font-size: 8px;
         }
 
         .buttons {
           display: flex;
+          align-items: center;
 
-          align-items:
-            center;
-
-          gap:
-            8px;
+          gap: 8px;
         }
 
         .buttons a,
         .buttons button {
-          min-height:
-            44px;
-
-          padding:
-            0 16px;
+          min-height: 44px;
+          padding: 0 16px;
 
           display: flex;
+          align-items: center;
+          justify-content: center;
 
-          align-items:
-            center;
+          border-radius: 10px;
 
-          justify-content:
-            center;
+          font-family: inherit;
+          font-size: 9px;
+          font-weight: 900;
 
-          border-radius:
-            10px;
-
-          font-family:
-            inherit;
-
-          font-size:
-            9px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
+          text-decoration: none;
         }
 
         .buttons a {
-          border:
-            1px solid #ccd9e7;
+          border: 1px solid #ccd9e7;
 
-          background:
-            #ffffff;
+          background: #ffffff;
 
-          color:
-            #64778b;
+          color: #64778b;
         }
 
         .buttons button {
-          min-width:
-            135px;
+          min-width: 140px;
 
           border: 0;
 
-          background:
-            #1266e9;
+          background: #1266e9;
 
-          color:
-            #ffffff;
+          color: #ffffff;
 
-          cursor:
-            pointer;
+          cursor: pointer;
         }
 
-        .buttons button:disabled {
-          opacity:
-            0.6;
-
-          cursor:
-            wait;
-        }
-
-        @media (
-          max-width:
-            650px
-        ) {
+        @media (max-width: 650px) {
           .intro {
-            align-items:
-              flex-start;
+            align-items: flex-start;
           }
 
           .continueCard {
-            flex-direction:
-              column;
+            flex-direction: column;
 
-            align-items:
-              stretch;
+            align-items: stretch;
           }
 
           .buttons {
-            width:
-              100%;
+            width: 100%;
           }
 
           .buttons a,
           .buttons button {
             flex: 1;
-          }
-
-          .step strong {
-            font-size:
-              8px;
           }
         }
       `}</style>
