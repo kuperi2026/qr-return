@@ -1,8 +1,3 @@
-ფაილი: [app/register/page.tsx — GitHub](https://github.com/kuperi2026/qr-return/blob/main/app/register/page.tsx?utm_source=chatgpt.com)
-
-**მთელი ძველი კოდი წაშალე და ეს ჩასვი.** განლაგება იგივე დავტოვე — Emergency მარცხნივ, 6 პროდუქტი მარჯვნივ 3×2. მხოლოდ შიგნით ტექსტები გავზარდე.
-
-```tsx
 "use client";
 
 const PRODUCTS = [
@@ -10,43 +5,37 @@ const PRODUCTS = [
     type: "dog",
     label: "ძაღლი",
     emoji: "🐶",
-    description:
-      "QR პროფილი თქვენი ძაღლის უსაფრთხო დაბრუნებისთვის.",
+    description: "QR პროფილი თქვენი ძაღლის უსაფრთხო დაბრუნებისთვის.",
   },
   {
     type: "cat",
     label: "კატა",
     emoji: "🐱",
-    description:
-      "შექმენით კატის პროფილი და დაამატეთ საჭირო ინფორმაცია.",
+    description: "შექმენით კატის პროფილი და დაამატეთ საჭირო ინფორმაცია.",
   },
   {
     type: "keys",
     label: "გასაღები",
     emoji: "🔑",
-    description:
-      "მიაბით QR კოდი გასაღებს და გაამარტივეთ დაბრუნება.",
+    description: "მიაბით QR კოდი გასაღებს და გაამარტივეთ დაბრუნება.",
   },
   {
     type: "wallet",
     label: "საფულე",
     emoji: "👛",
-    description:
-      "საფულის QR პროფილი სწრაფი დაკავშირებისთვის.",
+    description: "საფულის QR პროფილი სწრაფი დაკავშირებისთვის.",
   },
   {
     type: "bag",
     label: "ჩანთა",
     emoji: "👜",
-    description:
-      "დაარეგისტრირეთ ჩანთა და მისი განმასხვავებელი ინფორმაცია.",
+    description: "დაარეგისტრირეთ ჩანთა და მისი განმასხვავებელი ინფორმაცია.",
   },
   {
     type: "suitcase",
     label: "ჩემოდანი",
     emoji: "🧳",
-    description:
-      "QR პროფილი თქვენი სამგზავრო ჩემოდნისთვის.",
+    description: "QR პროფილი თქვენი სამგზავრო ჩემოდნისთვის.",
   },
 ] as const;
 
@@ -71,21 +60,17 @@ export default function RegisterPage() {
 
         <section className="mainCard">
           <div className="intro">
-            <span className="eyebrow">
-              PRODUCT REGISTRATION
-            </span>
+            <span className="eyebrow">PRODUCT REGISTRATION</span>
 
             <h1>აირჩიეთ პროდუქტი</h1>
 
             <p>
-              ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად დაამატოთ
-              და მართოთ ყველა თქვენი QR პროფილი.
+              ერთი ანგარიშიდან შეგიძლიათ შეუზღუდავად დაამატოთ და მართოთ
+              ყველა თქვენი QR პროფილი.
             </p>
           </div>
 
           <div className="selectionLayout">
-            {/* EMERGENCY — LEFT */}
-
             <a
               href="/register/emergency-bracelet"
               className="emergencyCard"
@@ -99,9 +84,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="emergencyContent">
-                <span className="emergencyEyebrow">
-                  EMERGENCY
-                </span>
+                <span className="emergencyEyebrow">EMERGENCY</span>
 
                 <h2>
                   Emergency
@@ -110,8 +93,8 @@ export default function RegisterPage() {
                 </h2>
 
                 <p>
-                  მნიშვნელოვანი ინფორმაციის სწრაფი წვდომა
-                  გადაუდებელ სიტუაციაში.
+                  მნიშვნელოვანი ინფორმაციის სწრაფი წვდომა გადაუდებელ
+                  სიტუაციაში.
                 </p>
 
                 <div className="featureList">
@@ -137,8 +120,6 @@ export default function RegisterPage() {
               </span>
             </a>
 
-            {/* SIX PRODUCTS — RIGHT */}
-
             <div className="productsGrid">
               {PRODUCTS.map((product) => (
                 <a
@@ -147,10 +128,7 @@ export default function RegisterPage() {
                   className="productCard"
                 >
                   <div className="productTop">
-                    <div className="productIcon">
-                      {product.emoji}
-                    </div>
-
+                    <div className="productIcon">{product.emoji}</div>
                     <div className="arrow">→</div>
                   </div>
 
@@ -175,9 +153,9 @@ export default function RegisterPage() {
               </strong>
 
               <p>
-                Lost &amp; Found პროდუქტები და Emergency Bracelet
-                ერთი ანგარიშიდან იმართება. თითოეული QR კოდი
-                საკუთარ პროფილზე ფიქსირდება.
+                Lost &amp; Found პროდუქტები და Emergency Bracelet ერთი
+                ანგარიშიდან იმართება. თითოეული QR კოდი საკუთარ პროფილზე
+                ფიქსირდება.
               </p>
             </div>
           </div>
@@ -197,18 +175,14 @@ export default function RegisterPage() {
           background: #0747c9;
         }
 
-        /* HEADER */
-
         .topbar {
           width: 100%;
           max-width: 1180px;
           height: 72px;
           margin: 0 auto;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
-
           border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -222,14 +196,11 @@ export default function RegisterPage() {
         .brandMark {
           width: 42px;
           height: 42px;
-
           display: grid;
           place-items: center;
-
           border-radius: 11px;
           background: #ffffff;
           color: #0747c9;
-
           font-size: 13px;
           font-weight: 950;
         }
@@ -256,39 +227,28 @@ export default function RegisterPage() {
         .profilesButton {
           min-height: 42px;
           padding: 0 17px;
-
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
           border: 1px solid rgba(255, 255, 255, 0.35);
           border-radius: 10px;
-
           background: rgba(255, 255, 255, 0.1);
           color: #ffffff;
-
           font-size: 14px;
           font-weight: 850;
           text-decoration: none;
         }
 
-        /* MAIN */
-
         .mainCard {
           width: 100%;
           max-width: 1180px;
-
           height: calc(100vh - 96px);
           margin: 0 auto;
-
           padding: 20px 24px 18px;
-
           display: flex;
           flex-direction: column;
-
           border-radius: 22px;
           background: #ffffff;
-
           box-shadow: 0 24px 60px rgba(0, 25, 78, 0.26);
         }
 
@@ -319,38 +279,26 @@ export default function RegisterPage() {
           line-height: 1.45;
         }
 
-        /* TWO SIDES */
-
         .selectionLayout {
           flex: 1;
           min-height: 0;
-
           margin-top: 15px;
-
           display: grid;
-
           grid-template-columns:
             minmax(235px, 0.72fr)
             minmax(0, 2fr);
-
           gap: 13px;
         }
-
-        /* EMERGENCY */
 
         .emergencyCard {
           min-height: 0;
           padding: 18px;
-
           display: flex;
           flex-direction: column;
-
           position: relative;
           overflow: hidden;
-
           border: 1px solid rgba(255, 255, 255, 0.18);
           border-radius: 16px;
-
           background:
             radial-gradient(
               circle at 100% 0%,
@@ -358,12 +306,9 @@ export default function RegisterPage() {
               transparent 34%
             ),
             #0b52d6;
-
           color: #ffffff;
           text-decoration: none;
-
           box-shadow: 0 10px 22px rgba(7, 71, 201, 0.14);
-
           transition:
             transform 0.18s ease,
             background 0.18s ease,
@@ -385,10 +330,8 @@ export default function RegisterPage() {
         .emergencyIcon {
           width: 52px;
           height: 52px;
-
           display: grid;
           place-items: center;
-
           border-radius: 13px;
           background: #ffffff;
         }
@@ -403,15 +346,11 @@ export default function RegisterPage() {
         .emergencyArrow {
           width: 34px;
           height: 34px;
-
           display: grid;
           place-items: center;
-
           border-radius: 50%;
-
           border: 1px solid rgba(255, 255, 255, 0.3);
           background: rgba(255, 255, 255, 0.14);
-
           color: #ffffff;
           font-size: 17px;
           font-weight: 900;
@@ -454,7 +393,6 @@ export default function RegisterPage() {
           display: flex;
           align-items: center;
           gap: 7px;
-
           color: rgba(255, 255, 255, 0.94);
           font-size: 13px;
           font-weight: 700;
@@ -463,17 +401,12 @@ export default function RegisterPage() {
         .check {
           width: 20px;
           height: 20px;
-
           flex: 0 0 20px;
-
           display: grid;
           place-items: center;
-
           border-radius: 50%;
-
           background: rgba(255, 255, 255, 0.14);
           border: 1px solid rgba(255, 255, 255, 0.25);
-
           color: #ffffff;
           font-size: 10px;
           font-weight: 900;
@@ -482,48 +415,32 @@ export default function RegisterPage() {
         .emergencyStart {
           margin-top: auto;
           padding-top: 12px;
-
           color: #ffffff;
           font-size: 14px;
           font-weight: 850;
         }
 
-        /* SIX PRODUCTS */
-
         .productsGrid {
           min-width: 0;
           min-height: 0;
-
           display: grid;
-
-          grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-
-          grid-template-rows:
-            repeat(2, minmax(0, 1fr));
-
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-rows: repeat(2, minmax(0, 1fr));
           gap: 11px;
         }
 
         .productCard {
           min-width: 0;
           min-height: 0;
-
           padding: 14px 15px;
-
           display: flex;
           flex-direction: column;
-
           border: 1px solid rgba(255, 255, 255, 0.18);
           border-radius: 14px;
-
           background: #0b52d6;
-
           color: #ffffff;
           text-decoration: none;
-
           box-shadow: 0 8px 18px rgba(7, 71, 201, 0.12);
-
           transition:
             transform 0.18s ease,
             background 0.18s ease,
@@ -545,28 +462,21 @@ export default function RegisterPage() {
         .productIcon {
           width: 41px;
           height: 41px;
-
           display: grid;
           place-items: center;
-
           border-radius: 11px;
           background: #ffffff;
-
           font-size: 21px;
         }
 
         .arrow {
           width: 28px;
           height: 28px;
-
           display: grid;
           place-items: center;
-
           border-radius: 50%;
-
           background: rgba(255, 255, 255, 0.14);
           border: 1px solid rgba(255, 255, 255, 0.3);
-
           color: #ffffff;
           font-size: 14px;
           font-weight: 900;
@@ -574,9 +484,7 @@ export default function RegisterPage() {
 
         .productCard h2 {
           margin: 10px 0 0;
-
           color: #ffffff;
-
           font-size: 20px;
           line-height: 1.15;
           font-weight: 850;
@@ -584,9 +492,7 @@ export default function RegisterPage() {
 
         .productCard p {
           margin: 6px 0 0;
-
           color: rgba(255, 255, 255, 0.9);
-
           font-size: 12px;
           line-height: 1.45;
         }
@@ -594,71 +500,50 @@ export default function RegisterPage() {
         .start {
           margin-top: auto;
           padding-top: 7px;
-
           color: #ffffff;
-
           font-size: 12px;
           font-weight: 850;
         }
 
-        /* BOTTOM INFO */
-
         .bottomInfo {
           flex: 0 0 auto;
-
           margin-top: 12px;
-
           min-height: 60px;
-
           padding: 9px 13px;
-
           display: flex;
           align-items: center;
           gap: 10px;
-
           border: 1px solid #cbdcf4;
           border-radius: 13px;
-
           background: #f2f6fc;
         }
 
         .infoIcon {
           width: 31px;
           height: 31px;
-
           flex: 0 0 31px;
-
           display: grid;
           place-items: center;
-
           border-radius: 50%;
-
           background: #0747c9;
           color: #ffffff;
-
           font-size: 13px;
           font-weight: 900;
         }
 
         .bottomInfo strong {
           display: block;
-
           color: #29445f;
-
           font-size: 14px;
           font-weight: 850;
         }
 
         .bottomInfo p {
           margin: 3px 0 0;
-
           color: #6b7e92;
-
           font-size: 12px;
           line-height: 1.4;
         }
-
-        /* TABLET */
 
         @media (max-width: 900px) {
           .page {
@@ -680,9 +565,7 @@ export default function RegisterPage() {
           }
 
           .productsGrid {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
-
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             grid-template-rows: auto;
           }
 
@@ -690,8 +573,6 @@ export default function RegisterPage() {
             min-height: 200px;
           }
         }
-
-        /* MOBILE */
 
         @media (max-width: 600px) {
           .page {
@@ -756,8 +637,3 @@ export default function RegisterPage() {
     </>
   );
 }
-```
-
-შენახვისა და Vercel deployment-ის შემდეგ ტესტი აქ:
-
-[QR RETURN — Register Test](https://qr-return.vercel.app/register?utm_source=chatgpt.com)
