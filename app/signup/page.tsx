@@ -31,6 +31,7 @@ export default function SignupPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setErrorMessage("");
 
     if (!firstName.trim()) {
@@ -94,7 +95,9 @@ export default function SignupPage() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       if (!data.user) {
         throw new Error("ანგარიშის შექმნა ვერ მოხერხდა.");
@@ -161,12 +164,16 @@ export default function SignupPage() {
   return (
     <>
       <main className="page">
+        {/* BACKGROUND */}
+
         <div className="backgroundPattern" aria-hidden="true">
           <span className="qr qr1">QR</span>
           <span className="qr qr2">QR</span>
           <span className="qr qr3">QR</span>
           <span className="qr qr4">QR</span>
         </div>
+
+        {/* HEADER */}
 
         <header className="header">
           <a href="/" className="brand">
@@ -183,7 +190,11 @@ export default function SignupPage() {
           </a>
         </header>
 
+        {/* MAIN */}
+
         <section className="content">
+          {/* LEFT */}
+
           <div className="intro">
             <span className="eyebrow">
               QR RETURN ACCOUNT
@@ -192,14 +203,13 @@ export default function SignupPage() {
             <h1>შექმენით ანგარიში</h1>
 
             <p className="introLead">
-              ერთი ანგარიში — თქვენი ყველა QR პროფილი
-              ერთ სივრცეში.
+              ერთი ანგარიში — თქვენი ყველა QR პროფილი ერთ
+              სივრცეში.
             </p>
 
             <div className="infoBox">
               <strong>
-                მარტივად მართეთ ის, რაც თქვენთვის
-                მნიშვნელოვანია.
+                მარტივად მართეთ ის, რაც თქვენთვის მნიშვნელოვანია.
               </strong>
 
               <p>
@@ -213,6 +223,8 @@ export default function SignupPage() {
               დაბრუნებამდე.
             </div>
           </div>
+
+          {/* FORM */}
 
           <section className="formCard">
             <div className="formHeader">
@@ -234,6 +246,8 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="grid">
+                {/* FIRST NAME */}
+
                 <Field label="სახელი" required>
                   <input
                     type="text"
@@ -244,6 +258,8 @@ export default function SignupPage() {
                     autoComplete="given-name"
                   />
                 </Field>
+
+                {/* LAST NAME */}
 
                 <Field label="გვარი" required>
                   <input
@@ -256,6 +272,8 @@ export default function SignupPage() {
                   />
                 </Field>
 
+                {/* EMAIL */}
+
                 <Field label="ელფოსტა" required>
                   <input
                     type="email"
@@ -266,6 +284,8 @@ export default function SignupPage() {
                     autoComplete="email"
                   />
                 </Field>
+
+                {/* PHONE */}
 
                 <Field label="ტელეფონის ნომერი" required>
                   <input
@@ -278,22 +298,24 @@ export default function SignupPage() {
                   />
                 </Field>
 
-                <div className="fullWidth">
-                  <Field label="კოდური სიტყვა" required>
-                    <input
-                      type="text"
-                      value={codeWord}
-                      onChange={(event) =>
-                        setCodeWord(event.target.value)
-                      }
-                      autoComplete="off"
-                    />
+                {/* CODE WORD */}
 
-                    <small className="fieldHelp">
-                      გამოიყენება ანგარიშის იდენტიფიკაციისთვის.
-                    </small>
-                  </Field>
-                </div>
+                <Field label="კოდური სიტყვა" required>
+                  <input
+                    type="text"
+                    value={codeWord}
+                    onChange={(event) =>
+                      setCodeWord(event.target.value)
+                    }
+                    autoComplete="off"
+                  />
+
+                  <small className="fieldHelp">
+                    გამოიყენება ანგარიშის იდენტიფიკაციისთვის.
+                  </small>
+                </Field>
+
+                {/* PASSWORD */}
 
                 <Field label="პაროლი" required>
                   <div className="passwordWrap">
@@ -316,6 +338,8 @@ export default function SignupPage() {
                     </button>
                   </div>
                 </Field>
+
+                {/* CONFIRM PASSWORD */}
 
                 <Field label="გაიმეორეთ პაროლი" required>
                   <input
@@ -347,7 +371,10 @@ export default function SignupPage() {
 
             <div className="bottomLogin">
               <span>უკვე გაქვთ ანგარიში?</span>
-              <a href="/login">შესვლა</a>
+
+              <a href="/login">
+                შესვლა
+              </a>
             </div>
           </section>
         </section>
@@ -360,68 +387,96 @@ export default function SignupPage() {
 
         .page {
           position: relative;
+
           min-height: 100vh;
+
+          padding: 0 32px 50px;
+
           overflow: hidden;
-          padding: 0 32px 45px;
+
           background: #0647c8;
-          font-family: Arial, Helvetica, sans-serif;
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
         }
 
-        /* BACKGROUND */
+        /* =========================
+           BACKGROUND
+        ========================= */
 
         .backgroundPattern {
           position: fixed;
+
           inset: 0;
+
           overflow: hidden;
+
           pointer-events: none;
         }
 
         .qr {
           position: absolute;
+
           color: rgba(255, 255, 255, 0.045);
+
           font-size: 130px;
+
           font-weight: 950;
+
           user-select: none;
         }
 
         .qr1 {
           top: 10%;
           left: 3%;
+
           transform: rotate(-14deg);
         }
 
         .qr2 {
           top: 13%;
           right: 4%;
+
           transform: rotate(13deg);
         }
 
         .qr3 {
           bottom: 4%;
           left: 7%;
+
           transform: rotate(10deg);
         }
 
         .qr4 {
           bottom: 4%;
           right: 6%;
+
           transform: rotate(-12deg);
         }
 
-        /* HEADER */
+        /* =========================
+           HEADER
+        ========================= */
 
         .header {
           position: relative;
+
           z-index: 2;
 
           width: 100%;
-          max-width: 1400px;
+
+          max-width: 1500px;
+
           min-height: 78px;
 
           margin: 0 auto;
 
           display: flex;
+
           align-items: center;
+
           justify-content: space-between;
 
           border-bottom:
@@ -430,24 +485,31 @@ export default function SignupPage() {
 
         .brand {
           display: flex;
+
           align-items: center;
+
           gap: 11px;
+
           text-decoration: none;
         }
 
         .brandMark {
           width: 46px;
+
           height: 46px;
 
           display: grid;
+
           place-items: center;
 
           border-radius: 12px;
 
           background: #ffffff;
+
           color: #0647c8;
 
           font-size: 13px;
+
           font-weight: 950;
 
           box-shadow:
@@ -461,7 +523,9 @@ export default function SignupPage() {
 
         .brandText strong {
           color: #ffffff;
+
           font-size: 19px;
+
           font-weight: 900;
         }
 
@@ -471,16 +535,21 @@ export default function SignupPage() {
           color: rgba(255, 255, 255, 0.7);
 
           font-size: 10px;
+
           font-weight: 700;
+
           letter-spacing: 0.6px;
         }
 
         .loginTop {
           min-height: 44px;
+
           padding: 0 20px;
 
           display: inline-flex;
+
           align-items: center;
+
           justify-content: center;
 
           border:
@@ -491,49 +560,66 @@ export default function SignupPage() {
           color: #ffffff;
 
           font-size: 14px;
+
           font-weight: 850;
 
           text-decoration: none;
+
+          transition:
+            background 0.18s ease;
         }
 
         .loginTop:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background:
+            rgba(255, 255, 255, 0.1);
         }
 
-        /* MAIN LAYOUT */
+        /* =========================
+           MAIN LAYOUT
+        ========================= */
 
         .content {
           position: relative;
+
           z-index: 2;
 
           width: 100%;
-          max-width: 1400px;
+
+          max-width: 1500px;
 
           margin: 0 auto;
+
           padding-top: 48px;
 
           display: grid;
 
           grid-template-columns:
-            minmax(310px, 0.55fr)
-            minmax(760px, 1.45fr);
+            minmax(300px, 0.42fr)
+            minmax(850px, 1.58fr);
 
-          align-items: center;
+          align-items: start;
 
-          gap: 75px;
+          gap: 70px;
         }
 
-        /* LEFT */
+        /* =========================
+           LEFT SIDE
+        ========================= */
 
         .intro {
+          padding-top: 30px;
+
           color: #ffffff;
         }
 
         .eyebrow {
-          color: rgba(255, 255, 255, 0.72);
+          color:
+            rgba(255, 255, 255, 0.72);
 
           font-size: 12px;
+
           font-weight: 900;
+
           letter-spacing: 1px;
         }
 
@@ -543,26 +629,31 @@ export default function SignupPage() {
           color: #ffffff;
 
           font-size: 40px;
+
           line-height: 1.12;
+
           letter-spacing: -0.7px;
         }
 
         .introLead {
-          max-width: 430px;
+          max-width: 410px;
 
-          margin: 15px 0 0;
+          margin: 16px 0 0;
 
-          color: rgba(255, 255, 255, 0.87);
+          color:
+            rgba(255, 255, 255, 0.87);
 
           font-size: 18px;
+
           line-height: 1.6;
         }
 
         .infoBox {
-          max-width: 450px;
+          max-width: 420px;
 
-          margin-top: 29px;
-          padding: 20px 21px;
+          margin-top: 30px;
+
+          padding: 21px;
 
           border:
             1px solid rgba(255, 255, 255, 0.18);
@@ -579,46 +670,57 @@ export default function SignupPage() {
           color: #ffffff;
 
           font-size: 16px;
+
           line-height: 1.45;
         }
 
         .infoBox p {
           margin: 9px 0 0;
 
-          color: rgba(255, 255, 255, 0.76);
+          color:
+            rgba(255, 255, 255, 0.76);
 
           font-size: 14px;
+
           line-height: 1.6;
         }
 
         .slogan {
-          max-width: 440px;
+          max-width: 420px;
 
-          margin-top: 21px;
-          padding-left: 15px;
+          margin-top: 22px;
 
-          border-left: 3px solid #ffffff;
+          padding-left: 16px;
 
-          color: rgba(255, 255, 255, 0.9);
+          border-left:
+            3px solid #ffffff;
+
+          color:
+            rgba(255, 255, 255, 0.9);
 
           font-size: 15px;
+
           line-height: 1.6;
         }
 
-        /* LARGE REGISTRATION PANEL */
+        /* =========================
+           LARGE FORM CARD
+        ========================= */
 
         .formCard {
           width: 100%;
-          max-width: 900px;
+
+          max-width: 1000px;
 
           margin-left: auto;
 
-          padding: 36px 42px 32px;
+          padding:
+            40px 50px 36px;
 
           border:
             1px solid rgba(255, 255, 255, 0.8);
 
-          border-radius: 24px;
+          border-radius: 25px;
 
           background: #ffffff;
 
@@ -627,13 +729,17 @@ export default function SignupPage() {
             0 4px 15px rgba(0, 25, 80, 0.08);
         }
 
-        /* HEADER */
+        /* =========================
+           FORM HEADER
+        ========================= */
 
         .formHeader > span {
           color: #0647c8;
 
           font-size: 12px;
+
           font-weight: 900;
+
           letter-spacing: 0.9px;
         }
 
@@ -642,106 +748,133 @@ export default function SignupPage() {
 
           color: #203a55;
 
-          font-size: 28px;
+          font-size: 29px;
+
           font-weight: 850;
+
           line-height: 1.25;
         }
 
         .formHeader p {
-          margin: 8px 0 0;
+          margin: 9px 0 0;
 
           color: #74869a;
 
           font-size: 15px;
+
           line-height: 1.55;
         }
 
-        /* ERROR */
+        /* =========================
+           ERROR
+        ========================= */
 
         .errorBox {
-          margin-top: 20px;
+          margin-top: 21px;
+
           padding: 14px 16px;
 
-          border: 1px solid #f0cdd2;
+          border:
+            1px solid #f0cdd2;
+
           border-radius: 11px;
 
           background: #fff2f4;
+
           color: #a23e49;
 
           font-size: 14px;
+
+          line-height: 1.5;
         }
 
-        /* FORM GRID */
+        /* =========================
+           FORM
+
+           IMPORTANT:
+           ONE COLUMN = FULL WIDTH
+        ========================= */
 
         .grid {
           width: 100%;
 
-          margin-top: 29px;
+          margin-top: 31px;
 
           display: grid;
 
-          grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+          grid-template-columns: 1fr;
 
-          column-gap: 28px;
-          row-gap: 23px;
-        }
-
-        .fullWidth {
-          grid-column: 1 / -1;
-          width: 100%;
+          gap: 23px;
         }
 
         .field {
           width: 100%;
+
           min-width: 0;
         }
 
-        /* LABEL */
+        /* =========================
+           LABEL
+        ========================= */
 
         .field label {
           display: block;
 
-          margin: 0 0 10px 2px;
+          margin:
+            0 0 11px 2px;
 
           color: #2f4963;
 
           font-size: 15px;
+
           font-weight: 850;
+
           line-height: 1.35;
         }
 
         .required {
           margin-left: 2px;
+
           color: #0647c8;
         }
 
-        /* INPUT */
+        /* =========================
+           EXTRA WIDE INPUTS
+        ========================= */
 
         .field input {
           display: block;
 
           width: 100%;
-          min-width: 0;
-          height: 58px;
 
-          padding: 0 18px;
+          min-width: 100%;
 
-          border: 1.5px solid #d6e1ec;
+          height: 60px;
+
+          padding:
+            0 20px;
+
+          border:
+            1.5px solid #d6e1ec;
+
           border-radius: 13px;
 
           background: #ffffff;
+
           color: #203a55;
 
           font-family: inherit;
+
           font-size: 16px;
+
           font-weight: 500;
 
           outline: none;
 
           transition:
             border-color 0.18s ease,
-            box-shadow 0.18s ease;
+            box-shadow 0.18s ease,
+            background 0.18s ease;
         }
 
         .field input:hover {
@@ -751,116 +884,167 @@ export default function SignupPage() {
         .field input:focus {
           border-color: #1266e9;
 
+          background: #ffffff;
+
           box-shadow:
-            0 0 0 4px rgba(18, 102, 233, 0.1);
+            0 0 0 4px
+            rgba(18, 102, 233, 0.1);
         }
 
         .fieldHelp {
           display: block;
 
-          margin: 9px 0 0 2px;
+          margin:
+            9px 0 0 2px;
 
           color: #7d8fa1;
 
           font-size: 13px;
+
           line-height: 1.5;
         }
 
-        /* PASSWORD */
+        /* =========================
+           PASSWORD
+        ========================= */
 
         .passwordWrap {
           position: relative;
+
           width: 100%;
         }
 
         .passwordWrap input {
-          padding-right: 95px;
+          width: 100%;
+
+          padding-right: 105px;
         }
 
         .passwordWrap button {
           position: absolute;
 
           top: 50%;
-          right: 10px;
 
-          transform: translateY(-50%);
+          right: 11px;
 
-          min-width: 69px;
-          height: 38px;
+          transform:
+            translateY(-50%);
 
-          padding: 0 12px;
+          min-width: 74px;
+
+          height: 39px;
+
+          padding: 0 13px;
 
           border: 0;
+
           border-radius: 9px;
 
           background: #edf4ff;
+
           color: #0647c8;
 
           font-family: inherit;
+
           font-size: 12px;
+
           font-weight: 850;
 
           cursor: pointer;
+
+          transition:
+            background 0.18s ease;
         }
 
         .passwordWrap button:hover {
           background: #e1ecff;
         }
 
-        /* SUBMIT */
+        /* =========================
+           SUBMIT BUTTON
+        ========================= */
 
         .submitButton {
           width: 100%;
-          height: 58px;
 
-          margin-top: 29px;
+          height: 60px;
+
+          margin-top: 31px;
+
+          padding: 0 22px;
 
           display: flex;
+
           align-items: center;
+
           justify-content: center;
-          gap: 10px;
+
+          gap: 11px;
 
           border: 0;
+
           border-radius: 13px;
 
           background: #0647c8;
+
           color: #ffffff;
 
           font-family: inherit;
+
           font-size: 16px;
+
           font-weight: 900;
 
           cursor: pointer;
 
           box-shadow:
             0 12px 27px rgba(6, 71, 200, 0.22);
+
+          transition:
+            background 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
         }
 
         .submitButton:hover:not(:disabled) {
           background: #0754df;
+
+          transform:
+            translateY(-1px);
+
+          box-shadow:
+            0 16px 32px rgba(6, 71, 200, 0.27);
         }
 
         .submitButton span {
-          font-size: 19px;
+          font-size: 20px;
         }
 
         .submitButton:disabled {
           opacity: 0.65;
+
           cursor: not-allowed;
         }
 
-        /* BOTTOM */
+        /* =========================
+           BOTTOM LOGIN
+        ========================= */
 
         .bottomLogin {
-          margin-top: 23px;
-          padding-top: 20px;
+          margin-top: 25px;
+
+          padding-top: 22px;
 
           display: flex;
+
           align-items: center;
+
           justify-content: center;
+
           gap: 7px;
 
-          border-top: 1px solid #e5edf5;
+          border-top:
+            1px solid #e5edf5;
 
           color: #7b8b9c;
 
@@ -869,22 +1053,28 @@ export default function SignupPage() {
 
         .bottomLogin a {
           color: #0647c8;
+
           font-weight: 850;
+
           text-decoration: none;
         }
 
-        /* RESPONSIVE */
+        /* =========================
+           TABLET
+        ========================= */
 
-        @media (max-width: 1100px) {
+        @media (max-width: 1150px) {
           .content {
-            max-width: 850px;
+            max-width: 950px;
 
             grid-template-columns: 1fr;
 
-            gap: 32px;
+            gap: 35px;
           }
 
           .intro {
+            padding-top: 0;
+
             text-align: center;
           }
 
@@ -892,6 +1082,7 @@ export default function SignupPage() {
           .infoBox,
           .slogan {
             margin-left: auto;
+
             margin-right: auto;
           }
 
@@ -904,9 +1095,14 @@ export default function SignupPage() {
           }
         }
 
+        /* =========================
+           MOBILE
+        ========================= */
+
         @media (max-width: 700px) {
           .page {
-            padding: 0 14px 30px;
+            padding:
+              0 14px 30px;
           }
 
           .header {
@@ -917,6 +1113,10 @@ export default function SignupPage() {
             display: none;
           }
 
+          .brandText strong {
+            font-size: 17px;
+          }
+
           .content {
             padding-top: 30px;
           }
@@ -925,26 +1125,59 @@ export default function SignupPage() {
             font-size: 32px;
           }
 
+          .introLead {
+            font-size: 16px;
+          }
+
           .formCard {
-            padding: 27px 20px 25px;
+            width: 100%;
+
+            padding:
+              28px 20px 26px;
+
             border-radius: 20px;
           }
 
+          .formHeader h2 {
+            font-size: 25px;
+          }
+
           .grid {
-            grid-template-columns: 1fr;
+            margin-top: 26px;
+
             gap: 20px;
           }
 
-          .fullWidth {
-            grid-column: auto;
+          .field label {
+            margin-bottom: 9px;
+
+            font-size: 14px;
           }
 
           .field input {
+            width: 100%;
+
             height: 58px;
+
+            padding: 0 16px;
+
+            border-radius: 12px;
+
+            font-size: 16px;
+          }
+
+          .passwordWrap input {
+            padding-right: 95px;
           }
 
           .submitButton {
             height: 58px;
+
+            margin-top: 26px;
+          }
+
+          .bottomLogin {
+            flex-wrap: wrap;
           }
         }
       `}</style>
@@ -967,7 +1200,9 @@ function Field({
         {label}
 
         {required && (
-          <span className="required"> *</span>
+          <span className="required">
+            {" "}*
+          </span>
         )}
       </label>
 
