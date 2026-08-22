@@ -2,8 +2,11 @@
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
+
+import Link from "next/link";
 
 import {
   useRouter,
@@ -13,15 +16,26 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
-type Profile = {
+import ProfileCard, {
+  type ProfileCardItem,
+} from "@/components/account/ProfileCard";
+
+type ItemRow = {
   id: string;
-  tag_code: string;
-  item_type: string;
+
+  tag_code: string | null;
+
+  item_type: string | null;
+  pet_type: string | null;
+
   item_name: string | null;
+
   photo: string | null;
+
   active: boolean | null;
 
   scan_count: number | null;
+
   last_scanned_at: string | null;
 
   last_scan_latitude:
@@ -35,93 +49,48 @@ type Profile = {
 };
 
 function createSupabaseClient() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url =
+    process.env
+      .NEXT_PUBLIC_SUPABASE_URL;
 
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_KEY;
+  const key =
+    process.env
+      .NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env
+      .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env
+      .NEXT_PUBLIC_SUPABASE_KEY;
 
   if (
-    !supabaseUrl ||
-    !supabaseKey
+    !url ||
+    !key
   ) {
     return null;
   }
 
   return createClient(
-    supabaseUrl,
-    supabaseKey
+    url,
+    key
   );
 }
 
-const CATEGORY_META: Record<
-  string,
-  {
-    label: string;
-    emoji: string;
-  }
-> = {
-  dog: {
-    label: "ძაღლი",
-    emoji: "🐶",
-  },
-
-  cat: {
-    label: "კატა",
-    emoji: "🐱",
-  },
-
-  keys: {
-    label: "გასაღები",
-    emoji: "🔑",
-  },
-
-  wallet: {
-    label: "საფულე",
-    emoji: "👛",
-  },
-
-  suitcase: {
-    label: "ჩემოდანი",
-    emoji: "🧳",
-  },
-
-  bag: {
-    label: "ჩანთა",
-    emoji: "👜",
-  },
-};
-
-function formatScanDate(
-  value: string | null
-) {
-  if (!value) {
-    return "ჯერ არ დასკანერებულა";
-  }
-
-  const date =
-    new Date(value);
-
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-    return value;
-  }
-
-  return date.toLocaleString();
-}
-
 export default function MyProfilesPage() {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [
     profiles,
     setProfiles,
   ] =
-    useState<Profile[]>([]);
+    useState<ItemRow[]>(
+      []
+    );
+
+  const [
+    email,
+    setEmail,
+  ] =
+    useState("");
 
   const [
     loading,
@@ -135,9 +104,24 @@ export default function MyProfilesPage() {
   ] =
     useState("");
 
+  const [
+    search,
+    setSearch,
+  ] =
+    useState("");
+
+  const [
+    filter,
+    setFilter,
+  ] =
+    useState("all");
+
   useEffect(() => {
     async function loadProfiles() {
       try {
+        setLoading(true);
+        setErrorMessage("");
+
         const supabase =
           createSupabaseClient();
 
@@ -153,9 +137,11 @@ export default function MyProfilesPage() {
           data: {
             user,
           },
-          error: userError,
+          error:
+            userError,
         } =
-          await supabase.auth.getUser();
+          await supabase.auth
+            .getUser();
 
         if (
           userError ||
@@ -168,6 +154,10 @@ export default function MyProfilesPage() {
           return;
         }
 
+        setEmail(
+          user.email || ""
+        );
+
         const {
           data,
           error,
@@ -179,6 +169,7 @@ export default function MyProfilesPage() {
                 id,
                 tag_code,
                 item_type,
+                pet_type,
                 item_name,
                 photo,
                 active,
@@ -206,7 +197,8 @@ export default function MyProfilesPage() {
         }
 
         setProfiles(
-          data || []
+          (data ||
+            []) as ItemRow[]
         );
       } catch (error) {
         console.error(
@@ -224,44 +216,220 @@ export default function MyProfilesPage() {
       }
     }
 
-    loadProfiles();
+    void loadProfiles();
   }, [router]);
+
+  async function handleLogout() {
+    const supabase =
+      createSupabaseClient();
+
+    if (!supabase) {
+      return;
+    }
+
+    await supabase.auth
+      .signOut();
+
+    window.location.href =
+      "/login";
+  }
+
+  const filteredProfiles =
+    useMemo(() => {
+      const query =
+        search
+          .trim()
+          .toLowerCase();
+
+      return profiles.filter(
+        (profile) => {
+          const type =
+            (
+              profile.item_type ||
+              profile.pet_type ||
+              ""
+            ).toLowerCase();
+
+          const matchesFilter =
+            filter === "all" ||
+            type === filter;
+
+          if (
+            !matchesFilter
+          ) {
+            return false;
+          }
+
+          if (!query) {
+            return true;
+          }
+
+          return (
+            profile.item_name
+              ?.toLowerCase()
+              .includes(
+                query
+              ) ||
+            profile.tag_code
+              ?.toLowerCase()
+              .includes(
+                query
+              ) ||
+            type.includes(
+              query
+            )
+          );
+        }
+      );
+    }, [
+      profiles,
+      search,
+      filter,
+    ]);
+
+  const cardProfiles:
+    ProfileCardItem[] =
+    filteredProfiles.map(
+      (profile) => ({
+        id:
+          profile.id,
+
+        tagCode:
+          profile.tag_code,
+
+        type:
+          profile.item_type,
+
+        petType:
+          profile.pet_type,
+
+        name:
+          profile.item_name,
+
+        photo:
+          profile.photo,
+
+        active:
+          profile.active,
+
+        scanCount:
+          profile.scan_count,
+
+        lastScannedAt:
+          profile
+            .last_scanned_at,
+
+        lastScanLatitude:
+          profile
+            .last_scan_latitude,
+
+        lastScanLongitude:
+          profile
+            .last_scan_longitude,
+
+        lastScanAccuracy:
+          profile
+            .last_scan_accuracy,
+      })
+    );
 
   if (loading) {
     return (
-      <main className="loadingPage">
-        <div className="loaderCard">
-          თქვენი პროფილები იტვირთება...
-        </div>
+      <>
+        <main className="loadingPage">
+          <div className="loader">
+            <div className="logo">
+              QR
+            </div>
+
+            <strong>
+              QR RETURN
+            </strong>
+
+            <span>
+              პროფილები იტვირთება...
+            </span>
+          </div>
+        </main>
 
         <style jsx>{`
           .loadingPage {
-            min-height: 100vh;
+            min-height:
+              100vh;
 
-            display: grid;
-            place-items: center;
+            display:
+              grid;
 
-            padding: 30px;
+            place-items:
+              center;
 
-            background: #f7faff;
+            background:
+              #f5f8fd;
           }
 
-          .loaderCard {
-            padding: 22px 28px;
+          .loader {
+            text-align:
+              center;
+          }
 
-            border:
-              1px solid #dce6f1;
+          .logo {
+            width:
+              48px;
 
-            border-radius: 14px;
+            height:
+              48px;
 
-            background: #ffffff;
+            margin:
+              0 auto 10px;
 
-            color: #718095;
+            display:
+              grid;
 
-            font-size: 11px;
+            place-items:
+              center;
+
+            border-radius:
+              12px;
+
+            background:
+              #1266e9;
+
+            color:
+              white;
+
+            font-size:
+              13px;
+
+            font-weight:
+              950;
+          }
+
+          .loader strong {
+            display:
+              block;
+
+            color:
+              #263f59;
+
+            font-size:
+              16px;
+          }
+
+          .loader span {
+            display:
+              block;
+
+            margin-top:
+              4px;
+
+            color:
+              #8392a2;
+
+            font-size:
+              11px;
           }
         `}</style>
-      </main>
+      </>
     );
   }
 
@@ -269,51 +437,77 @@ export default function MyProfilesPage() {
     <>
       <main className="page">
         <header className="header">
-          <a
+          <Link
             href="/"
             className="brand"
           >
-            <div className="brandMark">
+            <span className="brandMark">
               QR
-            </div>
+            </span>
 
-            <div>
+            <span className="brandText">
               <strong>
                 QR RETURN
               </strong>
 
-              <span>
+              <small>
                 SMART LOST &amp; FOUND
-              </span>
-            </div>
-          </a>
+              </small>
+            </span>
+          </Link>
 
-          <div className="headerActions">
-            <a
-              href="/register"
-              className="addTop"
+          <div className="headerRight">
+            {email && (
+              <span className="email">
+                {email}
+              </span>
+            )}
+
+            <button
+              type="button"
+              className="logout"
+              onClick={
+                handleLogout
+              }
             >
-              + ახალი პროფილი
-            </a>
+              გამოსვლა
+            </button>
+
+            <Link
+              href="/register"
+              className="addButton"
+            >
+              + ახალი QR პროფილი
+            </Link>
           </div>
         </header>
 
         <section className="hero">
-          <span>
-            OWNER DASHBOARD
-          </span>
+          <div>
+            <span className="eyebrow">
+              OWNER DASHBOARD
+            </span>
 
-          <h1>
-            ჩემი QR პროფილები
-          </h1>
+            <h1>
+              ჩემი QR პროფილები
+            </h1>
 
-          <p>
-            აქ შეგიძლიათ მართოთ
-            ყველა თქვენი QR RETURN
-            პროფილი, ნახოთ ბოლო
-            სკანირება და მპოვნელის
-            გაზიარებული მდებარეობა.
-          </p>
+            <p>
+              მართეთ ყველა თქვენი
+              QR RETURN პროფილი ერთ
+              სივრცეში.
+            </p>
+          </div>
+
+          <div className="totalBox">
+            <span>
+              TOTAL PROFILES
+            </span>
+
+            <strong>
+              {profiles.length}
+            </strong>
+          </div>
         </section>
 
         {errorMessage && (
@@ -322,240 +516,136 @@ export default function MyProfilesPage() {
           </div>
         )}
 
-        {profiles.length === 0 ? (
+        {profiles.length >
+          0 && (
+          <section className="toolbar">
+            <div className="searchBox">
+              <span>
+                ⌕
+              </span>
+
+              <input
+                type="search"
+                value={
+                  search
+                }
+                onChange={(
+                  event
+                ) =>
+                  setSearch(
+                    event.target.value
+                  )
+                }
+                placeholder="მოძებნეთ სახელი ან QR კოდი"
+              />
+            </div>
+
+            <select
+              value={
+                filter
+              }
+              onChange={(
+                event
+              ) =>
+                setFilter(
+                  event.target.value
+                )
+              }
+            >
+              <option value="all">
+                ყველა
+              </option>
+
+              <option value="dog">
+                ძაღლი
+              </option>
+
+              <option value="cat">
+                კატა
+              </option>
+
+              <option value="keys">
+                გასაღები
+              </option>
+
+              <option value="wallet">
+                საფულე
+              </option>
+
+              <option value="bag">
+                ჩანთა
+              </option>
+
+              <option value="suitcase">
+                ჩემოდანი
+              </option>
+            </select>
+          </section>
+        )}
+
+        {profiles.length ===
+        0 ? (
           <section className="emptyState">
             <div className="emptyIcon">
               QR
             </div>
 
             <h2>
-              ჯერ არცერთი პროფილი არ გაქვთ
+              ჯერ არცერთი QR პროფილი
+              არ გაქვთ
             </h2>
 
             <p>
-              დაამატეთ პირველი QR
-              პროფილი ძაღლისთვის,
-              კატისთვის ან თქვენი
-              ნივთისთვის.
+              დაამატეთ პირველი
+              ცხოველი ან ნივთი თქვენს
+              QR RETURN ანგარიშზე.
             </p>
 
-            <a
+            <Link
               href="/register"
-              className="primaryButton"
+              className="emptyButton"
             >
-              პირველი პროფილის დამატება
-            </a>
+              + პირველი პროფილის დამატება
+            </Link>
+          </section>
+        ) : cardProfiles.length ===
+          0 ? (
+          <section className="noResults">
+            <strong>
+              პროფილი ვერ მოიძებნა
+            </strong>
+
+            <span>
+              შეცვალეთ ძიება ან
+              ფილტრი.
+            </span>
           </section>
         ) : (
-          <>
-            <section className="summary">
-              <div>
-                <span>
-                  TOTAL PROFILES
-                </span>
-
-                <strong>
-                  {profiles.length}
-                </strong>
-              </div>
-
-              <a href="/register">
-                + ახალი პროფილის დამატება
-              </a>
-            </section>
-
-            <section className="grid">
-              {profiles.map(
-                (profile) => {
-                  const meta =
-                    CATEGORY_META[
-                      profile
-                        .item_type
-                    ] || {
-                      label:
-                        profile
-                          .item_type,
-                      emoji: "QR",
-                    };
-
-                  const hasLocation =
+          <section className="profileGrid">
+            {cardProfiles.map(
+              (profile) => (
+                <ProfileCard
+                  key={
+                    profile.id
+                  }
+                  item={
                     profile
-                      .last_scan_latitude !==
-                      null &&
-                    profile
-                      .last_scan_longitude !==
-                      null;
-
-                  const mapsUrl =
-                    hasLocation
-                      ? `https://www.google.com/maps?q=${profile.last_scan_latitude},${profile.last_scan_longitude}`
-                      : "";
-
-                  return (
-                    <article
-                      key={
-                        profile.id
-                      }
-                      className="card"
-                    >
-                      <div className="cardTop">
-                        <div className="categoryIcon">
-                          {
-                            meta.emoji
-                          }
-                        </div>
-
-                        <div
-                          className={
-                            profile.active !==
-                            false
-                              ? "status active"
-                              : "status"
-                          }
-                        >
-                          {profile.active !==
-                          false
-                            ? "ACTIVE"
-                            : "INACTIVE"}
-                        </div>
-                      </div>
-
-                      <div className="category">
-                        {
-                          meta.label
-                        }
-                      </div>
-
-                      <h2>
-                        {profile.item_name ||
-                          meta.label}
-                      </h2>
-
-                      <div className="tag">
-                        <span>
-                          QR CODE
-                        </span>
-
-                        <strong>
-                          {
-                            profile.tag_code
-                          }
-                        </strong>
-                      </div>
-
-                      <div className="scanBox">
-                        <div className="scanHeader">
-                          <div>
-                            <span>
-                              LAST SCAN
-                            </span>
-
-                            <strong>
-                              {formatScanDate(
-                                profile.last_scanned_at
-                              )}
-                            </strong>
-                          </div>
-
-                          <div className="scanCount">
-                            <span>
-                              SCANS
-                            </span>
-
-                            <strong>
-                              {profile.scan_count ||
-                                0}
-                            </strong>
-                          </div>
-                        </div>
-
-                        {hasLocation ? (
-                          <>
-                            <div className="locationData">
-                              <div>
-                                <span>
-                                  LAT
-                                </span>
-
-                                <strong>
-                                  {profile.last_scan_latitude?.toFixed(
-                                    6
-                                  )}
-                                </strong>
-                              </div>
-
-                              <div>
-                                <span>
-                                  LNG
-                                </span>
-
-                                <strong>
-                                  {profile.last_scan_longitude?.toFixed(
-                                    6
-                                  )}
-                                </strong>
-                              </div>
-                            </div>
-
-                            {profile.last_scan_accuracy !==
-                              null && (
-                              <div className="accuracy">
-                                Accuracy:{" "}
-                                <strong>
-                                  {Math.round(
-                                    profile.last_scan_accuracy
-                                  )}{" "}
-                                  m
-                                </strong>
-                              </div>
-                            )}
-
-                            <a
-                              href={
-                                mapsUrl
-                              }
-                              target="_blank"
-                              rel="noreferrer"
-                              className="mapButton"
-                            >
-                              📍 Open Location
-                            </a>
-                          </>
-                        ) : (
-                          <div className="noLocation">
-                            📍 მპოვნელს მდებარეობა ჯერ არ გაუზიარებია.
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="actions">
-                        <a
-                          href={`/profile/${profile.tag_code}`}
-                          className="viewButton"
-                        >
-                          ნახვა
-                        </a>
-
-                        <a
-                          href={`/edit-profile/${profile.id}`}
-                          className="editButton"
-                        >
-                          რედაქტირება
-                        </a>
-                      </div>
-                    </article>
-                  );
-                }
-              )}
-            </section>
-          </>
+                  }
+                />
+              )
+            )}
+          </section>
         )}
       </main>
 
-      <style jsx>{`
+      <style jsx global>{`
         * {
           box-sizing:
             border-box;
+        }
+
+        body {
+          margin: 0;
         }
 
         .page {
@@ -563,40 +653,53 @@ export default function MyProfilesPage() {
             100vh;
 
           padding-bottom:
-            80px;
+            60px;
 
           background:
             radial-gradient(
-              circle at 100% 0%,
+              circle at
+              100% 0%,
               rgba(
                 18,
                 102,
                 233,
-                .07
+                0.07
               ),
-              transparent 26%
+              transparent
+                26%
             ),
             linear-gradient(
               180deg,
-              #ffffff 0%,
-              #f6f9fe 100%
+              #ffffff
+                0%,
+              #f5f8fd
+                100%
             );
+
+          font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Arial,
+            sans-serif;
         }
 
         .header {
           width:
             calc(
-              100% - 60px
+              100% -
+              48px
             );
 
           max-width:
-            1200px;
+            1120px;
 
           min-height:
-            80px;
+            72px;
 
           margin:
-            auto;
+            0 auto;
 
           display:
             flex;
@@ -608,10 +711,11 @@ export default function MyProfilesPage() {
             space-between;
 
           gap:
-            20px;
+            18px;
 
           border-bottom:
-            1px solid #e5ebf2;
+            1px solid
+            #e5ebf2;
         }
 
         .brand {
@@ -622,7 +726,7 @@ export default function MyProfilesPage() {
             center;
 
           gap:
-            10px;
+            9px;
 
           text-decoration:
             none;
@@ -630,10 +734,10 @@ export default function MyProfilesPage() {
 
         .brandMark {
           width:
-            42px;
+            40px;
 
           height:
-            42px;
+            40px;
 
           display:
             grid;
@@ -642,7 +746,7 @@ export default function MyProfilesPage() {
             center;
 
           border-radius:
-            11px;
+            10px;
 
           background:
             #1266e9;
@@ -651,19 +755,19 @@ export default function MyProfilesPage() {
             #ffffff;
 
           font-size:
-            10px;
+            11px;
 
           font-weight:
             950;
         }
 
-        .brand strong,
-        .brand span {
+        .brandText strong,
+        .brandText small {
           display:
             block;
         }
 
-        .brand strong {
+        .brandText strong {
           color:
             #172b43;
 
@@ -674,12 +778,12 @@ export default function MyProfilesPage() {
             950;
         }
 
-        .brand span {
+        .brandText small {
           margin-top:
-            3px;
+            2px;
 
           color:
-            #8b97a5;
+            #8a98a7;
 
           font-size:
             7px;
@@ -688,12 +792,76 @@ export default function MyProfilesPage() {
             850;
 
           letter-spacing:
-            1.3px;
+            1px;
         }
 
-        .addTop {
-          min-height:
-            42px;
+        .headerRight {
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            8px;
+        }
+
+        .email {
+          max-width:
+            190px;
+
+          overflow:
+            hidden;
+
+          color:
+            #8391a0;
+
+          font-size:
+            9px;
+
+          text-overflow:
+            ellipsis;
+
+          white-space:
+            nowrap;
+        }
+
+        .logout {
+          height:
+            38px;
+
+          padding:
+            0 12px;
+
+          border:
+            1px solid
+            #dce5ee;
+
+          border-radius:
+            9px;
+
+          background:
+            #ffffff;
+
+          color:
+            #657a8e;
+
+          font-family:
+            inherit;
+
+          font-size:
+            9px;
+
+          font-weight:
+            850;
+
+          cursor:
+            pointer;
+        }
+
+        .addButton {
+          height:
+            40px;
 
           padding:
             0 14px;
@@ -704,8 +872,11 @@ export default function MyProfilesPage() {
           align-items:
             center;
 
+          justify-content:
+            center;
+
           border-radius:
-            10px;
+            9px;
 
           background:
             #1266e9;
@@ -724,16 +895,19 @@ export default function MyProfilesPage() {
         }
 
         .hero,
-        .summary,
-        .grid,
-        .errorBox {
+        .toolbar,
+        .profileGrid,
+        .errorBox,
+        .emptyState,
+        .noResults {
           width:
             calc(
-              100% - 60px
+              100% -
+              48px
             );
 
           max-width:
-            1200px;
+            1120px;
 
           margin-left:
             auto;
@@ -744,10 +918,22 @@ export default function MyProfilesPage() {
 
         .hero {
           margin-top:
-            60px;
+            38px;
+
+          display:
+            flex;
+
+          align-items:
+            flex-end;
+
+          justify-content:
+            space-between;
+
+          gap:
+            20px;
         }
 
-        .hero > span {
+        .eyebrow {
           color:
             #1266e9;
 
@@ -758,95 +944,64 @@ export default function MyProfilesPage() {
             900;
 
           letter-spacing:
-            1.5px;
+            1.4px;
         }
 
         .hero h1 {
           margin:
-            9px 0 0;
+            7px 0 0;
 
           color:
             #172b43;
 
           font-size:
-            40px;
+            32px;
+
+          font-weight:
+            950;
         }
 
         .hero p {
-          max-width:
-            580px;
-
           margin:
-            12px 0 0;
+            7px 0 0;
 
           color:
-            #77869a;
+            #7b8b9c;
 
           font-size:
             11px;
 
           line-height:
-            1.65;
+            1.5;
         }
 
-        .errorBox {
-          margin-top:
-            24px;
+        .totalBox {
+          min-width:
+            104px;
 
           padding:
-            14px;
+            11px 13px;
 
           border:
-            1px solid #efc7cb;
+            1px solid
+            #dce6f1;
 
           border-radius:
-            12px;
-
-          background:
-            #fff7f8;
-
-          color:
-            #a3434c;
-
-          font-size:
-            10px;
-        }
-
-        .summary {
-          margin-top:
-            34px;
-
-          padding:
-            16px 18px;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
-
-          gap:
-            20px;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius:
-            14px;
+            11px;
 
           background:
             #ffffff;
+
+          text-align:
+            right;
         }
 
-        .summary span {
+        .totalBox span {
           display:
             block;
 
           color:
-            #8a97a6;
+            #8a98a7;
 
           font-size:
             7px;
@@ -855,37 +1010,162 @@ export default function MyProfilesPage() {
             900;
         }
 
-        .summary strong {
+        .totalBox strong {
           display:
             block;
 
           margin-top:
-            4px;
+            3px;
 
-          color:
-            #172b43;
-
-          font-size:
-            22px;
-        }
-
-        .summary a {
           color:
             #1266e9;
 
           font-size:
-            9px;
+            22px;
 
           font-weight:
-            900;
+            950;
+        }
 
-          text-decoration:
+        .errorBox {
+          margin-top:
+            18px;
+
+          padding:
+            11px 13px;
+
+          border:
+            1px solid
+            #efcbd0;
+
+          border-radius:
+            10px;
+
+          background:
+            #fff7f8;
+
+          color:
+            #a3444d;
+
+          font-size:
+            10px;
+        }
+
+        .toolbar {
+          margin-top:
+            22px;
+
+          display:
+            grid;
+
+          grid-template-columns:
+            minmax(
+              0,
+              1fr
+            )
+            170px;
+
+          gap:
+            9px;
+        }
+
+        .searchBox {
+          height:
+            44px;
+
+          display:
+            flex;
+
+          align-items:
+            center;
+
+          gap:
+            8px;
+
+          padding:
+            0 13px;
+
+          border:
+            1px solid
+            #dce5ee;
+
+          border-radius:
+            10px;
+
+          background:
+            #ffffff;
+        }
+
+        .searchBox span {
+          color:
+            #8da0b3;
+
+          font-size:
+            17px;
+        }
+
+        .searchBox input {
+          width:
+            100%;
+
+          border:
+            0;
+
+          background:
+            transparent;
+
+          color:
+            #304b66;
+
+          font-family:
+            inherit;
+
+          font-size:
+            11px;
+
+          outline:
             none;
         }
 
-        .grid {
+        .toolbar select {
+          width:
+            100%;
+
+          height:
+            44px;
+
+          padding:
+            0 11px;
+
+          border:
+            1px solid
+            #dce5ee;
+
+          border-radius:
+            10px;
+
+          background:
+            #ffffff;
+
+          color:
+            #536b82;
+
+          font-family:
+            inherit;
+
+          font-size:
+            10px;
+
+          font-weight:
+            750;
+
+          outline:
+            none;
+        }
+
+        .profileGrid {
           margin-top:
-            18px;
+            14px;
 
           display:
             grid;
@@ -900,462 +1180,50 @@ export default function MyProfilesPage() {
             );
 
           gap:
-            15px;
+            14px;
         }
 
-        .card {
-          min-height:
-            400px;
+        .emptyState,
+        .noResults {
+          margin-top:
+            32px;
 
           padding:
-            20px;
-
-          display:
-            flex;
-
-          flex-direction:
-            column;
+            46px 20px;
 
           border:
-            1px solid #dce6f1;
+            1px solid
+            #dfe7ef;
 
           border-radius:
-            16px;
+            15px;
 
           background:
             #ffffff;
 
+          text-align:
+            center;
+
           box-shadow:
-            0 12px 28px
+            0 12px
+            28px
             rgba(
               30,
               70,
               120,
-              .055
+              0.04
             );
-        }
-
-        .cardTop {
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            space-between;
-
-          gap:
-            10px;
-        }
-
-        .categoryIcon {
-          width:
-            48px;
-
-          height:
-            48px;
-
-          display:
-            grid;
-
-          place-items:
-            center;
-
-          border-radius:
-            13px;
-
-          background:
-            #f0f5fd;
-
-          font-size:
-            24px;
-        }
-
-        .status {
-          padding:
-            5px 8px;
-
-          border-radius:
-            999px;
-
-          background:
-            #edf0f4;
-
-          color:
-            #8b97a5;
-
-          font-size:
-            6px;
-
-          font-weight:
-            900;
-        }
-
-        .status.active {
-          background:
-            #eaf2ff;
-
-          color:
-            #1266e9;
-        }
-
-        .category {
-          margin-top:
-            22px;
-
-          color:
-            #1266e9;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-        }
-
-        .card h2 {
-          margin:
-            7px 0 0;
-
-          color:
-            #263e57;
-
-          font-size:
-            19px;
-        }
-
-        .tag {
-          margin-top:
-            18px;
-
-          padding:
-            12px;
-
-          border:
-            1px solid #e1e8f0;
-
-          border-radius:
-            10px;
-
-          background:
-            #fafcff;
-        }
-
-        .tag span,
-        .tag strong {
-          display:
-            block;
-        }
-
-        .tag span {
-          color:
-            #9aa6b4;
-
-          font-size:
-            7px;
-
-          font-weight:
-            900;
-        }
-
-        .tag strong {
-          margin-top:
-            5px;
-
-          color:
-            #536980;
-
-          font-size:
-            10px;
-
-          word-break:
-            break-all;
-        }
-
-        .scanBox {
-          margin-top:
-            12px;
-
-          padding:
-            13px;
-
-          border:
-            1px solid #d9e5f3;
-
-          border-radius:
-            11px;
-
-          background:
-            #f8fbff;
-        }
-
-        .scanHeader {
-          display:
-            flex;
-
-          align-items:
-            flex-start;
-
-          justify-content:
-            space-between;
-
-          gap:
-            10px;
-        }
-
-        .scanHeader span,
-        .locationData span {
-          display:
-            block;
-
-          color:
-            #97a3b1;
-
-          font-size:
-            6px;
-
-          font-weight:
-            900;
-
-          letter-spacing:
-            .7px;
-        }
-
-        .scanHeader strong {
-          display:
-            block;
-
-          margin-top:
-            4px;
-
-          color:
-            #405974;
-
-          font-size:
-            8px;
-
-          line-height:
-            1.4;
-        }
-
-        .scanCount {
-          min-width:
-            48px;
-
-          text-align:
-            right;
-        }
-
-        .scanCount strong {
-          color:
-            #1266e9;
-
-          font-size:
-            15px;
-        }
-
-        .locationData {
-          margin-top:
-            12px;
-
-          display:
-            grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap:
-            7px;
-        }
-
-        .locationData > div {
-          padding:
-            8px;
-
-          border:
-            1px solid #e0e8f1;
-
-          border-radius:
-            8px;
-
-          background:
-            #ffffff;
-        }
-
-        .locationData strong {
-          display:
-            block;
-
-          margin-top:
-            4px;
-
-          color:
-            #526b84;
-
-          font-size:
-            8px;
-        }
-
-        .accuracy {
-          margin-top:
-            8px;
-
-          color:
-            #8594a5;
-
-          font-size:
-            7px;
-        }
-
-        .mapButton {
-          min-height:
-            37px;
-
-          margin-top:
-            10px;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            center;
-
-          border-radius:
-            8px;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
-        }
-
-        .noLocation {
-          margin-top:
-            10px;
-
-          color:
-            #8796a7;
-
-          font-size:
-            8px;
-
-          line-height:
-            1.45;
-        }
-
-        .actions {
-          margin-top:
-            auto;
-
-          padding-top:
-            18px;
-
-          display:
-            grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap:
-            8px;
-        }
-
-        .actions a {
-          min-height:
-            40px;
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            center;
-
-          border-radius:
-            9px;
-
-          font-size:
-            8px;
-
-          font-weight:
-            900;
-
-          text-decoration:
-            none;
-        }
-
-        .viewButton {
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-        }
-
-        .editButton {
-          border:
-            1px solid #ccdae9;
-
-          background:
-            #ffffff;
-
-          color:
-            #61758a;
-        }
-
-        .emptyState {
-          width:
-            calc(
-              100% - 60px
-            );
-
-          max-width:
-            620px;
-
-          margin:
-            60px auto 0;
-
-          padding:
-            50px 30px;
-
-          text-align:
-            center;
-
-          border:
-            1px solid #dce6f1;
-
-          border-radius:
-            18px;
-
-          background:
-            #ffffff;
         }
 
         .emptyIcon {
           width:
-            60px;
+            48px;
 
           height:
-            60px;
+            48px;
 
           margin:
-            auto;
+            0 auto;
 
           display:
             grid;
@@ -1364,16 +1232,16 @@ export default function MyProfilesPage() {
             center;
 
           border-radius:
-            16px;
+            12px;
 
           background:
-            #edf4ff;
+            #eef5ff;
 
           color:
             #1266e9;
 
           font-size:
-            12px;
+            11px;
 
           font-weight:
             950;
@@ -1381,35 +1249,41 @@ export default function MyProfilesPage() {
 
         .emptyState h2 {
           margin:
-            20px 0 0;
+            13px 0 0;
 
           color:
-            #263e57;
+            #263f59;
 
           font-size:
-            22px;
+            19px;
         }
 
         .emptyState p {
+          max-width:
+            420px;
+
           margin:
-            10px auto 0;
+            7px auto 0;
 
           color:
-            #7e8da0;
+            #8291a1;
 
           font-size:
             10px;
+
+          line-height:
+            1.55;
         }
 
-        .primaryButton {
+        .emptyButton {
           min-height:
-            44px;
+            41px;
 
           margin-top:
-            22px;
+            16px;
 
           padding:
-            0 17px;
+            0 15px;
 
           display:
             inline-flex;
@@ -1417,8 +1291,11 @@ export default function MyProfilesPage() {
           align-items:
             center;
 
+          justify-content:
+            center;
+
           border-radius:
-            10px;
+            9px;
 
           background:
             #1266e9;
@@ -1436,11 +1313,36 @@ export default function MyProfilesPage() {
             none;
         }
 
+        .noResults strong,
+        .noResults span {
+          display:
+            block;
+        }
+
+        .noResults strong {
+          color:
+            #304b66;
+
+          font-size:
+            14px;
+        }
+
+        .noResults span {
+          margin-top:
+            4px;
+
+          color:
+            #8796a6;
+
+          font-size:
+            10px;
+        }
+
         @media (
           max-width:
-            900px
+            920px
         ) {
-          .grid {
+          .profileGrid {
             grid-template-columns:
               repeat(
                 2,
@@ -1454,36 +1356,69 @@ export default function MyProfilesPage() {
 
         @media (
           max-width:
-            600px
+            650px
         ) {
           .header,
           .hero,
-          .summary,
-          .grid,
+          .toolbar,
+          .profileGrid,
           .errorBox,
-          .emptyState {
+          .emptyState,
+          .noResults {
             width:
               calc(
-                100% - 30px
+                100% -
+                24px
               );
+          }
+
+          .header {
+            min-height:
+              66px;
+          }
+
+          .brandText small,
+          .email {
+            display:
+              none;
+          }
+
+          .logout {
+            display:
+              none;
+          }
+
+          .addButton {
+            padding:
+              0 10px;
+          }
+
+          .hero {
+            margin-top:
+              27px;
+
+            align-items:
+              flex-start;
           }
 
           .hero h1 {
             font-size:
-              31px;
+              26px;
           }
 
-          .grid {
+          .totalBox {
+            min-width:
+              85px;
+          }
+
+          .toolbar {
             grid-template-columns:
               1fr;
           }
 
-          .summary {
-            flex-direction:
-              column;
-
-            align-items:
-              flex-start;
+          .profileGrid {
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
