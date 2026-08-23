@@ -10,10 +10,6 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
-import {
-  useSearchParams,
-} from "next/navigation";
-
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -40,16 +36,10 @@ type ChatMessage = {
 };
 
 export default function EmergencyLiveChatPage() {
-  const searchParams =
-    useSearchParams();
-
-  const tagCode =
-    (
-      searchParams.get("tag") ||
-      ""
-    )
-      .trim()
-      .toUpperCase();
+  const [
+    tagCode,
+    setTagCode,
+  ] = useState("");
 
   const [
     messages,
@@ -83,11 +73,35 @@ export default function EmergencyLiveChatPage() {
     "finder" | "owner"
   >("finder");
 
+  useEffect(() => {
+    if (
+      typeof window ===
+      "undefined"
+    ) {
+      return;
+    }
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const code =
+      (
+        params.get("tag") ||
+        ""
+      )
+        .trim()
+        .toUpperCase();
+
+    setTagCode(code);
+  }, []);
+
   const finderSession =
     useMemo(() => {
       if (
         typeof window ===
-        "undefined" ||
+          "undefined" ||
         !tagCode
       ) {
         return "";
@@ -122,12 +136,6 @@ export default function EmergencyLiveChatPage() {
 
   useEffect(() => {
     if (!tagCode) {
-      setLoading(false);
-
-      setErrorMessage(
-        "QR კოდი არ არის მითითებული."
-      );
-
       return;
     }
 
@@ -467,6 +475,13 @@ export default function EmergencyLiveChatPage() {
           </div>
         </div>
 
+        {!tagCode &&
+          !loading && (
+            <div className="error">
+              QR კოდი არ არის მითითებული.
+            </div>
+          )}
+
         {errorMessage && (
           <div className="error">
             {errorMessage}
@@ -505,7 +520,9 @@ export default function EmergencyLiveChatPage() {
 
                 return (
                   <div
-                    key={item.id}
+                    key={
+                      item.id
+                    }
                     className={
                       mine
                         ? "messageRow mine"
@@ -833,6 +850,10 @@ export default function EmergencyLiveChatPage() {
           outline: none;
           font-family: inherit;
           font-size: 13px;
+        }
+
+        .composer textarea:focus {
+          border-color: #0747c9;
         }
 
         .composer button {
