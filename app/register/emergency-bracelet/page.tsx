@@ -39,7 +39,8 @@ const supabase =
 ========================================================= */
 
 export default function EmergencyBraceletPage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] =
+    useState(1);
 
   const [
     loadingAccount,
@@ -596,7 +597,7 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      /* CREATE */
+      /* CREATE PROFILE */
 
       const {
         data: profile,
@@ -817,6 +818,11 @@ export default function EmergencyBraceletPage() {
         );
       }
 
+      /*
+        წარმატება
+        ძველი სატესტო alert აღარ არსებობს
+      */
+
       alert(
         "Emergency პროფილი წარმატებით შეიქმნა."
       );
@@ -866,10 +872,15 @@ export default function EmergencyBraceletPage() {
         <style jsx>{`
           .loadingPage {
             min-height: 100vh;
+
             display: grid;
             place-items: center;
+
             background: #0747c9;
-            font-family: Arial,
+
+            font-family:
+              Inter,
+              Arial,
               sans-serif;
           }
 
@@ -881,12 +892,18 @@ export default function EmergencyBraceletPage() {
           .loadingLogo {
             width: 58px;
             height: 58px;
-            margin: 0 auto 12px;
+
+            margin:
+              0 auto 12px;
+
             display: grid;
             place-items: center;
+
             border-radius: 15px;
+
             background: #ffffff;
             color: #0747c9;
+
             font-weight: 950;
           }
 
@@ -901,7 +918,9 @@ export default function EmergencyBraceletPage() {
 
           .loadingBox span {
             margin-top: 5px;
+
             opacity: 0.75;
+
             font-size: 13px;
           }
         `}</style>
@@ -1418,8 +1437,13 @@ export default function EmergencyBraceletPage() {
 
         .page {
           min-height: 100vh;
-          padding: 0 20px 38px;
-          background: #0747c9;
+
+          padding:
+            0 20px 38px;
+
+          background:
+            #0747c9;
+
           font-family:
             Inter,
             -apple-system,
@@ -1432,12 +1456,15 @@ export default function EmergencyBraceletPage() {
         .topbar {
           width: 100%;
           max-width: 940px;
+
           height: 72px;
+
           margin: 0 auto;
 
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
 
           border-bottom:
             1px solid
@@ -1452,6 +1479,7 @@ export default function EmergencyBraceletPage() {
         .brand {
           display: flex;
           align-items: center;
+
           gap: 10px;
 
           text-decoration: none;
@@ -1499,13 +1527,15 @@ export default function EmergencyBraceletPage() {
           font-size: 10px;
           font-weight: 700;
 
-          letter-spacing: 0.8px;
+          letter-spacing:
+            0.8px;
         }
 
         .topButton {
           min-height: 40px;
 
-          padding: 0 14px;
+          padding:
+            0 14px;
 
           display: inline-flex;
           align-items: center;
@@ -1544,7 +1574,9 @@ export default function EmergencyBraceletPage() {
           width: 100%;
           max-width: 820px;
 
-          margin: 26px auto 0;
+          margin:
+            26px auto 0;
+
           padding: 27px;
 
           border-radius: 21px;
@@ -1564,7 +1596,8 @@ export default function EmergencyBraceletPage() {
         .errorBox {
           margin-bottom: 15px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           border:
             1px solid #ffd0cc;
@@ -1589,7 +1622,8 @@ export default function EmergencyBraceletPage() {
           font-size: 10px;
           font-weight: 900;
 
-          letter-spacing: 0.8px;
+          letter-spacing:
+            0.8px;
         }
 
         .progressTrack {
@@ -1628,7 +1662,8 @@ export default function EmergencyBraceletPage() {
           width: 50px;
           height: 50px;
 
-          flex: 0 0 50px;
+          flex:
+            0 0 50px;
 
           display: grid;
           place-items: center;
@@ -1667,11 +1702,13 @@ export default function EmergencyBraceletPage() {
         }
 
         .heading p {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
           color: #718397;
 
           font-size: 14px;
+
           line-height: 1.45;
         }
 
@@ -1696,10 +1733,12 @@ export default function EmergencyBraceletPage() {
           width: 100%;
           height: 56px;
 
-          padding: 0 15px;
+          padding:
+            0 15px;
 
           border:
-            1.5px solid #d5e0eb;
+            1.5px solid
+            #d5e0eb;
 
           border-radius: 10px;
 
@@ -1716,12 +1755,14 @@ export default function EmergencyBraceletPage() {
 
           min-height: 94px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           resize: vertical;
 
           border:
-            1.5px solid #d5e0eb;
+            1.5px solid
+            #d5e0eb;
 
           border-radius: 10px;
 
@@ -1729,6 +1770,7 @@ export default function EmergencyBraceletPage() {
           color: #263f59;
 
           font-size: 14px;
+
           line-height: 1.45;
 
           outline: none;
@@ -1765,7 +1807,8 @@ export default function EmergencyBraceletPage() {
         .qrHelp {
           min-height: 83px;
 
-          padding: 11px 13px;
+          padding:
+            11px 13px;
 
           border:
             1px solid #cbdcf4;
@@ -1793,7 +1836,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .qrHelp p {
-          margin: 3px 0 0;
+          margin:
+            3px 0 0;
 
           color: #718397;
 
@@ -1819,13 +1863,15 @@ export default function EmergencyBraceletPage() {
         .choice {
           min-height: 130px;
 
-          padding: 15px 16px;
+          padding:
+            15px 16px;
 
           display: flex;
           flex-direction: column;
 
           border:
-            1px solid #0b52d6;
+            1px solid
+            #0b52d6;
 
           border-radius: 14px;
 
@@ -1850,40 +1896,9 @@ export default function EmergencyBraceletPage() {
             );
         }
 
-        .choiceTop {
-          display: flex;
-
-          justify-content:
-            space-between;
-        }
-
-        .choiceCircle {
-          width: 27px;
-          height: 27px;
-
-          display: grid;
-          place-items: center;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.3
-            );
-
-          border-radius: 50%;
-        }
-
-        .choiceIcon {
-          margin-top: 9px;
-
-          font-size: 24px;
-        }
-
         .choice h2 {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
           color: #ffffff;
 
@@ -1892,7 +1907,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .choice p {
-          margin: 5px 0 0;
+          margin:
+            5px 0 0;
 
           color:
             rgba(
@@ -1928,7 +1944,8 @@ export default function EmergencyBraceletPage() {
         .nameWarning {
           margin-top: 18px;
 
-          padding: 10px 12px;
+          padding:
+            10px 12px;
 
           display: flex;
           align-items: center;
@@ -1950,7 +1967,8 @@ export default function EmergencyBraceletPage() {
           width: 28px;
           height: 28px;
 
-          flex: 0 0 28px;
+          flex:
+            0 0 28px;
 
           display: grid;
           place-items: center;
@@ -1963,33 +1981,13 @@ export default function EmergencyBraceletPage() {
           font-weight: 900;
         }
 
-        .infoBox strong {
-          display: block;
-
-          color: #304a65;
-
-          font-size: 13px;
-        }
-
-        .infoBox p,
-        .optionalNotice p,
-        .finalNotice p,
-        .nameWarning p {
-          margin: 2px 0 0;
-
-          color: #718397;
-
-          font-size: 12px;
-
-          line-height: 1.4;
-        }
-
         .topSummary,
         .creatorSummary,
         .lockedSummary {
           margin-top: 19px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           display: grid;
 
@@ -2063,11 +2061,13 @@ export default function EmergencyBraceletPage() {
           font-size: 9px;
           font-weight: 900;
 
-          letter-spacing: 0.9px;
+          letter-spacing:
+            0.9px;
         }
 
         .sectionTitle h3 {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
           color: #304a65;
 
@@ -2120,7 +2120,8 @@ export default function EmergencyBraceletPage() {
         .holderSummary {
           margin-top: 19px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           display: flex;
           align-items: center;
@@ -2150,50 +2151,11 @@ export default function EmergencyBraceletPage() {
             );
         }
 
-        .holderSummary span,
-        .holderSummary strong,
-        .holderSummary p {
-          display: block;
-        }
-
-        .holderSummary span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.68
-            );
-
-          font-size: 9px;
-        }
-
-        .holderSummary strong {
-          margin-top: 2px;
-
-          color: #ffffff;
-
-          font-size: 15px;
-        }
-
-        .holderSummary p {
-          margin: 2px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.75
-            );
-
-          font-size: 10px;
-        }
-
         .optionalBox {
           min-height: 56px;
 
-          padding: 9px 12px;
+          padding:
+            9px 12px;
 
           border:
             1px solid #dce5ee;
@@ -2203,35 +2165,11 @@ export default function EmergencyBraceletPage() {
           background: #f8fafd;
         }
 
-        .optionalBox span {
-          color: #0747c9;
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .optionalBox strong {
-          display: block;
-
-          margin-top: 2px;
-
-          color: #304a65;
-
-          font-size: 12px;
-        }
-
-        .optionalBox p {
-          margin: 2px 0 0;
-
-          color: #7a8999;
-
-          font-size: 10px;
-        }
-
         .creatorContact {
           margin-top: 19px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           display: flex;
           align-items: center;
@@ -2243,44 +2181,6 @@ export default function EmergencyBraceletPage() {
           border-radius: 11px;
 
           background: #0747c9;
-        }
-
-        .creatorContact strong,
-        .creatorContact p,
-        .creatorContact span {
-          display: block;
-        }
-
-        .creatorContact strong {
-          color: #ffffff;
-        }
-
-        .creatorContact p {
-          margin: 3px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.82
-            );
-        }
-
-        .requiredBadge {
-          padding: 6px 8px;
-
-          border-radius: 999px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.15
-            );
-
-          color: #ffffff;
         }
 
         .sectionWithToggle {
@@ -2354,7 +2254,8 @@ export default function EmergencyBraceletPage() {
         .visibilityRow {
           min-height: 50px;
 
-          padding: 7px 9px;
+          padding:
+            7px 9px;
 
           display: flex;
           align-items: center;
@@ -2369,10 +2270,6 @@ export default function EmergencyBraceletPage() {
           border-radius: 9px;
 
           background: #fbfcfe;
-        }
-
-        .visibilityRow.disabled {
-          opacity: 0.45;
         }
 
         .visibilityToggle {
@@ -2405,7 +2302,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewTop {
-          padding: 13px 14px;
+          padding:
+            13px 14px;
 
           display: flex;
           align-items: center;
@@ -2432,7 +2330,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewPanel > h2 {
-          margin: 14px 14px 0;
+          margin:
+            14px 14px 0;
 
           color: #263f59;
 
@@ -2440,7 +2339,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewDetails {
-          padding: 10px 14px 12px;
+          padding:
+            10px 14px 12px;
 
           display: grid;
 
@@ -2450,7 +2350,8 @@ export default function EmergencyBraceletPage() {
         .previewRow {
           min-height: 42px;
 
-          padding: 7px 9px;
+          padding:
+            7px 9px;
 
           display: flex;
           align-items: center;
@@ -2465,7 +2366,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewBlock {
-          padding: 8px 9px;
+          padding:
+            8px 9px;
 
           border-radius: 8px;
 
@@ -2503,7 +2405,8 @@ export default function EmergencyBraceletPage() {
         .createButton {
           min-height: 47px;
 
-          padding: 0 18px;
+          padding:
+            0 18px;
 
           display: inline-flex;
           align-items: center;
@@ -2563,7 +2466,8 @@ export default function EmergencyBraceletPage() {
         }
 
         .savingBox {
-          padding: 22px 30px;
+          padding:
+            22px 30px;
 
           text-align: center;
 
