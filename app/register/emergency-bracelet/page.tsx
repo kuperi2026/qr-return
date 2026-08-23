@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 import EmergencyStep1 from "./components/EmergencyStep1";
 import EmergencyStep2 from "./components/EmergencyStep2";
@@ -14,17 +15,31 @@ import type {
   Relationship,
 } from "./components/emergencyTypes";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function EmergencyBraceletPage() {
   const [step, setStep] = useState(1);
 
-  /* STEP 1 */
+  const [loadingAccount, setLoadingAccount] =
+    useState(true);
 
-  const [tagCode, setTagCode] = useState("");
+  const [saving, setSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
+
+  const [ownerId, setOwnerId] =
+    useState("");
+
+  const [tagCode, setTagCode] =
+    useState("");
 
   const [profileFor, setProfileFor] =
     useState<ProfileFor>("");
-
-  /* STEP 2 — CREATOR */
 
   const [ownerFirstName, setOwnerFirstName] =
     useState("");
@@ -37,8 +52,6 @@ export default function EmergencyBraceletPage() {
 
   const [ownerEmail, setOwnerEmail] =
     useState("");
-
-  /* STEP 3 — HOLDER */
 
   const [holderFirstName, setHolderFirstName] =
     useState("");
@@ -60,8 +73,6 @@ export default function EmergencyBraceletPage() {
     setCustomRelationship,
   ] = useState("");
 
-  /* STEP 4 — MEDICAL */
-
   const [bloodGroup, setBloodGroup] =
     useState("");
 
@@ -79,8 +90,6 @@ export default function EmergencyBraceletPage() {
   const [medicalNotes, setMedicalNotes] =
     useState("");
 
-  /* STEP 5 — CONTACTS */
-
   const [
     primaryContactEnabled,
     setPrimaryContactEnabled,
@@ -96,8 +105,10 @@ export default function EmergencyBraceletPage() {
     setEmergencyLastName,
   ] = useState("");
 
-  const [emergencyPhone, setEmergencyPhone] =
-    useState("");
+  const [
+    emergencyPhone,
+    setEmergencyPhone,
+  ] = useState("");
 
   const [
     emergencyRelationship,
@@ -109,11 +120,15 @@ export default function EmergencyBraceletPage() {
     setSecondContactEnabled,
   ] = useState(false);
 
-  const [secondFirstName, setSecondFirstName] =
-    useState("");
+  const [
+    secondFirstName,
+    setSecondFirstName,
+  ] = useState("");
 
-  const [secondLastName, setSecondLastName] =
-    useState("");
+  const [
+    secondLastName,
+    setSecondLastName,
+  ] = useState("");
 
   const [secondPhone, setSecondPhone] =
     useState("");
@@ -122,8 +137,6 @@ export default function EmergencyBraceletPage() {
     secondRelationship,
     setSecondRelationship,
   ] = useState("");
-
-  /* STEP 6 — VISIBILITY */
 
   const [showName, setShowName] =
     useState(true);
@@ -171,6 +184,75 @@ export default function EmergencyBraceletPage() {
     setShowSecondContact,
   ] = useState(false);
 
+  useEffect(() => {
+    loadOwnerAccount();
+  }, []);
+
+  async function loadOwnerAccount() {
+    try {
+      setLoadingAccount(true);
+
+      const {
+        data,
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        window.location.href =
+          "/login";
+        return;
+      }
+
+      const {
+        data: owner,
+        error: ownerError,
+      } = await supabase
+        .from("owner_accounts")
+        .select(
+          "user_id, first_name, last_name, phone, email"
+        )
+        .eq(
+          "user_id",
+          data.user.id
+        )
+        .single();
+
+      if (ownerError) {
+        throw ownerError;
+      }
+
+      setOwnerId(owner.user_id);
+
+      setOwnerFirstName(
+        owner.first_name || ""
+      );
+
+      setOwnerLastName(
+        owner.last_name || ""
+      );
+
+      setOwnerPhone(
+        owner.phone || ""
+      );
+
+      setOwnerEmail(
+        owner.email || ""
+      );
+    } catch (error) {
+      console.error(error);
+
+      setSaveError(
+        "ანგარიშის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
+      );
+    } finally {
+      setLoadingAccount(false);
+    }
+  }
+
   const holderName =
     profileFor === "self"
       ? `${ownerFirstName} ${ownerLastName}`.trim()
@@ -198,155 +280,445 @@ export default function EmergencyBraceletPage() {
 
   function continueFromCreator() {
     if (profileFor === "self") {
-      setHolderFirstName(ownerFirstName);
-      setHolderLastName(ownerLastName);
+      setHolderFirstName(
+        ownerFirstName
+      );
+
+      setHolderLastName(
+        ownerLastName
+      );
 
       goToStep(4);
-
       return;
     }
 
     goToStep(3);
   }
 
-  function createEmergencyProfile() {
-    const payload = {
-      tagCode:
-        tagCode.trim().toUpperCase(),
+  async function createEmergencyProfile() {
+    if (saving) return;
 
-      profileType:
+    try {
+      setSaving(true);
+      setSaveError("");
+
+      if (!ownerId) {
+        throw new Error(
+          "Owner Account ვერ მოიძებნა."
+        );
+      }
+
+      const normalizedTag =
+        tagCode
+          .trim()
+          .toUpperCase();
+
+      if (!normalizedTag) {
+        throw new Error(
+          "QR კოდი სავალდებულოა."
+        );
+      }
+
+      const {
+        data: qrTag,
+        error: qrError,
+      } = await supabase
+        .from("qr_tags")
+        .select(
+          "id, tag_code, category, status, assigned_profile_id, assigned_owner_id"
+        )
+        .eq(
+          "tag_code",
+          normalizedTag
+        )
+        .maybeSingle();
+
+      if (qrError) {
+        throw qrError;
+      }
+
+      if (!qrTag) {
+        throw new Error(
+          "ეს QR კოდი სისტემაში ვერ მოიძებნა."
+        );
+      }
+
+      if (
+        qrTag.status !==
+        "unassigned"
+      ) {
+        throw new Error(
+          "ეს QR კოდი უკვე გამოყენებულია."
+        );
+      }
+
+      const qrCategory =
+        String(
+          qrTag.category || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      const allowedCategories = [
+        "emergency",
         "emergency_bracelet",
+        "emergency bracelet",
+      ];
 
-      profileFor,
+      if (
+        qrCategory &&
+        !allowedCategories.includes(
+          qrCategory
+        )
+      ) {
+        throw new Error(
+          "ეს QR კოდი Emergency Bracelet კატეგორიას არ ეკუთვნის."
+        );
+      }
 
-      creator: {
-        firstName:
-          ownerFirstName.trim(),
+      const finalFirstName =
+        profileFor === "self"
+          ? ownerFirstName.trim()
+          : holderFirstName.trim();
 
-        lastName:
-          ownerLastName.trim(),
+      const finalLastName =
+        profileFor === "self"
+          ? ownerLastName.trim()
+          : holderLastName.trim();
 
-        phone:
-          ownerPhone.trim(),
+      if (
+        !finalFirstName ||
+        !finalLastName
+      ) {
+        throw new Error(
+          "სახელი და გვარი სავალდებულოა."
+        );
+      }
 
-        email:
-          ownerEmail.trim(),
-      },
-
-      holder: {
-        firstName:
-          profileFor === "self"
-            ? ownerFirstName.trim()
-            : holderFirstName.trim(),
-
-        lastName:
-          profileFor === "self"
-            ? ownerLastName.trim()
-            : holderLastName.trim(),
-
-        birthDate:
-          holderBirthDate,
-
-        sex:
-          holderSex,
-      },
-
-      relationship:
-        profileFor === "other"
-          ? relationship
-          : null,
-
-      customRelationship:
+      if (
         profileFor === "other" &&
-        relationship === "other"
-          ? customRelationship.trim()
-          : null,
+        !relationship
+      ) {
+        throw new Error(
+          "მესამე პირთან კავშირი სავალდებულოა."
+        );
+      }
 
-      medical: {
-        bloodGroup,
-        allergies,
-        medicalConditions,
-        medications,
-        medicalNotes,
-      },
+      if (
+        profileFor === "other" &&
+        relationship === "other" &&
+        !customRelationship.trim()
+      ) {
+        throw new Error(
+          "მიუთითეთ რა კავშირი გაქვთ ამ პირთან."
+        );
+      }
 
-      contacts: {
-        default: {
-          firstName:
-            ownerFirstName.trim(),
+      const managerRelationship =
+        profileFor === "other"
+          ? relationship === "other"
+            ? customRelationship.trim()
+            : relationship
+          : null;
 
-          lastName:
-            ownerLastName.trim(),
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from(
+          "emergency_profiles"
+        )
+        .insert({
+          owner_id:
+            ownerId,
 
-          phone:
-            ownerPhone.trim(),
-        },
+          tag_code:
+            normalizedTag,
 
-        primary:
-          primaryContactEnabled
-            ? {
-                firstName:
-                  emergencyFirstName.trim(),
+          profile_for:
+            profileFor,
 
-                lastName:
-                  emergencyLastName.trim(),
+          first_name:
+            finalFirstName,
 
-                phone:
-                  emergencyPhone.trim(),
+          last_name:
+            finalLastName,
 
-                relationship:
-                  emergencyRelationship.trim(),
-              }
-            : null,
+          date_of_birth:
+            holderBirthDate ||
+            null,
 
-        secondary:
-          secondContactEnabled
-            ? {
-                firstName:
-                  secondFirstName.trim(),
+          sex:
+            holderSex ||
+            null,
 
-                lastName:
-                  secondLastName.trim(),
+          blood_type:
+            bloodGroup ||
+            null,
 
-                phone:
-                  secondPhone.trim(),
+          allergies:
+            allergies.trim() ||
+            null,
 
-                relationship:
-                  secondRelationship.trim(),
-              }
-            : null,
-      },
+          medical_conditions:
+            medicalConditions.trim() ||
+            null,
 
-      visibility: {
-        showName,
-        showBirthDate,
-        showSex,
-        showBloodGroup,
-        showAllergies,
-        showConditions,
-        showMedications,
-        showMedicalNotes,
-        showPrimaryContact,
-        showSecondContact,
-      },
+          medications:
+            medications.trim() ||
+            null,
 
-      security: {
-        profileTypeLocked: true,
-        profileForLocked: true,
-        tagCodeLocked: true,
-        holderIdentityLocked: true,
+          medical_note:
+            medicalNotes.trim() ||
+            null,
 
-        holderFirstNameChangeUsed: false,
-      },
-    };
+          owner_phone:
+            ownerPhone,
 
-    console.log(
-      "EMERGENCY PROFILE:",
-      payload
-    );
+          owner_email:
+            ownerEmail,
 
-    alert(
-      "Emergency პროფილის ფორმა მზადაა. შემდეგ ეტაპზე Supabase-ში შენახვას მივაბამთ."
+          profile_manager_type:
+            profileFor,
+
+          manager_first_name:
+            ownerFirstName,
+
+          manager_last_name:
+            ownerLastName,
+
+          manager_relationship:
+            managerRelationship,
+
+          emergency_contact_enabled:
+            primaryContactEnabled,
+
+          emergency_contact_name:
+            primaryContactEnabled
+              ? `${emergencyFirstName} ${emergencyLastName}`.trim()
+              : null,
+
+          emergency_contact_phone:
+            primaryContactEnabled
+              ? emergencyPhone.trim()
+              : null,
+
+          emergency_contact_relationship:
+            primaryContactEnabled
+              ? emergencyRelationship.trim()
+              : null,
+
+          second_contact_enabled:
+            secondContactEnabled,
+
+          second_contact_name:
+            secondContactEnabled
+              ? `${secondFirstName} ${secondLastName}`.trim()
+              : null,
+
+          second_contact_phone:
+            secondContactEnabled
+              ? secondPhone.trim()
+              : null,
+
+          second_contact_relationship:
+            secondContactEnabled
+              ? secondRelationship.trim()
+              : null,
+
+          show_name:
+            showName,
+
+          show_date_of_birth:
+            showBirthDate,
+
+          show_sex:
+            showSex,
+
+          show_blood_type:
+            showBloodGroup,
+
+          show_allergies:
+            showAllergies,
+
+          show_medical_conditions:
+            showConditions,
+
+          show_medications:
+            showMedications,
+
+          show_medical_note:
+            showMedicalNotes,
+
+          show_emergency_contact:
+            showPrimaryContact &&
+            primaryContactEnabled,
+
+          show_second_contact:
+            showSecondContact &&
+            secondContactEnabled,
+
+          live_chat_enabled:
+            true,
+
+          location_sharing_enabled:
+            false,
+
+          missing_mode:
+            false,
+
+          identity_edit_used:
+            false,
+
+          active:
+            true,
+        })
+        .select(
+          "id, tag_code"
+        )
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const {
+        data: updatedTag,
+        error: tagUpdateError,
+      } = await supabase
+        .from("qr_tags")
+        .update({
+          status:
+            "activated",
+
+          assigned_profile_id:
+            profile.id,
+
+          assigned_owner_id:
+            ownerId,
+
+          activated_at:
+            new Date().toISOString(),
+        })
+        .eq(
+          "id",
+          qrTag.id
+        )
+        .eq(
+          "status",
+          "unassigned"
+        )
+        .select("id")
+        .maybeSingle();
+
+      if (
+        tagUpdateError ||
+        !updatedTag
+      ) {
+        await supabase
+          .from(
+            "emergency_profiles"
+          )
+          .delete()
+          .eq(
+            "id",
+            profile.id
+          );
+
+        throw new Error(
+          "QR კოდის გააქტიურება ვერ მოხერხდა."
+        );
+      }
+
+      alert(
+        "Emergency პროფილი წარმატებით შეიქმნა."
+      );
+
+      window.location.href =
+        "/dashboard";
+    } catch (error) {
+      console.error(
+        "CREATE EMERGENCY PROFILE ERROR:",
+        error
+      );
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "პროფილის შექმნა ვერ მოხერხდა.";
+
+      setSaveError(message);
+
+      alert(message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loadingAccount) {
+    return (
+      <main className="loadingPage">
+        <div className="loadingBox">
+          <div className="loadingLogo">
+            QR
+          </div>
+
+          <strong>
+            QR RETURN
+          </strong>
+
+          <span>
+            ანგარიშის ჩატვირთვა...
+          </span>
+        </div>
+
+        <style jsx>{`
+          .loadingPage {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #0747c9;
+            font-family: Inter,
+              -apple-system,
+              BlinkMacSystemFont,
+              "Segoe UI",
+              Arial,
+              sans-serif;
+          }
+
+          .loadingBox {
+            text-align: center;
+            color: #ffffff;
+          }
+
+          .loadingLogo {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 12px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: #ffffff;
+            color: #0747c9;
+            font-weight: 950;
+          }
+
+          .loadingBox strong,
+          .loadingBox span {
+            display: block;
+          }
+
+          .loadingBox strong {
+            font-size: 20px;
+          }
+
+          .loadingBox span {
+            margin-top: 5px;
+            opacity: 0.75;
+            font-size: 13px;
+          }
+        `}</style>
+      </main>
     );
   }
 
@@ -374,14 +746,20 @@ export default function EmergencyBraceletPage() {
           </a>
 
           <a
-            href="/register"
+            href="/dashboard"
             className="topButton"
           >
-            ← პროდუქტები
+            ← ჩემი პროფილები
           </a>
         </header>
 
         <section className="card">
+          {saveError && (
+            <div className="errorBox">
+              {saveError}
+            </div>
+          )}
+
           <div className="progressRow">
             <span>
               EMERGENCY REGISTRATION
@@ -724,9 +1102,7 @@ export default function EmergencyBraceletPage() {
               secondRelationship={
                 secondRelationship
               }
-              showName={
-                showName
-              }
+              showName={showName}
               setShowName={
                 setShowName
               }
@@ -736,9 +1112,7 @@ export default function EmergencyBraceletPage() {
               setShowBirthDate={
                 setShowBirthDate
               }
-              showSex={
-                showSex
-              }
+              showSex={showSex}
               setShowSex={
                 setShowSex
               }
@@ -792,6 +1166,20 @@ export default function EmergencyBraceletPage() {
               }
             />
           )}
+
+          {saving && (
+            <div className="savingOverlay">
+              <div className="savingBox">
+                <strong>
+                  პროფილი იქმნება...
+                </strong>
+
+                <span>
+                  გთხოვთ დაელოდოთ
+                </span>
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
@@ -815,9 +1203,7 @@ export default function EmergencyBraceletPage() {
           min-height: 100vh;
           padding: 0 20px 38px;
           background: #0747c9;
-
-          font-family:
-            Inter,
+          font-family: Inter,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
@@ -830,19 +1216,11 @@ export default function EmergencyBraceletPage() {
           max-width: 940px;
           height: 72px;
           margin: 0 auto;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
-
-          border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.2
-            );
+          border-bottom: 1px solid
+            rgba(255,255,255,.2);
         }
 
         .brand {
@@ -855,14 +1233,11 @@ export default function EmergencyBraceletPage() {
         .brandMark {
           width: 42px;
           height: 42px;
-
           display: grid;
           place-items: center;
-
           border-radius: 11px;
-          background: #ffffff;
+          background: #fff;
           color: #0747c9;
-
           font-size: 13px;
           font-weight: 950;
         }
@@ -873,118 +1248,86 @@ export default function EmergencyBraceletPage() {
         }
 
         .brandText strong {
-          color: #ffffff;
+          color: #fff;
           font-size: 18px;
           font-weight: 950;
         }
 
         .brandText span {
           margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.72
-            );
-
+          color: rgba(255,255,255,.72);
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.8px;
+          letter-spacing: .8px;
         }
 
         .topButton {
           min-height: 40px;
           padding: 0 14px;
-
           display: inline-flex;
           align-items: center;
-          justify-content: center;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.34
-            );
-
+          border: 1px solid
+            rgba(255,255,255,.34);
           border-radius: 10px;
-
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.08
-            );
-
-          color: #ffffff;
-
+            rgba(255,255,255,.08);
+          color: #fff;
           font-size: 13px;
           font-weight: 800;
           text-decoration: none;
         }
 
         .card {
+          position: relative;
           width: 100%;
           max-width: 820px;
           margin: 26px auto 0;
           padding: 27px;
-
           border-radius: 21px;
-          background: #ffffff;
-
+          background: #fff;
           box-shadow:
             0 24px 56px
-            rgba(
-              0,
-              24,
-              77,
-              0.25
-            );
+            rgba(0,24,77,.25);
+        }
+
+        .errorBox {
+          margin-bottom: 15px;
+          padding: 12px 14px;
+          border: 1px solid #ffd0cc;
+          border-radius: 10px;
+          background: #fff3f3;
+          color: #b42318;
+          font-size: 13px;
+          font-weight: 750;
         }
 
         .progressRow {
           display: flex;
           align-items: center;
           gap: 12px;
-
           color: #0747c9;
-
           font-size: 10px;
           font-weight: 900;
-          letter-spacing: 0.8px;
+          letter-spacing: .8px;
         }
 
         .progressTrack {
           flex: 1;
           height: 5px;
-
           overflow: hidden;
-
           border-radius: 20px;
           background: #e4ebf4;
         }
 
         .progressFill {
           height: 100%;
-
           border-radius: 20px;
           background: #0747c9;
-
-          transition: width 0.2s ease;
-        }
-
-        .progressRow strong {
-          white-space: nowrap;
+          transition: width .2s ease;
         }
 
         .heading {
           margin-top: 18px;
-
           display: flex;
           align-items: center;
           gap: 13px;
@@ -994,15 +1337,11 @@ export default function EmergencyBraceletPage() {
           width: 50px;
           height: 50px;
           flex: 0 0 50px;
-
           display: grid;
           place-items: center;
-
           border-radius: 13px;
-
           background: #0747c9;
-          color: #ffffff;
-
+          color: #fff;
           font-size: 23px;
           font-weight: 800;
         }
@@ -1010,9 +1349,7 @@ export default function EmergencyBraceletPage() {
         .eyebrow {
           display: block;
           margin-bottom: 3px;
-
           color: #0747c9;
-
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 1px;
@@ -1020,9 +1357,7 @@ export default function EmergencyBraceletPage() {
 
         .heading h1 {
           margin: 0;
-
           color: #203a55;
-
           font-size: 29px;
           font-weight: 900;
           line-height: 1.15;
@@ -1030,298 +1365,74 @@ export default function EmergencyBraceletPage() {
 
         .heading p {
           margin: 4px 0 0;
-
           color: #718397;
-
           font-size: 14px;
           line-height: 1.45;
         }
 
         .qrSection {
           margin-top: 21px;
-
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 14px;
-
           align-items: end;
-        }
-
-        .qrHelp {
-          min-height: 83px;
-          padding: 11px 13px;
-
-          border: 1px solid #cbdcf4;
-          border-radius: 11px;
-
-          background: #f2f6fc;
-        }
-
-        .qrHelp span {
-          color: #0747c9;
-
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 0.8px;
-        }
-
-        .qrHelp strong {
-          display: block;
-          margin-top: 3px;
-
-          color: #304a65;
-
-          font-size: 12px;
-          font-weight: 850;
-        }
-
-        .qrHelp p {
-          margin: 3px 0 0;
-
-          color: #718397;
-
-          font-size: 10px;
-          line-height: 1.4;
         }
 
         .choiceGrid {
           margin-top: 18px;
-
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns:
+            repeat(2,minmax(0,1fr));
           gap: 14px;
         }
 
         .choice {
           min-height: 130px;
           padding: 15px 16px;
-
           display: flex;
           flex-direction: column;
-
           border: 1px solid #0b52d6;
           border-radius: 14px;
-
           background: #0b52d6;
-          color: #ffffff;
-
+          color: #fff;
           text-align: left;
           cursor: pointer;
         }
 
         .choice.active {
           background: #063fae;
-
           box-shadow:
             0 0 0 4px
-            rgba(
-              7,
-              71,
-              201,
-              0.1
-            );
-        }
-
-        .choiceTop {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .choiceTop > span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.72
-            );
-
-          font-size: 10px;
-          font-weight: 900;
-        }
-
-        .choiceCircle {
-          width: 27px;
-          height: 27px;
-
-          display: grid;
-          place-items: center;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.3
-            );
-
-          border-radius: 50%;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.12
-            );
-        }
-
-        .choiceIcon {
-          margin-top: 9px;
-          font-size: 24px;
+            rgba(7,71,201,.1);
         }
 
         .choice h2 {
           margin: 7px 0 0;
-
-          color: #ffffff;
-
+          color: #fff;
           font-size: 20px;
           font-weight: 900;
         }
 
         .choice p {
           margin: 5px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.86
-            );
-
+          color: rgba(255,255,255,.86);
           font-size: 13px;
           line-height: 1.4;
-        }
-
-        .infoBox,
-        .optionalNotice,
-        .finalNotice,
-        .nameWarning {
-          margin-top: 18px;
-          padding: 10px 12px;
-
-          display: flex;
-          align-items: center;
-          gap: 9px;
-
-          border: 1px solid #cbdcf4;
-          border-radius: 10px;
-
-          background: #f2f6fc;
-        }
-
-        .infoIcon,
-        .optionalNotice > div,
-        .finalNotice > div,
-        .nameWarning > div {
-          width: 28px;
-          height: 28px;
-          flex: 0 0 28px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 50%;
-
-          background: #0747c9;
-          color: #ffffff;
-
-          font-size: 11px;
-          font-weight: 900;
-        }
-
-        .infoBox strong {
-          display: block;
-          color: #304a65;
-
-          font-size: 13px;
-          font-weight: 850;
-        }
-
-        .infoBox p,
-        .optionalNotice p,
-        .finalNotice p,
-        .nameWarning p {
-          margin: 2px 0 0;
-
-          color: #718397;
-
-          font-size: 12px;
-          line-height: 1.4;
-        }
-
-        .topSummary,
-        .creatorSummary,
-        .lockedSummary {
-          margin-top: 19px;
-          padding: 12px 14px;
-
-          display: grid;
-          gap: 10px;
-
-          border-radius: 10px;
-          background: #0747c9;
-        }
-
-        .topSummary {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .creatorSummary,
-        .lockedSummary {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .summaryItem span,
-        .summaryItem strong {
-          display: block;
-        }
-
-        .summaryItem span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.68
-            );
-
-          font-size: 9px;
-        }
-
-        .summaryItem strong {
-          margin-top: 3px;
-
-          color: #ffffff;
-
-          font-size: 12px;
-
-          overflow-wrap: anywhere;
         }
 
         .formGrid,
         .textareaGrid {
           margin-top: 17px;
-
           display: grid;
-
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns:
+            repeat(2,minmax(0,1fr));
           gap: 14px;
-        }
-
-        .field {
-          min-width: 0;
         }
 
         .field label {
           display: block;
           margin: 0 0 7px 2px;
-
           color: #344e68;
-
           font-size: 14px;
           font-weight: 850;
         }
@@ -1330,15 +1441,11 @@ export default function EmergencyBraceletPage() {
         .field select {
           width: 100%;
           height: 56px;
-
           padding: 0 15px;
-
           border: 1.5px solid #d5e0eb;
           border-radius: 10px;
-
-          background: #ffffff;
+          background: #fff;
           color: #263f59;
-
           font-size: 15px;
           outline: none;
         }
@@ -1346,17 +1453,12 @@ export default function EmergencyBraceletPage() {
         .field textarea {
           width: 100%;
           min-height: 94px;
-
           padding: 12px 14px;
-
           resize: vertical;
-
           border: 1.5px solid #d5e0eb;
           border-radius: 10px;
-
-          background: #ffffff;
+          background: #fff;
           color: #263f59;
-
           font-size: 14px;
           line-height: 1.45;
           outline: none;
@@ -1366,313 +1468,101 @@ export default function EmergencyBraceletPage() {
         .field select:focus,
         .field textarea:focus {
           border-color: #0747c9;
-
           box-shadow:
             0 0 0 4px
-            rgba(
-              7,
-              71,
-              201,
-              0.08
-            );
+            rgba(7,71,201,.08);
+        }
+
+        .topSummary,
+        .creatorSummary,
+        .lockedSummary {
+          margin-top: 19px;
+          padding: 12px 14px;
+          display: grid;
+          gap: 10px;
+          border-radius: 10px;
+          background: #0747c9;
+        }
+
+        .topSummary {
+          grid-template-columns:
+            repeat(2,minmax(0,1fr));
+        }
+
+        .creatorSummary,
+        .lockedSummary {
+          grid-template-columns:
+            repeat(3,minmax(0,1fr));
+        }
+
+        .summaryItem span,
+        .summaryItem strong {
+          display: block;
+        }
+
+        .summaryItem span {
+          color: rgba(255,255,255,.68);
+          font-size: 9px;
+        }
+
+        .summaryItem strong {
+          margin-top: 3px;
+          color: #fff;
+          font-size: 12px;
+          overflow-wrap: anywhere;
         }
 
         .subSection {
           margin-top: 18px;
           padding-top: 16px;
-
           border-top: 1px solid #e1e8f0;
-        }
-
-        .firstSection {
-          margin-top: 20px;
         }
 
         .sectionTitle > span {
           color: #0747c9;
-
           font-size: 9px;
           font-weight: 900;
-          letter-spacing: 0.9px;
+          letter-spacing: .9px;
         }
 
         .sectionTitle h3 {
           margin: 4px 0 0;
-
           color: #304a65;
-
           font-size: 17px;
           font-weight: 850;
         }
 
         .relationshipGrid {
           margin-top: 11px;
-
           display: grid;
-
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns:
+            repeat(4,minmax(0,1fr));
           gap: 7px;
         }
 
         .relationshipButton {
           min-height: 46px;
-
           border: 1px solid #d7e2ed;
           border-radius: 9px;
-
-          background: #ffffff;
+          background: #fff;
           color: #536a81;
-
           font-size: 12px;
           font-weight: 800;
-
           cursor: pointer;
         }
 
         .relationshipButton.selected {
           border-color: #0747c9;
-
           background: #edf4ff;
           color: #0747c9;
         }
 
-        .singleField {
-          margin-top: 12px;
-        }
-
-        .holderSummary {
-          margin-top: 19px;
-          padding: 12px 14px;
-
-          display: flex;
-          align-items: center;
-          gap: 10px;
-
-          border-radius: 11px;
-
-          background: #0747c9;
-        }
-
-        .holderAvatar {
-          width: 38px;
-          height: 38px;
-
-          display: grid;
-          place-items: center;
-
-          border-radius: 10px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.15
-            );
-        }
-
-        .holderSummary span,
-        .holderSummary strong,
-        .holderSummary p {
-          display: block;
-        }
-
-        .holderSummary span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.68
-            );
-
-          font-size: 9px;
-          font-weight: 900;
-        }
-
-        .holderSummary strong {
-          margin-top: 2px;
-
-          color: #ffffff;
-
-          font-size: 15px;
-        }
-
-        .holderSummary p {
-          margin: 2px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.75
-            );
-
-          font-size: 10px;
-        }
-
-        .optionalBox {
-          min-height: 56px;
-          padding: 9px 12px;
-
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-
-          border: 1px solid #dce5ee;
-          border-radius: 10px;
-
-          background: #f8fafd;
-        }
-
-        .optionalBox span {
-          color: #0747c9;
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .optionalBox strong {
-          margin-top: 2px;
-
-          color: #304a65;
-
-          font-size: 12px;
-        }
-
-        .optionalBox p {
-          margin: 2px 0 0;
-
-          color: #7a8999;
-
-          font-size: 10px;
-        }
-
-        .creatorContact {
-          margin-top: 19px;
-          padding: 12px 14px;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          gap: 12px;
-
-          border-radius: 11px;
-          background: #0747c9;
-        }
-
-        .creatorContact span,
-        .creatorContact strong,
-        .creatorContact p {
-          display: block;
-        }
-
-        .creatorContact > div > span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.7
-            );
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .creatorContact strong {
-          margin-top: 2px;
-
-          color: #ffffff;
-
-          font-size: 14px;
-        }
-
-        .creatorContact p {
-          margin: 2px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.82
-            );
-
-          font-size: 12px;
-        }
-
-        .requiredBadge {
-          padding: 6px 8px;
-
-          border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.25
-            );
-
-          border-radius: 999px;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.12
-            );
-
-          color:
-            #ffffff !important;
-
-          font-size:
-            8px !important;
-
-          font-weight: 900;
-        }
-
-        .sectionWithToggle {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-        }
-
-        .miniToggle {
-          width: 70px;
-          height: 34px;
-
-          border: 1px solid #d5e0eb;
-          border-radius: 999px;
-
-          background: #f4f6f9;
-          color: #8090a0;
-
-          font-size: 10px;
-          font-weight: 900;
-
-          cursor: pointer;
-        }
-
-        .miniToggle.on {
-          border-color: #0747c9;
-
-          background: #0747c9;
-          color: #ffffff;
-        }
-
         .visibilityLayout {
           margin-top: 20px;
-
           display: grid;
-
-          grid-template-columns: 1fr 0.9fr;
+          grid-template-columns:
+            1fr .9fr;
           gap: 14px;
-
           align-items: start;
         }
 
@@ -1680,8 +1570,7 @@ export default function EmergencyBraceletPage() {
         .previewPanel {
           border: 1px solid #dde6ef;
           border-radius: 13px;
-
-          background: #ffffff;
+          background: #fff;
         }
 
         .visibilityPanel {
@@ -1690,7 +1579,6 @@ export default function EmergencyBraceletPage() {
 
         .visibilityGrid {
           margin-top: 12px;
-
           display: grid;
           gap: 7px;
         }
@@ -1698,125 +1586,65 @@ export default function EmergencyBraceletPage() {
         .visibilityRow {
           min-height: 50px;
           padding: 7px 9px;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-
           border: 1px solid #e1e8ef;
           border-radius: 9px;
-
           background: #fbfcfe;
-        }
-
-        .visibilityRow.disabled {
-          opacity: 0.48;
-        }
-
-        .visibilityRow strong {
-          color: #344e68;
-
-          font-size: 12px;
-          font-weight: 820;
         }
 
         .visibilityToggle {
           min-width: 64px;
           height: 30px;
-
           border: 1px solid #d3dde7;
           border-radius: 999px;
-
           background: #f3f5f8;
           color: #82909e;
-
           font-size: 9px;
           font-weight: 900;
-
           cursor: pointer;
         }
 
         .visibilityToggle.on {
           border-color: #0747c9;
-
           background: #0747c9;
-          color: #ffffff;
+          color: #fff;
         }
 
         .previewPanel {
           overflow: hidden;
-
-          box-shadow:
-            0 10px 24px
-            rgba(
-              30,
-              70,
-              120,
-              0.06
-            );
         }
 
         .previewTop {
           padding: 13px 14px;
-
           display: flex;
           align-items: center;
           gap: 9px;
-
           background: #0747c9;
-          color: #ffffff;
+          color: #fff;
         }
 
         .previewMark {
           width: 34px;
           height: 34px;
-
           display: grid;
           place-items: center;
-
           border-radius: 9px;
-
-          background: #ffffff;
+          background: #fff;
           color: #0747c9;
-
           font-size: 22px;
-        }
-
-        .previewTop span,
-        .previewTop strong {
-          display: block;
-        }
-
-        .previewTop span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.7
-            );
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .previewTop strong {
-          margin-top: 1px;
-          font-size: 13px;
         }
 
         .previewPanel > h2 {
           margin: 14px 14px 0;
-
           color: #263f59;
-
           font-size: 19px;
         }
 
         .previewDetails {
           padding: 10px 14px 12px;
-
           display: grid;
           gap: 7px;
         }
@@ -1824,118 +1652,31 @@ export default function EmergencyBraceletPage() {
         .previewRow {
           min-height: 42px;
           padding: 7px 9px;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-
           border-radius: 8px;
-
           background: #f5f8fc;
-        }
-
-        .previewRow.important {
-          background: #edf4ff;
-        }
-
-        .previewRow span {
-          color: #7b8b9c;
-
-          font-size: 10px;
-        }
-
-        .previewRow strong {
-          color: #304a65;
-
-          font-size: 12px;
         }
 
         .previewBlock {
           padding: 8px 9px;
-
           border-radius: 8px;
-
           background: #f8fafc;
-        }
-
-        .previewBlock span,
-        .previewBlock strong {
-          display: block;
-        }
-
-        .previewBlock span {
-          color: #8493a2;
-
-          font-size: 9px;
-          font-weight: 800;
-        }
-
-        .previewBlock strong {
-          margin-top: 3px;
-
-          color: #3b536b;
-
-          font-size: 11px;
-          line-height: 1.4;
         }
 
         .contactPreview {
           margin: 0 14px 10px;
           padding: 10px;
-
           border: 1px solid #cfe0f5;
           border-radius: 9px;
-
           background: #f2f7ff;
-        }
-
-        .contactPreview > span {
-          color: #0747c9;
-
-          font-size: 8px;
-          font-weight: 900;
-        }
-
-        .contactPreview h3 {
-          margin: 3px 0 0;
-
-          color: #304a65;
-
-          font-size: 13px;
-        }
-
-        .contactPreview p {
-          margin: 2px 0 0;
-
-          color: #718397;
-
-          font-size: 10px;
-        }
-
-        .contactPreview a {
-          margin-top: 7px;
-          height: 34px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border-radius: 8px;
-
-          background: #0747c9;
-          color: #ffffff;
-
-          font-size: 10px;
-          font-weight: 850;
-
-          text-decoration: none;
         }
 
         .actions,
         .finalActions {
           margin-top: 20px;
-
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -1947,58 +1688,60 @@ export default function EmergencyBraceletPage() {
         .createButton {
           min-height: 47px;
           padding: 0 18px;
-
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
           border-radius: 10px;
-
           font-size: 14px;
           font-weight: 850;
-
-          text-decoration: none;
           cursor: pointer;
         }
 
         .secondaryButton {
           border: 1px solid #d6e1ec;
-
-          background: #ffffff;
+          background: #fff;
           color: #64788d;
         }
 
         .primaryButton,
         .createButton {
           border: 0;
-
           background: #0747c9;
-          color: #ffffff;
-
-          box-shadow:
-            0 8px 18px
-            rgba(
-              7,
-              71,
-              201,
-              0.16
-            );
+          color: #fff;
         }
 
-        .primaryButton {
-          min-width: 145px;
+        .savingOverlay {
+          position: absolute;
+          inset: 0;
+          z-index: 50;
+          display: grid;
+          place-items: center;
+          border-radius: 21px;
+          background: rgba(255,255,255,.88);
+          backdrop-filter: blur(3px);
         }
 
-        .createButton {
-          min-width: 170px;
+        .savingBox {
+          padding: 22px 30px;
+          text-align: center;
+          border-radius: 14px;
+          background: #0747c9;
+          color: #fff;
         }
 
-        .primaryButton:disabled {
-          background: #b8c5d5;
+        .savingBox strong,
+        .savingBox span {
+          display: block;
+        }
 
-          box-shadow: none;
+        .savingBox strong {
+          font-size: 17px;
+        }
 
-          cursor: not-allowed;
+        .savingBox span {
+          margin-top: 4px;
+          font-size: 12px;
+          opacity: .75;
         }
 
         @media (max-width: 760px) {
@@ -2014,10 +1757,7 @@ export default function EmergencyBraceletPage() {
 
           .relationshipGrid {
             grid-template-columns:
-              repeat(
-                2,
-                minmax(0, 1fr)
-              );
+              repeat(2,minmax(0,1fr));
           }
         }
 
@@ -2026,31 +1766,14 @@ export default function EmergencyBraceletPage() {
             padding: 0 12px 26px;
           }
 
-          .topbar {
-            height: 66px;
-          }
-
-          .brandText span {
-            display: none;
-          }
-
           .card {
             margin-top: 18px;
             padding: 19px 15px;
-
             border-radius: 16px;
-          }
-
-          .progressRow > span {
-            display: none;
           }
 
           .heading h1 {
             font-size: 24px;
-          }
-
-          .heading p {
-            font-size: 13px;
           }
 
           .choiceGrid,
