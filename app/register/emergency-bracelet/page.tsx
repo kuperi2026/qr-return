@@ -29,52 +29,38 @@ const relationshipLabels: Record<Exclude<Relationship, "">, string> = {
 export default function EmergencyBraceletPage() {
   const [step, setStep] = useState(1);
 
+  // STEP 1 — ACCOUNT OWNER
+  const [ownerFirstName, setOwnerFirstName] = useState("");
+  const [ownerLastName, setOwnerLastName] = useState("");
+  const [ownerPhone, setOwnerPhone] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
+
+  // STEP 2 — WHO IS THIS PROFILE FOR?
   const [profileFor, setProfileFor] = useState<ProfileFor>("");
   const [relationship, setRelationship] =
     useState<Relationship>("");
   const [customRelationship, setCustomRelationship] = useState("");
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [sex, setSex] = useState("");
-  const [photo, setPhoto] = useState<File | null>(null);
+  const ownerReady =
+    ownerFirstName.trim().length > 0 &&
+    ownerLastName.trim().length > 0 &&
+    ownerPhone.trim().length > 0 &&
+    ownerEmail.trim().length > 0;
 
-  const stepOneReady =
+  const profileChoiceReady =
     profileFor === "self" ||
     (profileFor === "other" &&
       relationship !== "" &&
       (relationship !== "other" ||
         customRelationship.trim().length > 0));
 
-  const stepTwoReady =
-    firstName.trim().length > 0 &&
-    lastName.trim().length > 0;
+  function goStep(number: number) {
+    setStep(number);
 
-  function goToStepTwo() {
-    if (!stepOneReady) return;
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function continueFromStepTwo() {
-    if (!stepTwoReady) return;
-
-    console.log({
-      profileFor,
-      relationship,
-      customRelationship,
-      firstName,
-      lastName,
-      dateOfBirth,
-      sex,
-      photo,
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
     });
-
-    /*
-      შემდეგ ეტაპზე აქ დავამატებთ STEP 3-ს:
-      Emergency Contacts
-    */
   }
 
   return (
@@ -90,31 +76,182 @@ export default function EmergencyBraceletPage() {
             </div>
           </a>
 
-          <a href="/register" className="backLink">
+          <a href="/register" className="topBack">
             ← პროდუქტები
           </a>
         </header>
 
         <section className="card">
-          <div className="progressRow">
-            <span>STEP {step} OF 5</span>
+          <div className="progressHeader">
+            <span>STEP {step} OF 6</span>
 
             <div className="progressTrack">
               <div
                 className="progressFill"
-                style={{ width: `${step * 20}%` }}
+                style={{
+                  width: `${(step / 6) * 100}%`,
+                }}
               />
             </div>
           </div>
 
+          {/* STEP 1 — OWNER INFORMATION */}
+
           {step === 1 && (
             <>
               <div className="heading">
-                <div className="medicalIcon">+</div>
+                <div className="headingIcon">👤</div>
 
                 <div>
-                  <h1>Emergency Bracelet</h1>
-                  <p>ვისთვის ქმნით Emergency პროფილს?</p>
+                  <span className="eyebrow">
+                    ACCOUNT OWNER
+                  </span>
+
+                  <h1>მფლობელის ინფორმაცია</h1>
+
+                  <p>
+                    შეიყვანეთ იმ პირის მონაცემები, ვინც Emergency
+                    პროფილს ქმნის და მართავს.
+                  </p>
+                </div>
+              </div>
+
+              <div className="ownerInfo">
+                <div className="ownerInfoIcon">i</div>
+
+                <div>
+                  <strong>პროფილის მმართველი</strong>
+
+                  <p>
+                    ეს ინფორმაცია ეკუთვნის ანგარიშის მფლობელს და არა
+                    აუცილებლად იმ ადამიანს, ვისაც სამაჯური ექნება.
+                  </p>
+                </div>
+              </div>
+
+              <div className="formGrid">
+                <div className="field">
+                  <label>სახელი *</label>
+
+                  <input
+                    type="text"
+                    value={ownerFirstName}
+                    onChange={(e) =>
+                      setOwnerFirstName(e.target.value)
+                    }
+                    placeholder="სახელი"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>გვარი *</label>
+
+                  <input
+                    type="text"
+                    value={ownerLastName}
+                    onChange={(e) =>
+                      setOwnerLastName(e.target.value)
+                    }
+                    placeholder="გვარი"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>ტელეფონის ნომერი *</label>
+
+                  <input
+                    type="tel"
+                    value={ownerPhone}
+                    onChange={(e) =>
+                      setOwnerPhone(e.target.value)
+                    }
+                    placeholder="+1 000 000 0000"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>ელფოსტა *</label>
+
+                  <input
+                    type="email"
+                    value={ownerEmail}
+                    onChange={(e) =>
+                      setOwnerEmail(e.target.value)
+                    }
+                    placeholder="name@email.com"
+                  />
+                </div>
+              </div>
+
+              <div className="privacyNote">
+                <div className="shield">✓</div>
+
+                <div>
+                  <strong>Account Information</strong>
+
+                  <p>
+                    ეს მონაცემები გამოიყენება პროფილის მართვისა და
+                    თქვენთან დაკავშირებისთვის.
+                  </p>
+                </div>
+              </div>
+
+              <div className="actions">
+                <a href="/register" className="secondaryButton">
+                  ← უკან
+                </a>
+
+                <button
+                  type="button"
+                  className="primaryButton"
+                  disabled={!ownerReady}
+                  onClick={() => goStep(2)}
+                >
+                  გაგრძელება
+                  <span>→</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* STEP 2 — WHO IS THE PROFILE FOR */}
+
+          {step === 2 && (
+            <>
+              <div className="heading">
+                <div className="headingIcon">+</div>
+
+                <div>
+                  <span className="eyebrow">
+                    EMERGENCY PROFILE
+                  </span>
+
+                  <h1>ვისთვის ქმნით პროფილს?</h1>
+
+                  <p>
+                    აირჩიეთ, Emergency Bracelet თქვენ გეკუთვნით თუ
+                    სხვა პირს.
+                  </p>
+                </div>
+              </div>
+
+              <div className="ownerSummary">
+                <div>
+                  <span>ანგარიშის მფლობელი</span>
+
+                  <strong>
+                    {ownerFirstName} {ownerLastName}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>საკონტაქტო ნომერი</span>
+                  <strong>{ownerPhone}</strong>
+                </div>
+
+                <div>
+                  <span>ელფოსტა</span>
+                  <strong>{ownerEmail}</strong>
                 </div>
               </div>
 
@@ -133,11 +270,11 @@ export default function EmergencyBraceletPage() {
                   }}
                 >
                   <div className="choiceTop">
-                    <span className="choiceNumber">01</span>
+                    <span>01</span>
 
-                    <span className="choiceCheck">
+                    <div className="choiceCircle">
                       {profileFor === "self" ? "✓" : "→"}
-                    </span>
+                    </div>
                   </div>
 
                   <div className="choiceIcon">👤</div>
@@ -145,8 +282,7 @@ export default function EmergencyBraceletPage() {
                   <h2>ჩემთვის</h2>
 
                   <p>
-                    შექმენით Emergency პროფილი თქვენი პირადი
-                    ინფორმაციისთვის.
+                    Emergency Bracelet ეკუთვნის ანგარიშის მფლობელს.
                   </p>
                 </button>
 
@@ -160,11 +296,11 @@ export default function EmergencyBraceletPage() {
                   onClick={() => setProfileFor("other")}
                 >
                   <div className="choiceTop">
-                    <span className="choiceNumber">02</span>
+                    <span>02</span>
 
-                    <span className="choiceCheck">
+                    <div className="choiceCircle">
                       {profileFor === "other" ? "✓" : "→"}
-                    </span>
+                    </div>
                   </div>
 
                   <div className="choiceIcon">👥</div>
@@ -172,15 +308,15 @@ export default function EmergencyBraceletPage() {
                   <h2>სხვა პირისთვის</h2>
 
                   <p>
-                    შექმენით ბავშვის, ოჯახის წევრის ან სხვა პირის
-                    Emergency პროფილი.
+                    ბავშვის, ოჯახის წევრის ან სხვა პირის Emergency
+                    Bracelet.
                   </p>
                 </button>
               </div>
 
               {profileFor === "other" && (
                 <section className="relationshipSection">
-                  <div className="sectionTitle">
+                  <div className="sectionHeading">
                     <span>RELATIONSHIP</span>
 
                     <h3>რა კავშირი გაქვთ ამ პირთან?</h3>
@@ -208,14 +344,14 @@ export default function EmergencyBraceletPage() {
                   </div>
 
                   {relationship === "other" && (
-                    <div className="field fullField">
+                    <div className="otherField">
                       <label>მიუთითეთ კავშირი *</label>
 
                       <input
                         type="text"
                         value={customRelationship}
-                        onChange={(event) =>
-                          setCustomRelationship(event.target.value)
+                        onChange={(e) =>
+                          setCustomRelationship(e.target.value)
                         }
                         placeholder="მაგ. ოჯახის მეგობარი"
                       />
@@ -224,193 +360,11 @@ export default function EmergencyBraceletPage() {
                 </section>
               )}
 
-              <div className="infoBox">
-                <div className="infoIcon">i</div>
-
-                <div>
-                  <strong>
-                    ერთი ანგარიში — რამდენიმე Emergency პროფილი
-                  </strong>
-
-                  <p>
-                    შეგიძლიათ მართოთ თქვენი და სხვა პირების Emergency
-                    პროფილები ერთი ანგარიშიდან.
-                  </p>
-                </div>
-              </div>
-
-              <div className="actions">
-                <a href="/register" className="secondaryButton">
-                  ← უკან
-                </a>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  disabled={!stepOneReady}
-                  onClick={goToStepTwo}
-                >
-                  გაგრძელება <span>→</span>
-                </button>
-              </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="heading">
-                <div className="medicalIcon personIcon">👤</div>
-
-                <div>
-                  <h1>პირადი ინფორმაცია</h1>
-
-                  <p>
-                    შეავსეთ იმ ადამიანის ინფორმაცია, ვისაც Emergency
-                    Bracelet ეკუთვნის.
-                  </p>
-                </div>
-              </div>
-
-              {profileFor === "other" && (
-                <div className="relationshipSummary">
-                  <div>
-                    <span>პროფილი იქმნება</span>
-                    <strong>სხვა პირისთვის</strong>
-                  </div>
-
-                  <div>
-                    <span>თქვენი კავშირი</span>
-
-                    <strong>
-                      {relationship === "other"
-                        ? customRelationship
-                        : relationship
-                          ? relationshipLabels[
-                              relationship as Exclude<
-                                Relationship,
-                                ""
-                              >
-                            ]
-                          : ""}
-                    </strong>
-                  </div>
-                </div>
-              )}
-
-              {profileFor === "self" && (
-                <div className="selfNotice">
-                  <div className="infoIcon">✓</div>
-
-                  <div>
-                    <strong>ეს თქვენი Emergency პროფილია</strong>
-
-                    <p>
-                      ქვემოთ შეავსეთ ინფორმაცია, რომელიც ამ სამაჯურის
-                      მფლობელს ეკუთვნის.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="formSection">
-                <div className="sectionTitle">
-                  <span>PROFILE HOLDER</span>
-                  <h3>სამაჯურის მფლობელის მონაცემები</h3>
-                </div>
-
-                <div className="formGrid">
-                  <div className="field">
-                    <label>სახელი *</label>
-
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(event) =>
-                        setFirstName(event.target.value)
-                      }
-                      placeholder="სახელი"
-                    />
-                  </div>
-
-                  <div className="field">
-                    <label>გვარი *</label>
-
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(event) =>
-                        setLastName(event.target.value)
-                      }
-                      placeholder="გვარი"
-                    />
-                  </div>
-
-                  <div className="field">
-                    <label>დაბადების თარიღი</label>
-
-                    <input
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(event) =>
-                        setDateOfBirth(event.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="field">
-                    <label>სქესი</label>
-
-                    <select
-                      value={sex}
-                      onChange={(event) => setSex(event.target.value)}
-                    >
-                      <option value="">აირჩიეთ</option>
-                      <option value="female">ქალი</option>
-                      <option value="male">კაცი</option>
-                      <option value="other">სხვა</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="photoSection">
-                  <div className="photoText">
-                    <strong>პროფილის ფოტო</strong>
-
-                    <p>
-                      დაამატეთ მკაფიო ფოტო, რათა საჭიროების შემთხვევაში
-                      ადამიანის იდენტიფიცირება გამარტივდეს.
-                    </p>
-                  </div>
-
-                  <label className="photoButton">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) =>
-                        setPhoto(event.target.files?.[0] || null)
-                      }
-                    />
-
-                    <span className="uploadIcon">+</span>
-
-                    <span>
-                      {photo ? photo.name : "ფოტოს დამატება"}
-                    </span>
-                  </label>
-                </div>
-              </div>
-
               <div className="actions">
                 <button
                   type="button"
                   className="secondaryButton"
-                  onClick={() => {
-                    setStep(1);
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    });
-                  }}
+                  onClick={() => goStep(1)}
                 >
                   ← უკან
                 </button>
@@ -418,10 +372,26 @@ export default function EmergencyBraceletPage() {
                 <button
                   type="button"
                   className="primaryButton"
-                  disabled={!stepTwoReady}
-                  onClick={continueFromStepTwo}
+                  disabled={!profileChoiceReady}
+                  onClick={() => {
+                    /*
+                      STEP 3 შემდეგ დავამატებთ:
+                      Bracelet Holder Information
+                    */
+
+                    console.log({
+                      ownerFirstName,
+                      ownerLastName,
+                      ownerPhone,
+                      ownerEmail,
+                      profileFor,
+                      relationship,
+                      customRelationship,
+                    });
+                  }}
                 >
-                  გაგრძელება <span>→</span>
+                  გაგრძელება
+                  <span>→</span>
                 </button>
               </div>
             </>
@@ -439,8 +409,7 @@ export default function EmergencyBraceletPage() {
         }
 
         button,
-        input,
-        select {
+        input {
           font: inherit;
         }
 
@@ -457,15 +426,18 @@ export default function EmergencyBraceletPage() {
             sans-serif;
         }
 
+        /* HEADER */
+
         .topbar {
           width: 100%;
           max-width: 940px;
           height: 72px;
           margin: 0 auto;
+
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 18px;
+
           border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -479,11 +451,14 @@ export default function EmergencyBraceletPage() {
         .brandMark {
           width: 42px;
           height: 42px;
+
           display: grid;
           place-items: center;
+
           border-radius: 11px;
           background: #ffffff;
           color: #0747c9;
+
           font-size: 13px;
           font-weight: 950;
         }
@@ -507,36 +482,49 @@ export default function EmergencyBraceletPage() {
           letter-spacing: 0.8px;
         }
 
-        .backLink {
+        .topBack {
           min-height: 40px;
           padding: 0 14px;
+
           display: inline-flex;
           align-items: center;
           justify-content: center;
+
           border: 1px solid rgba(255, 255, 255, 0.34);
           border-radius: 10px;
+
           background: rgba(255, 255, 255, 0.08);
           color: #ffffff;
+
           font-size: 13px;
           font-weight: 800;
           text-decoration: none;
         }
 
+        /* CARD */
+
         .card {
           width: 100%;
           max-width: 820px;
+
           margin: 26px auto 0;
           padding: 27px;
+
           border-radius: 21px;
           background: #ffffff;
+
           box-shadow: 0 24px 56px rgba(0, 24, 77, 0.25);
         }
 
-        .progressRow {
+        /* PROGRESS */
+
+        .progressHeader {
           display: flex;
           align-items: center;
           gap: 12px;
+
           color: #0747c9;
+
           font-size: 11px;
           font-weight: 900;
           letter-spacing: 0.8px;
@@ -545,7 +533,9 @@ export default function EmergencyBraceletPage() {
         .progressTrack {
           flex: 1;
           height: 5px;
+
           overflow: hidden;
+
           border-radius: 20px;
           background: #e4ebf4;
         }
@@ -554,36 +544,53 @@ export default function EmergencyBraceletPage() {
           height: 100%;
           border-radius: 20px;
           background: #0747c9;
+
           transition: width 0.25s ease;
         }
 
+        /* HEADING */
+
         .heading {
-          margin-top: 16px;
+          margin-top: 18px;
+
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 13px;
         }
 
-        .medicalIcon {
-          width: 49px;
-          height: 49px;
-          flex: 0 0 49px;
+        .headingIcon {
+          width: 50px;
+          height: 50px;
+
+          flex: 0 0 50px;
+
           display: grid;
           place-items: center;
+
           border-radius: 13px;
           background: #0747c9;
           color: #ffffff;
-          font-size: 28px;
-          line-height: 1;
+
+          font-size: 24px;
+          font-weight: 700;
         }
 
-        .personIcon {
-          font-size: 23px;
+        .eyebrow {
+          display: block;
+          margin-bottom: 3px;
+
+          color: #0747c9;
+
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1px;
         }
 
         .heading h1 {
           margin: 0;
+
           color: #203a55;
+
           font-size: 29px;
           line-height: 1.15;
           font-weight: 900;
@@ -591,35 +598,204 @@ export default function EmergencyBraceletPage() {
 
         .heading p {
           margin: 4px 0 0;
+
           color: #718397;
+
           font-size: 14px;
           line-height: 1.45;
         }
 
-        .choiceGrid {
-          margin-top: 23px;
+        /* OWNER INFO */
+
+        .ownerInfo,
+        .privacyNote {
+          margin-top: 20px;
+          padding: 12px 14px;
+
+          display: flex;
+          align-items: center;
+          gap: 11px;
+
+          border: 1px solid #cbdcf4;
+          border-radius: 11px;
+
+          background: #f2f6fc;
+        }
+
+        .ownerInfoIcon,
+        .shield {
+          width: 30px;
+          height: 30px;
+
+          flex: 0 0 30px;
+
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          place-items: center;
+
+          border-radius: 50%;
+
+          background: #0747c9;
+          color: #ffffff;
+
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        .ownerInfo strong,
+        .privacyNote strong {
+          display: block;
+
+          color: #304a65;
+
+          font-size: 13px;
+          font-weight: 850;
+        }
+
+        .ownerInfo p,
+        .privacyNote p {
+          margin: 2px 0 0;
+
+          color: #718397;
+
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        /* FORM */
+
+        .formGrid {
+          margin-top: 20px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+          gap: 14px;
+        }
+
+        .field label,
+        .otherField label {
+          display: block;
+
+          margin: 0 0 7px 2px;
+
+          color: #344e68;
+
+          font-size: 14px;
+          font-weight: 850;
+        }
+
+        .field input,
+        .otherField input {
+          width: 100%;
+          height: 56px;
+
+          padding: 0 15px;
+
+          border: 1.5px solid #d5e0eb;
+          border-radius: 11px;
+
+          background: #ffffff;
+          color: #263f59;
+
+          font-size: 15px;
+
+          outline: none;
+        }
+
+        .field input:focus,
+        .otherField input:focus {
+          border-color: #0747c9;
+
+          box-shadow:
+            0 0 0 4px rgba(7, 71, 201, 0.08);
+        }
+
+        /* OWNER SUMMARY */
+
+        .ownerSummary {
+          margin-top: 20px;
+          padding: 14px 16px;
+
+          display: grid;
+
+          grid-template-columns:
+            1.1fr 1fr 1.2fr;
+
+          gap: 12px;
+
+          border-radius: 12px;
+
+          background: #0747c9;
+        }
+
+        .ownerSummary span,
+        .ownerSummary strong {
+          display: block;
+        }
+
+        .ownerSummary span {
+          color: rgba(255, 255, 255, 0.72);
+
+          font-size: 10px;
+          font-weight: 700;
+        }
+
+        .ownerSummary strong {
+          margin-top: 4px;
+
+          color: #ffffff;
+
+          font-size: 13px;
+          font-weight: 850;
+
+          overflow-wrap: anywhere;
+        }
+
+        /* CHOICES */
+
+        .choiceGrid {
+          margin-top: 18px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
           gap: 14px;
         }
 
         .choice {
-          min-height: 128px;
-          padding: 15px;
+          min-height: 145px;
+
+          padding: 16px;
+
           display: flex;
           flex-direction: column;
+
           border: 1.5px solid #0b52d6;
           border-radius: 14px;
+
           background: #0b52d6;
           color: #ffffff;
+
           text-align: left;
+
           cursor: pointer;
-          box-shadow: 0 9px 20px rgba(7, 71, 201, 0.13);
+
+          box-shadow:
+            0 9px 20px rgba(7, 71, 201, 0.13);
+        }
+
+        .choice:hover {
+          background: #0643b6;
         }
 
         .choice.active {
           background: #063fae;
           border-color: #063fae;
+
           box-shadow:
             0 0 0 4px rgba(7, 71, 201, 0.11),
             0 13px 26px rgba(7, 71, 201, 0.22);
@@ -631,300 +807,205 @@ export default function EmergencyBraceletPage() {
           justify-content: space-between;
         }
 
-        .choiceNumber {
-          color: rgba(255, 255, 255, 0.7);
+        .choiceTop > span {
+          color: rgba(255, 255, 255, 0.72);
+
           font-size: 10px;
           font-weight: 900;
         }
 
-        .choiceCheck {
-          width: 27px;
-          height: 27px;
+        .choiceCircle {
+          width: 28px;
+          height: 28px;
+
           display: grid;
           place-items: center;
-          border: 1px solid rgba(255, 255, 255, 0.28);
+
+          border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50%;
+
           background: rgba(255, 255, 255, 0.12);
+
+          color: #ffffff;
+
           font-size: 13px;
           font-weight: 900;
         }
 
         .choiceIcon {
           margin-top: 11px;
-          font-size: 25px;
+
+          font-size: 24px;
         }
 
         .choice h2 {
-          margin: 8px 0 0;
+          margin: 7px 0 0;
+
           color: #ffffff;
-          font-size: 20px;
-          line-height: 1.15;
+
+          font-size: 21px;
           font-weight: 900;
         }
 
         .choice p {
           margin: 5px 0 0;
-          color: rgba(255, 255, 255, 0.84);
+
+          color: rgba(255, 255, 255, 0.86);
+
           font-size: 13px;
           line-height: 1.4;
         }
 
-        .relationshipSection,
-        .formSection {
-          margin-top: 22px;
+        /* RELATIONSHIP */
+
+        .relationshipSection {
+          margin-top: 20px;
           padding-top: 18px;
+
           border-top: 1px solid #e1e8f0;
         }
 
-        .sectionTitle > span {
+        .sectionHeading span {
           color: #0747c9;
+
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 0.9px;
         }
 
-        .sectionTitle h3 {
+        .sectionHeading h3 {
           margin: 4px 0 0;
+
           color: #304a65;
+
           font-size: 17px;
           font-weight: 850;
         }
 
         .relationshipGrid {
           margin-top: 12px;
+
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+
+          grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
           gap: 8px;
         }
 
         .relationshipButton {
           min-height: 48px;
+
           padding: 0 10px;
+
           border: 1px solid #d7e2ed;
           border-radius: 10px;
+
           background: #ffffff;
           color: #536a81;
-          font-size: 12px;
+
+          font-size: 13px;
           font-weight: 800;
+
           cursor: pointer;
+        }
+
+        .relationshipButton:hover {
+          border-color: #a9c5e8;
+          background: #f7faff;
         }
 
         .relationshipButton.selected {
           border-color: #0747c9;
+
           background: #edf4ff;
           color: #0747c9;
-          box-shadow: 0 0 0 3px rgba(7, 71, 201, 0.07);
+
+          box-shadow:
+            0 0 0 3px rgba(7, 71, 201, 0.07);
         }
 
-        .relationshipSummary {
-          margin-top: 20px;
-          padding: 13px 15px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          border-radius: 12px;
-          background: #0747c9;
+        .otherField {
+          margin-top: 14px;
         }
 
-        .relationshipSummary span,
-        .relationshipSummary strong {
-          display: block;
-        }
-
-        .relationshipSummary span {
-          color: rgba(255, 255, 255, 0.72);
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .relationshipSummary strong {
-          margin-top: 3px;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 850;
-        }
-
-        .selfNotice,
-        .infoBox {
-          margin-top: 20px;
-          padding: 11px 13px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          border: 1px solid #cbdcf4;
-          border-radius: 11px;
-          background: #f2f6fc;
-        }
-
-        .infoIcon {
-          width: 29px;
-          height: 29px;
-          flex: 0 0 29px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #0747c9;
-          color: #ffffff;
-          font-size: 12px;
-          font-weight: 900;
-        }
-
-        .selfNotice strong,
-        .infoBox strong {
-          display: block;
-          color: #304a65;
-          font-size: 13px;
-          font-weight: 850;
-        }
-
-        .selfNotice p,
-        .infoBox p {
-          margin: 2px 0 0;
-          color: #718397;
-          font-size: 12px;
-          line-height: 1.4;
-        }
-
-        .formGrid {
-          margin-top: 15px;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 14px;
-        }
-
-        .field label {
-          display: block;
-          margin: 0 0 7px 2px;
-          color: #344e68;
-          font-size: 13px;
-          font-weight: 850;
-        }
-
-        .field input,
-        .field select {
-          width: 100%;
-          height: 56px;
-          padding: 0 15px;
-          border: 1.5px solid #d5e0eb;
-          border-radius: 11px;
-          background: #ffffff;
-          color: #263f59;
-          font-size: 15px;
-          outline: none;
-        }
-
-        .field input:focus,
-        .field select:focus {
-          border-color: #0747c9;
-          box-shadow: 0 0 0 4px rgba(7, 71, 201, 0.08);
-        }
-
-        .fullField {
-          margin-top: 13px;
-        }
-
-        .photoSection {
-          margin-top: 17px;
-          padding: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-          border: 1px solid #dce5ee;
-          border-radius: 12px;
-          background: #f8fafd;
-        }
-
-        .photoText strong {
-          color: #304a65;
-          font-size: 14px;
-          font-weight: 850;
-        }
-
-        .photoText p {
-          max-width: 430px;
-          margin: 4px 0 0;
-          color: #718397;
-          font-size: 12px;
-          line-height: 1.4;
-        }
-
-        .photoButton {
-          min-width: 160px;
-          min-height: 48px;
-          padding: 0 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          border-radius: 10px;
-          background: #0747c9;
-          color: #ffffff;
-          font-size: 12px;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .photoButton input {
-          display: none;
-        }
-
-        .uploadIcon {
-          font-size: 19px;
-          line-height: 1;
-        }
+        /* ACTIONS */
 
         .actions {
-          margin-top: 21px;
+          margin-top: 22px;
+
           display: flex;
           align-items: center;
           justify-content: space-between;
+
           gap: 10px;
         }
 
         .secondaryButton,
         .primaryButton {
-          min-height: 47px;
-          padding: 0 18px;
+          min-height: 48px;
+
+          padding: 0 19px;
+
           display: inline-flex;
           align-items: center;
           justify-content: center;
+
           border-radius: 10px;
-          font-size: 13px;
+
+          font-size: 14px;
           font-weight: 850;
+
           text-decoration: none;
         }
 
         .secondaryButton {
           border: 1px solid #d6e1ec;
+
           background: #ffffff;
           color: #64788d;
+
           cursor: pointer;
         }
 
         .primaryButton {
-          min-width: 140px;
+          min-width: 145px;
+
           gap: 8px;
+
           border: 0;
+
           background: #0747c9;
           color: #ffffff;
+
           cursor: pointer;
-          box-shadow: 0 8px 18px rgba(7, 71, 201, 0.16);
+
+          box-shadow:
+            0 8px 18px rgba(7, 71, 201, 0.16);
         }
 
         .primaryButton:disabled {
           background: #b8c5d5;
+
           cursor: not-allowed;
+
           box-shadow: none;
         }
 
         .primaryButton span {
-          font-size: 16px;
+          font-size: 17px;
         }
 
-        @media (max-width: 760px) {
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+          .ownerSummary {
+            grid-template-columns: 1fr;
+          }
+
           .relationshipGrid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
           }
         }
 
@@ -945,14 +1026,17 @@ export default function EmergencyBraceletPage() {
             font-size: 16px;
           }
 
-          .backLink {
+          .topBack {
             padding: 0 10px;
+
             font-size: 12px;
           }
 
           .card {
             margin-top: 18px;
+
             padding: 19px 15px;
+
             border-radius: 16px;
           }
 
@@ -964,27 +1048,13 @@ export default function EmergencyBraceletPage() {
             font-size: 13px;
           }
 
-          .choiceGrid,
           .formGrid,
-          .relationshipSummary {
+          .choiceGrid {
             grid-template-columns: 1fr;
           }
 
           .choice {
-            min-height: 120px;
-          }
-
-          .relationshipGrid {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .photoSection {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .photoButton {
-            width: 100%;
+            min-height: 135px;
           }
 
           .actions {
