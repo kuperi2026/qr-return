@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import type {
+  Dispatch,
+  SetStateAction,
+} from "react";
+
+import type {
+  ProfileFor,
+  Relationship,
+} from "./emergencyTypes";
 
 type Props = {
   tagCode: string;
 
-  profileFor: "self" | "other" | "";
+  profileFor: ProfileFor;
 
   holderName: string;
   holderBirthDate: string;
@@ -15,7 +23,7 @@ type Props = {
   ownerLastName: string;
   ownerPhone: string;
 
-  relationship: string;
+  relationship: Relationship;
   customRelationship: string;
 
   bloodGroup: string;
@@ -25,46 +33,58 @@ type Props = {
   medicalNotes: string;
 
   primaryContactEnabled: boolean;
+
   emergencyFirstName: string;
   emergencyLastName: string;
   emergencyPhone: string;
   emergencyRelationship: string;
 
   secondContactEnabled: boolean;
+
   secondFirstName: string;
   secondLastName: string;
   secondPhone: string;
   secondRelationship: string;
 
   showName: boolean;
-  setShowName: (value: boolean) => void;
+  setShowName:
+    Dispatch<SetStateAction<boolean>>;
 
   showBirthDate: boolean;
-  setShowBirthDate: (value: boolean) => void;
+  setShowBirthDate:
+    Dispatch<SetStateAction<boolean>>;
 
   showSex: boolean;
-  setShowSex: (value: boolean) => void;
+  setShowSex:
+    Dispatch<SetStateAction<boolean>>;
 
   showBloodGroup: boolean;
-  setShowBloodGroup: (value: boolean) => void;
+  setShowBloodGroup:
+    Dispatch<SetStateAction<boolean>>;
 
   showAllergies: boolean;
-  setShowAllergies: (value: boolean) => void;
+  setShowAllergies:
+    Dispatch<SetStateAction<boolean>>;
 
   showConditions: boolean;
-  setShowConditions: (value: boolean) => void;
+  setShowConditions:
+    Dispatch<SetStateAction<boolean>>;
 
   showMedications: boolean;
-  setShowMedications: (value: boolean) => void;
+  setShowMedications:
+    Dispatch<SetStateAction<boolean>>;
 
   showMedicalNotes: boolean;
-  setShowMedicalNotes: (value: boolean) => void;
+  setShowMedicalNotes:
+    Dispatch<SetStateAction<boolean>>;
 
   showPrimaryContact: boolean;
-  setShowPrimaryContact: (value: boolean) => void;
+  setShowPrimaryContact:
+    Dispatch<SetStateAction<boolean>>;
 
   showSecondContact: boolean;
-  setShowSecondContact: (value: boolean) => void;
+  setShowSecondContact:
+    Dispatch<SetStateAction<boolean>>;
 
   onBack: () => void;
   onCreate: () => void;
@@ -93,12 +113,14 @@ export default function EmergencyStep6({
   medicalNotes,
 
   primaryContactEnabled,
+
   emergencyFirstName,
   emergencyLastName,
   emergencyPhone,
   emergencyRelationship,
 
   secondContactEnabled,
+
   secondFirstName,
   secondLastName,
   secondPhone,
@@ -137,40 +159,40 @@ export default function EmergencyStep6({
   onBack,
   onCreate,
 }: Props) {
-  const [liveChatEnabled, setLiveChatEnabled] =
-    useState(true);
+  const liveChatEnabled = true;
 
-  const [missingModeEnabled, setMissingModeEnabled] =
-    useState(false);
+  const relationshipText =
+    relationship === "other"
+      ? customRelationship
+      : relationship;
 
-  const [locationSharingEnabled, setLocationSharingEnabled] =
-    useState(true);
+  const primaryContactName =
+    `${emergencyFirstName} ${emergencyLastName}`.trim();
 
-  const [missingMessage, setMissingMessage] =
-    useState("");
+  const secondContactName =
+    `${secondFirstName} ${secondLastName}`.trim();
 
-  const ownerRelationship =
-    profileFor === "self"
-      ? "პროფილის მფლობელი"
-      : relationship === "other"
-        ? customRelationship
-        : relationship || "საკონტაქტო პირი";
+  function toggle(
+    value: boolean,
+    setter:
+      Dispatch<SetStateAction<boolean>>
+  ) {
+    setter(!value);
+  }
 
-  function handleCreate() {
-    console.log("EMERGENCY CONTACT SETTINGS", {
-      phoneEnabled: true,
-      liveChatEnabled,
+  function openLiveChat() {
+    if (!tagCode.trim()) {
+      alert(
+        "Live Chat-ის გასახსნელად QR კოდი სავალდებულოა."
+      );
 
-      missingMode: {
-        enabled: missingModeEnabled,
-        message: missingMessage.trim(),
-        locationSharingEnabled:
-          missingModeEnabled &&
-          locationSharingEnabled,
-      },
-    });
+      return;
+    }
 
-    onCreate();
+    window.location.href =
+      `/live-chat/emergency/${encodeURIComponent(
+        tagCode.trim().toUpperCase()
+      )}`;
   }
 
   return (
@@ -182,17 +204,16 @@ export default function EmergencyStep6({
 
         <div>
           <span className="eyebrow">
-            VISIBILITY & PREVIEW
+            STEP 6
           </span>
 
           <h1>
-            რას დაინახავს QR-ის დამსკანერებელი?
+            პროფილის გადახედვა
           </h1>
 
           <p>
-            აირჩიეთ, რომელი ინფორმაცია და
-            დაკავშირების მეთოდები გამოჩნდეს
-            Emergency პროფილში.
+            აირჩიეთ რომელი ინფორმაცია
+            გამოჩნდება Emergency პროფილზე.
           </p>
         </div>
       </div>
@@ -200,7 +221,7 @@ export default function EmergencyStep6({
       <div className="lockedSummary">
         <div className="summaryItem">
           <span>
-            QR CODE · LOCKED
+            QR CODE
           </span>
 
           <strong>
@@ -210,7 +231,7 @@ export default function EmergencyStep6({
 
         <div className="summaryItem">
           <span>
-            PROFILE TYPE · LOCKED
+            PROFILE
           </span>
 
           <strong>
@@ -220,7 +241,7 @@ export default function EmergencyStep6({
 
         <div className="summaryItem">
           <span>
-            PROFILE FOR · LOCKED
+            PROFILE FOR
           </span>
 
           <strong>
@@ -231,172 +252,19 @@ export default function EmergencyStep6({
         </div>
       </div>
 
-      {/* CONTACT METHODS */}
-
-      <section className="contactMethodsSection">
-        <div className="sectionTitle">
-          <span>
-            CONTACT METHODS
-          </span>
-
-          <h3>
-            დაკავშირების მეთოდები
-          </h3>
+      <div className="finalNotice">
+        <div>
+          !
         </div>
 
-        <div className="contactMethodGrid">
-          <div className="contactMethod lockedMethod">
-            <div>
-              <span className="methodEyebrow">
-                REQUIRED
-              </span>
-
-              <strong>
-                ტელეფონი
-              </strong>
-
-              <p>
-                ძირითადი საკონტაქტო ნომერი ყოველთვის
-                ხელმისაწვდომია.
-              </p>
-            </div>
-
-            <div className="alwaysOn">
-              ALWAYS ON
-            </div>
-          </div>
-
-          <div className="contactMethod">
-            <div>
-              <span className="methodEyebrow">
-                OPTIONAL
-              </span>
-
-              <strong>
-                Live Chat
-              </strong>
-
-              <p>
-                QR-ის დამსკანერებელს შეეძლება
-                პლატფორმის Live Chat-ის გამოყენება.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className={
-                liveChatEnabled
-                  ? "methodToggle on"
-                  : "methodToggle"
-              }
-              onClick={() =>
-                setLiveChatEnabled(
-                  !liveChatEnabled
-                )
-              }
-            >
-              {liveChatEnabled
-                ? "ON"
-                : "OFF"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* MISSING MODE */}
-
-      <section className="missingModeSection">
-        <div className="missingModeHeader">
-          <div className="sectionTitle">
-            <span>
-              EMERGENCY / MISSING MODE
-            </span>
-
-            <h3>
-              დაკარგული ან დახმარების საჭიროების რეჟიმი
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            className={
-              missingModeEnabled
-                ? "missingToggle on"
-                : "missingToggle"
-            }
-            onClick={() =>
-              setMissingModeEnabled(
-                !missingModeEnabled
-              )
-            }
-          >
-            {missingModeEnabled
-              ? "ON"
-              : "OFF"}
-          </button>
-        </div>
-
-        <p className="missingDescription">
-          ჩვეულებრივ Emergency პროფილი ყოველთვის
-          მუშაობს. ეს დამატებითი რეჟიმი გამოიყენება
-          მაშინ, როცა პირი დაიკარგა ან განსაკუთრებული
-          დახმარება სჭირდება.
+        <p>
+          ყურადღებით გადაამოწმეთ
+          ინფორმაცია პროფილის შექმნამდე.
+          Emergency პროფილი დაკავშირებული
+          იქნება ამ QR კოდთან და პროფილის
+          კატეგორიის შეცვლა შეუძლებელი იქნება.
         </p>
-
-        {missingModeEnabled && (
-          <div className="missingModeBody">
-            <div className="field">
-              <label>
-                სპეციალური შეტყობინება
-              </label>
-
-              <textarea
-                value={missingMessage}
-                onChange={(event) =>
-                  setMissingMessage(
-                    event.target.value
-                  )
-                }
-                placeholder="მაგ. ეს ადამიანი დაკარგულია. გთხოვთ დაუკავშირდეთ ოჯახის წევრს ან გაგვიზიაროთ მდებარეობა."
-              />
-            </div>
-
-            <div className="locationSetting">
-              <div>
-                <strong>
-                  ლოკაციის გაზიარება
-                </strong>
-
-                <p>
-                  დამსკანერებელს შეეძლება ერთი
-                  ღილაკით გამოგიგზავნოთ თავისი
-                  მიმდინარე მდებარეობა.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className={
-                  locationSharingEnabled
-                    ? "methodToggle on"
-                    : "methodToggle"
-                }
-                onClick={() =>
-                  setLocationSharingEnabled(
-                    !locationSharingEnabled
-                  )
-                }
-              >
-                {locationSharingEnabled
-                  ? "ON"
-                  : "OFF"}
-              </button>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* VISIBILITY + PREVIEW */}
+      </div>
 
       <div className="visibilityLayout">
         <section className="visibilityPanel">
@@ -406,79 +274,143 @@ export default function EmergencyStep6({
             </span>
 
             <h3>
-              ინფორმაციის ჩვენება
+              რა გამოჩნდეს QR-ის
+              დასკანერებისას?
             </h3>
           </div>
 
           <div className="visibilityGrid">
+
             <VisibilityRow
-              title="სახელი და გვარი"
+              label="სახელი და გვარი"
               value={showName}
-              onChange={setShowName}
+              onClick={() =>
+                toggle(
+                  showName,
+                  setShowName
+                )
+              }
             />
 
             <VisibilityRow
-              title="დაბადების თარიღი"
+              label="დაბადების თარიღი"
               value={showBirthDate}
-              onChange={setShowBirthDate}
-              disabled={!holderBirthDate}
+              onClick={() =>
+                toggle(
+                  showBirthDate,
+                  setShowBirthDate
+                )
+              }
             />
 
             <VisibilityRow
-              title="სქესი"
+              label="სქესი"
               value={showSex}
-              onChange={setShowSex}
-              disabled={!holderSex}
+              onClick={() =>
+                toggle(
+                  showSex,
+                  setShowSex
+                )
+              }
             />
 
             <VisibilityRow
-              title="სისხლის ჯგუფი"
+              label="სისხლის ჯგუფი"
               value={showBloodGroup}
-              onChange={setShowBloodGroup}
-              disabled={!bloodGroup}
+              onClick={() =>
+                toggle(
+                  showBloodGroup,
+                  setShowBloodGroup
+                )
+              }
             />
 
             <VisibilityRow
-              title="ალერგიები"
+              label="ალერგიები"
               value={showAllergies}
-              onChange={setShowAllergies}
-              disabled={!allergies}
+              onClick={() =>
+                toggle(
+                  showAllergies,
+                  setShowAllergies
+                )
+              }
             />
 
             <VisibilityRow
-              title="სამედიცინო მდგომარეობები"
+              label="სამედიცინო მდგომარეობები"
               value={showConditions}
-              onChange={setShowConditions}
-              disabled={!medicalConditions}
+              onClick={() =>
+                toggle(
+                  showConditions,
+                  setShowConditions
+                )
+              }
             />
 
             <VisibilityRow
-              title="მედიკამენტები"
+              label="მედიკამენტები"
               value={showMedications}
-              onChange={setShowMedications}
-              disabled={!medications}
+              onClick={() =>
+                toggle(
+                  showMedications,
+                  setShowMedications
+                )
+              }
             />
 
             <VisibilityRow
-              title="სამედიცინო შენიშვნა"
+              label="დამატებითი სამედიცინო ინფორმაცია"
               value={showMedicalNotes}
-              onChange={setShowMedicalNotes}
-              disabled={!medicalNotes}
+              onClick={() =>
+                toggle(
+                  showMedicalNotes,
+                  setShowMedicalNotes
+                )
+              }
             />
 
             <VisibilityRow
-              title="დამატებითი Emergency Contact"
-              value={showPrimaryContact}
-              onChange={setShowPrimaryContact}
-              disabled={!primaryContactEnabled}
+              label="Emergency Contact"
+              value={
+                primaryContactEnabled &&
+                showPrimaryContact
+              }
+              disabled={
+                !primaryContactEnabled
+              }
+              onClick={() => {
+                if (
+                  primaryContactEnabled
+                ) {
+                  toggle(
+                    showPrimaryContact,
+                    setShowPrimaryContact
+                  );
+                }
+              }}
             />
 
             <VisibilityRow
-              title="მეორე დამატებითი კონტაქტი"
-              value={showSecondContact}
-              onChange={setShowSecondContact}
-              disabled={!secondContactEnabled}
+              label="მეორე Emergency Contact"
+              value={
+                secondContactEnabled &&
+                showSecondContact
+              }
+              disabled={
+                !secondContactEnabled
+              }
+              onClick={() => {
+                if (
+                  secondContactEnabled
+                ) {
+                  toggle(
+                    showSecondContact,
+                    setShowSecondContact
+                  );
+                }
+              }}
             />
+
           </div>
         </section>
 
@@ -489,47 +421,31 @@ export default function EmergencyStep6({
             </div>
 
             <div>
+              <strong>
+                EMERGENCY PROFILE
+              </strong>
+
               <span>
                 QR RETURN
               </span>
-
-              <strong>
-                EMERGENCY
-              </strong>
             </div>
           </div>
 
-          {missingModeEnabled && (
-            <div className="missingPreview">
-              <div className="missingBadge">
-                EMERGENCY / MISSING
-              </div>
-
-              <strong>
-                დახმარებაა საჭირო
-              </strong>
-
-              {missingMessage.trim() && (
-                <p>
-                  {missingMessage}
-                </p>
-              )}
-            </div>
-          )}
-
           {showName && (
             <h2>
-              {holderName ||
-                "Emergency Profile"}
+              {holderName || "—"}
             </h2>
           )}
 
           <div className="previewDetails">
+
             {showBirthDate &&
               holderBirthDate && (
                 <PreviewRow
                   label="დაბადების თარიღი"
-                  value={holderBirthDate}
+                  value={
+                    holderBirthDate
+                  }
                 />
               )}
 
@@ -538,11 +454,7 @@ export default function EmergencyStep6({
                 <PreviewRow
                   label="სქესი"
                   value={
-                    holderSex === "female"
-                      ? "ქალი"
-                      : holderSex === "male"
-                        ? "კაცი"
-                        : "სხვა"
+                    holderSex
                   }
                 />
               )}
@@ -551,8 +463,9 @@ export default function EmergencyStep6({
               bloodGroup && (
                 <PreviewRow
                   label="სისხლის ჯგუფი"
-                  value={bloodGroup}
-                  important
+                  value={
+                    bloodGroup
+                  }
                 />
               )}
 
@@ -560,7 +473,9 @@ export default function EmergencyStep6({
               allergies && (
                 <PreviewBlock
                   label="ალერგიები"
-                  value={allergies}
+                  value={
+                    allergies
+                  }
                 />
               )}
 
@@ -578,92 +493,165 @@ export default function EmergencyStep6({
               medications && (
                 <PreviewBlock
                   label="მედიკამენტები"
-                  value={medications}
+                  value={
+                    medications
+                  }
                 />
               )}
 
             {showMedicalNotes &&
               medicalNotes && (
                 <PreviewBlock
-                  label="სამედიცინო შენიშვნა"
-                  value={medicalNotes}
+                  label="დამატებითი ინფორმაცია"
+                  value={
+                    medicalNotes
+                  }
                 />
+              )}
+
+          </div>
+
+          <div className="contactPreview">
+            <span className="contactLabel">
+              ძირითადი საკონტაქტო პირი
+            </span>
+
+            <strong>
+              {ownerFirstName}{" "}
+              {ownerLastName}
+            </strong>
+
+            <p>
+              {ownerPhone || "—"}
+            </p>
+
+            {profileFor === "other" &&
+              relationshipText && (
+                <small>
+                  კავშირი:{" "}
+                  {relationshipText}
+                </small>
               )}
           </div>
 
-          <ContactPreview
-            label="PROFILE MANAGER"
-            name={`${ownerFirstName} ${ownerLastName}`}
-            relationship={ownerRelationship}
-            phone={ownerPhone}
-          />
+          {primaryContactEnabled &&
+            showPrimaryContact && (
+              <div className="contactPreview">
+                <span className="contactLabel">
+                  EMERGENCY CONTACT
+                </span>
 
-          {showPrimaryContact &&
-            primaryContactEnabled && (
-              <ContactPreview
-                label="EMERGENCY CONTACT"
-                name={`${emergencyFirstName} ${emergencyLastName}`}
-                relationship={
-                  emergencyRelationship
-                }
-                phone={emergencyPhone}
-              />
+                <strong>
+                  {primaryContactName ||
+                    "—"}
+                </strong>
+
+                <p>
+                  {emergencyPhone ||
+                    "—"}
+                </p>
+
+                {emergencyRelationship && (
+                  <small>
+                    კავშირი:{" "}
+                    {
+                      emergencyRelationship
+                    }
+                  </small>
+                )}
+              </div>
             )}
 
-          {showSecondContact &&
-            secondContactEnabled && (
-              <ContactPreview
-                label="SECOND EMERGENCY CONTACT"
-                name={`${secondFirstName} ${secondLastName}`}
-                relationship={
-                  secondRelationship
-                }
-                phone={secondPhone}
-              />
+          {secondContactEnabled &&
+            showSecondContact && (
+              <div className="contactPreview">
+                <span className="contactLabel">
+                  SECOND EMERGENCY CONTACT
+                </span>
+
+                <strong>
+                  {secondContactName ||
+                    "—"}
+                </strong>
+
+                <p>
+                  {secondPhone || "—"}
+                </p>
+
+                {secondRelationship && (
+                  <small>
+                    კავშირი:{" "}
+                    {
+                      secondRelationship
+                    }
+                  </small>
+                )}
+              </div>
             )}
 
-          <div className="previewContactButtons">
+          <div className="contactMethods">
             <a
-              href={`tel:${ownerPhone}`}
-              className="previewPhone"
+              href={
+                ownerPhone
+                  ? `tel:${ownerPhone}`
+                  : undefined
+              }
+              className="contactMethod"
             >
-              ☎ დარეკვა
+              <span className="methodIcon">
+                ☎
+              </span>
+
+              <div>
+                <small>
+                  PHONE
+                </small>
+
+                <strong>
+                  დარეკვა
+                </strong>
+              </div>
             </a>
 
             {liveChatEnabled && (
               <button
                 type="button"
-                className="previewChat"
+                className="contactMethod chatButton"
+                onClick={
+                  openLiveChat
+                }
               >
-                ◉ Live Chat
+                <span className="methodIcon">
+                  ●
+                </span>
+
+                <div>
+                  <small>
+                    LIVE CHAT
+                  </small>
+
+                  <strong>
+                    ჩათის გახსნა
+                  </strong>
+                </div>
               </button>
             )}
           </div>
-
-          {missingModeEnabled &&
-            locationSharingEnabled && (
-              <button
-                type="button"
-                className="previewLocation"
-              >
-                ⌖ მდებარეობის გაზიარება
-              </button>
-            )}
         </section>
       </div>
 
-      <div className="finalNotice">
+      <div className="nameWarning">
         <div>
           !
         </div>
 
         <p>
-          <strong>
-            შექმნამდე გადაამოწმეთ ინფორმაცია.
-          </strong>{" "}
-          ტელეფონი ყოველთვის ხელმისაწვდომი იქნება.
-          Live Chat-ის და Missing Mode-ის ჩართვა ან
-          გამორთვა მომავალშიც შეგეძლებათ.
+          პროფილის მფლობელის სახელი
+          ყურადღებით შეიყვანეთ. სახელის
+          შეცვლის უფლება შეზღუდული იქნება.
+          სხვა რედაქტირებადი ინფორმაცია
+          მოგვიანებით პროფილიდან შეგეძლებათ
+          განაახლოთ.
         </p>
       </div>
 
@@ -679,79 +667,106 @@ export default function EmergencyStep6({
         <button
           type="button"
           className="createButton"
-          onClick={handleCreate}
+          onClick={onCreate}
         >
-          ✓ პროფილის შექმნა
+          Emergency პროფილის შექმნა
         </button>
       </div>
 
-      <style jsx global>{`
-        .contactMethodsSection,
-        .missingModeSection {
-          margin-top: 18px;
-          padding: 15px;
-
-          border: 1px solid #dde6ef;
-          border-radius: 13px;
-
-          background: #ffffff;
-        }
-
-        .contactMethodGrid {
-          margin-top: 12px;
-
+      <style jsx>{`
+        .contactMethods {
+          padding: 4px 14px 15px;
           display: grid;
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-          gap: 10px;
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
+          gap: 9px;
         }
 
         .contactMethod {
-          min-height: 105px;
-
-          padding: 12px;
+          min-height: 58px;
+          padding: 10px 12px;
 
           display: flex;
           align-items: center;
-          justify-content: space-between;
 
-          gap: 12px;
+          gap: 9px;
 
-          border: 1px solid #dce5ee;
-          border-radius: 11px;
+          border: 0;
+          border-radius: 10px;
 
-          background: #f9fbfd;
+          background: #0747c9;
+          color: #ffffff;
+
+          text-align: left;
+          text-decoration: none;
+
+          cursor: pointer;
+
+          font-family: inherit;
         }
 
-        .lockedMethod {
-          background: #f2f7ff;
-          border-color: #cbdcf4;
+        .chatButton {
+          width: 100%;
+        }
+
+        .methodIcon {
+          width: 34px;
+          height: 34px;
+
+          flex: 0 0 34px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius: 9px;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.15
+            );
+
+          font-size: 16px;
+        }
+
+        .contactMethod small,
+        .contactMethod strong {
+          display: block;
+        }
+
+        .contactMethod small {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.7
+            );
+
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 0.7px;
         }
 
         .contactMethod strong {
-          display: block;
-
           margin-top: 2px;
 
-          color: #304a65;
+          color: #ffffff;
 
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 850;
         }
 
-        .contactMethod p {
-          max-width: 250px;
+        .contactLabel {
+          display: block;
 
-          margin: 4px 0 0;
+          margin-bottom: 4px;
 
-          color: #718397;
-
-          font-size: 11px;
-          line-height: 1.4;
-        }
-
-        .methodEyebrow {
           color: #0747c9;
 
           font-size: 8px;
@@ -760,222 +775,37 @@ export default function EmergencyStep6({
           letter-spacing: 0.8px;
         }
 
-        .alwaysOn {
-          min-width: 80px;
-          min-height: 32px;
-
-          padding: 0 9px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border-radius: 999px;
-
-          background: #0747c9;
-          color: #ffffff;
-
-          font-size: 9px;
-          font-weight: 900;
-
-          white-space: nowrap;
+        .contactPreview strong,
+        .contactPreview p,
+        .contactPreview small {
+          display: block;
         }
 
-        .methodToggle,
-        .missingToggle {
-          min-width: 68px;
-          height: 34px;
-
-          border: 1px solid #d5e0eb;
-          border-radius: 999px;
-
-          background: #f4f6f9;
-          color: #81909f;
-
-          font-size: 10px;
-          font-weight: 900;
-
-          cursor: pointer;
-        }
-
-        .methodToggle.on,
-        .missingToggle.on {
-          border-color: #0747c9;
-
-          background: #0747c9;
-          color: #ffffff;
-        }
-
-        .missingModeHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          gap: 15px;
-        }
-
-        .missingDescription {
-          margin: 8px 0 0;
-
-          max-width: 650px;
-
-          color: #718397;
-
-          font-size: 12px;
-          line-height: 1.45;
-        }
-
-        .missingModeBody {
-          margin-top: 14px;
-          padding-top: 14px;
-
-          border-top: 1px solid #e2e9f0;
-        }
-
-        .locationSetting {
-          margin-top: 12px;
-          padding: 11px 12px;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-
-          gap: 15px;
-
-          border: 1px solid #dce5ee;
-          border-radius: 10px;
-
-          background: #f8fafc;
-        }
-
-        .locationSetting strong {
+        .contactPreview strong {
           color: #304a65;
-
           font-size: 13px;
-          font-weight: 850;
         }
 
-        .locationSetting p {
-          max-width: 520px;
-
+        .contactPreview p {
           margin: 3px 0 0;
 
-          color: #718397;
-
-          font-size: 11px;
-          line-height: 1.4;
+          color: #526b84;
+          font-size: 12px;
         }
 
-        .missingPreview {
-          margin: 12px 14px 0;
-          padding: 11px;
+        .contactPreview small {
+          margin-top: 3px;
 
-          border: 1px solid #b9d3f5;
-          border-radius: 10px;
-
-          background: #edf5ff;
-        }
-
-        .missingBadge {
-          display: inline-flex;
-
-          padding: 4px 7px;
-
-          border-radius: 999px;
-
-          background: #0747c9;
-          color: #ffffff;
-
-          font-size: 7px;
-          font-weight: 900;
-
-          letter-spacing: 0.7px;
-        }
-
-        .missingPreview strong {
-          display: block;
-
-          margin-top: 6px;
-
-          color: #24415f;
-
-          font-size: 13px;
-          font-weight: 900;
-        }
-
-        .missingPreview p {
-          margin: 4px 0 0;
-
-          color: #5e7388;
-
-          font-size: 11px;
-          line-height: 1.45;
-        }
-
-        .previewContactButtons {
-          padding: 4px 14px 12px;
-
-          display: grid;
-          grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-          gap: 7px;
-        }
-
-        .previewPhone,
-        .previewChat {
-          min-height: 38px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          border: 0;
-          border-radius: 8px;
-
-          background: #0747c9;
-          color: #ffffff;
-
+          color: #8190a0;
           font-size: 10px;
-          font-weight: 850;
-
-          text-decoration: none;
-          cursor: pointer;
         }
 
-        .previewChat {
-          background: #ffffff;
-          color: #0747c9;
-
-          border: 1px solid #bcd2ef;
-        }
-
-        .previewLocation {
-          width: calc(100% - 28px);
-          min-height: 38px;
-
-          margin: 0 14px 14px;
-
-          border: 1px solid #bdd3ef;
-          border-radius: 8px;
-
-          background: #edf5ff;
-          color: #0747c9;
-
-          font-size: 10px;
-          font-weight: 850;
-
-          cursor: pointer;
-        }
-
-        @media (max-width: 650px) {
-          .contactMethodGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .contactMethod,
-          .locationSetting {
-            align-items: flex-start;
+        @media (
+          max-width: 600px
+        ) {
+          .contactMethods {
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
@@ -983,17 +813,19 @@ export default function EmergencyStep6({
   );
 }
 
-function VisibilityRow({
-  title,
-  value,
-  onChange,
-  disabled = false,
-}: {
-  title: string;
+type VisibilityRowProps = {
+  label: string;
   value: boolean;
-  onChange: (value: boolean) => void;
+  onClick: () => void;
   disabled?: boolean;
-}) {
+};
+
+function VisibilityRow({
+  label,
+  value,
+  onClick,
+  disabled = false,
+}: VisibilityRowProps) {
   return (
     <div
       className={
@@ -1003,24 +835,20 @@ function VisibilityRow({
       }
     >
       <strong>
-        {title}
+        {label}
       </strong>
 
       <button
         type="button"
-        disabled={disabled}
         className={
-          value && !disabled
+          value
             ? "visibilityToggle on"
             : "visibilityToggle"
         }
-        onClick={() =>
-          onChange(!value)
-        }
+        onClick={onClick}
+        disabled={disabled}
       >
-        {value && !disabled
-          ? "ON"
-          : "OFF"}
+        {value ? "ON" : "OFF"}
       </button>
     </div>
   );
@@ -1029,20 +857,12 @@ function VisibilityRow({
 function PreviewRow({
   label,
   value,
-  important = false,
 }: {
   label: string;
   value: string;
-  important?: boolean;
 }) {
   return (
-    <div
-      className={
-        important
-          ? "previewRow important"
-          : "previewRow"
-      }
-    >
+    <div className="previewRow">
       <span>
         {label}
       </span>
@@ -1067,41 +887,9 @@ function PreviewBlock({
         {label}
       </span>
 
-      <strong>
-        {value}
-      </strong>
-    </div>
-  );
-}
-
-function ContactPreview({
-  label,
-  name,
-  relationship,
-  phone,
-}: {
-  label: string;
-  name: string;
-  relationship: string;
-  phone: string;
-}) {
-  return (
-    <div className="contactPreview">
-      <span>
-        {label}
-      </span>
-
-      <h3>
-        {name || "—"}
-      </h3>
-
       <p>
-        {relationship || "საკონტაქტო პირი"}
+        {value}
       </p>
-
-      <a href={`tel:${phone}`}>
-        ☎ {phone || "—"}
-      </a>
     </div>
   );
 }
