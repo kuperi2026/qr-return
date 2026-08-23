@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useState,
+  type ReactNode,
+} from "react";
 
-type ProfileFor = "self" | "other" | "";
+type ProfileFor =
+  | "self"
+  | "other"
+  | "";
 
 type Relationship =
   | "parent"
@@ -41,30 +47,65 @@ const bloodGroups = [
 ];
 
 export default function EmergencyBraceletPage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] =
+    useState(1);
 
-  const [profileFor, setProfileFor] =
+  /* STEP 1 */
+
+  const [
+    profileFor,
+    setProfileFor,
+  ] =
     useState<ProfileFor>("");
 
-  const [ownerFirstName, setOwnerFirstName] =
-    useState("");
-  const [ownerLastName, setOwnerLastName] =
-    useState("");
-  const [ownerPhone, setOwnerPhone] =
-    useState("");
-  const [ownerEmail, setOwnerEmail] =
-    useState("");
+  /* STEP 2 — CREATOR */
 
-  const [holderFirstName, setHolderFirstName] =
-    useState("");
-  const [holderLastName, setHolderLastName] =
-    useState("");
-  const [holderBirthDate, setHolderBirthDate] =
-    useState("");
-  const [holderSex, setHolderSex] =
-    useState("");
+  const [
+    ownerFirstName,
+    setOwnerFirstName,
+  ] = useState("");
 
-  const [relationship, setRelationship] =
+  const [
+    ownerLastName,
+    setOwnerLastName,
+  ] = useState("");
+
+  const [
+    ownerPhone,
+    setOwnerPhone,
+  ] = useState("");
+
+  const [
+    ownerEmail,
+    setOwnerEmail,
+  ] = useState("");
+
+  /* STEP 3 — HOLDER */
+
+  const [
+    holderFirstName,
+    setHolderFirstName,
+  ] = useState("");
+
+  const [
+    holderLastName,
+    setHolderLastName,
+  ] = useState("");
+
+  const [
+    holderBirthDate,
+    setHolderBirthDate,
+  ] = useState("");
+
+  const [
+    holderSex,
+    setHolderSex,
+  ] = useState("");
+
+  const [
+    relationship,
+    setRelationship,
+  ] =
     useState<Relationship>("");
 
   const [
@@ -72,22 +113,39 @@ export default function EmergencyBraceletPage() {
     setCustomRelationship,
   ] = useState("");
 
-  const [bloodGroup, setBloodGroup] =
-    useState("");
+  /* STEP 4 — MEDICAL */
 
-  const [allergies, setAllergies] =
-    useState("");
+  const [
+    bloodGroup,
+    setBloodGroup,
+  ] = useState("");
+
+  const [
+    allergies,
+    setAllergies,
+  ] = useState("");
 
   const [
     medicalConditions,
     setMedicalConditions,
   ] = useState("");
 
-  const [medications, setMedications] =
-    useState("");
+  const [
+    medications,
+    setMedications,
+  ] = useState("");
 
-  const [medicalNotes, setMedicalNotes] =
-    useState("");
+  const [
+    medicalNotes,
+    setMedicalNotes,
+  ] = useState("");
+
+  /* STEP 5 — CONTACTS */
+
+  const [
+    primaryContactEnabled,
+    setPrimaryContactEnabled,
+  ] = useState(false);
 
   const [
     emergencyFirstName,
@@ -134,6 +192,58 @@ export default function EmergencyBraceletPage() {
     setSecondRelationship,
   ] = useState("");
 
+  /* STEP 6 — VISIBILITY */
+
+  const [
+    showName,
+    setShowName,
+  ] = useState(true);
+
+  const [
+    showBirthDate,
+    setShowBirthDate,
+  ] = useState(true);
+
+  const [
+    showSex,
+    setShowSex,
+  ] = useState(false);
+
+  const [
+    showBloodGroup,
+    setShowBloodGroup,
+  ] = useState(true);
+
+  const [
+    showAllergies,
+    setShowAllergies,
+  ] = useState(true);
+
+  const [
+    showConditions,
+    setShowConditions,
+  ] = useState(true);
+
+  const [
+    showMedications,
+    setShowMedications,
+  ] = useState(true);
+
+  const [
+    showMedicalNotes,
+    setShowMedicalNotes,
+  ] = useState(false);
+
+  const [
+    showPrimaryContact,
+    setShowPrimaryContact,
+  ] = useState(true);
+
+  const [
+    showSecondContact,
+    setShowSecondContact,
+  ] = useState(false);
+
   const ownerReady =
     ownerFirstName.trim() !== "" &&
     ownerLastName.trim() !== "" &&
@@ -144,16 +254,41 @@ export default function EmergencyBraceletPage() {
     holderFirstName.trim() !== "" &&
     holderLastName.trim() !== "" &&
     relationship !== "" &&
-    (relationship !== "other" ||
-      customRelationship.trim() !== "");
+    (
+      relationship !== "other" ||
+      customRelationship.trim() !== ""
+    );
 
-  const emergencyContactReady =
-    emergencyFirstName.trim() !== "" &&
-    emergencyLastName.trim() !== "" &&
-    emergencyPhone.trim() !== "" &&
-    emergencyRelationship.trim() !== "";
+  const primaryComplete =
+    !primaryContactEnabled ||
+    (
+      emergencyFirstName.trim() !== "" &&
+      emergencyLastName.trim() !== "" &&
+      emergencyPhone.trim() !== "" &&
+      emergencyRelationship.trim() !== ""
+    );
 
-  function goToStep(number: number) {
+  const secondComplete =
+    !secondContactEnabled ||
+    (
+      secondFirstName.trim() !== "" &&
+      secondLastName.trim() !== "" &&
+      secondPhone.trim() !== "" &&
+      secondRelationship.trim() !== ""
+    );
+
+  const contactsReady =
+    primaryComplete &&
+    secondComplete;
+
+  const holderName =
+    profileFor === "self"
+      ? `${ownerFirstName} ${ownerLastName}`.trim()
+      : `${holderFirstName} ${holderLastName}`.trim();
+
+  function goToStep(
+    number: number
+  ) {
     setStep(number);
 
     window.scrollTo({
@@ -163,11 +298,20 @@ export default function EmergencyBraceletPage() {
   }
 
   function continueFromOwner() {
-    if (!ownerReady) return;
+    if (!ownerReady) {
+      return;
+    }
 
-    if (profileFor === "self") {
-      setHolderFirstName(ownerFirstName);
-      setHolderLastName(ownerLastName);
+    if (
+      profileFor === "self"
+    ) {
+      setHolderFirstName(
+        ownerFirstName
+      );
+
+      setHolderLastName(
+        ownerLastName
+      );
 
       goToStep(4);
 
@@ -177,27 +321,19 @@ export default function EmergencyBraceletPage() {
     goToStep(3);
   }
 
-  function continueFromHolder() {
-    if (!holderReady) return;
-
-    goToStep(4);
-  }
-
-  function continueFromMedical() {
-    goToStep(5);
-  }
-
-  function continueFromContacts() {
-    if (!emergencyContactReady) return;
-
-    console.log({
+  function finishProfile() {
+    const payload = {
       profileFor,
 
       creator: {
-        firstName: ownerFirstName,
-        lastName: ownerLastName,
-        phone: ownerPhone,
-        email: ownerEmail,
+        firstName:
+          ownerFirstName,
+        lastName:
+          ownerLastName,
+        phone:
+          ownerPhone,
+        email:
+          ownerEmail,
       },
 
       holder: {
@@ -211,12 +347,23 @@ export default function EmergencyBraceletPage() {
             ? ownerLastName
             : holderLastName,
 
-        birthDate: holderBirthDate,
-        sex: holderSex,
+        birthDate:
+          holderBirthDate,
+
+        sex:
+          holderSex,
       },
 
-      relationship,
-      customRelationship,
+      relationship:
+        profileFor === "other"
+          ? relationship
+          : null,
+
+      customRelationship:
+        profileFor === "other" &&
+        relationship === "other"
+          ? customRelationship
+          : null,
 
       medical: {
         bloodGroup,
@@ -226,45 +373,74 @@ export default function EmergencyBraceletPage() {
         medicalNotes,
       },
 
-      emergencyContacts: [
-        {
-          firstName: emergencyFirstName,
-          lastName: emergencyLastName,
-          phone: emergencyPhone,
-          relationship: emergencyRelationship,
-          primary: true,
-        },
+      contacts: {
+        primary:
+          primaryContactEnabled
+            ? {
+                firstName:
+                  emergencyFirstName,
 
-        ...(secondContactEnabled
-          ? [
-              {
-                firstName: secondFirstName,
-                lastName: secondLastName,
-                phone: secondPhone,
-                relationship: secondRelationship,
-                primary: false,
-              },
-            ]
-          : []),
-      ],
-    });
+                lastName:
+                  emergencyLastName,
 
-    /*
-      შემდეგი:
-      STEP 6 — Visibility + Preview + Save
-    */
+                phone:
+                  emergencyPhone,
+
+                relationship:
+                  emergencyRelationship,
+              }
+            : null,
+
+        secondary:
+          secondContactEnabled
+            ? {
+                firstName:
+                  secondFirstName,
+
+                lastName:
+                  secondLastName,
+
+                phone:
+                  secondPhone,
+
+                relationship:
+                  secondRelationship,
+              }
+            : null,
+      },
+
+      visibility: {
+        showName,
+        showBirthDate,
+        showSex,
+        showBloodGroup,
+        showAllergies,
+        showConditions,
+        showMedications,
+        showMedicalNotes,
+        showPrimaryContact,
+        showSecondContact,
+      },
+    };
+
+    console.log(
+      "EMERGENCY PROFILE:",
+      payload
+    );
+
+    alert(
+      "Emergency პროფილის ფორმა მზადაა. შემდეგ ეტაპზე Supabase-ში შენახვას მივაბამთ."
+    );
   }
-
-  const holderDisplayName =
-    profileFor === "self"
-      ? `${ownerFirstName} ${ownerLastName}`.trim()
-      : `${holderFirstName} ${holderLastName}`.trim();
 
   return (
     <>
       <main className="page">
         <header className="topbar">
-          <a href="/" className="brand">
+          <a
+            href="/"
+            className="brand"
+          >
             <div className="brandMark">
               QR
             </div>
@@ -298,9 +474,8 @@ export default function EmergencyBraceletPage() {
               <div
                 className="progressFill"
                 style={{
-                  width: `${
-                    (step / 6) * 100
-                  }%`,
+                  width:
+                    `${(step / 6) * 100}%`,
                 }}
               />
             </div>
@@ -310,167 +485,86 @@ export default function EmergencyBraceletPage() {
             </strong>
           </div>
 
+          {/* STEP 1 */}
+
           {step === 1 && (
             <>
-              <div className="heading">
-                <div className="headingIcon">
-                  +
-                </div>
-
-                <div>
-                  <span className="eyebrow">
-                    EMERGENCY PROFILE
-                  </span>
-
-                  <h1>
-                    ვისთვის ქმნით პროფილს?
-                  </h1>
-
-                  <p>
-                    აირჩიეთ, Emergency Bracelet
-                    თქვენთვისაა თუ სხვა პირისთვის.
-                  </p>
-                </div>
-              </div>
+              <Heading
+                icon="+"
+                eyebrow="EMERGENCY PROFILE"
+                title="ვისთვის ქმნით პროფილს?"
+                text="აირჩიეთ, Emergency Bracelet თქვენთვისაა თუ სხვა პირისთვის."
+              />
 
               <div className="choiceGrid">
-                <button
-                  type="button"
-                  className={
-                    profileFor === "self"
-                      ? "choice active"
-                      : "choice"
+                <ChoiceCard
+                  number="01"
+                  icon="👤"
+                  title="ჩემთვის"
+                  text="Emergency Bracelet და პროფილი განკუთვნილია თქვენთვის."
+                  active={
+                    profileFor ===
+                    "self"
                   }
                   onClick={() => {
-                    setProfileFor("self");
-                    setRelationship("");
-                    setCustomRelationship("");
+                    setProfileFor(
+                      "self"
+                    );
+
+                    setRelationship(
+                      ""
+                    );
+
+                    setCustomRelationship(
+                      ""
+                    );
                   }}
-                >
-                  <div className="choiceTop">
-                    <span>01</span>
+                />
 
-                    <div className="choiceCircle">
-                      {profileFor === "self"
-                        ? "✓"
-                        : "→"}
-                    </div>
-                  </div>
-
-                  <div className="choiceIcon">
-                    👤
-                  </div>
-
-                  <h2>
-                    ჩემთვის
-                  </h2>
-
-                  <p>
-                    Emergency Bracelet და პროფილი
-                    განკუთვნილია თქვენთვის.
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  className={
-                    profileFor === "other"
-                      ? "choice active"
-                      : "choice"
+                <ChoiceCard
+                  number="02"
+                  icon="👥"
+                  title="სხვა პირისთვის"
+                  text="ბავშვის, ოჯახის წევრის ან სხვა პირის Emergency Bracelet."
+                  active={
+                    profileFor ===
+                    "other"
                   }
                   onClick={() =>
-                    setProfileFor("other")
+                    setProfileFor(
+                      "other"
+                    )
                   }
-                >
-                  <div className="choiceTop">
-                    <span>02</span>
-
-                    <div className="choiceCircle">
-                      {profileFor === "other"
-                        ? "✓"
-                        : "→"}
-                    </div>
-                  </div>
-
-                  <div className="choiceIcon">
-                    👥
-                  </div>
-
-                  <h2>
-                    სხვა პირისთვის
-                  </h2>
-
-                  <p>
-                    ბავშვის, ოჯახის წევრის ან სხვა
-                    პირის Emergency Bracelet.
-                  </p>
-                </button>
+                />
               </div>
 
-              <div className="infoBox">
-                <div className="infoIcon">
-                  i
-                </div>
+              <InfoBox
+                title="შემდეგი ნაბიჯი"
+                text="შემდეგ შეიყვანთ იმ ადამიანის მონაცემებს, ვინც პროფილს ქმნის და მართავს."
+              />
 
-                <div>
-                  <strong>
-                    შემდეგი ნაბიჯი
-                  </strong>
-
-                  <p>
-                    შემდეგ შეიყვანთ იმ ადამიანის
-                    მონაცემებს, ვინც პროფილს ქმნის
-                    და მართავს.
-                  </p>
-                </div>
-              </div>
-
-              <div className="actions">
-                <a
-                  href="/register"
-                  className="secondaryButton"
-                >
-                  ← უკან
-                </a>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  disabled={!profileFor}
-                  onClick={() =>
-                    goToStep(2)
-                  }
-                >
-                  გაგრძელება
-                  <span>→</span>
-                </button>
-              </div>
+              <Actions
+                backHref="/register"
+                nextDisabled={
+                  !profileFor
+                }
+                onNext={() =>
+                  goToStep(2)
+                }
+              />
             </>
           )}
 
+          {/* STEP 2 */}
+
           {step === 2 && (
             <>
-              <div className="heading">
-                <div className="headingIcon">
-                  👤
-                </div>
-
-                <div>
-                  <span className="eyebrow">
-                    PROFILE CREATOR
-                  </span>
-
-                  <h1>
-                    შემქმნელის ინფორმაცია
-                  </h1>
-
-                  <p>
-                    შეიყვანეთ იმ პირის მონაცემები,
-                    ვინც ამ Emergency პროფილს ქმნის
-                    და მართავს.
-                  </p>
-                </div>
-              </div>
+              <Heading
+                icon="👤"
+                eyebrow="PROFILE CREATOR"
+                title="შემქმნელის ინფორმაცია"
+                text="შეიყვანეთ იმ პირის მონაცემები, ვინც Emergency პროფილს ქმნის და მართავს."
+              />
 
               <div className="selectedType">
                 <span>
@@ -478,7 +572,8 @@ export default function EmergencyBraceletPage() {
                 </span>
 
                 <strong>
-                  {profileFor === "self"
+                  {profileFor ===
+                  "self"
                     ? "ჩემთვის"
                     : "სხვა პირისთვის"}
                 </strong>
@@ -487,11 +582,12 @@ export default function EmergencyBraceletPage() {
               <div className="formGrid">
                 <Field label="სახელი *">
                   <input
-                    type="text"
-                    value={ownerFirstName}
-                    onChange={(event) =>
+                    value={
+                      ownerFirstName
+                    }
+                    onChange={(e) =>
                       setOwnerFirstName(
-                        event.target.value
+                        e.target.value
                       )
                     }
                     placeholder="სახელი"
@@ -500,11 +596,12 @@ export default function EmergencyBraceletPage() {
 
                 <Field label="გვარი *">
                   <input
-                    type="text"
-                    value={ownerLastName}
-                    onChange={(event) =>
+                    value={
+                      ownerLastName
+                    }
+                    onChange={(e) =>
                       setOwnerLastName(
-                        event.target.value
+                        e.target.value
                       )
                     }
                     placeholder="გვარი"
@@ -514,10 +611,12 @@ export default function EmergencyBraceletPage() {
                 <Field label="ტელეფონის ნომერი *">
                   <input
                     type="tel"
-                    value={ownerPhone}
-                    onChange={(event) =>
+                    value={
+                      ownerPhone
+                    }
+                    onChange={(e) =>
                       setOwnerPhone(
-                        event.target.value
+                        e.target.value
                       )
                     }
                     placeholder="+1 000 000 0000"
@@ -527,10 +626,12 @@ export default function EmergencyBraceletPage() {
                 <Field label="ელფოსტა *">
                   <input
                     type="email"
-                    value={ownerEmail}
-                    onChange={(event) =>
+                    value={
+                      ownerEmail
+                    }
+                    onChange={(e) =>
                       setOwnerEmail(
-                        event.target.value
+                        e.target.value
                       )
                     }
                     placeholder="name@email.com"
@@ -538,99 +639,68 @@ export default function EmergencyBraceletPage() {
                 </Field>
               </div>
 
-              <div className="infoBox">
-                <div className="infoIcon">
-                  i
-                </div>
+              <InfoBox
+                title="პროფილის მმართველი"
+                text="ეს არის იმ ადამიანის საკონტაქტო ინფორმაცია, ვინც Emergency პროფილს მართავს."
+              />
 
-                <div>
-                  <strong>
-                    პროფილის მმართველი
-                  </strong>
-
-                  <p>
-                    ეს არის იმ ადამიანის საკონტაქტო
-                    ინფორმაცია, ვინც Emergency პროფილს
-                    მართავს.
-                  </p>
-                </div>
-              </div>
-
-              <div className="actions">
-                <button
-                  type="button"
-                  className="secondaryButton"
-                  onClick={() =>
-                    goToStep(1)
-                  }
-                >
-                  ← უკან
-                </button>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  disabled={!ownerReady}
-                  onClick={
-                    continueFromOwner
-                  }
-                >
-                  გაგრძელება
-                  <span>→</span>
-                </button>
-              </div>
+              <Actions
+                onBack={() =>
+                  goToStep(1)
+                }
+                nextDisabled={
+                  !ownerReady
+                }
+                onNext={
+                  continueFromOwner
+                }
+              />
             </>
           )}
 
+          {/* STEP 3 */}
+
           {step === 3 &&
-            profileFor === "other" && (
+            profileFor ===
+              "other" && (
               <>
-                <div className="heading">
-                  <div className="headingIcon">
-                    👥
-                  </div>
-
-                  <div>
-                    <span className="eyebrow">
-                      BRACELET HOLDER
-                    </span>
-
-                    <h1>
-                      ვის ეკუთვნის სამაჯური?
-                    </h1>
-
-                    <p>
-                      შეიყვანეთ იმ ადამიანის მონაცემები,
-                      ვისაც Emergency Bracelet ეკუთვნის.
-                    </p>
-                  </div>
-                </div>
+                <Heading
+                  icon="👥"
+                  eyebrow="BRACELET HOLDER"
+                  title="ვის ეკუთვნის სამაჯური?"
+                  text="შეიყვანეთ იმ ადამიანის მონაცემები, ვისაც Emergency Bracelet ეკუთვნის."
+                />
 
                 <div className="creatorSummary">
                   <SummaryItem
-                    label="პროფილის შემქმნელი"
+                    label="შემქმნელი"
                     value={`${ownerFirstName} ${ownerLastName}`}
                   />
 
                   <SummaryItem
                     label="ტელეფონი"
-                    value={ownerPhone}
+                    value={
+                      ownerPhone
+                    }
                   />
 
                   <SummaryItem
                     label="ელფოსტა"
-                    value={ownerEmail}
+                    value={
+                      ownerEmail
+                    }
                   />
                 </div>
 
                 <div className="formGrid">
                   <Field label="სახელი *">
                     <input
-                      type="text"
-                      value={holderFirstName}
-                      onChange={(event) =>
+                      value={
+                        holderFirstName
+                      }
+                      onChange={(e) =>
                         setHolderFirstName(
-                          event.target.value
+                          e.target.value
                         )
                       }
                       placeholder="სახელი"
@@ -639,11 +709,12 @@ export default function EmergencyBraceletPage() {
 
                   <Field label="გვარი *">
                     <input
-                      type="text"
-                      value={holderLastName}
-                      onChange={(event) =>
+                      value={
+                        holderLastName
+                      }
+                      onChange={(e) =>
                         setHolderLastName(
-                          event.target.value
+                          e.target.value
                         )
                       }
                       placeholder="გვარი"
@@ -653,10 +724,12 @@ export default function EmergencyBraceletPage() {
                   <Field label="დაბადების თარიღი">
                     <input
                       type="date"
-                      value={holderBirthDate}
-                      onChange={(event) =>
+                      value={
+                        holderBirthDate
+                      }
+                      onChange={(e) =>
                         setHolderBirthDate(
-                          event.target.value
+                          e.target.value
                         )
                       }
                     />
@@ -664,10 +737,12 @@ export default function EmergencyBraceletPage() {
 
                   <Field label="სქესი">
                     <select
-                      value={holderSex}
-                      onChange={(event) =>
+                      value={
+                        holderSex
+                      }
+                      onChange={(e) =>
                         setHolderSex(
-                          event.target.value
+                          e.target.value
                         )
                       }
                     >
@@ -690,17 +765,11 @@ export default function EmergencyBraceletPage() {
                   </Field>
                 </div>
 
-                <section className="relationshipSection">
-                  <div className="sectionTitle">
-                    <span>
-                      RELATIONSHIP
-                    </span>
-
-                    <h3>
-                      რა კავშირი აქვს პროფილის
-                      შემქმნელს ამ პირთან?
-                    </h3>
-                  </div>
+                <section className="subSection">
+                  <SectionTitle
+                    eyebrow="RELATIONSHIP"
+                    title="რა კავშირი აქვს შემქმნელს ამ პირთან?"
+                  />
 
                   <div className="relationshipGrid">
                     {(
@@ -710,135 +779,102 @@ export default function EmergencyBraceletPage() {
                         Relationship,
                         ""
                       >[]
-                    ).map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        className={
-                          relationship === value
-                            ? "relationshipButton selected"
-                            : "relationshipButton"
-                        }
-                        onClick={() =>
-                          setRelationship(value)
-                        }
-                      >
-                        {relationshipLabels[value]}
-                      </button>
-                    ))}
+                    ).map(
+                      (value) => (
+                        <button
+                          key={
+                            value
+                          }
+                          type="button"
+                          className={
+                            relationship ===
+                            value
+                              ? "relationshipButton selected"
+                              : "relationshipButton"
+                          }
+                          onClick={() =>
+                            setRelationship(
+                              value
+                            )
+                          }
+                        >
+                          {
+                            relationshipLabels[
+                              value
+                            ]
+                          }
+                        </button>
+                      )
+                    )}
                   </div>
 
-                  {relationship === "other" && (
-                    <div className="customRelationship">
-                      <label>
-                        მიუთითეთ კავშირი *
-                      </label>
-
-                      <input
-                        type="text"
-                        value={
-                          customRelationship
-                        }
-                        onChange={(event) =>
-                          setCustomRelationship(
-                            event.target.value
-                          )
-                        }
-                        placeholder="მაგ. ოჯახის მეგობარი"
-                      />
+                  {relationship ===
+                    "other" && (
+                    <div className="singleField">
+                      <Field label="მიუთითეთ კავშირი *">
+                        <input
+                          value={
+                            customRelationship
+                          }
+                          onChange={(e) =>
+                            setCustomRelationship(
+                              e.target
+                                .value
+                            )
+                          }
+                          placeholder="მაგ. ოჯახის მეგობარი"
+                        />
+                      </Field>
                     </div>
                   )}
                 </section>
 
-                <div className="actions">
-                  <button
-                    type="button"
-                    className="secondaryButton"
-                    onClick={() =>
-                      goToStep(2)
-                    }
-                  >
-                    ← უკან
-                  </button>
-
-                  <button
-                    type="button"
-                    className="primaryButton"
-                    disabled={!holderReady}
-                    onClick={
-                      continueFromHolder
-                    }
-                  >
-                    გაგრძელება
-                    <span>→</span>
-                  </button>
-                </div>
+                <Actions
+                  onBack={() =>
+                    goToStep(2)
+                  }
+                  nextDisabled={
+                    !holderReady
+                  }
+                  onNext={() =>
+                    goToStep(4)
+                  }
+                />
               </>
             )}
 
+          {/* STEP 4 */}
+
           {step === 4 && (
             <>
-              <div className="heading">
-                <div className="headingIcon">
-                  +
-                </div>
+              <Heading
+                icon="+"
+                eyebrow="MEDICAL INFORMATION"
+                title="სამედიცინო ინფორმაცია"
+                text="დაამატეთ ინფორმაცია, რომელიც გადაუდებელ სიტუაციაში შეიძლება მნიშვნელოვანი იყოს."
+              />
 
-                <div>
-                  <span className="eyebrow">
-                    MEDICAL INFORMATION
-                  </span>
+              <ProfileSummary
+                name={
+                  holderName
+                }
+              />
 
-                  <h1>
-                    სამედიცინო ინფორმაცია
-                  </h1>
-
-                  <p>
-                    დაამატეთ ინფორმაცია, რომელიც
-                    გადაუდებელ სიტუაციაში შეიძლება
-                    მნიშვნელოვანი იყოს.
-                  </p>
-                </div>
-              </div>
-
-              <div className="holderSummary">
-                <div className="holderAvatar">
-                  👤
-                </div>
-
-                <div>
-                  <span>
-                    EMERGENCY PROFILE
-                  </span>
-
-                  <strong>
-                    {holderDisplayName ||
-                      "პროფილის მფლობელი"}
-                  </strong>
-
-                  <p>
-                    Emergency Bracelet
-                  </p>
-                </div>
-              </div>
-
-              <section className="medicalSection">
-                <div className="sectionTitle">
-                  <span>
-                    01 · BASIC MEDICAL
-                  </span>
-
-                  <h3>
-                    ძირითადი სამედიცინო ინფორმაცია
-                  </h3>
-                </div>
+              <section className="subSection firstSection">
+                <SectionTitle
+                  eyebrow="01 · BASIC MEDICAL"
+                  title="ძირითადი სამედიცინო ინფორმაცია"
+                />
 
                 <div className="formGrid">
                   <Field label="სისხლის ჯგუფი">
                     <select
-                      value={bloodGroup}
-                      onChange={(event) =>
+                      value={
+                        bloodGroup
+                      }
+                      onChange={(e) =>
                         setBloodGroup(
-                          event.target.value
+                          e.target.value
                         )
                       }
                     >
@@ -849,8 +885,12 @@ export default function EmergencyBraceletPage() {
                       {bloodGroups.map(
                         (group) => (
                           <option
-                            key={group}
-                            value={group}
+                            key={
+                              group
+                            }
+                            value={
+                              group
+                            }
                           >
                             {group}
                           </option>
@@ -859,7 +899,7 @@ export default function EmergencyBraceletPage() {
                     </select>
                   </Field>
 
-                  <div className="medicalQuickNote">
+                  <div className="optionalBox">
                     <span>
                       OPTIONAL
                     </span>
@@ -869,32 +909,28 @@ export default function EmergencyBraceletPage() {
                     </strong>
 
                     <p>
-                      შეავსეთ მხოლოდ ის ველები,
-                      რომლებიც გადაუდებელ სიტუაციაში
-                      მნიშვნელოვანია.
+                      შეავსეთ მხოლოდ
+                      მნიშვნელოვანი ველები.
                     </p>
                   </div>
                 </div>
               </section>
 
-              <section className="medicalSection">
-                <div className="sectionTitle">
-                  <span>
-                    02 · HEALTH DETAILS
-                  </span>
-
-                  <h3>
-                    ჯანმრთელობის მნიშვნელოვანი ინფორმაცია
-                  </h3>
-                </div>
+              <section className="subSection">
+                <SectionTitle
+                  eyebrow="02 · HEALTH DETAILS"
+                  title="ჯანმრთელობის მნიშვნელოვანი ინფორმაცია"
+                />
 
                 <div className="textareaGrid">
                   <Field label="ალერგიები">
                     <textarea
-                      value={allergies}
-                      onChange={(event) =>
+                      value={
+                        allergies
+                      }
+                      onChange={(e) =>
                         setAllergies(
-                          event.target.value
+                          e.target.value
                         )
                       }
                       placeholder="მაგ. პენიცილინი, თხილი..."
@@ -906,33 +942,37 @@ export default function EmergencyBraceletPage() {
                       value={
                         medicalConditions
                       }
-                      onChange={(event) =>
+                      onChange={(e) =>
                         setMedicalConditions(
-                          event.target.value
+                          e.target.value
                         )
                       }
-                      placeholder="მნიშვნელოვანი დიაგნოზი ან მდგომარეობა"
+                      placeholder="მნიშვნელოვანი მდგომარეობა"
                     />
                   </Field>
 
                   <Field label="მიმდინარე მედიკამენტები">
                     <textarea
-                      value={medications}
-                      onChange={(event) =>
+                      value={
+                        medications
+                      }
+                      onChange={(e) =>
                         setMedications(
-                          event.target.value
+                          e.target.value
                         )
                       }
-                      placeholder="მედიკამენტის დასახელება და საჭირო ინფორმაცია"
+                      placeholder="მედიკამენტები"
                     />
                   </Field>
 
                   <Field label="დამატებითი სამედიცინო შენიშვნა">
                     <textarea
-                      value={medicalNotes}
-                      onChange={(event) =>
+                      value={
+                        medicalNotes
+                      }
+                      onChange={(e) =>
                         setMedicalNotes(
-                          event.target.value
+                          e.target.value
                         )
                       }
                       placeholder="სხვა მნიშვნელოვანი ინფორმაცია"
@@ -941,292 +981,541 @@ export default function EmergencyBraceletPage() {
                 </div>
               </section>
 
-              <div className="medicalPrivacy">
-                <div className="medicalPrivacyIcon">
-                  +
-                </div>
+              <InfoBox
+                title="Emergency Information"
+                text="ბოლო ნაბიჯზე თქვენ განსაზღვრავთ, რომელი ინფორმაცია გამოჩნდეს QR კოდის სკანირებისას."
+              />
 
-                <div>
-                  <strong>
-                    Emergency Information
-                  </strong>
-
-                  <p>
-                    მოგვიანებით განსაზღვრავთ,
-                    რომელი ინფორმაცია გამოჩნდეს
-                    QR კოდის სკანირებისას.
-                  </p>
-                </div>
-              </div>
-
-              <div className="actions">
-                <button
-                  type="button"
-                  className="secondaryButton"
-                  onClick={() =>
-                    goToStep(
-                      profileFor === "other"
-                        ? 3
-                        : 2
-                    )
-                  }
-                >
-                  ← უკან
-                </button>
-
-                <button
-                  type="button"
-                  className="primaryButton"
-                  onClick={
-                    continueFromMedical
-                  }
-                >
-                  გაგრძელება
-                  <span>→</span>
-                </button>
-              </div>
+              <Actions
+                onBack={() =>
+                  goToStep(
+                    profileFor ===
+                      "other"
+                      ? 3
+                      : 2
+                  )
+                }
+                onNext={() =>
+                  goToStep(5)
+                }
+              />
             </>
           )}
 
+          {/* STEP 5 */}
+
           {step === 5 && (
             <>
-              <div className="heading">
-                <div className="headingIcon">
-                  ☎
-                </div>
+              <Heading
+                icon="☎"
+                eyebrow="EMERGENCY CONTACTS"
+                title="გადაუდებელი კონტაქტები"
+                text="Emergency Contact-ის დამატება არჩევითია. სურვილის შემთხვევაში შეგიძლიათ არცერთი კონტაქტი არ დაამატოთ."
+              />
 
-                <div>
-                  <span className="eyebrow">
-                    EMERGENCY CONTACTS
-                  </span>
+              <ProfileSummary
+                name={
+                  holderName
+                }
+              />
 
-                  <h1>
-                    გადაუდებელი კონტაქტები
-                  </h1>
+              <section className="subSection firstSection">
+                <div className="sectionWithToggle">
+                  <SectionTitle
+                    eyebrow="PRIMARY CONTACT · OPTIONAL"
+                    title="მთავარი Emergency Contact"
+                  />
 
-                  <p>
-                    დაამატეთ პირი, რომელსაც
-                    გადაუდებელ სიტუაციაში უნდა
-                    დაუკავშირდნენ.
-                  </p>
-                </div>
-              </div>
-
-              <div className="holderSummary">
-                <div className="holderAvatar">
-                  👤
-                </div>
-
-                <div>
-                  <span>
-                    BRACELET HOLDER
-                  </span>
-
-                  <strong>
-                    {holderDisplayName ||
-                      "პროფილის მფლობელი"}
-                  </strong>
-
-                  <p>
-                    Emergency Bracelet
-                  </p>
-                </div>
-              </div>
-
-              <section className="contactSection">
-                <div className="sectionTitle">
-                  <span>
-                    PRIMARY CONTACT
-                  </span>
-
-                  <h3>
-                    მთავარი Emergency Contact
-                  </h3>
-                </div>
-
-                <div className="formGrid">
-                  <Field label="სახელი *">
-                    <input
-                      type="text"
-                      value={
-                        emergencyFirstName
-                      }
-                      onChange={(event) =>
-                        setEmergencyFirstName(
-                          event.target.value
-                        )
-                      }
-                      placeholder="სახელი"
-                    />
-                  </Field>
-
-                  <Field label="გვარი *">
-                    <input
-                      type="text"
-                      value={
-                        emergencyLastName
-                      }
-                      onChange={(event) =>
-                        setEmergencyLastName(
-                          event.target.value
-                        )
-                      }
-                      placeholder="გვარი"
-                    />
-                  </Field>
-
-                  <Field label="ტელეფონის ნომერი *">
-                    <input
-                      type="tel"
-                      value={
-                        emergencyPhone
-                      }
-                      onChange={(event) =>
-                        setEmergencyPhone(
-                          event.target.value
-                        )
-                      }
-                      placeholder="+1 000 000 0000"
-                    />
-                  </Field>
-
-                  <Field label="რა კავშირი აქვს ამ პირთან? *">
-                    <input
-                      type="text"
-                      value={
-                        emergencyRelationship
-                      }
-                      onChange={(event) =>
-                        setEmergencyRelationship(
-                          event.target.value
-                        )
-                      }
-                      placeholder="მაგ. დედა, მეუღლე, ექიმი..."
-                    />
-                  </Field>
-                </div>
-              </section>
-
-              <section className="contactSection">
-                <div className="secondContactHeader">
-                  <div className="sectionTitle">
-                    <span>
-                      SECONDARY CONTACT
-                    </span>
-
-                    <h3>
-                      დამატებითი კონტაქტი
-                    </h3>
-                  </div>
-
-                  <button
-                    type="button"
-                    className={
-                      secondContactEnabled
-                        ? "smallToggle active"
-                        : "smallToggle"
+                  <MiniToggle
+                    value={
+                      primaryContactEnabled
                     }
-                    onClick={() =>
-                      setSecondContactEnabled(
-                        !secondContactEnabled
-                      )
+                    onChange={
+                      setPrimaryContactEnabled
                     }
-                  >
-                    {secondContactEnabled
-                      ? "ON"
-                      : "OFF"}
-                  </button>
+                  />
                 </div>
 
-                {secondContactEnabled && (
-                  <div className="formGrid secondContactGrid">
-                    <Field label="სახელი">
+                {primaryContactEnabled && (
+                  <div className="formGrid">
+                    <Field label="სახელი *">
                       <input
-                        type="text"
                         value={
-                          secondFirstName
+                          emergencyFirstName
                         }
-                        onChange={(event) =>
-                          setSecondFirstName(
-                            event.target.value
+                        onChange={(e) =>
+                          setEmergencyFirstName(
+                            e.target
+                              .value
                           )
                         }
                         placeholder="სახელი"
                       />
                     </Field>
 
-                    <Field label="გვარი">
+                    <Field label="გვარი *">
                       <input
-                        type="text"
                         value={
-                          secondLastName
+                          emergencyLastName
                         }
-                        onChange={(event) =>
-                          setSecondLastName(
-                            event.target.value
+                        onChange={(e) =>
+                          setEmergencyLastName(
+                            e.target
+                              .value
                           )
                         }
                         placeholder="გვარი"
                       />
                     </Field>
 
-                    <Field label="ტელეფონის ნომერი">
+                    <Field label="ტელეფონის ნომერი *">
                       <input
                         type="tel"
                         value={
-                          secondPhone
+                          emergencyPhone
                         }
-                        onChange={(event) =>
-                          setSecondPhone(
-                            event.target.value
+                        onChange={(e) =>
+                          setEmergencyPhone(
+                            e.target
+                              .value
                           )
                         }
                         placeholder="+1 000 000 0000"
                       />
                     </Field>
 
-                    <Field label="კავშირი">
+                    <Field label="კავშირი *">
                       <input
-                        type="text"
                         value={
-                          secondRelationship
+                          emergencyRelationship
                         }
-                        onChange={(event) =>
-                          setSecondRelationship(
-                            event.target.value
+                        onChange={(e) =>
+                          setEmergencyRelationship(
+                            e.target
+                              .value
                           )
                         }
-                        placeholder="მაგ. მამა, და, მომვლელი..."
+                        placeholder="მაგ. დედა, მეუღლე..."
                       />
                     </Field>
                   </div>
                 )}
               </section>
 
-              <div className="contactNotice">
-                <div className="contactNoticeIcon">
-                  ☎
+              <section className="subSection">
+                <div className="sectionWithToggle">
+                  <SectionTitle
+                    eyebrow="SECONDARY CONTACT · OPTIONAL"
+                    title="დამატებითი Emergency Contact"
+                  />
+
+                  <MiniToggle
+                    value={
+                      secondContactEnabled
+                    }
+                    onChange={
+                      setSecondContactEnabled
+                    }
+                  />
                 </div>
 
-                <div>
-                  <strong>
-                    Primary Contact
-                  </strong>
+                {secondContactEnabled && (
+                  <div className="formGrid">
+                    <Field label="სახელი *">
+                      <input
+                        value={
+                          secondFirstName
+                        }
+                        onChange={(e) =>
+                          setSecondFirstName(
+                            e.target
+                              .value
+                          )
+                        }
+                        placeholder="სახელი"
+                      />
+                    </Field>
 
-                  <p>
-                    მთავარი კონტაქტი იქნება პირველი
-                    ადამიანი, რომელსაც Emergency
-                    პროფილიდან დაუკავშირდებიან.
-                  </p>
-                </div>
+                    <Field label="გვარი *">
+                      <input
+                        value={
+                          secondLastName
+                        }
+                        onChange={(e) =>
+                          setSecondLastName(
+                            e.target
+                              .value
+                          )
+                        }
+                        placeholder="გვარი"
+                      />
+                    </Field>
+
+                    <Field label="ტელეფონის ნომერი *">
+                      <input
+                        type="tel"
+                        value={
+                          secondPhone
+                        }
+                        onChange={(e) =>
+                          setSecondPhone(
+                            e.target
+                              .value
+                          )
+                        }
+                        placeholder="+1 000 000 0000"
+                      />
+                    </Field>
+
+                    <Field label="კავშირი *">
+                      <input
+                        value={
+                          secondRelationship
+                        }
+                        onChange={(e) =>
+                          setSecondRelationship(
+                            e.target
+                              .value
+                          )
+                        }
+                        placeholder="მაგ. მამა, მომვლელი..."
+                      />
+                    </Field>
+                  </div>
+                )}
+              </section>
+
+              {!primaryContactEnabled &&
+                !secondContactEnabled && (
+                  <div className="optionalNotice">
+                    <div>
+                      ✓
+                    </div>
+
+                    <p>
+                      კონტაქტის დამატება
+                      სავალდებულო არ არის.
+                      შეგიძლიათ პირდაპირ
+                      გააგრძელოთ.
+                    </p>
+                  </div>
+                )}
+
+              <Actions
+                onBack={() =>
+                  goToStep(4)
+                }
+                nextDisabled={
+                  !contactsReady
+                }
+                onNext={() =>
+                  goToStep(6)
+                }
+              />
+            </>
+          )}
+
+          {/* STEP 6 */}
+
+          {step === 6 && (
+            <>
+              <Heading
+                icon="✓"
+                eyebrow="VISIBILITY & PREVIEW"
+                title="რას დაინახავს QR-ის დამსკანერებელი?"
+                text="თქვენ აკონტროლებთ, რომელი ინფორმაცია გამოჩნდება Emergency პროფილში."
+              />
+
+              <div className="visibilityLayout">
+                <section className="visibilityPanel">
+                  <SectionTitle
+                    eyebrow="VISIBILITY"
+                    title="ინფორმაციის ჩვენება"
+                  />
+
+                  <div className="visibilityGrid">
+                    <VisibilityRow
+                      title="სახელი და გვარი"
+                      value={
+                        showName
+                      }
+                      onChange={
+                        setShowName
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="დაბადების თარიღი"
+                      value={
+                        showBirthDate
+                      }
+                      onChange={
+                        setShowBirthDate
+                      }
+                      disabled={
+                        !holderBirthDate
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="სქესი"
+                      value={
+                        showSex
+                      }
+                      onChange={
+                        setShowSex
+                      }
+                      disabled={
+                        !holderSex
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="სისხლის ჯგუფი"
+                      value={
+                        showBloodGroup
+                      }
+                      onChange={
+                        setShowBloodGroup
+                      }
+                      disabled={
+                        !bloodGroup
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="ალერგიები"
+                      value={
+                        showAllergies
+                      }
+                      onChange={
+                        setShowAllergies
+                      }
+                      disabled={
+                        !allergies
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="სამედიცინო მდგომარეობები"
+                      value={
+                        showConditions
+                      }
+                      onChange={
+                        setShowConditions
+                      }
+                      disabled={
+                        !medicalConditions
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="მედიკამენტები"
+                      value={
+                        showMedications
+                      }
+                      onChange={
+                        setShowMedications
+                      }
+                      disabled={
+                        !medications
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="სამედიცინო შენიშვნა"
+                      value={
+                        showMedicalNotes
+                      }
+                      onChange={
+                        setShowMedicalNotes
+                      }
+                      disabled={
+                        !medicalNotes
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="მთავარი Emergency Contact"
+                      value={
+                        showPrimaryContact
+                      }
+                      onChange={
+                        setShowPrimaryContact
+                      }
+                      disabled={
+                        !primaryContactEnabled
+                      }
+                    />
+
+                    <VisibilityRow
+                      title="დამატებითი Emergency Contact"
+                      value={
+                        showSecondContact
+                      }
+                      onChange={
+                        setShowSecondContact
+                      }
+                      disabled={
+                        !secondContactEnabled
+                      }
+                    />
+                  </div>
+                </section>
+
+                <section className="previewPanel">
+                  <div className="previewTop">
+                    <div className="previewMark">
+                      +
+                    </div>
+
+                    <div>
+                      <span>
+                        QR RETURN
+                      </span>
+
+                      <strong>
+                        EMERGENCY
+                      </strong>
+                    </div>
+                  </div>
+
+                  {showName && (
+                    <h2>
+                      {holderName ||
+                        "Emergency Profile"}
+                    </h2>
+                  )}
+
+                  <div className="previewDetails">
+                    {showBirthDate &&
+                      holderBirthDate && (
+                        <PreviewRow
+                          label="დაბადების თარიღი"
+                          value={
+                            holderBirthDate
+                          }
+                        />
+                      )}
+
+                    {showSex &&
+                      holderSex && (
+                        <PreviewRow
+                          label="სქესი"
+                          value={
+                            holderSex ===
+                            "female"
+                              ? "ქალი"
+                              : holderSex ===
+                                  "male"
+                                ? "კაცი"
+                                : "სხვა"
+                          }
+                        />
+                      )}
+
+                    {showBloodGroup &&
+                      bloodGroup && (
+                        <PreviewRow
+                          label="სისხლის ჯგუფი"
+                          value={
+                            bloodGroup
+                          }
+                          important
+                        />
+                      )}
+
+                    {showAllergies &&
+                      allergies && (
+                        <PreviewBlock
+                          label="ალერგიები"
+                          value={
+                            allergies
+                          }
+                        />
+                      )}
+
+                    {showConditions &&
+                      medicalConditions && (
+                        <PreviewBlock
+                          label="სამედიცინო მდგომარეობები"
+                          value={
+                            medicalConditions
+                          }
+                        />
+                      )}
+
+                    {showMedications &&
+                      medications && (
+                        <PreviewBlock
+                          label="მედიკამენტები"
+                          value={
+                            medications
+                          }
+                        />
+                      )}
+
+                    {showMedicalNotes &&
+                      medicalNotes && (
+                        <PreviewBlock
+                          label="სამედიცინო შენიშვნა"
+                          value={
+                            medicalNotes
+                          }
+                        />
+                      )}
+                  </div>
+
+                  {showPrimaryContact &&
+                    primaryContactEnabled && (
+                      <ContactPreview
+                        label="PRIMARY EMERGENCY CONTACT"
+                        name={`${emergencyFirstName} ${emergencyLastName}`}
+                        relationship={
+                          emergencyRelationship
+                        }
+                        phone={
+                          emergencyPhone
+                        }
+                      />
+                    )}
+
+                  {showSecondContact &&
+                    secondContactEnabled && (
+                      <ContactPreview
+                        label="SECONDARY EMERGENCY CONTACT"
+                        name={`${secondFirstName} ${secondLastName}`}
+                        relationship={
+                          secondRelationship
+                        }
+                        phone={
+                          secondPhone
+                        }
+                      />
+                    )}
+                </section>
               </div>
 
-              <div className="actions">
+              <div className="finalNotice">
+                <div>
+                  ✓
+                </div>
+
+                <p>
+                  ეს Preview ზუსტად
+                  აჩვენებს, რომელი ინფორმაცია
+                  იქნება ხელმისაწვდომი
+                  Emergency QR-ის
+                  სკანირებისას.
+                </p>
+              </div>
+
+              <div className="finalActions">
                 <button
                   type="button"
                   className="secondaryButton"
                   onClick={() =>
-                    goToStep(4)
+                    goToStep(5)
                   }
                 >
                   ← უკან
@@ -1234,16 +1523,12 @@ export default function EmergencyBraceletPage() {
 
                 <button
                   type="button"
-                  className="primaryButton"
-                  disabled={
-                    !emergencyContactReady
-                  }
+                  className="createButton"
                   onClick={
-                    continueFromContacts
+                    finishProfile
                   }
                 >
-                  გაგრძელება
-                  <span>→</span>
+                  ✓ პროფილის შექმნა
                 </button>
               </div>
             </>
@@ -1253,7 +1538,8 @@ export default function EmergencyBraceletPage() {
 
       <style jsx global>{`
         * {
-          box-sizing: border-box;
+          box-sizing:
+            border-box;
         }
 
         body {
@@ -1269,8 +1555,12 @@ export default function EmergencyBraceletPage() {
 
         .page {
           min-height: 100vh;
-          padding: 0 20px 38px;
-          background: #0747c9;
+
+          padding:
+            0 20px 38px;
+
+          background:
+            #0747c9;
 
           font-family:
             Inter,
@@ -1284,12 +1574,15 @@ export default function EmergencyBraceletPage() {
         .topbar {
           width: 100%;
           max-width: 940px;
+
           height: 72px;
+
           margin: 0 auto;
 
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
 
           border-bottom:
             1px solid
@@ -1304,7 +1597,9 @@ export default function EmergencyBraceletPage() {
         .brand {
           display: flex;
           align-items: center;
+
           gap: 10px;
+
           text-decoration: none;
         }
 
@@ -1317,8 +1612,11 @@ export default function EmergencyBraceletPage() {
 
           border-radius: 11px;
 
-          background: #ffffff;
-          color: #0747c9;
+          background:
+            #ffffff;
+
+          color:
+            #0747c9;
 
           font-size: 13px;
           font-weight: 950;
@@ -1330,7 +1628,9 @@ export default function EmergencyBraceletPage() {
         }
 
         .brandText strong {
-          color: #ffffff;
+          color:
+            #ffffff;
+
           font-size: 18px;
           font-weight: 950;
         }
@@ -1348,16 +1648,25 @@ export default function EmergencyBraceletPage() {
 
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.8px;
+
+          letter-spacing:
+            0.8px;
         }
 
         .topButton {
           min-height: 40px;
-          padding: 0 14px;
 
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          padding:
+            0 14px;
+
+          display:
+            inline-flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
 
           border:
             1px solid
@@ -1368,7 +1677,8 @@ export default function EmergencyBraceletPage() {
               0.34
             );
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
           background:
             rgba(
@@ -1378,28 +1688,33 @@ export default function EmergencyBraceletPage() {
               0.08
             );
 
-          color: #ffffff;
+          color:
+            #ffffff;
 
           font-size: 13px;
           font-weight: 800;
 
-          text-decoration: none;
+          text-decoration:
+            none;
         }
 
         .card {
           width: 100%;
           max-width: 820px;
 
-          margin: 26px auto 0;
+          margin:
+            26px auto 0;
+
           padding: 27px;
 
-          border-radius: 21px;
+          border-radius:
+            21px;
 
-          background: #ffffff;
+          background:
+            #ffffff;
 
           box-shadow:
-            0 24px
-            56px
+            0 24px 56px
             rgba(
               0,
               24,
@@ -1410,49 +1725,62 @@ export default function EmergencyBraceletPage() {
 
         .progressRow {
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
+
           gap: 12px;
 
-          color: #0747c9;
+          color:
+            #0747c9;
 
           font-size: 10px;
           font-weight: 900;
 
-          letter-spacing: 0.8px;
+          letter-spacing:
+            0.8px;
         }
 
         .progressTrack {
           flex: 1;
+
           height: 5px;
 
           overflow: hidden;
 
-          border-radius: 20px;
+          border-radius:
+            20px;
 
-          background: #e4ebf4;
+          background:
+            #e4ebf4;
         }
 
         .progressFill {
           height: 100%;
 
-          border-radius: 20px;
+          border-radius:
+            20px;
 
-          background: #0747c9;
+          background:
+            #0747c9;
 
           transition:
-            width 0.25s ease;
+            width 0.2s ease;
         }
 
         .progressRow strong {
-          white-space: nowrap;
-          font-size: 10px;
+          white-space:
+            nowrap;
         }
 
         .heading {
           margin-top: 18px;
 
           display: flex;
-          align-items: center;
+
+          align-items:
+            center;
+
           gap: 13px;
         }
 
@@ -1460,18 +1788,23 @@ export default function EmergencyBraceletPage() {
           width: 50px;
           height: 50px;
 
-          flex: 0 0 50px;
+          flex:
+            0 0 50px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 13px;
+          border-radius:
+            13px;
 
-          background: #0747c9;
-          color: #ffffff;
+          background:
+            #0747c9;
 
-          font-size: 24px;
-          font-weight: 700;
+          color:
+            #ffffff;
+
+          font-size: 23px;
+          font-weight: 800;
         }
 
         .eyebrow {
@@ -1479,7 +1812,8 @@ export default function EmergencyBraceletPage() {
 
           margin-bottom: 3px;
 
-          color: #0747c9;
+          color:
+            #0747c9;
 
           font-size: 10px;
           font-weight: 900;
@@ -1490,7 +1824,8 @@ export default function EmergencyBraceletPage() {
         .heading h1 {
           margin: 0;
 
-          color: #203a55;
+          color:
+            #203a55;
 
           font-size: 29px;
           font-weight: 900;
@@ -1499,16 +1834,19 @@ export default function EmergencyBraceletPage() {
         }
 
         .heading p {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
-          color: #718397;
+          color:
+            #718397;
 
           font-size: 14px;
+
           line-height: 1.45;
         }
 
         .choiceGrid {
-          margin-top: 23px;
+          margin-top: 22px;
 
           display: grid;
 
@@ -1524,37 +1862,36 @@ export default function EmergencyBraceletPage() {
         .choice {
           min-height: 130px;
 
-          padding: 15px 16px;
+          padding:
+            15px 16px;
 
           display: flex;
-          flex-direction: column;
+          flex-direction:
+            column;
 
-          border: 1px solid #0b52d6;
-          border-radius: 14px;
+          border:
+            1px solid
+            #0b52d6;
 
-          background: #0b52d6;
-          color: #ffffff;
+          border-radius:
+            14px;
 
-          text-align: left;
+          background:
+            #0b52d6;
+
+          color:
+            #ffffff;
+
+          text-align:
+            left;
 
           cursor: pointer;
-
-          box-shadow:
-            0 9px 20px
-            rgba(
-              7,
-              71,
-              201,
-              0.13
-            );
-        }
-
-        .choice:hover,
-        .choice.active {
-          background: #063fae;
         }
 
         .choice.active {
+          background:
+            #063fae;
+
           box-shadow:
             0 0 0 4px
             rgba(
@@ -1562,20 +1899,13 @@ export default function EmergencyBraceletPage() {
               71,
               201,
               0.1
-            ),
-            0 12px 25px
-            rgba(
-              7,
-              71,
-              201,
-              0.2
             );
         }
 
         .choiceTop {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
         }
 
         .choiceTop > span {
@@ -1584,7 +1914,7 @@ export default function EmergencyBraceletPage() {
               255,
               255,
               255,
-              0.7
+              0.72
             );
 
           font-size: 10px;
@@ -1616,27 +1946,27 @@ export default function EmergencyBraceletPage() {
               255,
               0.12
             );
-
-          font-size: 13px;
-          font-weight: 900;
         }
 
         .choiceIcon {
-          margin-top: 10px;
+          margin-top: 9px;
+
           font-size: 24px;
         }
 
         .choice h2 {
-          margin: 7px 0 0;
+          margin:
+            7px 0 0;
 
-          color: #ffffff;
+          color: white;
 
           font-size: 20px;
           font-weight: 900;
         }
 
         .choice p {
-          margin: 5px 0 0;
+          margin:
+            5px 0 0;
 
           color:
             rgba(
@@ -1647,77 +1977,94 @@ export default function EmergencyBraceletPage() {
             );
 
           font-size: 13px;
+
           line-height: 1.4;
         }
 
         .infoBox,
-        .medicalPrivacy,
-        .contactNotice {
-          margin-top: 20px;
+        .optionalNotice,
+        .finalNotice {
+          margin-top: 18px;
 
-          padding: 11px 13px;
+          padding:
+            10px 12px;
 
           display: flex;
-          align-items: center;
 
-          gap: 10px;
+          align-items:
+            center;
 
-          border: 1px solid #cbdcf4;
-          border-radius: 11px;
+          gap: 9px;
 
-          background: #f2f6fc;
+          border:
+            1px solid
+            #cbdcf4;
+
+          border-radius:
+            10px;
+
+          background:
+            #f2f6fc;
         }
 
         .infoIcon,
-        .medicalPrivacyIcon,
-        .contactNoticeIcon {
-          width: 29px;
-          height: 29px;
+        .optionalNotice > div,
+        .finalNotice > div {
+          width: 28px;
+          height: 28px;
 
-          flex: 0 0 29px;
+          flex:
+            0 0 28px;
 
           display: grid;
           place-items: center;
 
           border-radius: 50%;
 
-          background: #0747c9;
-          color: #ffffff;
+          background:
+            #0747c9;
 
-          font-size: 12px;
+          color: white;
+
+          font-size: 11px;
           font-weight: 900;
         }
 
-        .infoBox strong,
-        .medicalPrivacy strong,
-        .contactNotice strong {
+        .infoBox strong {
           display: block;
 
-          color: #304a65;
+          color:
+            #304a65;
 
           font-size: 13px;
           font-weight: 850;
         }
 
         .infoBox p,
-        .medicalPrivacy p,
-        .contactNotice p {
-          margin: 2px 0 0;
+        .optionalNotice p,
+        .finalNotice p {
+          margin:
+            2px 0 0;
 
-          color: #718397;
+          color:
+            #718397;
 
           font-size: 12px;
+
           line-height: 1.4;
         }
 
         .selectedType {
-          margin-top: 20px;
+          margin-top: 19px;
 
-          padding: 11px 14px;
+          padding:
+            11px 14px;
 
-          border-radius: 11px;
+          border-radius:
+            10px;
 
-          background: #0747c9;
+          background:
+            #0747c9;
         }
 
         .selectedType span,
@@ -1740,14 +2087,14 @@ export default function EmergencyBraceletPage() {
         .selectedType strong {
           margin-top: 3px;
 
-          color: #ffffff;
+          color: white;
 
           font-size: 14px;
-          font-weight: 850;
         }
 
-        .formGrid {
-          margin-top: 19px;
+        .formGrid,
+        .textareaGrid {
+          margin-top: 17px;
 
           display: grid;
 
@@ -1764,45 +2111,77 @@ export default function EmergencyBraceletPage() {
           min-width: 0;
         }
 
-        .field label,
-        .customRelationship label {
+        .field label {
           display: block;
 
           margin:
             0 0 7px 2px;
 
-          color: #344e68;
+          color:
+            #344e68;
 
           font-size: 14px;
           font-weight: 850;
         }
 
         .field input,
-        .field select,
-        .customRelationship input {
+        .field select {
           width: 100%;
           height: 56px;
 
-          padding: 0 15px;
+          padding:
+            0 15px;
 
           border:
-            1.5px solid #d5e0eb;
+            1.5px solid
+            #d5e0eb;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #ffffff;
-          color: #263f59;
+          background:
+            white;
+
+          color:
+            #263f59;
 
           font-size: 15px;
 
           outline: none;
         }
 
+        .field textarea {
+          width: 100%;
+
+          min-height: 94px;
+
+          padding:
+            12px 14px;
+
+          resize: vertical;
+
+          border:
+            1.5px solid
+            #d5e0eb;
+
+          border-radius:
+            10px;
+
+          color:
+            #263f59;
+
+          font-size: 14px;
+
+          line-height: 1.45;
+
+          outline: none;
+        }
+
         .field input:focus,
         .field select:focus,
-        .field textarea:focus,
-        .customRelationship input:focus {
-          border-color: #0747c9;
+        .field textarea:focus {
+          border-color:
+            #0747c9;
 
           box-shadow:
             0 0 0 4px
@@ -1814,43 +2193,27 @@ export default function EmergencyBraceletPage() {
             );
         }
 
-        .field textarea {
-          width: 100%;
-          min-height: 94px;
-
-          padding: 12px 14px;
-
-          resize: vertical;
-
-          border:
-            1.5px solid #d5e0eb;
-
-          border-radius: 10px;
-
-          background: #ffffff;
-          color: #263f59;
-
-          font-size: 14px;
-          line-height: 1.5;
-
-          outline: none;
-        }
-
         .creatorSummary {
-          margin-top: 20px;
+          margin-top: 19px;
 
-          padding: 13px 15px;
+          padding:
+            12px 14px;
 
           display: grid;
 
           grid-template-columns:
-            1.1fr 1fr 1.2fr;
+            repeat(
+              3,
+              minmax(0, 1fr)
+            );
 
-          gap: 12px;
+          gap: 10px;
 
-          border-radius: 11px;
+          border-radius:
+            10px;
 
-          background: #0747c9;
+          background:
+            #0747c9;
         }
 
         .summaryItem span,
@@ -1864,54 +2227,61 @@ export default function EmergencyBraceletPage() {
               255,
               255,
               255,
-              0.7
+              0.68
             );
 
-          font-size: 10px;
+          font-size: 9px;
         }
 
         .summaryItem strong {
           margin-top: 3px;
 
-          color: #ffffff;
+          color: white;
 
-          font-size: 13px;
-          font-weight: 850;
+          font-size: 12px;
 
-          overflow-wrap: anywhere;
+          overflow-wrap:
+            anywhere;
         }
 
-        .relationshipSection,
-        .medicalSection,
-        .contactSection {
-          margin-top: 20px;
+        .subSection {
+          margin-top: 18px;
 
-          padding-top: 17px;
+          padding-top: 16px;
 
           border-top:
-            1px solid #e1e8f0;
+            1px solid
+            #e1e8f0;
         }
 
-        .sectionTitle span {
-          color: #0747c9;
+        .firstSection {
+          margin-top: 20px;
+        }
 
-          font-size: 10px;
+        .sectionTitle > span {
+          color:
+            #0747c9;
+
+          font-size: 9px;
           font-weight: 900;
 
-          letter-spacing: 0.9px;
+          letter-spacing:
+            0.9px;
         }
 
         .sectionTitle h3 {
-          margin: 4px 0 0;
+          margin:
+            4px 0 0;
 
-          color: #304a65;
+          color:
+            #304a65;
 
           font-size: 17px;
           font-weight: 850;
         }
 
         .relationshipGrid {
-          margin-top: 12px;
+          margin-top: 11px;
 
           display: grid;
 
@@ -1921,73 +2291,75 @@ export default function EmergencyBraceletPage() {
               minmax(0, 1fr)
             );
 
-          gap: 8px;
+          gap: 7px;
         }
 
         .relationshipButton {
-          min-height: 47px;
-
-          padding: 0 8px;
+          min-height: 46px;
 
           border:
-            1px solid #d7e2ed;
+            1px solid
+            #d7e2ed;
 
-          border-radius: 9px;
+          border-radius:
+            9px;
 
-          background: #ffffff;
-          color: #536a81;
+          background:
+            white;
 
-          font-size: 13px;
+          color:
+            #536a81;
+
+          font-size: 12px;
           font-weight: 800;
 
           cursor: pointer;
         }
 
         .relationshipButton.selected {
-          border-color: #0747c9;
+          border-color:
+            #0747c9;
 
-          background: #edf4ff;
-          color: #0747c9;
+          background:
+            #edf4ff;
 
-          box-shadow:
-            0 0 0 3px
-            rgba(
-              7,
-              71,
-              201,
-              0.07
-            );
+          color:
+            #0747c9;
         }
 
-        .customRelationship {
-          margin-top: 13px;
+        .singleField {
+          margin-top: 12px;
         }
 
         .holderSummary {
-          margin-top: 20px;
+          margin-top: 19px;
 
-          padding: 12px 14px;
+          padding:
+            12px 14px;
 
           display: flex;
-          align-items: center;
 
-          gap: 11px;
+          align-items:
+            center;
 
-          border-radius: 12px;
+          gap: 10px;
 
-          background: #0747c9;
+          border-radius:
+            11px;
+
+          background:
+            #0747c9;
         }
 
         .holderAvatar {
-          width: 40px;
-          height: 40px;
-
-          flex: 0 0 40px;
+          width: 38px;
+          height: 38px;
 
           display: grid;
           place-items: center;
 
-          border-radius: 11px;
+          border-radius:
+            10px;
 
           background:
             rgba(
@@ -1996,8 +2368,6 @@ export default function EmergencyBraceletPage() {
               255,
               0.15
             );
-
-          font-size: 20px;
         }
 
         .holderSummary span,
@@ -2017,110 +2387,110 @@ export default function EmergencyBraceletPage() {
 
           font-size: 9px;
           font-weight: 900;
-
-          letter-spacing: 0.7px;
         }
 
         .holderSummary strong {
           margin-top: 2px;
 
-          color: #ffffff;
+          color: white;
 
           font-size: 15px;
-          font-weight: 900;
         }
 
         .holderSummary p {
-          margin: 2px 0 0;
+          margin:
+            2px 0 0;
 
           color:
             rgba(
               255,
               255,
               255,
-              0.74
+              0.75
             );
 
-          font-size: 11px;
+          font-size: 10px;
         }
 
-        .medicalQuickNote {
+        .optionalBox {
           min-height: 56px;
 
-          padding: 9px 12px;
+          padding:
+            9px 12px;
 
           display: flex;
-          flex-direction: column;
-          justify-content: center;
+          flex-direction:
+            column;
+
+          justify-content:
+            center;
 
           border:
-            1px solid #dce5ee;
+            1px solid
+            #dce5ee;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          background: #f8fafd;
+          background:
+            #f8fafd;
         }
 
-        .medicalQuickNote span {
-          color: #0747c9;
+        .optionalBox span {
+          color:
+            #0747c9;
 
           font-size: 8px;
           font-weight: 900;
-
-          letter-spacing: 0.8px;
         }
 
-        .medicalQuickNote strong {
+        .optionalBox strong {
           margin-top: 2px;
 
-          color: #304a65;
+          color:
+            #304a65;
 
           font-size: 12px;
-          font-weight: 850;
         }
 
-        .medicalQuickNote p {
-          margin: 2px 0 0;
+        .optionalBox p {
+          margin:
+            2px 0 0;
 
-          color: #7a8999;
+          color:
+            #7a8999;
 
           font-size: 10px;
-          line-height: 1.35;
         }
 
-        .textareaGrid {
-          margin-top: 14px;
-
-          display: grid;
-
-          grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-
-          gap: 14px;
-        }
-
-        .secondContactHeader {
+        .sectionWithToggle {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
 
-          gap: 12px;
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap: 15px;
         }
 
-        .smallToggle {
-          min-width: 64px;
+        .miniToggle {
+          width: 70px;
           height: 34px;
 
           border:
-            1px solid #d7e2ed;
+            1px solid
+            #d5e0eb;
 
-          border-radius: 999px;
+          border-radius:
+            999px;
 
-          background: #f3f6fa;
-          color: #7f8d9c;
+          background:
+            #f4f6f9;
+
+          color:
+            #8090a0;
 
           font-size: 10px;
           font-weight: 900;
@@ -2128,66 +2498,78 @@ export default function EmergencyBraceletPage() {
           cursor: pointer;
         }
 
-        .smallToggle.active {
-          border-color: #0747c9;
+        .miniToggle.on {
+          border-color:
+            #0747c9;
 
-          background: #0747c9;
-          color: #ffffff;
+          background:
+            #0747c9;
+
+          color: white;
         }
 
-        .secondContactGrid {
-          margin-top: 14px;
-        }
-
-        .actions {
-          margin-top: 21px;
+        .actions,
+        .finalActions {
+          margin-top: 20px;
 
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
 
           gap: 10px;
         }
 
         .secondaryButton,
-        .primaryButton {
+        .primaryButton,
+        .createButton {
           min-height: 47px;
 
-          padding: 0 18px;
+          padding:
+            0 18px;
 
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          display:
+            inline-flex;
 
-          border-radius: 10px;
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius:
+            10px;
 
           font-size: 14px;
           font-weight: 850;
 
           text-decoration: none;
+
+          cursor: pointer;
         }
 
         .secondaryButton {
           border:
-            1px solid #d6e1ec;
+            1px solid
+            #d6e1ec;
 
-          background: #ffffff;
-          color: #64788d;
+          background: white;
 
-          cursor: pointer;
+          color:
+            #64788d;
         }
 
-        .primaryButton {
-          min-width: 145px;
-
-          gap: 8px;
-
+        .primaryButton,
+        .createButton {
           border: 0;
 
-          background: #0747c9;
-          color: #ffffff;
+          background:
+            #0747c9;
 
-          cursor: pointer;
+          color: white;
 
           box-shadow:
             0 8px 18px
@@ -2199,21 +2581,387 @@ export default function EmergencyBraceletPage() {
             );
         }
 
-        .primaryButton:disabled {
-          background: #b8c5d5;
+        .primaryButton {
+          min-width: 145px;
+        }
 
-          cursor: not-allowed;
+        .createButton {
+          min-width: 170px;
+        }
+
+        .primaryButton:disabled {
+          background:
+            #b8c5d5;
 
           box-shadow: none;
+
+          cursor:
+            not-allowed;
         }
 
-        .primaryButton span {
-          font-size: 17px;
+        /* STEP 6 */
+
+        .visibilityLayout {
+          margin-top: 20px;
+
+          display: grid;
+
+          grid-template-columns:
+            1fr 0.9fr;
+
+          gap: 14px;
+
+          align-items: start;
         }
 
-        @media (max-width: 700px) {
+        .visibilityPanel,
+        .previewPanel {
+          border:
+            1px solid
+            #dde6ef;
+
+          border-radius:
+            13px;
+
+          background: white;
+        }
+
+        .visibilityPanel {
+          padding: 15px;
+        }
+
+        .visibilityGrid {
+          margin-top: 12px;
+
+          display: grid;
+
+          gap: 7px;
+        }
+
+        .visibilityRow {
+          min-height: 50px;
+
+          padding:
+            7px 9px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap: 10px;
+
+          border:
+            1px solid
+            #e1e8ef;
+
+          border-radius:
+            9px;
+
+          background:
+            #fbfcfe;
+        }
+
+        .visibilityRow.disabled {
+          opacity: 0.48;
+        }
+
+        .visibilityRow strong {
+          color:
+            #344e68;
+
+          font-size: 12px;
+          font-weight: 820;
+        }
+
+        .visibilityToggle {
+          min-width: 64px;
+          height: 30px;
+
+          border:
+            1px solid
+            #d3dde7;
+
+          border-radius:
+            999px;
+
+          background:
+            #f3f5f8;
+
+          color:
+            #82909e;
+
+          font-size: 9px;
+          font-weight: 900;
+
+          cursor: pointer;
+        }
+
+        .visibilityToggle.on {
+          border-color:
+            #0747c9;
+
+          background:
+            #0747c9;
+
+          color: white;
+        }
+
+        .previewPanel {
+          overflow: hidden;
+
+          box-shadow:
+            0 10px 24px
+            rgba(
+              30,
+              70,
+              120,
+              0.06
+            );
+        }
+
+        .previewTop {
+          padding:
+            13px 14px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          gap: 9px;
+
+          background:
+            #0747c9;
+
+          color: white;
+        }
+
+        .previewMark {
+          width: 34px;
+          height: 34px;
+
+          display: grid;
+          place-items: center;
+
+          border-radius:
+            9px;
+
+          background: white;
+
+          color:
+            #0747c9;
+
+          font-size: 22px;
+        }
+
+        .previewTop span,
+        .previewTop strong {
+          display: block;
+        }
+
+        .previewTop span {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              0.7
+            );
+
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        .previewTop strong {
+          margin-top: 1px;
+
+          font-size: 13px;
+        }
+
+        .previewPanel > h2 {
+          margin:
+            14px 14px 0;
+
+          color:
+            #263f59;
+
+          font-size: 19px;
+        }
+
+        .previewDetails {
+          padding:
+            10px 14px 12px;
+
+          display: grid;
+
+          gap: 7px;
+        }
+
+        .previewRow {
+          min-height: 42px;
+
+          padding:
+            7px 9px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            space-between;
+
+          gap: 10px;
+
+          border-radius:
+            8px;
+
+          background:
+            #f5f8fc;
+        }
+
+        .previewRow.important {
+          background:
+            #edf4ff;
+        }
+
+        .previewRow span {
+          color:
+            #7b8b9c;
+
+          font-size: 10px;
+        }
+
+        .previewRow strong {
+          color:
+            #304a65;
+
+          font-size: 12px;
+        }
+
+        .previewBlock {
+          padding:
+            8px 9px;
+
+          border-radius:
+            8px;
+
+          background:
+            #f8fafc;
+        }
+
+        .previewBlock span,
+        .previewBlock strong {
+          display: block;
+        }
+
+        .previewBlock span {
+          color:
+            #8493a2;
+
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        .previewBlock strong {
+          margin-top: 3px;
+
+          color:
+            #3b536b;
+
+          font-size: 11px;
+
+          line-height: 1.4;
+        }
+
+        .contactPreview {
+          margin:
+            0 14px 10px;
+
+          padding:
+            10px;
+
+          border:
+            1px solid
+            #cfe0f5;
+
+          border-radius:
+            9px;
+
+          background:
+            #f2f7ff;
+        }
+
+        .contactPreview > span {
+          color:
+            #0747c9;
+
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        .contactPreview h3 {
+          margin:
+            3px 0 0;
+
+          color:
+            #304a65;
+
+          font-size: 13px;
+        }
+
+        .contactPreview p {
+          margin:
+            2px 0 0;
+
+          color:
+            #718397;
+
+          font-size: 10px;
+        }
+
+        .contactPreview a {
+          margin-top: 7px;
+
+          height: 34px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius:
+            8px;
+
+          background:
+            #0747c9;
+
+          color: white;
+
+          font-size: 10px;
+          font-weight: 850;
+
+          text-decoration: none;
+        }
+
+        @media (
+          max-width: 760px
+        ) {
+          .visibilityLayout {
+            grid-template-columns:
+              1fr;
+          }
+
           .creatorSummary {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .relationshipGrid {
@@ -2225,9 +2973,12 @@ export default function EmergencyBraceletPage() {
           }
         }
 
-        @media (max-width: 600px) {
+        @media (
+          max-width: 600px
+        ) {
           .page {
-            padding: 0 12px 26px;
+            padding:
+              0 12px 26px;
           }
 
           .topbar {
@@ -2238,14 +2989,14 @@ export default function EmergencyBraceletPage() {
             display: none;
           }
 
-          .brandText strong {
-            font-size: 16px;
-          }
-
           .card {
             margin-top: 18px;
-            padding: 19px 15px;
-            border-radius: 16px;
+
+            padding:
+              19px 15px;
+
+            border-radius:
+              16px;
           }
 
           .progressRow > span {
@@ -2263,19 +3014,19 @@ export default function EmergencyBraceletPage() {
           .choiceGrid,
           .formGrid,
           .textareaGrid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
-          .choice {
-            min-height: 125px;
-          }
-
-          .actions {
-            flex-direction: column-reverse;
+          .actions,
+          .finalActions {
+            flex-direction:
+              column-reverse;
           }
 
           .secondaryButton,
-          .primaryButton {
+          .primaryButton,
+          .createButton {
             width: 100%;
           }
         }
@@ -2284,17 +3035,154 @@ export default function EmergencyBraceletPage() {
   );
 }
 
+function Heading({
+  icon,
+  eyebrow,
+  title,
+  text,
+}: {
+  icon: string;
+  eyebrow: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="heading">
+      <div className="headingIcon">
+        {icon}
+      </div>
+
+      <div>
+        <span className="eyebrow">
+          {eyebrow}
+        </span>
+
+        <h1>
+          {title}
+        </h1>
+
+        <p>
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ChoiceCard({
+  number,
+  icon,
+  title,
+  text,
+  active,
+  onClick,
+}: {
+  number: string;
+  icon: string;
+  title: string;
+  text: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        active
+          ? "choice active"
+          : "choice"
+      }
+      onClick={
+        onClick
+      }
+    >
+      <div className="choiceTop">
+        <span>
+          {number}
+        </span>
+
+        <div className="choiceCircle">
+          {active
+            ? "✓"
+            : "→"}
+        </div>
+      </div>
+
+      <div className="choiceIcon">
+        {icon}
+      </div>
+
+      <h2>
+        {title}
+      </h2>
+
+      <p>
+        {text}
+      </p>
+    </button>
+  );
+}
+
 function Field({
   label,
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="field">
-      <label>{label}</label>
+      <label>
+        {label}
+      </label>
+
       {children}
+    </div>
+  );
+}
+
+function InfoBox({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="infoBox">
+      <div className="infoIcon">
+        i
+      </div>
+
+      <div>
+        <strong>
+          {title}
+        </strong>
+
+        <p>
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({
+  eyebrow,
+  title,
+}: {
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <div className="sectionTitle">
+      <span>
+        {eyebrow}
+      </span>
+
+      <h3>
+        {title}
+      </h3>
     </div>
   );
 }
@@ -2308,8 +3196,254 @@ function SummaryItem({
 }) {
   return (
     <div className="summaryItem">
-      <span>{label}</span>
-      <strong>{value || "—"}</strong>
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value || "—"}
+      </strong>
+    </div>
+  );
+}
+
+function ProfileSummary({
+  name,
+}: {
+  name: string;
+}) {
+  return (
+    <div className="holderSummary">
+      <div className="holderAvatar">
+        👤
+      </div>
+
+      <div>
+        <span>
+          EMERGENCY PROFILE
+        </span>
+
+        <strong>
+          {name ||
+            "პროფილის მფლობელი"}
+        </strong>
+
+        <p>
+          Emergency Bracelet
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MiniToggle({
+  value,
+  onChange,
+}: {
+  value: boolean;
+  onChange: (
+    value: boolean
+  ) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={
+        value
+          ? "miniToggle on"
+          : "miniToggle"
+      }
+      onClick={() =>
+        onChange(!value)
+      }
+    >
+      {value
+        ? "ON"
+        : "OFF"}
+    </button>
+  );
+}
+
+function VisibilityRow({
+  title,
+  value,
+  onChange,
+  disabled = false,
+}: {
+  title: string;
+  value: boolean;
+  onChange: (
+    value: boolean
+  ) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      className={
+        disabled
+          ? "visibilityRow disabled"
+          : "visibilityRow"
+      }
+    >
+      <strong>
+        {title}
+      </strong>
+
+      <button
+        type="button"
+        className={
+          value &&
+          !disabled
+            ? "visibilityToggle on"
+            : "visibilityToggle"
+        }
+        disabled={
+          disabled
+        }
+        onClick={() =>
+          onChange(!value)
+        }
+      >
+        {value &&
+        !disabled
+          ? "ON"
+          : "OFF"}
+      </button>
+    </div>
+  );
+}
+
+function PreviewRow({
+  label,
+  value,
+  important = false,
+}: {
+  label: string;
+  value: string;
+  important?: boolean;
+}) {
+  return (
+    <div
+      className={
+        important
+          ? "previewRow important"
+          : "previewRow"
+      }
+    >
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+function PreviewBlock({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="previewBlock">
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+function ContactPreview({
+  label,
+  name,
+  relationship,
+  phone,
+}: {
+  label: string;
+  name: string;
+  relationship: string;
+  phone: string;
+}) {
+  return (
+    <div className="contactPreview">
+      <span>
+        {label}
+      </span>
+
+      <h3>
+        {name}
+      </h3>
+
+      <p>
+        {relationship}
+      </p>
+
+      <a
+        href={`tel:${phone}`}
+      >
+        ☎ {phone}
+      </a>
+    </div>
+  );
+}
+
+function Actions({
+  onBack,
+  backHref,
+  onNext,
+  nextDisabled = false,
+}: {
+  onBack?: () => void;
+  backHref?: string;
+  onNext: () => void;
+  nextDisabled?: boolean;
+}) {
+  return (
+    <div className="actions">
+      {backHref ? (
+        <a
+          href={
+            backHref
+          }
+          className="secondaryButton"
+        >
+          ← უკან
+        </a>
+      ) : (
+        <button
+          type="button"
+          className="secondaryButton"
+          onClick={
+            onBack
+          }
+        >
+          ← უკან
+        </button>
+      )}
+
+      <button
+        type="button"
+        className="primaryButton"
+        disabled={
+          nextDisabled
+        }
+        onClick={
+          onNext
+        }
+      >
+        გაგრძელება
+        <span>
+          →
+        </span>
+      </button>
     </div>
   );
 }
