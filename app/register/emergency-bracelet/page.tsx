@@ -459,7 +459,9 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      /* QR CHECK */
+      /* =====================================================
+         QR CHECK
+      ===================================================== */
 
       const {
         data: qrTag,
@@ -468,21 +470,35 @@ export default function EmergencyBraceletPage() {
         await supabase
           .from("qr_tags")
           .select(
-            "id, tag_code, category, status, assigned_profile_id, assigned_owner_id"
+            `
+              id,
+              tag_code,
+              category,
+              status,
+              assigned_profile_id,
+              assigned_owner_id
+            `
           )
-          .eq(
+          .ilike(
             "tag_code",
             normalizedTag
           )
           .maybeSingle();
 
       if (qrError) {
-        throw qrError;
+        console.error(
+          "QR LOOKUP ERROR:",
+          qrError
+        );
+
+        throw new Error(
+          "QR კოდის შემოწმება ვერ მოხერხდა."
+        );
       }
 
       if (!qrTag) {
         throw new Error(
-          "ეს QR კოდი სისტემაში ვერ მოიძებნა."
+          `QR კოდი "${normalizedTag}" სისტემაში ვერ მოიძებნა. ტესტისთვის გამოიყენეთ EMG-TEST001.`
         );
       }
 
@@ -519,7 +535,9 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      /* HOLDER */
+      /* =====================================================
+         HOLDER
+      ===================================================== */
 
       const finalFirstName =
         profileFor === "self"
@@ -567,7 +585,9 @@ export default function EmergencyBraceletPage() {
             : relationship
           : null;
 
-      /* CONTACT VALIDATION */
+      /* =====================================================
+         CONTACT VALIDATION
+      ===================================================== */
 
       if (
         primaryContactEnabled &&
@@ -597,7 +617,9 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      /* CREATE PROFILE */
+      /* =====================================================
+         CREATE PROFILE
+      ===================================================== */
 
       const {
         data: profile,
@@ -764,10 +786,20 @@ export default function EmergencyBraceletPage() {
           .single();
 
       if (profileError) {
-        throw profileError;
+        console.error(
+          "PROFILE INSERT ERROR:",
+          profileError
+        );
+
+        throw new Error(
+          profileError.message ||
+          "Emergency პროფილის შექმნა ვერ მოხერხდა."
+        );
       }
 
-      /* ACTIVATE QR */
+      /* =====================================================
+         ACTIVATE QR
+      ===================================================== */
 
       const {
         data: updatedTag,
@@ -818,11 +850,6 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      /*
-        წარმატება
-        ძველი სატესტო alert აღარ არსებობს
-      */
-
       alert(
         "Emergency პროფილი წარმატებით შეიქმნა."
       );
@@ -840,9 +867,13 @@ export default function EmergencyBraceletPage() {
           ? error.message
           : "Emergency პროფილის შექმნა ვერ მოხერხდა.";
 
-      setSaveError(message);
+      setSaveError(
+        message
+      );
 
-      alert(message);
+      alert(
+        message
+      );
     } finally {
       setSaving(false);
     }
@@ -872,12 +903,9 @@ export default function EmergencyBraceletPage() {
         <style jsx>{`
           .loadingPage {
             min-height: 100vh;
-
             display: grid;
             place-items: center;
-
             background: #0747c9;
-
             font-family:
               Inter,
               Arial,
@@ -890,20 +918,15 @@ export default function EmergencyBraceletPage() {
           }
 
           .loadingLogo {
-            width: 58px;
-            height: 58px;
-
-            margin:
-              0 auto 12px;
-
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 10px;
             display: grid;
             place-items: center;
-
-            border-radius: 15px;
-
+            border-radius: 14px;
             background: #ffffff;
             color: #0747c9;
-
+            font-size: 14px;
             font-weight: 950;
           }
 
@@ -913,15 +936,13 @@ export default function EmergencyBraceletPage() {
           }
 
           .loadingBox strong {
-            font-size: 20px;
+            font-size: 18px;
           }
 
           .loadingBox span {
-            margin-top: 5px;
-
-            opacity: 0.75;
-
+            margin-top: 4px;
             font-size: 13px;
+            opacity: 0.82;
           }
         `}</style>
       </main>
@@ -992,15 +1013,9 @@ export default function EmergencyBraceletPage() {
 
           {step === 1 && (
             <EmergencyStep1
-              tagCode={
-                tagCode
-              }
-              setTagCode={
-                setTagCode
-              }
-              profileFor={
-                profileFor
-              }
+              tagCode={tagCode}
+              setTagCode={setTagCode}
+              profileFor={profileFor}
               setProfileFor={
                 handleProfileForChange
               }
@@ -1016,9 +1031,7 @@ export default function EmergencyBraceletPage() {
 
           {step === 2 && (
             <EmergencyStep2
-              profileFor={
-                profileFor
-              }
+              profileFor={profileFor}
               ownerFirstName={
                 ownerFirstName
               }
@@ -1043,9 +1056,7 @@ export default function EmergencyBraceletPage() {
               setOwnerEmail={
                 setOwnerEmail
               }
-              tagCode={
-                tagCode
-              }
+              tagCode={tagCode}
               onBack={() =>
                 goToStep(1)
               }
@@ -1056,12 +1067,9 @@ export default function EmergencyBraceletPage() {
           )}
 
           {step === 3 &&
-            profileFor ===
-              "other" && (
+            profileFor === "other" && (
               <EmergencyStep3
-                tagCode={
-                  tagCode
-                }
+                tagCode={tagCode}
                 ownerFirstName={
                   ownerFirstName
                 }
@@ -1124,9 +1132,7 @@ export default function EmergencyBraceletPage() {
               holderName={
                 holderName
               }
-              tagCode={
-                tagCode
-              }
+              tagCode={tagCode}
               bloodGroup={
                 bloodGroup
               }
@@ -1159,8 +1165,7 @@ export default function EmergencyBraceletPage() {
               }
               onBack={() =>
                 goToStep(
-                  profileFor ===
-                    "other"
+                  profileFor === "other"
                     ? 3
                     : 2
                 )
@@ -1176,9 +1181,7 @@ export default function EmergencyBraceletPage() {
               holderName={
                 holderName
               }
-              tagCode={
-                tagCode
-              }
+              tagCode={tagCode}
               ownerFirstName={
                 ownerFirstName
               }
@@ -1259,12 +1262,8 @@ export default function EmergencyBraceletPage() {
 
           {step === 6 && (
             <EmergencyStep6
-              tagCode={
-                tagCode
-              }
-              profileFor={
-                profileFor
-              }
+              tagCode={tagCode}
+              profileFor={profileFor}
               holderName={
                 holderName
               }
@@ -1334,9 +1333,7 @@ export default function EmergencyBraceletPage() {
               secondRelationship={
                 secondRelationship
               }
-              showName={
-                showName
-              }
+              showName={showName}
               setShowName={
                 setShowName
               }
@@ -1346,9 +1343,7 @@ export default function EmergencyBraceletPage() {
               setShowBirthDate={
                 setShowBirthDate
               }
-              showSex={
-                showSex
-              }
+              showSex={showSex}
               setShowSex={
                 setShowSex
               }
@@ -1426,6 +1421,7 @@ export default function EmergencyBraceletPage() {
 
         body {
           margin: 0;
+          background: #0747c9;
         }
 
         button,
@@ -1437,13 +1433,8 @@ export default function EmergencyBraceletPage() {
 
         .page {
           min-height: 100vh;
-
-          padding:
-            0 20px 38px;
-
-          background:
-            #0747c9;
-
+          padding: 0 18px 34px;
+          background: #0747c9;
           font-family:
             Inter,
             -apple-system,
@@ -1456,47 +1447,30 @@ export default function EmergencyBraceletPage() {
         .topbar {
           width: 100%;
           max-width: 940px;
-
-          height: 72px;
-
+          height: 68px;
           margin: 0 auto;
-
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           border-bottom:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.2
-            );
+            1px solid rgba(255,255,255,.2);
         }
 
         .brand {
           display: flex;
           align-items: center;
-
           gap: 10px;
-
           text-decoration: none;
         }
 
         .brandMark {
-          width: 42px;
-          height: 42px;
-
+          width: 40px;
+          height: 40px;
           display: grid;
           place-items: center;
-
-          border-radius: 11px;
-
+          border-radius: 10px;
           background: #ffffff;
           color: #0747c9;
-
           font-size: 13px;
           font-weight: 950;
         }
@@ -1508,207 +1482,125 @@ export default function EmergencyBraceletPage() {
 
         .brandText strong {
           color: #ffffff;
-
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 950;
         }
 
         .brandText span {
           margin-top: 2px;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.72
-            );
-
+          color: rgba(255,255,255,.82);
           font-size: 10px;
           font-weight: 700;
-
-          letter-spacing:
-            0.8px;
+          letter-spacing: .7px;
         }
 
         .topButton {
-          min-height: 40px;
-
-          padding:
-            0 14px;
-
+          min-height: 38px;
+          padding: 0 13px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
           border:
-            1px solid
-            rgba(
-              255,
-              255,
-              255,
-              0.34
-            );
-
-          border-radius: 10px;
-
+            1px solid rgba(255,255,255,.35);
+          border-radius: 9px;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.08
-            );
-
+            rgba(255,255,255,.1);
           color: #ffffff;
-
           font-size: 13px;
           font-weight: 800;
-
           text-decoration: none;
         }
 
         .card {
           position: relative;
-
           width: 100%;
           max-width: 820px;
-
-          margin:
-            26px auto 0;
-
-          padding: 27px;
-
-          border-radius: 21px;
-
+          margin: 24px auto 0;
+          padding: 25px;
+          border-radius: 19px;
           background: #ffffff;
-
           box-shadow:
-            0 24px 56px
-            rgba(
-              0,
-              24,
-              77,
-              0.25
-            );
+            0 20px 48px rgba(0,24,77,.23);
         }
 
         .errorBox {
-          margin-bottom: 15px;
-
-          padding:
-            12px 14px;
-
-          border:
-            1px solid #ffd0cc;
-
-          border-radius: 10px;
-
+          margin-bottom: 14px;
+          padding: 11px 13px;
+          border: 1px solid #ffd0cc;
+          border-radius: 9px;
           background: #fff3f3;
           color: #b42318;
-
           font-size: 13px;
           font-weight: 750;
+          line-height: 1.45;
         }
 
         .progressRow {
           display: flex;
           align-items: center;
-
-          gap: 12px;
-
+          gap: 11px;
           color: #0747c9;
-
           font-size: 10px;
           font-weight: 900;
-
-          letter-spacing:
-            0.8px;
+          letter-spacing: .7px;
         }
 
         .progressTrack {
           flex: 1;
-
           height: 5px;
-
           overflow: hidden;
-
           border-radius: 20px;
-
           background: #e4ebf4;
         }
 
         .progressFill {
           height: 100%;
-
           border-radius: 20px;
-
           background: #0747c9;
-
-          transition:
-            width 0.2s ease;
+          transition: width .2s ease;
         }
 
         .heading {
-          margin-top: 18px;
-
+          margin-top: 17px;
           display: flex;
           align-items: center;
-
-          gap: 13px;
+          gap: 12px;
         }
 
         .headingIcon {
-          width: 50px;
-          height: 50px;
-
-          flex:
-            0 0 50px;
-
+          width: 46px;
+          height: 46px;
+          flex: 0 0 46px;
           display: grid;
           place-items: center;
-
-          border-radius: 13px;
-
+          border-radius: 12px;
           background: #0747c9;
-          color: #ffffff;
-
-          font-size: 23px;
-          font-weight: 800;
+          color: #ffffff !important;
+          font-size: 20px;
+          font-weight: 850;
         }
 
         .eyebrow {
           display: block;
-
           margin-bottom: 3px;
-
           color: #0747c9;
-
           font-size: 10px;
           font-weight: 900;
-
-          letter-spacing: 1px;
+          letter-spacing: .9px;
         }
 
         .heading h1 {
           margin: 0;
-
           color: #203a55;
-
-          font-size: 29px;
+          font-size: 24px;
           font-weight: 900;
-
-          line-height: 1.15;
+          line-height: 1.18;
         }
 
         .heading p {
-          margin:
-            4px 0 0;
-
+          margin: 4px 0 0;
           color: #718397;
-
           font-size: 14px;
-
           line-height: 1.45;
         }
 
@@ -1718,12 +1610,8 @@ export default function EmergencyBraceletPage() {
 
         .field label {
           display: block;
-
-          margin:
-            0 0 7px 2px;
-
+          margin: 0 0 6px 2px;
           color: #344e68;
-
           font-size: 14px;
           font-weight: 850;
         }
@@ -1731,48 +1619,27 @@ export default function EmergencyBraceletPage() {
         .field input,
         .field select {
           width: 100%;
-          height: 56px;
-
-          padding:
-            0 15px;
-
-          border:
-            1.5px solid
-            #d5e0eb;
-
-          border-radius: 10px;
-
+          height: 52px;
+          padding: 0 14px;
+          border: 1.5px solid #d5e0eb;
+          border-radius: 9px;
           background: #ffffff;
           color: #263f59;
-
-          font-size: 15px;
-
+          font-size: 14px;
           outline: none;
         }
 
         .field textarea {
           width: 100%;
-
-          min-height: 94px;
-
-          padding:
-            12px 14px;
-
+          min-height: 90px;
+          padding: 11px 13px;
           resize: vertical;
-
-          border:
-            1.5px solid
-            #d5e0eb;
-
-          border-radius: 10px;
-
+          border: 1.5px solid #d5e0eb;
+          border-radius: 9px;
           background: #ffffff;
           color: #263f59;
-
           font-size: 14px;
-
           line-height: 1.45;
-
           outline: none;
         }
 
@@ -1780,183 +1647,125 @@ export default function EmergencyBraceletPage() {
         .field select:focus,
         .field textarea:focus {
           border-color: #0747c9;
-
           box-shadow:
-            0 0 0 4px
-            rgba(
-              7,
-              71,
-              201,
-              0.08
-            );
+            0 0 0 3px rgba(7,71,201,.08);
         }
 
         .qrSection {
-          margin-top: 21px;
-
+          margin-top: 19px;
           display: grid;
-
-          grid-template-columns:
-            1fr 1fr;
-
-          gap: 14px;
-
+          grid-template-columns: 1fr 1fr;
+          gap: 13px;
           align-items: end;
         }
 
         .qrHelp {
-          min-height: 83px;
-
-          padding:
-            11px 13px;
-
-          border:
-            1px solid #cbdcf4;
-
-          border-radius: 11px;
-
+          min-height: 78px;
+          padding: 10px 12px;
+          border: 1px solid #cbdcf4;
+          border-radius: 10px;
           background: #f2f6fc;
         }
 
         .qrHelp span {
           color: #0747c9;
-
           font-size: 9px;
           font-weight: 900;
         }
 
         .qrHelp strong {
           display: block;
-
           margin-top: 3px;
-
           color: #304a65;
-
-          font-size: 12px;
+          font-size: 13px;
         }
 
         .qrHelp p {
-          margin:
-            3px 0 0;
-
+          margin: 3px 0 0;
           color: #718397;
-
-          font-size: 10px;
-
+          font-size: 11px;
           line-height: 1.4;
         }
 
         .choiceGrid {
-          margin-top: 18px;
-
+          margin-top: 17px;
           display: grid;
-
           grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-
-          gap: 14px;
+            repeat(2,minmax(0,1fr));
+          gap: 13px;
         }
 
         .choice {
-          min-height: 130px;
-
-          padding:
-            15px 16px;
-
+          min-height: 124px;
+          padding: 14px 15px;
           display: flex;
           flex-direction: column;
-
-          border:
-            1px solid
-            #0b52d6;
-
-          border-radius: 14px;
-
+          border: 1px solid #0b52d6;
+          border-radius: 13px;
           background: #0b52d6;
-          color: #ffffff;
-
+          color: #ffffff !important;
           text-align: left;
-
           cursor: pointer;
+        }
+
+        .choice,
+        .choice *,
+        .creatorContact,
+        .creatorContact *,
+        .holderSummary,
+        .holderSummary *,
+        .topSummary,
+        .topSummary *,
+        .creatorSummary,
+        .creatorSummary *,
+        .lockedSummary,
+        .lockedSummary *,
+        .previewTop,
+        .previewTop *,
+        .savingBox,
+        .savingBox * {
+          color: #ffffff !important;
         }
 
         .choice.active {
           background: #063fae;
-
           box-shadow:
-            0 0 0 4px
-            rgba(
-              7,
-              71,
-              201,
-              0.1
-            );
+            0 0 0 4px rgba(7,71,201,.1);
         }
 
         .choice h2 {
-          margin:
-            7px 0 0;
-
-          color: #ffffff;
-
-          font-size: 20px;
+          margin: 6px 0 0;
+          font-size: 18px;
           font-weight: 900;
         }
 
         .choice p {
-          margin:
-            5px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.86
-            );
-
+          margin: 4px 0 0;
           font-size: 13px;
-
           line-height: 1.4;
+          opacity: .9;
         }
 
         .formGrid,
         .textareaGrid {
-          margin-top: 17px;
-
+          margin-top: 16px;
           display: grid;
-
           grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
-
-          gap: 14px;
+            repeat(2,minmax(0,1fr));
+          gap: 13px;
         }
 
         .infoBox,
         .optionalNotice,
         .finalNotice,
         .nameWarning {
-          margin-top: 18px;
-
-          padding:
-            10px 12px;
-
+          margin-top: 17px;
+          padding: 10px 12px;
           display: flex;
           align-items: center;
-
           gap: 9px;
-
-          border:
-            1px solid #cbdcf4;
-
-          border-radius: 10px;
-
+          border: 1px solid #cbdcf4;
+          border-radius: 9px;
           background: #f2f6fc;
         }
 
@@ -1964,55 +1773,54 @@ export default function EmergencyBraceletPage() {
         .optionalNotice > div,
         .finalNotice > div,
         .nameWarning > div {
-          width: 28px;
-          height: 28px;
-
-          flex:
-            0 0 28px;
-
+          width: 27px;
+          height: 27px;
+          flex: 0 0 27px;
           display: grid;
           place-items: center;
-
           border-radius: 50%;
-
           background: #0747c9;
-          color: #ffffff;
-
+          color: #ffffff !important;
+          font-size: 11px;
           font-weight: 900;
+        }
+
+        .infoBox strong {
+          display: block;
+          color: #304a65;
+          font-size: 13px;
+        }
+
+        .infoBox p,
+        .optionalNotice p,
+        .finalNotice p,
+        .nameWarning p {
+          margin: 2px 0 0;
+          color: #718397;
+          font-size: 12px;
+          line-height: 1.45;
         }
 
         .topSummary,
         .creatorSummary,
         .lockedSummary {
-          margin-top: 19px;
-
-          padding:
-            12px 14px;
-
+          margin-top: 18px;
+          padding: 11px 13px;
           display: grid;
-
-          gap: 10px;
-
-          border-radius: 10px;
-
+          gap: 9px;
+          border-radius: 9px;
           background: #0747c9;
         }
 
         .topSummary {
           grid-template-columns:
-            repeat(
-              2,
-              minmax(0, 1fr)
-            );
+            repeat(2,minmax(0,1fr));
         }
 
         .creatorSummary,
         .lockedSummary {
           grid-template-columns:
-            repeat(
-              3,
-              minmax(0, 1fr)
-            );
+            repeat(3,minmax(0,1fr));
         }
 
         .summaryItem span,
@@ -2021,278 +1829,208 @@ export default function EmergencyBraceletPage() {
         }
 
         .summaryItem span {
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.68
-            );
-
           font-size: 9px;
+          opacity: .75;
         }
 
         .summaryItem strong {
           margin-top: 3px;
-
-          color: #ffffff;
-
           font-size: 12px;
-
           overflow-wrap: anywhere;
         }
 
         .subSection {
-          margin-top: 18px;
-
-          padding-top: 16px;
-
-          border-top:
-            1px solid #e1e8f0;
+          margin-top: 17px;
+          padding-top: 15px;
+          border-top: 1px solid #e1e8f0;
         }
 
         .firstSection {
-          margin-top: 20px;
+          margin-top: 19px;
         }
 
         .sectionTitle > span {
           color: #0747c9;
-
           font-size: 9px;
           font-weight: 900;
-
-          letter-spacing:
-            0.9px;
+          letter-spacing: .8px;
         }
 
         .sectionTitle h3 {
-          margin:
-            4px 0 0;
-
+          margin: 4px 0 0;
           color: #304a65;
-
-          font-size: 17px;
+          font-size: 16px;
           font-weight: 850;
         }
 
         .relationshipGrid {
-          margin-top: 11px;
-
+          margin-top: 10px;
           display: grid;
-
           grid-template-columns:
-            repeat(
-              4,
-              minmax(0, 1fr)
-            );
-
+            repeat(4,minmax(0,1fr));
           gap: 7px;
         }
 
         .relationshipButton {
-          min-height: 46px;
-
-          border:
-            1px solid #d7e2ed;
-
-          border-radius: 9px;
-
+          min-height: 44px;
+          border: 1px solid #d7e2ed;
+          border-radius: 8px;
           background: #ffffff;
           color: #536a81;
-
           font-size: 12px;
           font-weight: 800;
-
           cursor: pointer;
         }
 
         .relationshipButton.selected {
           border-color: #0747c9;
-
           background: #edf4ff;
           color: #0747c9;
         }
 
         .singleField {
-          margin-top: 12px;
+          margin-top: 11px;
         }
 
         .holderSummary {
-          margin-top: 19px;
-
-          padding:
-            12px 14px;
-
+          margin-top: 18px;
+          padding: 11px 13px;
           display: flex;
           align-items: center;
-
           gap: 10px;
-
-          border-radius: 11px;
-
+          border-radius: 10px;
           background: #0747c9;
         }
 
         .holderAvatar {
-          width: 38px;
-          height: 38px;
-
+          width: 36px;
+          height: 36px;
           display: grid;
           place-items: center;
-
-          border-radius: 10px;
-
+          border-radius: 9px;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.15
-            );
+            rgba(255,255,255,.14);
         }
 
         .optionalBox {
-          min-height: 56px;
-
-          padding:
-            9px 12px;
-
-          border:
-            1px solid #dce5ee;
-
-          border-radius: 10px;
-
+          min-height: 54px;
+          padding: 9px 11px;
+          border: 1px solid #dce5ee;
+          border-radius: 9px;
           background: #f8fafd;
         }
 
+        .optionalBox span {
+          color: #0747c9;
+          font-size: 8px;
+          font-weight: 900;
+        }
+
+        .optionalBox strong {
+          display: block;
+          margin-top: 2px;
+          color: #304a65;
+          font-size: 12px;
+        }
+
+        .optionalBox p {
+          margin: 2px 0 0;
+          color: #7a8999;
+          font-size: 10px;
+        }
+
         .creatorContact {
-          margin-top: 19px;
-
-          padding:
-            12px 14px;
-
+          margin-top: 18px;
+          padding: 11px 13px;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           gap: 12px;
-
-          border-radius: 11px;
-
+          border-radius: 10px;
           background: #0747c9;
         }
 
         .sectionWithToggle {
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
-          gap: 15px;
+          justify-content: space-between;
+          gap: 14px;
         }
 
         .miniToggle {
-          width: 70px;
-          height: 34px;
-
-          border:
-            1px solid #d5e0eb;
-
+          width: 66px;
+          height: 32px;
+          border: 1px solid #d5e0eb;
           border-radius: 999px;
-
           background: #f4f6f9;
           color: #8090a0;
-
+          font-size: 10px;
           font-weight: 900;
-
           cursor: pointer;
         }
 
         .miniToggle.on {
+          border-color: #0747c9;
           background: #0747c9;
           color: #ffffff;
-
-          border-color: #0747c9;
         }
 
         .visibilityLayout {
-          margin-top: 20px;
-
+          margin-top: 19px;
           display: grid;
-
-          grid-template-columns:
-            1fr 0.9fr;
-
-          gap: 14px;
-
+          grid-template-columns: 1fr .9fr;
+          gap: 13px;
           align-items: start;
         }
 
         .visibilityPanel,
         .previewPanel {
-          border:
-            1px solid #dde6ef;
-
-          border-radius: 13px;
-
+          border: 1px solid #dde6ef;
+          border-radius: 12px;
           background: #ffffff;
         }
 
         .visibilityPanel {
-          padding: 15px;
+          padding: 14px;
         }
 
         .visibilityGrid {
-          margin-top: 12px;
-
+          margin-top: 11px;
           display: grid;
-
           gap: 7px;
         }
 
         .visibilityRow {
-          min-height: 50px;
-
-          padding:
-            7px 9px;
-
+          min-height: 48px;
+          padding: 7px 9px;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           gap: 10px;
-
-          border:
-            1px solid #e1e8ef;
-
-          border-radius: 9px;
-
+          border: 1px solid #e1e8ef;
+          border-radius: 8px;
           background: #fbfcfe;
         }
 
+        .visibilityRow strong {
+          color: #344e68;
+          font-size: 12px;
+        }
+
         .visibilityToggle {
-          min-width: 64px;
-          height: 30px;
-
-          border:
-            1px solid #d3dde7;
-
+          min-width: 62px;
+          height: 29px;
+          border: 1px solid #d3dde7;
           border-radius: 999px;
-
           background: #f3f5f8;
           color: #82909e;
-
           font-size: 9px;
           font-weight: 900;
-
           cursor: pointer;
         }
 
         .visibilityToggle.on {
           border-color: #0747c9;
-
           background: #0747c9;
           color: #ffffff;
         }
@@ -2302,130 +2040,97 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewTop {
-          padding:
-            13px 14px;
-
+          padding: 12px 13px;
           display: flex;
           align-items: center;
-
           gap: 9px;
-
           background: #0747c9;
-          color: #ffffff;
         }
 
         .previewMark {
-          width: 34px;
-          height: 34px;
-
+          width: 32px;
+          height: 32px;
           display: grid;
           place-items: center;
-
-          border-radius: 9px;
-
+          border-radius: 8px;
           background: #ffffff;
-          color: #0747c9;
-
-          font-size: 22px;
+          color: #0747c9 !important;
+          font-size: 20px;
         }
 
         .previewPanel > h2 {
-          margin:
-            14px 14px 0;
-
+          margin: 13px 13px 0;
           color: #263f59;
-
-          font-size: 19px;
+          font-size: 18px;
         }
 
         .previewDetails {
-          padding:
-            10px 14px 12px;
-
+          padding: 9px 13px 11px;
           display: grid;
-
           gap: 7px;
         }
 
         .previewRow {
-          min-height: 42px;
-
-          padding:
-            7px 9px;
-
+          min-height: 40px;
+          padding: 7px 9px;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           gap: 10px;
-
           border-radius: 8px;
-
           background: #f5f8fc;
         }
 
+        .previewRow span {
+          color: #7b8b9c;
+          font-size: 10px;
+        }
+
+        .previewRow strong {
+          color: #304a65;
+          font-size: 12px;
+        }
+
         .previewBlock {
-          padding:
-            8px 9px;
-
+          padding: 8px 9px;
           border-radius: 8px;
-
           background: #f8fafc;
         }
 
         .contactPreview {
-          margin:
-            0 14px 10px;
-
-          padding: 10px;
-
-          border:
-            1px solid #cfe0f5;
-
-          border-radius: 9px;
-
+          margin: 0 13px 9px;
+          padding: 9px;
+          border: 1px solid #cfe0f5;
+          border-radius: 8px;
           background: #f2f7ff;
         }
 
         .actions,
         .finalActions {
-          margin-top: 20px;
-
+          margin-top: 19px;
           display: flex;
           align-items: center;
-          justify-content:
-            space-between;
-
+          justify-content: space-between;
           gap: 10px;
         }
 
         .secondaryButton,
         .primaryButton,
         .createButton {
-          min-height: 47px;
-
-          padding:
-            0 18px;
-
+          min-height: 44px;
+          padding: 0 17px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-
-          border-radius: 10px;
-
-          font-size: 14px;
+          border-radius: 9px;
+          font-size: 13px;
           font-weight: 850;
-
           cursor: pointer;
-
           text-decoration: none;
         }
 
         .secondaryButton {
-          border:
-            1px solid #d6e1ec;
-
+          border: 1px solid #d6e1ec;
           background: #ffffff;
           color: #64788d;
         }
@@ -2433,48 +2138,31 @@ export default function EmergencyBraceletPage() {
         .primaryButton,
         .createButton {
           border: 0;
-
           background: #0747c9;
           color: #ffffff;
         }
 
         .primaryButton:disabled {
           background: #b8c5d5;
-
           cursor: not-allowed;
         }
 
         .savingOverlay {
           position: absolute;
-
           inset: 0;
-
           z-index: 50;
-
           display: grid;
           place-items: center;
-
-          border-radius: 21px;
-
+          border-radius: 19px;
           background:
-            rgba(
-              255,
-              255,
-              255,
-              0.9
-            );
+            rgba(255,255,255,.9);
         }
 
         .savingBox {
-          padding:
-            22px 30px;
-
+          padding: 20px 27px;
           text-align: center;
-
-          border-radius: 14px;
-
+          border-radius: 13px;
           background: #0747c9;
-          color: #ffffff;
         }
 
         .savingBox strong,
@@ -2483,74 +2171,61 @@ export default function EmergencyBraceletPage() {
         }
 
         .savingBox strong {
-          font-size: 17px;
+          font-size: 16px;
         }
 
         .savingBox span {
           margin-top: 4px;
-
           font-size: 12px;
-
-          opacity: 0.75;
+          opacity: .8;
         }
 
-        @media (
-          max-width: 760px
-        ) {
+        @media (max-width: 760px) {
           .qrSection,
           .visibilityLayout {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .creatorSummary,
           .lockedSummary {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .relationshipGrid {
             grid-template-columns:
-              repeat(
-                2,
-                minmax(0, 1fr)
-              );
+              repeat(2,minmax(0,1fr));
           }
         }
 
-        @media (
-          max-width: 600px
-        ) {
+        @media (max-width: 600px) {
           .page {
-            padding:
-              0 12px 26px;
+            padding: 0 11px 24px;
           }
 
           .card {
-            margin-top: 18px;
-
-            padding:
-              19px 15px;
-
-            border-radius: 16px;
+            margin-top: 17px;
+            padding: 18px 14px;
+            border-radius: 15px;
           }
 
           .heading h1 {
-            font-size: 24px;
+            font-size: 21px;
+          }
+
+          .heading p {
+            font-size: 13px;
           }
 
           .choiceGrid,
           .formGrid,
           .textareaGrid,
           .topSummary {
-            grid-template-columns:
-              1fr;
+            grid-template-columns: 1fr;
           }
 
           .actions,
           .finalActions {
-            flex-direction:
-              column-reverse;
+            flex-direction: column-reverse;
           }
 
           .secondaryButton,
