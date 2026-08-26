@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import {
+  formatLocationAccuracy,
+  getPreciseLocation,
+  LocationAccuracyError,
+} from "@/lib/geolocation";
 
 type Props = {
   itemId: string;
@@ -26,110 +31,92 @@ export default function EmergencyLocationShare({
   const ka =
     language === "ka";
 
-  function shareLocation() {
+  async function shareLocation() {
     setMessage("");
     setSuccess(false);
 
-    if (
-      !navigator.geolocation
-    ) {
+    if (!navigator.geolocation) {
       setMessage(
         ka
           ? "თქვენი მოწყობილობა ლოკაციის გაზიარებას არ უჭერს მხარს."
           : "Your device does not support location sharing."
       );
-
       return;
     }
 
     setLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const latitude =
-            position.coords.latitude;
+    try {
+      const position =
+        await getPreciseLocation();
 
-          const longitude =
-            position.coords.longitude;
+      const {
+        latitude,
+        longitude,
+        accuracy,
+      } = position.coords;
 
-          const accuracy =
-            position.coords.accuracy;
-
-          const {
-            error,
-          } = await supabase.rpc(
-            "share_emergency_location",
-            {
-              p_item_id: itemId,
-              p_tag_code: tagCode,
-              p_latitude: latitude,
-              p_longitude: longitude,
-              p_accuracy: accuracy,
-            }
-          );
-
-          if (error) {
-            throw error;
-          }
-
-          setSuccess(true);
-
-          setMessage(
-            ka
-              ? "✓ ლოკაცია წარმატებით გაიგზავნა."
-              : "✓ Location shared successfully."
-          );
-        } catch (error) {
-          console.error(
-            "Emergency location error:",
-            error
-          );
-
-          setMessage(
-            ka
-              ? "ლოკაციის გაგზავნა ვერ მოხერხდა."
-              : "Could not share location."
-          );
-        } finally {
-          setLoading(false);
+      const { error } = await supabase.rpc(
+        "share_emergency_location",
+        {
+          p_item_id: itemId,
+          p_tag_code: tagCode,
+          p_latitude: latitude,
+          p_longitude: longitude,
+          p_accuracy: accuracy,
         }
-      },
+      );
 
-      (error) => {
-        console.error(
-          "Geolocation error:",
-          error
-        );
+      if (error) {
+        throw error;
+      }
 
-        setLoading(false);
+      setSuccess(true);
+      setMessage(
+        ka
+          ? `✓ ზუსტი ლოკაცია გაიგზავნა (სიზუსტე დაახლოებით ${formatLocationAccuracy(
+              accuracy
+            )} მეტრი).`
+          : `✓ Precise location shared (about ${formatLocationAccuracy(
+              accuracy
+            )} m accuracy).`
+      );
+    } catch (error) {
+      console.error(
+        "Emergency location sharing error:",
+        error
+      );
 
-        if (
-          error.code ===
-          error.PERMISSION_DENIED
-        ) {
-          setMessage(
-            ka
-              ? "ლოკაციის გასაზიარებლად საჭიროა Location Permission."
-              : "Location permission is required."
-          );
-
-          return;
-        }
-
+      if (
+        error instanceof
+        LocationAccuracyError
+      ) {
         setMessage(
           ka
-            ? "თქვენი ლოკაციის მიღება ვერ მოხერხდა."
-            : "Could not get your location."
+            ? "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+            : "GPS accuracy is too low. Move outdoors, enable Precise Location, and try again."
         );
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+      } else if (
+        error instanceof
+          GeolocationPositionError &&
+        error.code ===
+          error.PERMISSION_DENIED
+      ) {
+        setMessage(
+          ka
+            ? "ჩართეთ Location და Precise Location ნებართვა ბრაუზერის პარამეტრებში."
+            : "Enable Location and Precise Location permission in your browser settings."
+        );
+      } else {
+        setMessage(
+          ka
+            ? "ლოკაციის გაგზავნა ვერ მოხერხდა."
+            : "Could not share location."
+        );
       }
-    );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
