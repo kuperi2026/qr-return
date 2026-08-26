@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 type FinderProfile = {
   tag_code: string;
   item_type: string;
+  pet_type: string | null;
   item_name: string | null;
 
   colour: string | null;
@@ -60,6 +61,12 @@ type FinderProfile = {
   show_additional_contact: boolean | null;
   show_finder_message: boolean | null;
   show_lost_seen_location: boolean | null;
+
+  phone_enabled: boolean | null;
+  whatsapp_enabled: boolean | null;
+  live_chat_enabled: boolean | null;
+  show_reward: boolean | null;
+  reward: string | null;
 };
 
 export default function FinderPage() {
@@ -76,12 +83,8 @@ export default function FinderPage() {
   const [profile, setProfile] =
     useState<FinderProfile | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [locationStatus, setLocationStatus] =
     useState("");
 
@@ -142,9 +145,7 @@ export default function FinderPage() {
       return;
     }
 
-    setLocationStatus(
-      "ლოკაცია მუშავდება..."
-    );
+    setLocationStatus("ლოკაცია მუშავდება...");
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -157,27 +158,26 @@ export default function FinderPage() {
         const accuracy =
           position.coords.accuracy;
 
-        const {
-          error: updateError,
-        } = await supabase
-          .from("item")
-          .update({
-            last_scanned_at:
-              new Date().toISOString(),
+        const { error: updateError } =
+          await supabase
+            .from("item")
+            .update({
+              last_scanned_at:
+                new Date().toISOString(),
 
-            last_scan_latitude:
-              latitude,
+              last_scan_latitude:
+                latitude,
 
-            last_scan_longitude:
-              longitude,
+              last_scan_longitude:
+                longitude,
 
-            last_scan_accuracy:
-              accuracy,
-          })
-          .eq(
-            "tag_code",
-            profile.tag_code
-          );
+              last_scan_accuracy:
+                accuracy,
+            })
+            .eq(
+              "tag_code",
+              profile.tag_code
+            );
 
         if (updateError) {
           console.error(updateError);
@@ -221,45 +221,53 @@ export default function FinderPage() {
 
   if (loading) {
     return (
-      <>
-        <main className="centerPage">
-          <div className="logo centerLogo">
-            QR
-          </div>
+      <main className="centerPage">
+        <div className="logo centerLogo">
+          QR
+        </div>
 
-          <h1>QR RETURN</h1>
-
-          <p>პროფილი იტვირთება...</p>
-        </main>
+        <h1>QR RETURN</h1>
+        <p>პროფილი იტვირთება...</p>
 
         <Styles />
-      </>
+      </main>
     );
   }
 
   if (error || !profile) {
     return (
-      <>
-        <main className="centerPage">
-          <div className="logo centerLogo">
-            QR
-          </div>
+      <main className="centerPage">
+        <div className="logo centerLogo">
+          QR
+        </div>
 
-          <h1>QR RETURN</h1>
+        <h1>QR RETURN</h1>
 
-          <div className="errorBox">
-            {error || "პროფილი ვერ მოიძებნა."}
-          </div>
-        </main>
+        <div className="errorBox">
+          {error || "პროფილი ვერ მოიძებნა."}
+        </div>
 
         <Styles />
-      </>
+      </main>
     );
   }
 
+  /*
+   * ბაზაში ცხოველი ინახება ასე:
+   *
+   * item_type = "pet"
+   * pet_type = "dog" ან "cat"
+   *
+   * ამიტომ ვიზუალური კატეგორია pet_type-დან
+   * უნდა ავიღოთ.
+   */
+  const category =
+    profile.item_type === "pet"
+      ? profile.pet_type || "pet"
+      : profile.item_type;
+
   const isPet =
-    profile.item_type === "dog" ||
-    profile.item_type === "cat";
+    profile.item_type === "pet";
 
   const canShowPhoto =
     profile.show_photo !== false &&
@@ -267,24 +275,34 @@ export default function FinderPage() {
 
   const canCall =
     profile.show_owner_phone !== false &&
+    profile.phone_enabled !== false &&
     Boolean(profile.owner_phone);
 
   const canEmail =
     profile.show_owner_email === true &&
     Boolean(profile.owner_email);
 
+  const canWhatsApp =
+    profile.whatsapp_enabled === true &&
+    Boolean(profile.owner_phone);
+
+  const whatsappPhone =
+    profile.owner_phone
+      ? profile.owner_phone.replace(/\D/g, "")
+      : "";
+
   return (
     <>
       <main className="page">
         <header className="header">
-          <div className="brand">
+          <a href="/" className="brand">
             <div className="logo">QR</div>
 
             <div>
               <strong>QR RETURN</strong>
-              <small>FOUND ITEM PROFILE</small>
+              <small>FOUND PROFILE</small>
             </div>
-          </div>
+          </a>
         </header>
 
         <section className="content">
@@ -295,15 +313,13 @@ export default function FinderPage() {
                   src={profile.photo_url!}
                   alt={
                     profile.item_name ||
-                    "Profile"
+                    "QR RETURN Profile"
                   }
                   className="mainPhoto"
                 />
               ) : (
                 <div className="photoPlaceholder">
-                  {getIcon(
-                    profile.item_type
-                  )}
+                  {getIcon(category)}
                 </div>
               )}
 
@@ -314,15 +330,11 @@ export default function FinderPage() {
 
                 <h1>
                   {profile.item_name ||
-                    getCategory(
-                      profile.item_type
-                    )}
+                    getCategory(category)}
                 </h1>
 
                 <div className="categoryBadge">
-                  {getCategory(
-                    profile.item_type
-                  )}
+                  {getCategory(category)}
                 </div>
 
                 <p>
@@ -343,19 +355,35 @@ export default function FinderPage() {
                   </span>
 
                   <p>
-                    {
-                      profile.finder_message
-                    }
+                    {profile.finder_message}
                   </p>
                 </div>
               )}
 
+            {profile.show_reward === true &&
+              profile.reward && (
+                <div className="rewardBox">
+                  <span>ჯილდო</span>
+                  <strong>
+                    {profile.reward}
+                  </strong>
+                </div>
+              )}
+
             <section className="section">
-              <h2>
-                {isPet
-                  ? "ცხოველის ინფორმაცია"
-                  : "ნივთის ინფორმაცია"}
-              </h2>
+              <div className="sectionHeading">
+                <span>01</span>
+
+                <div>
+                  <small>PROFILE DETAILS</small>
+
+                  <h2>
+                    {isPet
+                      ? "ცხოველის ინფორმაცია"
+                      : "ნივთის ინფორმაცია"}
+                  </h2>
+                </div>
+              </div>
 
               <div className="grid">
                 {profile.show_colour !==
@@ -363,9 +391,7 @@ export default function FinderPage() {
                   profile.colour && (
                     <Info
                       label="ფერი"
-                      value={
-                        profile.colour
-                      }
+                      value={profile.colour}
                     />
                   )}
 
@@ -396,8 +422,7 @@ export default function FinderPage() {
                 {isPet &&
                   profile.show_weight ===
                     true &&
-                  profile.weight !==
-                    null && (
+                  profile.weight !== null && (
                     <Info
                       label="წონა"
                       value={`${profile.weight}`}
@@ -410,9 +435,7 @@ export default function FinderPage() {
                   profile.brand && (
                     <Info
                       label="ბრენდი"
-                      value={
-                        profile.brand
-                      }
+                      value={profile.brand}
                     />
                   )}
 
@@ -422,9 +445,7 @@ export default function FinderPage() {
                   profile.model && (
                     <Info
                       label="მოდელი"
-                      value={
-                        profile.model
-                      }
+                      value={profile.model}
                     />
                   )}
 
@@ -434,9 +455,7 @@ export default function FinderPage() {
                   profile.size && (
                     <Info
                       label="ზომა"
-                      value={
-                        profile.size
-                      }
+                      value={profile.size}
                     />
                   )}
 
@@ -446,9 +465,7 @@ export default function FinderPage() {
                   profile.material && (
                     <Info
                       label="მასალა"
-                      value={
-                        profile.material
-                      }
+                      value={profile.material}
                     />
                   )}
               </div>
@@ -501,9 +518,17 @@ export default function FinderPage() {
             </section>
 
             <section className="section">
-              <h2>
-                დაუკავშირდი მფლობელს
-              </h2>
+              <div className="sectionHeading">
+                <span>02</span>
+
+                <div>
+                  <small>CONTACT OWNER</small>
+
+                  <h2>
+                    დაუკავშირდი მფლობელს
+                  </h2>
+                </div>
+              </div>
 
               {profile.show_owner_photo ===
                 true &&
@@ -518,6 +543,15 @@ export default function FinderPage() {
                   </div>
                 )}
 
+              {profile.owner_name && (
+                <div className="ownerName">
+                  <span>მფლობელი</span>
+                  <strong>
+                    {profile.owner_name}
+                  </strong>
+                </div>
+              )}
+
               <div className="contactButtons">
                 {canCall && (
                   <a
@@ -528,12 +562,31 @@ export default function FinderPage() {
                   </a>
                 )}
 
+                {canWhatsApp && (
+                  <a
+                    href={`https://wa.me/${whatsappPhone}`}
+                    className="secondaryButton"
+                  >
+                    WhatsApp
+                  </a>
+                )}
+
                 {canEmail && (
                   <a
                     href={`mailto:${profile.owner_email}`}
                     className="secondaryButton"
                   >
-                    ✉️ ელფოსტა
+                    ელფოსტა
+                  </a>
+                )}
+
+                {profile.live_chat_enabled ===
+                  true && (
+                  <a
+                    href="/support"
+                    className="secondaryButton"
+                  >
+                    Live Chat
                   </a>
                 )}
               </div>
@@ -560,7 +613,6 @@ export default function FinderPage() {
                       <a
                         href={`tel:${profile.additional_contact_phone}`}
                       >
-                        📞{" "}
                         {
                           profile.additional_contact_phone
                         }
@@ -571,7 +623,6 @@ export default function FinderPage() {
                       <a
                         href={`mailto:${profile.additional_contact_email}`}
                       >
-                        ✉️{" "}
                         {
                           profile.additional_contact_email
                         }
@@ -581,13 +632,22 @@ export default function FinderPage() {
                 )}
             </section>
 
-            {profile.location_sharing_enabled && (
-              <section className="section">
-                <h2>
-                  მდებარეობის გაზიარება
-                </h2>
+            {profile.location_sharing_enabled !==
+              false && (
+              <section className="locationSection">
+                <div className="sectionHeading">
+                  <span>03</span>
 
-                <p className="locationText">
+                  <div>
+                    <small>SHARE LOCATION</small>
+
+                    <h2>
+                      მდებარეობის გაზიარება
+                    </h2>
+                  </div>
+                </div>
+
+                <p>
                   სურვილის შემთხვევაში შეგიძლია
                   მფლობელს გაუზიარო შენი მიმდინარე
                   მდებარეობა.
@@ -595,10 +655,10 @@ export default function FinderPage() {
 
                 <button
                   type="button"
-                  className="locationButton"
                   onClick={shareLocation}
+                  className="locationButton"
                 >
-                  📍 ჩემი ლოკაციის გაზიარება
+                  ჩემი ლოკაციის გაზიარება
                 </button>
 
                 {locationStatus && (
@@ -609,10 +669,22 @@ export default function FinderPage() {
               </section>
             )}
           </div>
-        </section>
 
-        <Styles />
+          <div className="privacy">
+            <strong>
+              QR RETURN
+            </strong>
+
+            <p>
+              მპოვნელს ეჩვენება მხოლოდ ის
+              ინფორმაცია, რომლის გაზიარებაც
+              მფლობელს აქვს არჩეული.
+            </p>
+          </div>
+        </section>
       </main>
+
+      <Styles />
     </>
   );
 }
@@ -625,7 +697,7 @@ function Info({
   value: string;
 }) {
   return (
-    <div className="infoBox">
+    <div className="info">
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -655,7 +727,7 @@ function getCategory(type: string) {
     case "cat":
       return "კატა";
 
-    case "key":
+    case "keys":
       return "გასაღები";
 
     case "wallet":
@@ -667,27 +739,30 @@ function getCategory(type: string) {
     case "suitcase":
       return "ჩემოდანი";
 
+    case "pet":
+      return "ცხოველი";
+
     default:
-      return type;
+      return "ნივთი";
   }
 }
 
 function getIcon(type: string) {
   switch (type) {
     case "dog":
-      return "🐕";
+      return "🐶";
 
     case "cat":
-      return "🐈";
+      return "🐱";
 
-    case "key":
+    case "keys":
       return "🔑";
 
     case "wallet":
       return "👛";
 
     case "bag":
-      return "🎒";
+      return "👜";
 
     case "suitcase":
       return "🧳";
@@ -697,14 +772,20 @@ function getIcon(type: string) {
   }
 }
 
-function translateSex(
-  sex: string
-) {
-  if (sex === "male") {
+function translateSex(sex: string) {
+  const value = sex.toLowerCase();
+
+  if (
+    value === "male" ||
+    value === "m"
+  ) {
     return "მამრობითი";
   }
 
-  if (sex === "female") {
+  if (
+    value === "female" ||
+    value === "f"
+  ) {
     return "მდედრობითი";
   }
 
@@ -718,30 +799,39 @@ function Styles() {
         box-sizing: border-box;
       }
 
+      html,
       body {
         margin: 0;
+        padding: 0;
       }
 
-      button,
-      input {
-        font: inherit;
+      body {
+        background: #f4f7fb;
+        color: #172b43;
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+      }
+
+      a {
+        text-decoration: none;
       }
 
       .page {
         min-height: 100vh;
-        background: #f8fafc;
-        color: #101828;
-        font-family: Inter, Arial, sans-serif;
       }
 
       .header {
-        width: calc(100% - 32px);
-        max-width: 1050px;
-        min-height: 78px;
-        margin: auto;
+        height: 70px;
+
         display: flex;
         align-items: center;
-        border-bottom: 1px solid #e8ecf1;
+
+        padding: 0 28px;
+
+        background: #ffffff;
+        border-bottom: 1px solid #e4eaf1;
       }
 
       .brand {
@@ -751,57 +841,79 @@ function Styles() {
       }
 
       .logo {
-        width: 43px;
-        height: 43px;
+        width: 39px;
+        height: 39px;
+
         display: grid;
         place-items: center;
-        border-radius: 13px;
-        background: #1465e8;
-        color: white;
-        font-size: 12px;
+
+        border-radius: 10px;
+
+        color: #ffffff;
+        background: #1266e9;
+
+        font-size: 10px;
         font-weight: 900;
       }
 
-      .brand strong {
+      .brand strong,
+      .brand small {
         display: block;
-        color: #1465e8;
-        font-size: 20px;
+      }
+
+      .brand strong {
+        color: #172b43;
+        font-size: 14px;
       }
 
       .brand small {
-        display: block;
-        margin-top: 2px;
-        color: #98a2b3;
+        margin-top: 3px;
+
+        color: #8b98a7;
         font-size: 7px;
-        letter-spacing: 2px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
       }
 
       .content {
-        width: calc(100% - 24px);
+        width: calc(100% - 30px);
         max-width: 720px;
-        margin: auto;
-        padding: 42px 0 80px;
+
+        margin: 0 auto;
+        padding: 38px 0 60px;
       }
 
       .finderCard {
-        padding: 28px;
-        border: 1px solid #e2e7ed;
-        border-radius: 24px;
-        background: white;
+        overflow: hidden;
+
+        border: 1px solid #e0e7ef;
+        border-radius: 22px;
+
+        background: #ffffff;
+
+        box-shadow:
+          0 18px 60px
+          rgba(22, 48, 78, 0.07);
       }
 
       .hero {
+        padding: 32px;
+
         display: flex;
         align-items: center;
-        gap: 22px;
+        gap: 24px;
+
+        border-bottom: 1px solid #e8edf3;
       }
 
       .mainPhoto,
       .photoPlaceholder {
-        width: 150px;
-        height: 150px;
-        flex: 0 0 150px;
-        border-radius: 22px;
+        width: 118px;
+        height: 118px;
+
+        flex: 0 0 118px;
+
+        border-radius: 20px;
       }
 
       .mainPhoto {
@@ -811,104 +923,205 @@ function Styles() {
       .photoPlaceholder {
         display: grid;
         place-items: center;
-        background: #eef4ff;
-        font-size: 52px;
+
+        background: #edf5ff;
+
+        font-size: 48px;
       }
 
       .eyebrow {
-        color: #1465e8;
-        font-size: 10px;
+        color: #1266e9;
+
+        font-size: 9px;
         font-weight: 900;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
       }
 
       .heroText h1 {
-        margin: 8px 0;
-        font-size: 36px;
+        margin: 7px 0 8px;
+
+        color: #172b43;
+
+        font-size: 31px;
+        line-height: 1.1;
       }
 
       .categoryBadge {
-        width: fit-content;
-        padding: 6px 11px;
-        border-radius: 30px;
-        background: #eef4ff;
-        color: #1465e8;
+        display: inline-flex;
+
+        padding: 6px 10px;
+
+        border-radius: 20px;
+
+        color: #1266e9;
+        background: #edf5ff;
+
         font-size: 10px;
-        font-weight: 900;
-      }
-
-      .heroText p {
-        margin: 10px 0 0;
-        color: #667085;
-        font-size: 11px;
-      }
-
-      .messageBox {
-        margin-top: 25px;
-        padding: 18px;
-        border-radius: 15px;
-        background: #eef4ff;
-      }
-
-      .messageBox span,
-      .infoBox span,
-      .longInfo span,
-      .additionalContact > span {
-        display: block;
-        color: #667085;
-        font-size: 11px;
         font-weight: 800;
       }
 
+      .heroText p {
+        margin: 11px 0 0;
+
+        color: #7c8998;
+        font-size: 11px;
+      }
+
+      .heroText p strong {
+        color: #42556b;
+      }
+
+      .messageBox {
+        margin: 24px 30px 0;
+        padding: 20px;
+
+        border: 1px solid #dbe8fb;
+        border-radius: 15px;
+
+        background: #f5f9ff;
+      }
+
+      .messageBox span,
+      .rewardBox span {
+        display: block;
+
+        color: #1266e9;
+
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+
       .messageBox p {
-        margin: 7px 0 0;
-        color: #1d2939;
-        font-size: 14px;
-        line-height: 1.6;
+        margin: 8px 0 0;
+
+        color: #34485f;
+
+        font-size: 13px;
+        line-height: 1.65;
       }
 
-      .section {
-        margin-top: 28px;
-        padding-top: 25px;
-        border-top: 1px solid #edf0f3;
+      .rewardBox {
+        margin: 13px 30px 0;
+        padding: 17px 20px;
+
+        border-radius: 13px;
+
+        background: #f6f8fb;
       }
 
-      .section h2 {
-        margin: 0 0 17px;
-        font-size: 19px;
+      .rewardBox strong {
+        display: block;
+
+        margin-top: 5px;
+
+        color: #172b43;
+        font-size: 17px;
+      }
+
+      .section,
+      .locationSection {
+        padding: 30px;
+
+        border-bottom: 1px solid #e8edf3;
+      }
+
+      .sectionHeading {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+
+        margin-bottom: 20px;
+      }
+
+      .sectionHeading > span {
+        width: 28px;
+        height: 28px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 8px;
+
+        color: #1266e9;
+        background: #edf5ff;
+
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .sectionHeading small {
+        display: block;
+
+        color: #9aa6b4;
+
+        font-size: 7px;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+
+      .sectionHeading h2 {
+        margin: 3px 0 0;
+
+        color: #20354e;
+
+        font-size: 17px;
       }
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 10px;
       }
 
-      .infoBox {
-        padding: 14px;
+      .info {
+        padding: 15px;
+
+        border: 1px solid #e4eaf1;
         border-radius: 12px;
-        background: #f8fafc;
+
+        background: #fbfcfe;
       }
 
-      .infoBox strong {
+      .info span,
+      .longInfo span,
+      .ownerName span,
+      .additionalContact > span {
         display: block;
+
+        color: #8996a5;
+
+        font-size: 9px;
+        font-weight: 800;
+      }
+
+      .info strong {
+        display: block;
+
         margin-top: 5px;
-        font-size: 14px;
+
+        color: #263a52;
+
+        font-size: 12px;
       }
 
       .longInfo {
-        margin-top: 12px;
-        padding: 14px;
+        margin-top: 10px;
+        padding: 16px;
+
+        border: 1px solid #e4eaf1;
         border-radius: 12px;
-        background: #f8fafc;
       }
 
       .longInfo p {
-        margin: 6px 0 0;
-        color: #344054;
-        font-size: 13px;
+        margin: 7px 0 0;
+
+        color: #53657a;
+
+        font-size: 12px;
         line-height: 1.6;
-        white-space: pre-wrap;
       }
 
       .ownerPhotoWrap {
@@ -916,151 +1129,243 @@ function Styles() {
       }
 
       .ownerPhotoWrap img {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+
         object-fit: cover;
+
+        border-radius: 50%;
+      }
+
+      .ownerName {
+        margin-bottom: 14px;
+      }
+
+      .ownerName strong {
+        display: block;
+
+        margin-top: 4px;
+
+        color: #263a52;
+        font-size: 13px;
       }
 
       .contactButtons {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 9px;
       }
 
       .primaryButton,
-      .secondaryButton,
-      .locationButton {
-        min-height: 54px;
-        padding: 0 18px;
+      .secondaryButton {
+        min-height: 45px;
+
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 900;
+
+        padding: 0 14px;
+
+        border-radius: 11px;
+
+        font-size: 11px;
+        font-weight: 850;
       }
 
       .primaryButton {
-        background: #1465e8;
-        color: white;
+        color: #ffffff;
+        background: #1266e9;
       }
 
       .secondaryButton {
-        border: 1px solid #d5dae1;
-        background: white;
-        color: #344054;
+        color: #1266e9;
+        background: #f1f6fd;
+
+        border: 1px solid #dbe7f7;
       }
 
       .additionalContact {
-        margin-top: 14px;
+        margin-top: 16px;
         padding: 16px;
-        border-radius: 13px;
-        background: #f8fafc;
+
+        border-radius: 12px;
+
+        background: #f7f9fc;
       }
 
       .additionalContact strong,
       .additionalContact a {
         display: block;
-      }
 
-      .additionalContact strong {
         margin-top: 6px;
-        font-size: 14px;
+
+        color: #263a52;
+
+        font-size: 11px;
       }
 
-      .additionalContact a {
-        margin-top: 6px;
-        color: #1465e8;
-        text-decoration: none;
-        font-size: 12px;
+      .locationSection {
+        border-bottom: 0;
       }
 
-      .locationText {
-        color: #667085;
+      .locationSection > p {
+        margin: -5px 0 17px;
+
+        color: #6f7e8e;
+
         font-size: 12px;
         line-height: 1.6;
       }
 
       .locationButton {
-        width: 100%;
+        min-height: 45px;
+
+        padding: 0 17px;
+
         border: 0;
-        background: #1465e8;
-        color: white;
+        border-radius: 11px;
+
+        color: #ffffff;
+        background: #1266e9;
+
+        font-size: 11px;
+        font-weight: 850;
+
         cursor: pointer;
       }
 
       .locationStatus {
-        margin-top: 10px;
-        padding: 12px;
-        border-radius: 10px;
-        background: #f3f7fd;
-        color: #344054;
-        font-size: 11px;
+        margin-top: 12px;
+
+        color: #53657a;
+
+        font-size: 10px;
+      }
+
+      .privacy {
+        padding: 19px 20px;
+
+        text-align: center;
+      }
+
+      .privacy strong {
+        color: #1266e9;
+
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+
+      .privacy p {
+        max-width: 420px;
+
+        margin: 6px auto 0;
+
+        color: #98a4b1;
+
+        font-size: 9px;
+        line-height: 1.5;
       }
 
       .centerPage {
-        width: calc(100% - 24px);
-        max-width: 500px;
-        margin: auto;
-        padding-top: 130px;
+        min-height: 100vh;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        padding: 25px;
+
         text-align: center;
-        font-family: Arial, sans-serif;
+
+        background: #f4f7fb;
       }
 
       .centerLogo {
-        margin: auto;
+        margin-bottom: 12px;
       }
 
       .centerPage h1 {
-        color: #1465e8;
+        margin: 0;
+
+        color: #172b43;
+
+        font-size: 25px;
       }
 
       .centerPage p {
-        color: #667085;
+        color: #7c8998;
+        font-size: 12px;
       }
 
       .errorBox {
-        margin-top: 20px;
-        padding: 14px;
-        border-radius: 12px;
-        background: #fff1f1;
-        color: #b42318;
+        margin-top: 15px;
+        padding: 14px 18px;
+
+        border-radius: 11px;
+
+        color: #53657a;
+        background: #ffffff;
+
+        border: 1px solid #e2e8ef;
+
         font-size: 12px;
       }
 
       @media (max-width: 600px) {
+        .header {
+          height: 62px;
+          padding: 0 16px;
+        }
+
         .content {
-          padding-top: 25px;
+          width: calc(100% - 20px);
+          padding-top: 18px;
         }
 
         .finderCard {
-          padding: 18px 14px;
-          border-radius: 18px;
+          border-radius: 17px;
         }
 
         .hero {
+          padding: 22px;
+
           align-items: flex-start;
-          gap: 14px;
+          gap: 16px;
         }
 
         .mainPhoto,
         .photoPlaceholder {
-          width: 105px;
-          height: 105px;
-          flex-basis: 105px;
+          width: 88px;
+          height: 88px;
+
+          flex-basis: 88px;
+
           border-radius: 16px;
         }
 
+        .photoPlaceholder {
+          font-size: 37px;
+        }
+
         .heroText h1 {
-          font-size: 26px;
+          font-size: 25px;
         }
 
-        .grid {
-          grid-template-columns: 1fr;
+        .messageBox,
+        .rewardBox {
+          margin-left: 20px;
+          margin-right: 20px;
         }
 
+        .section,
+        .locationSection {
+          padding: 24px 20px;
+        }
+
+        .grid,
         .contactButtons {
           grid-template-columns: 1fr;
         }
