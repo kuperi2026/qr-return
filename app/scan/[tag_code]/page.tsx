@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  formatLocationAccuracy,
+  getPreciseLocation,
+  LocationAccuracyError,
+} from "@/lib/geolocation";
 
 type FinderProfile = {
   tag_code: string;
@@ -138,85 +143,75 @@ export default function FinderPage() {
   async function shareLocation() {
     if (!profile) return;
 
-    if (!navigator.geolocation) {
-      setLocationStatus(
-        "თქვენს მოწყობილობას ლოკაციის გაზიარება არ აქვს მხარდაჭერილი."
-      );
-      return;
-    }
-
-    setLocationStatus("ლოკაცია მუშავდება...");
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const latitude =
-          position.coords.latitude;
-
-        const longitude =
-          position.coords.longitude;
-
-        const accuracy =
-          position.coords.accuracy;
-
-        const { error: updateError } =
-          await supabase
-            .from("item")
-            .update({
-              last_scanned_at:
-                new Date().toISOString(),
-
-              last_scan_latitude:
-                latitude,
-
-              last_scan_longitude:
-                longitude,
-
-              last_scan_accuracy:
-                accuracy,
-            })
-            .eq(
-              "tag_code",
-              profile.tag_code
-            );
-
-        if (updateError) {
-          console.error(updateError);
-
-          setLocationStatus(
-            "ლოკაციის გაგზავნა ვერ მოხერხდა."
-          );
-
-          return;
-        }
-
-        setLocationStatus(
-          "ლოკაცია წარმატებით გაიგზავნა."
-        );
-      },
-
-      (geoError) => {
-        console.error(geoError);
-
-        if (
-          geoError.code ===
-          geoError.PERMISSION_DENIED
-        ) {
-          setLocationStatus(
-            "ლოკაციის გაზიარებისთვის საჭიროა ნებართვა."
-          );
-        } else {
-          setLocationStatus(
-            "ლოკაციის მიღება ვერ მოხერხდა."
-          );
-        }
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
+    setLocationStatus(
+      "ზუსტი GPS ლოკაცია მუშავდება..."
     );
+
+    try {
+      const position =
+        await getPreciseLocation();
+
+      const {
+        latitude,
+        longitude,
+        accuracy,
+      } = position.coords;
+
+      const { data, error } =
+        await supabase.rpc(
+          "share_finder_location",
+          {
+            p_tag_code:
+              profile.tag_code,
+            p_latitude: latitude,
+            p_longitude: longitude,
+            p_accuracy: accuracy,
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      if (data !== true) {
+        throw new Error(
+          "ლოკაციის გაზიარება ვერ დადასტურდა."
+        );
+      }
+
+      setLocationStatus(
+        `ზუსტი ლოკაცია გაიგზავნა — სიზუსტე დაახლოებით ${formatLocationAccuracy(
+          accuracy
+        )} მეტრი.`
+      );
+    } catch (error) {
+      console.error(
+        "Geolocation error:",
+        error
+      );
+
+      if (
+        error instanceof
+        LocationAccuracyError
+      ) {
+        setLocationStatus(
+          "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+        );
+      } else if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === 1
+      ) {
+        setLocationStatus(
+          "ჩართეთ Location და Precise Location ნებართვა ბრაუზერის პარამეტრებში."
+        );
+      } else {
+        setLocationStatus(
+          "ლოკაციის მიღება ვერ მოხერხდა."
+        );
+      }
+    }
   }
 
   if (loading) {
