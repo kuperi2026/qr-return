@@ -3,6 +3,11 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  formatLocationAccuracy,
+  getPreciseLocation,
+  LocationAccuracyError,
+} from "@/lib/geolocation";
 
 type Lang = "ka" | "en";
 
@@ -39,6 +44,8 @@ export default function OwnerChatInboxPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [locationSending, setLocationSending] =
+    useState(false);
 
   const [error, setError] = useState("");
 
@@ -184,6 +191,99 @@ export default function OwnerChatInboxPage() {
     }
 
     setSending(false);
+  }
+
+
+  async function shareOwnerLocation() {
+    if (
+      !selected ||
+      locationSending
+    ) {
+      return;
+    }
+
+    setLocationSending(true);
+    setError("");
+
+    try {
+      const position =
+        await getPreciseLocation();
+
+      const {
+        latitude,
+        longitude,
+        accuracy,
+      } = position.coords;
+
+      const mapsUrl =
+        `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+      const locationMessage = ka
+        ? `📍 მფლობელმა ნებაყოფლობით გააზიარა ლოკაცია (სიზუსტე დაახლოებით ${formatLocationAccuracy(
+            accuracy
+          )} მეტრი): ${mapsUrl}`
+        : `📍 The owner voluntarily shared a location (about ${formatLocationAccuracy(
+            accuracy
+          )} m accuracy): ${mapsUrl}`;
+
+      const { error: rpcError } =
+        await supabase.rpc(
+          "owner_send_chat_message",
+          {
+            p_profile_id:
+              selected.profile_id,
+            p_finder_session:
+              selected.finder_session,
+            p_message:
+              locationMessage,
+          }
+        );
+
+      if (rpcError) {
+        throw rpcError;
+      }
+
+      await loadMessages(
+        selected,
+        true
+      );
+      await loadThreads();
+    } catch (error) {
+      console.error(
+        "Owner location sharing error:",
+        error
+      );
+
+      if (
+        error instanceof
+        LocationAccuracyError
+      ) {
+        setError(
+          ka
+            ? "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+            : "GPS accuracy is too low. Move outdoors, enable Precise Location, and try again."
+        );
+      } else if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === 1
+      ) {
+        setError(
+          ka
+            ? "ჩართეთ Location და Precise Location ნებართვა ბრაუზერის პარამეტრებში."
+            : "Enable Location and Precise Location permission in your browser settings."
+        );
+      } else {
+        setError(
+          ka
+            ? "ლოკაციის გაზიარება ვერ მოხერხდა."
+            : "Could not share location."
+        );
+      }
+    } finally {
+      setLocationSending(false);
+    }
   }
 
   function formatDate(value: string | null) {
@@ -548,6 +648,26 @@ export default function OwnerChatInboxPage() {
                         : "Reply to the finder..."
                     }
                   />
+
+                  <button
+                    type="button"
+                    className="locationButton"
+                    onClick={() =>
+                      void shareOwnerLocation()
+                    }
+                    disabled={
+                      locationSending ||
+                      sending
+                    }
+                  >
+                    {locationSending
+                      ? ka
+                        ? "GPS მუშავდება..."
+                        : "Getting GPS..."
+                      : ka
+                      ? "📍 ლოკაცია"
+                      : "📍 Location"}
+                  </button>
 
                   <button
                     type="submit"
@@ -1098,6 +1218,12 @@ function Styles() {
         font-size: 10px;
         font-weight: 900;
         cursor: pointer;
+      }
+
+      .composer .locationButton {
+        border: 1px solid #cbdcf7;
+        background: #eef4ff;
+        color: #1266e9;
       }
 
       .composer button:disabled {
