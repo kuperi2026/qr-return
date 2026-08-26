@@ -13,6 +13,12 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
+import {
+  formatLocationAccuracy,
+  getPreciseLocation,
+  LocationAccuracyError,
+} from "@/lib/geolocation";
+
 type PublicProfile = {
   id: string;
 
@@ -282,138 +288,89 @@ export default function PublicProfilePage() {
       setLocationError(
         "პროფილი ვერ მოიძებნა."
       );
-
-      return;
-    }
-
-    if (
-      typeof navigator === "undefined" ||
-      !navigator.geolocation
-    ) {
-      setLocationError(
-        "თქვენი ბრაუზერი მდებარეობის გაზიარებას არ უჭერს მხარს."
-      );
-
       return;
     }
 
     setLocationLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const supabase =
-            createSupabaseClient();
+    try {
+      const position =
+        await getPreciseLocation();
 
-          if (!supabase) {
-            throw new Error(
-              "Supabase კავშირი ვერ მოიძებნა."
-            );
-          }
+      const {
+        latitude,
+        longitude,
+        accuracy,
+      } = position.coords;
 
-          const {
-            latitude,
-            longitude,
-            accuracy,
-          } = position.coords;
+      const supabase =
+        createSupabaseClient();
 
-          const {
-            data,
-            error,
-          } =
-            await supabase.rpc(
-              "share_finder_location",
-              {
-                p_tag_code:
-                  profile.tag_code,
-
-                p_latitude:
-                  latitude,
-
-                p_longitude:
-                  longitude,
-
-                p_accuracy:
-                  accuracy,
-              }
-            );
-
-          if (error) {
-            throw error;
-          }
-
-          if (data !== true) {
-            throw new Error(
-              "მდებარეობის გაზიარება ვერ დადასტურდა."
-            );
-          }
-
-          setLocationSuccess(
-            "მდებარეობა წარმატებით გაეგზავნა მფლობელს."
-          );
-        } catch (error) {
-          console.error(
-            "Location share error:",
-            error
-          );
-
-          setLocationError(
-            error instanceof Error
-              ? error.message
-              : "მდებარეობის გაზიარება ვერ მოხერხდა."
-          );
-        } finally {
-          setLocationLoading(false);
-        }
-      },
-
-      (error) => {
-        setLocationLoading(false);
-
-        if (
-          error.code ===
-          error.PERMISSION_DENIED
-        ) {
-          setLocationError(
-            "მდებარეობაზე წვდომა არ დაუშვით. სურვილის შემთხვევაში შეგიძლიათ ბრაუზერის პარამეტრებიდან ჩართოთ Location."
-          );
-
-          return;
-        }
-
-        if (
-          error.code ===
-          error.POSITION_UNAVAILABLE
-        ) {
-          setLocationError(
-            "მიმდინარე მდებარეობის განსაზღვრა ვერ მოხერხდა."
-          );
-
-          return;
-        }
-
-        if (
-          error.code ===
-          error.TIMEOUT
-        ) {
-          setLocationError(
-            "მდებარეობის მიღების დრო ამოიწურა. სცადეთ კიდევ ერთხელ."
-          );
-
-          return;
-        }
-
-        setLocationError(
-          "მდებარეობის გაზიარება ვერ მოხერხდა."
+      if (!supabase) {
+        throw new Error(
+          "Supabase კავშირი ვერ მოიძებნა."
         );
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 0,
       }
-    );
+
+      const { data, error } =
+        await supabase.rpc(
+          "share_finder_location",
+          {
+            p_tag_code:
+              profile.tag_code,
+            p_latitude: latitude,
+            p_longitude: longitude,
+            p_accuracy: accuracy,
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      if (data !== true) {
+        throw new Error(
+          "მდებარეობის გაზიარება ვერ დადასტურდა."
+        );
+      }
+
+      setLocationSuccess(
+        `ზუსტი მდებარეობა გაეგზავნა მფლობელს — სიზუსტე დაახლოებით ${formatLocationAccuracy(
+          accuracy
+        )} მეტრი.`
+      );
+    } catch (error) {
+      console.error(
+        "Location share error:",
+        error
+      );
+
+      if (
+        error instanceof
+        LocationAccuracyError
+      ) {
+        setLocationError(
+          "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+        );
+      } else if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === 1
+      ) {
+        setLocationError(
+          "ჩართეთ Location და Precise Location ნებართვა ბრაუზერის პარამეტრებში."
+        );
+      } else {
+        setLocationError(
+          error instanceof Error
+            ? error.message
+            : "მდებარეობის გაზიარება ვერ მოხერხდა."
+        );
+      }
+    } finally {
+      setLocationLoading(false);
+    }
   }
 
   if (loading) {
