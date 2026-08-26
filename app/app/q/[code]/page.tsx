@@ -1,3 +1,5 @@
+import { maskTagCode } from "@/lib/maskTagCode";
+
 type PageProps = {
   params: {
     code: string;
@@ -38,7 +40,7 @@ export default function QRFinderPage({
 
         <div className="codeBox">
           <span>TAG CODE</span>
-          <strong>{code}</strong>
+          <strong>{maskTagCode(code)}</strong>
         </div>
 
         <div className="notice">

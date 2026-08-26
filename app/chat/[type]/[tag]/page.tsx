@@ -10,6 +10,7 @@ import {
 
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { maskTagCode } from "@/lib/maskTagCode";
 
 type Lang = "ka" | "en";
 
@@ -444,7 +445,7 @@ export default function FinderLiveChatPage() {
               </h1>
 
               <p>
-                QR: {tagCode}
+                QR: {maskTagCode(tagCode)}
               </p>
             </div>
 

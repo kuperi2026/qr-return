@@ -10,6 +10,8 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
+import { maskTagCode } from "@/lib/maskTagCode";
+
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -470,7 +472,7 @@ export default function EmergencyLiveChatPage() {
             </h1>
 
             <p>
-              QR: {tagCode || "—"}
+              QR: {tagCode ? maskTagCode(tagCode) : "—"}
             </p>
           </div>
         </div>

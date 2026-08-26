@@ -10,6 +10,7 @@ import {
 
 import { useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { maskTagCode } from "@/lib/maskTagCode";
 
 type Lang = "ka" | "en";
 type SenderType = "finder" | "owner";
@@ -336,7 +337,12 @@ export default function LiveChatPage() {
             <h1>{title}</h1>
 
             <p>
-              QR: <strong>{tagCode}</strong>
+              QR:{" "}
+              <strong>
+                {senderType === "owner"
+                  ? tagCode
+                  : maskTagCode(tagCode)}
+              </strong>
             </p>
           </div>
 
