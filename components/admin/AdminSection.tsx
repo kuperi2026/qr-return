@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import AdminCard from "./AdminCard";
+import AdminCard, {
+  type AdminCardTone,
+} from "./AdminCard";
 
 export type AdminSectionItem = {
   href: string;
@@ -10,6 +12,7 @@ export type AdminSectionItem = {
   icon?: ReactNode;
   badge?: number | string;
   disabled?: boolean;
+  tone?: AdminCardTone;
 };
 
 type Props = {
@@ -57,6 +60,7 @@ export default function AdminSection({
             icon={item.icon}
             badge={item.badge}
             disabled={item.disabled}
+            tone={item.tone}
           />
         ))}
       </div>
@@ -67,7 +71,7 @@ export default function AdminSection({
         }
 
         .heading {
-          margin-bottom: 18px;
+          margin-bottom: 22px;
 
           display: flex;
           align-items: flex-end;
@@ -89,7 +93,7 @@ export default function AdminSection({
 
           color: #27333e;
 
-          font-size: 23px;
+          font-size: 26px;
           font-weight: 800;
           letter-spacing: -0.8px;
         }
@@ -101,7 +105,7 @@ export default function AdminSection({
 
           color: #7f8a95;
 
-          font-size: 9px;
+          font-size: 11px;
           line-height: 1.6;
         }
 
@@ -134,7 +138,7 @@ export default function AdminSection({
               minmax(0, 1fr)
             );
 
-          gap: 13px;
+          gap: 18px;
         }
 
         @media (max-width: 950px) {
