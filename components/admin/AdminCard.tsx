@@ -165,7 +165,7 @@ export default function AdminCard({
     </>
   );
 
-  const className = `card ${tone} ${disabled ? "disabled" : ""}`;
+  const className = `adminCard ${tone} ${disabled ? "disabled" : ""}`;
 
   if (disabled) {
     return (
@@ -215,7 +215,7 @@ function CardStyles() {
           box-shadow 0.22s ease;
       }
 
-      .card.cyan {
+      .adminCard.cyan {
         --accent: #087ea4;
         --soft: #e9faff;
         --soft-border: #cceff8;
@@ -223,7 +223,7 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #087ea4, #20b8d8);
       }
 
-      .card.violet {
+      .adminCard.violet {
         --accent: #6d4bd1;
         --soft: #f3efff;
         --soft-border: #e2d8ff;
@@ -231,7 +231,7 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #6d4bd1, #9b78f2);
       }
 
-      .card.emerald {
+      .adminCard.emerald {
         --accent: #087f5b;
         --soft: #ebfaf4;
         --soft-border: #d0f0e4;
@@ -239,7 +239,7 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #087f5b, #2fbd8b);
       }
 
-      .card.amber {
+      .adminCard.amber {
         --accent: #a65f00;
         --soft: #fff7e7;
         --soft-border: #ffe7b4;
@@ -247,7 +247,7 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #e28a0d, #f2b84b);
       }
 
-      .card.rose {
+      .adminCard.rose {
         --accent: #c33f62;
         --soft: #fff0f4;
         --soft-border: #ffd6e1;
@@ -255,7 +255,7 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #c33f62, #ec718f);
       }
 
-      .card:hover {
+      .adminCard:hover {
         transform: translateY(-6px);
         border-color: var(--soft-border);
         box-shadow:
@@ -263,7 +263,7 @@ function CardStyles() {
           0 8px 20px var(--shadow);
       }
 
-      .card:hover :global(.arrow) {
+      .adminCard:hover .arrow {
         transform: translateX(3px);
       }
 
@@ -272,7 +272,7 @@ function CardStyles() {
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .card {
+        .adminCard {
           transition: none;
         }
       }
