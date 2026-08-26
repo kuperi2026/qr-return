@@ -97,10 +97,10 @@ export default function EmergencyLocationShare({
             : "GPS accuracy is too low. Move outdoors, enable Precise Location, and try again."
         );
       } else if (
-        error instanceof
-          GeolocationPositionError &&
-        error.code ===
-          error.PERMISSION_DENIED
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === 1
       ) {
         setMessage(
           ka
