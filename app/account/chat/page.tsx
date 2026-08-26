@@ -30,6 +30,16 @@ type ChatMessage = {
   created_at: string;
 };
 
+function getLocationUrl(
+  value: string
+) {
+  return (
+    value.match(
+      /https:\/\/www\.google\.com\/maps\?q=[^\s]+/
+    )?.[0] || ""
+  );
+}
+
 export default function OwnerChatInboxPage() {
   const router = useRouter();
 
@@ -598,6 +608,10 @@ export default function OwnerChatInboxPage() {
                       const mine =
                         message.sender_role === "owner" ||
                         message.sender_role === "admin";
+                      const locationUrl =
+                        getLocationUrl(
+                          message.message_text
+                        );
 
                       return (
                         <div
@@ -618,6 +632,20 @@ export default function OwnerChatInboxPage() {
                             <div>
                               {message.message_text}
                             </div>
+
+                            {locationUrl && (
+                              <a
+                                className="locationLink"
+                                href={locationUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                📍 {ka
+                                  ? "რუკაზე გახსნა"
+                                  : "Open map"} ↗
+                              </a>
+                            )}
+
 
                             <time>
                               {formatTime(message.created_at)}
@@ -1175,6 +1203,18 @@ function Styles() {
         border: 0;
         background: #1465e8;
         color: white;
+      }
+
+      .locationLink {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 7px 9px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: inherit;
+        font-size: 9px;
+        font-weight: 900;
+        text-decoration: none;
       }
 
       .bubble time {
