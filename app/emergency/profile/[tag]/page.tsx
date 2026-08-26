@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -9,100 +9,59 @@ type Lang = "ka" | "en";
 type EmergencyProfile = {
   tag_code: string;
 
-  first_name: string;
-  last_name: string;
-
-  country_code: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  photo_url: string | null;
 
   date_of_birth: string | null;
-  show_date_of_birth: boolean | null;
-
-  personal_number: string | null;
-  show_personal_number: boolean | null;
-
+  sex: string | null;
+  blood_type: string | null;
   address: string | null;
-  show_address: boolean | null;
 
+  allergies: string | null;
   medical_conditions: string | null;
-  show_medical_conditions: boolean | null;
-
+  medications: string | null;
+  medical_note: string | null;
   additional_info: string | null;
-  show_additional_info: boolean | null;
+
+  emergency_message: string | null;
 
   emergency_contact_enabled: boolean | null;
   emergency_contact_name: string | null;
   emergency_contact_relationship: string | null;
   emergency_contact_phone: string | null;
-
-  show_emergency_contact: boolean | null;
-
   emergency_contact_mobile_enabled: boolean | null;
   emergency_contact_whatsapp_enabled: boolean | null;
   emergency_contact_live_chat_enabled: boolean | null;
 
+  second_contact_enabled: boolean | null;
+  second_contact_name: string | null;
+  second_contact_relationship: string | null;
+  second_contact_phone: string | null;
+  second_contact_mobile_enabled: boolean | null;
+  second_contact_whatsapp_enabled: boolean | null;
+  second_contact_live_chat_enabled: boolean | null;
+
+  show_name: boolean | null;
+  show_photo: boolean | null;
+  show_date_of_birth: boolean | null;
+  show_sex: boolean | null;
+  show_blood_type: boolean | null;
+  show_address: boolean | null;
+  show_allergies: boolean | null;
+  show_medical_conditions: boolean | null;
+  show_medications: boolean | null;
+  show_medical_note: boolean | null;
+  show_additional_info: boolean | null;
+  show_emergency_message: boolean | null;
+  show_emergency_contact: boolean | null;
+  show_second_contact: boolean | null;
+
+  live_chat_enabled: boolean | null;
   active: boolean | null;
 };
 
-function emergencyNumber(countryCode: string | null) {
-  if (countryCode === "GE") {
-    return "112";
-  }
-
-  if (countryCode === "US") {
-    return "911";
-  }
-
-  return null;
-}
-
-function countryName(
-  countryCode: string | null,
-  lang: Lang
-) {
-  if (countryCode === "GE") {
-    return lang === "ka"
-      ? "🇬🇪 საქართველო"
-      : "🇬🇪 Georgia";
-  }
-
-  if (countryCode === "US") {
-    return lang === "ka"
-      ? "🇺🇸 ამერიკის შეერთებული შტატები"
-      : "🇺🇸 United States";
-  }
-
-  return "";
-}
-
-function formatDate(
-  value: string | null,
-  lang: Lang
-) {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(`${value}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat(
-    lang === "ka" ? "ka-GE" : "en-US",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
-  ).format(date);
-}
-
-function cleanPhoneForWhatsApp(phone: string) {
-  return phone.replace(/[^\d]/g, "");
-}
-
-export default function EmergencyPublicProfilePage() {
+export default function EmergencyProfilePage() {
   const params = useParams();
 
   const rawTag = params?.tag;
@@ -122,71 +81,36 @@ export default function EmergencyPublicProfilePage() {
 
   const ka = lang === "ka";
 
-  const emergency = useMemo(
-    () => emergencyNumber(profile?.country_code ?? null),
-    [profile?.country_code]
-  );
-
   useEffect(() => {
-    if (!tag) {
-      setLoading(false);
-
-      setError(
-        ka
-          ? "QR კოდი ვერ მოიძებნა."
-          : "QR code was not found."
-      );
-
-      return;
-    }
-
     async function loadProfile() {
+      if (!tag) {
+        setError(
+          ka
+            ? "QR კოდი ვერ მოიძებნა."
+            : "QR code was not found."
+        );
+
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError("");
 
-      const { data, error: loadError } = await supabase
-        .from("emergency_profiles")
-        .select(`
-          tag_code,
-          first_name,
-          last_name,
-          country_code,
-
-          date_of_birth,
-          show_date_of_birth,
-
-          personal_number,
-          show_personal_number,
-
-          address,
-          show_address,
-
-          medical_conditions,
-          show_medical_conditions,
-
-          additional_info,
-          show_additional_info,
-
-          emergency_contact_enabled,
-          emergency_contact_name,
-          emergency_contact_relationship,
-          emergency_contact_phone,
-          show_emergency_contact,
-
-          emergency_contact_mobile_enabled,
-          emergency_contact_whatsapp_enabled,
-          emergency_contact_live_chat_enabled,
-
-          active
-        `)
-        .eq("tag_code", tag)
-        .maybeSingle();
+      const { data, error: loadError } =
+        await supabase
+          .from("emergency_profiles")
+          .select("*")
+          .eq("tag_code", tag)
+          .maybeSingle();
 
       if (loadError) {
+        console.error(loadError);
+
         setError(
           ka
-            ? `პროფილის გახსნა ვერ მოხერხდა: ${loadError.message}`
-            : `Could not open profile: ${loadError.message}`
+            ? "პროფილის გახსნა ვერ მოხერხდა."
+            : "Could not open the profile."
         );
 
         setLoading(false);
@@ -196,8 +120,8 @@ export default function EmergencyPublicProfilePage() {
       if (!data) {
         setError(
           ka
-            ? "ამ QR კოდზე Emergency პროფილი არ არის რეგისტრირებული."
-            : "No Emergency profile is registered for this QR code."
+            ? "ამ QR კოდზე Emergency პროფილი არ მოიძებნა."
+            : "No Emergency profile was found for this QR code."
         );
 
         setLoading(false);
@@ -207,8 +131,8 @@ export default function EmergencyPublicProfilePage() {
       if (data.active === false) {
         setError(
           ka
-            ? "ეს Emergency პროფილი ამჟამად არააქტიურია."
-            : "This Emergency profile is currently inactive."
+            ? "ეს Emergency პროფილი არააქტიურია."
+            : "This Emergency profile is inactive."
         );
 
         setLoading(false);
@@ -224,37 +148,29 @@ export default function EmergencyPublicProfilePage() {
 
   if (loading) {
     return (
-      <main className="page">
-        <Header
-          lang={lang}
-          setLang={setLang}
-        />
+      <>
+        <main className="state">
+          <div className="logo">QR</div>
 
-        <section className="centerState">
-          <div className="loader" />
+          <h1>QR RETURN</h1>
 
-          <h2>
+          <p>
             {ka
               ? "Emergency პროფილი იტვირთება..."
               : "Loading Emergency profile..."}
-          </h2>
-        </section>
+          </p>
+        </main>
 
         <Styles />
-      </main>
+      </>
     );
   }
 
   if (error || !profile) {
     return (
-      <main className="page">
-        <Header
-          lang={lang}
-          setLang={setLang}
-        />
-
-        <section className="centerState">
-          <div className="errorIcon">!</div>
+      <>
+        <main className="state">
+          <div className="logo">QR</div>
 
           <h1>
             {ka
@@ -264,412 +180,544 @@ export default function EmergencyPublicProfilePage() {
 
           <p>{error}</p>
 
-          <a
-            href="/"
-            className="homeLink"
-          >
-            {ka
-              ? "მთავარ გვერდზე დაბრუნება"
-              : "Return home"}
+          <a href="/">
+            QR RETURN
           </a>
-        </section>
+        </main>
 
         <Styles />
-      </main>
+      </>
     );
   }
 
-  const showContact =
-    Boolean(profile.emergency_contact_enabled) &&
-    Boolean(profile.show_emergency_contact) &&
+  const fullName =
+    [profile.first_name, profile.last_name]
+      .filter(Boolean)
+      .join(" ");
+
+  const showName =
+    profile.show_name !== false &&
+    Boolean(fullName);
+
+  const showPhoto =
+    profile.show_photo !== false &&
+    Boolean(profile.photo_url);
+
+  const showEmergencyContact =
+    profile.emergency_contact_enabled === true &&
+    profile.show_emergency_contact !== false &&
     Boolean(
       profile.emergency_contact_name ||
         profile.emergency_contact_phone
     );
 
-  const whatsappPhone =
-    profile.emergency_contact_phone
-      ? cleanPhoneForWhatsApp(
-          profile.emergency_contact_phone
-        )
-      : "";
+  const showSecondContact =
+    profile.second_contact_enabled === true &&
+    profile.show_second_contact === true &&
+    Boolean(
+      profile.second_contact_name ||
+        profile.second_contact_phone
+    );
 
   return (
-    <main className="page">
-      <Header
-        lang={lang}
-        setLang={setLang}
-      />
+    <>
+      <main className="page">
+        <header className="header">
+          <a href="/" className="brand">
+            <div className="logo">QR</div>
 
-      <section className="container">
-        <div className="emergencyBadge">
-          <div className="cross">✚</div>
-
-          <div>
-            <span>QR RETURN</span>
-            <strong>EMERGENCY ID</strong>
-          </div>
-        </div>
-
-        <section className="identityCard">
-          <div className="statusRow">
-            <span className="activeDot" />
-
-            <span>
-              {ka
-                ? "აქტიური Emergency პროფილი"
-                : "Active Emergency profile"}
-            </span>
-          </div>
-
-          <h1>
-            {profile.first_name} {profile.last_name}
-          </h1>
-
-          {profile.country_code && (
-            <div className="country">
-              {countryName(
-                profile.country_code,
-                lang
-              )}
-            </div>
-          )}
-
-          <p className="identityHelp">
-            {ka
-              ? "ეს ინფორმაცია დაკავშირებულია ამ ადამიანის Emergency QR სამაჯურთან."
-              : "This information is linked to this person's Emergency QR bracelet."}
-          </p>
-        </section>
-
-        {emergency && (
-          <section className="emergencyCallCard">
             <div>
-              <span className="smallLabel">
-                {ka
-                  ? "გადაუდებელი დახმარება"
-                  : "Emergency services"}
-              </span>
-
-              <strong>
-                {ka
-                  ? `დარეკეთ ${emergency}-ზე`
-                  : `Call ${emergency}`}
-              </strong>
-
-              <p>
-                {ka
-                  ? "სიცოცხლისთვის საშიშ ან გადაუდებელ სიტუაციაში პირველ რიგში დაუკავშირდით საგანგებო სამსახურს."
-                  : "In a life-threatening or urgent situation, contact emergency services first."}
-              </p>
+              <strong>QR RETURN</strong>
+              <small>EMERGENCY ID</small>
             </div>
+          </a>
 
-            <a
-              href={`tel:${emergency}`}
-              className="emergencyCallButton"
+          <div className="languages">
+            <button
+              className={
+                lang === "ka" ? "activeLang" : ""
+              }
+              onClick={() => setLang("ka")}
             >
-              📞 {emergency}
-            </a>
-          </section>
-        )}
+              GEO
+            </button>
 
-        <div className="sectionHeading">
-          <span>
-            {ka
-              ? "ადამიანის ინფორმაცია"
-              : "Person information"}
-          </span>
-        </div>
+            <button
+              className={
+                lang === "en" ? "activeLang" : ""
+              }
+              onClick={() => setLang("en")}
+            >
+              ENG
+            </button>
+          </div>
+        </header>
 
-        <section className="infoGrid">
-          {profile.show_date_of_birth &&
-            profile.date_of_birth && (
-              <InfoCard
-                icon="🎂"
-                title={
-                  ka
-                    ? "დაბადების თარიღი"
-                    : "Date of birth"
-                }
-                value={formatDate(
-                  profile.date_of_birth,
-                  lang
+        <section className="container">
+          <div className="profileCard">
+            <section className="identity">
+              {showPhoto ? (
+                <img
+                  src={profile.photo_url!}
+                  alt={fullName || "Emergency profile"}
+                  className="photo"
+                />
+              ) : (
+                <div className="photoPlaceholder">
+                  ✚
+                </div>
+              )}
+
+              <div className="identityText">
+                <div className="emergencyLabel">
+                  EMERGENCY PROFILE
+                </div>
+
+                {showName ? (
+                  <h1>{fullName}</h1>
+                ) : (
+                  <h1>QR RETURN</h1>
                 )}
-              />
-            )}
-
-          {profile.show_personal_number &&
-            profile.personal_number && (
-              <InfoCard
-                icon="🪪"
-                title={
-                  ka
-                    ? "პირადი / საიდენტიფიკაციო ნომერი"
-                    : "Personal identification number"
-                }
-                value={profile.personal_number}
-              />
-            )}
-
-          {profile.show_address &&
-            profile.address && (
-              <InfoCard
-                icon="📍"
-                title={
-                  ka
-                    ? "მისამართი"
-                    : "Address"
-                }
-                value={profile.address}
-              />
-            )}
-        </section>
-
-        {profile.show_medical_conditions &&
-          profile.medical_conditions && (
-            <section className="importantCard">
-              <div className="importantIcon">
-                +
-              </div>
-
-              <div>
-                <span>
-                  {ka
-                    ? "ქრონიკული დაავადებები"
-                    : "Chronic conditions"}
-                </span>
 
                 <p>
-                  {profile.medical_conditions}
+                  QR: <strong>{profile.tag_code}</strong>
                 </p>
               </div>
-            </section>
-          )}
 
-        {profile.show_additional_info &&
-          profile.additional_info && (
-            <section className="additionalCard">
-              <span>
-                {ka
-                  ? "დამატებითი ინფორმაცია"
-                  : "Additional information"}
-              </span>
-
-              <p>
-                {profile.additional_info}
-              </p>
-            </section>
-          )}
-
-        {showContact && (
-          <>
-            <div className="sectionHeading">
-              <span>
-                {ka
-                  ? "საკონტაქტო პირი"
-                  : "Emergency contact"}
-              </span>
-            </div>
-
-            <section className="contactCard">
-              <div className="contactPerson">
-                <div className="contactAvatar">
-                  👤
-                </div>
+              <a
+                href="tel:112"
+                className="call112Top"
+              >
+                <span>📞</span>
 
                 <div>
-                  <h2>
-                    {profile.emergency_contact_name ||
-                      (ka
-                        ? "საკონტაქტო პირი"
-                        : "Emergency contact")}
-                  </h2>
+                  <small>
+                    {ka ? "დარეკვა" : "Call"}
+                  </small>
 
-                  {profile.emergency_contact_relationship && (
-                    <p>
-                      {ka
-                        ? "კავშირი პირთან: "
-                        : "Relationship: "}
-
-                      <strong>
-                        {
-                          profile.emergency_contact_relationship
-                        }
-                      </strong>
-                    </p>
-                  )}
-
-                  {profile.emergency_contact_phone && (
-                    <p className="phoneText">
-                      {
-                        profile.emergency_contact_phone
-                      }
-                    </p>
-                  )}
+                  <strong>112</strong>
                 </div>
-              </div>
-
-              <div className="contactActions">
-                {profile.emergency_contact_mobile_enabled &&
-                  profile.emergency_contact_phone && (
-                    <a
-                      className="contactButton"
-                      href={`tel:${profile.emergency_contact_phone}`}
-                    >
-                      <span>📞</span>
-
-                      <strong>
-                        {ka
-                          ? "დარეკვა"
-                          : "Call"}
-                      </strong>
-                    </a>
-                  )}
-
-                {profile.emergency_contact_whatsapp_enabled &&
-                  whatsappPhone && (
-                    <a
-                      className="contactButton whatsapp"
-                      href={`https://wa.me/${whatsappPhone}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span>🟢</span>
-
-                      <strong>
-                        WhatsApp
-                      </strong>
-                    </a>
-                  )}
-
-                {profile.emergency_contact_live_chat_enabled && (
-                  <a
-                    className="contactButton chat"
-                    href={`/chat/emergency/${encodeURIComponent(
-                      profile.tag_code
-                    )}`}
-                  >
-                    <span>💬</span>
-
-                    <strong>
-                      Live Chat
-                    </strong>
-                  </a>
-                )}
-              </div>
-
-              <div className="contactNote">
-                {ka
-                  ? "ეს პირი მითითებულია Emergency პროფილში საკონტაქტო პირად."
-                  : "This person is listed as the Emergency contact for this profile."}
-              </div>
+              </a>
             </section>
-          </>
-        )}
 
-        <section className="safetyNote">
-          <strong>
-            ⚕{" "}
-            {ka
-              ? "მნიშვნელოვანი"
-              : "Important"}
-          </strong>
+            {profile.show_emergency_message !== false &&
+              profile.emergency_message && (
+                <section className="alert">
+                  <span>!</span>
 
-          <p>
-            {ka
-              ? "QR RETURN Emergency პროფილში მოცემული ინფორმაცია მომხმარებლის მიერ არის შეყვანილი. გადაუდებელ სიტუაციაში გამოიყენეთ შესაბამისი საგანგებო სამსახური."
-              : "Information in this QR RETURN Emergency profile is provided by the user. In an emergency, use the appropriate emergency service."}
-          </p>
+                  <div>
+                    <strong>
+                      {ka
+                        ? "მნიშვნელოვანი ინფორმაცია"
+                        : "Important information"}
+                    </strong>
+
+                    <p>
+                      {profile.emergency_message}
+                    </p>
+                  </div>
+                </section>
+              )}
+
+            <section className="section">
+              <SectionTitle
+                number="01"
+                eyebrow="MEDICAL INFORMATION"
+                title={
+                  ka
+                    ? "სამედიცინო ინფორმაცია"
+                    : "Medical information"
+                }
+              />
+
+              <div className="medicalGrid">
+                {profile.show_blood_type !== false &&
+                  profile.blood_type && (
+                    <Info
+                      label={
+                        ka
+                          ? "სისხლის ჯგუფი"
+                          : "Blood type"
+                      }
+                      value={profile.blood_type}
+                      emphasis
+                    />
+                  )}
+
+                {profile.show_date_of_birth === true &&
+                  profile.date_of_birth && (
+                    <Info
+                      label={
+                        ka
+                          ? "დაბადების თარიღი"
+                          : "Date of birth"
+                      }
+                      value={formatDate(
+                        profile.date_of_birth,
+                        lang
+                      )}
+                    />
+                  )}
+
+                {profile.show_sex === true &&
+                  profile.sex && (
+                    <Info
+                      label={
+                        ka ? "სქესი" : "Sex"
+                      }
+                      value={profile.sex}
+                    />
+                  )}
+
+                {profile.show_address === true &&
+                  profile.address && (
+                    <Info
+                      label={
+                        ka
+                          ? "მისამართი"
+                          : "Address"
+                      }
+                      value={profile.address}
+                    />
+                  )}
+              </div>
+
+              {profile.show_allergies !== false &&
+                profile.allergies && (
+                  <MedicalRow
+                    label={
+                      ka
+                        ? "ალერგიები"
+                        : "Allergies"
+                    }
+                    value={profile.allergies}
+                  />
+                )}
+
+              {profile.show_medical_conditions !==
+                false &&
+                profile.medical_conditions && (
+                  <MedicalRow
+                    label={
+                      ka
+                        ? "სამედიცინო მდგომარეობები"
+                        : "Medical conditions"
+                    }
+                    value={
+                      profile.medical_conditions
+                    }
+                  />
+                )}
+
+              {profile.show_medications !== false &&
+                profile.medications && (
+                  <MedicalRow
+                    label={
+                      ka
+                        ? "მედიკამენტები"
+                        : "Medications"
+                    }
+                    value={profile.medications}
+                  />
+                )}
+
+              {profile.show_medical_note !== false &&
+                profile.medical_note && (
+                  <MedicalRow
+                    label={
+                      ka
+                        ? "სამედიცინო შენიშვნა"
+                        : "Medical note"
+                    }
+                    value={profile.medical_note}
+                  />
+                )}
+
+              {profile.show_additional_info === true &&
+                profile.additional_info && (
+                  <MedicalRow
+                    label={
+                      ka
+                        ? "დამატებითი ინფორმაცია"
+                        : "Additional information"
+                    }
+                    value={profile.additional_info}
+                  />
+                )}
+            </section>
+
+            {showEmergencyContact && (
+              <section className="section">
+                <SectionTitle
+                  number="02"
+                  eyebrow="EMERGENCY CONTACT"
+                  title={
+                    ka
+                      ? "საკონტაქტო პირი"
+                      : "Emergency contact"
+                  }
+                />
+
+                <Contact
+                  name={
+                    profile.emergency_contact_name
+                  }
+                  relationship={
+                    profile.emergency_contact_relationship
+                  }
+                  phone={
+                    profile.emergency_contact_phone
+                  }
+                  mobile={
+                    profile.emergency_contact_mobile_enabled !==
+                    false
+                  }
+                  whatsapp={
+                    profile.emergency_contact_whatsapp_enabled ===
+                    true
+                  }
+                  liveChat={
+                    profile.emergency_contact_live_chat_enabled ===
+                    true
+                  }
+                  lang={lang}
+                />
+              </section>
+            )}
+
+            {showSecondContact && (
+              <section className="section secondarySection">
+                <SectionTitle
+                  number="03"
+                  eyebrow="SECOND CONTACT"
+                  title={
+                    ka
+                      ? "დამატებითი საკონტაქტო პირი"
+                      : "Additional contact"
+                  }
+                />
+
+                <Contact
+                  name={profile.second_contact_name}
+                  relationship={
+                    profile.second_contact_relationship
+                  }
+                  phone={
+                    profile.second_contact_phone
+                  }
+                  mobile={
+                    profile.second_contact_mobile_enabled !==
+                    false
+                  }
+                  whatsapp={
+                    profile.second_contact_whatsapp_enabled ===
+                    true
+                  }
+                  liveChat={
+                    profile.second_contact_live_chat_enabled ===
+                    true
+                  }
+                  lang={lang}
+                />
+              </section>
+            )}
+
+            <section className="emergencyFooter">
+              <div>
+                <strong>
+                  {ka
+                    ? "გადაუდებელი დახმარება"
+                    : "Emergency services"}
+                </strong>
+
+                <p>
+                  {ka
+                    ? "გადაუდებელ სიტუაციაში დაუკავშირდით 112-ს."
+                    : "In an emergency, call 112."}
+                </p>
+              </div>
+
+              <a
+                href="tel:112"
+                className="call112"
+              >
+                📞 {ka ? "დარეკვა 112-ზე" : "Call 112"}
+              </a>
+            </section>
+          </div>
+
+          <div className="privacy">
+            <strong>QR RETURN</strong>
+
+            <p>
+              {ka
+                ? "ნაჩვენებია მხოლოდ ის ინფორმაცია, რომლის გაზიარებაც პროფილის მფლობელს აქვს არჩეული."
+                : "Only information selected by the profile owner for sharing is displayed."}
+            </p>
+          </div>
         </section>
-
-        <footer className="footer">
-          <strong>QR RETURN</strong>
-          <span>Emergency ID</span>
-        </footer>
-      </section>
+      </main>
 
       <Styles />
-    </main>
+    </>
   );
 }
 
-function Header({
-  lang,
-  setLang,
-}: {
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-}) {
-  return (
-    <header className="header">
-      <a
-        href="/"
-        className="brand"
-      >
-        <div className="brandLogo">
-          QR
-        </div>
-
-        <div>
-          <strong>QR RETURN</strong>
-          <small>EMERGENCY ID</small>
-        </div>
-      </a>
-
-      <div className="languages">
-        <button
-          type="button"
-          className={
-            lang === "ka"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("ka")
-          }
-        >
-          GEO
-        </button>
-
-        <button
-          type="button"
-          className={
-            lang === "en"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setLang("en")
-          }
-        >
-          ENG
-        </button>
-      </div>
-    </header>
-  );
-}
-
-function InfoCard({
-  icon,
+function SectionTitle({
+  number,
+  eyebrow,
   title,
-  value,
 }: {
-  icon: string;
+  number: string;
+  eyebrow: string;
   title: string;
-  value: string;
 }) {
   return (
-    <div className="infoCard">
-      <div className="infoIcon">
-        {icon}
-      </div>
+    <div className="sectionTitle">
+      <span>{number}</span>
 
       <div>
-        <span>{title}</span>
-        <strong>{value}</strong>
+        <small>{eyebrow}</small>
+        <h2>{title}</h2>
       </div>
     </div>
   );
+}
+
+function Info({
+  label,
+  value,
+  emphasis = false,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <div
+      className={
+        emphasis ? "info emphasis" : "info"
+      }
+    >
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function MedicalRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="medicalRow">
+      <span>{label}</span>
+      <p>{value}</p>
+    </div>
+  );
+}
+
+function Contact({
+  name,
+  relationship,
+  phone,
+  mobile,
+  whatsapp,
+  liveChat,
+  lang,
+}: {
+  name: string | null;
+  relationship: string | null;
+  phone: string | null;
+  mobile: boolean;
+  whatsapp: boolean;
+  liveChat: boolean;
+  lang: Lang;
+}) {
+  const ka = lang === "ka";
+
+  const whatsappPhone =
+    phone?.replace(/\D/g, "") || "";
+
+  return (
+    <div className="contact">
+      <div className="contactIdentity">
+        <div className="avatar">👤</div>
+
+        <div>
+          <strong>
+            {name ||
+              (ka
+                ? "საკონტაქტო პირი"
+                : "Emergency contact")}
+          </strong>
+
+          {relationship && (
+            <p>{relationship}</p>
+          )}
+
+          {phone && (
+            <span>{phone}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="contactActions">
+        {mobile && phone && (
+          <a
+            href={`tel:${phone}`}
+            className="primaryAction"
+          >
+            📞 {ka ? "დარეკვა" : "Call"}
+          </a>
+        )}
+
+        {whatsapp && phone && (
+          <a
+            href={`https://wa.me/${whatsappPhone}`}
+            className="action"
+          >
+            WhatsApp
+          </a>
+        )}
+
+        {liveChat && (
+          <a
+            href="/support"
+            className="action"
+          >
+            Live Chat
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatDate(
+  value: string,
+  lang: Lang
+) {
+  const date =
+    new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    lang === "ka"
+      ? "ka-GE"
+      : "en-US",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }
+  ).format(date);
 }
 
 function Styles() {
@@ -686,576 +734,687 @@ function Styles() {
       }
 
       body {
-        background: #f6f8fb;
+        background: #f4f7fb;
+        color: #1b3048;
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
       }
 
-      button,
       a {
-        -webkit-tap-highlight-color: transparent;
+        text-decoration: none;
+      }
+
+      button {
+        font-family: inherit;
       }
 
       .page {
         min-height: 100vh;
-        background:
-          radial-gradient(
-            circle at 100% 0%,
-            rgba(21, 94, 239, 0.09),
-            transparent 27%
-          ),
-          #f6f8fb;
-        color: #101828;
-        font-family: Arial, Helvetica, sans-serif;
       }
 
       .header {
-        width: calc(100% - 28px);
-        max-width: 760px;
-        min-height: 76px;
-        margin: auto;
+        height: 64px;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
+
+        padding: 0 24px;
+
+        background: #ffffff;
+        border-bottom: 1px solid #e3e9f0;
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 10px;
-        text-decoration: none;
+        gap: 9px;
       }
 
-      .brandLogo {
-        width: 43px;
-        height: 43px;
+      .logo {
+        width: 36px;
+        height: 36px;
+
         display: grid;
         place-items: center;
-        border-radius: 13px;
-        background: #155eef;
+
+        border-radius: 9px;
+
+        background: #1266e9;
         color: #ffffff;
-        font-size: 11px;
+
+        font-size: 9px;
         font-weight: 900;
+      }
+
+      .brand strong,
+      .brand small {
+        display: block;
       }
 
       .brand strong {
-        display: block;
-        color: #155eef;
-        font-size: 19px;
-        font-weight: 900;
+        color: #1c3048;
+        font-size: 13px;
       }
 
       .brand small {
-        display: block;
         margin-top: 2px;
-        color: #d92d20;
-        font-size: 8px;
-        font-weight: 900;
-        letter-spacing: 2px;
+
+        color: #8794a3;
+        font-size: 7px;
+        font-weight: 800;
+        letter-spacing: 1px;
       }
 
       .languages {
-        padding: 4px;
         display: flex;
+        gap: 4px;
+
+        padding: 3px;
+
         border-radius: 9px;
-        background: #eaecf0;
+        background: #f0f4f9;
       }
 
       .languages button {
-        padding: 7px 9px;
+        padding: 6px 9px;
+
         border: 0;
         border-radius: 7px;
+
         background: transparent;
-        color: #667085;
-        font-size: 10px;
+        color: #778697;
+
+        font-size: 8px;
         font-weight: 900;
+
         cursor: pointer;
       }
 
-      .languages button.active {
-        background: #ffffff;
-        color: #155eef;
+      .languages .activeLang {
+        background: #1266e9;
+        color: #ffffff;
       }
 
       .container {
         width: calc(100% - 24px);
-        max-width: 660px;
-        margin: auto;
-        padding: 38px 0 70px;
+        max-width: 680px;
+
+        margin: 0 auto;
+        padding: 24px 0 45px;
       }
 
-      .emergencyBadge {
-        margin-bottom: 18px;
+      .profileCard {
+        overflow: hidden;
+
+        border: 1px solid #dfe6ee;
+        border-radius: 18px;
+
+        background: #ffffff;
+
+        box-shadow:
+          0 14px 45px
+          rgba(25, 48, 74, 0.06);
+      }
+
+      .identity {
+        display: grid;
+        grid-template-columns:
+          72px 1fr auto;
+        align-items: center;
+
+        gap: 15px;
+
+        padding: 20px 22px;
+      }
+
+      .photo,
+      .photoPlaceholder {
+        width: 72px;
+        height: 72px;
+
+        border-radius: 15px;
+      }
+
+      .photo {
+        object-fit: cover;
+      }
+
+      .photoPlaceholder {
+        display: grid;
+        place-items: center;
+
+        background: #edf5ff;
+        color: #1266e9;
+
+        font-size: 27px;
+        font-weight: 900;
+      }
+
+      .emergencyLabel {
+        color: #1266e9;
+
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 1.1px;
+      }
+
+      .identityText h1 {
+        margin: 5px 0 5px;
+
+        color: #1d3149;
+
+        font-size: 22px;
+        line-height: 1.1;
+      }
+
+      .identityText p {
+        margin: 0;
+
+        color: #8794a2;
+        font-size: 9px;
+      }
+
+      .call112Top {
+        min-width: 90px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+
+        padding: 10px 12px;
+
+        border-radius: 11px;
+
+        background: #1266e9;
+        color: #ffffff;
+      }
+
+      .call112Top > span {
+        font-size: 15px;
+      }
+
+      .call112Top small,
+      .call112Top strong {
+        display: block;
+      }
+
+      .call112Top small {
+        font-size: 7px;
+        opacity: 0.85;
+      }
+
+      .call112Top strong {
+        margin-top: 1px;
+        font-size: 17px;
+      }
+
+      .alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+
+        margin: 0 22px 4px;
+        padding: 12px 14px;
+
+        border-radius: 11px;
+
+        background: #f1f6fd;
+        border: 1px solid #dbe8f9;
+      }
+
+      .alert > span {
+        width: 22px;
+        height: 22px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 22px;
+
+        border-radius: 50%;
+
+        background: #1266e9;
+        color: #ffffff;
+
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .alert strong {
+        display: block;
+
+        color: #263b53;
+        font-size: 10px;
+      }
+
+      .alert p {
+        margin: 4px 0 0;
+
+        color: #637386;
+
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .section {
+        padding: 20px 22px;
+
+        border-top: 1px solid #e7ecf2;
+      }
+
+      .sectionTitle {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+
+        margin-bottom: 14px;
+      }
+
+      .sectionTitle > span {
+        width: 25px;
+        height: 25px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 25px;
+
+        border-radius: 7px;
+
+        background: #edf5ff;
+        color: #1266e9;
+
+        font-size: 8px;
+        font-weight: 900;
+      }
+
+      .sectionTitle small {
+        display: block;
+
+        color: #96a2af;
+
+        font-size: 6px;
+        font-weight: 900;
+        letter-spacing: 0.9px;
+      }
+
+      .sectionTitle h2 {
+        margin: 2px 0 0;
+
+        color: #253950;
+
+        font-size: 15px;
+      }
+
+      .medicalGrid {
+        display: grid;
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+
+        margin-bottom: 8px;
+      }
+
+      .info {
+        min-height: 57px;
+
+        padding: 11px 12px;
+
+        border: 1px solid #e3e9f0;
+        border-radius: 10px;
+
+        background: #fbfcfe;
+      }
+
+      .info span {
+        display: block;
+
+        color: #8b98a6;
+
+        font-size: 8px;
+        font-weight: 700;
+      }
+
+      .info strong {
+        display: block;
+
+        margin-top: 4px;
+
+        color: #293e56;
+
+        font-size: 11px;
+      }
+
+      .info.emphasis {
+        background: #edf5ff;
+        border-color: #d7e6fa;
+      }
+
+      .info.emphasis strong {
+        color: #1266e9;
+        font-size: 15px;
+      }
+
+      .medicalRow {
+        display: grid;
+        grid-template-columns:
+          145px 1fr;
+
+        gap: 12px;
+
+        padding: 10px 12px;
+
+        border-top: 1px solid #edf0f4;
+      }
+
+      .medicalRow span {
+        color: #758496;
+
+        font-size: 9px;
+        font-weight: 800;
+      }
+
+      .medicalRow p {
+        margin: 0;
+
+        color: #344960;
+
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .contact {
+        padding: 14px;
+
+        border: 1px solid #e2e8ef;
+        border-radius: 12px;
+
+        background: #fbfcfe;
+      }
+
+      .contactIdentity {
         display: flex;
         align-items: center;
         gap: 11px;
       }
 
-      .cross {
-        width: 46px;
-        height: 46px;
+      .avatar {
+        width: 38px;
+        height: 38px;
+
         display: grid;
         place-items: center;
-        border: 1px solid #fecdca;
-        border-radius: 13px;
-        background: #fff1f0;
-        color: #d92d20;
-        font-size: 23px;
-        font-weight: 900;
+
+        flex: 0 0 38px;
+
+        border-radius: 10px;
+
+        background: #edf5ff;
+
+        font-size: 17px;
       }
 
-      .emergencyBadge span,
-      .emergencyBadge strong {
+      .contactIdentity strong {
         display: block;
+
+        color: #263b53;
+        font-size: 12px;
       }
 
-      .emergencyBadge span {
-        color: #155eef;
-        font-size: 15px;
-        font-weight: 900;
-      }
+      .contactIdentity p {
+        margin: 3px 0 0;
 
-      .emergencyBadge strong {
-        margin-top: 2px;
-        color: #d92d20;
+        color: #8794a2;
         font-size: 9px;
-        letter-spacing: 1.8px;
       }
 
-      .identityCard {
-        padding: 27px 24px;
-        border: 1px solid #e4e7ec;
-        border-top: 4px solid #155eef;
-        border-radius: 20px;
-        background: #ffffff;
-        box-shadow: 0 12px 35px rgba(16, 24, 40, 0.06);
-      }
-
-      .statusRow {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        color: #067647;
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .activeDot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #12b76a;
-      }
-
-      .identityCard h1 {
-        margin: 13px 0 8px;
-        font-size: 35px;
-        line-height: 1.1;
-        letter-spacing: -0.8px;
-      }
-
-      .country {
-        color: #475467;
-        font-size: 13px;
-        font-weight: 700;
-      }
-
-      .identityHelp {
-        margin: 15px 0 0;
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.55;
-      }
-
-      .emergencyCallCard {
-        margin-top: 16px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18px;
-        border: 1px solid #fecdca;
-        border-radius: 18px;
-        background: linear-gradient(
-          135deg,
-          #fff1f0,
-          #fff8f7
-        );
-      }
-
-      .smallLabel {
+      .contactIdentity span {
         display: block;
-        margin-bottom: 5px;
-        color: #b42318;
+
+        margin-top: 4px;
+
+        color: #1266e9;
+
         font-size: 10px;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-      }
-
-      .emergencyCallCard strong {
-        display: block;
-        color: #b42318;
-        font-size: 20px;
-      }
-
-      .emergencyCallCard p {
-        max-width: 380px;
-        margin: 6px 0 0;
-        color: #667085;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .emergencyCallButton {
-        min-width: 112px;
-        min-height: 58px;
-        padding: 0 17px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 13px;
-        background: #d92d20;
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 900;
-        box-shadow: 0 8px 20px rgba(217, 45, 32, 0.2);
-      }
-
-      .sectionHeading {
-        margin: 29px 0 11px;
-      }
-
-      .sectionHeading span {
-        color: #475467;
-        font-size: 11px;
-        font-weight: 900;
-        letter-spacing: 1.1px;
-        text-transform: uppercase;
-      }
-
-      .infoGrid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .infoCard {
-        min-height: 91px;
-        padding: 15px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border: 1px solid #e4e7ec;
-        border-radius: 15px;
-        background: #ffffff;
-      }
-
-      .infoIcon {
-        width: 41px;
-        height: 41px;
-        flex: 0 0 41px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        background: #f2f7ff;
-        font-size: 19px;
-      }
-
-      .infoCard span,
-      .infoCard strong {
-        display: block;
-      }
-
-      .infoCard span {
-        margin-bottom: 5px;
-        color: #667085;
-        font-size: 11px;
-      }
-
-      .infoCard strong {
-        color: #344054;
-        font-size: 14px;
-        line-height: 1.4;
-        word-break: break-word;
-      }
-
-      .importantCard {
-        margin-top: 10px;
-        padding: 18px;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        border: 1px solid #fedf89;
-        border-radius: 16px;
-        background: #fffaeb;
-      }
-
-      .importantIcon {
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        background: #f79009;
-        color: #ffffff;
-        font-size: 22px;
-        font-weight: 900;
-      }
-
-      .importantCard span,
-      .additionalCard span {
-        display: block;
-        color: #344054;
-        font-size: 12px;
-        font-weight: 900;
-      }
-
-      .importantCard p,
-      .additionalCard p {
-        margin: 7px 0 0;
-        color: #475467;
-        font-size: 14px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-      }
-
-      .additionalCard {
-        margin-top: 10px;
-        padding: 18px;
-        border: 1px solid #e4e7ec;
-        border-radius: 16px;
-        background: #ffffff;
-      }
-
-      .contactCard {
-        padding: 20px;
-        border: 1px solid #d6e4ff;
-        border-radius: 18px;
-        background: #ffffff;
-        box-shadow: 0 8px 24px rgba(16, 24, 40, 0.045);
-      }
-
-      .contactPerson {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-      }
-
-      .contactAvatar {
-        width: 50px;
-        height: 50px;
-        flex: 0 0 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: #f2f7ff;
-        font-size: 24px;
-      }
-
-      .contactPerson h2 {
-        margin: 0;
-        color: #101828;
-        font-size: 19px;
-      }
-
-      .contactPerson p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 12px;
-      }
-
-      .phoneText {
-        color: #155eef !important;
         font-weight: 800;
       }
 
       .contactActions {
-        margin-top: 18px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+
+        margin-top: 12px;
       }
 
-      .contactButton {
-        min-height: 61px;
-        padding: 8px;
+      .primaryAction,
+      .action {
+        min-height: 34px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0 13px;
+
+        border-radius: 9px;
+
+        font-size: 9px;
+        font-weight: 850;
+      }
+
+      .primaryAction {
+        background: #1266e9;
+        color: #ffffff;
+      }
+
+      .action {
+        background: #edf5ff;
+        color: #1266e9;
+      }
+
+      .secondarySection {
+        background: #fcfdff;
+      }
+
+      .emergencyFooter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+
+        padding: 17px 22px;
+
+        border-top: 1px solid #e4eaf1;
+
+        background: #f6f9fd;
+      }
+
+      .emergencyFooter strong {
+        display: block;
+
+        color: #253a52;
+
+        font-size: 11px;
+      }
+
+      .emergencyFooter p {
+        margin: 3px 0 0;
+
+        color: #8190a0;
+
+        font-size: 8px;
+      }
+
+      .call112 {
+        flex: 0 0 auto;
+
+        padding: 10px 14px;
+
+        border-radius: 10px;
+
+        background: #1266e9;
+        color: #ffffff;
+
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .privacy {
+        padding: 16px;
+
+        text-align: center;
+      }
+
+      .privacy strong {
+        color: #1266e9;
+
+        font-size: 8px;
+        letter-spacing: 1px;
+      }
+
+      .privacy p {
+        max-width: 420px;
+
+        margin: 5px auto 0;
+
+        color: #98a4b1;
+
+        font-size: 8px;
+        line-height: 1.5;
+      }
+
+      .state {
+        min-height: 100vh;
+
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 5px;
-        border: 1px solid #d6e4ff;
-        border-radius: 12px;
-        background: #f5f8ff;
-        color: #155eef;
-        text-decoration: none;
-        font-size: 12px;
-      }
 
-      .contactButton span {
-        font-size: 18px;
-      }
+        padding: 25px;
 
-      .contactButton.whatsapp {
-        border-color: #abefc6;
-        background: #ecfdf3;
-        color: #067647;
-      }
+        background: #f4f7fb;
 
-      .contactButton.chat {
-        border-color: #d9d6fe;
-        background: #f4f3ff;
-        color: #5925dc;
-      }
-
-      .contactNote {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid #eaecf0;
-        color: #667085;
-        font-size: 11px;
-        line-height: 1.5;
-      }
-
-      .safetyNote {
-        margin-top: 24px;
-        padding: 16px;
-        border: 1px solid #e4e7ec;
-        border-radius: 14px;
-        background: #f9fafb;
-      }
-
-      .safetyNote strong {
-        color: #344054;
-        font-size: 12px;
-      }
-
-      .safetyNote p {
-        margin: 6px 0 0;
-        color: #667085;
-        font-size: 11px;
-        line-height: 1.55;
-      }
-
-      .footer {
-        padding: 34px 0 0;
         text-align: center;
       }
 
-      .footer strong,
-      .footer span {
-        display: block;
+      .state .logo {
+        margin-bottom: 12px;
       }
 
-      .footer strong {
-        color: #155eef;
-        font-size: 13px;
+      .state h1 {
+        margin: 0;
+
+        color: #1d3149;
+        font-size: 22px;
       }
 
-      .footer span {
-        margin-top: 3px;
-        color: #98a2b3;
+      .state p {
+        color: #7f8c9a;
+        font-size: 11px;
+      }
+
+      .state a {
+        margin-top: 10px;
+
+        color: #1266e9;
+
         font-size: 10px;
+        font-weight: 800;
       }
 
-      .centerState {
-        width: calc(100% - 24px);
-        max-width: 520px;
-        margin: auto;
-        padding: 120px 0;
-        text-align: center;
-      }
-
-      .centerState h1,
-      .centerState h2 {
-        margin: 15px 0 8px;
-      }
-
-      .centerState p {
-        color: #667085;
-        font-size: 13px;
-        line-height: 1.55;
-      }
-
-      .loader {
-        width: 42px;
-        height: 42px;
-        margin: auto;
-        border: 4px solid #e4e7ec;
-        border-top-color: #155eef;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
+      @media (max-width: 560px) {
+        .header {
+          height: 59px;
+          padding: 0 14px;
         }
-      }
 
-      .errorIcon {
-        width: 62px;
-        height: 62px;
-        margin: auto;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: #fff1f0;
-        color: #d92d20;
-        font-size: 27px;
-        font-weight: 900;
-      }
-
-      .homeLink {
-        min-height: 48px;
-        margin-top: 18px;
-        padding: 0 18px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 11px;
-        background: #155eef;
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 900;
-      }
-
-      @media (max-width: 580px) {
         .container {
-          padding-top: 27px;
+          width: calc(100% - 16px);
+          padding-top: 12px;
         }
 
-        .identityCard {
-          padding: 22px 18px;
+        .profileCard {
+          border-radius: 14px;
         }
 
-        .identityCard h1 {
-          font-size: 29px;
+        .identity {
+          grid-template-columns:
+            58px 1fr auto;
+
+          gap: 10px;
+
+          padding: 15px;
         }
 
-        .emergencyCallCard {
-          align-items: stretch;
+        .photo,
+        .photoPlaceholder {
+          width: 58px;
+          height: 58px;
+
+          border-radius: 12px;
+        }
+
+        .photoPlaceholder {
+          font-size: 22px;
+        }
+
+        .identityText h1 {
+          font-size: 18px;
+        }
+
+        .call112Top {
+          min-width: 70px;
+          padding: 8px;
+        }
+
+        .call112Top > span {
+          display: none;
+        }
+
+        .call112Top strong {
+          font-size: 15px;
+        }
+
+        .alert {
+          margin-left: 15px;
+          margin-right: 15px;
+        }
+
+        .section {
+          padding: 17px 15px;
+        }
+
+        .medicalGrid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .medicalRow {
+          grid-template-columns: 1fr;
+          gap: 4px;
+
+          padding-left: 4px;
+          padding-right: 4px;
+        }
+
+        .emergencyFooter {
+          padding: 15px;
+
+          align-items: flex-start;
           flex-direction: column;
         }
 
-        .emergencyCallButton {
+        .call112 {
           width: 100%;
-        }
 
-        .infoGrid {
-          grid-template-columns: 1fr;
-        }
-
-        .contactActions {
-          grid-template-columns: 1fr;
-        }
-
-        .contactButton {
-          min-height: 52px;
-          flex-direction: row;
+          text-align: center;
         }
       }
     `}</style>
