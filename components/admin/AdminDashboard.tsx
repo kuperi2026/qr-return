@@ -32,10 +32,17 @@ export default function AdminDashboard({
     },
     {
       href: "/admin/search",
+      title: "გლობალური ძებნა",
+      description:
+        "მოძებნეთ მომხმარებლები, QR პროფილები, შეკვეთები და სხვა ჩანაწერები.",
+      icon: "🔎",
+    },
+    {
+      href: "/admin/qr-search",
       title: "QR ძებნა",
       description:
-        "მოძებნეთ ნებისმიერი QR პროფილი QR კოდით ან Tag Code-ით.",
-      icon: "🔎",
+        "მოძებნეთ კონკრეტული QR პროფილი QR კოდით ან Tag Code-ით.",
+      icon: "🔳",
     },
     {
       href: "/admin/users",
@@ -79,6 +86,13 @@ export default function AdminDashboard({
 
   const websiteItems: AdminSectionItem[] = [
     {
+      href: "/admin/chat",
+      title: "Admin Live Chat",
+      description:
+        "მომხმარებლებთან მიმდინარე Live Chat საუბრების ნახვა და პასუხების გაგზავნა.",
+      icon: "💬",
+    },
+    {
       href: "/admin/forms",
       title: "Registration Forms",
       description:
@@ -91,13 +105,6 @@ export default function AdminDashboard({
       description:
         "მთავარი გვერდის ტექსტები, სექციები, ღილაკები და სხვა კონტენტი.",
       icon: "🎨",
-    },
-    {
-      href: "/admin/media",
-      title: "Media",
-      description:
-        "პროდუქტის ფოტოების, ილუსტრაციების და სხვა მედიის მართვა.",
-      icon: "🖼️",
     },
     {
       href: "/admin/contact",
@@ -113,59 +120,8 @@ export default function AdminDashboard({
         "Live Chat, Support ტექსტები, ავტომატური პასუხები და Chat პარამეტრები.",
       icon: "💬",
     },
-    {
-      href: "/admin/system",
-      title: "System Settings",
-      description:
-        "QR RETURN-ის საერთო სისტემური პარამეტრები.",
-      icon: "⚙️",
-    },
   ];
 
-  const analyticsItems: AdminSectionItem[] = [
-    {
-      href: "/admin/analytics",
-      title: "Analytics",
-      description:
-        "რეგისტრაციები, QR Scan-ები, კატეგორიები, Orders და ზრდის სტატისტიკა.",
-      icon: "📊",
-    },
-    {
-      href: "/admin/activity",
-      title: "Activity Log",
-      description:
-        "Admin ცვლილებებისა და მნიშვნელოვანი სისტემური მოქმედებების ისტორია.",
-      icon: "🕒",
-    },
-    {
-      href: "/admin/admins",
-      title: "Admin Accounts",
-      description:
-        "Admin მომხმარებლები, როლები და მათი უფლებების მართვა.",
-      icon: "🛡️",
-    },
-    {
-      href: "/admin/security",
-      title: "Security",
-      description:
-        "წვდომები, უსაფრთხოების პარამეტრები და დაცული ფუნქციები.",
-      icon: "🔐",
-    },
-    {
-      href: "/admin/backup",
-      title: "Backup & Export",
-      description:
-        "QR RETURN მონაცემების ექსპორტი და სარეზერვო მართვა.",
-      icon: "☁️",
-    },
-    {
-      href: "/admin/help",
-      title: "Admin Help",
-      description:
-        "Admin Control Center-ის გამოყენების ინსტრუქცია.",
-      icon: "❓",
-    },
-  ];
 
   return (
     <main className="dashboard">
@@ -181,7 +137,7 @@ export default function AdminDashboard({
             <p>
               მართეთ QR RETURN-ის მომხმარებლები,
               QR პროფილები, Return Cases, Support,
-              Orders, კონტენტი და სისტემური პარამეტრები.
+              Orders, Live Chat, ფორმები და საიტის კონტენტი.
             </p>
           </div>
 
@@ -233,15 +189,8 @@ export default function AdminDashboard({
           <AdminSection
             eyebrow="WEBSITE & CONTENT"
             title="საიტისა და ფორმების მართვა"
-            description="მთავარი გვერდი, ფორმები, ფოტოები, Contact და Live Chat პარამეტრები."
+            description="მთავარი გვერდი, ფორმები, Contact და Live Chat-ის მართვა."
             items={websiteItems}
-          />
-
-          <AdminSection
-            eyebrow="SYSTEM & ANALYTICS"
-            title="ანალიტიკა და სისტემა"
-            description="სტატისტიკა, უსაფრთხოება, Admin Accounts და სისტემური მართვა."
-            items={analyticsItems}
           />
         </div>
       </div>
