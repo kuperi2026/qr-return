@@ -736,10 +736,7 @@ function Styles() {
       body {
         background: #f4f7fb;
         color: #1b3048;
-        font-family:
-          Arial,
-          Helvetica,
-          sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
       a {
@@ -755,14 +752,11 @@ function Styles() {
       }
 
       .header {
-        height: 64px;
-
+        height: 68px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         padding: 0 24px;
-
         background: #ffffff;
         border-bottom: 1px solid #e3e9f0;
       }
@@ -770,22 +764,18 @@ function Styles() {
       .brand {
         display: flex;
         align-items: center;
-        gap: 9px;
+        gap: 10px;
       }
 
       .logo {
-        width: 36px;
-        height: 36px;
-
+        width: 38px;
+        height: 38px;
         display: grid;
         place-items: center;
-
         border-radius: 9px;
-
         background: #1266e9;
         color: #ffffff;
-
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 900;
       }
 
@@ -796,40 +786,34 @@ function Styles() {
 
       .brand strong {
         color: #1c3048;
-        font-size: 13px;
+        font-size: 16px;
+        font-weight: 800;
       }
 
       .brand small {
-        margin-top: 2px;
-
-        color: #8794a3;
-        font-size: 7px;
+        margin-top: 3px;
+        color: #7f8d9d;
+        font-size: 11px;
         font-weight: 800;
-        letter-spacing: 1px;
+        letter-spacing: 0.8px;
       }
 
       .languages {
         display: flex;
         gap: 4px;
-
         padding: 3px;
-
         border-radius: 9px;
         background: #f0f4f9;
       }
 
       .languages button {
-        padding: 6px 9px;
-
+        padding: 7px 11px;
         border: 0;
         border-radius: 7px;
-
         background: transparent;
-        color: #778697;
-
-        font-size: 8px;
+        color: #667789;
+        font-size: 12px;
         font-weight: 900;
-
         cursor: pointer;
       }
 
@@ -841,32 +825,23 @@ function Styles() {
       .container {
         width: calc(100% - 24px);
         max-width: 680px;
-
         margin: 0 auto;
         padding: 24px 0 45px;
       }
 
       .profileCard {
         overflow: hidden;
-
         border: 1px solid #dfe6ee;
         border-radius: 18px;
-
         background: #ffffff;
-
-        box-shadow:
-          0 14px 45px
-          rgba(25, 48, 74, 0.06);
+        box-shadow: 0 14px 45px rgba(25, 48, 74, 0.06);
       }
 
       .identity {
         display: grid;
-        grid-template-columns:
-          72px 1fr auto;
+        grid-template-columns: 72px 1fr auto;
         align-items: center;
-
         gap: 15px;
-
         padding: 20px 22px;
       }
 
@@ -874,7 +849,6 @@ function Styles() {
       .photoPlaceholder {
         width: 72px;
         height: 72px;
-
         border-radius: 15px;
       }
 
@@ -885,56 +859,46 @@ function Styles() {
       .photoPlaceholder {
         display: grid;
         place-items: center;
-
         background: #edf5ff;
         color: #1266e9;
-
-        font-size: 27px;
+        font-size: 30px;
         font-weight: 900;
       }
 
       .emergencyLabel {
         color: #1266e9;
-
-        font-size: 8px;
+        font-size: 12px;
         font-weight: 900;
-        letter-spacing: 1.1px;
+        letter-spacing: 0.8px;
       }
 
       .identityText h1 {
-        margin: 5px 0 5px;
-
+        margin: 5px 0 6px;
         color: #1d3149;
-
-        font-size: 22px;
-        line-height: 1.1;
+        font-size: 24px;
+        line-height: 1.15;
       }
 
       .identityText p {
         margin: 0;
-
-        color: #8794a2;
-        font-size: 9px;
+        color: #748395;
+        font-size: 13px;
       }
 
       .call112Top {
-        min-width: 90px;
-
+        min-width: 96px;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 7px;
-
         padding: 10px 12px;
-
         border-radius: 11px;
-
         background: #1266e9;
         color: #ffffff;
       }
 
       .call112Top > span {
-        font-size: 15px;
+        font-size: 17px;
       }
 
       .call112Top small,
@@ -943,66 +907,54 @@ function Styles() {
       }
 
       .call112Top small {
-        font-size: 7px;
-        opacity: 0.85;
+        font-size: 11px;
+        font-weight: 700;
       }
 
       .call112Top strong {
         margin-top: 1px;
-        font-size: 17px;
+        font-size: 19px;
       }
 
       .alert {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
-
+        gap: 11px;
         margin: 0 22px 4px;
-        padding: 12px 14px;
-
+        padding: 13px 14px;
         border-radius: 11px;
-
         background: #f1f6fd;
         border: 1px solid #dbe8f9;
       }
 
       .alert > span {
-        width: 22px;
-        height: 22px;
-
+        width: 24px;
+        height: 24px;
         display: grid;
         place-items: center;
-
-        flex: 0 0 22px;
-
+        flex: 0 0 24px;
         border-radius: 50%;
-
         background: #1266e9;
         color: #ffffff;
-
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 900;
       }
 
       .alert strong {
         display: block;
-
         color: #263b53;
-        font-size: 10px;
+        font-size: 14px;
       }
 
       .alert p {
-        margin: 4px 0 0;
-
-        color: #637386;
-
-        font-size: 10px;
-        line-height: 1.5;
+        margin: 5px 0 0;
+        color: #53667b;
+        font-size: 13px;
+        line-height: 1.55;
       }
 
       .section {
         padding: 20px 22px;
-
         border-top: 1px solid #e7ecf2;
       }
 
@@ -1010,84 +962,65 @@ function Styles() {
         display: flex;
         align-items: flex-start;
         gap: 10px;
-
-        margin-bottom: 14px;
+        margin-bottom: 15px;
       }
 
       .sectionTitle > span {
-        width: 25px;
-        height: 25px;
-
+        width: 28px;
+        height: 28px;
         display: grid;
         place-items: center;
-
-        flex: 0 0 25px;
-
+        flex: 0 0 28px;
         border-radius: 7px;
-
         background: #edf5ff;
         color: #1266e9;
-
-        font-size: 8px;
+        font-size: 11px;
         font-weight: 900;
       }
 
       .sectionTitle small {
         display: block;
-
-        color: #96a2af;
-
-        font-size: 6px;
+        color: #8492a2;
+        font-size: 10px;
         font-weight: 900;
-        letter-spacing: 0.9px;
+        letter-spacing: 0.7px;
       }
 
       .sectionTitle h2 {
-        margin: 2px 0 0;
-
+        margin: 3px 0 0;
         color: #253950;
-
-        font-size: 15px;
+        font-size: 18px;
+        line-height: 1.25;
       }
 
       .medicalGrid {
         display: grid;
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
-
         margin-bottom: 8px;
       }
 
       .info {
-        min-height: 57px;
-
-        padding: 11px 12px;
-
+        min-height: 62px;
+        padding: 12px 13px;
         border: 1px solid #e3e9f0;
         border-radius: 10px;
-
         background: #fbfcfe;
       }
 
       .info span {
         display: block;
-
-        color: #8b98a6;
-
-        font-size: 8px;
+        color: #758496;
+        font-size: 12px;
         font-weight: 700;
       }
 
       .info strong {
         display: block;
-
-        margin-top: 4px;
-
+        margin-top: 5px;
         color: #293e56;
-
-        font-size: 11px;
+        font-size: 15px;
+        line-height: 1.35;
       }
 
       .info.emphasis {
@@ -1097,114 +1030,90 @@ function Styles() {
 
       .info.emphasis strong {
         color: #1266e9;
-        font-size: 15px;
+        font-size: 19px;
       }
 
       .medicalRow {
         display: grid;
-        grid-template-columns:
-          145px 1fr;
-
-        gap: 12px;
-
-        padding: 10px 12px;
-
+        grid-template-columns: 170px 1fr;
+        gap: 14px;
+        padding: 12px;
         border-top: 1px solid #edf0f4;
       }
 
       .medicalRow span {
-        color: #758496;
-
-        font-size: 9px;
+        color: #65768a;
+        font-size: 13px;
         font-weight: 800;
       }
 
       .medicalRow p {
         margin: 0;
-
         color: #344960;
-
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 14px;
+        line-height: 1.55;
       }
 
       .contact {
-        padding: 14px;
-
+        padding: 15px;
         border: 1px solid #e2e8ef;
         border-radius: 12px;
-
         background: #fbfcfe;
       }
 
       .contactIdentity {
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 12px;
       }
 
       .avatar {
-        width: 38px;
-        height: 38px;
-
+        width: 42px;
+        height: 42px;
         display: grid;
         place-items: center;
-
-        flex: 0 0 38px;
-
+        flex: 0 0 42px;
         border-radius: 10px;
-
         background: #edf5ff;
-
-        font-size: 17px;
+        font-size: 20px;
       }
 
       .contactIdentity strong {
         display: block;
-
         color: #263b53;
-        font-size: 12px;
+        font-size: 16px;
       }
 
       .contactIdentity p {
-        margin: 3px 0 0;
-
-        color: #8794a2;
-        font-size: 9px;
+        margin: 4px 0 0;
+        color: #748395;
+        font-size: 13px;
       }
 
       .contactIdentity span {
         display: block;
-
-        margin-top: 4px;
-
+        margin-top: 5px;
         color: #1266e9;
-
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 800;
       }
 
       .contactActions {
         display: flex;
         flex-wrap: wrap;
-        gap: 7px;
-
-        margin-top: 12px;
+        gap: 8px;
+        margin-top: 13px;
       }
 
       .primaryAction,
       .action {
-        min-height: 34px;
-
+        min-height: 38px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-
-        padding: 0 13px;
-
+        padding: 0 15px;
         border-radius: 9px;
-
-        font-size: 9px;
+        font-size: 13px;
         font-weight: 850;
       }
 
@@ -1226,82 +1135,62 @@ function Styles() {
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         gap: 15px;
-
-        padding: 17px 22px;
-
+        padding: 18px 22px;
         border-top: 1px solid #e4eaf1;
-
         background: #f6f9fd;
       }
 
       .emergencyFooter strong {
         display: block;
-
         color: #253a52;
-
-        font-size: 11px;
+        font-size: 15px;
       }
 
       .emergencyFooter p {
-        margin: 3px 0 0;
-
-        color: #8190a0;
-
-        font-size: 8px;
+        margin: 4px 0 0;
+        color: #718195;
+        font-size: 12px;
+        line-height: 1.45;
       }
 
       .call112 {
         flex: 0 0 auto;
-
-        padding: 10px 14px;
-
+        padding: 11px 16px;
         border-radius: 10px;
-
         background: #1266e9;
         color: #ffffff;
-
-        font-size: 9px;
+        font-size: 14px;
         font-weight: 900;
       }
 
       .privacy {
-        padding: 16px;
-
+        padding: 17px;
         text-align: center;
       }
 
       .privacy strong {
         color: #1266e9;
-
-        font-size: 8px;
-        letter-spacing: 1px;
+        font-size: 12px;
+        letter-spacing: 0.8px;
       }
 
       .privacy p {
-        max-width: 420px;
-
-        margin: 5px auto 0;
-
-        color: #98a4b1;
-
-        font-size: 8px;
+        max-width: 470px;
+        margin: 6px auto 0;
+        color: #7f8d9d;
+        font-size: 12px;
         line-height: 1.5;
       }
 
       .state {
         min-height: 100vh;
-
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-
         padding: 25px;
-
         background: #f4f7fb;
-
         text-align: center;
       }
 
@@ -1311,29 +1200,34 @@ function Styles() {
 
       .state h1 {
         margin: 0;
-
         color: #1d3149;
-        font-size: 22px;
+        font-size: 24px;
       }
 
       .state p {
-        color: #7f8c9a;
-        font-size: 11px;
+        color: #718195;
+        font-size: 14px;
       }
 
       .state a {
         margin-top: 10px;
-
         color: #1266e9;
-
-        font-size: 10px;
+        font-size: 13px;
         font-weight: 800;
       }
 
       @media (max-width: 560px) {
         .header {
-          height: 59px;
+          height: 62px;
           padding: 0 14px;
+        }
+
+        .brand strong {
+          font-size: 14px;
+        }
+
+        .brand small {
+          font-size: 10px;
         }
 
         .container {
@@ -1346,41 +1240,45 @@ function Styles() {
         }
 
         .identity {
-          grid-template-columns:
-            58px 1fr auto;
-
+          grid-template-columns: 60px 1fr auto;
           gap: 10px;
-
-          padding: 15px;
+          padding: 16px;
         }
 
         .photo,
         .photoPlaceholder {
-          width: 58px;
-          height: 58px;
-
+          width: 60px;
+          height: 60px;
           border-radius: 12px;
         }
 
-        .photoPlaceholder {
-          font-size: 22px;
+        .identityText h1 {
+          font-size: 20px;
         }
 
-        .identityText h1 {
-          font-size: 18px;
+        .emergencyLabel {
+          font-size: 10px;
+        }
+
+        .identityText p {
+          font-size: 12px;
         }
 
         .call112Top {
-          min-width: 70px;
-          padding: 8px;
+          min-width: 72px;
+          padding: 9px;
         }
 
         .call112Top > span {
           display: none;
         }
 
+        .call112Top small {
+          font-size: 10px;
+        }
+
         .call112Top strong {
-          font-size: 15px;
+          font-size: 17px;
         }
 
         .alert {
@@ -1389,7 +1287,11 @@ function Styles() {
         }
 
         .section {
-          padding: 17px 15px;
+          padding: 18px 15px;
+        }
+
+        .sectionTitle h2 {
+          font-size: 17px;
         }
 
         .medicalGrid {
@@ -1398,23 +1300,28 @@ function Styles() {
 
         .medicalRow {
           grid-template-columns: 1fr;
-          gap: 4px;
+          gap: 5px;
+          padding: 12px 4px;
+        }
 
-          padding-left: 4px;
-          padding-right: 4px;
+        .medicalRow span {
+          font-size: 13px;
+        }
+
+        .medicalRow p {
+          font-size: 14px;
         }
 
         .emergencyFooter {
-          padding: 15px;
-
+          padding: 16px;
           align-items: flex-start;
           flex-direction: column;
         }
 
         .call112 {
           width: 100%;
-
           text-align: center;
+          font-size: 14px;
         }
       }
     `}</style>
