@@ -28,6 +28,7 @@ export default function AdminDashboard({
       description:
         "ყველა მომხმარებლის Live Chat, Support შეტყობინებები, ფოტოები და ფაილები.",
       icon: "💬",
+      tone: "rose",
       badge: supportCount,
     },
     {
@@ -36,6 +37,7 @@ export default function AdminDashboard({
       description:
         "მოძებნეთ მომხმარებლები, QR პროფილები, შეკვეთები და სხვა ჩანაწერები.",
       icon: "🔎",
+      tone: "cyan",
     },
     {
       href: "/admin/qr-search",
@@ -43,6 +45,7 @@ export default function AdminDashboard({
       description:
         "მოძებნეთ კონკრეტული QR პროფილი QR კოდით ან Tag Code-ით.",
       icon: "🔳",
+      tone: "violet",
     },
     {
       href: "/admin/users",
@@ -50,6 +53,7 @@ export default function AdminDashboard({
       description:
         "ანგარიშები, დაკავშირებული QR პროფილები და მომხმარებლის ინფორმაცია.",
       icon: "👥",
+      tone: "blue",
       badge: totalUsers,
     },
     {
@@ -58,6 +62,7 @@ export default function AdminDashboard({
       description:
         "ძაღლი, კატა, გასაღები, საფულე, ჩანთა, ჩემოდანი და სხვა QR პროფილები.",
       icon: "🏷️",
+      tone: "emerald",
       badge: totalProfiles,
     },
     {
@@ -66,6 +71,7 @@ export default function AdminDashboard({
       description:
         "დაკარგულად მონიშნული QR პროფილები და მიმდინარე დაბრუნების პროცესები.",
       icon: "📍",
+      tone: "amber",
     },
     {
       href: "/admin/orders",
@@ -73,6 +79,7 @@ export default function AdminDashboard({
       description:
         "პროდუქტის შეკვეთები, მომხმარებლის ინფორმაცია, მისამართი, სტატუსი და Tracking.",
       icon: "🛒",
+      tone: "violet",
       badge: totalOrders,
     },
     {
@@ -81,6 +88,7 @@ export default function AdminDashboard({
       description:
         "QR Scan, Support, Location, Order და სისტემური შეტყობინებების მართვა.",
       icon: "🔔",
+      tone: "rose",
     },
   ];
 
@@ -91,6 +99,7 @@ export default function AdminDashboard({
       description:
         "მომხმარებლებთან მიმდინარე Live Chat საუბრების ნახვა და პასუხების გაგზავნა.",
       icon: "💬",
+      tone: "cyan",
     },
     {
       href: "/admin/forms",
@@ -98,6 +107,7 @@ export default function AdminDashboard({
       description:
         "სარეგისტრაციო ფორმების ველები, Required / Optional პარამეტრები და თანმიმდევრობა.",
       icon: "📝",
+      tone: "blue",
     },
     {
       href: "/admin/website",
@@ -105,6 +115,7 @@ export default function AdminDashboard({
       description:
         "მთავარი გვერდის ტექსტები, სექციები, ღილაკები და სხვა კონტენტი.",
       icon: "🎨",
+      tone: "violet",
     },
     {
       href: "/admin/contact",
@@ -112,6 +123,7 @@ export default function AdminDashboard({
       description:
         "QR RETURN-ის ტელეფონი, Email, WhatsApp და სხვა საკონტაქტო ინფორმაცია.",
       icon: "☎️",
+      tone: "emerald",
     },
     {
       href: "/admin/chat-settings",
@@ -119,6 +131,7 @@ export default function AdminDashboard({
       description:
         "Live Chat, Support ტექსტები, ავტომატური პასუხები და Chat პარამეტრები.",
       icon: "💬",
+      tone: "amber",
     },
   ];
 
@@ -127,7 +140,12 @@ export default function AdminDashboard({
     <main className="dashboard">
       <div className="shell">
         <header className="header">
-          <div>
+          <div className="headingGroup">
+            <div className="brandMark" aria-hidden="true">
+              <span className="brandCorners">⌗</span>
+            </div>
+
+            <div className="titleBlock">
             <span className="eyebrow">
               QR RETURN ADMIN
             </span>
@@ -139,6 +157,7 @@ export default function AdminDashboard({
               QR პროფილები, Return Cases, Support,
               Orders, Live Chat, ფორმები და საიტის კონტენტი.
             </p>
+            </div>
           </div>
 
           <a href="/">
@@ -199,7 +218,10 @@ export default function AdminDashboard({
         .dashboard {
           min-height: 100vh;
           padding: 54px 0 90px;
-          background: #f5f7f8;
+          background:
+            radial-gradient(circle at 8% 0%, rgba(18, 102, 233, 0.1), transparent 28%),
+            radial-gradient(circle at 92% 6%, rgba(109, 75, 209, 0.08), transparent 24%),
+            #f4f7fb;
         }
 
         .shell {
@@ -210,22 +232,55 @@ export default function AdminDashboard({
 
         .header {
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: space-between;
           gap: 30px;
+          padding: 27px 30px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 25px;
+          background:
+            radial-gradient(circle at 90% 10%, rgba(115, 162, 255, 0.28), transparent 34%),
+            linear-gradient(135deg, #0b2d65 0%, #115ccf 58%, #6b4fd8 125%);
+          box-shadow: 0 24px 60px rgba(19, 64, 130, 0.2);
+        }
+
+        .headingGroup {
+          display: flex;
+          align-items: center;
+          gap: 19px;
+        }
+
+        .brandMark {
+          flex: 0 0 auto;
+          width: 68px;
+          height: 68px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          border-radius: 20px;
+          color: #1266e9;
+          background: white;
+          box-shadow: 0 16px 30px rgba(5, 29, 69, 0.22);
+        }
+
+        .brandCorners {
+          font-size: 34px;
+          font-weight: 900;
+          line-height: 1;
         }
 
         .eyebrow {
-          color: #c84a50;
-          font-size: 8px;
+          color: #bcd6ff;
+          font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.5px;
         }
 
         h1 {
           margin: 8px 0 0;
-          color: #202b37;
-          font-size: clamp(35px, 4vw, 48px);
+          color: #ffffff;
+          font-size: clamp(31px, 4vw, 45px);
           font-weight: 760;
           letter-spacing: -2px;
         }
@@ -233,15 +288,19 @@ export default function AdminDashboard({
         .header p {
           max-width: 680px;
           margin: 10px 0 0;
-          color: #7b8691;
-          font-size: 10px;
+          color: rgba(255, 255, 255, 0.76);
+          font-size: 11px;
           line-height: 1.7;
         }
 
         .header a {
           flex: 0 0 auto;
-          color: #5f6b77;
-          font-size: 9px;
+          padding: 11px 14px;
+          border: 1px solid rgba(255, 255, 255, 0.24);
+          border-radius: 12px;
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.11);
+          font-size: 10px;
           font-weight: 800;
           text-decoration: none;
         }
@@ -251,7 +310,7 @@ export default function AdminDashboard({
           display: grid;
           grid-template-columns:
             repeat(5, minmax(0, 1fr));
-          gap: 10px;
+          gap: 14px;
         }
 
         .sections {
@@ -279,6 +338,21 @@ export default function AdminDashboard({
           .header {
             align-items: flex-start;
             flex-direction: column;
+            padding: 23px;
+          }
+
+          .headingGroup {
+            align-items: flex-start;
+          }
+
+          .brandMark {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+          }
+
+          .brandCorners {
+            font-size: 27px;
           }
 
           .stats {
@@ -316,11 +390,12 @@ function StatCard({
 
       <style jsx>{`
         .card {
-          min-height: 105px;
-          padding: 15px;
-          border: 1px solid #e0e5e8;
-          border-radius: 13px;
-          background: white;
+          min-height: 122px;
+          padding: 18px;
+          border: 1px solid #e0e8f2;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.94);
+          box-shadow: 0 14px 34px rgba(31, 55, 88, 0.07);
         }
 
         .top {
@@ -330,20 +405,26 @@ function StatCard({
         }
 
         .icon {
-          font-size: 15px;
+          width: 34px;
+          height: 34px;
+          display: grid;
+          place-items: center;
+          border-radius: 11px;
+          background: #edf4ff;
+          font-size: 18px;
         }
 
         .label {
           color: #89949e;
-          font-size: 7px;
+          font-size: 9px;
           font-weight: 900;
         }
 
         strong {
           display: block;
-          margin-top: 18px;
-          color: #293540;
-          font-size: 24px;
+          margin-top: 17px;
+          color: #14233a;
+          font-size: 28px;
           font-weight: 800;
         }
       `}</style>
