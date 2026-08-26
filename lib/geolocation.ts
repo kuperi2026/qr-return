@@ -39,9 +39,10 @@ export function getPreciseLocation({
       return;
     }
 
-    let bestPosition: GeolocationPosition | null = null;
+    const positions: GeolocationPosition[] = [];
     let settled = false;
     let watchId: number | null = null;
+    let timerId: number | null = null;
 
     const finish = (
       callback: () => void
@@ -53,54 +54,63 @@ export function getPreciseLocation({
         navigator.geolocation.clearWatch(watchId);
       }
 
-      window.clearTimeout(timerId);
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
+
       callback();
     };
 
-    const timerId = window.setTimeout(() => {
+    timerId = window.setTimeout(() => {
+      const bestPosition = positions
+        .slice()
+        .sort(
+          (a, b) =>
+            a.coords.accuracy -
+            b.coords.accuracy
+        )[0];
+
       const accuracy =
-        bestPosition?.coords.accuracy ?? null;
+        bestPosition?.coords.accuracy ??
+        null;
 
       if (
         bestPosition &&
-        Number.isFinite(accuracy) &&
+        accuracy !== null &&
         accuracy <= maximumAccuracy
       ) {
-        finish(() => resolve(bestPosition!));
+        finish(() =>
+          resolve(bestPosition)
+        );
         return;
       }
 
       finish(() =>
         reject(
-          new LocationAccuracyError(accuracy)
+          new LocationAccuracyError(
+            accuracy
+          )
         )
       );
     }, timeout);
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
-        const accuracy =
-          position.coords.accuracy;
+        const {
+          latitude,
+          longitude,
+          accuracy,
+        } = position.coords;
 
         if (
-          !Number.isFinite(
-            position.coords.latitude
-          ) ||
-          !Number.isFinite(
-            position.coords.longitude
-          ) ||
+          !Number.isFinite(latitude) ||
+          !Number.isFinite(longitude) ||
           !Number.isFinite(accuracy)
         ) {
           return;
         }
 
-        if (
-          !bestPosition ||
-          accuracy <
-            bestPosition.coords.accuracy
-        ) {
-          bestPosition = position;
-        }
+        positions.push(position);
 
         if (accuracy <= targetAccuracy) {
           finish(() => resolve(position));
@@ -110,7 +120,7 @@ export function getPreciseLocation({
         if (
           error.code ===
             error.PERMISSION_DENIED ||
-          !bestPosition
+          positions.length === 0
         ) {
           finish(() => reject(error));
         }
