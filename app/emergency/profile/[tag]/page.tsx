@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { maskTagCode } from "@/lib/maskTagCode";
 
 type Lang = "ka" | "en";
 
@@ -280,7 +281,7 @@ export default function EmergencyProfilePage() {
                 )}
 
                 <p>
-                  QR: <strong>{profile.tag_code}</strong>
+                  QR: <strong>{maskTagCode(profile.tag_code)}</strong>
                 </p>
               </div>
 

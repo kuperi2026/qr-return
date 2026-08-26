@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { maskTagCode } from "@/lib/maskTagCode";
 
 type FinderProfile = {
   tag_code: string;
@@ -340,7 +341,7 @@ export default function FinderPage() {
                 <p>
                   QR კოდი:{" "}
                   <strong>
-                    {profile.tag_code}
+                    {maskTagCode(profile.tag_code)}
                   </strong>
                 </p>
               </div>

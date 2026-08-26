@@ -13,6 +13,8 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
+import { maskTagCode } from "@/lib/maskTagCode";
+
 type PublicProfile = {
   id: string;
 
@@ -947,7 +949,7 @@ export default function PublicProfilePage() {
               </span>
 
               <strong>
-                {profile.tag_code}
+                {maskTagCode(profile.tag_code)}
               </strong>
 
               <p>

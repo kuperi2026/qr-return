@@ -2,6 +2,7 @@
 
 import EmergencyScanTracker from "@/components/EmergencyScanTracker";
 import EmergencyLocationShare from "@/components/EmergencyLocationShare";
+import { maskTagCode } from "@/lib/maskTagCode";
 
 type Privacy = {
   show_name?: boolean;
@@ -189,7 +190,7 @@ export default function EmergencyPublicProfile({
 
             {tagCode && (
               <span className="tag">
-                QR · {tagCode}
+                QR · {maskTagCode(tagCode)}
               </span>
             )}
           </div>
