@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  useEffect,
+  useState,
+} from "react";
+
+import { supabase } from "@/lib/supabase";
+
+import {
   Chevron,
   QRIcon,
 } from "./HomeIcons";
@@ -28,6 +35,66 @@ export default function HomeHeader({
   toggleMenu,
 }: Props) {
   const ka = language === "ka";
+  const [isAdmin, setIsAdmin] =
+    useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkAdmin(
+      userId?: string
+    ) {
+      if (!userId) {
+        if (active) {
+          setIsAdmin(false);
+        }
+
+        return;
+      }
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (active) {
+        setIsAdmin(
+          !error && Boolean(data)
+        );
+      }
+    }
+
+    async function loadAdminAccess() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      await checkAdmin(user?.id);
+    }
+
+    void loadAdminAccess();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        window.setTimeout(() => {
+          void checkAdmin(
+            session?.user.id
+          );
+        }, 0);
+      }
+    );
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <>
@@ -107,12 +174,14 @@ export default function HomeHeader({
 
             </div>
 
-            <a
-              href="/admin"
-              className="homeAdmin"
-            >
-              {ka ? "ადმინ პანელი" : "Admin"}
-            </a>
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="homeAdmin"
+              >
+                {ka ? "ადმინ პანელი" : "Admin"}
+              </a>
+            )}
 
             <a
               href="/login"
