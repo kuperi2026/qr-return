@@ -253,19 +253,19 @@ export default function AdminDashboard({
 
         .brandMark {
           flex: 0 0 auto;
-          width: 68px;
-          height: 68px;
+          width: 92px;
+          height: 92px;
           display: grid;
           place-items: center;
           border: 1px solid rgba(255, 255, 255, 0.25);
-          border-radius: 20px;
+          border-radius: 25px;
           color: #1266e9;
           background: white;
           box-shadow: 0 16px 30px rgba(5, 29, 69, 0.22);
         }
 
         .brandCorners {
-          font-size: 34px;
+          font-size: 48px;
           font-weight: 900;
           line-height: 1;
         }
@@ -392,10 +392,10 @@ function StatCard({
         .card {
           min-height: 122px;
           padding: 18px;
-          border: 1px solid #e0e8f2;
+          border: 1px solid rgba(255, 255, 255, 0.18);
           border-radius: 18px;
-          background: rgba(255, 255, 255, 0.94);
-          box-shadow: 0 14px 34px rgba(31, 55, 88, 0.07);
+          background: linear-gradient(145deg, #0c55c6, #1266e9 58%, #4c83ed);
+          box-shadow: 0 14px 34px rgba(18, 102, 233, 0.19);
         }
 
         .top {
@@ -405,17 +405,17 @@ function StatCard({
         }
 
         .icon {
-          width: 34px;
-          height: 34px;
+          width: 48px;
+          height: 48px;
           display: grid;
           place-items: center;
           border-radius: 11px;
-          background: #edf4ff;
-          font-size: 18px;
+          background: #ffffff;
+          font-size: 25px;
         }
 
         .label {
-          color: #89949e;
+          color: rgba(255, 255, 255, 0.82);
           font-size: 9px;
           font-weight: 900;
         }
@@ -423,8 +423,8 @@ function StatCard({
         strong {
           display: block;
           margin-top: 17px;
-          color: #14233a;
-          font-size: 28px;
+          color: #ffffff;
+          font-size: 32px;
           font-weight: 800;
         }
       `}</style>
