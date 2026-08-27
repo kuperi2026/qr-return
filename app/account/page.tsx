@@ -29,6 +29,15 @@ type OwnerData = {
   phone: string;
 };
 
+type EmergencyProfileSummary = {
+  id: string;
+  tag_code: string;
+  first_name: string;
+  last_name: string;
+  active: boolean;
+  photo_url: string | null;
+};
+
 function createSupabase() {
   const url =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -94,6 +103,9 @@ export default function AccountPage() {
 
   const [profiles, setProfiles] =
     useState<ItemProfile[]>([]);
+
+  const [emergencyProfiles, setEmergencyProfiles] =
+    useState<EmergencyProfileSummary[]>([]);
 
   const [isSystemAdmin, setIsSystemAdmin] =
     useState(false);
@@ -334,6 +346,24 @@ export default function AccountPage() {
           setProfiles(
             (profileData ||
               []) as ItemProfile[]
+          );
+        }
+
+        const {
+          data: emergencyData,
+          error: emergencyError,
+        } = await supabase
+          .from("emergency_profiles")
+          .select("id,tag_code,first_name,last_name,active,photo_url")
+          .eq("owner_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (emergencyError) {
+          console.error("Emergency profiles load:", emergencyError);
+          if (mounted) setEmergencyProfiles([]);
+        } else if (mounted) {
+          setEmergencyProfiles(
+            (emergencyData || []) as EmergencyProfileSummary[]
           );
         }
       } catch (error) {
@@ -636,11 +666,11 @@ export default function AccountPage() {
               </div>
 
               <span className="count">
-                {profiles.length} პროფილი
+                {profiles.length + emergencyProfiles.length} პროფილი
               </span>
             </div>
 
-            {profiles.length === 0 ? (
+            {profiles.length === 0 && emergencyProfiles.length === 0 ? (
               <section className="emptyState">
                 <div className="emptyIcon">
                   QR
@@ -820,6 +850,55 @@ export default function AccountPage() {
                     );
                   }
                 )}
+
+                {emergencyProfiles.map((profile) => {
+                  const fullName =
+                    `${profile.first_name || ""} ${profile.last_name || ""}`.trim() ||
+                    "Emergency ID";
+
+                  return (
+                    <article className="profileCard" key={`emergency-${profile.id}`}>
+                      <div className="photoArea">
+                        {profile.photo_url ? (
+                          <img src={profile.photo_url} alt={fullName} />
+                        ) : (
+                          <div className="placeholder">✚</div>
+                        )}
+
+                        <span className={profile.active ? "status active" : "status"}>
+                          <i />
+                          {profile.active ? "აქტიური" : "შენახული"}
+                        </span>
+                      </div>
+
+                      <div className="profileContent">
+                        <span className="type">✚ Emergency ID</span>
+                        <h3>{fullName}</h3>
+
+                        <div className="tag">
+                          <span>QR CODE</span>
+                          <strong>{profile.tag_code || "—"}</strong>
+                        </div>
+
+                        <div className="profileActions">
+                          <a
+                            href={`/emergency/profile/${encodeURIComponent(profile.tag_code)}`}
+                            className="viewButton"
+                          >
+                            პროფილის ნახვა
+                          </a>
+
+                          <a
+                            href={`/emergency/edit/${profile.id}`}
+                            className="editButton"
+                          >
+                            რედაქტირება
+                          </a>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
 
                 <a
                   href="/register"
