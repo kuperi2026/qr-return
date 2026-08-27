@@ -25,6 +25,19 @@ type PublicProfile = {
   tag_code: string;
   item_type: string;
   item_name: string | null;
+  pet_type: string | null;
+
+  colour: string | null;
+  sex: string | null;
+  date_of_birth: string | null;
+  weight: number | null;
+
+  brand: string | null;
+  model: string | null;
+  size: string | null;
+  material: string | null;
+  distinctive_features: string | null;
+  lost_seen_location: string | null;
 
   owner_first_name: string | null;
   owner_last_name: string | null;
@@ -198,6 +211,19 @@ export default function PublicProfilePage() {
               tag_code,
               item_type,
               item_name,
+              pet_type,
+
+              colour,
+              sex,
+              date_of_birth,
+              weight,
+
+              brand,
+              model,
+              size,
+              material,
+              distinctive_features,
+              lost_seen_location,
 
               owner_first_name,
               owner_last_name,
@@ -708,6 +734,109 @@ export default function PublicProfilePage() {
                 </p>
               </section>
             )}
+
+          {(profile.colour ||
+            profile.sex ||
+            profile.date_of_birth ||
+            profile.weight !== null ||
+            profile.brand ||
+            profile.model ||
+            profile.size ||
+            profile.material ||
+            profile.distinctive_features ||
+            profile.lost_seen_location) && (
+            <section className="detailsCard">
+              <div className="sectionTitle">
+                <span>
+                  PROFILE DETAILS
+                </span>
+
+                <h2>
+                  {profile.item_type === "dog" ||
+                  profile.item_type === "cat" ||
+                  profile.pet_type
+                    ? "ცხოველის ინფორმაცია"
+                    : "ნივთის ინფორმაცია"}
+                </h2>
+              </div>
+
+              <div className="detailsList">
+                {profile.colour && (
+                  <InfoRow
+                    title="ფერი"
+                    text={profile.colour}
+                  />
+                )}
+
+                {profile.sex && (
+                  <InfoRow
+                    title="სქესი"
+                    text={profile.sex}
+                  />
+                )}
+
+                {profile.date_of_birth && (
+                  <InfoRow
+                    title="დაბადების თარიღი"
+                    text={profile.date_of_birth}
+                  />
+                )}
+
+                {profile.weight !== null && (
+                  <InfoRow
+                    title="წონა"
+                    text={String(profile.weight)}
+                  />
+                )}
+
+                {profile.brand && (
+                  <InfoRow
+                    title="ბრენდი"
+                    text={profile.brand}
+                  />
+                )}
+
+                {profile.model && (
+                  <InfoRow
+                    title="მოდელი"
+                    text={profile.model}
+                  />
+                )}
+
+                {profile.size && (
+                  <InfoRow
+                    title="ზომა"
+                    text={profile.size}
+                  />
+                )}
+
+                {profile.material && (
+                  <InfoRow
+                    title="მასალა"
+                    text={profile.material}
+                  />
+                )}
+
+                {profile.distinctive_features && (
+                  <InfoRow
+                    title="განმასხვავებელი ნიშნები"
+                    text={
+                      profile.distinctive_features
+                    }
+                  />
+                )}
+
+                {profile.lost_seen_location && (
+                  <InfoRow
+                    title="ბოლო ნანახი ადგილი"
+                    text={
+                      profile.lost_seen_location
+                    }
+                  />
+                )}
+              </div>
+            </section>
+          )}
 
           <section className="locationCard">
             <div className="locationIcon">
