@@ -83,13 +83,13 @@ export default function AdminCard({
         }
 
         .iconWrap {
-          width: 58px;
-          height: 58px;
+          width: 82px;
+          height: 82px;
           display: grid;
           place-items: center;
           border: 1px solid var(--soft-border);
-          border-radius: 18px;
-          background: var(--soft);
+          border-radius: 22px;
+          background: #ffffff;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.9),
             0 10px 24px var(--shadow);
@@ -97,7 +97,7 @@ export default function AdminCard({
 
         .icon {
           display: block;
-          font-size: 27px;
+          font-size: 42px;
           line-height: 1;
           filter: saturate(1.08);
           transform: translateY(-1px);
@@ -112,8 +112,8 @@ export default function AdminCard({
           justify-content: center;
           border: 1px solid var(--soft-border);
           border-radius: 999px;
-          color: var(--accent);
-          background: var(--soft);
+          color: #0b56c5;
+          background: #ffffff;
           font-size: 10px;
           font-weight: 900;
         }
@@ -124,8 +124,8 @@ export default function AdminCard({
 
         h3 {
           margin: 0;
-          color: #14233a;
-          font-size: 17px;
+          color: #ffffff;
+          font-size: 19px;
           font-weight: 850;
           letter-spacing: -0.45px;
         }
@@ -133,8 +133,8 @@ export default function AdminCard({
         p {
           min-height: 48px;
           margin: 9px 0 0;
-          color: #69788c;
-          font-size: 11px;
+          color: rgba(255, 255, 255, 0.82);
+          font-size: 12px;
           line-height: 1.62;
         }
 
@@ -144,8 +144,8 @@ export default function AdminCard({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-top: 1px solid #e9eef5;
-          color: var(--accent);
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          color: #ffffff;
           font-size: 10px;
           font-weight: 900;
         }
@@ -156,8 +156,8 @@ export default function AdminCard({
           display: grid;
           place-items: center;
           border-radius: 10px;
-          color: white;
-          background: var(--gradient);
+          color: #1266e9;
+          background: #ffffff;
           font-size: 16px;
           transition: transform 0.2s ease;
         }
@@ -187,7 +187,7 @@ export default function AdminCard({
 function CardStyles() {
   return (
     <style jsx>{`
-      .card {
+      .adminCard {
         --accent: #1266e9;
         --soft: #edf4ff;
         --soft-border: #d8e7ff;
@@ -195,16 +195,16 @@ function CardStyles() {
         --gradient: linear-gradient(135deg, #1266e9, #4f8fff);
 
         position: relative;
-        min-height: 245px;
-        padding: 22px;
+        min-height: 285px;
+        padding: 25px;
         display: block;
         overflow: hidden;
-        border: 1px solid #e1e8f0;
-        border-radius: 21px;
-        color: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 23px;
+        color: #ffffff;
         background:
-          radial-gradient(circle at 100% 0, var(--soft), transparent 38%),
-          #ffffff;
+          radial-gradient(circle at 100% 0, rgba(255, 255, 255, 0.2), transparent 40%),
+          var(--gradient);
         text-decoration: none;
         box-shadow:
           0 18px 45px rgba(31, 55, 88, 0.075),
@@ -257,7 +257,7 @@ function CardStyles() {
 
       .adminCard:hover {
         transform: translateY(-6px);
-        border-color: var(--soft-border);
+        border-color: rgba(255, 255, 255, 0.42);
         box-shadow:
           0 25px 58px rgba(31, 55, 88, 0.14),
           0 8px 20px var(--shadow);

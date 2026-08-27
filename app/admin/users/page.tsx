@@ -119,8 +119,8 @@ export default function AdminUsersPage() {
         data: profileRows,
         error: profileError,
       } = await supabase
-        .from("profiles")
-        .select("*")
+        .from("owner_accounts")
+        .select("user_id, email, first_name, last_name, phone, created_at")
         .order("created_at", {
           ascending: false,
         });
@@ -150,6 +150,14 @@ export default function AdminUsersPage() {
         );
       }
 
+      const { data: emergencyRows, error: emergencyError } = await supabase
+        .from("emergency_profiles")
+        .select("owner_id");
+
+      if (emergencyError) {
+        console.error("Emergency count load error:", emergencyError);
+      }
+
       const counts: Record<string, number> = {};
 
       for (const item of itemRows || []) {
@@ -159,11 +167,21 @@ export default function AdminUsersPage() {
           (counts[item.owner_id] || 0) + 1;
       }
 
+      for (const item of emergencyRows || []) {
+        if (!item.owner_id) continue;
+        counts[item.owner_id] = (counts[item.owner_id] || 0) + 1;
+      }
+
       const rows: UserRow[] = (
-        (profileRows || []) as UserProfile[]
+        (profileRows || [])
       ).map((profile) => ({
-        ...profile,
-        qrCount: counts[profile.id] || 0,
+        id: profile.user_id,
+        email: profile.email,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        phone: profile.phone,
+        created_at: profile.created_at,
+        qrCount: counts[profile.user_id] || 0,
       }));
 
       setUsers(rows);
