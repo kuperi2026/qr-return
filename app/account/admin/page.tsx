@@ -23,6 +23,41 @@ type AdminRecord = {
   active: boolean;
 };
 
+type OwnerProfile = {
+  id: number;
+  item_name: string | null;
+  item_type: string | null;
+  pet_type: string | null;
+  tag_code: string | null;
+  photo: string | null;
+};
+
+type ProfileAccess = {
+  selected: boolean;
+  can_view_profiles: boolean;
+  can_edit_profiles: boolean;
+  can_manage_lost_mode: boolean;
+  can_manage_visibility: boolean;
+  can_manage_contacts: boolean;
+  can_manage_location: boolean;
+  can_manage_additional_contact: boolean;
+  can_use_live_chat: boolean;
+};
+
+type ProfilePermission = Exclude<keyof ProfileAccess, "selected">;
+
+const emptyProfileAccess = (): ProfileAccess => ({
+  selected: false,
+  can_view_profiles: true,
+  can_edit_profiles: false,
+  can_manage_lost_mode: false,
+  can_manage_visibility: false,
+  can_manage_contacts: false,
+  can_manage_location: false,
+  can_manage_additional_contact: false,
+  can_use_live_chat: false,
+});
+
 export default function AdminPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
@@ -40,6 +75,8 @@ export default function AdminPage() {
   const [canUseLiveChat, setCanUseLiveChat] = useState(false);
 
   const [active, setActive] = useState(true);
+  const [profiles, setProfiles] = useState<OwnerProfile[]>([]);
+  const [profileAccess, setProfileAccess] = useState<Record<number, ProfileAccess>>({});
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,6 +149,37 @@ export default function AdminPage() {
 
         setActive(record.active);
       }
+
+      const { data: profileRows, error: profilesError } = await supabase
+        .from("item")
+        .select("id, item_name, item_type, pet_type, tag_code, photo")
+        .eq("owner_id", user.id)
+        .order("id", { ascending: true });
+
+      if (profilesError) throw profilesError;
+
+      const ownerProfiles = (profileRows ?? []) as OwnerProfile[];
+      setProfiles(ownerProfiles);
+
+      const nextAccess: Record<number, ProfileAccess> = {};
+      ownerProfiles.forEach((profile) => {
+        nextAccess[profile.id] = emptyProfileAccess();
+      });
+
+      if (data) {
+        const { data: accessRows, error: accessError } = await supabase
+          .from("owner_admin_profile_access")
+          .select("item_id, can_view_profiles, can_edit_profiles, can_manage_lost_mode, can_manage_visibility, can_manage_contacts, can_manage_location, can_manage_additional_contact, can_use_live_chat")
+          .eq("owner_admin_id", data.id);
+
+        if (accessError) throw accessError;
+
+        (accessRows ?? []).forEach((row) => {
+          nextAccess[row.item_id] = { ...row, selected: true } as ProfileAccess;
+        });
+      }
+
+      setProfileAccess(nextAccess);
     } catch (err) {
       setError(
         err instanceof Error
@@ -181,6 +249,8 @@ export default function AdminPage() {
         updated_at: new Date().toISOString(),
       };
 
+      let savedAdmin: AdminRecord;
+
       if (admin) {
         const { data, error: updateError } = await supabase
           .from("owner_admins")
@@ -194,7 +264,8 @@ export default function AdminPage() {
           throw updateError;
         }
 
-        setAdmin(data as AdminRecord);
+        savedAdmin = data as AdminRecord;
+        setAdmin(savedAdmin);
       } else {
         const { data, error: insertError } = await supabase
           .from("owner_admins")
@@ -206,7 +277,34 @@ export default function AdminPage() {
           throw insertError;
         }
 
-        setAdmin(data as AdminRecord);
+        savedAdmin = data as AdminRecord;
+        setAdmin(savedAdmin);
+      }
+
+      const selectedAccess = profiles
+        .filter((profile) => profileAccess[profile.id]?.selected)
+        .map((profile) => ({
+          owner_admin_id: savedAdmin.id,
+          owner_id: user.id,
+          item_id: profile.id,
+          ...profileAccess[profile.id],
+          selected: undefined,
+          updated_at: new Date().toISOString(),
+        }));
+
+      const { error: clearAccessError } = await supabase
+        .from("owner_admin_profile_access")
+        .delete()
+        .eq("owner_admin_id", savedAdmin.id);
+
+      if (clearAccessError) throw clearAccessError;
+
+      if (selectedAccess.length > 0) {
+        const cleanAccess = selectedAccess.map(({ selected: _selected, ...row }) => row);
+        const { error: accessSaveError } = await supabase
+          .from("owner_admin_profile_access")
+          .insert(cleanAccess);
+        if (accessSaveError) throw accessSaveError;
       }
 
       setSuccess(
@@ -276,6 +374,13 @@ export default function AdminPage() {
       setCanUseLiveChat(false);
 
       setActive(true);
+      setProfileAccess((current) => {
+        const cleared: Record<number, ProfileAccess> = {};
+        Object.keys(current).forEach((id) => {
+          cleared[Number(id)] = emptyProfileAccess();
+        });
+        return cleared;
+      });
 
       setSuccess(
         ka
@@ -293,6 +398,13 @@ export default function AdminPage() {
     } finally {
       setRemoving(false);
     }
+  }
+
+  function updateProfileAccess(itemId: number, change: Partial<ProfileAccess>) {
+    setProfileAccess((current) => ({
+      ...current,
+      [itemId]: { ...(current[itemId] ?? emptyProfileAccess()), ...change },
+    }));
   }
 
   if (loading) {
@@ -428,6 +540,85 @@ export default function AdminPage() {
                   : "Enter the email of the person you want to authorize."}
               </small>
             </label>
+          </section>
+
+          <section className="card">
+            <div className="permissionsHeader">
+              <div>
+                <span className="eyebrow">{ka ? "პროდუქტები" : "PRODUCTS"}</span>
+                <h2>{ka ? "რომელ პროფილებზე ექნება წვდომა?" : "Which profiles can the Admin access?"}</h2>
+                <p>
+                  {ka
+                    ? `აირჩიეთ ერთი, რამდენიმე ან ყველა. ამჟამად გაქვთ ${profiles.length} QR პროფილი.`
+                    : `Choose one, several or all. You currently have ${profiles.length} QR profiles.`}
+                </p>
+              </div>
+              {profiles.length > 0 && (
+                <button
+                  type="button"
+                  className="selectAllButton"
+                  onClick={() => {
+                    const allSelected = profiles.every((profile) => profileAccess[profile.id]?.selected);
+                    const next: Record<number, ProfileAccess> = {};
+                    profiles.forEach((profile) => {
+                      next[profile.id] = {
+                        ...(profileAccess[profile.id] ?? emptyProfileAccess()),
+                        selected: !allSelected,
+                      };
+                    });
+                    setProfileAccess((current) => ({ ...current, ...next }));
+                  }}
+                >
+                  {profiles.every((profile) => profileAccess[profile.id]?.selected)
+                    ? ka ? "ყველას მოხსნა" : "Clear all"
+                    : ka ? "ყველას არჩევა" : "Select all"}
+                </button>
+              )}
+            </div>
+
+            {profiles.length === 0 ? (
+              <div className="emptyProductList">
+                {ka ? "ჯერ არცერთი QR პროფილი არ გაქვთ." : "You do not have any QR profiles yet."}
+              </div>
+            ) : (
+              <div className="productAccessList">
+                {profiles.map((profile) => {
+                  const current = profileAccess[profile.id] ?? emptyProfileAccess();
+                  const title = profile.item_name || (ka ? "უსახელო პროფილი" : "Unnamed profile");
+                  const icon = profile.pet_type === "dog" ? "🐶" : profile.pet_type === "cat" ? "🐱" : "🏷️";
+
+                  return (
+                    <article className={`productAccessCard ${current.selected ? "selected" : ""}`} key={profile.id}>
+                      <button
+                        type="button"
+                        className="productSelector"
+                        onClick={() => updateProfileAccess(profile.id, { selected: !current.selected })}
+                      >
+                        <span className="productIcon">{profile.photo ? <img src={profile.photo} alt="" /> : icon}</span>
+                        <span className="productIdentity">
+                          <strong>{title}</strong>
+                          <small>{profile.tag_code ? `QR · ${profile.tag_code}` : (ka ? "QR პროფილი" : "QR profile")}</small>
+                        </span>
+                        <span className="productCheck">{current.selected ? "✓" : "+"}</span>
+                      </button>
+
+                      {current.selected && (
+                        <div className="profilePermissionGrid">
+                          <MiniPermission label={ka ? "ნახვა" : "View"} value={current.can_view_profiles} locked onChange={() => {}} />
+                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} disabled={!canEditProfiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
+                          <MiniPermission label="Lost Mode" value={current.can_manage_lost_mode} disabled={!canManageLostMode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
+                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} disabled={!canManageVisibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
+                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} disabled={!canManageContacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
+                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} disabled={!canManageLocation} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
+                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} disabled={!canManageAdditionalContact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
+                          <MiniPermission label="Live Chat" value={current.can_use_live_chat} disabled={!canUseLiveChat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           <section className="card">
@@ -1145,6 +1336,160 @@ export default function AdminPage() {
           color: #027a48;
         }
 
+        .selectAllButton {
+          padding: 10px 14px;
+          border: 1px solid #c7d7fe;
+          border-radius: 10px;
+          background: #eef4ff;
+          color: #175cd3;
+          font-size: 12px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .productAccessList {
+          display: grid;
+          gap: 12px;
+          margin-top: 22px;
+        }
+
+        .productAccessCard {
+          overflow: hidden;
+          border: 1px solid #e4e7ec;
+          border-radius: 16px;
+          background: #fff;
+          transition: 0.2s ease;
+        }
+
+        .productAccessCard.selected {
+          border-color: #84adff;
+          box-shadow: 0 8px 24px rgba(20, 101, 232, 0.1);
+        }
+
+        .productSelector {
+          width: 100%;
+          padding: 14px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border: 0;
+          background: transparent;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .productIcon {
+          width: 48px;
+          height: 48px;
+          flex: 0 0 48px;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          border-radius: 13px;
+          background: #f2f4f7;
+          font-size: 23px;
+        }
+
+        .productIcon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .productIdentity {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .productIdentity strong,
+        .productIdentity small {
+          display: block;
+        }
+
+        .productIdentity small {
+          margin-top: 4px;
+          color: #667085;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .productCheck {
+          width: 30px;
+          height: 30px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          background: #eef4ff;
+          color: #1465e8;
+          font-weight: 900;
+        }
+
+        .selected .productCheck {
+          background: #1465e8;
+          color: white;
+        }
+
+        .profilePermissionGrid {
+          padding: 14px;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          border-top: 1px solid #eaecf0;
+          background: #f8faff;
+        }
+
+        .miniPermission {
+          padding: 10px 11px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          border: 1px solid #e4e7ec;
+          border-radius: 10px;
+          background: white;
+          color: #344054;
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .miniPermission.on {
+          border-color: #84adff;
+          background: #eef4ff;
+          color: #175cd3;
+        }
+
+        .miniPermission:disabled {
+          opacity: 0.48;
+          cursor: not-allowed;
+        }
+
+        .miniPermissionDot {
+          width: 18px;
+          height: 18px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          background: #eaecf0;
+          font-size: 10px;
+        }
+
+        .miniPermission.on .miniPermissionDot {
+          background: #1465e8;
+          color: white;
+        }
+
+        .emptyProductList {
+          margin-top: 20px;
+          padding: 22px;
+          border-radius: 12px;
+          background: #f2f4f7;
+          color: #667085;
+          text-align: center;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
         .statePage {
           min-height: 100vh;
           display: grid;
@@ -1181,9 +1526,39 @@ export default function AdminPage() {
           .removeButton {
             width: 100%;
           }
+
+          .profilePermissionGrid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </main>
+  );
+}
+
+function MiniPermission({
+  label,
+  value,
+  onChange,
+  disabled = false,
+  locked = false,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+  disabled?: boolean;
+  locked?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`miniPermission ${value ? "on" : ""}`}
+      onClick={() => !locked && onChange(!value)}
+      disabled={disabled || locked}
+    >
+      <span>{label}</span>
+      <span className="miniPermissionDot">{value ? "✓" : "−"}</span>
+    </button>
   );
 }
 
