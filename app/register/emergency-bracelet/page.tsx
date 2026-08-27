@@ -496,16 +496,7 @@ export default function EmergencyBraceletPage() {
         );
       }
 
-      if (!qrTag) {
-        throw new Error(
-          `QR კოდი "${normalizedTag}" სისტემაში ვერ მოიძებნა. ტესტისთვის გამოიყენეთ EMG-TEST001.`
-        );
-      }
-
-      if (
-        qrTag.status !==
-        "unassigned"
-      ) {
+      if (qrTag && qrTag.status !== "unassigned") {
         throw new Error(
           "ეს QR კოდი უკვე გამოყენებულია."
         );
@@ -513,7 +504,7 @@ export default function EmergencyBraceletPage() {
 
       const qrCategory =
         String(
-          qrTag.category || ""
+          qrTag?.category || ""
         )
           .trim()
           .toLowerCase();
@@ -801,53 +792,34 @@ export default function EmergencyBraceletPage() {
          ACTIVATE QR
       ===================================================== */
 
-      const {
-        data: updatedTag,
-        error: tagUpdateError,
-      } =
-        await supabase
-          .from("qr_tags")
-          .update({
-            status:
-              "activated",
+      if (qrTag) {
+        const {
+          data: updatedTag,
+          error: tagUpdateError,
+        } =
+          await supabase
+            .from("qr_tags")
+            .update({
+              status: "activated",
+              assigned_profile_id: profile.id,
+              assigned_owner_id: ownerId,
+              activated_at: new Date().toISOString(),
+            })
+            .eq("id", qrTag.id)
+            .eq("status", "unassigned")
+            .select("id")
+            .maybeSingle();
 
-            assigned_profile_id:
-              profile.id,
+        if (tagUpdateError || !updatedTag) {
+          await supabase
+            .from("emergency_profiles")
+            .delete()
+            .eq("id", profile.id);
 
-            assigned_owner_id:
-              ownerId,
-
-            activated_at:
-              new Date().toISOString(),
-          })
-          .eq(
-            "id",
-            qrTag.id
-          )
-          .eq(
-            "status",
-            "unassigned"
-          )
-          .select("id")
-          .maybeSingle();
-
-      if (
-        tagUpdateError ||
-        !updatedTag
-      ) {
-        await supabase
-          .from(
-            "emergency_profiles"
-          )
-          .delete()
-          .eq(
-            "id",
-            profile.id
+          throw new Error(
+            "QR კოდის გააქტიურება ვერ მოხერხდა."
           );
-
-        throw new Error(
-          "QR კოდის გააქტიურება ვერ მოხერხდა."
-        );
+        }
       }
 
       alert(
@@ -855,7 +827,7 @@ export default function EmergencyBraceletPage() {
       );
 
       window.location.href =
-        "/dashboard";
+        "/account";
     } catch (error) {
       console.error(
         "CREATE EMERGENCY PROFILE ERROR:",
@@ -977,7 +949,7 @@ export default function EmergencyBraceletPage() {
           </a>
 
           <a
-            href="/dashboard"
+            href="/account"
             className="topButton"
           >
             ← ჩემი პროფილები
