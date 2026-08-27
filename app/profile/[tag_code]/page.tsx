@@ -46,7 +46,7 @@ type PublicProfile = {
 
   photo: string | null;
   medical_info: string | null;
-  behaviour_note: string | null;
+  behavior_note: string | null;
   description: string | null;
   finder_message: string | null;
 
@@ -232,7 +232,7 @@ export default function PublicProfilePage() {
 
               photo,
               medical_info,
-              behaviour_note,
+              behavior_note,
               description,
               finder_message,
 
@@ -969,7 +969,7 @@ export default function PublicProfilePage() {
           {(profile.show_medical_info &&
             profile.medical_info) ||
           (profile.show_behaviour_note &&
-            profile.behaviour_note) ||
+            profile.behavior_note) ||
           (profile.show_description &&
             profile.description) ? (
             <section className="detailsCard">
@@ -998,12 +998,12 @@ export default function PublicProfilePage() {
                 {profile
                   .show_behaviour_note &&
                   profile
-                    .behaviour_note && (
+                    .behavior_note && (
                     <InfoRow
                       title="ქცევის შესახებ ინფორმაცია"
                       text={
                         profile
-                          .behaviour_note
+                          .behavior_note
                       }
                     />
                   )}
