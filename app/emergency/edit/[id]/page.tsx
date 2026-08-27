@@ -7,41 +7,6 @@ import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
 
-type Privacy = {
-  show_name?: boolean;
-  show_date_of_birth?: boolean;
-  show_blood_type?: boolean;
-  show_allergies?: boolean;
-  show_medications?: boolean;
-  show_medical_info?: boolean;
-  show_emergency_contact?: boolean;
-  show_secondary_contact?: boolean;
-  show_doctor?: boolean;
-  allow_call?: boolean;
-  allow_email?: boolean;
-};
-
-type EmergencyData = {
-  first_name?: string | null;
-  last_name?: string | null;
-  date_of_birth?: string | null;
-  blood_type?: string | null;
-  allergies?: string | null;
-  medications?: string | null;
-  medical_info?: string | null;
-
-  emergency_contact_name?: string | null;
-  emergency_contact_phone?: string | null;
-
-  secondary_contact_name?: string | null;
-  secondary_contact_phone?: string | null;
-
-  doctor_name?: string | null;
-  doctor_phone?: string | null;
-
-  privacy?: Privacy;
-};
-
 type FormState = {
   tagCode: string;
 
@@ -188,18 +153,37 @@ export default function EmergencyEditPage() {
         data,
         error: loadError,
       } = await supabase
-        .from("item")
+        .from("emergency_profiles")
         .select(
           `
             id,
             owner_id,
             tag_code,
-            item_type,
-            item_name,
-            description,
+            first_name,
+            last_name,
+            date_of_birth,
+            blood_type,
+            allergies,
+            medications,
+            medical_conditions,
+            medical_note,
+            emergency_contact_name,
+            emergency_contact_phone,
+            second_contact_name,
+            second_contact_phone,
             owner_email,
-            finder_message,
-            active
+            emergency_message,
+            active,
+            show_name,
+            show_date_of_birth,
+            show_blood_type,
+            show_allergies,
+            show_medications,
+            show_medical_conditions,
+            show_emergency_contact,
+            show_second_contact,
+            emergency_contact_mobile_enabled,
+            live_chat_enabled
           `
         )
         .eq("id", id)
@@ -218,75 +202,48 @@ export default function EmergencyEditPage() {
         );
       }
 
-      if (data.item_type !== "emergency") {
-        throw new Error(
-          ka
-            ? "ეს პროფილი Emergency ID არ არის."
-            : "This profile is not an Emergency ID."
-        );
-      }
-
-      let emergency: EmergencyData = {};
-
-      if (data.description) {
-        try {
-          emergency = JSON.parse(
-            data.description
-          ) as EmergencyData;
-        } catch {
-          emergency = {};
-        }
-      }
-
-      const privacy =
-        emergency.privacy || {};
-
       setForm({
         tagCode:
           data.tag_code || "",
 
         firstName:
-          emergency.first_name || "",
+          data.first_name || "",
 
         lastName:
-          emergency.last_name || "",
+          data.last_name || "",
 
         dateOfBirth:
-          emergency.date_of_birth || "",
+          data.date_of_birth || "",
 
         bloodType:
-          emergency.blood_type || "",
+          data.blood_type || "",
 
         allergies:
-          emergency.allergies || "",
+          data.allergies || "",
 
         medications:
-          emergency.medications || "",
+          data.medications || "",
 
         medicalInfo:
-          emergency.medical_info || "",
+          data.medical_conditions || "",
 
         primaryName:
-          emergency.emergency_contact_name ||
-          "",
+          data.emergency_contact_name || "",
 
         primaryPhone:
-          emergency.emergency_contact_phone ||
-          "",
+          data.emergency_contact_phone || "",
 
         secondaryName:
-          emergency.secondary_contact_name ||
-          "",
+          data.second_contact_name || "",
 
         secondaryPhone:
-          emergency.secondary_contact_phone ||
-          "",
+          data.second_contact_phone || "",
 
         doctorName:
-          emergency.doctor_name || "",
+          data.medical_note || "",
 
         doctorPhone:
-          emergency.doctor_phone || "",
+          "",
 
         ownerEmail:
           data.owner_email ||
@@ -294,46 +251,46 @@ export default function EmergencyEditPage() {
           "",
 
         finderMessage:
-          data.finder_message || "",
+          data.emergency_message || "",
 
         active:
           data.active !== false,
 
         showName:
-          privacy.show_name !== false,
+          data.show_name !== false,
 
         showDateOfBirth:
-          privacy.show_date_of_birth !==
+          data.show_date_of_birth !==
           false,
 
         showBloodType:
-          privacy.show_blood_type !== false,
+          data.show_blood_type !== false,
 
         showAllergies:
-          privacy.show_allergies !== false,
+          data.show_allergies !== false,
 
         showMedications:
-          privacy.show_medications !== false,
+          data.show_medications !== false,
 
         showMedicalInfo:
-          privacy.show_medical_info !== false,
+          data.show_medical_conditions !== false,
 
         showPrimaryContact:
-          privacy.show_emergency_contact !==
+          data.show_emergency_contact !==
           false,
 
         showSecondaryContact:
-          privacy.show_secondary_contact ===
+          data.show_second_contact ===
           true,
 
         showDoctor:
-          privacy.show_doctor === true,
+          Boolean(data.medical_note),
 
         allowCall:
-          privacy.allow_call !== false,
+          data.emergency_contact_mobile_enabled !== false,
 
         allowEmail:
-          privacy.allow_email === true,
+          data.live_chat_enabled === true,
       });
     } catch (err) {
       console.error(err);
@@ -401,104 +358,56 @@ export default function EmergencyEditPage() {
         return;
       }
 
-      const emergencyData: EmergencyData = {
-        first_name:
-          form.firstName.trim(),
-
-        last_name:
-          form.lastName.trim(),
-
-        date_of_birth:
-          form.dateOfBirth || null,
-
-        blood_type:
-          form.bloodType.trim() || null,
-
-        allergies:
-          form.allergies.trim() || null,
-
-        medications:
-          form.medications.trim() || null,
-
-        medical_info:
-          form.medicalInfo.trim() || null,
-
-        emergency_contact_name:
-          form.primaryName.trim() || null,
-
-        emergency_contact_phone:
-          form.primaryPhone.trim(),
-
-        secondary_contact_name:
-          form.secondaryName.trim() || null,
-
-        secondary_contact_phone:
-          form.secondaryPhone.trim() || null,
-
-        doctor_name:
-          form.doctorName.trim() || null,
-
-        doctor_phone:
-          form.doctorPhone.trim() || null,
-
-        privacy: {
-          show_name:
-            form.showName,
-
-          show_date_of_birth:
-            form.showDateOfBirth,
-
-          show_blood_type:
-            form.showBloodType,
-
-          show_allergies:
-            form.showAllergies,
-
-          show_medications:
-            form.showMedications,
-
-          show_medical_info:
-            form.showMedicalInfo,
-
-          show_emergency_contact:
-            form.showPrimaryContact,
-
-          show_secondary_contact:
-            form.showSecondaryContact,
-
-          show_doctor:
-            form.showDoctor,
-
-          allow_call:
-            form.allowCall,
-
-          allow_email:
-            form.allowEmail,
-        },
-      };
-
       const {
         error: updateError,
       } = await supabase
-        .from("item")
+        .from("emergency_profiles")
         .update({
-          item_name:
-            `${form.firstName.trim()} ${form.lastName.trim()}`,
-
-          description:
-            JSON.stringify(emergencyData),
+          first_name: form.firstName.trim(),
+          last_name: form.lastName.trim(),
+          date_of_birth: form.dateOfBirth || null,
+          blood_type: form.bloodType.trim() || null,
+          allergies: form.allergies.trim() || null,
+          medications: form.medications.trim() || null,
+          medical_conditions: form.medicalInfo.trim() || null,
+          medical_note: form.showDoctor
+            ? [form.doctorName.trim(), form.doctorPhone.trim()]
+                .filter(Boolean)
+                .join(" · ") || null
+            : null,
+          emergency_contact_enabled: true,
+          emergency_contact_name: form.primaryName.trim() || null,
+          emergency_contact_phone: form.primaryPhone.trim(),
+          second_contact_enabled: Boolean(
+            form.secondaryName.trim() || form.secondaryPhone.trim()
+          ),
+          second_contact_name: form.secondaryName.trim() || null,
+          second_contact_phone: form.secondaryPhone.trim() || null,
 
           owner_email:
             form.ownerEmail.trim() ||
             user.email ||
             null,
 
-          finder_message:
+          emergency_message:
             form.finderMessage.trim() ||
             null,
 
           active:
             form.active,
+
+          show_name: form.showName,
+          show_date_of_birth: form.showDateOfBirth,
+          show_blood_type: form.showBloodType,
+          show_allergies: form.showAllergies,
+          show_medications: form.showMedications,
+          show_medical_conditions: form.showMedicalInfo,
+          show_medical_note: form.showDoctor,
+          show_emergency_contact: form.showPrimaryContact,
+          show_second_contact: form.showSecondaryContact,
+          emergency_contact_mobile_enabled: form.allowCall,
+          live_chat_enabled: form.allowEmail,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", id)
         .eq("owner_id", user.id);
