@@ -335,7 +335,7 @@ export default function FinderPage() {
                 <p>
                   QR კოდი:{" "}
                   <strong>
-                    {profile.tag_code}
+                    {maskTagCode(profile.tag_code)}
                   </strong>
                 </p>
               </div>
@@ -578,7 +578,7 @@ export default function FinderPage() {
                 {profile.live_chat_enabled ===
                   true && (
                   <a
-                    href="/support"
+                    href={`/chat/finder/${encodeURIComponent(profile.tag_code)}`}
                     className="secondaryButton"
                   >
                     Live Chat
@@ -1367,4 +1367,10 @@ function Styles() {
       }
     `}</style>
   );
+}
+
+
+function maskTagCode(tagCode: string) {
+  const normalized = tagCode.trim();
+  return `••••${normalized.slice(-4)}`;
 }
