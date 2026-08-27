@@ -68,7 +68,7 @@ export default function AccountHeader({
         </Link>
 
         <Link
-          href="/account/messages"
+          href="/account/chat"
           className="navButton"
         >
           <span className="icon">

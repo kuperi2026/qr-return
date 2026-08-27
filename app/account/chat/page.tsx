@@ -103,10 +103,13 @@ export default function OwnerChatInboxPage() {
       return;
     }
 
-    await loadThreads();
+    const requestedSession =
+      new URLSearchParams(window.location.search).get("session") || "";
+
+    await loadThreads(requestedSession);
   }
 
-  async function loadThreads() {
+  async function loadThreads(requestedSession = "") {
     setLoading(true);
 
     const { data, error: rpcError } = await supabase.rpc(
@@ -121,7 +124,15 @@ export default function OwnerChatInboxPage() {
 
       setThreads(result);
 
-      if (!selected && result.length > 0) {
+      const requested = requestedSession
+        ? result.find(
+            (thread) => thread.finder_session === requestedSession
+          )
+        : null;
+
+      if (requested) {
+        setSelected(requested);
+      } else if (!selected && result.length > 0) {
         setSelected(result[0]);
       }
 

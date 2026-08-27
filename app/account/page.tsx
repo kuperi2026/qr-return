@@ -219,7 +219,7 @@ export default function AccountPage() {
                 "first_name,last_name,email,phone"
               )
               .eq(
-                "id",
+                "user_id",
                 currentUser.id
               )
               .maybeSingle();

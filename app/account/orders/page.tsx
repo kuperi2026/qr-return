@@ -311,7 +311,7 @@ export default function AccountOrdersPage() {
               : "Store"}
           </Link>
 
-          <Link href="/account/messages">
+          <Link href="/account/chat">
             💬 Live Chat
           </Link>
 

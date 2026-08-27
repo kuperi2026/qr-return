@@ -630,10 +630,6 @@ export default function AdminDashboardPage() {
                             <span>📞</span>
                           )}
 
-                          {profile.whatsapp_enabled && (
-                            <span>💬</span>
-                          )}
-
                           {profile.live_chat_enabled && (
                             <span>🗨️</span>
                           )}

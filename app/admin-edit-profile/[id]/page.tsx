@@ -157,7 +157,6 @@ export default function AdminEditProfilePage() {
     useState(false);
 
   const [phoneEnabled, setPhoneEnabled] = useState(true);
-  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [liveChatEnabled, setLiveChatEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
 
@@ -332,7 +331,6 @@ export default function AdminEditProfilePage() {
       setShowAdditionalContact(Boolean(p.show_additional_contact));
 
       setPhoneEnabled(p.phone_enabled !== false);
-      setWhatsappEnabled(Boolean(p.whatsapp_enabled));
       setLiveChatEnabled(p.live_chat_enabled !== false);
       setLocationEnabled(Boolean(p.location_sharing_enabled));
 
@@ -467,8 +465,8 @@ export default function AdminEditProfilePage() {
           "admin_update_contact_methods",
           {
             profile_id: String(profile.id),
-            new_phone_enabled: phoneEnabled,
-            new_whatsapp_enabled: whatsappEnabled,
+            new_phone_enabled: true,
+            new_whatsapp_enabled: false,
             new_live_chat_enabled: liveChatEnabled,
           }
         );
@@ -1199,13 +1197,6 @@ export default function AdminEditProfilePage() {
               />
 
               <Toggle
-                label="💬 WhatsApp"
-                value={whatsappEnabled}
-                setValue={setWhatsappEnabled}
-                disabled={!access.can_manage_contacts}
-              />
-
-              <Toggle
                 label="💬 Live Chat"
                 value={liveChatEnabled}
                 setValue={setLiveChatEnabled}
@@ -1468,7 +1459,6 @@ export default function AdminEditProfilePage() {
                 {lostMode && (
                   <div className="contactPreview">
                     {phoneEnabled && <span>📞 Phone</span>}
-                    {whatsappEnabled && <span>💬 WhatsApp</span>}
                     {liveChatEnabled && <span>💬 Live Chat</span>}
                     {locationEnabled && <span>📍 Location</span>}
                   </div>
