@@ -95,6 +95,9 @@ export default function AccountPage() {
   const [profiles, setProfiles] =
     useState<ItemProfile[]>([]);
 
+  const [isSystemAdmin, setIsSystemAdmin] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -162,6 +165,28 @@ export default function AccountPage() {
 
         const currentUser =
           session.user;
+
+        const {
+          data: adminRecord,
+          error: adminError,
+        } = await supabase
+          .from("admin_users")
+          .select("user_id")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if (adminError) {
+          console.error(
+            "Admin check:",
+            adminError
+          );
+        }
+
+        if (mounted) {
+          setIsSystemAdmin(
+            Boolean(adminRecord)
+          );
+        }
 
         /*
          * OWNER DATA
@@ -477,6 +502,15 @@ export default function AccountPage() {
           </a>
 
           <div className="headerActions">
+            {isSystemAdmin && (
+              <a
+                href="/admin"
+                className="adminButton"
+              >
+                Admin
+              </a>
+            )}
+
             <a
               href="/"
               className="homeButton"
@@ -994,6 +1028,7 @@ export default function AccountPage() {
           gap: 9px;
         }
 
+        .adminButton,
         .homeButton,
         .logoutButton {
           min-height:
@@ -1028,6 +1063,18 @@ export default function AccountPage() {
 
           text-decoration:
             none;
+        }
+
+        .adminButton {
+          border:
+            1px solid
+            #ffffff;
+
+          color:
+            #0647c8;
+
+          background:
+            #ffffff;
         }
 
         .homeButton {
@@ -2090,6 +2137,23 @@ export default function AccountPage() {
           .brand small {
             display:
               none;
+          }
+
+          .headerActions {
+            gap: 5px;
+          }
+
+          .adminButton,
+          .homeButton,
+          .logoutButton {
+            min-height:
+              35px;
+
+            padding:
+              0 8px;
+
+            font-size:
+              10px;
           }
 
           .shell {
