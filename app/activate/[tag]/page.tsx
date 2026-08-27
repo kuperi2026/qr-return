@@ -151,11 +151,36 @@ export default function ScanPage() {
       }
 
       if (!data) {
-        setError(
-          ka
-            ? "ეს QR კოდი QR RETURN-ის სისტემაში არ არსებობს."
-            : "This QR code does not exist in QR RETURN."
-        );
+        const {
+          data: existingProfile,
+          error: profileError,
+        } = await supabase
+          .from("item")
+          .select("tag_code")
+          .ilike("tag_code", tag)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error(profileError);
+        }
+
+        if (existingProfile) {
+          router.replace(
+            `/profile/${encodeURIComponent(tag)}`
+          );
+          return;
+        }
+
+        setQr({
+          id: `test:${tag}`,
+          tag_code: tag,
+          qr_type: "test",
+          category: null,
+          status: "unclaimed",
+          owner_id: null,
+          item_id: null,
+          emergency_profile_id: null,
+        });
 
         setLoading(false);
         return;
@@ -251,11 +276,24 @@ export default function ScanPage() {
     }
 
     /*
-     * თუ უკვე შესულია:
+     * სატესტო კოდი წინასწარ inventory-ში
+     * ჩაწერას არ საჭიროებს.
      */
+    if (qr.qr_type === "test") {
+      router.push(
+        `/register?tag_code=${encodeURIComponent(
+          qr.tag_code
+        )}&test=1`
+      );
+      return;
+    }
 
+    /*
+     * რეალური inventory QR გადადის დაცულ
+     * claim/activation flow-ზე.
+     */
     router.push(
-      `/activate/${encodeURIComponent(
+      `/app/activate/${encodeURIComponent(
         qr.tag_code
       )}`
     );
