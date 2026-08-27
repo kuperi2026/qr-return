@@ -50,12 +50,25 @@ type QrProfile = {
   location_sharing_enabled: boolean | null;
 };
 
+type ProfileAccess = {
+  item_id: number;
+  can_view_profiles: boolean;
+  can_edit_profiles: boolean;
+  can_manage_lost_mode: boolean;
+  can_manage_visibility: boolean;
+  can_manage_contacts: boolean;
+  can_manage_location: boolean;
+  can_manage_additional_contact: boolean;
+  can_use_live_chat: boolean;
+};
+
 export default function AdminDashboardPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
   const [access, setAccess] = useState<AdminAccess | null>(null);
   const [owner, setOwner] = useState<OwnerAccount | null>(null);
   const [profiles, setProfiles] = useState<QrProfile[]>([]);
+  const [profileAccess, setProfileAccess] = useState<Record<string, ProfileAccess>>({});
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -115,6 +128,20 @@ export default function AdminDashboardPage() {
       }
 
       setAccess(adminAccess);
+
+      const { data: assignmentRows, error: assignmentError } = await supabase
+        .from("owner_admin_profile_access")
+        .select("item_id, can_view_profiles, can_edit_profiles, can_manage_lost_mode, can_manage_visibility, can_manage_contacts, can_manage_location, can_manage_additional_contact, can_use_live_chat")
+        .eq("owner_admin_id", adminAccess.admin_record_id)
+        .eq("can_view_profiles", true);
+
+      if (assignmentError) throw assignmentError;
+
+      const assignments: Record<string, ProfileAccess> = {};
+      ((assignmentRows ?? []) as ProfileAccess[]).forEach((row) => {
+        assignments[String(row.item_id)] = row;
+      });
+      setProfileAccess(assignments);
 
       const {
         data: ownerData,
@@ -179,7 +206,7 @@ export default function AdminDashboardPage() {
   }
 
   async function toggleLostMode(profile: QrProfile) {
-    if (!access?.can_manage_lost_mode) {
+    if (!access?.can_manage_lost_mode || !profileAccess[String(profile.id)]?.can_manage_lost_mode) {
       setError(
         ka
           ? "Owner-ს Lost Mode-ის მართვის უფლება არ მოუცია."
@@ -546,6 +573,7 @@ export default function AdminDashboardPage() {
               <div className="profilesGrid">
                 {profiles.map((profile) => {
                   const type = getType(profile);
+                  const assigned = profileAccess[String(profile.id)];
 
                   return (
                     <article
@@ -616,7 +644,7 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div className="actions">
-                          {access.can_edit_profiles && (
+                          {access.can_edit_profiles && assigned?.can_edit_profiles && (
                             <a
                               href={`/admin-edit-profile/${profile.id}`}
                             >
@@ -627,7 +655,7 @@ export default function AdminDashboardPage() {
                             </a>
                           )}
 
-                          {access.can_manage_lost_mode && (
+                          {access.can_manage_lost_mode && assigned?.can_manage_lost_mode && (
                             <button
                               type="button"
                               className={
@@ -663,6 +691,7 @@ export default function AdminDashboardPage() {
                           )}
 
                           {access.can_use_live_chat &&
+                            assigned?.can_use_live_chat &&
                             profile.live_chat_enabled &&
                             profile.tag_code && (
                               <a

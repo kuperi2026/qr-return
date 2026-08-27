@@ -229,7 +229,16 @@ export default function AdminEditProfilePage() {
         );
       }
 
-      if (!currentAccess.can_view_profiles) {
+      const { data: assignedAccess, error: assignedError } = await supabase
+        .from("owner_admin_profile_access")
+        .select("can_view_profiles, can_edit_profiles, can_manage_lost_mode, can_manage_visibility, can_manage_contacts, can_manage_location, can_manage_additional_contact, can_use_live_chat")
+        .eq("owner_admin_id", currentAccess.admin_record_id)
+        .eq("item_id", rawId)
+        .maybeSingle();
+
+      if (assignedError) throw assignedError;
+
+      if (!assignedAccess || !currentAccess.can_view_profiles || !assignedAccess.can_view_profiles) {
         throw new Error(
           ka
             ? "QR პროფილების ნახვის უფლება არ გაქვთ."
@@ -237,7 +246,19 @@ export default function AdminEditProfilePage() {
         );
       }
 
-      setAccess(currentAccess);
+      const effectiveAccess: AdminAccess = {
+        ...currentAccess,
+        can_view_profiles: currentAccess.can_view_profiles && assignedAccess.can_view_profiles,
+        can_edit_profiles: currentAccess.can_edit_profiles && assignedAccess.can_edit_profiles,
+        can_manage_lost_mode: currentAccess.can_manage_lost_mode && assignedAccess.can_manage_lost_mode,
+        can_manage_visibility: currentAccess.can_manage_visibility && assignedAccess.can_manage_visibility,
+        can_manage_contacts: currentAccess.can_manage_contacts && assignedAccess.can_manage_contacts,
+        can_manage_location: currentAccess.can_manage_location && assignedAccess.can_manage_location,
+        can_manage_additional_contact: currentAccess.can_manage_additional_contact && assignedAccess.can_manage_additional_contact,
+        can_use_live_chat: currentAccess.can_use_live_chat && assignedAccess.can_use_live_chat,
+      };
+
+      setAccess(effectiveAccess);
 
       const {
         data,
