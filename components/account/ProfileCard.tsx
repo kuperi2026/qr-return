@@ -169,7 +169,7 @@ export default function ProfileCard({
           {item.tagCode && (
             <Link
               className="primaryButton"
-              href={`/scan/${encodeURIComponent(
+              href={`/profile/${encodeURIComponent(
                 item.tagCode
               )}`}
               target="_blank"

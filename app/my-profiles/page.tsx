@@ -31,6 +31,10 @@ type ItemRow = {
 
   item_name: string | null;
 
+  photo: string | null;
+  scan_count: number | null;
+  last_scanned_at: string | null;
+
   active: boolean | null;
 };
 
@@ -164,6 +168,9 @@ export default function MyProfilesPage() {
                 item_type,
                 pet_type,
                 item_name,
+                photo,
+                scan_count,
+                last_scanned_at,
                 active
               `
             )
@@ -330,27 +337,21 @@ export default function MyProfilesPage() {
           profile
             .item_name,
 
-        /*
-          PHOTO COLUMN ჯერ არ გვაქვს
-          item ცხრილში.
-        */
         photo:
-          null,
+          profile
+            .photo,
 
         active:
           profile
             .active,
 
-        /*
-          SCAN FIELDS მოგვიანებით
-          დავამატებთ, როცა ზუსტ
-          column სახელებს გადავამოწმებთ.
-        */
         scanCount:
-          0,
+          profile
+            .scan_count,
 
         lastScannedAt:
-          null,
+          profile
+            .last_scanned_at,
 
         lastScanLatitude:
           null,
