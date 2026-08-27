@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 const PRODUCTS = [
   {
     type: "dog",
@@ -40,6 +42,23 @@ const PRODUCTS = [
 ] as const;
 
 export default function RegisterPage() {
+  const [tagQuery, setTagQuery] = useState("");
+
+  useEffect(() => {
+    const tagCode = new URLSearchParams(
+      window.location.search
+    )
+      .get("tag_code")
+      ?.trim()
+      .toUpperCase();
+
+    if (tagCode) {
+      setTagQuery(
+        `?tag_code=${encodeURIComponent(tagCode)}&test=1`
+      );
+    }
+  }, []);
+
   return (
     <>
       <main className="page">
@@ -72,7 +91,7 @@ export default function RegisterPage() {
 
           <div className="selectionLayout">
             <a
-              href="/register/emergency-bracelet"
+              href={`/register/emergency-bracelet${tagQuery}`}
               className="emergencyCard"
             >
               <div className="emergencyTop">
@@ -124,7 +143,7 @@ export default function RegisterPage() {
               {PRODUCTS.map((product) => (
                 <a
                   key={product.type}
-                  href={`/register-item/${product.type}`}
+                  href={`/register-item/${product.type}${tagQuery}`}
                   className="productCard"
                 >
                   <div className="productTop">
