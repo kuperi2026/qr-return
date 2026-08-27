@@ -753,6 +753,16 @@ export default function RegistrationFlow({
         owner_id:
           user.id,
 
+        owner_first_name:
+          draft
+            .ownerFirstName
+            .trim(),
+
+        owner_last_name:
+          draft
+            .ownerLastName
+            .trim(),
+
         owner_phone:
           draft
             .ownerPhone
@@ -891,6 +901,12 @@ export default function RegistrationFlow({
             .trim() ||
           null,
 
+        show_owner_name:
+          true,
+
+        show_owner_phone:
+          true,
+
         show_email:
           draft
             .showEmail,
@@ -914,6 +930,10 @@ export default function RegistrationFlow({
             ? draft
                 .showBehaviourNote
             : false,
+
+        show_lost_seen_location:
+          draft
+            .showLostLocation,
 
         show_finder_message:
           draft
