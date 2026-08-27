@@ -107,8 +107,11 @@ export default function AdminPage() {
       const [
         profilesResult,
         activeResult,
+        emergencyProfilesResult,
+        activeEmergencyResult,
         usersResult,
         ordersResult,
+        supportResult,
       ] = await Promise.all([
         supabase
           .from("item")
@@ -135,7 +138,7 @@ export default function AdminPage() {
           ),
 
         supabase
-          .from("profiles")
+          .from("emergency_profiles")
           .select(
             "id",
             {
@@ -143,6 +146,15 @@ export default function AdminPage() {
               head: true,
             }
           ),
+
+        supabase
+          .from("emergency_profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("active", true),
+
+        supabase
+          .from("owner_accounts")
+          .select("user_id", { count: "exact", head: true }),
 
         supabase
           .from("orders")
@@ -153,6 +165,11 @@ export default function AdminPage() {
               head: true,
             }
           ),
+
+        supabase
+          .from("support_conversations")
+          .select("id", { count: "exact", head: true })
+          .neq("status", "closed"),
       ]);
 
       /*
@@ -199,15 +216,17 @@ export default function AdminPage() {
       */
 
       setStats({
-        supportCount: 0,
+        supportCount:
+          supportResult.count ||
+          0,
 
         totalProfiles:
-          profilesResult.count ||
-          0,
+          (profilesResult.count || 0) +
+          (emergencyProfilesResult.count || 0),
 
         activeProfiles:
-          activeResult.count ||
-          0,
+          (activeResult.count || 0) +
+          (activeEmergencyResult.count || 0),
 
         scanCount,
 
