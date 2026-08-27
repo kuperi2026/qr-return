@@ -114,6 +114,7 @@ function createSupabaseClient() {
 
   const supabaseKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
   if (
@@ -532,7 +533,10 @@ export default function PublicProfilePage() {
 
   const meta =
     CATEGORY_META[
-      profile.item_type
+      profile.item_type === "pet" &&
+      profile.pet_type
+        ? profile.pet_type
+        : profile.item_type
     ] || {
       label:
         profile.item_type,
