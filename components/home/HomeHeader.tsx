@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { supabase } from "@/lib/supabase";
+
 type Lang = "ka" | "en";
 type Menu = "about" | "shop" | "faq" | "contact" | null;
 
@@ -17,6 +21,36 @@ export default function HomeHeader({
   onMenuChange,
 }: Props) {
   const ka = language === "ka";
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkAdmin() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted || !user) {
+        if (mounted) setIsAdmin(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (mounted) setIsAdmin(Boolean(data));
+    }
+
+    void checkAdmin();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const toggleMenu = (menu: Exclude<Menu, null>) => {
     onMenuChange(openMenu === menu ? null : menu);
@@ -89,10 +123,11 @@ export default function HomeHeader({
             </button>
           </div>
 
-          {/* დროებით ჩანს მხოლოდ დიზაინის სანახავად */}
-          <a href="/admin" className="admin">
-            {ka ? "ადმინ პანელი" : "Admin"}
-          </a>
+          {isAdmin && (
+            <a href="/admin" className="admin">
+              {ka ? "ადმინ პანელი" : "Admin"}
+            </a>
+          )}
 
           <a href="/login" className="auth">
             {ka ? "შესვლა" : "Sign in"}
@@ -292,14 +327,22 @@ export default function HomeHeader({
             justify-self: end;
           }
 
-          .admin {
-            display: none;
-          }
         }
 
         @media (max-width: 650px) {
           .headerInner {
             width: calc(100% - 20px);
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 6px;
+          }
+
+          .brandLogo {
+            width: 34px;
+            height: 34px;
+          }
+
+          .brand strong {
+            font-size: 12px;
           }
 
           .brand span {
@@ -307,12 +350,44 @@ export default function HomeHeader({
           }
 
           .auth {
-            padding: 0 8px;
-            font-size: 8px;
+            min-height: 34px;
+            padding: 0 6px;
+            font-size: 7px;
+          }
+
+          .admin {
+            min-height: 34px;
+            padding: 0 7px;
+            font-size: 7px;
           }
 
           .languages button {
-            font-size: 9px;
+            font-size: 8px;
+          }
+
+          .languages {
+            margin-right: 2px;
+            gap: 3px;
+          }
+
+          .actions {
+            gap: 4px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .brand strong {
+            font-size: 10px;
+          }
+
+          .brandLogo {
+            width: 30px;
+            height: 30px;
+          }
+
+          .languages span,
+          .languages button:not(.activeLang) {
+            display: none;
           }
         }
       `}</style>
