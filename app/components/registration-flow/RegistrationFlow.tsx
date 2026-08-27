@@ -948,6 +948,10 @@ export default function RegistrationFlow({
           draft
             .liveChatEnabled,
 
+        owner_message_enabled:
+          draft
+            .liveChatEnabled,
+
         active:
           true,
       };
