@@ -509,7 +509,10 @@ export default function EditProfilePage() {
     setSaving(true);
 
     try {
-      const { error } =
+      const {
+        data: updatedProfile,
+        error,
+      } =
         await supabase
           .from("item")
           .update({
@@ -588,10 +591,18 @@ export default function EditProfilePage() {
           .eq(
             "owner_id",
             profile.owner_id
-          );
+          )
+          .select("id")
+          .maybeSingle();
 
       if (error) {
         throw error;
+      }
+
+      if (!updatedProfile) {
+        throw new Error(
+          "პროფილის განახლება ვერ დადასტურდა."
+        );
       }
 
       setSuccessMessage(
@@ -626,33 +637,44 @@ export default function EditProfilePage() {
     setSuccessMessage("");
 
     try {
-      const {
-        data,
-        error,
-      } = await supabase.rpc(
-        "mark_profile_lost",
-        {
-          p_item_id:
-            profile.id,
+      const now =
+        new Date().toISOString();
 
-          p_lost_message:
+      const {
+        data: updatedProfile,
+        error,
+      } = await supabase
+        .from("item")
+        .update({
+          lost: true,
+          lost_at: now,
+          lost_message:
             lostMessage.trim() ||
             null,
-        }
-      );
+          found_at: null,
+        })
+        .eq("id", profile.id)
+        .eq(
+          "owner_id",
+          profile.owner_id
+        )
+        .select(
+          "id,lost,lost_at,lost_message,found_at"
+        )
+        .maybeSingle();
 
       if (error) {
         throw error;
       }
 
-      if (data !== true) {
+      if (
+        !updatedProfile ||
+        updatedProfile.lost !== true
+      ) {
         throw new Error(
           "Lost სტატუსის შეცვლა ვერ დადასტურდა."
         );
       }
-
-      const now =
-        new Date().toISOString();
 
       setLost(true);
       setLostAt(now);
@@ -685,29 +707,41 @@ export default function EditProfilePage() {
     setSuccessMessage("");
 
     try {
+      const now =
+        new Date().toISOString();
+
       const {
-        data,
+        data: updatedProfile,
         error,
-      } = await supabase.rpc(
-        "mark_profile_found",
-        {
-          p_item_id:
-            profile.id,
-        }
-      );
+      } = await supabase
+        .from("item")
+        .update({
+          lost: false,
+          found_at: now,
+          lost_message: null,
+        })
+        .eq("id", profile.id)
+        .eq(
+          "owner_id",
+          profile.owner_id
+        )
+        .select(
+          "id,lost,lost_at,lost_message,found_at"
+        )
+        .maybeSingle();
 
       if (error) {
         throw error;
       }
 
-      if (data !== true) {
+      if (
+        !updatedProfile ||
+        updatedProfile.lost !== false
+      ) {
         throw new Error(
           "Found სტატუსის შეცვლა ვერ დადასტურდა."
         );
       }
-
-      const now =
-        new Date().toISOString();
 
       setLost(false);
       setFoundAt(now);
