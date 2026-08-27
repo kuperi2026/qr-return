@@ -797,7 +797,7 @@ export default function PublicProfilePage() {
               {profile
                 .live_chat_enabled && (
                 <a
-                  href={`/chat/finder/${profile.tag_code}`}
+                  href={`/chat/finder/${encodeURIComponent(profile.tag_code)}`}
                   className="secondaryAction"
                 >
                   <div>
@@ -904,7 +904,7 @@ export default function PublicProfilePage() {
               </span>
 
               <strong>
-                {profile.tag_code}
+                {maskTagCode(profile.tag_code)}
               </strong>
 
               <p>
@@ -1553,4 +1553,10 @@ function InfoRow({
       </p>
     </div>
   );
+}
+
+
+function maskTagCode(tagCode: string) {
+  const normalized = tagCode.trim();
+  return `••••${normalized.slice(-4)}`;
 }
