@@ -91,7 +91,7 @@ export default function RegisterPage() {
 
           <div className="selectionLayout">
             <a
-              href={`/register/emergency-bracelet${tagQuery}`}
+              href="/register/emergency-bracelet"
               className="emergencyCard"
             >
               <div className="emergencyTop">
