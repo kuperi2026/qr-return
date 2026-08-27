@@ -792,7 +792,10 @@ export default function EditProfilePage() {
 
   const meta =
     CATEGORY_META[
-      profile.item_type
+      profile.item_type === "pet" &&
+      profile.pet_type
+        ? profile.pet_type
+        : profile.item_type
     ] || {
       label:
         profile.item_type,
@@ -800,6 +803,8 @@ export default function EditProfilePage() {
     };
 
   const isPet =
+    profile.item_type ===
+      "pet" ||
     profile.item_type ===
       "dog" ||
     profile.item_type ===
