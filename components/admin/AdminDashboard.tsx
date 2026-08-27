@@ -121,7 +121,7 @@ export default function AdminDashboard({
       href: "/admin/contact",
       title: "Contact Settings",
       description:
-        "QR RETURN-ის ტელეფონი, Email, WhatsApp და სხვა საკონტაქტო ინფორმაცია.",
+        "QR RETURN-ის ტელეფონი, Email და სხვა საკონტაქტო ინფორმაცია.",
       icon: "☎️",
       tone: "emerald",
     },

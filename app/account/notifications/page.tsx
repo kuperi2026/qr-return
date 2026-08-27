@@ -279,7 +279,7 @@ export default function AccountNotificationsPage() {
 
     if (finderSession) {
       router.push(
-        `/account/messages?session=${encodeURIComponent(
+        `/account/chat?session=${encodeURIComponent(
           finderSession
         )}`
       );
@@ -288,7 +288,7 @@ export default function AccountNotificationsPage() {
     }
 
     router.push(
-      "/account/messages"
+      "/account/chat"
     );
   }
 
@@ -487,7 +487,7 @@ export default function AccountNotificationsPage() {
         </Link>
 
         <div className="topActions">
-          <Link href="/account/messages">
+          <Link href="/account/chat">
             💬 Live Chat
           </Link>
 

@@ -245,7 +245,7 @@ export default function RegistrationFlow({
                 "first_name,last_name,phone,email"
               )
               .eq(
-                "id",
+                "user_id",
                 user.id
               )
               .maybeSingle();

@@ -277,15 +277,6 @@ export default function FinderPage() {
     profile.show_owner_email === true &&
     Boolean(profile.owner_email);
 
-  const canWhatsApp =
-    profile.whatsapp_enabled === true &&
-    Boolean(profile.owner_phone);
-
-  const whatsappPhone =
-    profile.owner_phone
-      ? profile.owner_phone.replace(/\D/g, "")
-      : "";
-
   return (
     <>
       <main className="page">
@@ -554,15 +545,6 @@ export default function FinderPage() {
                     className="primaryButton"
                   >
                     📞 დარეკვა
-                  </a>
-                )}
-
-                {canWhatsApp && (
-                  <a
-                    href={`https://wa.me/${whatsappPhone}`}
-                    className="secondaryButton"
-                  >
-                    WhatsApp
                   </a>
                 )}
 

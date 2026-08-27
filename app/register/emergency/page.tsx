@@ -774,18 +774,6 @@ export default function EmergencyPage() {
       return false;
     }
 
-    if (
-      form.contact_whatsapp_enabled &&
-      !form.contact_phone.trim()
-    ) {
-      setError(
-        ka
-          ? "WhatsApp-ის ჩასართავად მიუთითეთ საკონტაქტო პირის ნომერი."
-          : "Enter a contact phone number to enable WhatsApp."
-      );
-      return false;
-    }
-
     return true;
   }
 
@@ -847,6 +835,20 @@ export default function EmergencyPage() {
     resetMessages();
 
     try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        setError(
+          ka
+            ? "პროფილის შესანახად სისტემაში შესვლა აუცილებელია."
+            : "You must be signed in to save a profile."
+        );
+        return;
+      }
+
       const tag =
         normalizeTag(
           form.tag_code
@@ -903,6 +905,8 @@ export default function EmergencyPage() {
         .join(" ");
 
       const payload = {
+        owner_id: user.id,
+
         /*
          * PROFILE MANAGER — PRIVATE UI DATA
          */
@@ -1029,10 +1033,7 @@ export default function EmergencyPage() {
             ? form.contact_mobile_enabled
             : false,
 
-        emergency_contact_whatsapp_enabled:
-          contactExists
-            ? form.contact_whatsapp_enabled
-            : false,
+        emergency_contact_whatsapp_enabled: false,
 
         emergency_contact_live_chat_enabled:
           contactExists
@@ -1699,10 +1700,7 @@ export default function EmergencyPage() {
             ? form.contact_mobile_enabled
             : false,
 
-        emergency_contact_whatsapp_enabled:
-          contactExists
-            ? form.contact_whatsapp_enabled
-            : false,
+        emergency_contact_whatsapp_enabled: false,
 
         emergency_contact_live_chat_enabled:
           contactExists
@@ -3841,20 +3839,6 @@ function ContactCard({
         />
 
         <ContactMethod
-          icon="🟢"
-          label="WhatsApp"
-          active={
-            form.contact_whatsapp_enabled
-          }
-          onClick={() =>
-            update(
-              "contact_whatsapp_enabled",
-              !form.contact_whatsapp_enabled
-            )
-          }
-        />
-
-        <ContactMethod
           icon="💬"
           label="Live Chat"
           active={
@@ -3939,8 +3923,8 @@ function Terms({
 
         <li>
           {ka
-            ? "საკონტაქტო პირთან დაკავშირების Phone, WhatsApp და Live Chat მეთოდები არჩევითია."
-            : "Phone, WhatsApp and Live Chat contact methods are optional."}
+            ? "საკონტაქტო პირთან დაკავშირების ტელეფონი და Live Chat ხელმისაწვდომია."
+            : "Phone and Live Chat are available for contacting the emergency contact."}
         </li>
 
         <li>

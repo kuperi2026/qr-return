@@ -400,11 +400,6 @@ export default function EditProfilePage() {
   ] = useState(true);
 
   const [
-    whatsappEnabled,
-    setWhatsappEnabled,
-  ] = useState(false);
-
-  const [
     liveChatEnabled,
     setLiveChatEnabled,
   ] = useState(true);
@@ -672,11 +667,6 @@ export default function EditProfilePage() {
           true
       );
 
-      setWhatsappEnabled(
-        current.whatsapp_enabled ??
-          false
-      );
-
       setLiveChatEnabled(
         current.live_chat_enabled ??
           true
@@ -796,18 +786,6 @@ export default function EditProfilePage() {
     ) {
       setError(
         "მფლობელის ელფოსტა სავალდებულოა."
-      );
-
-      return;
-    }
-
-    if (
-      !phoneEnabled &&
-      !whatsappEnabled &&
-      !liveChatEnabled
-    ) {
-      setError(
-        "აირჩიე დაკავშირების მინიმუმ ერთი მეთოდი."
       );
 
       return;
@@ -980,11 +958,9 @@ export default function EditProfilePage() {
           form.lost_seen_location.trim() ||
           null,
 
-        phone_enabled:
-          phoneEnabled,
+        phone_enabled: true,
 
-        whatsapp_enabled:
-          whatsappEnabled,
+        whatsapp_enabled: false,
 
         live_chat_enabled:
           liveChatEnabled,
@@ -1613,20 +1589,6 @@ export default function EditProfilePage() {
                 onClick={() =>
                   setPhoneEnabled(
                     !phoneEnabled
-                  )
-                }
-              />
-
-              <ContactMethod
-                icon="🟢"
-                title="WhatsApp"
-                description="WhatsApp გამოიყენებს შენს მითითებულ მობილურის ნომერს."
-                active={
-                  whatsappEnabled
-                }
-                onClick={() =>
-                  setWhatsappEnabled(
-                    !whatsappEnabled
                   )
                 }
               />

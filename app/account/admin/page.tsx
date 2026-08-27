@@ -717,8 +717,8 @@ export default function AdminPage() {
                 }
                 description={
                   ka
-                    ? "მართოს Phone, WhatsApp და სხვა საკონტაქტო მეთოდები."
-                    : "Manage Phone, WhatsApp and other contact options."
+                    ? "მართოს ტელეფონი, Live Chat და სხვა საკონტაქტო მეთოდები."
+                    : "Manage Phone, Live Chat and other contact options."
                 }
                 value={canManageContacts}
                 onChange={setCanManageContacts}

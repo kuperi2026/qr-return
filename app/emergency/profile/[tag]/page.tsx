@@ -472,14 +472,11 @@ export default function EmergencyProfilePage() {
                     profile.emergency_contact_mobile_enabled !==
                     false
                   }
-                  whatsapp={
-                    profile.emergency_contact_whatsapp_enabled ===
-                    true
-                  }
                   liveChat={
                     profile.emergency_contact_live_chat_enabled ===
                     true
                   }
+                  chatHref={`/app/live-chat/emergency/${encodeURIComponent(profile.tag_code)}`}
                   lang={lang}
                 />
               </section>
@@ -509,14 +506,11 @@ export default function EmergencyProfilePage() {
                     profile.second_contact_mobile_enabled !==
                     false
                   }
-                  whatsapp={
-                    profile.second_contact_whatsapp_enabled ===
-                    true
-                  }
                   liveChat={
                     profile.second_contact_live_chat_enabled ===
                     true
                   }
+                  chatHref={`/app/live-chat/emergency/${encodeURIComponent(profile.tag_code)}`}
                   lang={lang}
                 />
               </section>
@@ -625,22 +619,19 @@ function Contact({
   relationship,
   phone,
   mobile,
-  whatsapp,
   liveChat,
+  chatHref,
   lang,
 }: {
   name: string | null;
   relationship: string | null;
   phone: string | null;
   mobile: boolean;
-  whatsapp: boolean;
   liveChat: boolean;
+  chatHref: string;
   lang: Lang;
 }) {
   const ka = lang === "ka";
-
-  const whatsappPhone =
-    phone?.replace(/\D/g, "") || "";
 
   return (
     <div className="contact">
@@ -675,18 +666,9 @@ function Contact({
           </a>
         )}
 
-        {whatsapp && phone && (
-          <a
-            href={`https://wa.me/${whatsappPhone}`}
-            className="action"
-          >
-            WhatsApp
-          </a>
-        )}
-
         {liveChat && (
           <a
-            href="/support"
+            href={chatHref}
             className="action"
           >
             Live Chat
