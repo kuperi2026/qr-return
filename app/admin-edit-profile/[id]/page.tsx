@@ -41,7 +41,7 @@ type Profile = {
   date_of_birth: string | null;
   weight: string | null;
   medical_info: string | null;
-  behaviour_note: string | null;
+  behavior_note: string | null;
 
   brand: string | null;
   model: string | null;
@@ -293,7 +293,7 @@ export default function AdminEditProfilePage() {
       setDateOfBirth(p.date_of_birth ?? "");
       setWeight(p.weight ?? "");
       setMedicalInfo(p.medical_info ?? "");
-      setBehaviourNote(p.behaviour_note ?? "");
+      setBehaviourNote(p.behavior_note ?? "");
 
       setBrand(p.brand ?? "");
       setModel(p.model ?? "");
@@ -377,7 +377,7 @@ export default function AdminEditProfilePage() {
           payload.date_of_birth = dateOfBirth;
           payload.weight = weight;
           payload.medical_info = medicalInfo;
-          payload.behaviour_note = behaviourNote;
+          payload.behavior_note = behaviourNote;
         } else {
           payload.brand = brand;
           payload.model = model;

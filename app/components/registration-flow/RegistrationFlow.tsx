@@ -875,7 +875,7 @@ export default function RegistrationFlow({
               null
             : null,
 
-        behaviour_note:
+        behavior_note:
           isPet
             ? draft
                 .behaviourNote

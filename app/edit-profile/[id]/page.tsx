@@ -31,7 +31,7 @@ type ProfileData = {
   photo: string | null;
 
   medical_info: string | null;
-  behaviour_note: string | null;
+  behavior_note: string | null;
   description: string | null;
   finder_message: string | null;
 
@@ -313,7 +313,7 @@ export default function EditProfilePage() {
               weight,
               photo,
               medical_info,
-              behaviour_note,
+              behavior_note,
               description,
               finder_message,
               show_email,
@@ -383,7 +383,7 @@ export default function EditProfilePage() {
         );
 
         setBehaviourNote(
-          loaded.behaviour_note || ""
+          loaded.behavior_note || ""
         );
 
         setDescription(
@@ -543,7 +543,7 @@ export default function EditProfilePage() {
               medicalInfo.trim() ||
               null,
 
-            behaviour_note:
+            behavior_note:
               behaviourNote.trim() ||
               null,
 
