@@ -777,7 +777,9 @@ export default function RegistrationFlow({
           cleanTag,
 
         item_type:
-          type,
+          isPet
+            ? "pet"
+            : type,
 
         pet_type:
           isPet
