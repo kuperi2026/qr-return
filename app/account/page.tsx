@@ -1,5 +1,3 @@
-[fix/admin-entry-account b45af2f] Add protected admin entry to account page
- 1 file changed, 64 insertions(+)
 "use client";
 
 import {
