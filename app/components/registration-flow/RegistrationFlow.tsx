@@ -319,6 +319,24 @@ export default function RegistrationFlow({
   }, []);
 
   useEffect(() => {
+    const tagCode = new URLSearchParams(
+      window.location.search
+    )
+      .get("tag_code")
+      ?.trim()
+      .toUpperCase();
+
+    if (tagCode) {
+      setDraft(
+        (current) => ({
+          ...current,
+          tagCode,
+        })
+      );
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (
         photoPreview.startsWith(
