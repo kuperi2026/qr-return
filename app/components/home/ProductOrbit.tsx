@@ -36,8 +36,8 @@ export default function ProductOrbit({
 
           <h2>
             {ka
-              ? "ერთი QR სისტემა თქვენი მნიშვნელოვანი ნივთებისა და ცხოველებისთვის."
-              : "One QR system for your belongings and pets."}
+              ? "7 QR პროდუქტი ნივთების, ცხოველებისა და უსაფრთხოებისთვის."
+              : "7 QR products for belongings, pets and safety."}
           </h2>
         </div>
 
@@ -46,16 +46,15 @@ export default function ProductOrbit({
           <div className="ring ringOne" />
           <div className="ring ringTwo" />
 
-          <div className="mainQR">
-            <QRIcon size={48} />
-
-            <strong>
-              QR RETURN
-            </strong>
-
-            <span>
-              {ka ? "დაასკანერე" : "SCAN"}
-            </span>
+          <div className="emergencyCenter">
+            <span className="emergencyLabel">EMERGENCY</span>
+            <div className="bracelet">
+              <i />
+              <div><QRIcon size={28} /></div>
+              <i />
+            </div>
+            <strong>{ka ? "სამაჯური" : "Bracelet"}</strong>
+            <small>{ka ? "ინფორმაცია · კონტაქტი · 112" : "Information · Contact · 911"}</small>
           </div>
 
           <Product
@@ -171,11 +170,11 @@ export default function ProductOrbit({
         }
 
 
-        /* CENTER QR */
+        /* EMERGENCY CENTER */
 
-        .mainQR {
-          width: 138px;
-          height: 138px;
+        .emergencyCenter {
+          width: 154px;
+          height: 154px;
 
           position: absolute;
 
@@ -201,23 +200,51 @@ export default function ProductOrbit({
             0 17px 40px rgba(0,0,0,.14);
         }
 
-        .mainQR strong {
-          margin-top: 7px;
-
-          color: #223a55;
-
-          font-size: 10px;
-        }
-
-        .mainQR span {
-          margin-top: 3px;
-
-          color: #8593a4;
-
+        .emergencyLabel {
+          color: #1266e9;
           font-size: 6px;
           font-weight: 900;
-
           letter-spacing: 1px;
+        }
+
+        .bracelet {
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .bracelet i {
+          width: 25px;
+          height: 13px;
+          display: block;
+          background: #1266e9;
+        }
+
+        .bracelet div {
+          width: 45px;
+          height: 45px;
+          display: grid;
+          place-items: center;
+          border: 2px solid #1266e9;
+          border-radius: 9px;
+          color: #1266e9;
+          background: #ffffff;
+        }
+
+        .emergencyCenter strong {
+          margin-top: 7px;
+          color: #223a55;
+          font-size: 9px;
+        }
+
+        .emergencyCenter small {
+          max-width: 116px;
+          margin-top: 3px;
+          color: #8593a4;
+          font-size: 6px;
+          font-weight: 800;
+          text-align: center;
         }
 
 
@@ -339,17 +366,17 @@ export default function ProductOrbit({
             inset: 76px;
           }
 
-          .mainQR {
+          .emergencyCenter {
             width: 105px;
             height: 105px;
           }
 
-          .mainQR :global(svg) {
+          .emergencyCenter :global(svg) {
             width: 38px;
             height: 38px;
           }
 
-          .mainQR strong {
+          .emergencyCenter strong {
             font-size: 8px;
           }
 
@@ -412,7 +439,7 @@ export default function ProductOrbit({
             inset: 70px;
           }
 
-          .mainQR {
+          .emergencyCenter {
             width: 94px;
             height: 94px;
           }
