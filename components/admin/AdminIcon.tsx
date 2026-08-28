@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export type AdminIconName =
   | "support" | "search" | "qr" | "users" | "profiles" | "location"
   | "orders" | "notifications" | "chat" | "forms" | "website"
-  | "contact" | "settings";
+  | "contact" | "settings" | "products";
 
 const paths: Record<AdminIconName, ReactNode> = {
   support: <><path d="M5 6.5h14v9H9l-4 3v-12Z"/><path d="M9 10h6M9 13h4"/></>,
@@ -12,6 +12,7 @@ const paths: Record<AdminIconName, ReactNode> = {
   users: <><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c.4-4 2.3-6 5.5-6s5.1 2 5.5 6M14 14c3.4-.5 5.5 1.2 6 4"/></>,
   profiles: <><path d="M4 5h10l6 6-9 9-7-7V5Z"/><circle cx="9" cy="10" r="1.4"/></>,
   location: <><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></>,
+  products: <><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></>,
   orders: <><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></>,
   notifications: <><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5L6 17Z"/><path d="M10 20h4"/></>,
   chat: <><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></>,
