@@ -23,18 +23,7 @@ export default function HomeHero({
 
           color: #ffffff;
 
-          background:
-            radial-gradient(
-              circle at 79% 48%,
-              rgba(255, 255, 255, 0.14),
-              transparent 31%
-            ),
-            linear-gradient(
-              135deg,
-              #0750ba 0%,
-              #1266e9 48%,
-              #0748aa 100%
-            );
+          background: #0754c7;
         }
 
         .homeHeroInner {
