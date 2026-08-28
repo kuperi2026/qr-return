@@ -526,8 +526,8 @@ export default function StorePage() {
 
             <p>
               {ka
-                ? "აირჩიეთ ბრელოკის ან სტიკერის დიზაინი, დაარეგულირეთ რაოდენობა და შეუკვეთეთ თქვენი ანგარიშიდან."
-                : "Choose your keychain or sticker design, select a quantity, and order securely from your account."}
+                ? "აირჩიეთ შესაბამისი QR RETURN კატეგორია. პროდუქტის დამატების შემდეგ შეძლებთ რაოდენობის არჩევასა და შეკვეთას."
+                : "Choose a QR RETURN category. Once products are available, select a quantity and order securely."}
             </p>
 
             <div className="heroFeatures">
@@ -799,8 +799,8 @@ export default function StorePage() {
               }
               text={
                 ka
-                  ? "აირჩიეთ სასურველი ბრელოკი ან QR სტიკერი."
-                  : "Select the keychain or QR sticker you prefer."
+                  ? "აირჩიეთ თქვენთვის შესაბამისი QR RETURN პროდუქტი."
+                  : "Select the QR RETURN product that fits your needs."
               }
             />
 
