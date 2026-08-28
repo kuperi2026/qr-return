@@ -445,7 +445,7 @@ export default function StorePage() {
 
             color: #7d8791;
 
-            background: #f5f7f8;
+            background: #ffffff;
           }
 
           .loadingLogo {
@@ -474,7 +474,7 @@ export default function StorePage() {
           }
 
           span {
-            font-size: 9px;
+            font-size: 13px;
           }
         `}</style>
       </main>
@@ -954,7 +954,7 @@ export default function StorePage() {
 
           color: #202b37;
 
-          background: #f5f7f8;
+          background: #ffffff;
         }
 
         .topbar {
@@ -1032,7 +1032,7 @@ export default function StorePage() {
 
           color: #7655f7;
 
-          font-size: 6px;
+          font-size: 13px;
 
           font-weight: 900;
 
@@ -1069,7 +1069,7 @@ export default function StorePage() {
 
           text-decoration: none;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 850;
         }
@@ -1102,7 +1102,7 @@ export default function StorePage() {
 
           cursor: pointer;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 900;
         }
@@ -1115,31 +1115,13 @@ export default function StorePage() {
 
         .hero {
           overflow: hidden;
-
           position: relative;
+          color: #ffffff;
+          background: #0647c8;
+        }
 
-          background:
-            radial-gradient(
-              circle at 85% 30%,
-              rgba(
-                118,
-                85,
-                247,
-                0.16
-              ),
-              transparent 24%
-            ),
-            radial-gradient(
-              circle at 70% 70%,
-              rgba(
-                20,
-                101,
-                232,
-                0.12
-              ),
-              transparent 30%
-            ),
-            white;
+        .hero .eyebrow {
+          color: #cfe0ff;
         }
 
         .heroInner {
@@ -1178,7 +1160,7 @@ export default function StorePage() {
           > span {
           color: #7655f7;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 900;
 
@@ -1191,7 +1173,7 @@ export default function StorePage() {
           margin:
             9px 0 0;
 
-          color: #202b37;
+          color: #ffffff;
 
           font-size:
             clamp(
@@ -1211,9 +1193,9 @@ export default function StorePage() {
           margin:
             17px 0 0;
 
-          color: #74808b;
+          color: rgba(255, 255, 255, 0.84);
 
-          font-size: 10px;
+          font-size: 16px;
 
           line-height: 1.75;
         }
@@ -1247,7 +1229,7 @@ export default function StorePage() {
               0.85
             );
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 850;
         }
@@ -1418,7 +1400,7 @@ export default function StorePage() {
 
           background: #fff5f5;
 
-          font-size: 8px;
+          font-size: 12px;
         }
 
         .featured,
@@ -1464,7 +1446,7 @@ export default function StorePage() {
 
           color: #89939d;
 
-          font-size: 8px;
+          font-size: 12px;
         }
 
         .featuredGrid {
@@ -1512,7 +1494,7 @@ export default function StorePage() {
 
           cursor: pointer;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 850;
         }
@@ -1655,7 +1637,7 @@ export default function StorePage() {
 
           color: #7e8992;
 
-          font-size: 8px;
+          font-size: 12px;
 
           line-height: 1.6;
         }
@@ -1680,7 +1662,7 @@ export default function StorePage() {
 
           text-decoration: none;
 
-          font-size: 8px;
+          font-size: 12px;
 
           font-weight: 900;
         }
@@ -1726,7 +1708,7 @@ export default function StorePage() {
 
           color: #929ca5;
 
-          font-size: 7px;
+          font-size: 11px;
         }
 
         .footerLinks {
@@ -1741,7 +1723,7 @@ export default function StorePage() {
 
           text-decoration: none;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 850;
         }
@@ -2213,7 +2195,7 @@ function ProductCard({
         .category {
           color: #7655f7;
 
-          font-size: 6px;
+          font-size: 13px;
 
           font-weight: 900;
 
@@ -2237,7 +2219,7 @@ function ProductCard({
 
           color: #7e8992;
 
-          font-size: 8px;
+          font-size: 12px;
         }
 
         .price {
@@ -2256,7 +2238,7 @@ function ProductCard({
 
           color: #7f8a94;
 
-          font-size: 8px;
+          font-size: 12px;
 
           line-height: 1.65;
         }
@@ -2280,7 +2262,7 @@ function ProductCard({
         .meta span {
           color: #949da5;
 
-          font-size: 6px;
+          font-size: 13px;
         }
 
         .buyRow {
@@ -2341,7 +2323,7 @@ function ProductCard({
         .quantity strong {
           text-align: center;
 
-          font-size: 9px;
+          font-size: 13px;
         }
 
         .buy {
@@ -2367,7 +2349,7 @@ function ProductCard({
 
           cursor: pointer;
 
-          font-size: 8px;
+          font-size: 12px;
 
           font-weight: 900;
         }
@@ -2598,7 +2580,7 @@ function FeaturedProduct({
         .label {
           color: #7655f7;
 
-          font-size: 6px;
+          font-size: 13px;
 
           font-weight: 900;
 
@@ -2621,7 +2603,7 @@ function FeaturedProduct({
 
           color: #77838e;
 
-          font-size: 8px;
+          font-size: 12px;
         }
 
         p {
@@ -2630,7 +2612,7 @@ function FeaturedProduct({
 
           color: #818c96;
 
-          font-size: 8px;
+          font-size: 12px;
 
           line-height: 1.7;
         }
@@ -2691,7 +2673,7 @@ function FeaturedProduct({
 
           place-items: center;
 
-          font-size: 8px;
+          font-size: 12px;
         }
 
         .buy {
@@ -2705,7 +2687,7 @@ function FeaturedProduct({
 
           cursor: pointer;
 
-          font-size: 8px;
+          font-size: 12px;
 
           font-weight: 900;
         }
@@ -2791,7 +2773,7 @@ function Step({
         .number {
           color: #7655f7;
 
-          font-size: 7px;
+          font-size: 11px;
 
           font-weight: 900;
         }
@@ -2816,7 +2798,7 @@ function Step({
 
           color: #89939d;
 
-          font-size: 8px;
+          font-size: 12px;
 
           line-height: 1.6;
         }
