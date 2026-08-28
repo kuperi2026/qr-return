@@ -290,8 +290,10 @@ export default function EmergencyBraceletPage() {
       } =
         await supabase.auth.getUser();
 
-      if (error) {
-        throw error;
+      if (error || !data.user) {
+        window.location.href =
+          "/login?next=/register/emergency-bracelet";
+        return;
       }
 
       const user =
@@ -670,6 +672,11 @@ export default function EmergencyBraceletPage() {
             owner_email:
               ownerEmail,
 
+            country_code:
+              ownerPhone.trim().startsWith("+995")
+                ? "+995"
+                : "+1",
+
             show_owner_phone:
               true,
 
@@ -827,7 +834,7 @@ export default function EmergencyBraceletPage() {
       );
 
       window.location.href =
-        "/account";
+        `/emergency/${encodeURIComponent(normalizedTag)}`;
     } catch (error) {
       console.error(
         "CREATE EMERGENCY PROFILE ERROR:",
