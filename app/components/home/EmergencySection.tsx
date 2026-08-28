@@ -30,6 +30,21 @@ export default function EmergencySection({
             : "An Emergency profile provides quick access to the essential information and emergency contacts you have chosen in advance."}
         </p>
 
+        <div className="marketingActions">
+          <a className="storeButton" href="/store">
+            {ka ? "მაღაზიის ნახვა" : "View store"}
+          </a>
+          <a className="howButton" href="#how-it-works">
+            {ka ? "როგორ მუშაობს" : "How it works"}
+          </a>
+        </div>
+
+        <div className="marketingProof" aria-label={ka ? "QR RETURN-ის უპირატესობები" : "QR RETURN benefits"}>
+          <span>{ka ? "აპლიკაცია არ სჭირდება" : "No app needed"}</span>
+          <span>{ka ? "უსაფრთხო კავშირი" : "Secure connection"}</span>
+          <span>{ka ? "თქვენ აკონტროლებთ ინფორმაციას" : "You control your information"}</span>
+        </div>
+
         <div className="flow">
 
           <div className="flowStep">
@@ -164,6 +179,61 @@ export default function EmergencySection({
 
           font-size: 13px;
           line-height: 1.72;
+        }
+
+
+        /* MARKETING ACTIONS */
+
+        .marketingActions {
+          margin-top: 22px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .marketingActions a {
+          min-height: 42px;
+          padding: 0 18px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 900;
+          text-decoration: none;
+          transition: transform .2s ease, background .2s ease;
+        }
+
+        .marketingActions a:hover {
+          transform: translateY(-2px);
+        }
+
+        .storeButton {
+          color: #1266e9;
+          background: #ffffff;
+        }
+
+        .howButton {
+          color: #ffffff;
+          border: 1px solid rgba(255,255,255,.42);
+          background: rgba(255,255,255,.08);
+        }
+
+        .marketingProof {
+          margin-top: 14px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .marketingProof span {
+          padding: 6px 9px;
+          border: 1px solid rgba(255,255,255,.18);
+          border-radius: 999px;
+          color: rgba(255,255,255,.78);
+          background: rgba(255,255,255,.07);
+          font-size: 8px;
+          font-weight: 800;
         }
 
 
