@@ -184,20 +184,9 @@ export default function StorePage() {
     }
   }
 
-  const categories =
-    useMemo(() => {
-      const unique =
-        Array.from(
-          new Set(
-            products.map(
-              (product) =>
-                product.category
-            )
-          )
-        );
-
-      return unique;
-    }, [products]);
+  const categories = [
+    "dog", "cat", "keys", "wallet", "bag", "suitcase", "emergency",
+  ];
 
   const filteredProducts =
     useMemo(() => {
@@ -370,48 +359,22 @@ export default function StorePage() {
     }
   }
 
-  function categoryTitle(
-    category: string
-  ) {
-    if (
-      category ===
-      "keychain"
-    ) {
-      return ka
-        ? "QR ბრელოკები"
-        : "QR Keychains";
-    }
+  const categoryMeta: Record<string, { ka: string; en: string; icon: string }> = {
+    dog: { ka: "ძაღლი", en: "Dog", icon: "🐶" },
+    cat: { ka: "კატა", en: "Cat", icon: "🐱" },
+    keys: { ka: "გასაღები", en: "Keys", icon: "🔑" },
+    wallet: { ka: "საფულე", en: "Wallet", icon: "👛" },
+    bag: { ka: "ჩანთა", en: "Bag", icon: "👜" },
+    suitcase: { ka: "ჩემოდანი", en: "Suitcase", icon: "🧳" },
+    emergency: { ka: "Emergency", en: "Emergency", icon: "🆘" },
+  };
 
-    if (
-      category ===
-      "sticker"
-    ) {
-      return ka
-        ? "QR სტიკერები"
-        : "QR Stickers";
-    }
-
-    return category;
+  function categoryTitle(category: string) {
+    return categoryMeta[category]?.[ka ? "ka" : "en"] || category;
   }
 
-  function categoryIcon(
-    category: string
-  ) {
-    if (
-      category ===
-      "keychain"
-    ) {
-      return "🏷️";
-    }
-
-    if (
-      category ===
-      "sticker"
-    ) {
-      return "🔳";
-    }
-
-    return "◈";
+  function categoryIcon(category: string) {
+    return categoryMeta[category]?.icon || "◈";
   }
 
   if (loading) {
@@ -760,8 +723,8 @@ export default function StorePage() {
 
               <strong>
                 {ka
-                  ? "პროდუქტი ჯერ არ არის"
-                  : "No products yet"}
+                  ? "პროდუქტები მალე დაემატება"
+                  : "Products are coming soon"}
               </strong>
             </div>
           ) : (
@@ -1919,10 +1882,7 @@ function ProductCard({
         ) : (
           <div className="placeholder">
             <span>
-              {product.category ===
-              "sticker"
-                ? "🔳"
-                : "🏷️"}
+              {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
             </span>
 
             <strong>
@@ -2411,10 +2371,7 @@ function FeaturedProduct({
           />
         ) : (
           <div className="placeholder">
-            {product.category ===
-            "sticker"
-              ? "🔳"
-              : "🏷️"}
+            {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
           </div>
         )}
       </div>
