@@ -268,10 +268,10 @@ export default function AdminPage() {
             "center",
 
           background:
-            "#f5f7f8",
+            "#0647c8",
 
           color:
-            "#687481",
+            "#ffffff",
 
           fontFamily:
             "Arial, sans-serif",
@@ -300,7 +300,7 @@ export default function AdminPage() {
             "30px",
 
           background:
-            "#f5f7f8",
+            "#0647c8",
 
           fontFamily:
             "Arial, sans-serif",
@@ -321,7 +321,7 @@ export default function AdminPage() {
               "14px",
 
             background:
-              "#ffffff",
+              "#0b52d6",
 
             textAlign:
               "center",
@@ -333,7 +333,7 @@ export default function AdminPage() {
                 "block",
 
               color:
-                "#a33f45",
+                "#ffffff",
 
               fontSize:
                 "18px",
@@ -348,7 +348,7 @@ export default function AdminPage() {
                 "10px",
 
               color:
-                "#6f7a85",
+                "rgba(255,255,255,0.82)",
 
               fontSize:
                 "13px",
@@ -367,7 +367,7 @@ export default function AdminPage() {
                 "15px",
 
               color:
-                "#225fc7",
+                "#ffffff",
 
               textDecoration:
                 "none",
