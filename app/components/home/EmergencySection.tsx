@@ -32,17 +32,27 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
           ))}
         </div>
 
+        <div className="rolesIntro">
+          <span>OWNER &amp; FINDER</span>
+          <h2>{ka ? "მარტივი გამოცდილება ორივე მხარისთვის" : "Simple for both sides"}</h2>
+          <p>
+            {ka
+              ? "მპოვნელს ანგარიში არ სჭირდება, მფლობელი კი ყველაფერს დაცული ანგარიშიდან მართავს."
+              : "The finder needs no account, while the owner manages everything securely."}
+          </p>
+        </div>
+
         <div className="roles">
           <article>
             <span>OWNER</span>
             <strong>{ka ? "მფლობელის სივრცე" : "Owner space"}</strong>
-            <p>{ka ? "პროფილები · რედაქტირება · Lost ON · Scan ისტორია" : "Profiles · Editing · Lost ON · Scan history"}</p>
+            <p>{ka ? "შეუზღუდავი პროფილები · რედაქტირება · Lost ON/Scan · Chat/ლოკაცია" : "Unlimited profiles · Editing · Lost ON/Scan · Chat/Location"}</p>
             <a href="/signup">{ka ? "რეგისტრაცია" : "Register"} →</a>
           </article>
           <article>
             <span>FINDER</span>
             <strong>{ka ? "მპოვნელის გვერდი" : "Finder page"}</strong>
-            <p>{ka ? "ანგარიშის გარეშე · ზარი · Live Chat · ლოკაცია" : "No account · Call · Live Chat · Location"}</p>
+            <p>{ka ? "რეგისტრაციის გარეშე · არჩეული ინფორმაცია · ზარი/Chat · ლოკაცია" : "No registration · Selected information · Call/Chat · Location"}</p>
           </article>
         </div>
 
@@ -57,7 +67,7 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
       </div>
 
       <style jsx>{`
-        .featurePanel{max-width:640px}.eyebrow{color:rgba(255,255,255,.68);font-size:8px;font-weight:900;letter-spacing:1.4px}h1{max-width:590px;margin:12px 0 0;color:#fff;font-size:clamp(31px,3.1vw,43px);line-height:1.08;letter-spacing:-1.4px}.lead{max-width:570px;margin:14px 0 0;color:rgba(255,255,255,.8);font-size:12px;line-height:1.65}.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:22px}.feature{min-height:72px;padding:11px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.09)}.icon{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;border-radius:10px;background:#fff;color:#1266e9}.icon :global(svg){width:21px;height:21px}.feature strong,.feature span{display:block}.feature strong{color:#fff;font-size:10px}.feature span{margin-top:4px;color:rgba(255,255,255,.66);font-size:8px}.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.roles article{min-height:101px;padding:12px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.07)}.roles span{display:block;color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.roles strong{display:block;margin-top:7px;color:#fff;font-size:11px}.roles p{margin:6px 0 0;color:rgba(255,255,255,.68);font-size:8px;line-height:1.5}.roles a{display:inline-block;margin-top:8px;color:#fff;font-size:8px;font-weight:900;text-decoration:none}.slogan{display:block;margin-top:14px;color:#fff;font-size:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.actions a{min-height:39px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.38);border-radius:9px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.actions .primary{border-color:#fff;color:#1266e9;background:#fff}
+        .featurePanel{max-width:640px}.eyebrow{color:rgba(255,255,255,.68);font-size:8px;font-weight:900;letter-spacing:1.4px}h1{max-width:590px;margin:12px 0 0;color:#fff;font-size:clamp(31px,3.1vw,43px);line-height:1.08;letter-spacing:-1.4px}.lead{max-width:570px;margin:14px 0 0;color:rgba(255,255,255,.8);font-size:12px;line-height:1.65}.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:22px}.feature{min-height:72px;padding:11px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.09)}.icon{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;border-radius:10px;background:#fff;color:#1266e9}.icon :global(svg){width:21px;height:21px}.feature strong,.feature span{display:block}.feature strong{color:#fff;font-size:10px}.feature span{margin-top:4px;color:rgba(255,255,255,.66);font-size:8px}.rolesIntro{margin-top:18px}.rolesIntro>span{color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.rolesIntro h2{margin:5px 0 0;color:#fff;font-size:16px;line-height:1.25}.rolesIntro p{margin:5px 0 0;color:rgba(255,255,255,.7);font-size:8px;line-height:1.5}.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.roles article{min-height:101px;padding:12px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.07)}.roles span{display:block;color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.roles strong{display:block;margin-top:7px;color:#fff;font-size:11px}.roles p{margin:6px 0 0;color:rgba(255,255,255,.68);font-size:8px;line-height:1.5}.roles a{display:inline-block;margin-top:8px;color:#fff;font-size:8px;font-weight:900;text-decoration:none}.slogan{display:block;margin-top:14px;color:#fff;font-size:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.actions a{min-height:39px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.38);border-radius:9px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.actions .primary{border-color:#fff;color:#1266e9;background:#fff}
         @media(max-width:650px){h1{font-size:32px}.features{grid-template-columns:1fr 1fr}.feature{min-height:68px;padding:9px}.roles{grid-template-columns:1fr}.roles article{min-height:auto}.actions a{flex:1}}
         @media(max-width:390px){.features{grid-template-columns:1fr}.feature{min-height:62px}}
       `}</style>
