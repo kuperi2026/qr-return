@@ -3,6 +3,7 @@
 import AdminSection, {
   type AdminSectionItem,
 } from "./AdminSection";
+import AdminIcon from "./AdminIcon";
 
 type Props = {
   supportCount?: number;
@@ -27,7 +28,7 @@ export default function AdminDashboard({
       title: "Support Inbox",
       description:
         "ყველა მომხმარებლის Live Chat, Support შეტყობინებები, ფოტოები და ფაილები.",
-      icon: "💬",
+      icon: <AdminIcon name="support" />,
       tone: "rose",
       badge: supportCount,
     },
@@ -36,7 +37,7 @@ export default function AdminDashboard({
       title: "გლობალური ძებნა",
       description:
         "მოძებნეთ მომხმარებლები, QR პროფილები, შეკვეთები და სხვა ჩანაწერები.",
-      icon: "🔎",
+      icon: <AdminIcon name="search" />,
       tone: "cyan",
     },
     {
@@ -44,7 +45,7 @@ export default function AdminDashboard({
       title: "QR ძებნა",
       description:
         "მოძებნეთ კონკრეტული QR პროფილი QR კოდით ან Tag Code-ით.",
-      icon: "🔳",
+      icon: <AdminIcon name="qr" />,
       tone: "violet",
     },
     {
@@ -52,7 +53,7 @@ export default function AdminDashboard({
       title: "მომხმარებლები",
       description:
         "ანგარიშები, დაკავშირებული QR პროფილები და მომხმარებლის ინფორმაცია.",
-      icon: "👥",
+      icon: <AdminIcon name="users" />,
       tone: "blue",
       badge: totalUsers,
     },
@@ -61,7 +62,7 @@ export default function AdminDashboard({
       title: "QR პროფილები",
       description:
         "ძაღლი, კატა, გასაღები, საფულე, ჩანთა, ჩემოდანი და სხვა QR პროფილები.",
-      icon: "🏷️",
+      icon: <AdminIcon name="profiles" />,
       tone: "emerald",
       badge: totalProfiles,
     },
@@ -70,7 +71,7 @@ export default function AdminDashboard({
       title: "Return Cases",
       description:
         "დაკარგულად მონიშნული QR პროფილები და მიმდინარე დაბრუნების პროცესები.",
-      icon: "📍",
+      icon: <AdminIcon name="location" />,
       tone: "amber",
     },
     {
@@ -78,7 +79,7 @@ export default function AdminDashboard({
       title: "Orders",
       description:
         "პროდუქტის შეკვეთები, მომხმარებლის ინფორმაცია, მისამართი, სტატუსი და Tracking.",
-      icon: "🛒",
+      icon: <AdminIcon name="orders" />,
       tone: "violet",
       badge: totalOrders,
     },
@@ -87,7 +88,7 @@ export default function AdminDashboard({
       title: "შეტყობინებები",
       description:
         "QR Scan, Support, Location, Order და სისტემური შეტყობინებების მართვა.",
-      icon: "🔔",
+      icon: <AdminIcon name="notifications" />,
       tone: "rose",
     },
   ];
@@ -98,7 +99,7 @@ export default function AdminDashboard({
       title: "Admin Live Chat",
       description:
         "მომხმარებლებთან მიმდინარე Live Chat საუბრების ნახვა და პასუხების გაგზავნა.",
-      icon: "💬",
+      icon: <AdminIcon name="chat" />,
       tone: "cyan",
     },
     {
@@ -106,7 +107,7 @@ export default function AdminDashboard({
       title: "Registration Forms",
       description:
         "სარეგისტრაციო ფორმების ველები, Required / Optional პარამეტრები და თანმიმდევრობა.",
-      icon: "📝",
+      icon: <AdminIcon name="forms" />,
       tone: "blue",
     },
     {
@@ -114,7 +115,7 @@ export default function AdminDashboard({
       title: "Website Editor",
       description:
         "მთავარი გვერდის ტექსტები, სექციები, ღილაკები და სხვა კონტენტი.",
-      icon: "🎨",
+      icon: <AdminIcon name="website" />,
       tone: "violet",
     },
     {
@@ -122,7 +123,7 @@ export default function AdminDashboard({
       title: "Contact Settings",
       description:
         "QR RETURN-ის ტელეფონი, Email და სხვა საკონტაქტო ინფორმაცია.",
-      icon: "☎️",
+      icon: <AdminIcon name="contact" />,
       tone: "emerald",
     },
     {
@@ -130,7 +131,7 @@ export default function AdminDashboard({
       title: "Live Chat Settings",
       description:
         "Live Chat, Support ტექსტები, ავტომატური პასუხები და Chat პარამეტრები.",
-      icon: "💬",
+      icon: <AdminIcon name="settings" />,
       tone: "amber",
     },
   ];
@@ -169,31 +170,31 @@ export default function AdminDashboard({
           <StatCard
             label="QR პროფილი"
             value={totalProfiles}
-            icon="🏷️"
+            icon={<AdminIcon name="profiles" />}
           />
 
           <StatCard
             label="აქტიური"
             value={activeProfiles}
-            icon="✅"
+            icon={<AdminIcon name="profiles" />}
           />
 
           <StatCard
             label="QR Scan"
             value={scanCount}
-            icon="📱"
+            icon={<AdminIcon name="qr" />}
           />
 
           <StatCard
             label="Support"
             value={supportCount}
-            icon="💬"
+            icon={<AdminIcon name="support" />}
           />
 
           <StatCard
             label="Orders"
             value={totalOrders}
-            icon="🛒"
+            icon={<AdminIcon name="orders" />}
           />
         </section>
 
@@ -217,11 +218,8 @@ export default function AdminDashboard({
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          padding: 54px 0 90px;
-          background:
-            radial-gradient(circle at 8% 0%, rgba(18, 102, 233, 0.1), transparent 28%),
-            radial-gradient(circle at 92% 6%, rgba(109, 75, 209, 0.08), transparent 24%),
-            #f4f7fb;
+          padding: 38px 0 90px;
+          background: #0647c8;
         }
 
         .shell {
@@ -237,12 +235,10 @@ export default function AdminDashboard({
           gap: 30px;
           padding: 27px 30px;
           overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.16);
+          border: 1px solid rgba(255, 255, 255, 0.25);
           border-radius: 25px;
-          background:
-            radial-gradient(circle at 90% 10%, rgba(115, 162, 255, 0.28), transparent 34%),
-            linear-gradient(135deg, #0b2d65 0%, #115ccf 58%, #6b4fd8 125%);
-          box-shadow: 0 24px 60px rgba(19, 64, 130, 0.2);
+          background: #083fAD;
+          box-shadow: 0 24px 60px rgba(0, 24, 88, 0.28);
         }
 
         .headingGroup {
@@ -372,7 +368,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: string;
+  icon: React.ReactNode;
 }) {
   return (
     <div className="card">
@@ -394,7 +390,7 @@ function StatCard({
           padding: 18px;
           border: 1px solid rgba(255, 255, 255, 0.18);
           border-radius: 18px;
-          background: linear-gradient(145deg, #0c55c6, #1266e9 58%, #4c83ed);
+          background: #0b52d6;
           box-shadow: 0 14px 34px rgba(18, 102, 233, 0.19);
         }
 
@@ -410,7 +406,8 @@ function StatCard({
           display: grid;
           place-items: center;
           border-radius: 11px;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
+          color: #ffffff;
           font-size: 25px;
         }
 
@@ -426,6 +423,10 @@ function StatCard({
           color: #ffffff;
           font-size: 32px;
           font-weight: 800;
+        }
+      `}:global(.adminIcon) {
+          width: 27px;
+          height: 27px;
         }
       `}</style>
     </div>
