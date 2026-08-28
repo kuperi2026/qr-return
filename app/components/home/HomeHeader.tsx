@@ -434,26 +434,13 @@ export default function HomeHeader({
 
         @media (max-width: 850px) {
 
-          .homeHeaderInner {
-            grid-template-columns: auto 1fr;
-            padding: 10px 0 0;
-          }
-
           .homeNav {
-            grid-column: 1 / -1;
-            grid-row: 2;
-            width: 100%;
-            overflow-x: auto;
-            gap: 22px;
-            padding: 0 2px;
-            scrollbar-width: none;
+            display: none;
           }
 
-          .homeNav::-webkit-scrollbar { display: none; }
-
-          .homeNav button {
-            padding: 13px 0 15px;
-            font-size: 10px;
+          .homeHeaderInner {
+            grid-template-columns:
+              auto 1fr;
           }
 
           .homeActions {
