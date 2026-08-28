@@ -4,6 +4,7 @@ import AdminSection, {
   type AdminSectionItem,
 } from "./AdminSection";
 import AdminIcon from "./AdminIcon";
+import type { ReactNode } from "react";
 
 type Props = {
   supportCount?: number;
@@ -368,7 +369,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }) {
   return (
     <div className="card">
@@ -424,7 +425,7 @@ function StatCard({
           font-size: 32px;
           font-weight: 800;
         }
-      `}:global(.adminIcon) {
+        :global(.adminIcon) {
           width: 27px;
           height: 27px;
         }
