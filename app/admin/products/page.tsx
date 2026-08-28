@@ -40,9 +40,9 @@ type FormState = {
 };
 
 const EMPTY: FormState = {
-  id: "", name: "", slug: "", category: "keychain", design_name: "",
+  id: "", name: "", slug: "", category: "dog", design_name: "",
   description: "", sku: "", price: "", currency: "USD", image_url: "",
-  stock_quantity: "0", active: true, featured: false, sort_order: "0",
+  stock_quantity: "0", active: false, featured: false, sort_order: "0",
 };
 
 function slugify(value: string) {
@@ -150,7 +150,7 @@ export default function AdminProductsPage() {
     event.preventDefault();
     setMessage("");
     setError("");
-    const price = Number(form.price);
+    const price = form.price.trim() ? Number(form.price) : 0;
     const stock = Number(form.stock_quantity);
     const sort = Number(form.sort_order);
     if (!form.name.trim() || !form.sku.trim() || !form.slug.trim()) {
@@ -159,6 +159,10 @@ export default function AdminProductsPage() {
     }
     if (!Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
       setError("ფასი და მარაგი სწორად შეავსეთ.");
+      return;
+    }
+    if (form.active && (price <= 0 || stock <= 0 || !form.image_url.trim())) {
+      setError("გასაყიდად გამოჩენამდე დაამატეთ ფოტო, ფასი და მარაგი.");
       return;
     }
     const payload = {
@@ -195,6 +199,10 @@ export default function AdminProductsPage() {
 
   async function toggle(product: Product, key: "active" | "featured") {
     setError("");
+    if (key === "active" && !product.active && (Number(product.price) <= 0 || product.stock_quantity <= 0 || !product.image_url)) {
+      setError("გასაყიდად გამოჩენამდე პროდუქტს სჭირდება ფოტო, ფასი და მარაგი.");
+      return;
+    }
     const { error: updateError } = await supabase
       .from("products").update({ [key]: !product[key] }).eq("id", product.id);
     if (updateError) {
@@ -230,13 +238,15 @@ export default function AdminProductsPage() {
             <label>Slug *<input value={form.slug} onChange={(e) => setForm((v) => ({...v, slug:slugify(e.target.value)}))} required /></label>
             <label>კატეგორია *
               <select value={form.category} onChange={(e) => setForm((v) => ({...v, category:e.target.value}))}>
-                <option value="keychain">QR ბრელოკი</option><option value="sticker">QR სტიკერი</option>
-                <option value="card">QR ბარათი</option><option value="accessory">აქსესუარი</option>
+                <option value="dog">🐶 ძაღლი / Dog</option><option value="cat">🐱 კატა / Cat</option>
+                <option value="keys">🔑 გასაღები / Keys</option><option value="wallet">👛 საფულე / Wallet</option>
+                <option value="bag">👜 ჩანთა / Bag</option><option value="suitcase">🧳 ჩემოდანი / Suitcase</option>
+                <option value="emergency">🆘 Emergency</option>
               </select>
             </label>
             <label>დიზაინის სახელი<input value={form.design_name} onChange={(e) => setForm((v) => ({...v, design_name:e.target.value}))} /></label>
             <label>SKU *<input value={form.sku} onChange={(e) => setForm((v) => ({...v, sku:e.target.value}))} required /></label>
-            <label>ფასი *<input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((v) => ({...v, price:e.target.value}))} required /></label>
+            <label>ფასი (მოგვიანებით)<input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((v) => ({...v, price:e.target.value}))} /></label>
             <label>ვალუტა<input maxLength={3} value={form.currency} onChange={(e) => setForm((v) => ({...v, currency:e.target.value}))} /></label>
             <label>მარაგი<input type="number" min="0" step="1" value={form.stock_quantity} onChange={(e) => setForm((v) => ({...v, stock_quantity:e.target.value}))} /></label>
             <label>თანმიმდევრობა<input type="number" step="1" value={form.sort_order} onChange={(e) => setForm((v) => ({...v, sort_order:e.target.value}))} /></label>
@@ -249,7 +259,7 @@ export default function AdminProductsPage() {
             </div>
             <label className="wide">სურათის URL<input type="url" value={form.image_url} onChange={(e) => setForm((v) => ({...v, image_url:e.target.value}))} placeholder="ატვირთვის შემდეგ ავტომატურად შეივსება" /></label>
             <div className="wide checks">
-              <label><input type="checkbox" checked={form.active} onChange={(e) => setForm((v) => ({...v, active:e.target.checked}))} /> მაღაზიაში გამოჩნდეს</label>
+              <label><input type="checkbox" checked={form.active} onChange={(e) => setForm((v) => ({...v, active:e.target.checked}))} /> მაღაზიაში გამოჩნდეს (ფოტო + ფასი + მარაგი)</label>
               <label><input type="checkbox" checked={form.featured} onChange={(e) => setForm((v) => ({...v, featured:e.target.checked}))} /> რჩეული პროდუქტი</label>
             </div>
             <div className="wide actions"><button className="primary" disabled={saving || uploading}>{saving ? "ინახება…" : form.id ? "ცვლილებების შენახვა" : "პროდუქტის დამატება"}</button>{form.id && <button type="button" className="secondary" onClick={() => setForm(EMPTY)}>გაუქმება</button>}</div>
@@ -261,9 +271,9 @@ export default function AdminProductsPage() {
           <div className="grid">{products.map((product) => (
             <article key={product.id}>
               <div className="photo">{product.image_url ? <img src={product.image_url} alt={product.name} /> : <span>QR</span>}</div>
-              <div className="productBody"><div className="badges"><span>{product.category}</span>{product.featured && <span>რჩეული</span>}{!product.active && <span>დამალული</span>}</div>
+              <div className="productBody"><div className="badges"><span>{product.category}</span>{product.featured && <span>რჩეული</span>}{!product.active && <span>DRAFT</span>}</div>
                 <h3>{product.name}</h3><p>{product.design_name || product.sku}</p>
-                <div className="facts"><strong>{Number(product.price).toFixed(2)} {product.currency}</strong><span>მარაგი: {product.stock_quantity}</span></div>
+                <div className="facts"><strong>{Number(product.price) > 0 ? `${Number(product.price).toFixed(2)} ${product.currency}` : "ფასი მოგვიანებით"}</strong><span>მარაგი: {product.stock_quantity}</span></div>
                 <div className="cardActions"><button onClick={() => edit(product)}>რედაქტირება</button><button onClick={() => void toggle(product, "active")}>{product.active ? "დამალვა" : "გამოჩენა"}</button><button onClick={() => void toggle(product, "featured")}>{product.featured ? "რჩეულიდან მოხსნა" : "რჩეულად მონიშვნა"}</button></div>
               </div>
             </article>
