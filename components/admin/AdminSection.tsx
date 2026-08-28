@@ -81,7 +81,7 @@ export default function AdminSection({
         }
 
         .eyebrow {
-          color: #c84a50;
+          color: rgba(255, 255, 255, 0.7);
 
           font-size: 7px;
           font-weight: 900;
@@ -91,7 +91,7 @@ export default function AdminSection({
         h2 {
           margin: 7px 0 0;
 
-          color: #27333e;
+          color: #ffffff;
 
           font-size: 26px;
           font-weight: 800;
@@ -103,7 +103,7 @@ export default function AdminSection({
 
           margin: 6px 0 0;
 
-          color: #7f8a95;
+          color: rgba(255, 255, 255, 0.76);
 
           font-size: 11px;
           line-height: 1.6;
@@ -119,11 +119,11 @@ export default function AdminSection({
           align-items: center;
           justify-content: center;
 
-          border: 1px solid #dfe4e8;
+          border: 1px solid rgba(255, 255, 255, 0.28);
           border-radius: 999px;
 
-          color: #73808c;
-          background: white;
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
 
           font-size: 8px;
           font-weight: 900;
