@@ -882,7 +882,7 @@ export default function AccountPage() {
 
                         <div className="profileActions">
                           <a
-                            href={`/emergency/profile/${encodeURIComponent(profile.tag_code)}`}
+                            href={`/emergency/${encodeURIComponent(profile.tag_code)}`}
                             className="viewButton"
                           >
                             პროფილის ნახვა
