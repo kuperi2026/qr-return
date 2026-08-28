@@ -7,7 +7,7 @@ import AboutMenu from "./components/home/AboutMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import FAQMenu from "./components/home/FAQMenu";
 import ContactMenu from "./components/home/ContactMenu";
-import CompleteHomePage from "./components/home/CompleteHomePage";
+import HomeHero from "./components/home/HomeHero";
 
 type Lang = "ka" | "en";
 
@@ -60,7 +60,7 @@ export default function HomePage() {
         <ContactMenu ka={ka} />
       )}
 
-      <CompleteHomePage ka={ka} />
+      <HomeHero ka={ka} />
     </main>
   );
 }
