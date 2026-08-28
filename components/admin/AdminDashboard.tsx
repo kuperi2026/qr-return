@@ -76,6 +76,14 @@ export default function AdminDashboard({
       tone: "amber",
     },
     {
+      href: "/admin/products",
+      title: "პროდუქტები",
+      description:
+        "პროდუქტის დამატება, სურათის ატვირთვა, ფასი, მარაგი და მაღაზიაში ხილვადობა.",
+      icon: <AdminIcon name="products" />,
+      tone: "cyan",
+    },
+    {
       href: "/admin/orders",
       title: "Orders",
       description:
