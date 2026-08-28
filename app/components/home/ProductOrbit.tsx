@@ -97,8 +97,8 @@ export default function ProductOrbit({
 
         <p className="productsCaption">
           {ka
-            ? "ერთი სკანირება მპოვნელს აძლევს თქვენ მიერ არჩეულ ინფორმაციასა და დაკავშირების გზას."
-            : "One scan gives the finder access to the information and contact options you selected."}
+            ? "6 კატეგორია და Emergency სამაჯური — ერთი დაცული QR RETURN სისტემით."
+            : "6 categories and an Emergency bracelet — one secure QR RETURN system."}
         </p>
 
       </div>
@@ -371,10 +371,11 @@ export default function ProductOrbit({
             height: 105px;
           }
 
-          .emergencyCenter :global(svg) {
-            width: 38px;
-            height: 38px;
-          }
+          .bracelet { margin-top: 5px; }
+          .bracelet i { width: 17px; height: 9px; }
+          .bracelet div { width: 31px; height: 31px; border-radius: 7px; }
+          .emergencyCenter :global(svg) { width: 20px; height: 20px; }
+          .emergencyCenter small { max-width: 86px; font-size: 5px; }
 
           .emergencyCenter strong {
             font-size: 8px;
@@ -443,6 +444,10 @@ export default function ProductOrbit({
             width: 94px;
             height: 94px;
           }
+          .emergencyLabel { font-size: 5px; }
+          .bracelet i { width: 14px; }
+          .bracelet div { width: 28px; height: 28px; }
+          .emergencyCenter small { display: none; }
 
           .productCircle :global(.productEmoji) {
             width: 44px;
