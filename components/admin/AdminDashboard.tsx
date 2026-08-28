@@ -144,7 +144,7 @@ export default function AdminDashboard({
         <header className="header">
           <div className="headingGroup">
             <div className="brandMark" aria-hidden="true">
-              <span className="brandCorners">⌗</span>
+              <AdminIcon name="qr" />
             </div>
 
             <div className="titleBlock">
@@ -256,15 +256,14 @@ export default function AdminDashboard({
           place-items: center;
           border: 1px solid rgba(255, 255, 255, 0.25);
           border-radius: 25px;
-          color: #1266e9;
-          background: white;
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
           box-shadow: 0 16px 30px rgba(5, 29, 69, 0.22);
         }
 
-        .brandCorners {
-          font-size: 48px;
-          font-weight: 900;
-          line-height: 1;
+        .brandMark :global(.adminIcon) {
+          width: 52px;
+          height: 52px;
         }
 
         .eyebrow {
@@ -348,8 +347,9 @@ export default function AdminDashboard({
             border-radius: 16px;
           }
 
-          .brandCorners {
-            font-size: 27px;
+          .brandMark :global(.adminIcon) {
+            width: 30px;
+            height: 30px;
           }
 
           .stats {
