@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { PhoneIcon, QRIcon, ShieldIcon } from "./HomeIcons";
 
 export default function EmergencySection({ ka }: { ka: boolean }) {
+  const [activeFeature, setActiveFeature] = useState<number | null>(0);
   const features = [
     [<ChatIcon key="chat" />, "Live Chat", ka ? "უსაფრთხოდ დაუკავშირდით ერთმანეთს პირადი ნომრის გამჟღავნების გარეშე." : "Connect securely without revealing a private phone number."],
     [<PhoneIcon key="phone" />, ka ? "ტელეფონით დაკავშირება" : "Phone contact", ka ? "მპოვნელი ერთი შეხებით დაგირეკავთ, თუ ამ ფუნქციას ჩართავთ." : "The finder can call in one tap when you enable this option."],
@@ -23,14 +25,31 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
             : "One QR scan gives the finder a safe way to reach you, helping a lost item or pet return faster. The owner controls communication, visibility and location."}
         </p>
 
-        <div className="features">
-          {features.map(([icon, title, text]) => (
-            <article className="feature" key={String(title)}>
-              <div className="icon">{icon}</div>
-              <div><strong>{title}</strong><span>{text}</span></div>
-            </article>
+        <div className="featureTabs" role="tablist" aria-label={ka ? "QR RETURN ფუნქციები" : "QR RETURN features"}>
+          {features.map(([icon, title], index) => (
+            <button
+              className={activeFeature === index ? "featureTab active" : "featureTab"}
+              key={String(title)}
+              type="button"
+              aria-expanded={activeFeature === index}
+              onClick={() => setActiveFeature(activeFeature === index ? null : index)}
+            >
+              <span className="tabIcon">{icon}</span>
+              <strong>{title}</strong>
+              <span className="toggle">{activeFeature === index ? "−" : "+"}</span>
+            </button>
           ))}
         </div>
+
+        {activeFeature !== null && (
+          <div className="featureDetails" role="region" aria-live="polite">
+            <div className="detailIcon">{features[activeFeature][0]}</div>
+            <div>
+              <strong>{features[activeFeature][1]}</strong>
+              <p>{features[activeFeature][2]}</p>
+            </div>
+          </div>
+        )}
 
         <div className="rolesIntro">
           <span>OWNER &amp; FINDER</span>
@@ -67,9 +86,9 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
       </div>
 
       <style jsx>{`
-        .featurePanel{max-width:640px}.eyebrow{color:rgba(255,255,255,.68);font-size:8px;font-weight:900;letter-spacing:1.4px}h1{max-width:590px;margin:12px 0 0;color:#fff;font-size:clamp(31px,3.1vw,43px);line-height:1.08;letter-spacing:-1.4px}.lead{max-width:570px;margin:14px 0 0;color:rgba(255,255,255,.8);font-size:12px;line-height:1.65}.features{display:grid;grid-template-columns:1fr;gap:9px;margin-top:22px}.feature{min-height:84px;padding:13px 15px;display:flex;align-items:center;gap:13px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.09)}.icon{width:46px;height:46px;flex:0 0 auto;display:grid;place-items:center;border-radius:10px;background:#fff;color:#1266e9}.icon :global(svg){width:25px;height:25px}.feature strong,.feature span{display:block}.feature strong{color:#fff;font-size:13px}.feature span{margin-top:5px;color:rgba(255,255,255,.78);font-size:11px;line-height:1.5}.rolesIntro{margin-top:18px}.rolesIntro>span{color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.rolesIntro h2{margin:6px 0 0;color:#fff;font-size:20px;line-height:1.25}.rolesIntro p{margin:7px 0 0;color:rgba(255,255,255,.78);font-size:11px;line-height:1.55}.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.roles article{min-height:154px;padding:15px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.07)}.roles span{display:block;color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.roles strong{display:block;margin-top:8px;color:#fff;font-size:14px}.roles p{margin:8px 0 0;color:rgba(255,255,255,.78);font-size:10px;line-height:1.55}.roles a{display:inline-block;margin-top:10px;color:#fff;font-size:10px;font-weight:900;text-decoration:none}.slogan{display:block;margin-top:14px;color:#fff;font-size:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.actions a{min-height:39px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.38);border-radius:9px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.actions .primary{border-color:#fff;color:#1266e9;background:#fff}
-        @media(max-width:650px){h1{font-size:32px}.lead{font-size:13px}.feature{min-height:88px;padding:12px}.roles{grid-template-columns:1fr}.roles article{min-height:auto}.actions a{flex:1}}
-        @media(max-width:390px){.feature{min-height:84px}}
+        .featurePanel{max-width:640px}.eyebrow{color:rgba(255,255,255,.68);font-size:8px;font-weight:900;letter-spacing:1.4px}h1{max-width:590px;margin:12px 0 0;color:#fff;font-size:clamp(31px,3.1vw,43px);line-height:1.08;letter-spacing:-1.4px}.lead{max-width:570px;margin:14px 0 0;color:rgba(255,255,255,.8);font-size:12px;line-height:1.65}.featureTabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:22px}.featureTab{min-height:82px;padding:10px;display:grid;grid-template-columns:38px 1fr 16px;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.18);border-radius:12px;color:#fff;background:rgba(255,255,255,.08);font:inherit;text-align:left;cursor:pointer;transition:background .2s ease,border-color .2s ease}.featureTab:hover,.featureTab.active{border-color:rgba(255,255,255,.48);background:rgba(255,255,255,.15)}.tabIcon,.detailIcon{display:grid;place-items:center;background:#fff;color:#1266e9}.tabIcon{width:38px;height:38px;border-radius:10px}.tabIcon :global(svg){width:21px;height:21px}.featureTab strong{font-size:10px;line-height:1.3}.toggle{font-size:17px;font-weight:500;text-align:center}.featureDetails{min-height:108px;margin-top:9px;padding:17px;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.3);border-radius:13px;background:rgba(255,255,255,.14)}.detailIcon{width:48px;height:48px;flex:0 0 auto;border-radius:12px}.detailIcon :global(svg){width:26px;height:26px}.featureDetails strong{display:block;color:#fff;font-size:14px}.featureDetails p{margin:7px 0 0;color:rgba(255,255,255,.84);font-size:12px;line-height:1.55}.rolesIntro{margin-top:18px}.rolesIntro>span{color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.rolesIntro h2{margin:6px 0 0;color:#fff;font-size:20px;line-height:1.25}.rolesIntro p{margin:7px 0 0;color:rgba(255,255,255,.78);font-size:11px;line-height:1.55}.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.roles article{min-height:154px;padding:15px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.07)}.roles span{display:block;color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.roles strong{display:block;margin-top:8px;color:#fff;font-size:14px}.roles p{margin:8px 0 0;color:rgba(255,255,255,.78);font-size:10px;line-height:1.55}.roles a{display:inline-block;margin-top:10px;color:#fff;font-size:10px;font-weight:900;text-decoration:none}.slogan{display:block;margin-top:14px;color:#fff;font-size:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.actions a{min-height:39px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.38);border-radius:9px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.actions .primary{border-color:#fff;color:#1266e9;background:#fff}
+        @media(max-width:650px){h1{font-size:32px}.lead{font-size:13px}.featureTabs{display:flex;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity}.featureTab{min-width:170px;scroll-snap-align:start}.featureDetails{align-items:flex-start}.roles{grid-template-columns:1fr}.roles article{min-height:auto}.actions a{flex:1}}
+        @media(max-width:390px){.featureTab{min-width:155px}}
       `}</style>
     </>
   );
