@@ -35,7 +35,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#1266e9",
+        background: "#f5f7fb",
       }}
     >
       <HomeHeader
