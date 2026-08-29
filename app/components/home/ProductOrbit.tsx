@@ -36,8 +36,8 @@ export default function ProductOrbit({
 
           <h2>
             {ka
-              ? "7 QR პროდუქტი ნივთების, ცხოველებისა და უსაფრთხოებისთვის."
-              : "7 QR products for belongings, pets and safety."}
+              ? "მყისიერი კავშირი — საჭირო დროს, საჭირო ადამიანთან"
+              : "Instant connection — at the right time, with the right person"}
           </h2>
         </div>
 
@@ -94,12 +94,6 @@ export default function ProductOrbit({
           />
 
         </div>
-
-        <p className="productsCaption">
-          {ka
-            ? "6 კატეგორია და Emergency სამაჯური — ერთი დაცული QR RETURN სისტემით."
-            : "6 categories and an Emergency bracelet — one secure QR RETURN system."}
-        </p>
 
       </div>
 
