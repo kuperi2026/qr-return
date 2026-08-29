@@ -9,6 +9,7 @@ type Benefit = {
 };
 
 export default function HomeHero({ ka }: { ka: boolean }) {
+  const [showAllBenefits, setShowAllBenefits] = useState(false);
   const ownerBenefits: Benefit[] = ka
     ? [
         { title: "ყველა პროფილი ერთ ანგარიშზე", description: "ძაღლის, კატის, გასაღების, საფულის, ჩანთის, ჩემოდნისა და Emergency სამაჯურის QR პროფილები ერთი დაცული ანგარიშიდან მართეთ." },
@@ -55,18 +56,33 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             <p>{ka ? "ერთი სკანირებით მპოვნელი ხედავს მხოლოდ იმ ინფორმაციასა და დაკავშირების საშუალებებს, რომლებიც მფლობელმა წინასწარ განსაზღვრა." : "With one scan, the finder sees only the information and contact options selected by the owner."}</p>
           </header>
 
+          <div className="featuredBenefits">
+            <div><b>01</b><strong>{ka ? "ერთი სკანირება — მყისიერი კავშირი" : "One scan — instant contact"}</strong></div>
+            <div><b>02</b><strong>{ka ? "აპლიკაციისა და რეგისტრაციის გარეშე" : "No app or registration required"}</strong></div>
+            <div><b>03</b><strong>{ka ? "ინფორმაცია — მფლობელის კონტროლით" : "Information controlled by the owner"}</strong></div>
+            <button type="button" aria-expanded={showAllBenefits} onClick={() => setShowAllBenefits((current) => !current)}>
+              {ka ? "ყველა შესაძლებლობა" : "All capabilities"}
+              <i aria-hidden="true">{showAllBenefits ? "−" : "+"}</i>
+            </button>
+          </div>
+
+          {showAllBenefits && (
+            <div className="benefitsDropdown">
+              <InfoPanel eyebrow="OWNER" title={ka ? "მფლობელის შესაძლებლობები" : "Owner capabilities"} items={ownerBenefits} />
+              <InfoPanel eyebrow="FINDER" title={ka ? "მპოვნელის შესაძლებლობები" : "Finder capabilities"} items={finderBenefits} />
+            </div>
+          )}
+
           <div className="productExperience">
-            <InfoPanel eyebrow="OWNER" title={ka ? "მფლობელის უპირატესობები" : "Owner benefits"} items={ownerBenefits} />
             <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
-            <InfoPanel eyebrow="FINDER" title={ka ? "მპოვნელის უპირატესობები" : "Finder benefits"} items={finderBenefits} />
           </div>
         </div>
       </section>
 
       <style jsx>{`
-        .homeHero{color:#fff;background:#063B72}.homeHeroInner{width:calc(100% - 80px);max-width:1340px;margin:auto;padding:74px 0 86px}.heroTitle{max-width:1040px;margin:0 auto;text-align:center}.heroTitle>span{color:rgba(255,255,255,.72);font-size:11px;font-weight:900;letter-spacing:1.5px}.heroTitle h1{margin:14px 0 0;color:#fff;font-size:clamp(29px,2.8vw,40px);line-height:1.22;letter-spacing:-1px}.heroTitle p{max-width:820px;margin:18px auto 0;color:rgba(255,255,255,.78);font-size:18px;line-height:1.65}.productExperience{margin-top:48px;display:grid;grid-template-columns:300px minmax(430px,1fr) 300px;gap:18px;align-items:center}.productExperience>:global(.infoPanel):first-child{transform:translate(-16px,-24px)}.productExperience>:global(.infoPanel):last-child{transform:translate(16px,-24px)}.orbitFrame{min-width:0;display:flex;justify-content:center}
-        @media(max-width:1100px){.productExperience{grid-template-columns:1fr 1fr;gap:24px}.productExperience>:global(.infoPanel):first-child,.productExperience>:global(.infoPanel):last-child{transform:none}.orbitFrame{grid-column:1/-1;grid-row:1}}
-        @media(max-width:760px){.homeHeroInner{width:calc(100% - 28px);padding:52px 0 65px}.heroTitle h1{font-size:27px;letter-spacing:-.5px}.heroTitle p{font-size:16px}.productExperience{grid-template-columns:1fr;margin-top:38px}.orbitFrame{grid-column:auto;grid-row:auto;order:-1}}
+        .homeHero{color:#fff;background:#063B72}.homeHeroInner{width:calc(100% - 80px);max-width:1340px;margin:auto;padding:74px 0 86px}.heroTitle{max-width:1040px;margin:0 auto;text-align:center}.heroTitle>span{color:rgba(255,255,255,.72);font-size:11px;font-weight:900;letter-spacing:1.5px}.heroTitle h1{margin:14px 0 0;color:#fff;font-size:clamp(29px,2.8vw,40px);line-height:1.22;letter-spacing:-1px}.heroTitle p{max-width:820px;margin:18px auto 0;color:rgba(255,255,255,.78);font-size:18px;line-height:1.65}.featuredBenefits{max-width:1120px;margin:34px auto 0;padding:10px;display:grid;grid-template-columns:repeat(3,1fr) auto;gap:8px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:rgba(255,255,255,.08)}.featuredBenefits>div{min-height:58px;padding:10px 13px;display:flex;align-items:center;gap:10px;border-radius:12px;background:rgba(255,255,255,.08)}.featuredBenefits b{color:rgba(255,255,255,.58);font-size:8px;letter-spacing:.8px}.featuredBenefits strong{color:#fff;font-size:12px;line-height:1.35}.featuredBenefits button{min-height:58px;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:11px;border:0;border-radius:12px;background:#fff;color:#063B72;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}.featuredBenefits button i{width:22px;height:22px;display:grid;place-items:center;border:1px solid rgba(6,59,114,.25);border-radius:50%;font-style:normal;font-size:15px}.benefitsDropdown{max-width:900px;margin:14px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:reveal .22s ease-out}.productExperience{margin-top:24px;display:flex;justify-content:center}.orbitFrame{min-width:0;display:flex;justify-content:center}@keyframes reveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+        @media(max-width:1000px){.featuredBenefits{grid-template-columns:1fr 1fr}.featuredBenefits button{grid-column:1/-1}.benefitsDropdown{grid-template-columns:1fr 1fr}}
+        @media(max-width:760px){.homeHeroInner{width:calc(100% - 28px);padding:52px 0 65px}.heroTitle h1{font-size:27px;letter-spacing:-.5px}.heroTitle p{font-size:16px}.featuredBenefits{grid-template-columns:1fr;margin-top:28px}.featuredBenefits button{grid-column:auto}.benefitsDropdown{grid-template-columns:1fr}.productExperience{margin-top:28px}}
       `}</style>
     </>
   );
