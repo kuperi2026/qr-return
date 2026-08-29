@@ -45,7 +45,7 @@ export default function HomeContinuation({ka}:{ka:boolean}) {
   return <div className="continuation">
     <section className="section how" id="how-it-works">
       <div className="shell">
-        <SectionTitle number="01" label="HOW IT WORKS" title={ka ? "როგორ მუშაობს QR RETURN" : "How QR RETURN Works"} text={ka ? "ოთხი მარტივი ეტაპი შეძენიდან უსაფრთხო დაბრუნებამდე." : "Four simple stages from purchase to safe return."} />
+        <SectionTitle number="01" label="HOW IT WORKS" title={ka ? "როგორ მუშაობს QR RETURN" : "How QR RETURN Works"} text={ka ? "ექვსი მარტივი ნაბიჯი რეგისტრაციიდან უსაფრთხო დაბრუნებამდე." : "Six simple steps from registration to safe return."} />
         <div className="phoneFlow">
           {steps.map((step,index) => (
             <article className="phoneStep" key={String(step.title)}>
