@@ -207,9 +207,9 @@ export default function HomeHeader({
           position: relative;
           z-index: 100;
 
-          background: #ffffff;
+          background: #063B72;
 
-          border-bottom: 1px solid #e6ebf1;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .homeHeaderInner {
@@ -248,8 +248,8 @@ export default function HomeHeader({
 
           border-radius: 10px;
 
-          background: #1266e9;
-          color: #ffffff;
+          background: #ffffff;
+          color: #063B72;
         }
 
         .homeBrand strong,
@@ -258,7 +258,7 @@ export default function HomeHeader({
         }
 
         .homeBrand strong {
-          color: #172b43;
+          color: #ffffff;
 
           font-size: 18px;
           font-weight: 900;
@@ -267,7 +267,7 @@ export default function HomeHeader({
         .homeBrand span {
           margin-top: 3px;
 
-          color: #8995a4;
+          color: rgba(255, 255, 255, 0.65);
 
           font-size: 8px;
           font-weight: 800;
@@ -297,7 +297,7 @@ export default function HomeHeader({
 
           background: transparent;
 
-          color: #1266e9;
+          color: #ffffff;
 
           font-family: inherit;
           font-size: 14px;
@@ -336,7 +336,7 @@ export default function HomeHeader({
 
           background: transparent;
 
-          color: #7b8796;
+          color: rgba(255, 255, 255, 0.65);
 
           font-size: 12px;
           font-weight: 900;
@@ -345,14 +345,14 @@ export default function HomeHeader({
         }
 
         .homeLanguages button.activeLanguage {
-          color: #1266e9;
+          color: #ffffff;
         }
 
         .homeLanguages span {
           width: 1px;
           height: 14px;
 
-          background: #d9e0e8;
+          background: rgba(255, 255, 255, 0.28);
         }
 
 
@@ -379,19 +379,25 @@ export default function HomeHeader({
         }
 
         .homeAuth {
-          color: #ffffff;
-
-          background: #1266e9;
-
-          border: 1px solid #1266e9;
-        }
-
-        .homeAdmin {
-          color: #1266e9;
+          color: #063B72;
 
           background: #ffffff;
 
-          border: 1px solid #cdddf4;
+          border: 1px solid #ffffff;
+        }
+
+        .homeAuth[href="/login"] {
+          color: #ffffff;
+          background: transparent;
+          border-color: rgba(255, 255, 255, 0.58);
+        }
+
+        .homeAdmin {
+          color: #063B72;
+
+          background: #ffffff;
+
+          border: 1px solid #ffffff;
         }
 
 
