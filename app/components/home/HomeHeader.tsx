@@ -260,7 +260,7 @@ export default function HomeHeader({
         .homeBrand strong {
           color: #172b43;
 
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 900;
         }
 
@@ -269,7 +269,7 @@ export default function HomeHeader({
 
           color: #8995a4;
 
-          font-size: 7px;
+          font-size: 8px;
           font-weight: 800;
 
           letter-spacing: 1.3px;
@@ -300,7 +300,7 @@ export default function HomeHeader({
           color: #1266e9;
 
           font-family: inherit;
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 800;
 
           cursor: pointer;
@@ -338,7 +338,7 @@ export default function HomeHeader({
 
           color: #7b8796;
 
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 900;
 
           cursor: pointer;
@@ -360,9 +360,9 @@ export default function HomeHeader({
 
         .homeAuth,
         .homeAdmin {
-          min-height: 38px;
+          min-height: 42px;
 
-          padding: 0 13px;
+          padding: 0 15px;
 
           display: flex;
           align-items: center;
@@ -370,7 +370,7 @@ export default function HomeHeader({
 
           border-radius: 9px;
 
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 800;
 
           text-decoration: none;
@@ -413,7 +413,7 @@ export default function HomeHeader({
           }
 
           .homeNav button {
-            font-size: 10px;
+            font-size: 11px;
           }
 
           .homeActions {
@@ -424,7 +424,7 @@ export default function HomeHeader({
           .homeAdmin {
             padding: 0 9px;
 
-            font-size: 9px;
+            font-size: 10.5px;
           }
 
         }
@@ -488,15 +488,15 @@ export default function HomeHeader({
           }
 
           .homeLanguages button {
-            font-size: 9px;
+            font-size: 10px;
           }
 
           .homeAuth {
-            min-height: 34px;
+            min-height: 36px;
 
             padding: 0 8px;
 
-            font-size: 8px;
+            font-size: 10px;
           }
 
         }
