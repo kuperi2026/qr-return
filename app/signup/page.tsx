@@ -510,13 +510,7 @@ export default function SignupPage() {
           padding:
             0 24px 30px;
 
-          background:
-            radial-gradient(
-              circle at 12% 20%,
-              rgba(255, 255, 255, 0.08),
-              transparent 25%
-            ),
-            #0647c8;
+          background: #063B72;
 
           font-family:
             Arial,
@@ -599,7 +593,7 @@ export default function SignupPage() {
           border-radius: 11px;
 
           background: #ffffff;
-          color: #0647c8;
+          color: #063B72;
 
           font-size: 12px;
           font-weight: 950;
@@ -693,12 +687,7 @@ export default function SignupPage() {
 
           border-radius: 17px;
 
-          background:
-            linear-gradient(
-              145deg,
-              rgba(255, 255, 255, 0.13),
-              rgba(255, 255, 255, 0.055)
-            );
+          background: rgba(255, 255, 255, 0.1);
 
           box-shadow:
             0 18px 42px
@@ -791,7 +780,7 @@ export default function SignupPage() {
         }
 
         .cardHeader > span {
-          color: #0647c8;
+          color: #063B72;
 
           font-size: 10px;
           font-weight: 900;
@@ -856,7 +845,7 @@ export default function SignupPage() {
         }
 
         .field label b {
-          color: #0647c8;
+          color: #063B72;
         }
 
         /*
@@ -907,7 +896,7 @@ export default function SignupPage() {
         .field input:focus,
         .passwordField input:focus {
           border-color:
-            #1266e9 !important;
+            #063B72 !important;
 
           background:
             #ffffff !important;
@@ -915,9 +904,9 @@ export default function SignupPage() {
           box-shadow:
             0 0 0 4px
             rgba(
-              18,
-              102,
-              233,
+              6,
+              59,
+              114,
               0.09
             ) !important;
         }
@@ -965,7 +954,7 @@ export default function SignupPage() {
           border-radius: 8px;
 
           background: #edf4ff;
-          color: #0647c8;
+          color: #063B72;
 
           font-family: inherit;
 
@@ -1006,7 +995,7 @@ export default function SignupPage() {
           border: 0;
           border-radius: 10px;
 
-          background: #0647c8;
+          background: #063B72;
           color: #ffffff;
 
           font-family: inherit;
@@ -1043,7 +1032,7 @@ export default function SignupPage() {
         }
 
         .bottom a {
-          color: #0647c8;
+          color: #063B72;
 
           font-weight: 850;
           text-decoration: none;
