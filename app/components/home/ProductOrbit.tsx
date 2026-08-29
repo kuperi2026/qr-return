@@ -112,7 +112,7 @@ export default function ProductOrbit({
         }
 
         .productIntro > span {
-          color: #1266e9;
+          color: rgba(255,255,255,.72);
 
           font-size: 8px;
           font-weight: 900;
@@ -123,7 +123,7 @@ export default function ProductOrbit({
         .productIntro h2 {
           margin: 8px 0 0;
 
-          color: #12345B;
+          color: #ffffff;
 
           font-size: 22px;
           line-height: 1.4;
@@ -149,7 +149,7 @@ export default function ProductOrbit({
           border-radius: 50%;
 
           border:
-            1px solid rgba(18,102,233,.2);
+            1px solid rgba(255,255,255,.28);
         }
 
         .ringOne {
@@ -160,7 +160,7 @@ export default function ProductOrbit({
           inset: 104px;
 
           border-color:
-            rgba(18,102,233,.1);
+            rgba(255,255,255,.14);
         }
 
 
@@ -186,16 +186,16 @@ export default function ProductOrbit({
 
           border-radius: 50%;
 
-          background: #E53935;
+          background: #ffffff;
 
-          color: #ffffff;
+          color: #063B72;
 
           box-shadow:
-            0 17px 40px rgba(176,35,35,.22);
+            0 17px 40px rgba(0,24,55,.25);
         }
 
         .emergencyLabel {
-          color: rgba(255,255,255,.76);
+          color: rgba(6,59,114,.68);
           font-size: 7px;
           font-weight: 900;
           letter-spacing: 1px;
@@ -212,7 +212,7 @@ export default function ProductOrbit({
           width: 26px;
           height: 13px;
           display: block;
-          background: #ffffff;
+          background: #063B72;
         }
 
         .bracelet div {
@@ -220,22 +220,22 @@ export default function ProductOrbit({
           height: 46px;
           display: grid;
           place-items: center;
-          border: 2px solid #ffffff;
+          border: 2px solid #063B72;
           border-radius: 9px;
-          color: #1266e9;
-          background: #ffffff;
+          color: #ffffff;
+          background: #063B72;
         }
 
         .emergencyCenter strong {
           margin-top: 7px;
-          color: #ffffff;
+          color: #063B72;
           font-size: 11px;
         }
 
         .emergencyCenter small {
           max-width: 118px;
           margin-top: 3px;
-          color: rgba(255,255,255,.72);
+          color: rgba(6,59,114,.68);
           font-size: 7px;
           font-weight: 800;
           text-align: center;
@@ -264,7 +264,7 @@ export default function ProductOrbit({
 
           border-radius: 50%;
 
-          border: 1px solid #dbe4ee;
+          border: 1px solid rgba(255,255,255,.7);
 
           background: #ffffff;
 
@@ -278,7 +278,7 @@ export default function ProductOrbit({
           margin-top: 8px;
 
           color:
-            #12345B;
+            #ffffff;
 
           font-size: 13px;
           font-weight: 850;
