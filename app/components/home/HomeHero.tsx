@@ -54,6 +54,10 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             <span>QR RETURN · SMART LOST &amp; FOUND</span>
           </header>
 
+          <div className="productExperience">
+            <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
+          </div>
+
           <div className="featuredBenefits">
             <div className="valueCard">
               <b>01</b>
@@ -76,9 +80,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             </div>
           )}
 
-          <div className="productExperience">
-            <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
-          </div>
         </div>
       </section>
 
