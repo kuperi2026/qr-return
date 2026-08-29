@@ -133,8 +133,8 @@ export default function ProductOrbit({
         /* ORBIT */
 
         .productCircle {
-          width: 600px;
-          height: 600px;
+          width: 480px;
+          height: 480px;
 
           margin-top: 18px;
 
@@ -153,11 +153,11 @@ export default function ProductOrbit({
         }
 
         .ringOne {
-          inset: 56px;
+          inset: 45px;
         }
 
         .ringTwo {
-          inset: 130px;
+          inset: 104px;
 
           border-color:
             rgba(255,255,255,.1);
@@ -167,8 +167,8 @@ export default function ProductOrbit({
         /* EMERGENCY CENTER */
 
         .emergencyCenter {
-          width: 190px;
-          height: 190px;
+          width: 150px;
+          height: 150px;
 
           position: absolute;
 
@@ -209,15 +209,15 @@ export default function ProductOrbit({
         }
 
         .bracelet i {
-          width: 32px;
-          height: 16px;
+          width: 26px;
+          height: 13px;
           display: block;
           background: #1266e9;
         }
 
         .bracelet div {
-          width: 56px;
-          height: 56px;
+          width: 46px;
+          height: 46px;
           display: grid;
           place-items: center;
           border: 2px solid #1266e9;
@@ -233,7 +233,7 @@ export default function ProductOrbit({
         }
 
         .emergencyCenter small {
-          max-width: 145px;
+          max-width: 118px;
           margin-top: 3px;
           color: #8593a4;
           font-size: 7px;
@@ -245,7 +245,7 @@ export default function ProductOrbit({
         /* PRODUCTS */
 
         .productCircle :global(.product) {
-          width: 104px;
+          width: 92px;
 
           position: absolute;
 
@@ -256,8 +256,8 @@ export default function ProductOrbit({
         }
 
         .productCircle :global(.productEmoji) {
-          width: 78px;
-          height: 78px;
+          width: 64px;
+          height: 64px;
 
           display: grid;
           place-items: center;
@@ -266,7 +266,7 @@ export default function ProductOrbit({
 
           background: #ffffff;
 
-          font-size: 34px;
+          font-size: 30px;
 
           box-shadow:
             0 9px 23px rgba(0,0,0,.12);
@@ -287,31 +287,31 @@ export default function ProductOrbit({
 
         .productCircle :global(.p1) {
           top: 0;
-          left: 150px;
+          left: 120px;
         }
 
         .productCircle :global(.p2) {
           top: 0;
-          right: 150px;
+          right: 120px;
         }
 
         .productCircle :global(.p3) {
-          top: 225px;
+          top: 180px;
           right: 0;
         }
 
         .productCircle :global(.p4) {
-          right: 105px;
+          right: 84px;
           bottom: 2px;
         }
 
         .productCircle :global(.p5) {
-          left: 105px;
+          left: 84px;
           bottom: 2px;
         }
 
         .productCircle :global(.p6) {
-          top: 225px;
+          top: 180px;
           left: 0;
         }
 
