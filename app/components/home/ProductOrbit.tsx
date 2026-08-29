@@ -112,7 +112,7 @@ export default function ProductOrbit({
         }
 
         .productIntro {
-          max-width: 440px;
+          max-width: 520px;
 
           text-align: center;
         }
@@ -131,7 +131,7 @@ export default function ProductOrbit({
 
           color: #ffffff;
 
-          font-size: 18px;
+          font-size: 22px;
           line-height: 1.4;
         }
 
@@ -139,8 +139,8 @@ export default function ProductOrbit({
         /* ORBIT */
 
         .productCircle {
-          width: 450px;
-          height: 450px;
+          width: 600px;
+          height: 600px;
 
           margin-top: 18px;
 
@@ -159,11 +159,11 @@ export default function ProductOrbit({
         }
 
         .ringOne {
-          inset: 42px;
+          inset: 56px;
         }
 
         .ringTwo {
-          inset: 98px;
+          inset: 130px;
 
           border-color:
             rgba(255,255,255,.1);
@@ -173,8 +173,8 @@ export default function ProductOrbit({
         /* EMERGENCY CENTER */
 
         .emergencyCenter {
-          width: 154px;
-          height: 154px;
+          width: 190px;
+          height: 190px;
 
           position: absolute;
 
@@ -202,7 +202,7 @@ export default function ProductOrbit({
 
         .emergencyLabel {
           color: #1266e9;
-          font-size: 6px;
+          font-size: 7px;
           font-weight: 900;
           letter-spacing: 1px;
         }
@@ -215,15 +215,15 @@ export default function ProductOrbit({
         }
 
         .bracelet i {
-          width: 25px;
-          height: 13px;
+          width: 32px;
+          height: 16px;
           display: block;
           background: #1266e9;
         }
 
         .bracelet div {
-          width: 45px;
-          height: 45px;
+          width: 56px;
+          height: 56px;
           display: grid;
           place-items: center;
           border: 2px solid #1266e9;
@@ -235,14 +235,14 @@ export default function ProductOrbit({
         .emergencyCenter strong {
           margin-top: 7px;
           color: #223a55;
-          font-size: 9px;
+          font-size: 11px;
         }
 
         .emergencyCenter small {
-          max-width: 116px;
+          max-width: 145px;
           margin-top: 3px;
           color: #8593a4;
-          font-size: 6px;
+          font-size: 7px;
           font-weight: 800;
           text-align: center;
         }
@@ -251,7 +251,7 @@ export default function ProductOrbit({
         /* PRODUCTS */
 
         .productCircle :global(.product) {
-          width: 82px;
+          width: 104px;
 
           position: absolute;
 
@@ -262,8 +262,8 @@ export default function ProductOrbit({
         }
 
         .productCircle :global(.productEmoji) {
-          width: 62px;
-          height: 62px;
+          width: 78px;
+          height: 78px;
 
           display: grid;
           place-items: center;
@@ -272,19 +272,19 @@ export default function ProductOrbit({
 
           background: #ffffff;
 
-          font-size: 28px;
+          font-size: 34px;
 
           box-shadow:
             0 9px 23px rgba(0,0,0,.12);
         }
 
         .productCircle :global(.productName) {
-          margin-top: 7px;
+          margin-top: 8px;
 
           color:
-            rgba(255,255,255,.9);
+            rgba(255,255,255,.94);
 
-          font-size: 9px;
+          font-size: 11px;
           font-weight: 800;
         }
 
@@ -293,31 +293,31 @@ export default function ProductOrbit({
 
         .productCircle :global(.p1) {
           top: 0;
-          left: 112px;
+          left: 150px;
         }
 
         .productCircle :global(.p2) {
           top: 0;
-          right: 112px;
+          right: 150px;
         }
 
         .productCircle :global(.p3) {
-          top: 170px;
+          top: 225px;
           right: 0;
         }
 
         .productCircle :global(.p4) {
-          right: 80px;
+          right: 105px;
           bottom: 2px;
         }
 
         .productCircle :global(.p5) {
-          left: 80px;
+          left: 105px;
           bottom: 2px;
         }
 
         .productCircle :global(.p6) {
-          top: 170px;
+          top: 225px;
           left: 0;
         }
 
@@ -325,23 +325,23 @@ export default function ProductOrbit({
         /* CAPTION */
 
         .productsCaption {
-          max-width: 390px;
+          max-width: 460px;
 
-          margin: 8px 0 0;
+          margin: 10px 0 0;
 
           text-align: center;
 
           color:
             rgba(255,255,255,.65);
 
-          font-size: 9px;
-          line-height: 1.55;
+          font-size: 10px;
+          line-height: 1.6;
         }
 
 
         /* MOBILE */
 
-        @media (max-width: 650px) {
+        @media (max-width: 760px) {
 
           .productIntro {
             max-width: 330px;
