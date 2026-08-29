@@ -13,12 +13,12 @@ export default function HomeHero({ ka }: { ka: boolean }) {
   ];
 
   const features = ka
-    ? ["Live Chat", "ტელეფონით დაკავშირება", "ლოკაციის გაზიარება", "Lost ON", "Scan შეტყობინება", "ინფორმაციის კონტროლი"]
-    : ["Live Chat", "Phone contact", "Location sharing", "Lost ON", "Scan alert", "Information control"];
+    ? ["ტელეფონი და Live Chat", "ლოკაციის გაზიარება", "Lost ON", "Scan შეტყობინება", "ინფორმაციის კონტროლი", "Emergency პროფილი მესამე პირისთვის"]
+    : ["Phone and Live Chat", "Location sharing", "Lost ON", "Scan alert", "Information control", "Emergency profile for another person"];
 
   const finderBenefits = ka
-    ? ["რეგისტრაცია არ სჭირდება", "აპლიკაცია არ სჭირდება", "ხედავს არჩეულ ინფორმაციას", "ერთი შეხებით დარეკვა", "მფლობელთან Live Chat", "ლოკაცია მხოლოდ თანხმობით"]
-    : ["No registration required", "No app required", "Sees selected information", "One-tap phone call", "Live Chat with owner", "Location only by consent"];
+    ? ["რეგისტრაცია არ სჭირდება", "აპლიკაცია არ სჭირდება", "ზარი ან Live Chat", "ხედავს მხოლოდ არჩეულ ინფორმაციას", "ლოკაციას მხოლოდ თანხმობით აზიარებს", "Emergency ინფორმაციაზე სწრაფი წვდომა"]
+    : ["No registration required", "No app required", "Call or Live Chat", "Sees only selected information", "Shares location only by consent", "Fast access to Emergency information"];
 
   return (
     <>
@@ -31,9 +31,9 @@ export default function HomeHero({ ka }: { ka: boolean }) {
           </header>
 
           <div className="productExperience">
-            <InfoPanel eyebrow="QR RETURN · FEATURES" title={ka ? "ყველა საჭირო ფუნქცია" : "Every essential feature"} items={features} />
+            <InfoPanel eyebrow="OWNER" title={ka ? "მფლობელის შესაძლებლობები" : "Owner capabilities"} items={features} />
             <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
-            <InfoPanel eyebrow="FINDER" title={ka ? "მარტივი გამოცდილება მპოვნელისთვის" : "A simple finder experience"} items={finderBenefits} />
+            <InfoPanel eyebrow="FINDER" title={ka ? "მპოვნელის შესაძლებლობები" : "Finder capabilities"} items={finderBenefits} />
           </div>
 
           <div className="journeyHeading" id="how-it-works">
