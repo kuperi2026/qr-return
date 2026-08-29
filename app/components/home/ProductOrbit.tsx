@@ -276,10 +276,10 @@ export default function ProductOrbit({
           margin-top: 8px;
 
           color:
-            rgba(255,255,255,.94);
+            rgba(255,255,255,.96);
 
-          font-size: 11px;
-          font-weight: 800;
+          font-size: 13px;
+          font-weight: 850;
         }
 
 
