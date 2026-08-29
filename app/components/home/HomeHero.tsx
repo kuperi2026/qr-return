@@ -13,13 +13,13 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             <span>QR RETURN · SMART LOST &amp; FOUND</span>
             <h1>
               {ka
-                ? "დაკარგული ნივთის დაბრუნება იწყება ერთი სკანირებით."
-                : "A safe return begins with one scan."}
+                ? "QR პროფილის შექმნის შემდეგ ნივთი, შინაური ცხოველი ან Emergency სამაჯური უნიკალურ ციფრულ გვერდს უკავშირდება."
+                : "Each QR profile connects an item, pet, or Emergency bracelet to a unique digital page."}
             </h1>
             <p>
               {ka
-                ? "7 პროდუქტი. ერთი მიზანი — მპოვნელისა და მფლობელის სწრაფად, მარტივად და უსაფრთხოდ დაკავშირება."
-                : "7 products. One mission — connecting finder and owner quickly, simply and securely."}
+                ? "ერთი სკანირებით მპოვნელი ხედავს მხოლოდ იმ ინფორმაციასა და დაკავშირების საშუალებებს, რომლებიც მფლობელმა წინასწარ განსაზღვრა."
+                : "With one scan, the finder sees only the information and contact options selected by the owner."}
             </p>
           </header>
 
