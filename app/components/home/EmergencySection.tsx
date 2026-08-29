@@ -16,14 +16,18 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
 
   return (
     <>
-      <div className="featurePanel">
-        <span className="eyebrow">QR RETURN · FEATURES</span>
-        <h1>{ka ? "ყველა საჭირო ფუნქცია ერთ სისტემაში" : "Every essential feature in one system"}</h1>
-        <p className="lead">
-          {ka
-            ? "QR კოდის ერთი სკანირება მპოვნელს აძლევს თქვენთან დაკავშირების უსაფრთხო გზას, რათა დაკარგული ნივთი ან ცხოველი უფრო სწრაფად დაბრუნდეს. მფლობელი თავად აკონტროლებს კომუნიკაციას, ხილვადობასა და ლოკაციას."
-            : "One QR scan gives the finder a safe way to reach you, helping a lost item or pet return faster. The owner controls communication, visibility and location."}
-        </p>
+      <section className="featurePanel">
+        <div className="featureHeading">
+          <div>
+            <span>QR RETURN · FEATURES</span>
+            <h2>{ka ? "ყველა საჭირო ფუნქცია ერთ სისტემაში" : "Every essential feature in one system"}</h2>
+          </div>
+          <p>
+            {ka
+              ? "აირჩიეთ ფუნქცია და ნახეთ, როგორ ამარტივებს QR RETURN დაკარგული ნივთის ან ცხოველის უსაფრთხოდ დაბრუნებას."
+              : "Select a feature to see how QR RETURN makes a safe return simpler."}
+          </p>
+        </div>
 
         <div className="featureTabs" role="tablist" aria-label={ka ? "QR RETURN ფუნქციები" : "QR RETURN features"}>
           {features.map(([icon, title], index) => (
@@ -51,44 +55,18 @@ export default function EmergencySection({ ka }: { ka: boolean }) {
           </div>
         )}
 
-        <div className="rolesIntro">
-          <span>OWNER &amp; FINDER</span>
-          <h2>{ka ? "მარტივი გამოცდილება ორივე მხარისთვის" : "Simple for both sides"}</h2>
-          <p>
-            {ka
-              ? "მპოვნელს ანგარიში არ სჭირდება, მფლობელი კი ყველაფერს დაცული ანგარიშიდან მართავს."
-              : "The finder needs no account, while the owner manages everything securely."}
-          </p>
+        <div className="featureFooter">
+          <strong>{ka ? "დაასკანირე. დაუკავშირდი. დააბრუნე." : "Scan. Connect. Return."}</strong>
+          <div>
+            <a className="primary" href="/store">{ka ? "მაღაზიის ნახვა" : "View store"}</a>
+            <a href="#how-it-works">{ka ? "როგორ მუშაობს" : "How it works"}</a>
+          </div>
         </div>
-
-        <div className="roles">
-          <article>
-            <span>OWNER</span>
-            <strong>{ka ? "მფლობელის სივრცე" : "Owner space"}</strong>
-            <p>{ka ? "მართეთ შეუზღუდავი QR პროფილები, შეცვალეთ ხილვადობა, ჩართეთ Lost ON და აკონტროლეთ Scan ისტორია, Live Chat და ლოკაცია." : "Manage unlimited QR profiles, edit visibility, activate Lost ON, and control scan history, Live Chat and location."}</p>
-            <a href="/signup">{ka ? "რეგისტრაცია" : "Register"} →</a>
-          </article>
-          <article>
-            <span>FINDER</span>
-            <strong>{ka ? "მპოვნელის გვერდი" : "Finder page"}</strong>
-            <p>{ka ? "მპოვნელს რეგისტრაცია და აპლიკაცია არ სჭირდება — სკანირების შემდეგ ხედავს მხოლოდ არჩეულ ინფორმაციას და შეუძლია ზარი, Live Chat ან ლოკაციის გაზიარება." : "The finder needs no registration or app, sees only selected information, and can call, chat or share location after scanning."}</p>
-          </article>
-        </div>
-
-        <strong className="slogan">
-          {ka ? "დაასკანირე. დაუკავშირდი. დააბრუნე." : "Scan. Connect. Return."}
-        </strong>
-
-        <div className="actions">
-          <a className="primary" href="/store">{ka ? "მაღაზიის ნახვა" : "View store"}</a>
-          <a href="#how-it-works">{ka ? "როგორ მუშაობს" : "How it works"}</a>
-        </div>
-      </div>
+      </section>
 
       <style jsx>{`
-        .featurePanel{max-width:640px}.eyebrow{color:rgba(255,255,255,.68);font-size:8px;font-weight:900;letter-spacing:1.4px}h1{max-width:590px;margin:12px 0 0;color:#fff;font-size:clamp(31px,3.1vw,43px);line-height:1.08;letter-spacing:-1.4px}.lead{max-width:570px;margin:14px 0 0;color:rgba(255,255,255,.8);font-size:12px;line-height:1.65}.featureTabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:22px}.featureTab{min-height:82px;padding:10px;display:grid;grid-template-columns:38px 1fr 16px;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.18);border-radius:12px;color:#fff;background:rgba(255,255,255,.08);font:inherit;text-align:left;cursor:pointer;transition:background .2s ease,border-color .2s ease}.featureTab:hover,.featureTab.active{border-color:rgba(255,255,255,.48);background:rgba(255,255,255,.15)}.tabIcon,.detailIcon{display:grid;place-items:center;background:#fff;color:#1266e9}.tabIcon{width:38px;height:38px;border-radius:10px}.tabIcon :global(svg){width:21px;height:21px}.featureTab strong{font-size:10px;line-height:1.3}.toggle{font-size:17px;font-weight:500;text-align:center}.featureDetails{min-height:108px;margin-top:9px;padding:17px;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.3);border-radius:13px;background:rgba(255,255,255,.14)}.detailIcon{width:48px;height:48px;flex:0 0 auto;border-radius:12px}.detailIcon :global(svg){width:26px;height:26px}.featureDetails strong{display:block;color:#fff;font-size:14px}.featureDetails p{margin:7px 0 0;color:rgba(255,255,255,.84);font-size:12px;line-height:1.55}.rolesIntro{margin-top:18px}.rolesIntro>span{color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.rolesIntro h2{margin:6px 0 0;color:#fff;font-size:20px;line-height:1.25}.rolesIntro p{margin:7px 0 0;color:rgba(255,255,255,.78);font-size:11px;line-height:1.55}.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.roles article{min-height:154px;padding:15px;border:1px solid rgba(255,255,255,.17);border-radius:12px;background:rgba(255,255,255,.07)}.roles span{display:block;color:rgba(255,255,255,.58);font-size:7px;font-weight:900;letter-spacing:1px}.roles strong{display:block;margin-top:8px;color:#fff;font-size:14px}.roles p{margin:8px 0 0;color:rgba(255,255,255,.78);font-size:10px;line-height:1.55}.roles a{display:inline-block;margin-top:10px;color:#fff;font-size:10px;font-weight:900;text-decoration:none}.slogan{display:block;margin-top:14px;color:#fff;font-size:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.actions a{min-height:39px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.38);border-radius:9px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.actions .primary{border-color:#fff;color:#1266e9;background:#fff}
-        @media(max-width:650px){h1{font-size:32px}.lead{font-size:13px}.featureTabs{display:flex;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity}.featureTab{min-width:170px;scroll-snap-align:start}.featureDetails{align-items:flex-start}.roles{grid-template-columns:1fr}.roles article{min-height:auto}.actions a{flex:1}}
-        @media(max-width:390px){.featureTab{min-width:155px}}
+        .featurePanel{margin-top:66px;padding-top:54px;border-top:1px solid rgba(255,255,255,.18)}.featureHeading{display:flex;align-items:end;justify-content:space-between;gap:35px}.featureHeading>div>span{color:rgba(255,255,255,.62);font-size:8px;font-weight:900;letter-spacing:1.4px}.featureHeading h2{max-width:690px;margin:9px 0 0;color:#fff;font-size:clamp(30px,3.4vw,46px);line-height:1.08;letter-spacing:-1.4px}.featureHeading>p{max-width:430px;margin:0;color:rgba(255,255,255,.76);font-size:12px;line-height:1.7}.featureTabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:30px}.featureTab{min-height:112px;padding:12px 10px;display:flex;flex-direction:column;align-items:flex-start;border:1px solid rgba(255,255,255,.2);border-radius:14px;color:#fff;background:rgba(4,48,126,.26);font:inherit;text-align:left;cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease}.featureTab:hover,.featureTab.active{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.14);transform:translateY(-2px)}.tabIcon,.detailIcon{display:grid;place-items:center;color:#0754c7;background:#fff}.tabIcon{width:39px;height:39px;border-radius:10px}.tabIcon :global(svg){width:21px;height:21px}.featureTab strong{margin-top:13px;font-size:10px;line-height:1.3}.toggle{margin-top:auto;align-self:flex-end;font-size:17px}.featureDetails{min-height:124px;margin-top:10px;padding:21px;display:flex;align-items:center;gap:16px;border:1px solid rgba(255,255,255,.34);border-radius:15px;background:rgba(255,255,255,.13)}.detailIcon{width:56px;height:56px;flex:0 0 auto;border-radius:14px}.detailIcon :global(svg){width:29px;height:29px}.featureDetails strong{display:block;color:#fff;font-size:16px}.featureDetails p{margin:8px 0 0;color:rgba(255,255,255,.86);font-size:13px;line-height:1.6}.featureFooter{margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:20px}.featureFooter>strong{font-size:12px}.featureFooter>div{display:flex;gap:8px}.featureFooter a{min-height:42px;padding:0 17px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.4);border-radius:10px;color:#fff;background:rgba(255,255,255,.07);font-size:10px;font-weight:900;text-decoration:none}.featureFooter a.primary{border-color:#fff;color:#0754c7;background:#fff}
+        @media(max-width:950px){.featureTabs{grid-template-columns:repeat(3,1fr)}.featureHeading{align-items:flex-start;flex-direction:column;gap:13px}}@media(max-width:650px){.featurePanel{margin-top:48px;padding-top:42px}.featureHeading h2{font-size:32px}.featureHeading>p{font-size:12px}.featureTabs{display:flex;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}.featureTab{min-width:165px;scroll-snap-align:start}.featureDetails{align-items:flex-start}.featureFooter{align-items:flex-start;flex-direction:column}.featureFooter>div{width:100%}.featureFooter a{flex:1;justify-content:center}}
       `}</style>
     </>
   );
