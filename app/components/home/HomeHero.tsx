@@ -1,15 +1,49 @@
 "use client";
 
+import { useState } from "react";
 import ProductOrbit from "./ProductOrbit";
 
-export default function HomeHero({ ka }: { ka: boolean }) {
-  const features = ka
-    ? ["ტელეფონი და Live Chat", "ლოკაციის გაზიარება", "Lost ON", "Scan შეტყობინება", "ინფორმაციის კონტროლი", "Emergency პროფილი მესამე პირისთვის"]
-    : ["Phone and Live Chat", "Location sharing", "Lost ON", "Scan alert", "Information control", "Emergency profile for another person"];
+type Benefit = {
+  title: string;
+  description: string;
+};
 
-  const finderBenefits = ka
-    ? ["რეგისტრაცია არ სჭირდება", "აპლიკაცია არ სჭირდება", "ზარი ან Live Chat", "ხედავს მხოლოდ არჩეულ ინფორმაციას", "ლოკაციას მხოლოდ თანხმობით აზიარებს", "Emergency ინფორმაციაზე სწრაფი წვდომა"]
-    : ["No registration required", "No app required", "Call or Live Chat", "Sees only selected information", "Shares location only by consent", "Fast access to Emergency information"];
+export default function HomeHero({ ka }: { ka: boolean }) {
+  const ownerBenefits: Benefit[] = ka
+    ? [
+        { title: "ყველა პროფილი ერთ ანგარიშზე", description: "ძაღლის, კატის, გასაღების, საფულის, ჩანთის, ჩემოდნისა და Emergency სამაჯურის QR პროფილები ერთი დაცული ანგარიშიდან მართეთ." },
+        { title: "კატეგორიაზე მორგებული პროფილი", description: "ცხოველისთვის დაამატეთ სამედიცინო და ქცევითი ინფორმაცია, ნივთისთვის კი — მისი ამოცნობისთვის საჭირო შესაბამისი დეტალები." },
+        { title: "ინფორმაციის სრული კონტროლი", description: "თავად განსაზღვრეთ, რომელი ფოტო, აღწერა, ელფოსტა და დამატებითი ინფორმაცია გამოჩნდება მპოვნელის გვერდზე." },
+        { title: "Lost ON და Scan ინფორმაცია", description: "დაკარგვისას ჩართეთ Lost ON და ნახეთ QR კოდის დასკანირების ინფორმაცია და მპოვნელის მიერ ნებაყოფლობით გაზიარებული მდებარეობა." },
+        { title: "ტელეფონი და Live Chat", description: "მიეცით მპოვნელს თქვენთან ტელეფონით ან Live Chat-ის საშუალებით დაკავშირების შესაძლებლობა." },
+        { title: "Emergency პროფილის მართვა", description: "შექმენით Emergency პროფილი საკუთარი ან სხვა პირისთვის და მართეთ მნიშვნელოვანი სამედიცინო ინფორმაცია და Emergency კონტაქტები." },
+      ]
+    : [
+        { title: "Every profile in one account", description: "Manage QR profiles for dogs, cats, keys, wallets, bags, suitcases, and Emergency bracelets from one secure account." },
+        { title: "Category-specific profiles", description: "Add medical and behavior information for pets, or the relevant identification details for personal belongings." },
+        { title: "Full information control", description: "Choose which photo, description, email, and additional details appear on the finder page." },
+        { title: "Lost ON and scan information", description: "Turn on Lost ON and view scan information, including a location voluntarily shared by the finder." },
+        { title: "Phone and Live Chat", description: "Let the finder contact you by phone or through Live Chat." },
+        { title: "Emergency profile management", description: "Create an Emergency profile for yourself or another person and manage medical details and Emergency contacts." },
+      ];
+
+  const finderBenefits: Benefit[] = ka
+    ? [
+        { title: "ერთი სკანირება", description: "QR კოდის სკანირების შემდეგ მპოვნელი პირდაპირ შესაბამის ციფრულ პროფილზე გადადის." },
+        { title: "რეგისტრაციის გარეშე", description: "QR პროფილის სანახავად მპოვნელს ანგარიშის შექმნა არ სჭირდება." },
+        { title: "აპლიკაციის გარეშე", description: "პროფილი ტელეფონის კამერით იხსნება და დამატებითი აპლიკაციის ჩამოტვირთვა საჭირო არ არის." },
+        { title: "სწრაფი დაკავშირება", description: "მფლობელთან დაკავშირება შესაძლებელია ტელეფონით ან Live Chat-ის საშუალებით." },
+        { title: "ნებაყოფლობითი ლოკაცია", description: "მპოვნელი თავად წყვეტს, გააზიაროს თუ არა თავისი ზუსტი მდებარეობა." },
+        { title: "Emergency ინფორმაციაზე წვდომა", description: "სამაჯურის სკანირებისას ჩანს პროფილის მმართველის მიერ არჩეული სამედიცინო ინფორმაცია და Emergency კონტაქტები." },
+      ]
+    : [
+        { title: "One scan", description: "After scanning the QR code, the finder goes directly to the corresponding digital profile." },
+        { title: "No registration", description: "The finder does not need to create an account to view a QR profile." },
+        { title: "No app required", description: "The profile opens with the phone camera, with no additional app to download." },
+        { title: "Fast contact", description: "The finder can contact the owner by phone or through Live Chat." },
+        { title: "Voluntary location sharing", description: "The finder decides whether to share their precise location." },
+        { title: "Emergency information access", description: "Scanning the bracelet shows the medical information and Emergency contacts selected by the profile manager." },
+      ];
 
   return (
     <>
@@ -22,16 +56,15 @@ export default function HomeHero({ ka }: { ka: boolean }) {
           </header>
 
           <div className="productExperience">
-            <InfoPanel eyebrow="OWNER" title={ka ? "მფლობელის შესაძლებლობები" : "Owner capabilities"} items={features} />
+            <InfoPanel eyebrow="OWNER" title={ka ? "მფლობელის უპირატესობები" : "Owner benefits"} items={ownerBenefits} />
             <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
-            <InfoPanel eyebrow="FINDER" title={ka ? "მპოვნელის შესაძლებლობები" : "Finder capabilities"} items={finderBenefits} />
+            <InfoPanel eyebrow="FINDER" title={ka ? "მპოვნელის უპირატესობები" : "Finder benefits"} items={finderBenefits} />
           </div>
-
         </div>
       </section>
 
       <style jsx>{`
-        .homeHero{color:#fff;background:#0754c7}.homeHeroInner{width:calc(100% - 80px);max-width:1280px;margin:auto;padding:74px 0 86px}.heroTitle{max-width:1040px;margin:0 auto;text-align:center}.heroTitle>span{color:rgba(255,255,255,.64);font-size:11px;font-weight:900;letter-spacing:1.5px}.heroTitle h1{margin:14px 0 0;color:#fff;font-size:clamp(29px,2.8vw,40px);line-height:1.22;letter-spacing:-1px}.heroTitle p{max-width:820px;margin:18px auto 0;color:rgba(255,255,255,.82);font-size:18px;line-height:1.65}.productExperience{margin-top:48px;display:grid;grid-template-columns:250px minmax(480px,1fr) 250px;gap:24px;align-items:center}.orbitFrame{min-width:0;display:flex;justify-content:center}
+        .homeHero{color:#fff;background:#0754c7}.homeHeroInner{width:calc(100% - 80px);max-width:1280px;margin:auto;padding:74px 0 86px}.heroTitle{max-width:1040px;margin:0 auto;text-align:center}.heroTitle>span{color:rgba(255,255,255,.64);font-size:11px;font-weight:900;letter-spacing:1.5px}.heroTitle h1{margin:14px 0 0;color:#fff;font-size:clamp(29px,2.8vw,40px);line-height:1.22;letter-spacing:-1px}.heroTitle p{max-width:820px;margin:18px auto 0;color:rgba(255,255,255,.82);font-size:18px;line-height:1.65}.productExperience{margin-top:48px;display:grid;grid-template-columns:285px minmax(430px,1fr) 285px;gap:24px;align-items:center}.orbitFrame{min-width:0;display:flex;justify-content:center}
         @media(max-width:1100px){.productExperience{grid-template-columns:1fr 1fr}.orbitFrame{grid-column:1/-1;grid-row:1}}
         @media(max-width:760px){.homeHeroInner{width:calc(100% - 28px);padding:52px 0 65px}.heroTitle h1{font-size:27px;letter-spacing:-.5px}.heroTitle p{font-size:16px}.productExperience{grid-template-columns:1fr;margin-top:38px}.orbitFrame{grid-column:auto;grid-row:auto;order:-1}}
       `}</style>
@@ -39,9 +72,31 @@ export default function HomeHero({ ka }: { ka: boolean }) {
   );
 }
 
-function InfoPanel({ eyebrow, title, items }: { eyebrow: string; title: string; items: string[] }) {
-  return <aside className="infoPanel"><span>{eyebrow}</span><h2>{title}</h2><div>{items.map((item,index)=><p key={item}><b>{String(index+1).padStart(2,"0")}</b>{item}</p>)}</div><style jsx>{`
-    .infoPanel{padding:22px 19px;border:1px solid rgba(255,255,255,.2);border-radius:19px;background:rgba(4,48,126,.28);box-shadow:0 18px 40px rgba(0,35,102,.14)}.infoPanel>span{color:rgba(255,255,255,.6);font-size:8px;font-weight:900;letter-spacing:1.2px}.infoPanel h2{margin:10px 0 0;color:#fff;font-size:21px;line-height:1.3}.infoPanel>div{margin-top:16px}.infoPanel p{min-height:42px;margin:0;padding:10px 0;display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.9);font-size:13px;font-weight:800}.infoPanel b{color:rgba(255,255,255,.48);font-size:8px}@media(max-width:760px){.infoPanel{padding:18px}.infoPanel h2{font-size:20px}.infoPanel p{font-size:13px}}
-  `}</style></aside>
-}
+function InfoPanel({ eyebrow, title, items }: { eyebrow: string; title: string; items: Benefit[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  return (
+    <aside className="infoPanel">
+      <span>{eyebrow}</span>
+      <h2>{title}</h2>
+      <div className="accordion">
+        {items.map((item, index) => {
+          const open = openIndex === index;
+          return (
+            <section className={open ? "benefit open" : "benefit"} key={item.title}>
+              <button type="button" aria-expanded={open} onClick={() => setOpenIndex(open ? null : index)}>
+                <b>{String(index + 1).padStart(2, "0")}</b>
+                <strong>{item.title}</strong>
+                <i aria-hidden="true">{open ? "−" : "+"}</i>
+              </button>
+              {open && <p>{item.description}</p>}
+            </section>
+          );
+        })}
+      </div>
+      <style jsx>{`
+        .infoPanel{padding:23px 20px;border:1px solid rgba(255,255,255,.22);border-radius:20px;background:rgba(4,48,126,.3);box-shadow:0 18px 40px rgba(0,35,102,.16)}.infoPanel>span{color:rgba(255,255,255,.62);font-size:9px;font-weight:900;letter-spacing:1.3px}.infoPanel h2{margin:10px 0 0;color:#fff;font-size:21px;line-height:1.3}.accordion{margin-top:17px}.benefit{border-top:1px solid rgba(255,255,255,.15)}.benefit button{width:100%;min-height:49px;padding:10px 0;display:grid;grid-template-columns:23px 1fr 20px;align-items:center;gap:8px;border:0;background:transparent;color:#fff;text-align:left;cursor:pointer}.benefit button b{color:rgba(255,255,255,.48);font-size:8px}.benefit button strong{font-size:13px;font-weight:850;line-height:1.35}.benefit button i{width:20px;height:20px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.22);border-radius:50%;font-style:normal;font-size:14px}.benefit p{margin:-1px 0 13px;padding:0 0 0 31px;color:rgba(255,255,255,.78);font-size:12px;line-height:1.58}.benefit.open button i{background:#fff;color:#0754c7}.benefit.open button strong{color:#fff}@media(max-width:760px){.infoPanel{padding:20px}.infoPanel h2{font-size:20px}.benefit button strong{font-size:14px}.benefit p{font-size:13px}}
+      `}</style>
+    </aside>
+  );
+}
