@@ -139,8 +139,8 @@ export default function ProductOrbit({
         /* ORBIT */
 
         .productCircle {
-          width: 450px;
-          height: 450px;
+          width: 600px;
+          height: 600px;
 
           margin-top: 18px;
 
@@ -173,8 +173,8 @@ export default function ProductOrbit({
         /* EMERGENCY CENTER */
 
         .emergencyCenter {
-          width: 154px;
-          height: 154px;
+          width: 190px;
+          height: 190px;
 
           position: absolute;
 
@@ -202,7 +202,7 @@ export default function ProductOrbit({
 
         .emergencyLabel {
           color: #1266e9;
-          font-size: 6px;
+          font-size: 7px;
           font-weight: 900;
           letter-spacing: 1px;
         }
@@ -215,15 +215,15 @@ export default function ProductOrbit({
         }
 
         .bracelet i {
-          width: 25px;
-          height: 13px;
+          width: 32px;
+          height: 16px;
           display: block;
           background: #1266e9;
         }
 
         .bracelet div {
-          width: 45px;
-          height: 45px;
+          width: 56px;
+          height: 56px;
           display: grid;
           place-items: center;
           border: 2px solid #1266e9;
@@ -235,14 +235,14 @@ export default function ProductOrbit({
         .emergencyCenter strong {
           margin-top: 7px;
           color: #223a55;
-          font-size: 9px;
+          font-size: 11px;
         }
 
         .emergencyCenter small {
           max-width: 145px;
           margin-top: 3px;
           color: #8593a4;
-          font-size: 6px;
+          font-size: 7px;
           font-weight: 800;
           text-align: center;
         }
@@ -262,8 +262,8 @@ export default function ProductOrbit({
         }
 
         .productCircle :global(.productEmoji) {
-          width: 62px;
-          height: 62px;
+          width: 78px;
+          height: 78px;
 
           display: grid;
           place-items: center;
