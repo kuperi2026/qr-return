@@ -5,54 +5,69 @@ import { QRIcon, ShieldIcon } from "./HomeIcons";
 export default function HomeContinuation({ka}:{ka:boolean}) {
   const steps = [
     {
-      icon:<StoreIcon key="store"/>,
-      title:ka ? "აირჩიეთ თქვენი QR RETURN პროდუქტი" : "Choose your QR RETURN product",
-      text:ka ? "შეარჩიეთ კატეგორია თქვენი ძაღლისთვის, კატის, გასაღების, საფულის, ჩანთის, ჩემოდნის ან Emergency პროფილისთვის." : "Choose a category for a dog, cat, keys, wallet, bag, suitcase or Emergency profile.",
-      points:ka ? ["7 განსხვავებული პროდუქტის კატეგორია","ერთი ანგარიშიდან რამდენიმე პროდუქტის მართვა","პროდუქტის ფოტო მოგვიანებით მარტივად ჩანაცვლდება"] : ["7 product categories","Manage multiple products in one account","Replace product imagery whenever ready"]
+      title: ka ? "შექმენით ანგარიში" : "Create your account",
+      text: ka ? "შეიყვანეთ ძირითადი მონაცემები და შექმენით თქვენი დაცული QR RETURN სივრცე." : "Add the essential details and create your secure QR RETURN space.",
+      rows: ka ? ["სახელი და გვარი", "ელფოსტა", "ტელეფონი"] : ["Full name", "Email", "Phone"],
+      action: ka ? "ანგარიშის შექმნა" : "Create account",
     },
     {
-      icon:<ProfileIcon key="profile"/>,
-      title:ka ? "შექმენით და მართეთ დაცული პროფილი" : "Create and control a secure profile",
-      text:ka ? "დაარეგისტრირეთ QR კოდი, შეავსეთ საჭირო ინფორმაცია და ზუსტად განსაზღვრეთ, რომელი მონაცემი გამოჩნდება საჯარო გვერდზე." : "Register the QR, add the needed information and choose exactly what appears publicly.",
-      points:ka ? ["ინფორმაციისა და ფოტოების რედაქტირება","კონტაქტის ფუნქციების ON/OFF მართვა","მპოვნელის გვერდის წინასწარი ნახვა"] : ["Edit information and photos","Turn contact options on or off","Preview the finder page"]
+      title: ka ? "შედით ანგარიშში" : "Sign in",
+      text: ka ? "ელფოსტითა და პაროლით შედით ყველა თქვენი QR პროფილის სამართავად." : "Sign in with email and password to manage every QR profile.",
+      rows: ka ? ["ელფოსტა", "პაროლი"] : ["Email", "Password"],
+      action: ka ? "შესვლა" : "Sign in",
     },
     {
-      icon:<QRIcon key="qr" size={36}/>,
-      title:ka ? "მპოვნელი ასკანირებს — აპლიკაციის გარეშე" : "The finder scans — no app required",
-      text:ka ? "ტელეფონის კამერით სკანირების შემდეგ მპოვნელი ხედავს მხოლოდ თქვენ მიერ არჩეულ ინფორმაციას და დაბრუნებისთვის საჭირო მოქმედებებს." : "After scanning with a phone camera, the finder sees only the information and return actions you selected.",
-      points:ka ? ["რეგისტრაცია არ სჭირდება","სრული Tag Code დაფარულია","ზარი ან Live Chat ერთი შეხებით"] : ["No registration needed","Full Tag Code remains masked","Call or Live Chat in one tap"]
+      title: ka ? "აირჩიეთ პროდუქტი" : "Choose a product",
+      text: ka ? "აირჩიეთ თქვენი QR პროდუქტის შესაბამისი კატეგორია." : "Select the category that matches your QR product.",
+      rows: ["🐶  🐱  🔑", "👛  👜  🧳", "Emergency"],
+      action: ka ? "არჩევა" : "Select",
     },
     {
-      icon:<ReturnIcon key="return"/>,
-      title:ka ? "იწყება უსაფრთხო დაბრუნება" : "A safe return begins",
-      text:ka ? "Lost ON, Scan შეტყობინება, Live Chat, ტელეფონი და ნებაყოფლობითი ლოკაცია ორივე მხარეს შეთანხმებაში და დაბრუნებაში ეხმარება." : "Lost ON, scan alerts, Live Chat, phone and voluntary location help both sides coordinate the return.",
-      points:ka ? ["მფლობელი იღებს სკანირების ინფორმაციას","ლოკაცია მხოლოდ თანხმობით ზიარდება","კომუნიკაციას მფლობელი აკონტროლებს"] : ["Owner receives scan information","Location is shared only by consent","Owner controls communication"]
-    }
+      title: ka ? "შექმენით პროფილი" : "Create the profile",
+      text: ka ? "დაამატეთ ფოტო, საჭირო ინფორმაცია და მპოვნელისთვის განკუთვნილი დეტალები." : "Add a photo, essential information and finder-facing details.",
+      rows: ka ? ["ფოტო", "ძირითადი ინფორმაცია", "დამატებითი დეტალები"] : ["Photo", "Basic information", "Additional details"],
+      action: ka ? "პროფილის შენახვა" : "Save profile",
+    },
+    {
+      title: ka ? "მართეთ ფუნქციები" : "Control the features",
+      text: ka ? "ჩართეთ Lost ON, მართეთ Live Chat და თავად განსაზღვრეთ ხილვადობა." : "Enable Lost ON, manage Live Chat and control visibility.",
+      rows: ["Lost ON", "Live Chat", ka ? "ხილვადობის მართვა" : "Visibility controls"],
+      action: ka ? "ცვლილებების შენახვა" : "Save changes",
+    },
+    {
+      title: ka ? "დაუკავშირდით მპოვნელს" : "Connect with the finder",
+      text: ka ? "სკანირების შემდეგ დაიწყეთ ზარი ან Live Chat და მიიღეთ თანხმობით გაზიარებული ლოკაცია." : "After a scan, use phone or Live Chat and receive consent-based location.",
+      rows: ka ? ["Scan შეტყობინება", "ზარი ან Live Chat", "გაზიარებული ლოკაცია"] : ["Scan alert", "Call or Live Chat", "Shared location"],
+      action: ka ? "დაკავშირება" : "Connect",
+    },
   ];
 
   return <div className="continuation">
     <section className="section how" id="how-it-works">
       <div className="shell">
         <SectionTitle number="01" label="HOW IT WORKS" title={ka ? "როგორ მუშაობს QR RETURN" : "How QR RETURN Works"} text={ka ? "ოთხი მარტივი ეტაპი შეძენიდან უსაფრთხო დაბრუნებამდე." : "Four simple stages from purchase to safe return."} />
-        <div className="storySteps">
-          {steps.map((step,index)=><article className="storyStep" key={String(step.title)}>
-            <div className="stepVisual">
-              <span>0{index+1}</span>
-              <div className="device">
-                <div className="deviceTop"/>
-                <div className="visualIcon">{step.icon}</div>
-                <strong>QR RETURN</strong>
-                <small>{index===0 ? (ka ? "აირჩიეთ პროდუქტი" : "Choose product") : index===1 ? (ka ? "მართეთ პროფილი" : "Manage profile") : index===2 ? (ka ? "დაასკანირეთ" : "Scan") : (ka ? "დააბრუნეთ" : "Return")}</small>
-                <div className="deviceAction">{index===3 ? "✓" : "QR"}</div>
+        <div className="phoneFlow">
+          {steps.map((step,index) => (
+            <article className="phoneStep" key={String(step.title)}>
+              <span className="stepNumber">0{index + 1}</span>
+              <div className="phoneDevice">
+                <div className="phoneTop" />
+                <div className="phoneBrand">QR RETURN</div>
+                <h3>{step.title}</h3>
+                <div className="screenRows">
+                  {step.rows.map((row) => (
+                    <div className="screenRow" key={row}>{row}</div>
+                  ))}
+                </div>
+                <div className="phoneAction">{step.action}</div>
               </div>
-            </div>
-            <div className="stepCopy">
-              <span>STEP 0{index+1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-              <ul>{step.points.map(point=><li key={point}>{point}</li>)}</ul>
-            </div>
-          </article>)}
+              <div className="phoneCopy">
+                <span>STEP 0{index + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
@@ -70,8 +85,8 @@ export default function HomeContinuation({ka}:{ka:boolean}) {
     <footer><div className="shell footerTop"><div className="brand"><div><QRIcon size={23}/></div><strong>QR RETURN<small>SMART LOST &amp; FOUND</small></strong></div><p>{ka ? "ნივთების, ცხოველებისა და Emergency პროფილების ერთიანი QR სისტემა." : "One QR system for belongings, pets and Emergency profiles."}</p><nav><a href="/store">{ka ? "მაღაზია" : "Store"}</a><a href="/support">Live Chat</a><a href="/login">{ka ? "შესვლა" : "Sign in"}</a><a href="/signup">{ka ? "რეგისტრაცია" : "Register"}</a></nav></div><div className="shell copyright">© 2026 QR RETURN</div></footer>
 
     <style jsx>{`
-      .continuation{color:#fff;background:#0754c7}.shell{width:calc(100% - 80px);max-width:1280px;margin:auto}.section{padding:92px 0}.sectionBorder{border-top:1px solid rgba(255,255,255,.16)}.storySteps{margin-top:52px;display:grid;gap:76px}.storyStep{min-height:500px;display:grid;grid-template-columns:1fr 1fr;gap:75px;align-items:center}.storyStep:nth-child(even) .stepVisual{order:2}.stepVisual{min-height:480px;position:relative;display:grid;place-items:center;border:1px solid rgba(255,255,255,.17);border-radius:24px;background:radial-gradient(circle at 50% 48%,rgba(255,255,255,.16),transparent 48%),rgba(4,48,126,.25);overflow:hidden}.stepVisual>span{position:absolute;top:24px;left:25px;color:rgba(255,255,255,.48);font-size:10px;font-weight:900;letter-spacing:1px}.device{width:245px;height:390px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;border:8px solid #fff;border-radius:39px;color:#0754c7;background:#f7faff;box-shadow:0 30px 65px rgba(0,27,85,.32)}.deviceTop{width:72px;height:17px;margin-top:-15px;border-radius:0 0 11px 11px;background:#0754c7}.visualIcon{width:84px;height:84px;margin-top:54px;display:grid;place-items:center;border-radius:22px;color:#fff;background:#0754c7}.visualIcon :global(svg){width:42px;height:42px}.device>strong{margin-top:24px;color:#183657;font-size:15px}.device>small{margin-top:7px;color:#6d8299;font-size:9px}.deviceAction{width:100%;min-height:42px;margin-top:auto;display:grid;place-items:center;border-radius:12px;color:#fff;background:#0754c7;font-size:11px;font-weight:900}.stepCopy>span,.privacyInner>div>span,.ctaInner>div>span{color:rgba(255,255,255,.62);font-size:8px;font-weight:900;letter-spacing:1.2px}.stepCopy h3{max-width:520px;margin:13px 0 0;color:#fff;font-size:clamp(31px,3.5vw,48px);line-height:1.08;letter-spacing:-1.5px}.stepCopy>p{max-width:540px;margin:19px 0 0;color:rgba(255,255,255,.78);font-size:13px;line-height:1.75}.stepCopy ul{margin:25px 0 0;padding:0;list-style:none}.stepCopy li{padding:11px 0;border-top:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:12px}.stepCopy li:before{content:"•";margin-right:10px;color:#fff;font-size:17px}.privacyInner{display:grid;grid-template-columns:100px 1fr .72fr;gap:28px;align-items:center}.privacyIcon{width:86px;height:86px;display:grid;place-items:center;border-radius:20px;background:#fff;color:#0754c7}.privacyIcon :global(svg){width:40px;height:40px}.privacy h2,.cta h2{margin:8px 0 0;font-size:30px}.privacy p,.cta p,.footerTop>p{color:rgba(255,255,255,.74);font-size:11px;line-height:1.7}.privacyPoints{display:grid;gap:9px}.privacyPoints strong{padding:12px 13px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.08);font-size:10px}.cta{padding:54px 0}.ctaInner{display:grid;grid-template-columns:70px 1fr auto;gap:22px;align-items:center}.ctaQr{width:62px;height:62px;display:grid;place-items:center;border-radius:16px;background:#fff;color:#0754c7}.cta h2{font-size:26px}.cta p{margin:6px 0 0}.ctaButtons{display:flex;gap:8px}.ctaButtons a{min-height:40px;padding:0 15px;display:flex;align-items:center;border-radius:9px;background:#fff;color:#0754c7;font-size:10px;font-weight:900;text-decoration:none}.ctaButtons a:last-child{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff}footer{padding:46px 0 18px;border-top:1px solid rgba(255,255,255,.16);background:#0649ad}.footerTop{display:grid;grid-template-columns:220px 1fr auto;gap:25px;align-items:center}.brand{display:flex;align-items:center;gap:9px}.brand>div{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:#fff;color:#0754c7}.brand strong{font-size:13px}.brand small{display:block;margin-top:2px;color:rgba(255,255,255,.6);font-size:6px;letter-spacing:1px}.footerTop nav{display:flex;gap:15px}.footerTop a{color:#fff;font-size:9px;font-weight:800;text-decoration:none}.copyright{margin-top:28px;padding-top:15px;border-top:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.55);font-size:8px}
-      @media(max-width:900px){.storyStep{grid-template-columns:1fr;gap:35px}.storyStep:nth-child(even) .stepVisual{order:0}.privacyInner{grid-template-columns:86px 1fr}.privacyPoints{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.footerTop{grid-template-columns:1fr 1fr}.footerTop nav{grid-column:1/-1}}@media(max-width:650px){.shell{width:calc(100% - 28px)}.section{padding:64px 0}.storySteps{gap:60px}.storyStep{min-height:auto}.stepVisual{min-height:430px}.device{width:220px;height:350px}.stepCopy h3{font-size:32px}.privacyInner{grid-template-columns:1fr}.privacyPoints{grid-template-columns:1fr}.ctaInner{grid-template-columns:60px 1fr}.ctaButtons{grid-column:1/-1}.footerTop{grid-template-columns:1fr}.footerTop nav{grid-column:auto;flex-wrap:wrap}}
+      .continuation{color:#fff;background:#0754c7}.shell{width:calc(100% - 80px);max-width:1280px;margin:auto}.section{padding:92px 0}.sectionBorder{border-top:1px solid rgba(255,255,255,.16)}.phoneFlow{margin-top:50px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}.phoneStep{min-width:0;position:relative;padding:28px 20px 24px;border:1px solid rgba(255,255,255,.17);border-radius:24px;background:rgba(4,48,126,.24)}.stepNumber{position:absolute;top:17px;left:18px;color:rgba(255,255,255,.52);font-size:9px;font-weight:900;letter-spacing:1px}.phoneDevice{width:210px;height:370px;margin:6px auto 0;padding:22px 17px 18px;display:flex;flex-direction:column;border:7px solid #fff;border-radius:36px;color:#0754c7;background:#f7faff;box-shadow:0 25px 55px rgba(0,27,85,.28)}.phoneTop{width:64px;height:15px;margin:-15px auto 0;border-radius:0 0 10px 10px;background:#0754c7}.phoneBrand{margin-top:30px;color:#0754c7;font-size:7px;font-weight:950;letter-spacing:1.2px;text-align:center}.phoneDevice>h3{min-height:43px;margin:12px 0 0;color:#183657;font-size:16px;line-height:1.25;text-align:center}.screenRows{margin-top:17px;display:grid;gap:8px}.screenRow{min-height:38px;padding:0 11px;display:flex;align-items:center;border:1px solid #d9e6f7;border-radius:9px;color:#546d87;background:#fff;font-size:9px;font-weight:750}.phoneAction{min-height:39px;margin-top:auto;display:grid;place-items:center;border-radius:10px;color:#fff;background:#0754c7;font-size:9px;font-weight:900}.phoneCopy{margin-top:24px}.phoneCopy>span{color:rgba(255,255,255,.58);font-size:8px;font-weight:900;letter-spacing:1.2px}.phoneCopy h3{margin:9px 0 0;color:#fff;font-size:20px;line-height:1.25}.phoneCopy p{margin:10px 0 0;color:rgba(255,255,255,.76);font-size:11px;line-height:1.7}.privacyInner{display:grid;grid-template-columns:100px 1fr .72fr;gap:28px;align-items:center}.privacyIcon{width:86px;height:86px;display:grid;place-items:center;border-radius:20px;background:#fff;color:#0754c7}.privacyIcon :global(svg){width:40px;height:40px}.privacy h2,.cta h2{margin:8px 0 0;font-size:30px}.privacy p,.cta p,.footerTop>p{color:rgba(255,255,255,.74);font-size:11px;line-height:1.7}.privacyPoints{display:grid;gap:9px}.privacyPoints strong{padding:12px 13px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.08);font-size:10px}.cta{padding:54px 0}.ctaInner{display:grid;grid-template-columns:70px 1fr auto;gap:22px;align-items:center}.ctaQr{width:62px;height:62px;display:grid;place-items:center;border-radius:16px;background:#fff;color:#0754c7}.cta h2{font-size:26px}.cta p{margin:6px 0 0}.ctaButtons{display:flex;gap:8px}.ctaButtons a{min-height:40px;padding:0 15px;display:flex;align-items:center;border-radius:9px;background:#fff;color:#0754c7;font-size:10px;font-weight:900;text-decoration:none}.ctaButtons a:last-child{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff}footer{padding:46px 0 18px;border-top:1px solid rgba(255,255,255,.16);background:#0649ad}.footerTop{display:grid;grid-template-columns:220px 1fr auto;gap:25px;align-items:center}.brand{display:flex;align-items:center;gap:9px}.brand>div{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:#fff;color:#0754c7}.brand strong{font-size:13px}.brand small{display:block;margin-top:2px;color:rgba(255,255,255,.6);font-size:6px;letter-spacing:1px}.footerTop nav{display:flex;gap:15px}.footerTop a{color:#fff;font-size:9px;font-weight:800;text-decoration:none}.copyright{margin-top:28px;padding-top:15px;border-top:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.55);font-size:8px}
+      @media(max-width:1050px){.phoneFlow{grid-template-columns:repeat(2,minmax(0,1fr))}.privacyInner{grid-template-columns:86px 1fr}.privacyPoints{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.footerTop{grid-template-columns:1fr 1fr}.footerTop nav{grid-column:1/-1}}@media(max-width:650px){.shell{width:calc(100% - 28px)}.section{padding:64px 0}.phoneFlow{display:flex;gap:16px;overflow-x:auto;padding:0 2px 16px;scroll-snap-type:x mandatory}.phoneStep{min-width:286px;scroll-snap-align:start}.phoneDevice{width:205px;height:360px}.privacyInner{grid-template-columns:1fr}.privacyPoints{grid-template-columns:1fr}.ctaInner{grid-template-columns:60px 1fr}.ctaButtons{grid-column:1/-1}.footerTop{grid-template-columns:1fr}.footerTop nav{grid-column:auto;flex-wrap:wrap}}
     `}</style>
   </div>
 }
