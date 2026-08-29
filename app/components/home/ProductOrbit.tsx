@@ -123,7 +123,7 @@ export default function ProductOrbit({
         .productIntro h2 {
           margin: 8px 0 0;
 
-          color: #17324d;
+          color: #12345B;
 
           font-size: 22px;
           line-height: 1.4;
@@ -186,12 +186,12 @@ export default function ProductOrbit({
 
           border-radius: 50%;
 
-          background: #1266e9;
+          background: #E53935;
 
           color: #ffffff;
 
           box-shadow:
-            0 17px 40px rgba(18,79,165,.22);
+            0 17px 40px rgba(176,35,35,.22);
         }
 
         .emergencyLabel {
@@ -278,7 +278,7 @@ export default function ProductOrbit({
           margin-top: 8px;
 
           color:
-            #29445f;
+            #12345B;
 
           font-size: 13px;
           font-weight: 850;
