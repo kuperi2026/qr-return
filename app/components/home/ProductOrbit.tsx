@@ -279,12 +279,12 @@ export default function ProductOrbit({
         }
 
         .productCircle :global(.productName) {
-          margin-top: 7px;
+          margin-top: 8px;
 
           color:
-            rgba(255,255,255,.9);
+            rgba(255,255,255,.94);
 
-          font-size: 9px;
+          font-size: 11px;
           font-weight: 800;
         }
 
@@ -327,15 +327,15 @@ export default function ProductOrbit({
         .productsCaption {
           max-width: 460px;
 
-          margin: 8px 0 0;
+          margin: 10px 0 0;
 
           text-align: center;
 
           color:
             rgba(255,255,255,.65);
 
-          font-size: 9px;
-          line-height: 1.55;
+          font-size: 10px;
+          line-height: 1.6;
         }
 
 
