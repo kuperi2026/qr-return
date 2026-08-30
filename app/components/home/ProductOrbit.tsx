@@ -31,16 +31,6 @@ export default function ProductOrbit({
     <>
       <div className="productsArea">
 
-        <div className="productIntro">
-          <span>QR RETURN</span>
-
-          <h2>
-            {ka
-              ? "მყისიერი კავშირი — საჭირო დროს, საჭირო ადამიანთან"
-              : "Instant connection — at the right time, with the right person"}
-          </h2>
-        </div>
-
         <div className="productCircle">
 
           <div className="ring ringOne" />
@@ -105,38 +95,13 @@ export default function ProductOrbit({
           align-items: center;
         }
 
-        .productIntro {
-          max-width: 520px;
-
-          text-align: center;
-        }
-
-        .productIntro > span {
-          color: rgba(255,255,255,.72);
-
-          font-size: 8px;
-          font-weight: 900;
-
-          letter-spacing: 1.4px;
-        }
-
-        .productIntro h2 {
-          margin: 8px 0 0;
-
-          color: #ffffff;
-
-          font-size: 22px;
-          line-height: 1.4;
-        }
-
-
         /* ORBIT */
 
         .productCircle {
           width: 480px;
           height: 480px;
 
-          margin-top: 18px;
+          margin-top: 0;
 
           position: relative;
 
@@ -339,19 +304,11 @@ export default function ProductOrbit({
 
         @media (max-width: 760px) {
 
-          .productIntro {
-            max-width: 330px;
-          }
-
-          .productIntro h2 {
-            font-size: 16px;
-          }
-
           .productCircle {
             width: 340px;
             height: 340px;
 
-            margin-top: 24px;
+            margin-top: 12px;
           }
 
           .ringOne {

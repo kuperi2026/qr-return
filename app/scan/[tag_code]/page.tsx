@@ -8,6 +8,7 @@ import {
   getPreciseLocation,
   LocationAccuracyError,
 } from "@/lib/geolocation";
+import { getFinderSession } from "@/lib/finderSession";
 
 type FinderProfile = {
   tag_code: string;
@@ -159,10 +160,12 @@ export default function FinderPage() {
 
       const { data, error } =
         await supabase.rpc(
-          "share_finder_location",
+          "share_finder_location_v2",
           {
             p_tag_code:
               profile.tag_code,
+            p_finder_session:
+              getFinderSession(profile.tag_code),
             p_latitude: latitude,
             p_longitude: longitude,
             p_accuracy: accuracy,

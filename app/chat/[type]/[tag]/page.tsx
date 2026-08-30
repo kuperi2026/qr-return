@@ -10,6 +10,7 @@ import {
 
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getFinderSession } from "@/lib/finderSession";
 
 type Lang = "ka" | "en";
 
@@ -80,19 +81,6 @@ const typeMap: Record<
     en: "Suitcase",
   },
 };
-
-function makeSessionId() {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}`;
-}
 
 export default function FinderLiveChatPage() {
   const params = useParams();
@@ -175,24 +163,7 @@ export default function FinderLiveChatPage() {
       return;
     }
 
-    const key =
-      `qr-return-chat-${profileType}-${tagCode}`;
-
-    let id =
-      window.localStorage.getItem(
-        key
-      );
-
-    if (!id) {
-      id = makeSessionId();
-
-      window.localStorage.setItem(
-        key,
-        id
-      );
-    }
-
-    setSessionId(id);
+    setSessionId(getFinderSession(tagCode));
   }, [
     tagCode,
     profileType,
