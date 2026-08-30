@@ -8,9 +8,9 @@ export default function AboutMenu({
   return (
     <section
       style={{
-        background: "#f7faff",
-        borderBottom: "1px solid #dfe7f1",
-        boxShadow: "0 20px 45px rgba(10, 48, 100, 0.1)",
+        background: "#F3F3F5",
+        borderBottom: "1px solid #DFDFE2",
+        boxShadow: "0 20px 45px rgba(23, 25, 35, 0.1)",
       }}
     >
       <div
@@ -29,7 +29,7 @@ export default function AboutMenu({
         >
           <span
             style={{
-              color: "#1266e9",
+              color: "#2F3039",
               fontSize: "9px",
               fontWeight: 900,
               letterSpacing: "1px",
@@ -41,7 +41,7 @@ export default function AboutMenu({
           <h2
             style={{
               margin: "8px 0 0",
-              color: "#1c324d",
+              color: "#2F3039",
               fontSize: "25px",
               lineHeight: 1.15,
             }}
@@ -75,7 +75,7 @@ export default function AboutMenu({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  color: "#1266e9",
+                  color: "#2F3039",
                   background: "#ffffff",
                   fontSize: "10px",
                   fontWeight: 900,
@@ -218,9 +218,9 @@ export default function AboutMenu({
 const cardStyle = {
   padding: "23px",
   borderRadius: "16px",
-  background: "#1266e9",
+  background: "#2F3039",
   color: "#ffffff",
-  boxShadow: "0 12px 25px rgba(18,102,233,.14)",
+  boxShadow: "0 12px 25px rgba(23,25,35,.14)",
 };
 
 const numberStyle = {

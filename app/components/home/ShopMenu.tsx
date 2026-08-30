@@ -8,9 +8,9 @@ export default function ShopMenu({
   return (
     <section
       style={{
-        background: "#f7faff",
-        borderBottom: "1px solid #dfe7f1",
-        boxShadow: "0 20px 45px rgba(10, 48, 100, 0.1)",
+        background: "#F3F3F5",
+        borderBottom: "1px solid #DFDFE2",
+        boxShadow: "0 20px 45px rgba(23, 25, 35, 0.1)",
       }}
     >
       <div
@@ -29,7 +29,7 @@ export default function ShopMenu({
         >
           <span
             style={{
-              color: "#1266e9",
+              color: "#2F3039",
               fontSize: "9px",
               fontWeight: 900,
               letterSpacing: "1px",
@@ -41,7 +41,7 @@ export default function ShopMenu({
           <h2
             style={{
               margin: "8px 0 0",
-              color: "#1c324d",
+              color: "#2F3039",
               fontSize: "25px",
               lineHeight: 1.15,
             }}
@@ -110,7 +110,7 @@ export default function ShopMenu({
 const cardStyle = {
   minHeight: "205px",
   padding: "24px",
-  border: "1px solid #d7e2ef",
+  border: "1px solid #DFDFE2",
   borderRadius: "15px",
   background: "#ffffff",
   color: "inherit",
@@ -118,20 +118,20 @@ const cardStyle = {
 };
 
 const numberStyle = {
-  color: "#1266e9",
+  color: "#2F3039",
   fontSize: "10px",
   fontWeight: 900,
 };
 
 const headingStyle = {
   margin: "17px 0 0",
-  color: "#263c55",
+  color: "#2F3039",
   fontSize: "17px",
 };
 
 const paragraphStyle = {
   margin: "9px 0 0",
-  color: "#6d7c90",
+  color: "#63636C",
   fontSize: "12px",
   lineHeight: 1.68,
 };
@@ -139,6 +139,6 @@ const paragraphStyle = {
 const linkStyle = {
   display: "block",
   marginTop: "19px",
-  color: "#1266e9",
+  color: "#2F3039",
   fontSize: "11px",
 };
