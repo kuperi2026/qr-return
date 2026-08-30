@@ -11,13 +11,13 @@ function FaqItem({
     <div
       style={{
         padding: "15px 0",
-        borderBottom: "1px solid #dce4ed",
+        borderBottom: "1px solid #DFDFE2",
       }}
     >
       <h3
         style={{
           margin: 0,
-          color: "#293f58",
+          color: "#2F3039",
           fontSize: "13px",
         }}
       >
@@ -27,7 +27,7 @@ function FaqItem({
       <p
         style={{
           margin: "6px 0 0",
-          color: "#718095",
+          color: "#63636C",
           fontSize: "11px",
           lineHeight: 1.65,
         }}
@@ -46,9 +46,9 @@ export default function FAQMenu({
   return (
     <section
       style={{
-        background: "#f7faff",
-        borderBottom: "1px solid #dfe7f1",
-        boxShadow: "0 20px 45px rgba(10, 48, 100, 0.1)",
+        background: "#F3F3F5",
+        borderBottom: "1px solid #DFDFE2",
+        boxShadow: "0 20px 45px rgba(23, 25, 35, 0.1)",
       }}
     >
       <div
@@ -69,7 +69,7 @@ export default function FAQMenu({
         >
           <span
             style={{
-              color: "#1266e9",
+              color: "#2F3039",
               fontSize: "9px",
               fontWeight: 900,
               letterSpacing: "1px",
@@ -81,7 +81,7 @@ export default function FAQMenu({
           <h2
             style={{
               margin: "8px 0 0",
-              color: "#1c324d",
+              color: "#2F3039",
               fontSize: "25px",
               lineHeight: 1.15,
             }}
@@ -94,7 +94,7 @@ export default function FAQMenu({
 
         <div
           style={{
-            borderTop: "1px solid #dce4ed",
+            borderTop: "1px solid #DFDFE2",
           }}
         >
           <FaqItem
