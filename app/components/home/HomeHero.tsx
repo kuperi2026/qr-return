@@ -50,31 +50,22 @@ export default function HomeHero({ ka }: { ka: boolean }) {
     <>
       <section className="homeHero">
         <div className="homeHeroInner">
-          <div className="heroLayout">
-            <div className="heroCopy">
-              <span>QR RETURN · SMART LOST &amp; FOUND</span>
-              <h1>{ka ? "მყისიერი კავშირი — საჭირო დროს, საჭირო ადამიანთან" : "Instant connection — at the right time, with the right person"}</h1>
-              <p>{ka ? "QR პროფილის შექმნის შემდეგ ნივთი, შინაური ცხოველი ან Emergency სამაჯური უნიკალურ ციფრულ გვერდს უკავშირდება. ერთი სკანირებით მპოვნელი ხედავს მხოლოდ იმ ინფორმაციასა და დაკავშირების საშუალებებს, რომლებიც მფლობელმა წინასწარ განსაზღვრა." : "A QR profile connects an item, pet, or Emergency bracelet to a unique digital page. With one scan, the finder sees only the information and contact options selected by the owner."}</p>
-              <div className="heroActions">
-                <a href="/signup">{ka ? "ანგარიშის შექმნა" : "Create account"}<b>→</b></a>
-                <a href="/store">{ka ? "პროდუქტების ნახვა" : "View products"}</a>
-              </div>
-              <small><b>20</b> {ka ? "წამი — მარტივი რეგისტრაციისთვის" : "seconds — to create your account"}</small>
-            </div>
+          <header className="heroTitle">
+            <span>QR RETURN · SMART LOST &amp; FOUND</span>
+          </header>
 
-            <div className="productExperience">
-              <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
-            </div>
+          <div className="productExperience">
+            <div className="orbitFrame"><ProductOrbit ka={ka} /></div>
           </div>
 
           <div className="featuredBenefits">
             <div className="valueCard">
               <b>01</b>
-              <p><strong>{ka ? "მოემზადეთ წინასწარ." : "Prepare in advance."}</strong> {ka ? "დაკარგვის შემთხვევაში QR პროფილი მპოვნელს თქვენთან სწრაფად და უსაფრთხოდ დაკავშირებაში ეხმარება." : "If something is lost, the QR profile helps the finder contact you quickly and safely."}</p>
+              <p><strong>{ka ? "გახდი ჩვენი მომხმარებელი 20 წამში." : "Join QR RETURN in 20 seconds."}</strong> {ka ? "მოემზადე წინასწარ, რათა დაკარგვის შემთხვევაში დაბრუნება უფრო სწრაფი და მარტივი გახდეს." : "Prepare in advance so that, if something is lost, returning it can be faster and easier."}</p>
             </div>
             <div className="valueCard">
               <b>02</b>
-              <p><strong>{ka ? "თქვენი ინფორმაცია — თქვენი არჩევანი." : "Your information, your choice."}</strong> {ka ? "მპოვნელი ხედავს მხოლოდ თქვენ მიერ წინასწარ განსაზღვრულ მონაცემებსა და დაკავშირების საშუალებებს." : "The finder sees only the details and contact options you selected in advance."}</p>
+              <p>{ka ? "QR პროფილის შექმნის შემდეგ ნივთი, შინაური ცხოველი ან Emergency სამაჯური უნიკალურ ციფრულ გვერდს უკავშირდება." : "After a QR profile is created, an item, pet, or Emergency bracelet is connected to a unique digital page."}</p>
             </div>
             <button type="button" aria-expanded={showAllBenefits} onClick={() => setShowAllBenefits((current) => !current)}>
               {ka ? "ყველა შესაძლებლობა" : "All capabilities"}
@@ -93,10 +84,10 @@ export default function HomeHero({ ka }: { ka: boolean }) {
       </section>
 
       <style jsx>{`
-        .homeHero{color:#fff;background:#063B72}.homeHeroInner{width:calc(100% - 80px);max-width:1340px;margin:auto;padding:62px 0 86px}.heroLayout{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(520px,1.1fr);align-items:center;gap:42px}.heroCopy>span{color:rgba(255,255,255,.68);font-size:10px;font-weight:900;letter-spacing:1.5px}.heroCopy h1{max-width:610px;margin:18px 0 0;color:#fff;font-size:clamp(38px,4.4vw,64px);line-height:1.08;letter-spacing:-2.4px}.heroCopy>p{max-width:590px;margin:24px 0 0;color:rgba(255,255,255,.82);font-size:16px;line-height:1.75}.heroActions{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap}.heroActions a{min-height:50px;padding:0 20px;display:flex;align-items:center;gap:18px;border:1px solid rgba(255,255,255,.62);border-radius:12px;color:#fff;font-size:12px;font-weight:900;text-decoration:none}.heroActions a:first-child{background:#fff;color:#063B72}.heroActions a b{font-size:18px}.heroCopy small{margin-top:18px;display:block;color:rgba(255,255,255,.66);font-size:10px;font-weight:800;letter-spacing:.3px}.heroCopy small b{color:#fff;font-size:14px}.featuredBenefits{max-width:1120px;margin:42px auto 0;padding:10px;display:grid;grid-template-columns:1fr 1fr auto;gap:9px;border:1px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.08)}.valueCard{min-height:84px;padding:16px 18px;display:grid;grid-template-columns:28px 1fr;align-items:center;gap:10px;border-radius:13px;background:#fff;box-shadow:0 12px 28px rgba(0,22,50,.13)}.featuredBenefits b{color:#7790a8;font-size:9px;letter-spacing:.8px}.valueCard p{margin:0;color:#294f73;font-size:13px;line-height:1.55}.valueCard strong{display:block;color:#063B72;font-size:14px}.featuredBenefits button{min-width:164px;min-height:54px;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:11px;border:1px solid rgba(255,255,255,.55);border-radius:13px;background:transparent;color:#fff;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}.featuredBenefits button i{width:22px;height:22px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.45);border-radius:50%;font-style:normal;font-size:15px}.benefitsDropdown{max-width:1120px;margin:14px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:reveal .22s ease-out}.productExperience{display:flex;justify-content:center}.orbitFrame{min-width:0;display:flex;justify-content:center}@keyframes reveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+        .homeHero{color:#fff;background:#063B72}.homeHeroInner{width:calc(100% - 80px);max-width:1340px;margin:auto;padding:60px 0 86px}.heroTitle{max-width:1040px;margin:0 auto;text-align:center}.heroTitle>span{color:rgba(255,255,255,.72);font-size:11px;font-weight:900;letter-spacing:1.5px}.featuredBenefits{max-width:900px;margin:24px auto 0;padding:10px;display:grid;gap:9px;border:1px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.08)}.valueCard{min-height:76px;padding:16px 18px;display:grid;grid-template-columns:28px 1fr;align-items:center;gap:10px;border-radius:13px;background:#fff;box-shadow:0 12px 28px rgba(0,22,50,.13)}.featuredBenefits b{color:#7790a8;font-size:9px;letter-spacing:.8px}.valueCard p{margin:0;color:#294f73;font-size:14px;line-height:1.55}.valueCard strong{color:#063B72;font-size:15px}.featuredBenefits button{min-height:54px;padding:0 17px;display:flex;align-items:center;justify-content:center;gap:11px;border:1px solid rgba(255,255,255,.55);border-radius:13px;background:transparent;color:#fff;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}.featuredBenefits button i{width:22px;height:22px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.45);border-radius:50%;font-style:normal;font-size:15px}.benefitsDropdown{max-width:900px;margin:14px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:reveal .22s ease-out}.productExperience{margin-top:24px;display:flex;justify-content:center}.orbitFrame{min-width:0;display:flex;justify-content:center}@keyframes reveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
         .homeHero{background:#0A4C8A}
-        @media(max-width:1080px){.heroLayout{grid-template-columns:1fr}.heroCopy{max-width:780px;margin:auto;text-align:center}.heroCopy h1,.heroCopy>p{margin-left:auto;margin-right:auto}.heroActions{justify-content:center}.productExperience{margin-top:18px}.featuredBenefits{grid-template-columns:1fr 1fr}.featuredBenefits button{grid-column:1/-1}.benefitsDropdown{grid-template-columns:1fr 1fr}}
-        @media(max-width:760px){.homeHeroInner{width:calc(100% - 28px);padding:44px 0 65px}.heroLayout{gap:12px}.heroCopy h1{margin-top:14px;font-size:36px;line-height:1.13;letter-spacing:-1.4px}.heroCopy>p{margin-top:18px;font-size:14px;line-height:1.68}.heroActions{margin-top:23px}.heroActions a{min-height:47px;padding:0 16px}.featuredBenefits{margin-top:22px;grid-template-columns:1fr}.featuredBenefits button{grid-column:auto}.valueCard{padding:15px 14px;grid-template-columns:24px 1fr}.valueCard p{font-size:13px}.valueCard strong{font-size:14px}.benefitsDropdown{grid-template-columns:1fr}.productExperience{margin-top:16px}}
+        @media(max-width:1000px){.benefitsDropdown{grid-template-columns:1fr 1fr}}
+        @media(max-width:760px){.homeHeroInner{width:calc(100% - 28px);padding:46px 0 65px}.featuredBenefits{margin-top:20px}.valueCard{padding:15px 14px;grid-template-columns:24px 1fr}.valueCard p{font-size:13px}.valueCard strong{font-size:14px}.benefitsDropdown{grid-template-columns:1fr}.productExperience{margin-top:28px}}
       `}</style>
     </>
   );
