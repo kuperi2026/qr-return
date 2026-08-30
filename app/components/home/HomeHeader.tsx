@@ -207,7 +207,7 @@ export default function HomeHeader({
           position: relative;
           z-index: 100;
 
-          background: #063B72;
+          background: #0A4C8A;
 
           border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
