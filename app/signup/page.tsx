@@ -510,7 +510,7 @@ export default function SignupPage() {
           padding:
             0 24px 30px;
 
-          background: #063B72;
+          background: #0A4C8A;
 
           font-family:
             Arial,
