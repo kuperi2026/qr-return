@@ -207,7 +207,7 @@ export default function HomeHeader({
           position: relative;
           z-index: 100;
 
-          background: #45464F;
+          background: #0A4C8A;
 
           border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -249,7 +249,7 @@ export default function HomeHeader({
           border-radius: 10px;
 
           background: #ffffff;
-          color: #2F3039;
+          color: #063B72;
         }
 
         .homeBrand strong,
@@ -379,7 +379,7 @@ export default function HomeHeader({
         }
 
         .homeAuth {
-          color: #2F3039;
+          color: #063B72;
 
           background: #ffffff;
 
@@ -393,7 +393,7 @@ export default function HomeHeader({
         }
 
         .homeAdmin {
-          color: #2F3039;
+          color: #063B72;
 
           background: #ffffff;
 
