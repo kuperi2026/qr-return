@@ -58,11 +58,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             </div>
 
             <div className="productExperience">
-              <div className="productSectionHead">
-                <span>QR RETURN · COLLECTION</span>
-                <h2>{ka ? "შვიდი გზა იმის დასაცავად, რაც მნიშვნელოვანია" : "Seven ways to protect what matters"}</h2>
-                <p>{ka ? "აირჩიეთ შესაბამისი QR პროდუქტი ნივთისთვის, შინაური ცხოველისთვის ან Emergency საჭიროებისთვის." : "Choose the right QR product for an item, a pet, or an Emergency need."}</p>
-              </div>
               <ProductOrbit ka={ka} />
             </div>
           </div>
