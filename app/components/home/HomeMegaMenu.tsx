@@ -429,7 +429,7 @@ function Styles() {
       .megaMenu {
         width: 100%;
         background: #ffffff;
-        border-bottom: 1px solid #DFDFE2;
+        border-bottom: 1px solid #e5eaf0;
         box-shadow: 0 22px 55px rgba(23, 40, 64, 0.08);
       }
 
@@ -461,20 +461,20 @@ function Styles() {
       .label {
         display: flex;
         gap: 10px;
-        color: #63636C;
+        color: #77869a;
         font-size: 10px;
         font-weight: 900;
         letter-spacing: 1.2px;
       }
 
       .label span {
-        color: #2F3039;
+        color: #1266e9;
       }
 
       h2 {
         max-width: 680px;
         margin: 13px 0 0;
-        color: #2F3039;
+        color: #17283d;
         font-size: 34px;
         line-height: 1.1;
         letter-spacing: -1.4px;
@@ -482,7 +482,7 @@ function Styles() {
 
       h3 {
         margin: 13px 0 0;
-        color: #2F3039;
+        color: #24364c;
         font-size: 20px;
         line-height: 1.35;
       }
@@ -495,7 +495,7 @@ function Styles() {
       .card p,
       .storeCard p,
       .faqIntro {
-        color: #63636C;
+        color: #657488;
         font-size: 13px;
         line-height: 1.75;
       }
@@ -505,7 +505,7 @@ function Styles() {
       }
 
       .text .lead {
-        color: #45464F;
+        color: #2c3d52;
         font-size: 14px;
       }
 
@@ -513,22 +513,22 @@ function Styles() {
         margin: 24px 0;
         padding: 21px 23px;
         border-radius: 14px;
-        color: #2F3039;
-        background: linear-gradient(135deg, #F3F3F5, #F8F8F8);
+        color: #263b54;
+        background: linear-gradient(135deg, #f2f7ff, #f8f6ff);
         font-size: 15px;
         font-weight: 750;
         line-height: 1.6;
       }
 
       .thanks {
-        color: #2F3039 !important;
+        color: #293c52 !important;
         font-weight: 750;
       }
 
       .signature {
         margin-top: 27px;
         padding-top: 20px;
-        border-top: 1px solid #DFDFE2;
+        border-top: 1px solid #e5e9ee;
       }
 
       .signature strong,
@@ -538,19 +538,19 @@ function Styles() {
       }
 
       .signature strong {
-        color: #2F3039;
+        color: #203146;
         font-size: 14px;
       }
 
       .signature span {
         margin-top: 3px;
-        color: #63636C;
+        color: #68778a;
         font-size: 11px;
       }
 
       .signature small {
         margin-top: 3px;
-        color: #2F3039;
+        color: #1266e9;
         font-size: 9px;
         font-weight: 900;
       }
@@ -564,9 +564,9 @@ function Styles() {
       .card,
       .storeCard {
         padding: 28px;
-        border: 1px solid #DFDFE2;
+        border: 1px solid #e2e8ef;
         border-radius: 18px;
-        background: #F8F8F8;
+        background: #f9fbfd;
       }
 
       .steps {
@@ -581,20 +581,20 @@ function Styles() {
         display: grid;
         grid-template-columns: 32px 1fr;
         gap: 9px;
-        border: 1px solid #DFDFE2;
+        border: 1px solid #e3e9ef;
         border-radius: 13px;
-        background: #F8F8F8;
+        background: #fafbfd;
       }
 
       .step span {
-        color: #2F3039;
+        color: #1266e9;
         font-size: 10px;
         font-weight: 900;
       }
 
       .step p {
         margin: 0;
-        color: #63636C;
+        color: #5f6e80;
         font-size: 12px;
         line-height: 1.6;
       }
@@ -608,18 +608,18 @@ function Styles() {
         justify-content: space-between;
         border-radius: 9px;
         color: #ffffff;
-        background: #2F3039;
+        background: #1266e9;
         text-decoration: none;
         font-size: 12px;
         font-weight: 850;
       }
 
       .faqList {
-        border-top: 1px solid #DFDFE2;
+        border-top: 1px solid #e2e7ed;
       }
 
       .faqItem {
-        border-bottom: 1px solid #DFDFE2;
+        border-bottom: 1px solid #e2e7ed;
       }
 
       .faqItem button {
@@ -631,7 +631,7 @@ function Styles() {
         justify-content: space-between;
         gap: 20px;
         border: 0;
-        color: #2F3039;
+        color: #293b51;
         background: transparent;
         cursor: pointer;
         text-align: left;
@@ -648,14 +648,14 @@ function Styles() {
         place-items: center;
         flex: 0 0 31px;
         border-radius: 50%;
-        color: #2F3039;
-        background: #F3F3F5;
+        color: #1266e9;
+        background: #eef4ff;
         font-size: 18px;
       }
 
       .faqItem > p {
         margin: -3px 45px 20px 0;
-        color: #63636C;
+        color: #68778a;
         font-size: 13px;
         line-height: 1.7;
       }
