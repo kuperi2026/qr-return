@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import ProductOrbit from "./ProductOrbit";
 import ProductGallery from "./ProductGallery";
 
 type Benefit = {
@@ -58,9 +57,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <p>{ka ? "QR პროფილის შექმნის შემდეგ ნივთი, შინაური ცხოველი ან Emergency სამაჯური უნიკალურ ციფრულ გვერდს უკავშირდება. ერთი სკანირებით მპოვნელი ხედავს მხოლოდ იმ ინფორმაციასა და დაკავშირების საშუალებებს, რომლებიც მფლობელმა წინასწარ განსაზღვრა." : "A QR profile connects an item, pet, or Emergency bracelet to a unique digital page. With one scan, the finder sees only the information and contact options selected by the owner."}</p>
             </div>
 
-            <div className="productExperience">
-              <ProductOrbit ka={ka} />
-            </div>
           </div>
 
           <ProductGallery ka={ka} />
