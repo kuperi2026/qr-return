@@ -18,6 +18,21 @@ function getSupabase() {
   return createClient(url, key);
 }
 
+function getSafeNextPath() {
+  const requested = new URLSearchParams(
+    window.location.search
+  ).get("next");
+
+  if (
+    requested?.startsWith("/") &&
+    !requested.startsWith("//")
+  ) {
+    return requested;
+  }
+
+  return "/register";
+}
+
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -154,7 +169,7 @@ export default function SignupPage() {
        */
 
       if (data.session) {
-        window.location.assign("/register");
+        window.location.assign(getSafeNextPath());
         return;
       }
 
@@ -169,7 +184,7 @@ export default function SignupPage() {
       window.location.assign(
         `/login?registered=1&email=${encodeURIComponent(
           cleanEmail
-        )}&next=${encodeURIComponent("/register")}`
+        )}&next=${encodeURIComponent(getSafeNextPath())}`
       );
     } catch (error) {
       console.error(
