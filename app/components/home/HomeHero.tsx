@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ProductGallery from "./ProductGallery";
 
 type Benefit = {
   title: string;
@@ -57,6 +58,8 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             </div>
 
           </div>
+
+          <ProductGallery ka={ka} />
 
           <div className="featuredBenefits">
             <div className="valueCard">
