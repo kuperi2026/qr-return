@@ -16,6 +16,7 @@ type Lang = "ka" | "en";
 
 type Menu =
   | "about"
+  | "products"
   | "shop"
   | "faq"
   | "contact"
@@ -119,6 +120,13 @@ export default function HomeHeader({
             >
               {ka ? "ჩვენ შესახებ" : "About"}
               <Chevron open={openMenu === "about"} />
+            </button>
+
+            <button
+              onClick={() => toggleMenu("products")}
+            >
+              {ka ? "პროდუქტები" : "Products"}
+              <Chevron open={openMenu === "products"} />
             </button>
 
             <button
@@ -441,12 +449,33 @@ export default function HomeHeader({
         @media (max-width: 850px) {
 
           .homeNav {
+            width: 100%;
+            padding: 0 0 10px;
+
+            grid-column: 1 / -1;
+
+            display: flex;
+            gap: 18px;
+
+            overflow-x: auto;
+            scrollbar-width: none;
+          }
+
+          .homeNav::-webkit-scrollbar {
             display: none;
+          }
+
+          .homeNav button {
+            padding: 9px 0;
+
+            font-size: 12px;
           }
 
           .homeHeaderInner {
             grid-template-columns:
               auto 1fr;
+
+            padding-top: 8px;
           }
 
           .homeActions {
@@ -468,6 +497,14 @@ export default function HomeHeader({
             width: calc(100% - 20px);
 
             min-height: 68px;
+          }
+
+          .homeNav {
+            gap: 15px;
+          }
+
+          .homeNav button {
+            font-size: 11px;
           }
 
           .homeBrand span {
