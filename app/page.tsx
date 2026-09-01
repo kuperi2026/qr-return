@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import HomeHeader from "./components/home/HomeHeader";
 import AboutMenu from "./components/home/AboutMenu";
+import ProductsMenu from "./components/home/ProductsMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import FAQMenu from "./components/home/FAQMenu";
 import ContactMenu from "./components/home/ContactMenu";
@@ -14,6 +15,7 @@ type Lang = "ka" | "en";
 
 type Menu =
   | "about"
+  | "products"
   | "shop"
   | "faq"
   | "contact"
@@ -47,6 +49,10 @@ export default function HomePage() {
 
       {openMenu === "about" && (
         <AboutMenu ka={ka} />
+      )}
+
+      {openMenu === "products" && (
+        <ProductsMenu ka={ka} />
       )}
 
       {openMenu === "shop" && (
