@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ProductOrbit from "./ProductOrbit";
+import ProductGallery from "./ProductGallery";
 
 type Benefit = {
   title: string;
@@ -61,6 +62,8 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <ProductOrbit ka={ka} />
             </div>
           </div>
+
+          <ProductGallery ka={ka} />
 
           <div className="featuredBenefits">
             <div className="valueCard">
