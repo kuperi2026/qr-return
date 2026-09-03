@@ -5,6 +5,104 @@ import { useState } from "react";
 export default function HomeHero({ ka }: { ka: boolean }) {
   const [showDetails, setShowDetails] = useState(false);
 
+  type ProductKind = "emergency" | "parking" | "suitcase" | "dog" | "cat" | "bag" | "wallet" | "keys";
+  const detailCopyKa: Record<ProductKind, Array<[string, string, string]>> = {
+    emergency: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი Emergency პროფილი და დაამატე აუცილებელი პირადი, სამედიცინო და საკონტაქტო ინფორმაცია."],
+      ["📱","აპლიკაციის გარეშე:","დახმარების მსურველს არ სჭირდება აპლიკაცია ან რეგისტრაცია — საკმარისია QR კოდის დასკანერება ნებისმიერი სმარტფონით."],
+      ["🔒","პრივატულობის სრული კონტროლი:","თავად განსაზღვრე, რა ინფორმაცია გამოჩნდება პროფილში და როდის გახდება ის ხელმისაწვდომი."],
+      ["🚨","Lost Mode & სწრაფი კავშირი:","საჭიროებისას ჩართე Lost Mode — დამსკანერებელი დაგიკავშირდება ზარით ან Live Chat-ით და შეძლებს ლოკაციის გაზიარებას."],
+      ["👥","ადმინისტრატორის დელეგირება:","დაამატე სანდო ადმინისტრატორი და მიეცი Emergency პროფილის მართვის განსაზღვრული უფლება."],
+      ["🛡️","პერსონალური უსაფრთხოება:","ერთხელ გააქტიურებული Emergency პროფილი სხვა ადამიანზე არ გადადის; სამედიცინო და საკონტაქტო ინფორმაციის განახლება კი ყოველთვის შეგიძლია."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე საიტის Live Chat ან დაჯავშნე სატელეფონო ზარი; შეკვეთა შესაძლებელია ონლაინ და ტელეფონით."]
+    ],
+    parking: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","დააკავშირე QR ბარათი ავტომობილთან და მიუთითე მძღოლთან დაკავშირების სასურველი გზა."],
+      ["📱","აპლიკაციის გარეშე:","სხვა მძღოლს ან გამვლელს მხოლოდ QR კოდის დასკანერება სჭირდება — აპლიკაციის ჩამოტვირთვის გარეშე."],
+      ["🔒","ნომრისა და ინფორმაციის კონტროლი:","თავად გადაწყვიტე, გამოჩნდეს ტელეფონის ნომერი თუ კომუნიკაცია მხოლოდ დაცული Live Chat-ით დაიწყოს."],
+      ["🚘","სწრაფი შეტყობინება მძღოლთან:","თუ მანქანა გადაადგილებას საჭიროებს ან საფრთხეშია, დამსკანერებელი სწრაფად დაგიკავშირდება."],
+      ["👥","ადმინისტრატორის დელეგირება:","ავტომობილის პროფილის მართვა შეგიძლია სანდო ოჯახის წევრს ან სხვა უფლებამოსილ პირსაც გაუზიარო."],
+      ["🔄","დინამიური ჩანაცვლება:","QR ბარათის მონაცემები ნებისმიერ დროს განაახლე ან იმავე კატეგორიის სხვა ავტომობილს დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან სატელეფონო ზარი; პროდუქტი შეუკვეთე ონლაინ ან ტელეფონით."]
+    ],
+    suitcase: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი ჩემოდნის პროფილი და დაამატე მისი ფერი, აღწერა და მფლობელთან დაკავშირების ინფორმაცია."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს მხოლოდ QR კოდის დასკანერება სჭირდება ნებისმიერი სმარტფონით."],
+      ["🔒","პრივატულობის სრული კონტროლი:","შენ წყვეტ, რა დამატებით ინფორმაციას ნახავს მპოვნელი და როდის გახდება პროფილი ხელმისაწვდომი."],
+      ["🧳","Lost Mode & Instant Live Chat:","დაკარგვისას ჩართე Lost Mode — მპოვნელი დაგიკავშირდება ზარით ან Live Chat-ით და გაგიზიარებს ზუსტ ლოკაციას."],
+      ["👥","ადმინისტრატორის დელეგირება:","ჩემოდნის პროფილის მართვა გაუზიარე სანდო ოჯახის წევრს ან თანამგზავრს."],
+      ["🔄","დინამიური ჩანაცვლება:","მონაცემები ნებისმიერ დროს განაახლე ან იგივე QR იარლიყი სხვა ჩემოდანს დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან სატელეფონო ზარი; შეკვეთა შესაძლებელია ონლაინ და ტელეფონით."]
+    ],
+    dog: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი ანგარიში, აირჩიე ძაღლის პროფილი და მიუთითე პატრონის საკონტაქტო ინფორმაცია და QR იარლიყის ფერი."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს არ სჭირდება აპლიკაცია ან რეგისტრაცია — საკმარისია QR კოდის დასკანერება ნებისმიერი სმარტფონით."],
+      ["🔒","პრივატულობის სრული კონტროლი:","სამედიცინო ჩანაწერების, აცრებისა და განსაკუთრებული საჭიროებების გამოჩენას წყვეტ მხოლოდ შენ."],
+      ["🚨","Lost Mode & Instant Live Chat:","დაკარგვისას ჩართე Lost Mode — მპოვნელი დაგიკავშირდება ზარით ან Live Chat-ით და გაგიზიარებს ზუსტ ლოკაციას."],
+      ["👥","ადმინისტრატორის დელეგირება:","პროფილის მართვა გაუზიარე სანდო ოჯახის წევრს, ძაღლის გამსეირნებელს ან ვეტერინარს."],
+      ["🔄","დინამიური ჩანაცვლება:","მონაცემები ნებისმიერ დროს განაახლე ან იგივე QR იარლიყი იმავე კატეგორიის სხვა ძაღლს დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან დაჯავშნე სატელეფონო ზარი; შეუკვეთე ონლაინ ან ტელეფონით."]
+    ],
+    cat: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი კატის პროფილი და დაამატე მისი სახელი, ფერი, ფოტო და პატრონის საკონტაქტო ინფორმაცია."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს მხოლოდ QR კოდის დასკანერება სჭირდება — აპლიკაციისა და რეგისტრაციის გარეშე."],
+      ["🔒","პრივატულობის სრული კონტროლი:","თავად მართე აცრების, სამედიცინო ჩანაწერებისა და განსაკუთრებული საჭიროებების ხილვადობა."],
+      ["🚨","Lost Mode & Instant Live Chat:","დაკარგვისას გაააქტიურე Lost Mode — მპოვნელი დაგიკავშირდება და სურვილის შემთხვევაში გაგიზიარებს ლოკაციას."],
+      ["👥","ადმინისტრატორის დელეგირება:","კატის პროფილის მართვა გაუზიარე სანდო ოჯახის წევრს, მომვლელს ან ვეტერინარს."],
+      ["🔄","დინამიური ჩანაცვლება:","პროფილის მონაცემები განაახლე ან იგივე QR იარლიყი იმავე კატეგორიის სხვა კატას დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე საიტის Live Chat ან სატელეფონო ზარი; შეუკვეთე ონლაინ ან ტელეფონით."]
+    ],
+    bag: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი ჩანთის პროფილი და მიუთითე ფერი, ტიპი, აღწერა და საკონტაქტო ინფორმაცია."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს მხოლოდ QR კოდის დასკანერება სჭირდება ნებისმიერი სმარტფონით."],
+      ["🔒","პრივატულობის სრული კონტროლი:","თავად განსაზღვრე, რა დამატებით ინფორმაციასა და დაკავშირების გზებს ნახავს მპოვნელი."],
+      ["🎒","Lost Mode & ლოკაციის გაზიარება:","დაკარგვისას ჩართე Lost Mode — მპოვნელი დაგიკავშირდება Live Chat-ით ან ზარით და გაგიზიარებს ზუსტ მდებარეობას."],
+      ["👥","ადმინისტრატორის დელეგირება:","ჩანთის პროფილის მართვა შეგიძლია სანდო ოჯახის წევრსაც გაუზიარო."],
+      ["🔄","დინამიური ჩანაცვლება:","მონაცემები ნებისმიერ დროს განაახლე ან იგივე QR იარლიყი სხვა ჩანთას დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან სატელეფონო ზარი; შეკვეთა შესაძლებელია ონლაინ და ტელეფონით."]
+    ],
+    wallet: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი საფულის პროფილი და დაამატე მხოლოდ მფლობელთან უსაფრთხოდ დაკავშირებისთვის საჭირო ინფორმაცია."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს არ სჭირდება აპლიკაცია ან ანგარიში — საკმარისია QR კოდის დასკანერება."],
+      ["🔒","პრივატულობის სრული კონტროლი:","თავად გადაწყვიტე, რომელი მონაცემი გამოჩნდება; ფინანსური ინფორმაცია პროფილში არ ინახება."],
+      ["👛","Lost Mode & სწრაფი დაბრუნება:","დაკარგვისას ჩართე Lost Mode — მპოვნელი დაგიკავშირდება ზარით ან Live Chat-ით და შეძლებს ლოკაციის გაზიარებას."],
+      ["👥","ადმინისტრატორის დელეგირება:","საჭიროებისას პროფილის მართვის უფლება სანდო ოჯახის წევრს გაუზიარე."],
+      ["🔄","დინამიური ჩანაცვლება:","მონაცემები განაახლე ან იგივე QR იარლიყი იმავე კატეგორიის სხვა საფულეს დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან სატელეფონო ზარი; შეუკვეთე ონლაინ ან ტელეფონით."]
+    ],
+    keys: [
+      ["⚡","სწრაფი & მარტივი რეგისტრაცია:","შექმენი გასაღების პროფილი და მიუთითე მფლობელთან დაკავშირების უსაფრთხო გზა."],
+      ["📱","აპლიკაციის გარეშე:","მპოვნელს მხოლოდ QR კოდის დასკანერება სჭირდება ნებისმიერი სმარტფონით."],
+      ["🔒","მისამართის დაცვა:","თავად აკონტროლე ხილული ინფორმაცია — სახლის ზუსტი მისამართის მითითება საჭირო არ არის."],
+      ["🔑","Lost Mode & სწრაფი კავშირი:","დაკარგვისას ჩართე Lost Mode — მპოვნელი დაგიკავშირდება ზარით ან Live Chat-ით და გაგიზიარებს მდებარეობას."],
+      ["👥","ადმინისტრატორის დელეგირება:","პროფილის მართვის უფლება სანდო ოჯახის წევრსაც შეგიძლია გაუზიარო."],
+      ["🔄","დინამიური ჩანაცვლება:","მონაცემები ნებისმიერ დროს განაახლე ან იგივე QR იარლიყი სხვა გასაღების ნაკრებს დაუკავშირე."],
+      ["📞","24/7 მხარდაჭერა & შეკვეთა:","დახმარებისთვის გამოიყენე Live Chat ან სატელეფონო ზარი; შეკვეთა შესაძლებელია ონლაინ და ტელეფონით."]
+    ]
+  };
+  const detailCopyEn: Record<ProductKind, Array<[string, string, string]>> = {
+    emergency:[["⚡","Quick setup:","Create a personal emergency profile with essential medical and contact details."],["📱","No app required:","Any helper can scan the QR code with a smartphone."],["🔒","Privacy control:","Choose what is visible and when the profile is available."],["🚨","Lost Mode:","Enable calls, Live Chat and voluntary location sharing when needed."],["👥","Trusted access:","Delegate limited profile management to someone you trust."],["🛡️","Personal protection:","The activated profile cannot be transferred to another person, while its information remains editable."],["📞","Support & ordering:","Reach us through Live Chat or by phone."]],
+    parking:[["⚡","Quick setup:","Connect the QR card to your vehicle."],["📱","No app required:","Anyone can scan it with a smartphone."],["🔒","Contact control:","Choose how another driver can reach you."],["🚘","Fast driver contact:","Receive a message when your parked vehicle needs attention."],["👥","Trusted access:","Share management with a trusted person."],["🔄","Reusable profile:","Update it or connect it to another vehicle."],["📞","Support & ordering:","Reach us online or by phone."]],
+    suitcase:[["⚡","Quick setup:","Add your suitcase details and contact preferences."],["📱","No app required:","A finder only scans the QR code."],["🔒","Privacy control:","Choose what a finder can see."],["🧳","Lost Mode:","Enable calls, chat and location sharing."],["👥","Trusted access:","Share management with a travel companion."],["🔄","Reusable profile:","Update it or link another suitcase."],["📞","Support & ordering:","Reach us online or by phone."]],
+    dog:[["⚡","Quick setup:","Create a dog profile with owner contact details."],["📱","No app required:","A finder only scans the QR code."],["🔒","Privacy control:","Control medical and care information."],["🚨","Lost Mode:","Enable calls, chat and location sharing."],["👥","Trusted access:","Share management with a trusted caregiver."],["🔄","Reusable profile:","Update it or link another dog."],["📞","Support & ordering:","Reach us online or by phone."]],
+    cat:[["⚡","Quick setup:","Create a cat profile with photo and contact details."],["📱","No app required:","A finder only scans the QR code."],["🔒","Privacy control:","Control medical and care information."],["🚨","Lost Mode:","Enable calls, chat and location sharing."],["👥","Trusted access:","Share management with a trusted caregiver."],["🔄","Reusable profile:","Update it or link another cat."],["📞","Support & ordering:","Reach us online or by phone."]],
+    bag:[["⚡","Quick setup:","Add your bag description and contact preferences."],["📱","No app required:","A finder only scans the QR code."],["🔒","Privacy control:","Choose what a finder can see."],["🎒","Lost Mode:","Enable calls, chat and location sharing."],["👥","Trusted access:","Share management with someone you trust."],["🔄","Reusable profile:","Update it or link another bag."],["📞","Support & ordering:","Reach us online or by phone."]],
+    wallet:[["⚡","Quick setup:","Create a secure wallet return profile."],["📱","No app required:","A finder only scans the QR code."],["🔒","Privacy control:","No financial information is required."],["👛","Lost Mode:","Enable safe contact and location sharing."],["👥","Trusted access:","Share management with someone you trust."],["🔄","Reusable profile:","Update it or link another wallet."],["📞","Support & ordering:","Reach us online or by phone."]],
+    keys:[["⚡","Quick setup:","Create a secure key return profile."],["📱","No app required:","A finder only scans the QR code."],["🔒","Address protection:","Your home address does not need to be shown."],["🔑","Lost Mode:","Enable safe contact and location sharing."],["👥","Trusted access:","Share management with someone you trust."],["🔄","Reusable profile:","Update it or link another key set."],["📞","Support & ordering:","Reach us online or by phone."]]
+  };
+  const ProductDescription = ({ kind }: { kind: ProductKind }) => {
+    const items = ka ? detailCopyKa[kind] : detailCopyEn[kind];
+    return (
+      <details className="productDetails">
+        <summary>{ka ? "პროდუქტის აღწერა" : "Product details"}<span aria-hidden="true">+</span></summary>
+        <div className="productDetailsBody">
+          <h4>{ka ? "მთავარი შესაძლებლობები & უპირატესობები:" : "Key features & benefits:"}</h4>
+          <ul>{items.map(([icon,title,text]) => <li key={title}><span aria-hidden="true">{icon}</span><p><strong>{title}</strong> {text}</p></li>)}</ul>
+        </div>
+      </details>
+    );
+  };
+
   return (
     <section className="homeHero">
       <div className="homeHeroInner">
@@ -44,6 +142,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR სამაჯური — ყველაზე ფრთხილებისთვის!" : "A smart QR wristband — for the most careful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="emergency" />
           </article>
           <article className="dogProduct parkingProduct">
             <div className="dogVisual">
@@ -53,6 +152,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR ბარათი — წინდახედული მძღოლებისთვის!" : "A smart QR card — for thoughtful drivers!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="parking" />
           </article>
           <article className="dogProduct suitcaseProduct">
             <div className="dogVisual">
@@ -62,6 +162,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — მოგზაურობის მოყვარულთათვის!" : "A smart QR tag — for travel lovers!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="suitcase" />
           </article>
           <article className="dogProduct">
             <div className="dogVisual">
@@ -71,25 +172,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ერთგულებისთვის!" : "A smart QR tag — for your most loyal friend!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <details className="productDetails">
-              <summary>{ka ? "პროდუქტის აღწერა" : "Product details"}<span aria-hidden="true">+</span></summary>
-              {ka ? (
-                <div className="productDetailsBody">
-                  <h4>მთავარი შესაძლებლობები &amp; უპირატესობები:</h4>
-                  <ul>
-                    <li><span>⚡</span><p><strong>სწრაფი &amp; მარტივი რეგისტრაცია:</strong> შექმენი ანგარიში, აირჩიე ძაღლის პროფილი და მიუთითე მხოლოდ საბაზისო მონაცემები (პატრონის სახელი, გვარი, ტელეფონის ნომერი და ბირკის ფერი).</p></li>
-                    <li><span>📱</span><p><strong>აპლიკაციის გარეშე:</strong> მპოვნელს არ სჭირდება არანაირი აპლიკაციის ჩამოტვირთვა ან რეგისტრაცია — <b>საკმარისია მხოლოდ QR კოდის დასკანერება</b> ნებისმიერი სმარტფონით.</p></li>
-                    <li><span>🔒</span><p><strong>პრივატულობის სრული კონტროლი:</strong> დამატებითი ინფორმაციის (სამედიცინო ჩანაწერები, აცრები, განსაკუთრებული საჭიროებები) გამოჩენას წყვეტ მხოლოდ შენ — მართე ხილვადობა ერთი თითის დაჭერით.</p></li>
-                    <li><span>🚨</span><p><strong>Lost Mode &amp; Instant Live Chat:</strong> დაკარგვისას გაააქტიურე დაკარგვის რეჟიმი. მპოვნელი დასკანერებით ნახავს პროფილს, დაგიკავშირდება პირდაპირი ზარით ან <b>Live Chat</b>-ით და გაგიზიარებს ზუსტ გეოლოკაციას.</p></li>
-                    <li><span>👥</span><p><strong>ადმინისტრატორის დელეგირება:</strong> დაამატე თანა-ადმინისტრატორები (ოჯახის წევრი, ძაღლის გასეირნებელი ან ვეტერინარი), ინდივიდუალურად განუსაზღვრე წვდომის უფლებები და მართეთ პროფილი ერთად.</p></li>
-                    <li><span>🔄</span><p><strong>დინამიური ჩანაცვლება:</strong> ბირკის მონაცემების განახლება შეგიძლია ნებისმიერ დროს. საჭიროებისას, იგივე ბირკა მარტივად შეგიძლია გადააბა იმავე კატეგორიის სხვა ოთხფეხა მეგობარს.</p></li>
-                    <li><span>📞</span><p><strong>24/7 მხარდაჭერა &amp; შეკვეთა:</strong> გჭირდება დახმარება? ისარგებლე ჩვენი საიტის Live Chat-ით ან დაჯავშნე სატელეფონო ზარი. პროდუქტის შეკვეთა შესაძლებელია როგორც ონლაინ, ისე ტელეფონით.</p></li>
-                  </ul>
-                </div>
-              ) : (
-                <div className="productDetailsBody"><p>Create and manage the dog profile, control privacy, enable Lost Mode, connect through Live Chat and share location without requiring an app.</p></div>
-              )}
-            </details>
+            <ProductDescription kind="dog" />
           </article>
           <article className="dogProduct catProduct">
             <div className="dogVisual">
@@ -99,6 +182,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ცნობისმოყვარეებისთვის!" : "A smart QR tag — for the most curious!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="cat" />
           </article>
           <article className="dogProduct bagProduct">
             <div className="dogVisual">
@@ -108,6 +192,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე პრაქტიკულებისთვის!" : "A smart QR tag — for the most practical!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="bag" />
           </article>
           <article className="dogProduct catProduct">
             <div className="dogVisual">
@@ -117,6 +202,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ფრთხილებისთვის!" : "A smart QR tag — for the most careful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="wallet" />
           </article>
           <article className="dogProduct keysProduct">
             <div className="dogVisual">
@@ -126,6 +212,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — გულმავიწყებისთვის!" : "A smart QR tag — for the forgetful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
+            <ProductDescription kind="keys" />
           </article>
           </div>
         </section>
