@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./product-grid.css";
 
 export const metadata: Metadata = {
   title: "QR Return | Lost & Found",
