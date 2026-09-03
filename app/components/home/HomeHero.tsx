@@ -130,7 +130,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR სამაჯური — ყველაზე ფრთხილებისთვის!" : "A smart QR wristband — for the most careful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="emergency" />
           </article>
           <article className="dogProduct parkingProduct">
             <div className="dogVisual">
@@ -140,7 +139,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR ბარათი — წინდახედული მძღოლებისთვის!" : "A smart QR card — for thoughtful drivers!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="parking" />
           </article>
           <article className="dogProduct suitcaseProduct">
             <div className="dogVisual">
@@ -150,7 +148,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — მოგზაურობის მოყვარულთათვის!" : "A smart QR tag — for travel lovers!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="suitcase" />
           </article>
           <article className="dogProduct">
             <div className="dogVisual">
@@ -160,7 +157,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ერთგულებისთვის!" : "A smart QR tag — for your most loyal friend!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="dog" />
           </article>
           <article className="dogProduct catProduct">
             <div className="dogVisual">
@@ -170,7 +166,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ცნობისმოყვარეებისთვის!" : "A smart QR tag — for the most curious!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="cat" />
           </article>
           <article className="dogProduct bagProduct">
             <div className="dogVisual">
@@ -180,7 +175,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე პრაქტიკულებისთვის!" : "A smart QR tag — for the most practical!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="bag" />
           </article>
           <article className="dogProduct catProduct">
             <div className="dogVisual">
@@ -190,7 +184,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — ყველაზე ფრთხილებისთვის!" : "A smart QR tag — for the most careful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="wallet" />
           </article>
           <article className="dogProduct keysProduct">
             <div className="dogVisual">
@@ -200,7 +193,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
               <h3>{ka ? "ჭკვიანი QR იარლიყი — გულმავიწყებისთვის!" : "A smart QR tag — for the forgetful!"}</h3>
               <a href="/store">{ka ? "შეძენა" : "Buy now"}<span aria-hidden="true">→</span></a>
             </div>
-            <ProductDescription kind="keys" />
           </article>
           </div>
         </section>
@@ -223,13 +215,16 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         .ecosystemCircle h1{max-width:235px;margin:0;color:#fff;font-size:clamp(27px,2.6vw,37px);line-height:1.1;letter-spacing:-1.1px}.ecosystemCircle h1 strong{display:block;margin-top:7px;color:#ffd0d0}
         .stageAccent{width:100%;max-width:380px;aspect-ratio:1;padding:48px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.34);border-radius:50%;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(3,49,94,.25));box-shadow:0 22px 52px rgba(0,21,52,.22),inset 0 1px 0 rgba(255,255,255,.22);text-align:center}.stageAccent:after{content:"";position:absolute;inset:14px;border:1px solid rgba(255,255,255,.16);border-radius:50%}.stageAccent .leadCopy{position:relative;z-index:1;max-width:285px;margin:0;color:#fff;font-size:clamp(17px,1.7vw,22px);font-weight:850;line-height:1.48;letter-spacing:-.35px}.stageAccent p em{color:#ffd0d0;font-style:italic;font-weight:950}
         .heroSupport{width:100%;max-width:420px;display:grid;gap:13px}.supportCard{border:1px solid rgba(255,255,255,.3);border-radius:17px;color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.07));box-shadow:0 13px 32px rgba(0,24,58,.2);backdrop-filter:blur(12px)}.supportCard summary{min-height:68px;padding:0 18px;display:grid;grid-template-columns:30px 1fr 28px;align-items:center;gap:10px;cursor:pointer;list-style:none}.supportCard summary::-webkit-details-marker{display:none}.supportCard summary b,.supportLink>b{font-size:23px;font-weight:500}.supportCard[open] summary b{transform:rotate(45deg)}.supportCard p{margin:0;padding:0 18px 18px 58px;color:rgba(255,255,255,.82);font-size:13px;line-height:1.55}.supportLink{min-height:68px;padding:0 18px;display:grid;grid-template-columns:30px 1fr 28px;align-items:center;gap:10px;text-decoration:none;transition:transform .2s ease,background .2s ease}.supportLink:hover{transform:translateX(4px);background:rgba(255,255,255,.19)}.supportLink strong,.supportLink small{display:block}.supportLink small{margin-top:3px;color:#b9ddfc;font-size:12px}.bottomAccountNote{max-width:860px;margin:70px auto 0;padding:24px 34px;border:1px solid rgba(255,255,255,.25);border-radius:18px;background:rgba(255,255,255,.08);text-align:center}.bottomAccountNote p{margin:0;color:#fff;font-size:16px;font-weight:800;line-height:1.65}.bottomAccountNote em{color:#ffd0d0;font-style:italic;font-weight:950}
-        .productShowcase{width:min(1480px,calc(100vw - 24px));margin-top:84px;margin-left:50%;padding:0;transform:translateX(-50%)}.productHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:30px}.productHeading span{color:#b9ddfc;font-size:9px;font-weight:900;letter-spacing:1.4px;white-space:nowrap}.productHeading h2{max-width:690px;margin:0;font-size:clamp(22px,2.7vw,34px);line-height:1.2;text-align:right;letter-spacing:-1px}
-        .productRail{margin:34px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,312px));justify-content:space-between;column-gap:28px;row-gap:78px}.dogProduct{min-width:0;display:flex;flex-direction:column;background:transparent;transition:transform .22s ease}.dogProduct:hover{transform:translateY(-4px)}.dogVisual,.catProduct .dogVisual{position:relative;order:1;min-height:0;aspect-ratio:3/2;overflow:hidden;border-radius:20px;background:#dcefff;box-shadow:0 14px 30px rgba(0,20,50,.2)}.dogVisual:after,.catProduct .dogVisual:after{display:none}.dogVisual img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center}
+        .productShowcase{width:min(1480px,calc(100vw - 40px));margin-top:84px;margin-left:50%;padding:0;transform:translateX(-50%);overflow:hidden}.productHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:30px}.productHeading span{color:#b9ddfc;font-size:9px;font-weight:900;letter-spacing:1.4px;white-space:nowrap}.productHeading h2{max-width:690px;margin:0;font-size:clamp(22px,2.7vw,34px);line-height:1.2;text-align:right;letter-spacing:-1px}
+        .productRail{margin:34px auto 0;padding:8px 4px 20px;display:grid;grid-template-columns:repeat(8,minmax(136px,1fr));gap:22px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin}.dogProduct{min-width:136px;display:flex;flex-direction:column;align-items:center;background:transparent;scroll-snap-align:start;transition:transform .22s ease}.dogProduct:hover{transform:translateY(-5px)}.dogVisual,.catProduct .dogVisual{width:100%;max-width:158px;position:relative;order:1;min-height:0;aspect-ratio:1;overflow:hidden;border:3px solid rgba(255,255,255,.82);border-radius:50%;background:#dcefff;box-shadow:0 14px 30px rgba(0,20,50,.28),0 0 0 5px rgba(255,255,255,.08)}.dogVisual:after,.catProduct .dogVisual:after{display:none}.dogVisual img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center}
         .dogVisual img{animation:existingPhoneZoom 9s cubic-bezier(.35,.72,.2,1) infinite;will-change:transform}.dogProduct:nth-child(1) .dogVisual img{transform-origin:68% 44%}.dogProduct:nth-child(2) .dogVisual img{transform-origin:76% 46%}.dogProduct:nth-child(3) .dogVisual img{transform-origin:72% 48%}.dogProduct:nth-child(4) .dogVisual img{transform-origin:69% 48%}.dogProduct:nth-child(5) .dogVisual img{transform-origin:72% 48%}.dogProduct:nth-child(6) .dogVisual img{transform-origin:64% 43%}.dogProduct:nth-child(7) .dogVisual img{transform-origin:73% 46%}.dogProduct:nth-child(8) .dogVisual img{transform-origin:72% 46%}.dogProduct{--phone-zoom:1.3}.dogProduct:nth-child(3){--phone-zoom:1.52}@keyframes existingPhoneZoom{0%,24%{transform:scale(1)}39%,70%{transform:scale(var(--phone-zoom))}86%,100%{transform:scale(1)}}@media(prefers-reduced-motion:reduce){.dogVisual img{animation:none!important}}.dogCopy,.catProduct .dogCopy{position:relative;z-index:1;order:2;min-height:154px;padding:18px 6px 4px;display:flex;flex-direction:column;align-items:flex-start;color:#fff}.dogCopy:before{content:"";width:42px;height:3px;margin-bottom:16px;border-radius:999px;background:#db3f51}.dogCopy h3{margin:0;font-size:clamp(17px,1.4vw,20px);line-height:1.28;letter-spacing:-.3px;text-shadow:0 2px 8px rgba(0,24,55,.2)}.dogCopy a{min-width:116px;min-height:44px;margin-top:auto;padding:0 14px;display:inline-flex;align-items:center;justify-content:space-between;gap:16px;border-radius:12px;color:#fff;background:#d93449;box-shadow:0 10px 22px rgba(217,52,73,.22);font-size:14px;font-weight:900;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}.dogCopy a:hover{transform:translateY(-2px);box-shadow:0 14px 27px rgba(217,52,73,.3)}.dogCopy a span{font-size:19px}
         .productDetails{order:3;margin-top:14px;overflow:visible}.productDetails summary{min-height:50px;padding:7px 8px 7px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.3);border-radius:15px;color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 9px 22px rgba(0,26,60,.12);font-size:14px;font-weight:900;cursor:pointer;list-style:none;transition:border-color .2s ease,background .2s ease,transform .2s ease}.productDetails summary:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.52);background:rgba(255,255,255,.15)}.productDetails summary::-webkit-details-marker{display:none}.summaryLabel{display:flex;align-items:center;gap:9px}.productDetails summary .summaryIcon{width:auto;height:auto;display:inline;color:#ff9ca7;background:transparent;box-shadow:none;font-size:12px}.productDetails summary .summaryAction{width:32px;height:32px;display:grid;place-items:center;flex:0 0 auto;border-radius:11px;color:#fff;background:#d93449;box-shadow:0 7px 16px rgba(217,52,73,.28);font-size:20px;transition:transform .2s ease}.productDetails[open] summary .summaryAction{transform:rotate(45deg)}.productDetailsBody{margin-top:9px;padding:21px 18px 22px;border:1px solid rgba(255,255,255,.2);border-radius:17px;color:#fff;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(2,47,91,.24));box-shadow:0 16px 34px rgba(0,24,58,.18);animation:productReveal .2s ease-out}.productDetailsBody h4{margin:0 0 18px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.16);font-size:16px;line-height:1.35}.productDetailsBody ul{margin:0;padding:0;display:grid;gap:17px;list-style:none}.productDetailsBody li{display:grid;grid-template-columns:27px 1fr;gap:10px;align-items:start}.productDetailsBody li>span{font-size:18px;line-height:1.4}.productDetailsBody p{margin:0;font-size:14px;line-height:1.62}.productDetailsBody strong,.productDetailsBody b{display:block;margin-bottom:2px;color:#ffd2d6}@keyframes productReveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}.heroActions{margin-top:26px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.heroActions a{min-height:62px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid rgba(255,255,255,.72);border-radius:16px;font-size:15px;font-weight:900;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}.heroActions a:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(0,20,50,.22)}.primaryAction{color:#063b72;background:#fff}.secondaryAction{color:#fff;background:rgba(255,255,255,.09)}
         @media(max-width:900px){.heroStage{min-height:auto;display:flex;flex-direction:column;justify-content:center;gap:34px;transform:translateY(12px)}.ecosystemCircle{width:min(340px,74vw);max-width:340px;transform:none}.heroSupport{max-width:520px}}
         @media(max-width:900px){.productRail{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.dogProduct{min-width:0}.dogCopy h3{font-size:21px}}
         @media(max-width:700px){.homeHero{padding:34px 14px 54px;overflow-x:hidden}.stageAccent{padding:31px 23px}.stageAccent h2{font-size:29px}.stageAccent .leadCopy,.detailCopy p{font-size:17px;line-height:1.55;letter-spacing:-.2px}.ecosystemCircle{width:min(300px,82vw)}.productShowcase{width:100%;margin-top:44px;padding:0}.productHeading{display:block;text-align:center}.productHeading h2{max-width:360px;margin:10px auto 0;font-size:25px;text-align:center}.productRail{margin-top:34px;display:grid;grid-template-columns:minmax(0,1fr);gap:48px;overflow:visible;padding:0}.dogProduct{width:100%;min-width:0}.dogVisual,.catProduct .dogVisual{width:100%;border-radius:22px}.dogCopy,.catProduct .dogCopy{min-height:0;padding:18px 6px 0}.dogCopy h3{font-size:21px;line-height:1.3}.dogCopy a{margin-top:20px}.heroActions{grid-template-columns:1fr;gap:10px;margin-top:54px}.heroActions a{min-height:58px}}
+        .productRail .dogCopy,.productRail .catProduct .dogCopy{width:100%;min-height:142px;padding:16px 2px 0;align-items:center;text-align:center}.productRail .dogCopy:before{width:30px;margin-bottom:11px}.productRail .dogCopy h3{font-size:14px;line-height:1.35;letter-spacing:-.15px}.productRail .dogCopy a{min-width:94px;min-height:38px;margin-top:auto;padding:0 11px;gap:11px;border-radius:10px;font-size:12px}.productRail .dogCopy a span{font-size:16px}
+        @media(max-width:900px){.productShowcase{width:calc(100vw - 24px)}.productRail{grid-template-columns:repeat(8,145px);gap:20px;justify-content:start}.productRail .dogProduct{width:auto;min-width:145px}.productRail .dogVisual,.productRail .catProduct .dogVisual{width:145px;border-radius:50%}.productRail .dogCopy h3{font-size:14px}}
+        @media(max-width:700px){.productShowcase{width:calc(100vw - 28px);margin-top:44px}.productRail{margin-top:28px;padding:6px 5px 18px;display:grid;grid-template-columns:repeat(8,136px);gap:18px;overflow-x:auto}.productRail .dogProduct{width:auto;min-width:136px}.productRail .dogVisual,.productRail .catProduct .dogVisual{width:136px;border-radius:50%}.productRail .dogCopy,.productRail .catProduct .dogCopy{min-height:138px;padding-top:14px}.productRail .dogCopy h3{font-size:13px;line-height:1.35}.productRail .dogCopy a{margin-top:auto}.bottomAccountNote{margin-top:52px;padding:20px 18px}.bottomAccountNote p{font-size:14px}}
       `}</style>
     </section>
   );
