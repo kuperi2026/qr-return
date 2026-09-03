@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
+import ProductInfoSection from "./ProductInfoSection";
 
 type Lang = "ka" | "en";
 
@@ -185,7 +186,7 @@ export default function StorePage() {
   }
 
   const categories = [
-    "dog", "cat", "keys", "wallet", "bag", "suitcase", "emergency",
+    "dog", "cat", "keys", "wallet", "bag", "suitcase", "parking", "emergency",
   ];
 
   const filteredProducts =
@@ -366,6 +367,7 @@ export default function StorePage() {
     wallet: { ka: "საფულე", en: "Wallet", icon: "👛" },
     bag: { ka: "ჩანთა", en: "Bag", icon: "👜" },
     suitcase: { ka: "ჩემოდანი", en: "Suitcase", icon: "🧳" },
+    parking: { ka: "Parking", en: "Parking", icon: "🚘" },
     emergency: { ka: "Emergency", en: "Emergency", icon: "🆘" },
   };
 
@@ -572,6 +574,8 @@ export default function StorePage() {
           </div>
         </div>
       </section>
+
+      <ProductInfoSection />
 
       <div className="shell">
         {error && (
@@ -1882,7 +1886,7 @@ function ProductCard({
         ) : (
           <div className="placeholder">
             <span>
-              {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
+              {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", parking:"🚘", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
             </span>
 
             <strong>
@@ -2371,7 +2375,7 @@ function FeaturedProduct({
           />
         ) : (
           <div className="placeholder">
-            {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
+            {({ dog:"🐶", cat:"🐱", keys:"🔑", wallet:"👛", bag:"👜", suitcase:"🧳", parking:"🚘", emergency:"🆘" } as Record<string,string>)[product.category] || "QR"}
           </div>
         )}
       </div>
