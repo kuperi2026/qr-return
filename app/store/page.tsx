@@ -575,7 +575,7 @@ export default function StorePage() {
         </div>
       </section>
 
-      <ProductInfoSection />
+      <ProductInfoSection ka={ka} />
 
       <div className="shell">
         {error && (
