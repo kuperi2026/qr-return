@@ -16,9 +16,7 @@ type Lang = "ka" | "en";
 
 type Menu =
   | "about"
-  | "products"
   | "shop"
-  | "faq"
   | "contact"
   | null;
 
@@ -123,25 +121,10 @@ export default function HomeHeader({
             </button>
 
             <button
-              onClick={() => toggleMenu("products")}
-            >
-              {ka ? "პროდუქტები" : "Products"}
-              <Chevron open={openMenu === "products"} />
-            </button>
-
-            <button
               onClick={() => toggleMenu("shop")}
             >
               {ka ? "ონლაინ შეძენა" : "Shop"}
               <Chevron open={openMenu === "shop"} />
-            </button>
-
-            <button
-              onClick={() => toggleMenu("faq")}
-            >
-              {ka
-                ? "ხშირად დასმული კითხვები"
-                : "FAQ"}
             </button>
 
             <button
