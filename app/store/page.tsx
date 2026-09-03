@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
-import ProductInfoSection from "./ProductInfoSection";
 
 type Lang = "ka" | "en";
 
@@ -574,8 +573,6 @@ export default function StorePage() {
           </div>
         </div>
       </section>
-
-      <ProductInfoSection ka={ka} />
 
       <div className="shell">
         {error && (
