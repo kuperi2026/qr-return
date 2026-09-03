@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import HomeHeader from "./components/home/HomeHeader";
 import AboutMenu from "./components/home/AboutMenu";
-import ProductsMenu from "./components/home/ProductsMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import FAQMenu from "./components/home/FAQMenu";
 import ContactMenu from "./components/home/ContactMenu";
@@ -14,9 +13,7 @@ type Lang = "ka" | "en";
 
 type Menu =
   | "about"
-  | "products"
   | "shop"
-  | "faq"
   | "contact"
   | null;
 
@@ -50,16 +47,8 @@ export default function HomePage() {
         <AboutMenu ka={ka} />
       )}
 
-      {openMenu === "products" && (
-        <ProductsMenu ka={ka} />
-      )}
-
       {openMenu === "shop" && (
         <ShopMenu ka={ka} />
-      )}
-
-      {openMenu === "faq" && (
-        <FAQMenu ka={ka} />
       )}
 
       {openMenu === "contact" && (
@@ -67,6 +56,7 @@ export default function HomePage() {
       )}
 
       <HomeHero ka={ka} />
+      <FAQMenu ka={ka} />
     </main>
   );
 }
