@@ -44,11 +44,11 @@ export default function FAQMenu({
   ka: boolean;
 }) {
   return (
-    <section
+    <section id="faq"
       style={{
         background: "#f7faff",
         borderBottom: "1px solid #dfe7f1",
-        boxShadow: "0 20px 45px rgba(10, 48, 100, 0.1)",
+        boxShadow: "none",
       }}
     >
       <div
