@@ -33,6 +33,9 @@ export default function LoginPage() {
   const [password, setPassword] =
     useState("");
 
+  const [rememberMe, setRememberMe] =
+    useState(true);
+
   const [
     showPassword,
     setShowPassword,
@@ -86,10 +89,17 @@ export default function LoginPage() {
       registeredValue === "1"
     );
 
+    const rememberedEmail =
+      window.localStorage.getItem(
+        "qr-return-remembered-email"
+      );
+
     if (emailValue) {
       setEmail(
         emailValue
       );
+    } else if (rememberedEmail) {
+      setEmail(rememberedEmail);
     }
 
     if (
@@ -150,6 +160,17 @@ export default function LoginPage() {
 
       if (error) {
         throw error;
+      }
+
+      if (rememberMe) {
+        window.localStorage.setItem(
+          "qr-return-remembered-email",
+          cleanEmail
+        );
+      } else {
+        window.localStorage.removeItem(
+          "qr-return-remembered-email"
+        );
       }
 
       /*
@@ -289,6 +310,7 @@ export default function LoginPage() {
 
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(event) =>
@@ -318,6 +340,7 @@ export default function LoginPage() {
                 <div className="passwordBox">
                   <input
                     id="password"
+                    name="password"
                     type={
                       showPassword
                         ? "text"
@@ -349,6 +372,20 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
+
+              <label className="rememberRow">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) =>
+                    setRememberMe(event.target.checked)
+                  }
+                />
+                <span>
+                  დამიმახსოვრე ამ მოწყობილობაზე
+                  <small>შემდეგ შესვლაზე ელფოსტა ავტომატურად ჩაიწერება</small>
+                </span>
+              </label>
 
               <button
                 type="submit"
@@ -394,11 +431,15 @@ export default function LoginPage() {
 
           background:
             radial-gradient(
-              circle at 15% 20%,
-              rgba(255, 255, 255, 0.08),
-              transparent 26%
+              circle at 21% 17%,
+              rgba(78, 166, 238, 0.3),
+              transparent 30%
             ),
-            #0647c8;
+            linear-gradient(
+              180deg,
+              #0a4c8a 0%,
+              #063b72 100%
+            );
 
           font-family:
             Arial,
@@ -666,6 +707,35 @@ export default function LoginPage() {
 
         .passwordBox input {
           padding-right: 85px;
+        }
+
+        .rememberRow {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          color: #42576b;
+          font-size: 12px;
+          font-weight: 850;
+          line-height: 1.35;
+          cursor: pointer;
+        }
+
+        .rememberRow input {
+          width: 18px;
+          height: 18px;
+          margin: 1px 0 0;
+          padding: 0;
+          flex: 0 0 auto;
+          accent-color: #0a4c8a;
+          box-shadow: none;
+        }
+
+        .rememberRow small {
+          display: block;
+          margin-top: 3px;
+          color: #8291a0;
+          font-size: 10px;
+          font-weight: 600;
         }
 
         .showButton {
