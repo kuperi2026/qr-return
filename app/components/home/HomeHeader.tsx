@@ -18,6 +18,7 @@ type Menu =
   | "about"
   | "shop"
   | "productInfo"
+  | "faq"
   | "contact"
   | null;
 
@@ -133,6 +134,13 @@ export default function HomeHeader({
             >
               {ka ? "პროდუქტის შესახებ" : "Product info"}
               <Chevron open={openMenu === "productInfo"} />
+            </button>
+
+            <button
+              onClick={() => toggleMenu("faq")}
+            >
+              {ka ? "ხშირად დასმული კითხვები" : "FAQ"}
+              <Chevron open={openMenu === "faq"} />
             </button>
 
             <button

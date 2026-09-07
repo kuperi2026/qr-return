@@ -9,7 +9,6 @@ import ProductInfoMenu from "./components/home/ProductInfoMenu";
 import FAQMenu from "./components/home/FAQMenu";
 import ContactMenu from "./components/home/ContactMenu";
 import HomeHero from "./components/home/HomeHero";
-import HomeLowerSection from "./components/home/HomeLowerSection";
 import HomeFooter from "./components/home/HomeFooter";
 
 type Lang = "ka" | "en";
@@ -18,6 +17,7 @@ type Menu =
   | "about"
   | "shop"
   | "productInfo"
+  | "faq"
   | "contact"
   | null;
 
@@ -59,13 +59,15 @@ export default function HomePage() {
         <ProductInfoMenu ka={ka} />
       )}
 
+      {openMenu === "faq" && (
+        <FAQMenu ka={ka} />
+      )}
+
       {openMenu === "contact" && (
         <ContactMenu ka={ka} />
       )}
 
       <HomeHero ka={ka} />
-      <HomeLowerSection ka={ka} />
-      <FAQMenu ka={ka} />
       <HomeFooter ka={ka} />
     </main>
   );

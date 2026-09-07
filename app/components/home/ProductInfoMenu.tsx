@@ -6,6 +6,9 @@ const itemsKa = [
   ["🔒", "კონფიდენციალურობის სრული კონტროლი", "თავად წყვეტთ, რომელი დამატებითი ინფორმაცია გამოუჩნდეს მპოვნელს სკანირებისას."],
   ["🚨", "Lost Mode", "თავად ააქტიურებთ სტატუსს „დაიკარგა“, იღებთ სკანირების ინფორმაციას ჩათში და მპოვნელს შეუძლია ლოკაციის გაზიარება."],
   ["👥", "ადმინისტრატორის დელეგირება", "ერთ პროდუქტზე შეგიძლიათ დაამატოთ ერთი დამატებითი ადმინისტრატორი და განსაზღვროთ მისი უფლებები."],
+  ["🗂️", "ყველა პროფილი ერთ ანგარიშზე", "ერთი ანგარიშიდან შეგიძლიათ მართოთ ყველა თქვენი QR RETURN პროდუქტი და განაახლოთ მათი ინფორმაცია ნებისმიერ დროს."],
+  ["💬", "უსაფრთხო დაკავშირება", "პროფილის პარამეტრების მიხედვით, მპოვნელს შეუძლია დაგიკავშირდეთ ზარით ან QR RETURN-ის დაცული ჩატით."],
+  ["📍", "ლოკაციის ნებაყოფლობით გაზიარება", "მპოვნელს შეუძლია საკუთარი სურვილით გამოგიგზავნოთ ზუსტი ლოკაცია. მდებარეობა მისი თანხმობის გარეშე არ იგზავნება."],
   ["🔄", "პროფილის რედაქტირება", "ინფორმაცია ნებისმიერ დროს განაახლეთ ან პროფილი იმავე კატეგორიის სხვა ნივთს ან ცხოველს დაუკავშირეთ. კატეგორია არ იცვლება."],
   ["📞", "24/7 მხარდაჭერა & შეძენა", "დაჯავშნეთ ზარი, მოგვწერეთ ონლაინ ჩათში ან დაგვიკავშირდით ცხელ ხაზზე."],
 ];
@@ -16,6 +19,9 @@ const itemsEn = [
   ["🔒", "Complete privacy control", "You decide what additional information a finder sees after scanning."],
   ["🚨", "Lost Mode", "Mark a profile as lost, receive scan updates in chat and allow voluntary location sharing."],
   ["👥", "Administrator delegation", "Add one additional administrator per product and define their permissions."],
+  ["🗂️", "All profiles in one account", "Manage every QR RETURN product from one account and update the information at any time."],
+  ["💬", "Secure contact", "Depending on profile settings, a finder can call you or use QR RETURN's protected chat."],
+  ["📍", "Voluntary location sharing", "A finder can choose to share their precise location. It is never sent without consent."],
   ["🔄", "Editable profile", "Update details or connect the profile to another item in the same category. The category cannot change."],
   ["📞", "24/7 support & purchasing", "Book a call, message us in online chat or contact our hotline."],
 ];
