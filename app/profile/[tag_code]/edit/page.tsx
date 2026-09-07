@@ -18,6 +18,7 @@ type Profile = {
   owner_id: string;
   tag_code: string;
   item_type: string;
+  pet_type: string | null;
   item_name: string | null;
   colour: string | null;
 
@@ -25,6 +26,7 @@ type Profile = {
   date_of_birth: string | null;
   weight: number | null;
   medical_info: string | null;
+  behavior_note: string | null;
 
   brand: string | null;
   model: string | null;
@@ -34,9 +36,12 @@ type Profile = {
   description: string | null;
 
   photo_url: string | null;
+  photo: string | null;
   owner_photo_url: string | null;
 
   owner_name: string | null;
+  owner_first_name: string | null;
+  owner_last_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
 
@@ -57,6 +62,7 @@ type Profile = {
   show_date_of_birth: boolean | null;
   show_weight: boolean | null;
   show_medical_info: boolean | null;
+  show_behaviour_note: boolean | null;
 
   show_brand: boolean | null;
   show_model: boolean | null;
@@ -77,6 +83,11 @@ type Profile = {
   show_lost_seen_location: boolean | null;
 
   lost_seen_location: string | null;
+  active: boolean | null;
+  lost: boolean | null;
+  lost_mode: boolean | null;
+  reward: string | null;
+  show_reward: boolean | null;
 };
 
 type FormState = {
@@ -87,6 +98,7 @@ type FormState = {
   date_of_birth: string;
   weight: string;
   medical_info: string;
+  behavior_note: string;
 
   brand: string;
   model: string;
@@ -105,6 +117,7 @@ type FormState = {
 
   finder_message: string;
   lost_seen_location: string;
+  reward: string;
 };
 
 type VisibilityState = {
@@ -113,6 +126,7 @@ type VisibilityState = {
   show_date_of_birth: boolean;
   show_weight: boolean;
   show_medical_info: boolean;
+  show_behaviour_note: boolean;
 
   show_brand: boolean;
   show_model: boolean;
@@ -131,6 +145,7 @@ type VisibilityState = {
 
   show_finder_message: boolean;
   show_lost_seen_location: boolean;
+  show_reward: boolean;
 };
 
 const BUCKET = "qr-return-images";
@@ -146,6 +161,7 @@ const emptyForm: FormState = {
   date_of_birth: "",
   weight: "",
   medical_info: "",
+  behavior_note: "",
 
   brand: "",
   model: "",
@@ -164,6 +180,7 @@ const emptyForm: FormState = {
 
   finder_message: "",
   lost_seen_location: "",
+  reward: "",
 };
 
 const defaultVisibility: VisibilityState = {
@@ -172,6 +189,7 @@ const defaultVisibility: VisibilityState = {
   show_date_of_birth: false,
   show_weight: false,
   show_medical_info: false,
+  show_behaviour_note: false,
 
   show_brand: true,
   show_model: true,
@@ -190,6 +208,7 @@ const defaultVisibility: VisibilityState = {
 
   show_finder_message: true,
   show_lost_seen_location: true,
+  show_reward: false,
 };
 
 function cleanTag(tag: string) {
@@ -395,6 +414,9 @@ export default function EditProfilePage() {
     setLocationSharingEnabled,
   ] = useState(false);
 
+  const [active, setActive] = useState(true);
+  const [lostMode, setLostMode] = useState(false);
+
   const [
     phoneEnabled,
     setPhoneEnabled,
@@ -498,8 +520,17 @@ export default function EditProfilePage() {
         return;
       }
 
-      const current =
-        data as Profile;
+      const raw = data as Profile;
+      const current: Profile = {
+        ...raw,
+        photo_url: raw.photo_url || raw.photo || null,
+        owner_name:
+          raw.owner_name ||
+          [raw.owner_first_name, raw.owner_last_name]
+            .filter(Boolean)
+            .join(" ") ||
+          null,
+      };
 
       setProfile(
         current
@@ -534,6 +565,9 @@ export default function EditProfilePage() {
         medical_info:
           current.medical_info ||
           "",
+
+        behavior_note:
+          current.behavior_note || "",
 
         brand:
           current.brand || "",
@@ -587,6 +621,9 @@ export default function EditProfilePage() {
         lost_seen_location:
           current.lost_seen_location ||
           "",
+
+        reward:
+          current.reward || "",
       });
 
       setVisibility({
@@ -609,6 +646,9 @@ export default function EditProfilePage() {
         show_medical_info:
           current.show_medical_info ??
           false,
+
+        show_behaviour_note:
+          current.show_behaviour_note ?? false,
 
         show_brand:
           current.show_brand ??
@@ -661,6 +701,9 @@ export default function EditProfilePage() {
         show_lost_seen_location:
           current.show_lost_seen_location ??
           true,
+
+        show_reward:
+          current.show_reward ?? false,
       });
 
       setPhoneEnabled(
@@ -678,6 +721,9 @@ export default function EditProfilePage() {
           current.location_sharing_enabled
         )
       );
+
+      setActive(current.active !== false);
+      setLostMode(current.lost_mode === true || current.lost === true);
 
       setLoading(false);
     }
@@ -858,6 +904,10 @@ export default function EditProfilePage() {
         profile.item_type ===
           "pet";
 
+      const ownerNameParts = form.owner_name.trim().split(/\s+/).filter(Boolean);
+      const ownerFirstName = ownerNameParts.shift() || null;
+      const ownerLastName = ownerNameParts.join(" ") || null;
+
       const payload = {
         item_name:
           form.item_name.trim(),
@@ -888,6 +938,9 @@ export default function EditProfilePage() {
             ? form.medical_info.trim() ||
               null
             : null,
+
+        behavior_note:
+          isPet ? form.behavior_note.trim() || null : null,
 
         brand:
           !isPet
@@ -926,12 +979,17 @@ export default function EditProfilePage() {
         photo_url:
           photoUrl,
 
+        photo: photoUrl,
+
         owner_photo_url:
           ownerPhotoUrl,
 
         owner_name:
           form.owner_name.trim() ||
           null,
+
+        owner_first_name: ownerFirstName,
+        owner_last_name: ownerLastName,
 
         owner_phone:
           form.owner_phone.trim(),
@@ -968,6 +1026,14 @@ export default function EditProfilePage() {
 
         location_sharing_enabled:
           locationSharingEnabled,
+
+        owner_message_enabled: liveChatEnabled,
+        active,
+        lost: lostMode,
+        lost_mode: lostMode,
+        reward: form.reward.trim() || null,
+        show_email: visibility.show_owner_email,
+        show_pet_photo: visibility.show_photo,
 
         ...visibility,
       };
@@ -1137,7 +1203,7 @@ export default function EditProfilePage() {
             </strong>
 
             <span>
-              კატეგორია და QR კოდი უცვლელია.
+              QR კოდი და კატეგორია უცვლელია, თუმცა პროფილი შეგიძლია იმავე კატეგორიის სხვა {isPet ? "ცხოველს" : profile.item_type === "parking" ? "ავტომობილს" : "ნივთს"} დაუკავშირო.
             </span>
           </div>
 
@@ -1338,6 +1404,14 @@ export default function EditProfilePage() {
                       "show_medical_info"
                     )
                   }
+                />
+
+                <OptionalTextArea
+                  label="ხასიათი და ქცევა"
+                  value={form.behavior_note}
+                  onChange={(value) => updateField("behavior_note", value)}
+                  visible={visibility.show_behaviour_note}
+                  onToggle={() => toggleVisibility("show_behaviour_note")}
                 />
               </>
             ) : (
@@ -1739,6 +1813,32 @@ export default function EditProfilePage() {
                 )
               }
             />
+
+            <div className="optionalGroup">
+              <div className="optionalHeader">
+                <div>
+                  <strong>Lost Mode</strong>
+                  <p>ჩართე მხოლოდ მაშინ, როცა ეს ნივთი, ცხოველი ან ავტომობილი დაკარგულია.</p>
+                </div>
+                <VisibilityToggle active={lostMode} onClick={() => setLostMode(!lostMode)} />
+              </div>
+
+              <OptionalField
+                label="ჯილდო მპოვნელისთვის"
+                value={form.reward}
+                onChange={(value) => updateField("reward", value)}
+                visible={visibility.show_reward}
+                onToggle={() => toggleVisibility("show_reward")}
+              />
+            </div>
+
+            <div className="locationBox">
+              <div>
+                <strong>პროფილი აქტიურია</strong>
+                <p>გამორთვისას მპოვნელი პროფილის ინფორმაციას ვერ ნახავს.</p>
+              </div>
+              <VisibilityToggle active={active} onClick={() => setActive(!active)} />
+            </div>
 
             <div className="locationBox">
               <div>
@@ -2273,7 +2373,9 @@ function Styles() {
 
       .page {
         min-height: 100vh;
-        background: #f8fafc;
+        background:
+          radial-gradient(circle at 21% 17%, rgba(78,166,238,.3), transparent 30%),
+          linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
         color: #101828;
         font-family:
           Inter,
@@ -2291,7 +2393,7 @@ function Styles() {
         justify-content:
           space-between;
         border-bottom:
-          1px solid #e8ecf1;
+          1px solid rgba(255,255,255,.22);
       }
 
       .brand {
@@ -2315,21 +2417,21 @@ function Styles() {
 
       .brand strong {
         display: block;
-        color: #1465e8;
+        color: #ffffff;
         font-size: 20px;
       }
 
       .brand small {
         display: block;
-        color: #98a2b3;
-        font-size: 7px;
+        color: rgba(255,255,255,.7);
+        font-size: 9px;
         letter-spacing: 2px;
       }
 
       .back {
-        color: #475467;
+        color: #ffffff;
         text-decoration: none;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 800;
       }
 
@@ -2341,21 +2443,22 @@ function Styles() {
       }
 
       .eyebrow {
-        color: #1465e8;
-        font-size: 10px;
+        color: #b9ddfc;
+        font-size: 12px;
         font-weight: 900;
         letter-spacing: 2px;
       }
 
       .intro h1 {
         margin: 8px 0;
-        font-size: 38px;
+        color: #ffffff;
+        font-size: 40px;
       }
 
       .intro p {
         margin: 0;
-        color: #667085;
-        font-size: 13px;
+        color: rgba(255,255,255,.82);
+        font-size: 15px;
         line-height: 1.6;
       }
 
@@ -2363,16 +2466,17 @@ function Styles() {
         margin: 24px 0;
         padding: 14px 16px;
         border-radius: 13px;
-        background: #eef4ff;
-        color: #344054;
-        font-size: 12px;
+        border: 1px solid rgba(255,255,255,.22);
+        background: rgba(255,255,255,.1);
+        color: #ffffff;
+        font-size: 14px;
       }
 
       .locked span {
         display: block;
         margin-top: 4px;
-        color: #667085;
-        font-size: 10px;
+        color: rgba(255,255,255,.76);
+        font-size: 12px;
       }
 
       .card {
@@ -2381,6 +2485,7 @@ function Styles() {
           1px solid #e2e7ed;
         border-radius: 23px;
         background: white;
+        box-shadow: 0 24px 65px rgba(0,24,58,.28);
       }
 
       .sectionTitle {
@@ -2396,13 +2501,13 @@ function Styles() {
 
       .sectionTitle h2 {
         margin: 0;
-        font-size: 21px;
+        font-size: 24px;
       }
 
       .sectionTitle p {
         margin: 5px 0 0;
         color: #7b8492;
-        font-size: 11px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
@@ -2784,6 +2889,8 @@ function Styles() {
       .center p {
         color: #667085;
       }
+
+      .field label,.visibilityField label{font-size:15px}.field input,.field select,.field textarea,.visibilityField input,.visibilityField select,.visibilityField textarea{font-size:15px}.optionalHeader strong,.contactMethodsHeader strong,.locationBox strong{font-size:16px}.optionalHeader p,.contactMethodsHeader p,.locationBox p{font-size:12px}.saveButton,.cancelButton{font-size:14px}
 
       @media (
         max-width: 600px

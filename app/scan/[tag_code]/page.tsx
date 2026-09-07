@@ -32,9 +32,12 @@ type FinderProfile = {
   description: string | null;
 
   photo_url: string | null;
+  photo: string | null;
   owner_photo_url: string | null;
 
   owner_name: string | null;
+  owner_first_name: string | null;
+  owner_last_name: string | null;
   owner_phone: string | null;
   owner_email: string | null;
 
@@ -66,6 +69,8 @@ type FinderProfile = {
   show_owner_photo: boolean | null;
   show_owner_phone: boolean | null;
   show_owner_email: boolean | null;
+  show_email: boolean | null;
+  show_pet_photo: boolean | null;
   show_additional_contact: boolean | null;
   show_finder_message: boolean | null;
   show_lost_seen_location: boolean | null;
@@ -136,7 +141,19 @@ export default function FinderPage() {
         return;
       }
 
-      setProfile(data as FinderProfile);
+      const raw = data as FinderProfile;
+      setProfile({
+        ...raw,
+        photo_url: raw.photo_url || raw.photo || null,
+        owner_name:
+          raw.owner_name ||
+          [raw.owner_first_name, raw.owner_last_name]
+            .filter(Boolean)
+            .join(" ") ||
+          null,
+        show_photo: raw.show_photo ?? raw.show_pet_photo,
+        show_owner_email: raw.show_owner_email ?? raw.show_email,
+      });
       setLoading(false);
     }
 
@@ -809,6 +826,9 @@ function Styles() {
 
       .page {
         min-height: 100vh;
+        background:
+          radial-gradient(circle at 21% 17%, rgba(78,166,238,.3), transparent 30%),
+          linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
       }
 
       .header {
@@ -819,8 +839,8 @@ function Styles() {
 
         padding: 0 28px;
 
-        background: #ffffff;
-        border-bottom: 1px solid #e4eaf1;
+        background: rgba(255,255,255,.1);
+        border-bottom: 1px solid rgba(255,255,255,.22);
       }
 
       .brand {
@@ -851,15 +871,15 @@ function Styles() {
       }
 
       .brand strong {
-        color: #172b43;
-        font-size: 14px;
+        color: #ffffff;
+        font-size: 17px;
       }
 
       .brand small {
         margin-top: 3px;
 
-        color: #8b98a7;
-        font-size: 7px;
+        color: rgba(255,255,255,.7);
+        font-size: 9px;
         font-weight: 800;
         letter-spacing: 1.1px;
       }
@@ -880,9 +900,7 @@ function Styles() {
 
         background: #ffffff;
 
-        box-shadow:
-          0 18px 60px
-          rgba(22, 48, 78, 0.07);
+        box-shadow: 0 24px 65px rgba(0,24,58,.28);
       }
 
       .hero {
@@ -1256,6 +1274,8 @@ function Styles() {
         font-size: 9px;
         line-height: 1.5;
       }
+
+      .eyebrow,.messageBox span,.rewardBox span{font-size:11px}.heroText p{font-size:14px}.categoryBadge{font-size:12px}.messageBox p{font-size:15px}.sectionHeading small{font-size:9px}.sectionHeading h2{font-size:20px}.info span,.longInfo span,.ownerName span,.additionalContact>span{font-size:11px}.info strong,.longInfo p{font-size:14px}.ownerName strong{font-size:15px}.primaryButton,.secondaryButton,.locationButton{min-height:50px;font-size:14px}.additionalContact strong,.additionalContact a,.locationSection>p{font-size:14px}.locationStatus{font-size:12px}.privacy strong{font-size:11px}.privacy p{font-size:11px}
 
       .centerPage {
         min-height: 100vh;
