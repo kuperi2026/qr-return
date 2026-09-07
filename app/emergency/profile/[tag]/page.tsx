@@ -228,11 +228,11 @@ export default function EmergencyProfilePage() {
 
             <div>
               <strong>QR RETURN</strong>
-              <small>EMERGENCY ID</small>
+              <small>გადაუდებელი პროფილი</small>
             </div>
           </a>
 
-          <div className="languages">
+          <div className="languages" hidden>
             <button
               className={
                 lang === "ka" ? "activeLang" : ""
@@ -270,7 +270,7 @@ export default function EmergencyProfilePage() {
 
               <div className="identityText">
                 <div className="emergencyLabel">
-                  EMERGENCY PROFILE
+                  გადაუდებელი პროფილი
                 </div>
 
                 {showName ? (
@@ -322,7 +322,7 @@ export default function EmergencyProfilePage() {
             <section className="section">
               <SectionTitle
                 number="01"
-                eyebrow="MEDICAL INFORMATION"
+                eyebrow="სამედიცინო ინფორმაცია"
                 title={
                   ka
                     ? "სამედიცინო ინფორმაცია"
@@ -450,7 +450,7 @@ export default function EmergencyProfilePage() {
               <section className="section">
                 <SectionTitle
                   number="02"
-                  eyebrow="EMERGENCY CONTACT"
+                  eyebrow="საკონტაქტო პირი"
                   title={
                     ka
                       ? "საკონტაქტო პირი"
@@ -486,7 +486,7 @@ export default function EmergencyProfilePage() {
               <section className="section secondarySection">
                 <SectionTitle
                   number="03"
-                  eyebrow="SECOND CONTACT"
+                  eyebrow="დამატებითი საკონტაქტო პირი"
                   title={
                     ka
                       ? "დამატებითი საკონტაქტო პირი"
@@ -671,7 +671,7 @@ function Contact({
             href={chatHref}
             className="action"
           >
-            Live Chat
+            ჩატი
           </a>
         )}
       </div>

@@ -291,7 +291,6 @@ export default function FinderPage() {
     Boolean(profile.photo_url);
 
   const canCall =
-    profile.show_owner_phone !== false &&
     profile.phone_enabled !== false &&
     Boolean(profile.owner_phone);
 
@@ -388,20 +387,23 @@ export default function FinderPage() {
                 <span>01</span>
 
                 <div>
-                  <small>PROFILE DETAILS</small>
+                  <small>პროფილის დეტალები</small>
 
                   <h2>
                     {isPet
                       ? "ცხოველის ინფორმაცია"
+                      : category === "parking"
+                      ? "ავტომობილის ინფორმაცია"
                       : "ნივთის ინფორმაცია"}
                   </h2>
                 </div>
               </div>
 
               <div className="grid">
-                {profile.show_colour !==
-                  false &&
-                  profile.colour && (
+                {category === "parking" && profile.item_name && (
+                  <Info label="სახელმწიფო ნომერი" value={profile.item_name} />
+                )}
+                {profile.colour && (
                     <Info
                       label="ფერი"
                       value={profile.colour}
@@ -535,7 +537,7 @@ export default function FinderPage() {
                 <span>02</span>
 
                 <div>
-                  <small>CONTACT OWNER</small>
+                  <small>მფლობელის ინფორმაცია</small>
 
                   <h2>
                     დაუკავშირდი მფლობელს
@@ -562,6 +564,13 @@ export default function FinderPage() {
                   <strong>
                     {profile.owner_name}
                   </strong>
+                </div>
+              )}
+
+              {profile.owner_phone && (
+                <div className="ownerName">
+                  <span>ტელეფონის ნომერი</span>
+                  <strong>{profile.owner_phone}</strong>
                 </div>
               )}
 
@@ -595,9 +604,7 @@ export default function FinderPage() {
                 )}
               </div>
 
-              {profile.show_additional_contact ===
-                true &&
-                (profile.additional_contact_name ||
+              {(profile.additional_contact_name ||
                   profile.additional_contact_phone ||
                   profile.additional_contact_email) && (
                   <div className="additionalContact">
@@ -643,7 +650,7 @@ export default function FinderPage() {
                   <span>03</span>
 
                   <div>
-                    <small>SHARE LOCATION</small>
+                    <small>მდებარეობის გაზიარება</small>
 
                     <h2>
                       მდებარეობის გაზიარება
@@ -652,9 +659,7 @@ export default function FinderPage() {
                 </div>
 
                 <p>
-                  სურვილის შემთხვევაში შეგიძლია
-                  მფლობელს გაუზიარო შენი მიმდინარე
-                  მდებარეობა.
+                  სურვილის შემთხვევაში შეგიძლიათ მფლობელს გაუზიარო შენი მიმდინარე მდებარეობა.
                 </p>
 
                 <button

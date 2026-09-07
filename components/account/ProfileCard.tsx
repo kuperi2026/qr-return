@@ -116,17 +116,19 @@ export default function ProfileCard({
         <div className="stats">
           <div className="stat">
             <span>
-              სკანირება
+              სულ დასკანირდა
             </span>
 
             <strong>
-              {item.scanCount || 0}
+              {item.scanCount
+                ? `${item.scanCount}-ჯერ`
+                : "ჯერ არცერთხელ"}
             </strong>
           </div>
 
           <div className="stat">
             <span>
-              ბოლო სკანირება
+              ბოლო აქტივობა
             </span>
 
             <strong className="date">
@@ -174,7 +176,7 @@ export default function ProfileCard({
               )}`}
               target="_blank"
             >
-              მპოვნელის ხედვა ↗
+              ნახვა როგორც მპოვნელი ↗
             </Link>
           )}
         </div>
@@ -475,12 +477,7 @@ export default function ProfileCard({
 
           display: grid;
 
-          grid-template-columns:
-            86px
-            minmax(
-              0,
-              1fr
-            );
+          grid-template-columns: repeat(2,minmax(0,1fr));
 
           gap: 7px;
         }
@@ -524,15 +521,8 @@ export default function ProfileCard({
         }
 
         .stat strong.date {
-          overflow: hidden;
-
           font-size: 13px;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          white-space: normal;
         }
 
         .location {
@@ -802,7 +792,7 @@ function formatScanDate(
   value?: string | null
 ) {
   if (!value) {
-    return "ჯერ არა";
+    return "ჯერ არ დასკანერებულა";
   }
 
   const date =
