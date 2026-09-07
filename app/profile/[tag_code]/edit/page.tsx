@@ -15,6 +15,7 @@ import {
 import { supabase } from "@/lib/supabase";
 
 type Profile = {
+  owner_id: string;
   tag_code: string;
   item_type: string;
   item_name: string | null;
@@ -971,16 +972,16 @@ export default function EditProfilePage() {
         ...visibility,
       };
 
-      const {
-        error:
-          updateError,
-      } = await supabase
+      const { data: updatedProfile, error: updateError } = await supabase
         .from("item")
         .update(payload)
         .eq(
           "tag_code",
           profile.tag_code
-        );
+        )
+        .eq("owner_id", profile.owner_id)
+        .select("id")
+        .maybeSingle();
 
       if (updateError) {
         console.error(
@@ -992,6 +993,11 @@ export default function EditProfilePage() {
           `ცვლილებების შენახვა ვერ მოხერხდა: ${updateError.message}`
         );
 
+        return;
+      }
+
+      if (!updatedProfile) {
+        setError("ცვლილებები არ შეინახა. გთხოვთ, თავიდან შეხვიდეთ ანგარიშში და სცადოთ ხელახლა.");
         return;
       }
 

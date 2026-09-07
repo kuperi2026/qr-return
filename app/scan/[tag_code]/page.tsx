@@ -9,8 +9,10 @@ import {
   LocationAccuracyError,
 } from "@/lib/geolocation";
 import { getFinderSession } from "@/lib/finderSession";
+import QRScanTracker from "@/components/QRScanTracker";
 
 type FinderProfile = {
+  id: string;
   tag_code: string;
   item_type: string;
   pet_type: string | null;
@@ -282,6 +284,7 @@ export default function FinderPage() {
 
   return (
     <>
+      <QRScanTracker itemId={profile.id} tagCode={profile.tag_code} />
       <main className="page">
         <header className="header">
           <a href="/" className="brand">

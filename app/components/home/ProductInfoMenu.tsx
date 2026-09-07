@@ -35,10 +35,15 @@ export default function ProductInfoMenu({ ka }: { ka: boolean }) {
   return (
     <section className="productInfoMenu">
       <div className="menuInner">
-        <div className="menuHeading">
-          <span>PRODUCT INFORMATION</span>
-          <h2>{ka ? "ხშირად დასმული კითხვები" : "Frequently Asked Questions"}</h2>
-          <p>{ka ? "ყველაფერი, რაც QR RETURN-ის გამოყენებამდე უნდა იცოდეთ." : "Everything you need to know before using QR RETURN."}</p>
+        <div className="menuTop">
+          <div className="menuHeading">
+            <span>PRODUCT INFORMATION</span>
+            <p>{ka ? "ყველაფერი, რაც QR RETURN-ის გამოყენებამდე უნდა იცოდეთ." : "Everything you need to know before using QR RETURN."}</p>
+          </div>
+          <div className="links">
+            <a href="/book-call">📞 {ka ? "ზარის დაჯავშნა" : "Book a call"}</a>
+            <a href="/support">💬 {ka ? "ჩატი" : "Chat"}</a>
+          </div>
         </div>
         <div className="infoGrid">
           {items.map(([icon, title, text]) => (
@@ -48,13 +53,9 @@ export default function ProductInfoMenu({ ka }: { ka: boolean }) {
             </article>
           ))}
         </div>
-        <div className="links">
-          <a href="/book-call">📞 {ka ? "ზარის დაჯავშნა" : "Book a call"}</a>
-          <a href="/support">💬 {ka ? "ჩატი" : "Chat"}</a>
-        </div>
       </div>
       <style jsx>{`
-        .productInfoMenu{position:relative;z-index:90;padding:24px 32px 28px;border-bottom:1px solid #dce6ef;background:#fff;color:#1c324d;box-shadow:0 18px 35px rgba(0,35,70,.13)}.menuInner{max-width:1260px;margin:auto}.menuHeading span{color:#1266e9;font-size:9px;font-weight:900;letter-spacing:1.3px}.menuHeading h2{margin:5px 0 0;font-size:23px}.menuHeading p{margin:5px 0 15px;color:#708196;font-size:11px}.infoGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.infoGrid article{padding:12px;display:grid;grid-template-columns:28px 1fr;gap:8px;border:1px solid #e1e8ef;border-radius:13px;background:#f8fbff}.infoGrid article>span{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;background:#e8f2ff;color:#1266e9;font-size:13px;font-weight:900}.infoGrid p{margin:0;color:#60758a;font-size:11px;line-height:1.45}.infoGrid strong{display:block;margin-bottom:3px;color:#174f85;font-size:11px;line-height:1.35}.links{margin-top:11px;display:flex;gap:8px}.links a{padding:9px 13px;border-radius:9px;color:#fff;background:#0a4c8a;font-size:11px;font-weight:900;text-decoration:none}.links a:last-child{background:#d93449}@media(max-width:1000px){.infoGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.productInfoMenu{padding:20px 14px}.infoGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.infoGrid{grid-template-columns:1fr}.links{flex-direction:column}.links a{text-align:center}}
+        .productInfoMenu{position:relative;z-index:90;padding:25px 32px 30px;border-bottom:1px solid #dce6ef;background:#fff;color:#1c324d;box-shadow:0 18px 35px rgba(0,35,70,.13)}.menuInner{max-width:1260px;margin:auto}.menuTop{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:18px}.menuHeading span{color:#1266e9;font-size:11px;font-weight:900;letter-spacing:1.3px}.menuHeading p{margin:7px 0 0;color:#324f6c;font-size:18px;font-weight:800;line-height:1.4}.infoGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.infoGrid article{padding:14px;display:grid;grid-template-columns:32px 1fr;gap:10px;border:1px solid #e1e8ef;border-radius:13px;background:#f8fbff}.infoGrid article>span{width:31px;height:31px;display:grid;place-items:center;border-radius:9px;background:#e8f2ff;color:#1266e9;font-size:15px;font-weight:900}.infoGrid p{margin:0;color:#60758a;font-size:13px;line-height:1.5}.infoGrid strong{display:block;margin-bottom:4px;color:#174f85;font-size:13px;line-height:1.35}.links{display:flex;flex:none;gap:9px}.links a{padding:11px 16px;border-radius:10px;color:#fff;background:#0a4c8a;font-size:13px;font-weight:900;text-decoration:none;box-shadow:0 7px 16px rgba(10,76,138,.16)}.links a:last-child{background:#d93449}@media(max-width:1000px){.infoGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.productInfoMenu{padding:20px 14px}.menuTop{align-items:flex-start;flex-direction:column}.infoGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.menuHeading p{font-size:16px}.infoGrid{grid-template-columns:1fr}.links{width:100%}.links a{flex:1;text-align:center}}
       `}</style>
     </section>
   );

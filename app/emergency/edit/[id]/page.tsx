@@ -358,9 +358,7 @@ export default function EmergencyEditPage() {
         return;
       }
 
-      const {
-        error: updateError,
-      } = await supabase
+      const { data: updatedProfile, error: updateError } = await supabase
         .from("emergency_profiles")
         .update({
           first_name: form.firstName.trim(),
@@ -410,10 +408,20 @@ export default function EmergencyEditPage() {
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
-        .eq("owner_id", user.id);
+        .eq("owner_id", user.id)
+        .select("id")
+        .maybeSingle();
 
       if (updateError) {
         throw updateError;
+      }
+
+      if (!updatedProfile) {
+        throw new Error(
+          ka
+            ? "ცვლილებები არ შეინახა. გთხოვთ, თავიდან შეხვიდეთ ანგარიშში და სცადოთ ხელახლა."
+            : "Changes were not saved. Please sign in again and retry."
+        );
       }
 
       setSuccess(
