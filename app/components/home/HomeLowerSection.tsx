@@ -6,13 +6,6 @@ const STEPS = [
   ["03", "მიიღე კავშირი", "მპოვნელი ასკანერებს კოდს და გიკავშირდება ზარით ან დაცული ჩატით."],
 ];
 
-const BENEFITS = [
-  ["📱", "აპლიკაციის გარეშე", "მპოვნელს არ სჭირდება რეგისტრაცია ან აპლიკაციის ჩამოტვირთვა."],
-  ["🔒", "შენი კონფიდენციალურობა", "დამატებითი ინფორმაციის ხილვადობას სრულად თავად აკონტროლებ."],
-  ["📍", "Lost Mode და ლოკაცია", "მიიღე სკანირების ინფორმაცია და მპოვნელის გაზიარებული მდებარეობა."],
-  ["👥", "დამატებითი ადმინისტრატორი", "პროფილის მართვა ერთ სანდო ადამიანს განსაზღვრული უფლებებით გაუზიარე."],
-];
-
 export default function HomeLowerSection({ ka }: { ka: boolean }) {
   return (
     <section className="lower">
@@ -42,14 +35,6 @@ export default function HomeLowerSection({ ka }: { ka: boolean }) {
           <h2>{ka ? "საჭირო ფუნქციები — ზედმეტი სირთულის გარეშე" : "Essential features without unnecessary complexity"}</h2>
           <p>{ka ? "ერთი სისტემა ნივთებისთვის, ოთხფეხა მეგობრებისთვის, ავტომობილებისა და Emergency პროფილებისთვის." : "One system for belongings, pets, vehicles and Emergency profiles."}</p>
         </div>
-        <div className="benefits">
-          {BENEFITS.map(([icon, title, text]) => (
-            <article key={title}>
-              <span>{icon}</span>
-              <div><h3>{title}</h3><p>{text}</p></div>
-            </article>
-          ))}
-        </div>
       </div>
 
       <div className="support">
@@ -66,7 +51,7 @@ export default function HomeLowerSection({ ka }: { ka: boolean }) {
 
       <style jsx global>{`
         .homeHero .heroActions,.homeHero .bottomAccountNote{display:none!important}
-        .lower{padding:78px 40px 86px;background:#fff;color:#1d3651;font-family:Arial,Helvetica,sans-serif}.lower>*{width:100%;max-width:1160px;margin-left:auto;margin-right:auto}.accountStatement{padding:34px 44px;border-radius:24px;background:linear-gradient(135deg,#0b55a0,#083d79);box-shadow:0 22px 52px rgba(7,54,112,.2);text-align:center}.accountStatement>span,.sectionHead>span,.benefitIntro>span,.support>div>span{color:#8dccff;font-size:10px;font-weight:900;letter-spacing:1.5px}.accountStatement p{max-width:850px;margin:12px auto 0;color:#fff;font-size:clamp(17px,2vw,23px);font-weight:850;line-height:1.55}.accountStatement em{color:#ffd0d5;font-style:normal}.sectionHead{margin-top:82px;text-align:center}.sectionHead>span,.benefitIntro>span{color:#0e62c5}.sectionHead h2{max-width:650px;margin:10px auto 0;font-size:clamp(28px,3.4vw,42px);line-height:1.16;letter-spacing:-1.2px}.steps{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.steps article{min-height:210px;padding:27px;border:1px solid #dce7f4;border-radius:20px;background:#f8fbff}.steps article>span{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#0d5fc2;color:#fff;font-size:12px;font-weight:900}.steps h3{margin:24px 0 0;font-size:19px}.steps p,.benefitIntro p,.benefits p,.support p{margin:8px 0 0;color:#6e8094;font-size:13px;line-height:1.65}.benefitArea{margin-top:82px;padding:48px;display:grid;grid-template-columns:.86fr 1.14fr;gap:60px;border-radius:28px;background:#f3f8ff}.benefitIntro h2{margin:11px 0 0;font-size:clamp(27px,3vw,38px);line-height:1.18;letter-spacing:-1px}.benefits{display:grid;gap:12px}.benefits article{padding:18px;display:grid;grid-template-columns:46px 1fr;gap:14px;align-items:start;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(22,67,116,.06)}.benefits article>span{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;background:#eaf3ff;font-size:21px}.benefits h3{margin:2px 0 0;font-size:15px}.benefits p{font-size:12px}.support{margin-top:82px;padding:38px 42px;display:flex;align-items:center;justify-content:space-between;gap:30px;border:1px solid #d7e5f4;border-radius:24px}.support>div>span{color:#0e62c5}.support h2{margin:8px 0 0;font-size:29px}.supportActions{display:flex;gap:11px}.supportActions a{min-width:190px;min-height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-radius:15px;background:#0d5fc2;color:#fff;font-size:14px;font-weight:900;text-decoration:none}.supportActions a:last-child{background:#d93449}.supportActions b{font-size:19px}.supportActions a:hover{transform:translateY(-2px)}
+        .lower{padding:78px 40px 86px;background:#fff;color:#1d3651;font-family:Arial,Helvetica,sans-serif}.lower>*{width:100%;max-width:1160px;margin-left:auto;margin-right:auto}.accountStatement{padding:34px 44px;border-radius:24px;background:linear-gradient(135deg,#0b55a0,#083d79);box-shadow:0 22px 52px rgba(7,54,112,.2);text-align:center}.accountStatement>span,.sectionHead>span,.benefitIntro>span,.support>div>span{color:#8dccff;font-size:10px;font-weight:900;letter-spacing:1.5px}.accountStatement p{max-width:850px;margin:12px auto 0;color:#fff;font-size:clamp(17px,2vw,23px);font-weight:850;line-height:1.55}.accountStatement em{color:#ffd0d5;font-style:normal}.sectionHead{margin-top:82px;text-align:center}.sectionHead>span,.benefitIntro>span{color:#0e62c5}.sectionHead h2{max-width:650px;margin:10px auto 0;font-size:clamp(28px,3.4vw,42px);line-height:1.16;letter-spacing:-1.2px}.steps{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.steps article{min-height:210px;padding:27px;border:1px solid #dce7f4;border-radius:20px;background:#f8fbff}.steps article>span{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#0d5fc2;color:#fff;font-size:12px;font-weight:900}.steps h3{margin:24px 0 0;font-size:19px}.steps p,.benefitIntro p,.support p{margin:8px 0 0;color:#6e8094;font-size:13px;line-height:1.65}.benefitArea{margin-top:82px;padding:48px;border-radius:28px;background:#f3f8ff;text-align:center}.benefitIntro{max-width:760px;margin:auto}.benefitIntro h2{margin:11px 0 0;font-size:clamp(27px,3vw,38px);line-height:1.18;letter-spacing:-1px}.support{margin-top:82px;padding:38px 42px;display:flex;align-items:center;justify-content:space-between;gap:30px;border:1px solid #d7e5f4;border-radius:24px}.support>div>span{color:#0e62c5}.support h2{margin:8px 0 0;font-size:29px}.supportActions{display:flex;gap:11px}.supportActions a{min-width:190px;min-height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-radius:15px;background:#0d5fc2;color:#fff;font-size:14px;font-weight:900;text-decoration:none}.supportActions a:last-child{background:#d93449}.supportActions b{font-size:19px}.supportActions a:hover{transform:translateY(-2px)}
         @media(max-width:800px){.lower{padding:54px 16px 62px}.accountStatement{padding:27px 20px}.steps{grid-template-columns:1fr}.steps article{min-height:0}.benefitArea{padding:28px 20px;grid-template-columns:1fr;gap:28px}.support{padding:28px 20px;display:block}.supportActions{margin-top:24px}.supportActions a{min-width:0;flex:1}.sectionHead,.benefitArea,.support{margin-top:56px}}
         @media(max-width:520px){.supportActions{display:grid}.supportActions a{width:100%}}
       `}</style>
