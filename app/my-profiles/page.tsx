@@ -482,7 +482,7 @@ export default function MyProfilesPage() {
               </strong>
 
               <small>
-                SMART LOST &amp; FOUND
+                დაცული QR კავშირი
               </small>
             </span>
           </Link>
@@ -516,7 +516,7 @@ export default function MyProfilesPage() {
         <section className="hero">
           <div>
             <span className="eyebrow">
-              OWNER DASHBOARD
+              მფლობელის სივრცე
             </span>
 
             <h1>
@@ -532,7 +532,7 @@ export default function MyProfilesPage() {
 
           <div className="totalBox">
             <span>
-              TOTAL PROFILES
+              სულ პროფილები
             </span>
 
             <strong>
@@ -623,7 +623,7 @@ export default function MyProfilesPage() {
                 </option>
 
                 <option value="parking">
-                  მანქანა / Parking
+                  ავტომობილი
                 </option>
               </select>
             </section>
@@ -713,25 +713,8 @@ export default function MyProfilesPage() {
             60px;
 
           background:
-            radial-gradient(
-              circle at
-                100% 0%,
-              rgba(
-                18,
-                102,
-                233,
-                0.07
-              ),
-              transparent
-                26%
-            ),
-            linear-gradient(
-              180deg,
-              #ffffff
-                0%,
-              #f5f8fd
-                100%
-            );
+            radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),
+            linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
 
           font-family:
             Inter,
@@ -1416,6 +1399,8 @@ export default function MyProfilesPage() {
           font-size:
             10px;
         }
+
+        .brandText strong,.hero h1{color:#fff}.brandText small,.email,.hero p{color:rgba(255,255,255,.74)}.eyebrow{color:#b9ddfc;font-size:11px}.hero p{font-size:14px}.header{border-bottom-color:rgba(255,255,255,.22)}.logout{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff}.totalBox span{font-size:10px}.toolbar{border-radius:14px}.profileGrid{gap:18px}
 
         @media (
           max-width:

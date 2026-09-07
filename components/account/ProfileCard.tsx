@@ -79,8 +79,8 @@ export default function ProfileCard({
           }
         >
           {item.active !== false
-            ? "ACTIVE"
-            : "INACTIVE"}
+            ? "აქტიური"
+            : "არააქტიური"}
         </span>
       </div>
 
@@ -88,7 +88,7 @@ export default function ProfileCard({
         <div className="titleRow">
           <div>
             <span className="eyebrow">
-              QR RETURN PROFILE
+              QR RETURN პროფილი
             </span>
 
             <h3>
@@ -104,7 +104,7 @@ export default function ProfileCard({
 
         <div className="tagBox">
           <span>
-            QR / TAG CODE
+            QR კოდი
           </span>
 
           <strong>
@@ -116,7 +116,7 @@ export default function ProfileCard({
         <div className="stats">
           <div className="stat">
             <span>
-              SCANS
+              სკანირება
             </span>
 
             <strong>
@@ -126,7 +126,7 @@ export default function ProfileCard({
 
           <div className="stat">
             <span>
-              LAST SCAN
+              ბოლო სკანირება
             </span>
 
             <strong className="date">
@@ -161,7 +161,7 @@ export default function ProfileCard({
         <div className="actions">
           <Link
             className="secondaryButton"
-            href={`/edit-profile/${item.id}`}
+            href={`/profile/${encodeURIComponent(item.tagCode || "")}/edit`}
           >
             რედაქტირება
           </Link>
@@ -169,12 +169,12 @@ export default function ProfileCard({
           {item.tagCode && (
             <Link
               className="primaryButton"
-              href={`/profile/${encodeURIComponent(
+              href={`/scan/${encodeURIComponent(
                 item.tagCode
               )}`}
               target="_blank"
             >
-              Finder View ↗
+              მპოვნელის ხედვა ↗
             </Link>
           )}
         </div>
@@ -310,7 +310,7 @@ export default function ProfileCard({
           backdrop-filter:
             blur(8px);
 
-          font-size: 9px;
+          font-size: 12px;
 
           font-weight: 900;
         }
@@ -381,7 +381,7 @@ export default function ProfileCard({
           color:
             #8494a4;
 
-          font-size: 8px;
+          font-size: 11px;
 
           font-weight: 900;
 
@@ -396,7 +396,7 @@ export default function ProfileCard({
           color:
             #263f59;
 
-          font-size: 18px;
+          font-size: 21px;
 
           font-weight: 900;
 
@@ -448,7 +448,7 @@ export default function ProfileCard({
           color:
             #8a98a6;
 
-          font-size: 8px;
+          font-size: 11px;
 
           font-weight: 900;
         }
@@ -459,7 +459,7 @@ export default function ProfileCard({
           color:
             #31506b;
 
-          font-size: 11px;
+          font-size: 14px;
 
           font-weight: 850;
 
@@ -507,7 +507,7 @@ export default function ProfileCard({
           color:
             #8d9baa;
 
-          font-size: 8px;
+          font-size: 11px;
 
           font-weight: 900;
         }
@@ -518,7 +518,7 @@ export default function ProfileCard({
           color:
             #344f69;
 
-          font-size: 12px;
+          font-size: 15px;
 
           font-weight: 850;
         }
@@ -526,7 +526,7 @@ export default function ProfileCard({
         .stat strong.date {
           overflow: hidden;
 
-          font-size: 10px;
+          font-size: 13px;
 
           text-overflow:
             ellipsis;
@@ -568,7 +568,7 @@ export default function ProfileCard({
           text-decoration:
             none;
 
-          font-size: 9px;
+          font-size: 12px;
 
           font-weight: 700;
         }
@@ -606,7 +606,7 @@ export default function ProfileCard({
           color:
             #0647c8;
 
-          font-size: 9px;
+          font-size: 12px;
 
           font-weight: 900;
         }
@@ -630,7 +630,7 @@ export default function ProfileCard({
 
         .actions
         :global(a) {
-          min-height: 39px;
+          min-height: 46px;
 
           padding:
             0 10px;
@@ -653,7 +653,7 @@ export default function ProfileCard({
           text-decoration:
             none;
 
-          font-size: 10px;
+          font-size: 13px;
 
           font-weight: 850;
         }
@@ -763,7 +763,7 @@ function getLabel(
         "ჩემოდანი",
 
       parking:
-        "მანქანა / Parking",
+        "ავტომობილი",
     };
 
   return (

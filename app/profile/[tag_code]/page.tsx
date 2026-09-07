@@ -146,6 +146,14 @@ export default function PublicProfilePage() {
       ? rawTag
       : "";
 
+  useEffect(() => {
+    if (tagCode) {
+      window.location.replace(
+        `/scan/${encodeURIComponent(tagCode)}`
+      );
+    }
+  }, [tagCode]);
+
   const [
     profile,
     setProfile,

@@ -349,6 +349,11 @@ export default function EditProfilePage() {
         const loaded =
           data as ProfileData;
 
+        router.replace(
+          `/profile/${encodeURIComponent(loaded.tag_code)}/edit`
+        );
+        return;
+
         setProfile(loaded);
 
         setItemName(
