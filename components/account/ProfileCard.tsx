@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import QRCode from "qrcode";
 
 export type ProfileCardItem = {
   id: string;
@@ -47,6 +48,24 @@ export default function ProfileCard({
     hasLocation
       ? `https://www.google.com/maps?q=${item.lastScanLatitude},${item.lastScanLongitude}`
       : "";
+
+  async function downloadProfileQR() {
+    if (!item.tagCode) return;
+
+    const cleanTag = item.tagCode.trim().toUpperCase();
+    const profileUrl = `https://qr-return.vercel.app/scan/${encodeURIComponent(cleanTag)}`;
+    const image = await QRCode.toDataURL(profileUrl, {
+      width: 1000,
+      margin: 3,
+      errorCorrectionLevel: "H",
+      color: { dark: "#10263f", light: "#ffffff" },
+    });
+
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = `QR-RETURN-${cleanTag}.png`;
+    link.click();
+  }
 
   return (
     <article className="profileCard">
@@ -178,6 +197,16 @@ export default function ProfileCard({
             >
               ნახვა როგორც მპოვნელი ↗
             </Link>
+          )}
+
+          {item.tagCode && (
+            <button
+              type="button"
+              className="qrButton"
+              onClick={downloadProfileQR}
+            >
+              QR კოდის ჩამოტვირთვა ↓
+            </button>
           )}
         </div>
       </div>
@@ -619,7 +648,8 @@ export default function ProfileCard({
         }
 
         .actions
-        :global(a) {
+        :global(a),
+        .actions button {
           min-height: 46px;
 
           padding:
@@ -647,6 +677,8 @@ export default function ProfileCard({
 
           font-weight: 850;
         }
+
+        .actions button{grid-column:1/-1;border:1px solid #b8cce3;background:#eef5ff;color:#0a4c8a;font-family:inherit;cursor:pointer}
 
         .actions
         :global(
