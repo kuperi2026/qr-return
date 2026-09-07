@@ -102,6 +102,9 @@ export default function RegistrationFlow({
   const isSuitcase =
     type === "suitcase";
 
+  const isParking =
+    type === "parking";
+
   const [
     step,
     setStep,
@@ -833,7 +836,8 @@ export default function RegistrationFlow({
         model:
           (
             isBag ||
-            isSuitcase
+            isSuitcase ||
+            isParking
           ) &&
           draft.model
             .trim()

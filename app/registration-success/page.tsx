@@ -39,6 +39,10 @@ const PRODUCT_META: Record<
     label: "ჩემოდანი",
     emoji: "🧳",
   },
+  parking: {
+    label: "მანქანა / Parking",
+    emoji: "🚘",
+  },
 };
 
 export default function RegistrationSuccessPage() {
@@ -114,7 +118,7 @@ function RegistrationSuccessContent() {
               ახალი ანგარიშის შექმნა აღარ გჭირდებათ.
               იგივე ანგარიშიდან შეგიძლიათ დაამატოთ
               ძაღლი, კატა, გასაღები, საფულე,
-              ჩანთა ან ჩემოდანი.
+              ჩანთა, ჩემოდანი ან მანქანა.
             </p>
           </div>
 

@@ -91,6 +91,7 @@ export default function MyProfilesPage() {
     if (value.includes("wallet")) return "👛";
     if (value.includes("suitcase") || value.includes("luggage")) return "🧳";
     if (value.includes("bag")) return "👜";
+    if (value.includes("parking") || value.includes("car")) return "🚘";
     if (value.includes("phone")) return "📱";
     if (value.includes("computer") || value.includes("laptop")) return "💻";
 
@@ -126,6 +127,10 @@ export default function MyProfilesPage() {
 
     if (type === "bag") {
       return ka ? "ჩანთა" : "Bag";
+    }
+
+    if (type === "parking" || type === "car") {
+      return ka ? "მანქანა / Parking" : "Car / Parking";
     }
 
     if (type === "phone") {

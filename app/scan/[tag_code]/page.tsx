@@ -719,6 +719,9 @@ function getCategory(type: string) {
     case "suitcase":
       return "ჩემოდანი";
 
+    case "parking":
+      return "მანქანა / Parking";
+
     case "pet":
       return "ცხოველი";
 
@@ -746,6 +749,9 @@ function getIcon(type: string) {
 
     case "suitcase":
       return "🧳";
+
+    case "parking":
+      return "🚘";
 
     default:
       return "📦";

@@ -761,6 +761,9 @@ function getLabel(
 
       luggage:
         "ჩემოდანი",
+
+      parking:
+        "მანქანა / Parking",
     };
 
   return (
@@ -786,6 +789,7 @@ function getIcon(
       bag: "👜",
       suitcase: "🧳",
       luggage: "🧳",
+      parking: "🚘",
     };
 
   return (

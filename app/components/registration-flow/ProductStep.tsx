@@ -151,6 +151,8 @@ export default function ProductStep({
             label={
               pet
                 ? "სახელი *"
+                : type === "parking"
+                ? "სახელმწიფო ნომერი *"
                 : "პროფილის სახელი *"
             }
           >
@@ -172,6 +174,8 @@ export default function ProductStep({
                   ? "მაგ. Max"
                   : type === "cat"
                   ? "მაგ. Luna"
+                  : type === "parking"
+                  ? "მაგ. AA-123-BB"
                   : "მაგ. ჩემი ნივთი"
               }
             />

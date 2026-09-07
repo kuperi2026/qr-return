@@ -15,6 +15,7 @@ const productTypes: ProductType[] = [
   "wallet",
   "bag",
   "suitcase",
+  "parking",
 ];
 
 function isProductType(

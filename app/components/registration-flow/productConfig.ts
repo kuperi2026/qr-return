@@ -60,6 +60,14 @@ export const PRODUCT_META: Record<
     subline:
       "ერთი QR მპოვნელიდან მფლობელამდე.",
   },
+  parking: {
+    label: "მანქანა / Parking",
+    emoji: "🚘",
+    slogan:
+      "ერთი სკანირება — სწრაფი კავშირი ავტომობილის მფლობელთან.",
+    subline:
+      "პარკირებისას მპოვნელს შეუძლია უსაფრთხოდ დაგიკავშირდეთ ზარით ან ჩატით.",
+  },
 };
 
 export function isProductType(
@@ -71,7 +79,8 @@ export function isProductType(
     value === "keys" ||
     value === "wallet" ||
     value === "bag" ||
-    value === "suitcase"
+    value === "suitcase" ||
+    value === "parking"
   );
 }
 
@@ -96,7 +105,8 @@ export function showBrandField(
   return (
     type === "wallet" ||
     type === "bag" ||
-    type === "suitcase"
+    type === "suitcase" ||
+    type === "parking"
   );
 }
 
@@ -105,7 +115,8 @@ export function showModelField(
 ) {
   return (
     type === "bag" ||
-    type === "suitcase"
+    type === "suitcase" ||
+    type === "parking"
   );
 }
 

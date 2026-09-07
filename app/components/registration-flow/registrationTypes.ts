@@ -4,7 +4,8 @@ export type ProductType =
   | "keys"
   | "wallet"
   | "bag"
-  | "suitcase";
+  | "suitcase"
+  | "parking";
 
 export type RegistrationStep =
   | 1

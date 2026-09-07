@@ -135,6 +135,7 @@ export default function ItemRegistrationPage() {
                 <option value="wallet">👛 საფულე</option>
                 <option value="suitcase">🧳 ჩემოდანი</option>
                 <option value="bag">🎒 ჩანთა</option>
+                <option value="parking">🚘 მანქანა / Parking</option>
               </select>
             </div>
 

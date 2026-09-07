@@ -621,6 +621,10 @@ export default function MyProfilesPage() {
                 <option value="suitcase">
                   ჩემოდანი
                 </option>
+
+                <option value="parking">
+                  მანქანა / Parking
+                </option>
               </select>
             </section>
           )}

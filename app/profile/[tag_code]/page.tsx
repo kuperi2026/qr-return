@@ -107,6 +107,10 @@ const CATEGORY_META: Record<
     label: "ჩანთა",
     emoji: "👜",
   },
+  parking: {
+    label: "მანქანა / Parking",
+    emoji: "🚘",
+  },
 };
 
 function createSupabaseClient() {
