@@ -309,7 +309,7 @@ export default function FinderPage() {
 
             <div>
               <strong>QR RETURN</strong>
-              <small>FOUND PROFILE</small>
+              <small>ნაპოვნი პროფილი</small>
             </div>
           </a>
         </header>
@@ -334,7 +334,7 @@ export default function FinderPage() {
 
               <div className="heroText">
                 <div className="eyebrow">
-                  YOU FOUND
+                  თქვენ იპოვეთ
                 </div>
 
                 <h1>
@@ -345,6 +345,10 @@ export default function FinderPage() {
                 <div className="categoryBadge">
                   {getCategory(category)}
                 </div>
+
+                {category === "parking" && (
+                  <p className="driverStatus">● მძღოლთან დაკავშირება ხელმისაწვდომია</p>
+                )}
 
                 <p>
                   QR კოდი:{" "}
@@ -586,7 +590,7 @@ export default function FinderPage() {
                     href={`/chat/finder/${encodeURIComponent(profile.tag_code)}`}
                     className="secondaryButton"
                   >
-                    Live Chat
+                    ჩატი
                   </a>
                 )}
               </div>
@@ -976,6 +980,13 @@ function Styles() {
 
       .heroText p strong {
         color: #42556b;
+      }
+
+      .heroText .driverStatus {
+        margin-top: 10px;
+        color: #16845b;
+        font-size: 13px;
+        font-weight: 850;
       }
 
       .messageBox {

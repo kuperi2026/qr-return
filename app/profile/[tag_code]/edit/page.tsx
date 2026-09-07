@@ -1161,7 +1161,7 @@ export default function EditProfilePage() {
               </strong>
 
               <small>
-                EDIT PROFILE
+                პროფილის რედაქტირება
               </small>
             </div>
           </a>
@@ -1675,8 +1675,8 @@ export default function EditProfilePage() {
 
               <ContactMethod
                 icon="💬"
-                title="Live Chat"
-                description="მპოვნელს შეუძლია დაგიკავშირდეს QR Return-ის Live Chat-ით."
+                title="ჩატი"
+                description="მპოვნელს შეუძლია QR RETURN-ის დაცული ჩატით დაგიკავშირდეს."
                 active={
                   liveChatEnabled
                 }
@@ -1817,7 +1817,7 @@ export default function EditProfilePage() {
             <div className="optionalGroup">
               <div className="optionalHeader">
                 <div>
-                  <strong>Lost Mode</strong>
+                  <strong>დაკარგულად მონიშვნა</strong>
                   <p>ჩართე მხოლოდ მაშინ, როცა ეს ნივთი, ცხოველი ან ავტომობილი დაკარგულია.</p>
                 </div>
                 <VisibilityToggle active={lostMode} onClick={() => setLostMode(!lostMode)} />
@@ -2527,7 +2527,7 @@ function Styles() {
       .visibilityHeader > span {
         display: block;
         color: #344054;
-        font-size: 14px;
+        font-size: 17px;
         font-weight: 800;
       }
 
@@ -2551,13 +2551,15 @@ function Styles() {
       .field input,
       .visibilityField input,
       .visibilityField select {
-        height: 54px;
-        padding: 0 14px;
+        height: 58px;
+        padding: 0 16px;
+        font-size: 16px;
       }
 
       .visibilityField textarea {
-        min-height: 105px;
-        padding: 14px;
+        min-height: 120px;
+        padding: 16px;
+        font-size: 16px;
         resize: vertical;
       }
 
@@ -2589,7 +2591,7 @@ function Styles() {
         display: block;
         margin-top: 6px;
         color: #98a2b3;
-        font-size: 10px;
+        font-size: 13px;
       }
 
       .visibilityField small b {
@@ -2612,13 +2614,13 @@ function Styles() {
       .contactMethodsHeader strong {
         display: block;
         color: #344054;
-        font-size: 14px;
+        font-size: 17px;
       }
 
       .contactMethodsHeader p {
         margin: 5px 0 0;
         color: #7b8492;
-        font-size: 10px;
+        font-size: 13px;
       }
 
       .contactMethod {
@@ -2660,14 +2662,14 @@ function Styles() {
       .contactMethodText strong {
         display: block;
         color: #344054;
-        font-size: 13px;
+        font-size: 16px;
       }
 
       .contactMethodText span {
         display: block;
         margin-top: 4px;
         color: #7b8492;
-        font-size: 10px;
+        font-size: 13px;
         line-height: 1.4;
       }
 
@@ -2707,13 +2709,13 @@ function Styles() {
       }
 
       .optionalHeader strong {
-        font-size: 14px;
+        font-size: 17px;
       }
 
       .optionalHeader p {
         margin: 4px 0 0;
         color: #98a2b3;
-        font-size: 10px;
+        font-size: 13px;
       }
 
       .photoEditor {
@@ -2741,7 +2743,7 @@ function Styles() {
         border-radius: 10px;
         background: #eaf2ff;
         color: #1465e8;
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 800;
         cursor: pointer;
       }
@@ -2754,7 +2756,7 @@ function Styles() {
         display: block;
         margin-top: 8px;
         color: #98a2b3;
-        font-size: 10px;
+        font-size: 13px;
       }
 
       .photoEditor small b {
@@ -2802,13 +2804,13 @@ function Styles() {
       }
 
       .locationBox strong {
-        font-size: 14px;
+        font-size: 17px;
       }
 
       .locationBox p {
         margin: 5px 0 0;
         color: #7b8492;
-        font-size: 10px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
@@ -2842,12 +2844,12 @@ function Styles() {
 
       .cancelButton,
       .saveButton {
-        min-height: 54px;
+        min-height: 58px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 12px;
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 900;
         text-decoration: none;
       }
