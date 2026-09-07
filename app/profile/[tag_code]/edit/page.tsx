@@ -2897,25 +2897,13 @@ function Styles() {
       @media (
         max-width: 600px
       ) {
+        .page{min-height:100dvh}.header{min-height:64px}.content{width:100%;padding:22px 0 0}.intro,.locked{margin-left:14px;margin-right:14px}.intro{padding:0}.locked{margin-top:18px;margin-bottom:14px}.card{padding:22px 15px calc(92px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;border-left:0;border-right:0;border-bottom:0}.sectionTitle h2{font-size:22px}.field>span,.visibilityHeader>span{font-size:16px}.optionalGroup,.contactMethods,.locationBox{padding:15px}.actions{position:sticky;z-index:20;bottom:0;margin:28px -15px calc(-92px - env(safe-area-inset-bottom));padding:12px 15px max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);box-shadow:0 -8px 24px rgba(0,28,65,.12);grid-template-columns:1fr 1.45fr}.cancelButton,.saveButton{min-height:54px}
         .back {
           display: none;
         }
 
-        .content {
-          padding-top: 28px;
-        }
-
         .intro h1 {
-          font-size: 29px;
-        }
-
-        .card {
-          padding: 20px 14px;
-        }
-
-        .actions {
-          grid-template-columns:
-            1fr;
+          font-size: 31px;
         }
 
         .field input,

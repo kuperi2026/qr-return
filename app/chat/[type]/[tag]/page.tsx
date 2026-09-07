@@ -80,6 +80,11 @@ const typeMap: Record<
     ka: "ჩემოდანი",
     en: "Suitcase",
   },
+  parking: {
+    icon: "🚘",
+    ka: "ავტომობილი",
+    en: "Vehicle",
+  },
 };
 
 export default function FinderLiveChatPage() {
@@ -344,7 +349,7 @@ export default function FinderLiveChatPage() {
       <header className="topbar">
         <a
           className="brand"
-          href={`/profile/${encodeURIComponent(
+          href={`/scan/${encodeURIComponent(
             tagCode
           )}`}
         >
@@ -358,46 +363,18 @@ export default function FinderLiveChatPage() {
             </strong>
 
             <small>
-              LIVE CHAT
+              დაცული ჩატი
             </small>
           </span>
         </a>
 
-        <div className="langs">
-          <button
-            type="button"
-            className={
-              ka
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLang("ka")
-            }
-          >
-            GEO
-          </button>
-
-          <button
-            type="button"
-            className={
-              !ka
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLang("en")
-            }
-          >
-            ENG
-          </button>
-        </div>
+        <span className="secureBadge">🔒 უსაფრთხო კავშირი</span>
       </header>
 
       <section className="wrap">
         <a
           className="back"
-          href={`/profile/${encodeURIComponent(
+          href={`/scan/${encodeURIComponent(
             tagCode
           )}`}
         >
@@ -415,7 +392,7 @@ export default function FinderLiveChatPage() {
 
             <div className="title">
               <small>
-                QR RETURN • LIVE CHAT
+                QR RETURN • დაცული ჩატი
               </small>
 
               <h1>
@@ -431,7 +408,7 @@ export default function FinderLiveChatPage() {
 
             {!closed && (
               <span className="live">
-                ● Live
+                ● კავშირზეა
               </span>
             )}
           </div>
@@ -451,13 +428,13 @@ export default function FinderLiveChatPage() {
 
               <h2>
                 {ka
-                  ? "Live Chat ამჟამად მიუწვდომელია"
+                  ? "ჩატი ამჟამად მიუწვდომელია"
                   : "Live Chat is currently unavailable"}
               </h2>
 
               <p>
                 {ka
-                  ? "მფლობელმა შესაძლოა გამორთო Live Chat ან Lost Mode."
+                  ? "მფლობელმა შესაძლოა გამორთო ჩატი ან დაკარგვის რეჟიმი."
                   : "The Owner may have disabled Live Chat or Lost Mode."}
               </p>
             </div>
@@ -515,7 +492,7 @@ export default function FinderLiveChatPage() {
                             <div className="sender">
                               {message.sender_role ===
                               "admin"
-                                ? "Admin"
+                                ? "ადმინისტრატორი"
                                 : ka
                                 ? "მფლობელი"
                                 : "Owner"}
@@ -631,7 +608,9 @@ export default function FinderLiveChatPage() {
 
         body {
           font-family: Arial, sans-serif;
-          background: #f7f9fc;
+          background:
+            radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),
+            linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
           color: #101828;
         }
 
@@ -647,7 +626,7 @@ export default function FinderLiveChatPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid #e4e7ec;
+          border-bottom: 1px solid rgba(255,255,255,.22);
         }
 
         .brand {
@@ -674,37 +653,17 @@ export default function FinderLiveChatPage() {
         }
 
         .brand strong {
-          color: #1465e8;
+          color: #ffffff;
         }
 
         .brand small {
           margin-top: 2px;
-          color: #7655f7;
-          font-size: 9px;
+          color: rgba(255,255,255,.72);
+          font-size: 10px;
           font-weight: 900;
         }
 
-        .langs {
-          display: flex;
-          gap: 4px;
-          padding: 4px;
-          border-radius: 9px;
-          background: #eaecf0;
-        }
-
-        .langs button {
-          padding: 7px 9px;
-          border: 0;
-          border-radius: 7px;
-          background: transparent;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .langs button.active {
-          background: white;
-          color: #1465e8;
-        }
+        .secureBadge{padding:9px 12px;border:1px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;background:rgba(255,255,255,.1);font-size:12px;font-weight:850}
 
         .wrap {
           width: calc(100% - 24px);
@@ -716,7 +675,7 @@ export default function FinderLiveChatPage() {
         .back {
           display: inline-block;
           margin-bottom: 15px;
-          color: #667085;
+          color: #ffffff;
           text-decoration: none;
           font-size: 11px;
           font-weight: 800;
@@ -727,7 +686,7 @@ export default function FinderLiveChatPage() {
           border: 1px solid #e4e7ec;
           border-radius: 22px;
           background: white;
-          box-shadow: 0 20px 55px rgba(16, 24, 40, 0.08);
+          box-shadow: 0 24px 65px rgba(0,24,58,.28);
         }
 
         .chatHead {
@@ -916,7 +875,10 @@ export default function FinderLiveChatPage() {
           color: #667085;
         }
 
+        .title small{font-size:11px}.title h1{font-size:23px}.title p{font-size:12px}.live{font-size:11px}.notice{font-size:13px}.sender{font-size:11px}.bubble{font-size:15px}.locationLink{font-size:12px}.bubble time{font-size:10px}.error{font-size:13px}.composer textarea{font-size:16px}.composer button{font-size:14px}
+
         @media (max-width: 600px) {
+          .page{min-height:100dvh}.topbar{min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:100%;padding:12px 0 0}.back{margin:0 14px 10px;font-size:13px}.card{min-height:calc(100dvh - 86px);display:flex;flex-direction:column;border-left:0;border-right:0;border-bottom:0;border-radius:18px 18px 0 0}.chatHead{padding:14px 16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));background:#fff}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
           .chatHead {
             flex-wrap: wrap;
           }
