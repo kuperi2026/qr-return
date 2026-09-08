@@ -157,7 +157,7 @@ export default function FinderPreviewStep({
               type="button"
               className="contactButton secondary"
             >
-              Live Chat
+              ჩატი
             </button>
           )}
         </div>

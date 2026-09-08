@@ -121,7 +121,7 @@ export default function ProductStep({
 
         <div className="formGrid">
           <Field
-            label="QR / Tag Code *"
+            label="QR კოდი *"
             full
           >
             <input
@@ -596,7 +596,7 @@ export default function ProductStep({
 
           <VisibilityToggle
             label="ფოტო"
-            description="აჩვენეთ დამატებული ფოტო Finder View-ში."
+            description="აჩვენეთ დამატებული ფოტო მპოვნელის ხედვაში."
             value={
               draft.showPhoto
             }
@@ -695,8 +695,8 @@ export default function ProductStep({
           />
 
           <VisibilityToggle
-            label="Live Chat"
-            description="მპოვნელმა შეძლოს თქვენთან Live Chat-ის დაწყება."
+            label="ჩატი"
+            description="მპოვნელმა შეძლოს თქვენთან ჩატის დაწყება."
             value={
               draft.liveChatEnabled
             }

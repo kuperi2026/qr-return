@@ -658,7 +658,7 @@ export default function FinderPage() {
                 </div>
 
                 <p>
-                  სურვილის შემთხვევაში შეგიძლიათ მფლობელს გაუზიარო შენი მიმდინარე მდებარეობა.
+                  სურვილის შემთხვევაში შეგიძლიათ მფლობელს გაუზიაროთ თქვენი მიმდინარე მდებარეობა.
                 </p>
 
                 <button
@@ -666,7 +666,7 @@ export default function FinderPage() {
                   onClick={shareLocation}
                   className="locationButton"
                 >
-                  📍 ჩემი მიმდინარე ლოკაციის გაზიარება
+                  📍 მიმდინარე მდებარეობის გაზიარება
                 </button>
 
                 {locationStatus && (

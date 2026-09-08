@@ -55,7 +55,7 @@ export default function AccountHeader({
           </span>
 
           <span className="label">
-            Notifications
+            შეტყობინებები
           </span>
 
           {notificationCount > 0 && (
@@ -76,7 +76,7 @@ export default function AccountHeader({
           </span>
 
           <span className="label">
-            Live Chat
+            ჩატი
           </span>
 
           {unreadChatCount > 0 && (
@@ -97,7 +97,7 @@ export default function AccountHeader({
           </span>
 
           <span className="label">
-            My Profiles
+            ჩემი პროფილები
           </span>
         </Link>
 

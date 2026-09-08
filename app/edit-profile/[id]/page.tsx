@@ -842,7 +842,7 @@ export default function EditProfilePage() {
 
             <div>
               <span>
-                EDIT PROFILE
+                პროფილის რედაქტირება
               </span>
 
               <h1>
@@ -851,8 +851,8 @@ export default function EditProfilePage() {
               </h1>
 
               <p>
-                მართეთ პროფილი, Finder View
-                და Lost / Found სტატუსი.
+                მართეთ სრული პროფილი, მპოვნელის ხედვა
+                და დაკარგვის სტატუსი.
               </p>
             </div>
           </section>
@@ -867,7 +867,7 @@ export default function EditProfilePage() {
             <div className="lostTop">
               <div>
                 <span>
-                  LOST / FOUND STATUS
+                  დაკარგვის სტატუსი
                 </span>
 
                 <h2>
@@ -878,8 +878,8 @@ export default function EditProfilePage() {
 
                 <p>
                   {lost
-                    ? "Finder-ს შეუძლია დაგიკავშირდეთ და გაგიზიაროთ მდებარეობა."
-                    : "თუ ნივთი ან ცხოველი დაიკარგა, აქედან ჩართეთ Lost რეჟიმი."}
+                    ? "მპოვნელს შეუძლია დაგიკავშირდეთ და სურვილის შემთხვევაში გაგიზიაროთ მდებარეობა."
+                    : "თუ ნივთი ან ცხოველი დაიკარგა, აქედან ჩართეთ დაკარგვის რეჟიმი."}
                 </p>
               </div>
 
@@ -891,8 +891,8 @@ export default function EditProfilePage() {
                 }
               >
                 {lost
-                  ? "LOST"
-                  : "SAFE"}
+                  ? "დაკარგულია"
+                  : "უსაფრთხოდაა"}
               </div>
             </div>
 
@@ -924,7 +924,7 @@ export default function EditProfilePage() {
                 >
                   {statusLoading
                     ? "სტატუსი იცვლება..."
-                    : "Mark as Lost"}
+                    : "დაკარგულად მონიშვნა"}
                 </button>
               </>
             )}
@@ -934,7 +934,7 @@ export default function EditProfilePage() {
                 {lostMessage && (
                   <div className="lostMessageBox">
                     <span>
-                      LOST MESSAGE
+                      შეტყობინება დაკარგვის შესახებ
                     </span>
 
                     <p>
@@ -1181,7 +1181,7 @@ export default function EditProfilePage() {
                 </Field>
 
                 <Field
-                  label="Finder Message"
+                  label="შეტყობინება მპოვნელისთვის"
                   full
                 >
                   <textarea
@@ -1201,11 +1201,11 @@ export default function EditProfilePage() {
 
             <section className="card">
               <h2>
-                Finder View
+                მპოვნელის ხედვა
               </h2>
 
               <Toggle
-                label="Email"
+                label="ელფოსტა"
                 checked={showEmail}
                 onChange={
                   setShowEmail
@@ -1213,7 +1213,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="Address"
+                label="მისამართი"
                 checked={
                   showAddress
                 }
@@ -1223,7 +1223,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="Photo"
+                label="ფოტო"
                 checked={
                   showPetPhoto
                 }
@@ -1235,7 +1235,7 @@ export default function EditProfilePage() {
               {isPet && (
                 <>
                   <Toggle
-                    label="Medical info"
+                    label="სამედიცინო ინფორმაცია"
                     checked={
                       showMedicalInfo
                     }
@@ -1245,7 +1245,7 @@ export default function EditProfilePage() {
                   />
 
                   <Toggle
-                    label="Behaviour"
+                    label="ქცევის შესახებ ინფორმაცია"
                     checked={
                       showBehaviourNote
                     }
@@ -1257,7 +1257,7 @@ export default function EditProfilePage() {
               )}
 
               <Toggle
-                label="Description"
+                label="აღწერა"
                 checked={
                   showDescription
                 }
@@ -1267,7 +1267,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="Finder message"
+                label="შეტყობინება მპოვნელისთვის"
                 checked={
                   showFinderMessage
                 }
@@ -1277,7 +1277,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="Live Chat"
+                label="ჩატი"
                 checked={
                   liveChatEnabled
                 }
@@ -1287,7 +1287,7 @@ export default function EditProfilePage() {
               />
 
               <Toggle
-                label="Profile active"
+                label="პროფილი აქტიურია"
                 checked={active}
                 onChange={
                   setActive
@@ -1302,8 +1302,8 @@ export default function EditProfilePage() {
                 </strong>
 
                 <p>
-                  QR Code და category
-                  არ შეიცვლება.
+                  QR კოდი არ შეიცვლება. კატეგორიის შეცვლა შესაძლებელია
+                  მხოლოდ დაშვებული წესების ფარგლებში.
                 </p>
               </div>
 
