@@ -9,7 +9,7 @@ import ProductInfoMenu from "./components/home/ProductInfoMenu";
 import ContactMenu from "./components/home/ContactMenu";
 import HomeHero from "./components/home/HomeHero";
 import HomeFooter from "./components/home/HomeFooter";
-import ServicePlansPromo from "./components/service/ServicePlansPromo";
+import PlansMenu from "./components/home/PlansMenu";
 
 type Lang = "ka" | "en";
 
@@ -17,6 +17,7 @@ type Menu =
   | "about"
   | "shop"
   | "productInfo"
+  | "plans"
   | "contact"
   | null;
 
@@ -58,12 +59,13 @@ export default function HomePage() {
         <ProductInfoMenu ka={ka} />
       )}
 
+      {openMenu === "plans" && <PlansMenu ka={ka} />}
+
       {openMenu === "contact" && (
         <ContactMenu ka={ka} />
       )}
 
       <HomeHero ka={ka} />
-      <ServicePlansPromo />
       <HomeFooter ka={ka} />
     </main>
   );
