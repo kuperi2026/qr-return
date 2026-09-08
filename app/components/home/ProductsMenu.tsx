@@ -61,7 +61,7 @@ const products: Product[] = [
     shortKa: "ჩემოდნისა და სამგზავრო ბარგისთვის", shortEn: "For suitcases and travel luggage",
     descriptionKa: "მოგზაურობისას დაკარგული ბარგის მპოვნელს მფლობელთან დაკავშირების მარტივი და უსაფრთხო გზა ექნება.",
     descriptionEn: "A finder of lost luggage gets a simple and secure way to contact its owner while travelling.",
-    featuresKa: ["ბარგის ამოსაცნობი დეტალები", "მფლობელის შეტყობინება", "სკანირების ისტორია და უსაფრთხო კავშირი"],
+    featuresKa: ["ბარგის ამოსაცნობი დეტალები", "მფლობელის შეტყობინება", "Scan ისტორია და უსაფრთხო კავშირი"],
     featuresEn: ["Luggage identification details", "Owner message", "Scan history and secure contact"],
   },
   {
