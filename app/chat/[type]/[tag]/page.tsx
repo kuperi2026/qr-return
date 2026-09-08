@@ -574,7 +574,6 @@ export default function FinderLiveChatPage() {
                           type="button"
                           onClick={() => {
                             setText((value) => `${value}${emoji}`);
-                            setShowEmojis(false);
                           }}
                         >
                           {emoji}

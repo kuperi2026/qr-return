@@ -687,7 +687,7 @@ export default function OwnerChatInboxPage() {
                     {showEmojis && (
                       <div className="emojiPicker">
                         {CHAT_EMOJIS.map((emoji) => (
-                          <button key={emoji} type="button" onClick={() => { setText((value) => `${value}${emoji}`); setShowEmojis(false); }}>{emoji}</button>
+                          <button key={emoji} type="button" onClick={() => setText((value) => `${value}${emoji}`)}>{emoji}</button>
                         ))}
                       </div>
                     )}

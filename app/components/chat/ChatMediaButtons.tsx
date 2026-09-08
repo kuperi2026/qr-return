@@ -17,6 +17,7 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const releaseRequestedRef = useRef(false);
   const [uploading, setUploading] = useState(false);
   const [recording, setRecording] = useState(false);
 
@@ -43,8 +44,9 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
     await upload(file, "image", file.name);
   }
 
-  async function toggleRecording() {
-    if (recording) { recorderRef.current?.stop(); return; }
+  async function startRecording() {
+    if (recording || disabled || uploading) return;
+    releaseRequestedRef.current = false;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") { onError("ამ ბრაუზერში ხმოვანი შეტყობინება არ არის მხარდაჭერილი."); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -59,13 +61,30 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
         if (blob.size) await upload(blob, "audio", `ხმოვანი-${Date.now()}.webm`);
       };
       recorder.start(); setRecording(true); onError("");
+      if (releaseRequestedRef.current) recorder.stop();
     } catch { onError("მიკროფონზე წვდომა ვერ მივიღეთ. ბრაუზერში მიკროფონის ნებართვა ჩართეთ."); }
+  }
+
+  function stopRecording() {
+    releaseRequestedRef.current = true;
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
   }
 
   const busy = disabled || uploading;
   return <>
     <input ref={photoRef} className="chatMediaInput" type="file" accept="image/*" onChange={choosePhoto} />
     <button type="button" className="mediaButton" disabled={busy || recording} onClick={() => photoRef.current?.click()} aria-label="ფოტოს გაგზავნა">{uploading ? "…" : "📷"}</button>
-    <button type="button" className={`mediaButton ${recording ? "recording" : ""}`} disabled={busy && !recording} onClick={() => void toggleRecording()} aria-label={recording ? "ჩაწერის დასრულება" : "ხმოვანი შეტყობინება"}>{recording ? "■" : "🎙️"}</button>
+    <button
+      type="button"
+      className={`mediaButton ${recording ? "recording" : ""}`}
+      disabled={busy && !recording}
+      onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); void startRecording(); }}
+      onPointerUp={(event) => { event.preventDefault(); stopRecording(); }}
+      onPointerCancel={stopRecording}
+      onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) void startRecording(); }}
+      onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") stopRecording(); }}
+      aria-label="დააჭირეთ და გეჭიროთ ხმოვანი შეტყობინების ჩასაწერად"
+      title="დააჭირეთ და გეჭიროთ — გაშვებისას ავტომატურად გაიგზავნება"
+    >{recording ? "●" : "🎙️"}</button>
   </>;
 }
