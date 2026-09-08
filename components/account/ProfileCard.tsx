@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import QRCode from "qrcode";
+import { useState } from "react";
 
 export type ProfileCardItem = {
   id: string;
@@ -16,6 +17,8 @@ export type ProfileCardItem = {
   photo?: string | null;
 
   active?: boolean | null;
+  lost?: boolean | null;
+  lostAt?: string | null;
 
   scanCount?: number | null;
 
@@ -31,11 +34,15 @@ export type ProfileCardItem = {
 
 type Props = {
   item: ProfileCardItem;
+  onLostChange?: (item: ProfileCardItem, nextLost: boolean) => Promise<void>;
 };
 
 export default function ProfileCard({
   item,
+  onLostChange,
 }: Props) {
+  const [changingLost, setChangingLost] = useState(false);
+  const [lostError, setLostError] = useState("");
   const type = getType(item);
 
   const label =
@@ -95,14 +102,14 @@ export default function ProfileCard({
 
         <span
           className={
-            item.active !== false
-              ? "status active"
-              : "status"
+            item.lost
+              ? "status lost"
+              : item.active !== false
+                ? "status active"
+                : "status"
           }
         >
-          {item.active !== false
-            ? "აქტიური"
-            : "არააქტიური"}
+          {item.lost ? "დაკარგულია" : item.active !== false ? "აქტიური" : "არააქტიური"}
         </span>
       </div>
 
@@ -135,10 +142,32 @@ export default function ProfileCard({
           </strong>
         </div>
 
+        <div className={item.lost ? "lostMode isLost" : "lostMode"}>
+          <div className="lostModeText">
+            <span>{item.lost ? "დაკარგვის რეჟიმი ჩართულია" : "დაკარგვის რეჟიმი"}</span>
+            <strong>{item.lost ? "მპოვნელი დაინახავს, რომ პროფილი დაკარგულია." : "დაკარგვის შემთხვევაში ჩართეთ ერთი დაჭერით."}</strong>
+          </div>
+          <button
+            type="button"
+            disabled={changingLost}
+            onClick={async () => {
+              if (!onLostChange || changingLost) return;
+              setLostError("");
+              setChangingLost(true);
+              try { await onLostChange(item, !item.lost); }
+              catch (error) { setLostError(error instanceof Error ? error.message : "სტატუსის შეცვლა ვერ მოხერხდა."); }
+              finally { setChangingLost(false); }
+            }}
+          >
+            {changingLost ? "ინახება..." : item.lost ? "გამორთვა" : "ჩართვა"}
+          </button>
+        </div>
+        {lostError && <div className="lostError">{lostError}</div>}
+
         <div className={`serviceBox ${item.serviceStatus || "trial"}`}>
           <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
           <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
-          <Link href="/account/subscriptions">მართვა →</Link>
+          <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა →</Link>
         </div>
 
         <div className="stats">
@@ -398,6 +427,8 @@ export default function ProfileCard({
             #28764e;
         }
 
+        .status.lost { background:rgba(255,235,235,.97); color:#bd232b; }
+
         .content {
           padding:
             15px 16px 16px;
@@ -520,7 +551,8 @@ export default function ProfileCard({
           gap: 7px;
         }
 
-        .serviceBox{margin-top:9px;padding:10px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;border:1px solid #cfe0f3;border-radius:10px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#71869a;font-size:9px;font-weight:850}.serviceBox>div strong{margin-top:3px;color:#234d73;font-size:12px}.serviceBox>a{padding:7px 9px;border-radius:8px;background:#fff;color:#075dcc;text-decoration:none;font-size:10px;font-weight:900}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}}
+        .lostMode{margin-top:10px;padding:11px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#244765;font-size:12px;font-weight:950}.lostModeText strong{margin-top:3px;color:#71869a;font-size:10px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
+        .serviceBox{margin-top:9px;padding:11px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#71869a;font-size:10px;font-weight:850}.serviceBox>div strong{margin-top:3px;color:#234d73;font-size:12px;line-height:1.3}.serviceBox>a{padding:9px 10px;border-radius:9px;background:#fff;color:#075dcc;text-decoration:none;font-size:11px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
 
         .stat {
           min-width: 0;

@@ -36,6 +36,8 @@ type ItemRow = {
   last_scanned_at: string | null;
 
   active: boolean | null;
+  lost: boolean | null;
+  lost_at: string | null;
   trial_ends_at: string | null;
   service_expires_at: string | null;
   service_status: string | null;
@@ -180,6 +182,8 @@ export default function MyProfilesPage() {
                 scan_count,
                 last_scanned_at,
                 active,
+                lost,
+                lost_at,
                 trial_ends_at,
                 service_expires_at,
                 service_status
@@ -356,6 +360,9 @@ export default function MyProfilesPage() {
           profile
             .active,
 
+        lost: profile.lost,
+        lostAt: profile.lost_at,
+
         scanCount:
           profile
             .scan_count,
@@ -477,6 +484,35 @@ export default function MyProfilesPage() {
         `}</style>
       </>
     );
+  }
+
+  async function handleLostChange(item: ProfileCardItem, nextLost: boolean) {
+    const supabase = createSupabaseClient();
+    if (!supabase) throw new Error("სერვერთან კავშირი ვერ მოიძებნა.");
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("გთხოვთ, ხელახლა შეხვიდეთ ანგარიშზე.");
+
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("item")
+      .update({
+        lost: nextLost,
+        lost_at: nextLost ? now : null,
+        found_at: nextLost ? null : now,
+      })
+      .eq("id", item.id)
+      .eq("owner_id", user.id)
+      .select("id,lost,lost_at")
+      .maybeSingle();
+
+    if (error) throw new Error(`დაკარგვის რეჟიმის შეცვლა ვერ მოხერხდა: ${error.message}`);
+    if (!data) throw new Error("ცვლილების შენახვა ვერ დადასტურდა.");
+
+    setProfiles((current) => current.map((profile) =>
+      profile.id === item.id
+        ? { ...profile, lost: data.lost, lost_at: data.lost_at }
+        : profile
+    ));
   }
 
   return (
@@ -708,6 +744,7 @@ export default function MyProfilesPage() {
                     item={
                       profile
                     }
+                    onLostChange={handleLostChange}
                   />
                 )
               )}
