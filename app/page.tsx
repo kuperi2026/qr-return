@@ -9,6 +9,7 @@ import ProductInfoMenu from "./components/home/ProductInfoMenu";
 import ContactMenu from "./components/home/ContactMenu";
 import HomeHero from "./components/home/HomeHero";
 import HomeFooter from "./components/home/HomeFooter";
+import ServicePlansPromo from "./components/service/ServicePlansPromo";
 
 type Lang = "ka" | "en";
 
@@ -62,6 +63,7 @@ export default function HomePage() {
       )}
 
       <HomeHero ka={ka} />
+      <ServicePlansPromo />
       <HomeFooter ka={ka} />
     </main>
   );

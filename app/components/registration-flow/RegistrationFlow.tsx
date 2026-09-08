@@ -756,6 +756,9 @@ export default function RegistrationFlow({
         owner_id:
           user.id,
 
+        owner_name:
+          `${draft.ownerFirstName.trim()} ${draft.ownerLastName.trim()}`.trim(),
+
         owner_first_name:
           draft
             .ownerFirstName
@@ -996,8 +999,19 @@ export default function RegistrationFlow({
         created.tag_code ||
         cleanTag;
 
+      const { data: verified, error: verifyError } = await client
+        .from("item")
+        .select("id,tag_code,owner_id")
+        .eq("id", created.id)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (verifyError || !verified) {
+        throw new Error("პროფილი შეიქმნა, მაგრამ ანგარიშში დადასტურება ვერ მოხერხდა. გთხოვთ სცადოთ ხელახლა.");
+      }
+
       window.location.assign(
-        `/registration-success?type=${type}&tag=${encodeURIComponent(
+        `/my-profiles?created=${encodeURIComponent(
           createdTag
         )}`
       );

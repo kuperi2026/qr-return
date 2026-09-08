@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
+import ServicePlansPromo from "@/app/components/service/ServicePlansPromo";
 
 type Lang = "ka" | "en";
 
@@ -573,6 +574,8 @@ export default function StorePage() {
           </div>
         </div>
       </section>
+
+      <ServicePlansPromo compact />
 
       <div className="shell">
         {error && (

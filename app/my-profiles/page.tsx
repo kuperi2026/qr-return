@@ -106,7 +106,12 @@ export default function MyProfilesPage() {
   ] =
     useState("all");
 
+  const [createdMessage, setCreatedMessage] = useState("");
+
   useEffect(() => {
+    const created = new URLSearchParams(window.location.search).get("created");
+    if (created) setCreatedMessage(`QR პროფილი ${created} წარმატებით შეიქმნა და შეინახა.`);
+
     async function loadProfiles() {
       try {
         setLoading(
@@ -544,6 +549,8 @@ export default function MyProfilesPage() {
           </div>
         </section>
 
+        {createdMessage && <section className="createdNotice">✓ {createdMessage}</section>}
+
         {errorMessage && (
           <section className="errorBox">
             <strong>
@@ -850,6 +857,7 @@ export default function MyProfilesPage() {
         }
 
         .plansButton{min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid #b8d2f4;border-radius:9px;background:#eaf3ff;color:#0647c8;text-decoration:none;font-size:11px;font-weight:900}
+        .createdNotice{width:calc(100% - 48px);max-width:1120px;margin:0 auto 16px;padding:14px 16px;border:1px solid #9fd8bc;border-radius:12px;background:#eaf8f1;color:#087443;font-size:14px;font-weight:850}
 
         .email {
           max-width:
