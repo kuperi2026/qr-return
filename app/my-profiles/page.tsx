@@ -488,6 +488,9 @@ export default function MyProfilesPage() {
           </Link>
 
           <div className="headerRight">
+            <Link href="/account/subscriptions" className="plansButton">
+              მომსახურება და პაკეტები
+            </Link>
             {email && (
               <span className="email">
                 {email}
@@ -845,6 +848,8 @@ export default function MyProfilesPage() {
           gap:
             8px;
         }
+
+        .plansButton{min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid #b8d2f4;border-radius:9px;background:#eaf3ff;color:#0647c8;text-decoration:none;font-size:11px;font-weight:900}
 
         .email {
           max-width:
