@@ -24,6 +24,9 @@ export type ProfileCardItem = {
   lastScanLatitude?: number | null;
   lastScanLongitude?: number | null;
   lastScanAccuracy?: number | null;
+  trialEndsAt?: string | null;
+  serviceExpiresAt?: string | null;
+  serviceStatus?: string | null;
 };
 
 type Props = {
@@ -130,6 +133,12 @@ export default function ProfileCard({
             {item.tagCode ||
               "—"}
           </strong>
+        </div>
+
+        <div className={`serviceBox ${item.serviceStatus || "trial"}`}>
+          <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
+          <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
+          <Link href="/account/subscriptions">მართვა →</Link>
         </div>
 
         <div className="stats">
@@ -511,6 +520,8 @@ export default function ProfileCard({
           gap: 7px;
         }
 
+        .serviceBox{margin-top:9px;padding:10px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;border:1px solid #cfe0f3;border-radius:10px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#71869a;font-size:9px;font-weight:850}.serviceBox>div strong{margin-top:3px;color:#234d73;font-size:12px}.serviceBox>a{padding:7px 9px;border-radius:8px;background:#fff;color:#075dcc;text-decoration:none;font-size:10px;font-weight:900}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}}
+
         .stat {
           min-width: 0;
 
@@ -839,4 +850,17 @@ function formatScanDate(
   }
 
   return date.toLocaleString();
+}
+
+function serviceLabel(item: ProfileCardItem) {
+  if (item.serviceStatus === "active") return "აქტიური პაკეტი";
+  if (item.serviceStatus === "expired") return "ვადა დასრულებულია";
+  return "უფასო პერიოდი";
+}
+
+function formatServiceDate(value?: string | null) {
+  if (!value) return "ჯერ არ არის მითითებული";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("ka-GE", { day:"numeric", month:"long", year:"numeric" }).format(date);
 }

@@ -36,6 +36,9 @@ type ItemRow = {
   last_scanned_at: string | null;
 
   active: boolean | null;
+  trial_ends_at: string | null;
+  service_expires_at: string | null;
+  service_status: string | null;
 };
 
 function createSupabaseClient() {
@@ -176,7 +179,10 @@ export default function MyProfilesPage() {
                 photo,
                 scan_count,
                 last_scanned_at,
-                active
+                active,
+                trial_ends_at,
+                service_expires_at,
+                service_status
               `
             )
             .eq(
@@ -357,6 +363,10 @@ export default function MyProfilesPage() {
         lastScannedAt:
           profile
             .last_scanned_at,
+
+        trialEndsAt: profile.trial_ends_at,
+        serviceExpiresAt: profile.service_expires_at,
+        serviceStatus: profile.service_status,
 
         lastScanLatitude:
           null,
