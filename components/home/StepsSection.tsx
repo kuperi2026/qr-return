@@ -113,7 +113,7 @@ export default function StepsSection({
       text:
         step3Text ||
         (ka
-          ? "ჩატი, ზარი ან თქვენ მიერ არჩეული სხვა მეთოდი."
+          ? "Live Chat, ზარი ან თქვენ მიერ არჩეული მეთოდი."
           : "Live Chat, call, or another contact method."),
 
       icon: <ChatIcon />,

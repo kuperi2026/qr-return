@@ -114,7 +114,7 @@ export default function PetHealthSection({
             />
 
             <small>
-              ეს ტექსტი გამოჩნდება მპოვნელის ხედვაში, თუ მის ჩვენებას
+              ეს ტექსტი გამოჩნდება Finder View-ში, თუ მისი ჩვენება
               აქტიურია.
             </small>
           </div>

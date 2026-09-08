@@ -75,7 +75,7 @@ export default function PhonePreview({
             className="primary"
           >
             <ChatIcon />
-            <span>ჩატი</span>
+            <span>Live Chat</span>
           </button>
 
           <button type="button">

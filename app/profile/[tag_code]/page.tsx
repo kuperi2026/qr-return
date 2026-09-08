@@ -660,7 +660,7 @@ export default function PublicProfilePage() {
           <section className="ownerCard">
             <div className="sectionTitle">
               <span>
-                მფლობელის ინფორმაცია
+                OWNER INFORMATION
               </span>
 
               <h2>
@@ -679,12 +679,12 @@ export default function PublicProfilePage() {
 
               <div>
                 <span>
-                  მფლობელი
+                  OWNER
                 </span>
 
                 <strong>
                   {ownerFullName ||
-                    "QR RETURN მფლობელი"}
+                    "QR RETURN Owner"}
                 </strong>
               </div>
             </div>
@@ -745,7 +745,7 @@ export default function PublicProfilePage() {
             profile.finder_message && (
               <section className="finderMessage">
                 <span>
-                  მფლობელის შეტყობინება
+                  OWNER MESSAGE
                 </span>
 
                 <p>
@@ -767,7 +767,7 @@ export default function PublicProfilePage() {
             <section className="detailsCard">
               <div className="sectionTitle">
                 <span>
-                  პროფილის დეტალები
+                  PROFILE DETAILS
                 </span>
 
                 <h2>
@@ -864,7 +864,7 @@ export default function PublicProfilePage() {
 
             <div className="locationContent">
               <span>
-                მდებარეობის გაზიარება
+                SHARE LOCATION
               </span>
 
               <h2>
@@ -872,9 +872,10 @@ export default function PublicProfilePage() {
               </h2>
 
               <p>
-                სურვილის შემთხვევაში შეგიძლიათ მფლობელს
-                გაუზიაროთ თქვენი მიმდინარე მდებარეობა.
-                ბრაუზერი ჯერ მოგთხოვთ ნებართვას.
+                სურვილის შემთხვევაში შეგიძლიათ ერთი
+                ღილაკით გაუზიაროთ თქვენი მიმდინარე
+                მდებარეობა მფლობელს. ბრაუზერი ჯერ
+                მოგთხოვთ ნებართვას.
               </p>
 
               <button
@@ -949,7 +950,7 @@ export default function PublicProfilePage() {
                 >
                   <div>
                     <strong>
-                      ◌ QR RETURN ჩატი
+                      ◌ QR RETURN Live Chat
                     </strong>
 
                     <span>
@@ -967,7 +968,7 @@ export default function PublicProfilePage() {
                 <div className="emailRow">
                   <div>
                     <span>
-                      ელფოსტა
+                      EMAIL
                     </span>
 
                     <strong>

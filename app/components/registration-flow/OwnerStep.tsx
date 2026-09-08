@@ -114,7 +114,7 @@ export default function OwnerStep({
         </div>
 
         <div className="finderText">
-          <strong>მპოვნელის ხედვა</strong>
+          <strong>Finder View</strong>
 
           <p>
             სახელი, გვარი და ტელეფონი ყოველთვის ხილულია.

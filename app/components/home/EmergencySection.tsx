@@ -6,11 +6,11 @@ import { PhoneIcon, QRIcon, ShieldIcon } from "./HomeIcons";
 export default function EmergencySection({ ka }: { ka: boolean }) {
   const [activeFeature, setActiveFeature] = useState<number | null>(0);
   const features = [
-    [<ChatIcon key="chat" />, ka ? "ჩატი" : "Live Chat", ka ? "უსაფრთხოდ დაუკავშირდით ერთმანეთს პირადი ნომრის გამჟღავნების გარეშე." : "Connect securely without revealing a private phone number."],
+    [<ChatIcon key="chat" />, "Live Chat", ka ? "უსაფრთხოდ დაუკავშირდით ერთმანეთს პირადი ნომრის გამჟღავნების გარეშე." : "Connect securely without revealing a private phone number."],
     [<PhoneIcon key="phone" />, ka ? "ტელეფონით დაკავშირება" : "Phone contact", ka ? "მპოვნელი ერთი შეხებით დაგირეკავთ, თუ ამ ფუნქციას ჩართავთ." : "The finder can call in one tap when you enable this option."],
     [<LocationIcon key="location" />, ka ? "ლოკაციის გაზიარება" : "Location sharing", ka ? "ზუსტი ადგილი გაზიარდება მხოლოდ შესაბამისი მხარის თანხმობით." : "Precise location is shared only with the person's consent."],
     [<LostIcon key="lost" />, "Lost ON", ka ? "აჩვენებს, რომ პროდუქტი დაკარგულია და ააქტიურებს დაბრუნების ფუნქციებს." : "Shows the product is lost and activates return tools."],
-    [<QRIcon key="scan" size={23} />, ka ? "სკანირების შეტყობინება" : "Scan alert", ka ? "მფლობელი ხედავს, როდის დასკანერდა მისი QR კოდი." : "The owner can see when the QR code was scanned."],
+    [<QRIcon key="scan" size={23} />, ka ? "Scan შეტყობინება" : "Scan alert", ka ? "მფლობელი ხედავს, როდის დასკანერდა მისი QR კოდი." : "The owner can see when the QR code was scanned."],
     [<ShieldIcon key="shield" />, ka ? "ინფორმაციის კონტროლი" : "Information control", ka ? "თქვენ ირჩევთ, რომელი მონაცემი გამოჩნდეს მპოვნელისთვის." : "You choose which information the finder can see."],
   ];
 

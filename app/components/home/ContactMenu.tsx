@@ -82,12 +82,12 @@ export default function ContactMenu({
 
             <p style={paragraphStyle}>
               {ka
-                ? "გახსენით QR RETURN-ის მხარდაჭერის ჩატი და მოგვწერეთ თქვენი საკითხის შესახებ."
+                ? "გახსენით QR RETURN-ის მხარდაჭერის Live Chat და მოგვწერეთ თქვენი საკითხის შესახებ."
                 : "Open QR RETURN Support Live Chat."}
             </p>
 
             <strong style={linkStyle}>
-              {ka ? "ჩატის გახსნა" : "Open Live Chat"} →
+              {ka ? "Live Chat-ის გახსნა" : "Open Live Chat"} →
             </strong>
           </a>
 

@@ -76,7 +76,7 @@ export default function RegistrationShell({
                 <span>03</span>
 
                 <div>
-                  <strong>მპოვნელის ხედვა</strong>
+                  <strong>Finder View</strong>
                   <p>
                     მპოვნელს გამოუჩნდება მხოლოდ ის ინფორმაცია, რომელიც შესაბამის პროფილშია დაშვებული.
                   </p>
