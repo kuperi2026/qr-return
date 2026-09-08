@@ -62,7 +62,6 @@ export default function StorePage() {
 
   const [lang, setLang] =
     useState<Lang>("ka");
-  const [showPlans, setShowPlans] = useState(false);
 
   const [
     products,
@@ -470,9 +469,9 @@ export default function StorePage() {
         </Link>
 
         <div className="topActions">
-          <button type="button" className="plansNavButton" onClick={() => setShowPlans((value) => !value)}>
-            {ka ? "მომსახურება და პაკეტები" : "Service & plans"}⌄
-          </button>
+          <a className="plansNavButton" href="#service-plans">
+            {ka ? "მომსახურება და პაკეტები" : "Service & plans"}
+          </a>
           <Link href="/my-profiles">
             {ka
               ? "ჩემი პროფილები"
@@ -516,8 +515,6 @@ export default function StorePage() {
           </div>
         </div>
       </header>
-
-      {showPlans && <PlansMenu ka={ka} />}
 
       <section className="hero">
         <div className="heroInner">
@@ -580,6 +577,10 @@ export default function StorePage() {
           </div>
         </div>
       </section>
+
+      <div id="service-plans" className="storePlans">
+        <PlansMenu ka={ka} />
+      </div>
 
       <div className="shell">
         {error && (
@@ -1045,7 +1046,7 @@ export default function StorePage() {
           font-weight: 850;
         }
 
-        .plansNavButton{min-height:32px;padding:0 10px;border:1px solid #b8d2f4;border-radius:8px;background:#eaf3ff;color:#0647c8;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}
+        .plansNavButton{min-height:32px;padding:0 10px;display:flex;align-items:center;border:1px solid #b8d2f4!important;border-radius:8px;background:#eaf3ff!important;color:#0647c8!important;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer;text-decoration:none}.storePlans{scroll-margin-top:12px}
 
         .langs {
           padding: 3px;
