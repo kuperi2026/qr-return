@@ -11,6 +11,8 @@ import {
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getFinderSession } from "@/lib/finderSession";
+import ChatMediaButtons from "@/app/components/chat/ChatMediaButtons";
+import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
 
 type Lang = "ka" | "en";
 
@@ -21,10 +23,7 @@ type ChatMessage = {
   created_at: string;
 };
 
-const CHAT_EMOJIS = [
-  "😊", "🙂", "🙏", "❤️", "👍", "👋", "🐶", "🐱",
-  "📍", "🏠", "🚗", "🔑", "✅", "🎉", "😢", "🚨",
-];
+const CHAT_EMOJIS = ["😀","😃","😄","😁","😊","🙂","😉","😍","🥰","😘","😇","🤗","🤔","😢","😭","😮","😅","😂","🤣","🙏","❤️","🧡","💛","💚","💙","💜","👍","👎","👏","🙌","👋","🤝","💪","✅","❗","❓","🎉","🚨","📍","🏠","🚗","🔑","🐶","🐱","🐾","📞","💬","✨"];
 
 function getLocationUrl(
   value: string
@@ -282,13 +281,13 @@ export default function FinderLiveChatPage() {
       return;
     }
 
-    setSending(true);
-    setError("");
+    await sendPayload(clean);
+  }
 
-    const {
-      error: rpcError,
-    } =
-      await supabase.rpc(
+  async function sendPayload(clean: string): Promise<boolean> {
+    if (!clean || !sessionId || sending) return false;
+    setSending(true); setError("");
+    const { error: rpcError } = await supabase.rpc(
         "finder_send_chat_message",
         {
           p_tag_code:
@@ -330,6 +329,7 @@ export default function FinderLiveChatPage() {
     }
 
     setSending(false);
+    return !rpcError;
   }
 
   function formatTime(
@@ -508,11 +508,7 @@ export default function FinderLiveChatPage() {
                           )}
 
                           <div className="bubble">
-                            <div>
-                              {
-                                message.message_text
-                              }
-                            </div>
+                            <ChatMessageMedia message={message.message_text} />
 
                             {locationUrl && (
                               <a
@@ -587,6 +583,8 @@ export default function FinderLiveChatPage() {
                     </div>
                   )}
                 </div>
+
+                <ChatMediaButtons tagCode={tagCode} sessionId={sessionId} disabled={sending} onSend={sendPayload} onError={setError} />
 
                 <textarea
                   value={text}
@@ -879,7 +877,7 @@ export default function FinderLiveChatPage() {
           border-top: 1px solid #e4e7ec;
         }
 
-        .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton{width:46px;min-height:46px;padding:0;border:1px solid #d6e2f5;background:#f1f6ff;color:#1d4ed8;font-size:22px}.emojiPicker{position:absolute;left:0;bottom:54px;z-index:20;width:252px;padding:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:5px;border:1px solid #d8e2ef;border-radius:14px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:32px;padding:0;border:0;background:transparent;color:inherit;font-size:20px}.composer .emojiPicker button:hover{background:#edf5ff}
+        .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton,.composer .mediaButton{width:48px;min-height:48px;padding:0;border:1px solid #d6e2f5;background:#f1f6ff;color:#1d4ed8;font-size:24px}.emojiPicker{position:absolute;left:0;bottom:56px;z-index:20;width:336px;max-width:calc(100vw - 40px);max-height:260px;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:7px;border:1px solid #d8e2ef;border-radius:16px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:38px;padding:0;border:0;background:transparent;color:inherit;font-size:25px}.composer .emojiPicker button:hover{background:#edf5ff}.chatMediaInput{display:none}.composer .mediaButton.recording{background:#fee4e2;color:#d92d20;animation:pulse 1s infinite}.chatMediaImage{display:block;max-width:min(290px,65vw);max-height:300px;border-radius:12px;object-fit:cover}.chatMediaAudio{width:min(280px,65vw);height:40px}.chatMediaLink{display:block}@keyframes pulse{50%{opacity:.55}}
 
         .composer textarea {
           flex: 1;
@@ -923,7 +921,7 @@ export default function FinderLiveChatPage() {
             flex-wrap: wrap;
           }
 
-          .composer{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:end}.composer>button[type="submit"]{grid-column:1/-1;width:100%}.emojiPicker{left:0;grid-template-columns:repeat(6,1fr);width:224px}
+          .composer{display:grid;grid-template-columns:48px 48px 48px minmax(0,1fr);align-items:end}.composer>button[type="submit"]{grid-column:1/-1;width:100%}.emojiPicker{left:0;grid-template-columns:repeat(6,1fr);width:300px}
 
           .bubble {
             max-width: 88%;

@@ -8,6 +8,9 @@ import {
   getPreciseLocation,
   LocationAccuracyError,
 } from "@/lib/geolocation";
+import ChatMediaButtons from "@/app/components/chat/ChatMediaButtons";
+import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
+import { parseChatMedia } from "@/lib/chatMedia";
 
 type Lang = "ka" | "en";
 
@@ -30,7 +33,7 @@ type ChatMessage = {
   created_at: string;
 };
 
-const CHAT_EMOJIS = ["😊", "🙂", "🙏", "❤️", "👍", "👋", "🐶", "🐱", "📍", "🏠", "🚗", "🔑", "✅", "🎉", "😢", "🚨"];
+const CHAT_EMOJIS = ["😀","😃","😄","😁","😊","🙂","😉","😍","🥰","😘","😇","🤗","🤔","😢","😭","😮","😅","😂","🤣","🙏","❤️","🧡","💛","💚","💙","💜","👍","👎","👏","🙌","👋","🤝","💪","✅","❗","❓","🎉","🚨","📍","🏠","🚗","🔑","🐶","🐱","🐾","📞","💬","✨"];
 
 function getLocationUrl(
   value: string
@@ -193,9 +196,12 @@ export default function OwnerChatInboxPage() {
       return;
     }
 
-    setSending(true);
-    setError("");
+    await sendPayload(clean);
+  }
 
+  async function sendPayload(clean: string): Promise<boolean> {
+    if (!selected || !clean || sending) return false;
+    setSending(true); setError("");
     const { error: rpcError } = await supabase.rpc(
       "owner_send_chat_message",
       {
@@ -215,6 +221,7 @@ export default function OwnerChatInboxPage() {
     }
 
     setSending(false);
+    return !rpcError;
   }
 
 
@@ -537,7 +544,7 @@ export default function OwnerChatInboxPage() {
                         </div>
 
                         <p>
-                          {thread.last_message ||
+                          {(thread.last_message && (parseChatMedia(thread.last_message)?.type === "image" ? "📷 ფოტო" : parseChatMedia(thread.last_message)?.type === "audio" ? "🎙️ ხმოვანი შეტყობინება" : thread.last_message)) ||
                             (ka
                               ? "ახალი საუბარი"
                               : "New conversation")}
@@ -643,9 +650,7 @@ export default function OwnerChatInboxPage() {
                           )}
 
                           <div className="bubble">
-                            <div>
-                              {message.message_text}
-                            </div>
+                            <ChatMessageMedia message={message.message_text} />
 
                             {locationUrl && (
                               <a
@@ -687,6 +692,8 @@ export default function OwnerChatInboxPage() {
                       </div>
                     )}
                   </div>
+
+                  <ChatMediaButtons tagCode={selected.tag_code} sessionId={selected.finder_session} disabled={sending} onSend={sendPayload} onError={setError} />
 
                   <textarea
                     value={text}
@@ -1259,7 +1266,7 @@ function Styles() {
         border-top: 1px solid #e4e7ec;
       }
 
-      .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton{width:44px;min-height:44px;padding:0;border:1px solid #cbdcf7;background:#eef4ff;color:#1266e9;font-size:21px}.emojiPicker{position:absolute;left:0;bottom:52px;z-index:20;width:252px;padding:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:5px;border:1px solid #d8e2ef;border-radius:14px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:32px;padding:0;border:0;background:transparent;color:inherit;font-size:20px}
+      .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton,.composer .mediaButton{width:46px;min-height:46px;padding:0;border:1px solid #cbdcf7;background:#eef4ff;color:#1266e9;font-size:24px}.emojiPicker{position:absolute;left:0;bottom:54px;z-index:20;width:336px;max-width:calc(100vw - 40px);max-height:260px;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:7px;border:1px solid #d8e2ef;border-radius:16px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:38px;padding:0;border:0;background:transparent;color:inherit;font-size:25px}.chatMediaInput{display:none}.composer .mediaButton.recording{background:#fee4e2;color:#d92d20;animation:pulse 1s infinite}.chatMediaImage{display:block;max-width:min(300px,65vw);max-height:320px;border-radius:12px;object-fit:cover}.chatMediaAudio{width:min(290px,65vw);height:40px}.chatMediaLink{display:block}@keyframes pulse{50%{opacity:.55}}
 
       .composer textarea {
         min-height: 66px;
