@@ -39,6 +39,8 @@ type ChatMessage = {
   created_at: string;
 };
 
+const CHAT_EMOJIS = ["😊", "🙂", "🙏", "❤️", "👍", "👋", "📍", "🏠", "🚑", "✅", "🎉", "😢", "🚨", "🩺", "💊", "🆘"];
+
 export default function EmergencyLiveChatPage() {
   const params =
     useParams();
@@ -61,6 +63,8 @@ export default function EmergencyLiveChatPage() {
     newMessage,
     setNewMessage,
   ] = useState("");
+
+  const [showEmojis, setShowEmojis] = useState(false);
 
   const [
     loading,
@@ -536,6 +540,17 @@ export default function EmergencyLiveChatPage() {
         </div>
 
         <div className="composer">
+          <div className="emojiWrap">
+            <button type="button" className="emojiButton" aria-label="სმაილების არჩევა" aria-expanded={showEmojis} onClick={() => setShowEmojis((value) => !value)}>😊</button>
+            {showEmojis && (
+              <div className="emojiPicker">
+                {CHAT_EMOJIS.map((emoji) => (
+                  <button key={emoji} type="button" onClick={() => { setNewMessage((value) => `${value}${emoji}`); setShowEmojis(false); }}>{emoji}</button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <textarea
             value={
               newMessage
@@ -803,15 +818,18 @@ export default function EmergencyLiveChatPage() {
         }
 
         .composer {
+          position: relative;
           padding: 13px;
           display: grid;
           grid-template-columns:
-            1fr auto;
+            auto 1fr auto;
           gap: 9px;
           border-top:
             1px solid #e1e8ef;
           background: white;
         }
+
+        .emojiWrap{position:relative}.composer .emojiButton{min-width:46px;width:46px;height:48px;padding:0;border:1px solid #cbdcf7;background:#eef4ff;color:#1266e9;font-size:21px}.emojiPicker{position:absolute;left:0;bottom:56px;z-index:20;width:224px;padding:10px;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;border:1px solid #d8e2ef;border-radius:14px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-width:0;min-height:32px;padding:0;border:0;background:transparent;color:inherit;font-size:20px}
 
         .composer textarea {
           min-height: 48px;
@@ -823,7 +841,7 @@ export default function EmergencyLiveChatPage() {
           border-radius: 10px;
           outline: none;
           font-family: inherit;
-          font-size: 13px;
+          font-size: 16px;
         }
 
         .composer button {
@@ -835,6 +853,7 @@ export default function EmergencyLiveChatPage() {
           color: white;
           font-weight: 850;
           cursor: pointer;
+          font-size: 14px;
         }
 
         .composer button:disabled {

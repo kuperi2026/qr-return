@@ -292,6 +292,7 @@ export default function FinderPage() {
 
   const canCall =
     profile.phone_enabled !== false &&
+    profile.show_owner_phone !== false &&
     Boolean(profile.owner_phone);
 
   const canEmail =
@@ -567,7 +568,7 @@ export default function FinderPage() {
                 </div>
               )}
 
-              {profile.owner_phone && (
+              {profile.show_owner_phone !== false && profile.owner_phone && (
                 <div className="ownerName">
                   <span>ტელეფონის ნომერი</span>
                   <strong>{profile.owner_phone}</strong>
@@ -577,7 +578,7 @@ export default function FinderPage() {
               <div className="contactButtons">
                 {canCall && (
                   <a
-                    href={`tel:${profile.owner_phone}`}
+                    href={phoneHref(profile.owner_phone!)}
                     className="primaryButton"
                   >
                     📞 დარეკვა
@@ -604,7 +605,7 @@ export default function FinderPage() {
                 )}
               </div>
 
-              {(profile.additional_contact_name ||
+              {profile.show_additional_contact === true && (profile.additional_contact_name ||
                   profile.additional_contact_phone ||
                   profile.additional_contact_email) && (
                   <div className="additionalContact">
@@ -622,7 +623,7 @@ export default function FinderPage() {
 
                     {profile.additional_contact_phone && (
                       <a
-                        href={`tel:${profile.additional_contact_phone}`}
+                        href={phoneHref(profile.additional_contact_phone)}
                       >
                         {
                           profile.additional_contact_phone
@@ -805,6 +806,10 @@ function translateSex(sex: string) {
   }
 
   return sex;
+}
+
+function phoneHref(phone: string) {
+  return `tel:${phone.trim().replace(/[^\d+]/g, "")}`;
 }
 
 function Styles() {
@@ -1291,7 +1296,7 @@ function Styles() {
         line-height: 1.5;
       }
 
-      .eyebrow,.messageBox span,.rewardBox span{font-size:11px}.heroText p{font-size:14px}.categoryBadge{font-size:12px}.messageBox p{font-size:15px}.sectionHeading small{font-size:9px}.sectionHeading h2{font-size:20px}.info span,.longInfo span,.ownerName span,.additionalContact>span{font-size:11px}.info strong,.longInfo p{font-size:14px}.ownerName strong{font-size:15px}.primaryButton,.secondaryButton,.locationButton{min-height:50px;font-size:14px}.additionalContact strong,.additionalContact a,.locationSection>p{font-size:14px}.locationStatus{font-size:12px}.privacy strong{font-size:11px}.privacy p{font-size:11px}
+      .eyebrow,.messageBox span,.rewardBox span{font-size:12px}.heroText p{font-size:15px}.categoryBadge{font-size:13px}.messageBox p{font-size:16px}.sectionHeading small{font-size:11px}.sectionHeading h2{font-size:22px}.info span,.longInfo span,.ownerName span,.additionalContact>span{font-size:13px}.info strong,.longInfo p{font-size:16px}.ownerName strong{font-size:17px}.primaryButton,.secondaryButton,.locationButton{min-height:54px;font-size:16px}.additionalContact strong,.additionalContact a,.locationSection>p{font-size:16px}.locationStatus{font-size:14px}.privacy strong{font-size:12px}.privacy p{font-size:13px}
 
       .centerPage {
         min-height: 100vh;

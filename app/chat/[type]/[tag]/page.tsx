@@ -21,6 +21,11 @@ type ChatMessage = {
   created_at: string;
 };
 
+const CHAT_EMOJIS = [
+  "😊", "🙂", "🙏", "❤️", "👍", "👋", "🐶", "🐱",
+  "📍", "🏠", "🚗", "🔑", "✅", "🎉", "😢", "🚨",
+];
+
 function getLocationUrl(
   value: string
 ) {
@@ -100,6 +105,9 @@ export default function FinderLiveChatPage() {
 
   const [text, setText] =
     useState("");
+
+  const [showEmojis, setShowEmojis] =
+    useState(false);
 
   const [loading, setLoading] =
     useState(true);
@@ -551,6 +559,35 @@ export default function FinderLiveChatPage() {
                 }
                 className="composer"
               >
+                <div className="emojiWrap">
+                  <button
+                    type="button"
+                    className="emojiButton"
+                    aria-label="სმაილების არჩევა"
+                    aria-expanded={showEmojis}
+                    onClick={() => setShowEmojis((value) => !value)}
+                  >
+                    😊
+                  </button>
+
+                  {showEmojis && (
+                    <div className="emojiPicker">
+                      {CHAT_EMOJIS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => {
+                            setText((value) => `${value}${emoji}`);
+                            setShowEmojis(false);
+                          }}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <textarea
                   value={text}
                   onChange={(
@@ -834,12 +871,15 @@ export default function FinderLiveChatPage() {
         }
 
         .composer {
+          position: relative;
           padding: 14px 18px;
           display: flex;
           gap: 10px;
           align-items: flex-end;
           border-top: 1px solid #e4e7ec;
         }
+
+        .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton{width:46px;min-height:46px;padding:0;border:1px solid #d6e2f5;background:#f1f6ff;color:#1d4ed8;font-size:22px}.emojiPicker{position:absolute;left:0;bottom:54px;z-index:20;width:252px;padding:10px;display:grid;grid-template-columns:repeat(8,1fr);gap:5px;border:1px solid #d8e2ef;border-radius:14px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:32px;padding:0;border:0;background:transparent;color:inherit;font-size:20px}.composer .emojiPicker button:hover{background:#edf5ff}
 
         .composer textarea {
           flex: 1;
@@ -875,7 +915,7 @@ export default function FinderLiveChatPage() {
           color: #667085;
         }
 
-        .title small{font-size:11px}.title h1{font-size:23px}.title p{font-size:12px}.live{font-size:11px}.notice{font-size:13px}.sender{font-size:11px}.bubble{font-size:15px}.locationLink{font-size:12px}.bubble time{font-size:10px}.error{font-size:13px}.composer textarea{font-size:16px}.composer button{font-size:14px}
+        .title small{font-size:12px}.title h1{font-size:24px}.title p{font-size:13px}.live{font-size:12px}.notice{font-size:14px}.sender{font-size:12px}.bubble{font-size:16px}.locationLink{font-size:13px}.bubble time{font-size:11px}.error{font-size:14px}.composer textarea{font-size:16px}.composer button{font-size:15px}
 
         @media (max-width: 600px) {
           .page{min-height:100dvh}.topbar{min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:100%;padding:12px 0 0}.back{margin:0 14px 10px;font-size:13px}.card{min-height:calc(100dvh - 86px);display:flex;flex-direction:column;border-left:0;border-right:0;border-bottom:0;border-radius:18px 18px 0 0}.chatHead{padding:14px 16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));background:#fff}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
@@ -883,14 +923,7 @@ export default function FinderLiveChatPage() {
             flex-wrap: wrap;
           }
 
-          .composer {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .composer button {
-            width: 100%;
-          }
+          .composer{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:end}.composer>button[type="submit"]{grid-column:1/-1;width:100%}.emojiPicker{left:0;grid-template-columns:repeat(6,1fr);width:224px}
 
           .bubble {
             max-width: 88%;

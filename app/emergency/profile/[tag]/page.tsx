@@ -659,7 +659,7 @@ function Contact({
       <div className="contactActions">
         {mobile && phone && (
           <a
-            href={`tel:${phone}`}
+            href={phoneHref(phone)}
             className="primaryAction"
           >
             📞 {ka ? "დარეკვა" : "Call"}
@@ -700,6 +700,10 @@ function formatDate(
       day: "numeric",
     }
   ).format(date);
+}
+
+function phoneHref(phone: string) {
+  return `tel:${phone.trim().replace(/[^\d+]/g, "")}`;
 }
 
 function Styles() {
@@ -1089,13 +1093,13 @@ function Styles() {
 
       .primaryAction,
       .action {
-        min-height: 38px;
+        min-height: 48px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: 0 15px;
         border-radius: 9px;
-        font-size: 13px;
+        font-size: 15px;
         font-weight: 850;
       }
 
