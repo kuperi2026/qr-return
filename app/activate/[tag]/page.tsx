@@ -178,6 +178,41 @@ export default function ScanPage() {
       if (
         record.status === "claimed"
       ) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data: isOwner, error: ownerError } =
+            await supabase.rpc("is_qr_owner", {
+              p_tag_code: record.tag_code,
+            });
+
+          if (ownerError) {
+            console.error(ownerError);
+          }
+
+          if (isOwner) {
+            if (
+              record.category === "emergency" &&
+              record.emergency_profile_id
+            ) {
+              router.replace(
+                `/emergency/edit/${encodeURIComponent(
+                  record.emergency_profile_id
+                )}`
+              );
+            } else {
+              router.replace(
+                `/profile/${encodeURIComponent(
+                  record.tag_code
+                )}/edit`
+              );
+            }
+            return;
+          }
+        }
+
         /*
          * Emergency
          */
@@ -203,7 +238,7 @@ export default function ScanPage() {
          */
 
         router.replace(
-          `/profile/${encodeURIComponent(
+          `/scan/${encodeURIComponent(
             record.tag_code
           )}`
         );
