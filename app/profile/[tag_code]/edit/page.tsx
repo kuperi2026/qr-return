@@ -828,6 +828,13 @@ export default function EditProfilePage() {
       return;
     }
 
+    if (!form.owner_name.trim()) {
+      setError(
+        "მფლობელის სახელი და გვარი სავალდებულოა."
+      );
+      return;
+    }
+
     if (
       !form.owner_email.trim()
     ) {
@@ -1036,6 +1043,7 @@ export default function EditProfilePage() {
         show_pet_photo: visibility.show_photo,
 
         ...visibility,
+        show_owner_phone: true,
       };
 
       const { data: updatedProfile, error: updateError } = await supabase
@@ -1565,7 +1573,7 @@ export default function EditProfilePage() {
             />
 
             <Field
-              label="სახელი და გვარი"
+              label="სახელი და გვარი *"
               value={
                 form.owner_name
               }
@@ -1579,7 +1587,7 @@ export default function EditProfilePage() {
               }
             />
 
-            <RequiredVisibilityField
+            <Field
               label="ტელეფონი *"
               type="tel"
               value={
@@ -1591,14 +1599,6 @@ export default function EditProfilePage() {
                 updateField(
                   "owner_phone",
                   value
-                )
-              }
-              visible={
-                visibility.show_owner_phone
-              }
-              onToggle={() =>
-                toggleVisibility(
-                  "show_owner_phone"
                 )
               }
             />

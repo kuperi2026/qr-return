@@ -291,8 +291,6 @@ export default function FinderPage() {
     Boolean(profile.photo_url);
 
   const canCall =
-    profile.phone_enabled !== false &&
-    profile.show_owner_phone !== false &&
     Boolean(profile.owner_phone);
 
   const canEmail =
@@ -568,7 +566,7 @@ export default function FinderPage() {
                 </div>
               )}
 
-              {profile.show_owner_phone !== false && profile.owner_phone && (
+              {profile.owner_phone && (
                 <div className="ownerName">
                   <span>ტელეფონის ნომერი</span>
                   <strong>{profile.owner_phone}</strong>
@@ -668,7 +666,7 @@ export default function FinderPage() {
                   onClick={shareLocation}
                   className="locationButton"
                 >
-                  ჩემი ლოკაციის გაზიარება
+                  📍 ჩემი მიმდინარე ლოკაციის გაზიარება
                 </button>
 
                 {locationStatus && (
