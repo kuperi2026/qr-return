@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
-import PlansMenu from "@/app/components/home/PlansMenu";
 
 type Lang = "ka" | "en";
 
@@ -469,7 +468,7 @@ export default function StorePage() {
         </Link>
 
         <div className="topActions">
-          <a className="plansNavButton" href="#service-plans">
+          <a className="plansNavButton" href="/account/profile#service-plans">
             {ka ? "მომსახურება და პაკეტები" : "Service & plans"}
           </a>
           <Link href="/my-profiles">
@@ -537,6 +536,10 @@ export default function StorePage() {
 
             <div className="heroFeatures">
               <span>
+                ✓ {ka ? "QR პროფილის პირველი 2 თვე უფასოა" : "First 2 months free"}
+              </span>
+
+              <span>
                 ✓ QR RETURN Profile
               </span>
 
@@ -577,10 +580,6 @@ export default function StorePage() {
           </div>
         </div>
       </section>
-
-      <div id="service-plans" className="storePlans">
-        <PlansMenu ka={ka} />
-      </div>
 
       <div className="shell">
         {error && (

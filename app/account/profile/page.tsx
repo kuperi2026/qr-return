@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import PlansMenu from "@/app/components/home/PlansMenu";
 
 type Lang = "ka" | "en";
 
@@ -476,6 +477,10 @@ export default function OwnerProfileEditPage() {
         </form>
       </section>
 
+      <section id="service-plans" className="servicePlansSection">
+        <PlansMenu ka={ka} />
+      </section>
+
       <style jsx global>{`
         * {
           box-sizing: border-box;
@@ -512,6 +517,11 @@ export default function OwnerProfileEditPage() {
               transparent 28%
             ),
             #f7f9fc;
+        }
+
+        .servicePlansSection {
+          margin-top: 34px;
+          scroll-margin-top: 18px;
         }
 
         .statePage {
