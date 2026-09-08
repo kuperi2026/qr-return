@@ -74,7 +74,7 @@ export default function QRLocationShare({
       setSuccess(true);
       setMessage(
         ka
-          ? `✓ ზუსტი ლოკაცია გაიგზავნა (სიზუსტე დაახლოებით ${formatLocationAccuracy(
+          ? `✓ მდებარეობა გაიგზავნა (სიზუსტე დაახლოებით ${formatLocationAccuracy(
               accuracy
             )} მეტრი).`
           : `✓ Precise location shared (about ${formatLocationAccuracy(
@@ -93,7 +93,7 @@ export default function QRLocationShare({
       ) {
         setMessage(
           ka
-            ? "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+            ? "მდებარეობის დადგენა ვერ მოხერხდა. ჩართეთ ზუსტი მდებარეობა და სცადეთ ღია სივრცეში."
             : "GPS accuracy is too low. Move outdoors, enable Precise Location, and try again."
         );
       } else if (

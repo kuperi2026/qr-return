@@ -164,7 +164,7 @@ export default function FinderPage() {
     if (!profile) return;
 
     setLocationStatus(
-      "ზუსტი GPS ლოკაცია მუშავდება..."
+      "მდებარეობა დგინდება..."
     );
 
     try {
@@ -202,7 +202,7 @@ export default function FinderPage() {
       }
 
       setLocationStatus(
-        `ზუსტი ლოკაცია გაიგზავნა — სიზუსტე დაახლოებით ${formatLocationAccuracy(
+        `მდებარეობა გაიგზავნა — სიზუსტე დაახლოებით ${formatLocationAccuracy(
           accuracy
         )} მეტრი.`
       );
@@ -217,7 +217,7 @@ export default function FinderPage() {
         LocationAccuracyError
       ) {
         setLocationStatus(
-          "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
+          "მდებარეობის დადგენა ვერ მოხერხდა. ჩართეთ ზუსტი მდებარეობა და სცადეთ ღია სივრცეში."
         );
       } else if (
         error &&
@@ -658,7 +658,7 @@ export default function FinderPage() {
                 </div>
 
                 <p>
-                  სურვილის შემთხვევაში შეგიძლიათ მფლობელს გაუზიარო შენი მიმდინარე მდებარეობა.
+                  სურვილის შემთხვევაში შეგიძლიათ მფლობელს გაუზიაროთ თქვენი მიმდინარე მდებარეობა.
                 </p>
 
                 <button
@@ -666,7 +666,7 @@ export default function FinderPage() {
                   onClick={shareLocation}
                   className="locationButton"
                 >
-                  📍 ჩემი მიმდინარე ლოკაციის გაზიარება
+                  📍 მიმდინარე მდებარეობის გაზიარება
                 </button>
 
                 {locationStatus && (

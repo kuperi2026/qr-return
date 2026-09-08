@@ -1,5 +1,5 @@
-export const TARGET_LOCATION_ACCURACY_METERS = 25;
-export const MAX_LOCATION_ACCURACY_METERS = 100;
+export const TARGET_LOCATION_ACCURACY_METERS = 60;
+export const MAX_LOCATION_ACCURACY_METERS = 2000;
 
 export class LocationAccuracyError extends Error {
   accuracy: number | null;
@@ -24,7 +24,7 @@ type PreciseLocationOptions = {
 export function getPreciseLocation({
   targetAccuracy = TARGET_LOCATION_ACCURACY_METERS,
   maximumAccuracy = MAX_LOCATION_ACCURACY_METERS,
-  timeout = 20000,
+  timeout = 10000,
 }: PreciseLocationOptions = {}): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (
@@ -61,6 +61,21 @@ export function getPreciseLocation({
       callback();
     };
 
+    const considerPosition = (position: GeolocationPosition) => {
+      const { latitude, longitude, accuracy } = position.coords;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(accuracy)) return;
+      positions.push(position);
+      if (accuracy <= targetAccuracy) finish(() => resolve(position));
+    };
+
+    // A recent network/GPS fix often returns immediately on mobile. Keep
+    // refining it with watchPosition until the requested accuracy is reached.
+    navigator.geolocation.getCurrentPosition(
+      considerPosition,
+      () => undefined,
+      { enableHighAccuracy: false, maximumAge: 60000, timeout: 4000 }
+    );
+
     timerId = window.setTimeout(() => {
       const bestPosition = positions
         .slice()
@@ -95,40 +110,19 @@ export function getPreciseLocation({
     }, timeout);
 
     watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const {
-          latitude,
-          longitude,
-          accuracy,
-        } = position.coords;
-
-        if (
-          !Number.isFinite(latitude) ||
-          !Number.isFinite(longitude) ||
-          !Number.isFinite(accuracy)
-        ) {
-          return;
-        }
-
-        positions.push(position);
-
-        if (accuracy <= targetAccuracy) {
-          finish(() => resolve(position));
-        }
-      },
+      considerPosition,
       (error) => {
         if (
           error.code ===
-            error.PERMISSION_DENIED ||
-          positions.length === 0
+          error.PERMISSION_DENIED
         ) {
           finish(() => reject(error));
         }
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: timeout + 5000,
+        maximumAge: 30000,
+        timeout,
       }
     );
   });
