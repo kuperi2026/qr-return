@@ -21,7 +21,6 @@ type QRRecord = {
   qr_type: string;
   category: string | null;
   status: string;
-  owner_id: string | null;
   item_id: number | null;
   emergency_profile_id: string | null;
 };
@@ -68,6 +67,12 @@ const categoryInfo: Record<
     icon: "🧳",
     ka: "ჩემოდანი",
     en: "Suitcase",
+  },
+
+  parking: {
+    icon: "🚗",
+    ka: "ავტომობილი",
+    en: "Vehicle",
   },
 
   emergency: {
@@ -119,23 +124,11 @@ export default function ScanPage() {
       setLoading(true);
       setError("");
 
-      const { data, error } =
-        await supabase
-          .from("qr_inventory")
-          .select(
-            `
-            id,
-            tag_code,
-            qr_type,
-            category,
-            status,
-            owner_id,
-            item_id,
-            emergency_profile_id
-          `
-          )
-          .eq("tag_code", tag)
-          .maybeSingle();
+      const { data, error } = await supabase
+        .rpc("get_qr_activation", {
+          p_tag_code: tag,
+        })
+        .maybeSingle();
 
       if (error) {
         console.error(error);
@@ -177,7 +170,6 @@ export default function ScanPage() {
           qr_type: "test",
           category: null,
           status: "unclaimed",
-          owner_id: null,
           item_id: null,
           emergency_profile_id: null,
         });
@@ -195,8 +187,7 @@ export default function ScanPage() {
        */
 
       if (
-        record.status === "claimed" ||
-        record.status === "active"
+        record.status === "claimed"
       ) {
         /*
          * Emergency

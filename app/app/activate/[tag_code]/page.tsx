@@ -15,6 +15,7 @@ type QRInventory = {
     | "wallet"
     | "bag"
     | "suitcase"
+    | "parking"
     | "emergency"
     | null;
   status: string;
@@ -45,11 +46,9 @@ export default function ActivateQRPage() {
       }
 
       const { data, error: qrError } = await supabase
-        .from("qr_inventory")
-        .select(
-          "id, tag_code, qr_type, category, status, owner_id"
-        )
-        .eq("tag_code", tagCode)
+        .rpc("get_qr_activation", {
+          p_tag_code: tagCode,
+        })
         .maybeSingle();
 
       if (qrError) {
@@ -132,19 +131,9 @@ export default function ActivateQRPage() {
      */
     const { data: claimedQR, error: claimError } =
       await supabase
-        .from("qr_inventory")
-        .update({
-          owner_id: user.id,
-          status: "claimed",
-          claimed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+        .rpc("claim_qr_inventory", {
+          p_tag_code: tagCode,
         })
-        .eq("id", qr.id)
-        .eq("status", "unclaimed")
-        .is("owner_id", null)
-        .select(
-          "id, tag_code, qr_type, category, status, owner_id"
-        )
         .maybeSingle();
 
     if (claimError) {
@@ -173,14 +162,16 @@ export default function ActivateQRPage() {
       return;
     }
 
+    const claimed = claimedQR as QRInventory;
+
     /*
      * 4. კატეგორიის მიხედვით მომხმარებელი
      * შესაბამის რეგისტრაციის გვერდზე მიდის.
      */
 
     const nextUrl = getRegistrationUrl(
-      claimedQR.category,
-      claimedQR.tag_code
+      claimed.category,
+      claimed.tag_code
     );
 
     router.push(nextUrl);
@@ -397,6 +388,9 @@ function getCategoryName(
     case "suitcase":
       return "ჩემოდანი";
 
+    case "parking":
+      return "ავტომობილი";
+
     case "emergency":
       return "Emergency";
 
@@ -426,6 +420,9 @@ function getCategoryIcon(
 
     case "suitcase":
       return "🧳";
+
+    case "parking":
+      return "🚗";
 
     case "emergency":
       return "🆘";
