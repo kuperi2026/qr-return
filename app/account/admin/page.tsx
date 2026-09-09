@@ -134,7 +134,7 @@ export default function AdminPage() {
         return {owner_id:user.id,item_id:p.id,admin_email:mail,admin_first_name:a.adminFirstName.trim(),admin_last_name:a.adminLastName.trim(),admin_phone:a.adminPhone.trim(),active:a.active,can_view_profiles:true,can_edit_profiles:a.can_edit_profiles,can_manage_lost_mode:a.can_manage_lost_mode,can_manage_visibility:a.can_manage_visibility,can_manage_contacts:a.can_manage_contacts,can_manage_location:a.can_manage_location,can_manage_additional_contact:a.can_manage_additional_contact,can_use_live_chat:a.can_use_live_chat,updated_at:new Date().toISOString()};});
       const {error:saveError}=await supabase.from("profile_co_admins").upsert(payload,{onConflict:"item_id"});
       if(saveError) throw saveError;
-      setSuccess("თანაადმინისტრატორები და უფლებები წარმატებით შეინახა.");await loadAdmin();
+      setSuccess("თანაადმინისტრატორის მონაცემები და უფლებები წარმატებით შეინახა.");await loadAdmin();
     }catch(err){setError(err instanceof Error?err.message:"შენახვა ვერ მოხერხდა.");}
     finally{setSaving(false);}
   }
@@ -372,6 +372,8 @@ export default function AdminPage() {
 
                       {current.selected && (
                         <div className="profileAdminPanel">
+                          <h3 className="profileAdminTitle">{ka ? "თანაადმინისტრატორის მონაცემები და უფლებები" : "Co-administrator details and permissions"}</h3>
+                          <p className="profileEditNote">{ka ? "შეგიძლიათ შეცვალოთ ნებისმიერი მონაცემი ან მინიჭებული უფლება." : "You can edit any detail or assigned permission."}</p>
                           <div className="profileContactGrid">
                             <label>
                               <span>{ka ? "სახელი" : "First name"} *</span>
@@ -454,7 +456,7 @@ export default function AdminPage() {
                   ? ka
                     ? "ინახება..."
                     : "Saving..."
-                  : ka ? "თანაადმინისტრატორების შენახვა" : "Save co-administrators"}
+                  : ka ? "ცვლილებების შენახვა" : "Save changes"}
               </button>
             </div>
           </div>
@@ -1044,6 +1046,8 @@ export default function AdminPage() {
         }
 
         .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
+        .profileAdminTitle{margin:0;color:#173a67;font-size:20px;line-height:1.35}
+        .profileEditNote{margin:6px 0 16px;color:#52677f;font-size:14px;line-height:1.55}
         .profileContactGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
         .profileContactGrid label span{font-size:14px;color:#24486f;font-weight:800}
         .profileContactGrid input{background:#fff;font-size:16px}
