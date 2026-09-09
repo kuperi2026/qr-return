@@ -761,12 +761,25 @@ export default function FinderLiveChatPage() {
         }
 
         .back {
-          display: inline-block;
-          margin-bottom: 15px;
-          color: #ffffff;
+          display: inline-flex;
+          align-items: center;
+          min-height: 46px;
+          margin: 0 0 18px;
+          padding: 0 18px;
+          border: 2px solid rgba(255,255,255,.92);
+          border-radius: 14px;
+          background: #ffffff;
+          color: #073b91;
+          box-shadow: 0 10px 28px rgba(1,20,66,.28);
           text-decoration: none;
-          font-size: 11px;
-          font-weight: 800;
+          font-size: 16px;
+          font-weight: 900;
+          letter-spacing: .01em;
+        }
+
+        .back:hover {
+          background: #eef6ff;
+          transform: translateY(-1px);
         }
 
         .card {
@@ -975,7 +988,7 @@ export default function FinderLiveChatPage() {
         .title small{font-size:12px}.title h1{font-size:24px}.title p{font-size:13px}.live{font-size:12px}.notice{font-size:14px}.sender{font-size:12px}.bubble{font-size:16px}.locationLink{font-size:13px}.bubble time{font-size:11px}.error{font-size:14px}.composer textarea{font-size:16px}.composer button{font-size:15px}
 
         @media (max-width: 600px) {
-          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.back{margin:0 4px 12px;font-size:13px}.card{min-height:calc(100dvh - 126px);display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
+          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.back{width:max-content;min-height:44px;margin:0 4px 14px;padding:0 15px;font-size:15px}.card{min-height:calc(100dvh - 126px);display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
           .chatHead {
             flex-wrap: wrap;
           }
