@@ -29,6 +29,7 @@ export type ProfileCardItem = {
   lastScanLongitude?: number | null;
   lastScanAccuracy?: number | null;
   trialEndsAt?: string | null;
+  serviceStartsAt?: string | null;
   serviceExpiresAt?: string | null;
   serviceStatus?: string | null;
 };
@@ -198,7 +199,10 @@ export default function ProfileCard({
 
         <div className={`serviceBox ${item.serviceStatus || "trial"}`}>
           <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
-          <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
+          {item.serviceStatus === "active" && (
+            <div><span>ჩართვის თარიღი</span><strong>{formatServiceDate(item.serviceStartsAt)}</strong></div>
+          )}
+          <div><span>{item.serviceStatus === "active" ? "მოქმედებს" : "უფასო პერიოდის დასრულება"}</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
           <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა →</Link>
         </div>
 
@@ -635,7 +639,7 @@ export default function ProfileCard({
         }
 
         .lostMode{margin-top:12px;margin-bottom:14px;padding:13px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#183f63;font-size:14px;font-weight:950}.lostModeText strong{margin-top:4px;color:#4f6478;font-size:12px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
-        .serviceBox{margin-top:16px;padding:17px;display:grid;grid-template-columns:1fr 1fr;align-items:center;column-gap:15px;row-gap:14px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{grid-column:1/-1;padding:13px 16px;border-radius:9px;background:#075dcc;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
+        .serviceBox{margin-top:16px;padding:17px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:15px;row-gap:14px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div:first-child{grid-column:1/-1}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.45}.serviceBox>a{grid-column:1/-1;padding:13px 16px;border-radius:9px;background:#075dcc;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr}.serviceBox>div:first-child,.serviceBox>a{grid-column:1}.serviceBox>a{text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
 
         .stat {
           min-width: 0;
@@ -967,6 +971,7 @@ function formatScanDate(
   }
 
   return new Intl.DateTimeFormat("ka-GE", {
+    timeZone: "Asia/Tbilisi",
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -986,6 +991,7 @@ function formatServiceDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("ka-GE", {
+    timeZone: "Asia/Tbilisi",
     day: "numeric",
     month: "long",
     year: "numeric",

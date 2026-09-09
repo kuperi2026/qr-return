@@ -42,9 +42,12 @@ type ItemRow = {
   lost: boolean | null;
   lost_at: string | null;
   trial_ends_at: string | null;
+  service_starts_at: string | null;
   service_expires_at: string | null;
   service_status: string | null;
 };
+
+const PROFILES_PER_PAGE = 2;
 
 function createSupabaseClient() {
   const url =
@@ -115,6 +118,8 @@ export default function MyProfilesPage() {
     useState("all");
 
   const [createdMessage, setCreatedMessage] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const created = new URLSearchParams(window.location.search).get("created");
@@ -191,6 +196,7 @@ export default function MyProfilesPage() {
                 lost,
                 lost_at,
                 trial_ends_at,
+                service_starts_at,
                 service_expires_at,
                 service_status
               `
@@ -378,6 +384,7 @@ export default function MyProfilesPage() {
             .last_scanned_at,
 
         trialEndsAt: profile.trial_ends_at,
+        serviceStartsAt: profile.service_starts_at,
         serviceExpiresAt: profile.service_expires_at,
         serviceStatus: profile.service_status,
 
@@ -391,6 +398,21 @@ export default function MyProfilesPage() {
           profile.last_scan_accuracy,
       })
     );
+
+  const totalPages = Math.ceil(cards.length / PROFILES_PER_PAGE);
+
+  const visibleCards = cards.slice(
+    (currentPage - 1) * PROFILES_PER_PAGE,
+    currentPage * PROFILES_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, Math.max(totalPages, 1)));
+  }, [totalPages]);
 
   if (
     loading
@@ -744,7 +766,7 @@ export default function MyProfilesPage() {
           cards.length >
             0 && (
             <section className="profileGrid">
-              {cards.map(
+              {visibleCards.map(
                 (
                   profile
                 ) => (
@@ -762,6 +784,41 @@ export default function MyProfilesPage() {
               )}
             </section>
           )}
+
+        {!errorMessage && totalPages > 1 && (
+          <nav className="pagination" aria-label="პროფილების გვერდები">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              aria-label="წინა გვერდი"
+            >
+              ‹
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                className={page === currentPage ? "active" : ""}
+                onClick={() => setCurrentPage(page)}
+                aria-current={page === currentPage ? "page" : undefined}
+                aria-label={`${page} გვერდი`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="შემდეგი გვერდი"
+            >
+              ›
+            </button>
+          </nav>
+        )}
       </main>
 
       <style jsx global>{`
@@ -953,6 +1010,7 @@ export default function MyProfilesPage() {
         .hero,
         .toolbar,
         .profileGrid,
+        .pagination,
         .errorBox,
         .emptyState,
         .noResults {
@@ -1250,6 +1308,45 @@ export default function MyProfilesPage() {
 
           gap:
             20px;
+        }
+
+        .pagination {
+          margin-top: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .pagination button {
+          width: 42px;
+          height: 42px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(255, 255, 255, 0.42);
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.14);
+          color: #ffffff;
+          font: 900 15px/1 inherit;
+          cursor: pointer;
+          transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+          transform: translateY(-1px);
+          background: rgba(255, 255, 255, 0.24);
+        }
+
+        .pagination button.active {
+          border-color: #ffffff;
+          background: #ffffff;
+          color: #0a4c8a;
+        }
+
+        .pagination button:disabled {
+          opacity: 0.38;
+          cursor: not-allowed;
         }
 
         .emptyState,
