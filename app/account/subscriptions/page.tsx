@@ -8,6 +8,17 @@ import { supabase } from "@/lib/supabase";
 type Period = "1" | "3" | "6" | "12";
 type Product = { type: string; icon: string; name: string; prices: Record<Period, number> };
 type Profile = { id: number; tag_code: string; item_name: string | null; item_type: string | null; pet_type: string | null; created_at?: string | null };
+type ServiceRequest = {
+  id: string;
+  item_id: number;
+  period_months: number;
+  final_amount: number;
+  status: string;
+  requested_at: string;
+  confirmed_at: string | null;
+  service_starts_at: string | null;
+  service_expires_at: string | null;
+};
 
 const PERIODS: { value: Period; label: string }[] = [
   { value: "1", label: "1 თვე" }, { value: "3", label: "3 თვე" },
@@ -38,6 +49,7 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pendingItems, setPendingItems] = useState<number[]>([]);
+  const [history, setHistory] = useState<ServiceRequest[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -49,8 +61,14 @@ export default function SubscriptionsPage() {
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
     const initialProfile = rows.find((profile) => profile.id === requestedProfile) || rows[0];
     setProfiles(rows); setSelectedProfiles(initialProfile?.id ? [initialProfile.id] : []); setLoading(false);
-    const { data: requests } = await supabase.from("service_activation_requests").select("item_id").eq("owner_id", user.id).eq("status", "pending");
-    setPendingItems((requests || []).map((request) => Number(request.item_id)));
+    const { data: requests } = await supabase
+      .from("service_activation_requests")
+      .select("id,item_id,period_months,final_amount,status,requested_at,confirmed_at,service_starts_at,service_expires_at")
+      .eq("owner_id", user.id)
+      .order("requested_at", { ascending: false });
+    const requestRows = (requests || []) as ServiceRequest[];
+    setHistory(requestRows);
+    setPendingItems(requestRows.filter((request) => request.status === "pending").map((request) => Number(request.item_id)));
   })(); }, [router]);
 
   const selectedItems = useMemo(() => profiles.filter((item) => selectedProfiles.includes(item.id)), [profiles, selectedProfiles]);
@@ -119,10 +137,46 @@ export default function SubscriptionsPage() {
         </aside>
       </div>
 
+      <section className="purchaseHistory" id="history">
+        <div className="historyHeading">
+          <div>
+            <small>მომსახურება და გადახდები</small>
+            <h2>შეძენებისა და პაკეტების ისტორია</h2>
+          </div>
+          <span>{history.length} ჩანაწერი</span>
+        </div>
+
+        {history.length === 0 ? (
+          <div className="historyEmpty">შეძენის ისტორია ჯერ არ გაქვთ.</div>
+        ) : (
+          <div className="historyList">
+            {history.map((request) => {
+              const profile = profiles.find((item) => item.id === Number(request.item_id));
+              return (
+                <article key={request.id}>
+                  <div>
+                    <strong>{profile?.item_name || profile?.tag_code || "QR პროფილი"}</strong>
+                    <span>{request.period_months === 12 ? "1 წელი" : `${request.period_months} თვე`} · {formatHistoryDate(request.requested_at)}</span>
+                  </div>
+                  <div className="historyAmount">{Number(request.final_amount)} ₾</div>
+                  <div className={`historyStatus ${request.status}`}>{historyStatusLabel(request.status)}</div>
+                  <div className="historyDates">
+                    <span>დაწყება: {request.service_starts_at ? formatHistoryDate(request.service_starts_at) : "—"}</span>
+                    <span>დასრულება: {request.service_expires_at ? formatHistoryDate(request.service_expires_at) : "—"}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <section className="prices"><div><small>სრული ტარიფები</small><h2>ყველა პროდუქტის ფასი</h2><p className="discountNote">3–4 პროდუქტი −5% · 5–6 პროდუქტი −10% · 7 პროდუქტი −12% · რვავე პროდუქტი −15%</p></div><div className="tableWrap"><table><thead><tr><th>პროდუქტი</th>{PERIODS.map((p) => <th key={p.value}>{p.label}</th>)}</tr></thead><tbody>{PRODUCTS.map((item) => <tr key={item.type}><td><span>{item.icon}</span><b>{item.name}</b></td>{PERIODS.map((p) => <td key={p.value}>{item.prices[p.value]} ₾</td>)}</tr>)}</tbody></table></div></section>
     </section>
 
     <style jsx>{`
+      .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:9px;display:flex;gap:18px;border-top:1px solid #e3eaf2}.historyDates span{margin:0!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{flex-direction:column;gap:5px}}
+
       .stepNumber{width:27px;height:27px;margin-right:5px;display:inline-grid;place-items:center;border-radius:8px;background:#eaf3ff;color:#0966db;font-size:13px}.requestSuccess,.requestError{margin-top:14px;padding:11px 12px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.45}.requestSuccess{background:#e8f8f0;color:#087443}.requestError{background:#fff0f0;color:#b42318}
       .chosen{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:#f6f9fd}.chosen>div{padding:7px 0;display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e3eaf2;font-size:13px}.chosen>div:last-child{border-bottom:0}.discount b{color:#087443}.saving{margin-top:12px;padding:10px 12px;border-radius:11px;background:#e8f8f0;color:#087443;font-size:13px}.discountNote{margin:-10px 0 18px;color:#087443;font-size:14px;font-weight:800}
       :global(*){box-sizing:border-box}:global(body){margin:0;background:#063b72;color:#13283f}.subscriptionsPage{min-height:100vh;padding-bottom:52px;background:radial-gradient(circle at 16% 10%,rgba(75,174,249,.42),transparent 29%),linear-gradient(150deg,#0c5aa0 0%,#073f78 48%,#062f5d 100%);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}.topbar{width:calc(100% - 32px);max-width:1120px;min-height:76px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.22)}.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}.brand>span{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:#fff;color:#1266e9;font-weight:950}.brand strong,.brand small{display:block}.brand strong{font-size:17px}.brand small{margin-top:2px;color:#c6e6ff;font-size:12px}.back{padding:10px 13px;border:1px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.1);color:#fff;text-decoration:none;font-size:13px;font-weight:850}.shell{width:calc(100% - 28px);max-width:1120px;margin:30px auto}.intro{display:flex;align-items:center;justify-content:space-between;gap:24px;color:#fff}.intro small,.prices>div>small{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.intro h1{max-width:700px;margin:8px 0 9px;color:#fff;font-size:36px;line-height:1.16}.intro p{max-width:760px;margin:0;color:#d7ecff;font-size:16px;line-height:1.55}.free{min-width:185px;padding:17px 20px;border:1px solid rgba(255,255,255,.3);border-radius:17px;background:rgba(255,255,255,.13);color:#fff;text-align:center;box-shadow:inset 0 1px rgba(255,255,255,.15)}.free b,.free span{display:block}.free b{font-size:30px}.free span{margin-top:3px;color:#d8edff;font-size:13px}.layout{margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:16px}.panel,.summary,.prices{border:1px solid rgba(220,231,243,.95);border-radius:20px;background:#fff;box-shadow:0 18px 45px rgba(0,23,52,.2)}.panel{padding:24px}.panel h2{display:flex;align-items:center;margin:0 0 15px;color:#17324d;font-size:19px}.panel h2:not(:first-child){margin-top:25px}.profiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.profile{min-height:72px;padding:10px 12px;display:flex;align-items:center;gap:11px;border:1px solid #dbe5ef;border-radius:13px;background:#f8fbff;color:#13283f;text-align:left;cursor:pointer;transition:.18s ease}.profile:hover{border-color:#9fc3ed;transform:translateY(-1px)}.profile.selected{border:2px solid #1266e9;background:#edf5ff;box-shadow:0 5px 16px rgba(18,102,233,.12)}.profile .icon{width:43px;height:43px;display:grid;place-items:center;border-radius:11px;background:#fff;font-size:23px}.profile span:nth-child(2){min-width:0;flex:1}.profile b,.profile small{display:block}.profile b{font-size:15px}.profile small{margin-top:4px;overflow:hidden;color:#6a7d90;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.profile i{width:23px;height:23px;display:grid;place-items:center;border-radius:50%;background:#1266e9;color:#fff;font-style:normal}.periods{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.period{position:relative;min-height:94px;padding:14px 8px;border:1px solid #dbe5ef;border-radius:13px;background:#fff;color:#13283f;cursor:pointer}.period.active{border:2px solid #1266e9;background:#edf5ff;box-shadow:0 5px 16px rgba(18,102,233,.1)}.period b,.period span{display:block}.period b{font-size:14px}.period span{margin-top:8px;color:#1266e9;font-size:23px;font-weight:950}.period em{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);padding:3px 7px;border-radius:10px;background:#0b9b62;color:#fff;font-size:9px;font-style:normal;white-space:nowrap}.summary{align-self:start;padding:24px;position:sticky;top:18px}.summary>small{color:#1266e9;font-size:12px;font-weight:900}.summary h2{margin:8px 0 20px;color:#17324d;font-size:23px}.line{padding:12px 0;display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid #e5ebf2;color:#526b82;font-size:13px}.line b{color:#1b3852}.total{margin-top:16px;padding:16px;border-radius:13px;background:#eaf3ff}.total span,.total strong{display:block}.total span{color:#56718a;font-size:12px}.total strong{margin-top:5px;color:#0647c8;font-size:31px}.summary button{width:100%;min-height:50px;margin-top:14px;border:0;border-radius:11px;background:#1266e9;color:#fff;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 8px 18px rgba(18,102,233,.2)}.summary button:disabled{opacity:.45}.summary p{text-align:center;color:#718397;font-size:11px;line-height:1.4}.prices{margin-top:16px;padding:24px}.prices h2{margin:5px 0 18px;color:#17324d;font-size:25px}.tableWrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:13px;border-bottom:1px solid #e5ebf2;text-align:center;font-size:14px}th{background:#f2f7fd;color:#536a80;font-size:12px}th:first-child,td:first-child{text-align:left}td:first-child span{margin-right:9px;font-size:20px}tbody tr:hover{background:#f8fbff}.state{padding:25px;border:1px dashed #cbd9e8;border-radius:14px;text-align:center;color:#66798d}.state a{color:#1266e9;font-weight:800}
@@ -132,4 +186,22 @@ export default function SubscriptionsPage() {
       @media(max-width:760px){.period b{font-size:16px}.period span{font-size:27px}.line{font-size:14px}.line b{font-size:15px}.total strong{font-size:36px}tbody td:not(:first-child){font-size:16px}}
     `}</style>
   </main>;
+}
+
+
+function formatHistoryDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("ka-GE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function historyStatusLabel(status: string) {
+  if (status === "confirmed") return "აქტიური";
+  if (status === "rejected") return "უარყოფილი";
+  if (status === "cancelled") return "გაუქმებული";
+  return "დადასტურების მოლოდინში";
 }
