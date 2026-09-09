@@ -815,9 +815,10 @@ export default function SignupPage() {
         .cardHeader p {
           margin: 5px 0 0;
 
-          color: #7a8998;
+          color: #4f6478;
 
-          font-size: 12px;
+          font-size: 15px;
+          font-weight: 600;
           line-height: 1.5;
         }
 
@@ -932,10 +933,11 @@ export default function SignupPage() {
           margin:
             5px 0 0 2px;
 
-          color: #8593a0;
+          color: #4f6478;
 
-          font-size: 10px;
-          line-height: 1.35;
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1.4;
         }
 
         /* PASSWORD */
