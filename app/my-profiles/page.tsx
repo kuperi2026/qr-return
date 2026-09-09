@@ -34,6 +34,9 @@ type ItemRow = {
   photo: string | null;
   scan_count: number | null;
   last_scanned_at: string | null;
+  last_scan_latitude: number | null;
+  last_scan_longitude: number | null;
+  last_scan_accuracy: number | null;
 
   active: boolean | null;
   lost: boolean | null;
@@ -181,6 +184,9 @@ export default function MyProfilesPage() {
                 photo,
                 scan_count,
                 last_scanned_at,
+                last_scan_latitude,
+                last_scan_longitude,
+                last_scan_accuracy,
                 active,
                 lost,
                 lost_at,
@@ -376,13 +382,13 @@ export default function MyProfilesPage() {
         serviceStatus: profile.service_status,
 
         lastScanLatitude:
-          null,
+          profile.last_scan_latitude,
 
         lastScanLongitude:
-          null,
+          profile.last_scan_longitude,
 
         lastScanAccuracy:
-          null,
+          profile.last_scan_accuracy,
       })
     );
 
