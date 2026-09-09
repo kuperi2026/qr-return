@@ -486,6 +486,27 @@ export default function MyProfilesPage() {
     );
   }
 
+  async function handleDelete(item: ProfileCardItem) {
+    const supabase = createSupabaseClient();
+    if (!supabase) throw new Error("სერვერთან კავშირი ვერ მოიძებნა.");
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("გთხოვთ, ხელახლა შეხვიდეთ ანგარიშზე.");
+
+    const { data, error } = await supabase
+      .from("item")
+      .delete()
+      .eq("id", item.id)
+      .eq("owner_id", user.id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw new Error(`პროფილის წაშლა ვერ მოხერხდა: ${error.message}`);
+    if (!data) throw new Error("პროფილის წაშლა ვერ დადასტურდა.");
+
+    setProfiles((current) => current.filter((profile) => profile.id !== item.id));
+  }
+
   async function handleLostChange(item: ProfileCardItem, nextLost: boolean) {
     const supabase = createSupabaseClient();
     if (!supabase) throw new Error("სერვერთან კავშირი ვერ მოიძებნა.");
@@ -745,6 +766,7 @@ export default function MyProfilesPage() {
                       profile
                     }
                     onLostChange={handleLostChange}
+                    onDelete={handleDelete}
                   />
                 )
               )}
