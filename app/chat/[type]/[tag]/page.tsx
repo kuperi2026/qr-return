@@ -857,8 +857,9 @@ export default function FinderLiveChatPage() {
 
         .mine .bubble {
           border: 0;
-          background: #1465e8;
+          background: linear-gradient(135deg,#1769e8 0%,#0747c9 100%);
           color: white;
+          box-shadow: 0 7px 18px rgba(7,71,201,.2);
         }
 
         .locationLink {
