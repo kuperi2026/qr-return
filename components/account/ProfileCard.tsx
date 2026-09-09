@@ -3,6 +3,7 @@
 import Link from "next/link";
 import QRCode from "qrcode";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type ProfileCardItem = {
   id: string;
@@ -32,6 +33,15 @@ export type ProfileCardItem = {
   serviceStatus?: string | null;
 };
 
+type ScanHistoryEvent = {
+  id: number;
+  created_at: string;
+  latitude: number | null;
+  longitude: number | null;
+  accuracy: number | null;
+  location_shared: boolean | null;
+};
+
 type Props = {
   item: ProfileCardItem;
   onLostChange?: (item: ProfileCardItem, nextLost: boolean) => Promise<void>;
@@ -47,6 +57,11 @@ export default function ProfileCard({
   const [lostError, setLostError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [scanHistory, setScanHistory] = useState<ScanHistoryEvent[]>([]);
   const type = getType(item);
 
   const label =
@@ -62,6 +77,30 @@ export default function ProfileCard({
     hasLocation
       ? `https://www.google.com/maps?q=${item.lastScanLatitude},${item.lastScanLongitude}`
       : "";
+
+  async function toggleScanHistory() {
+    const nextOpen = !historyOpen;
+    setHistoryOpen(nextOpen);
+    if (!nextOpen || historyLoaded || historyLoading) return;
+
+    setHistoryLoading(true);
+    setHistoryError("");
+
+    const { data, error } = await supabase
+      .from("scan_events")
+      .select("id,created_at,latitude,longitude,accuracy,location_shared")
+      .eq("item_id", item.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      setHistoryError("სკანირების ისტორიის ჩატვირთვა ვერ მოხერხდა.");
+    } else {
+      setScanHistory((data || []) as ScanHistoryEvent[]);
+      setHistoryLoaded(true);
+    }
+    setHistoryLoading(false);
+  }
 
   async function downloadProfileQR() {
     if (!item.tagCode) return;
@@ -161,6 +200,7 @@ export default function ProfileCard({
           <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
           <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
           <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა →</Link>
+          <Link href="/account/subscriptions#history">შეძენების ისტორია</Link>
         </div>
 
         <div className="stats">
@@ -187,6 +227,36 @@ export default function ProfileCard({
               )}
             </strong>
           </div>
+        </div>
+
+        <div className="scanHistory">
+          <button type="button" onClick={toggleScanHistory}>
+            <span>სკანირების ისტორია</span>
+            <strong>{historyOpen ? "⌃" : "⌄"}</strong>
+          </button>
+
+          {historyOpen && (
+            <div className="historyContent">
+              {historyLoading && <p>ისტორია იტვირთება...</p>}
+              {historyError && <p className="historyError">{historyError}</p>}
+              {!historyLoading && !historyError && scanHistory.length <= 1 && (
+                <p>წინა სკანირებები ჯერ არ არის.</p>
+              )}
+              {!historyLoading && !historyError && scanHistory.slice(1).map((event) => (
+                <div className="historyRow" key={event.id}>
+                  <div>
+                    <strong>{formatScanDate(event.created_at)}</strong>
+                    <span>{event.location_shared ? "მდებარეობა გაზიარებულია" : "მდებარეობა არ გაზიარებულა"}</span>
+                  </div>
+                  {event.latitude !== null && event.longitude !== null && (
+                    <a href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`} target="_blank" rel="noreferrer">
+                      რუკაზე ნახვა ↗
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {hasLocation && (
@@ -687,6 +757,8 @@ export default function ProfileCard({
           font-weight: 900;
         }
 
+        .scanHistory{margin-top:10px;border:1px solid #d7e3ef;border-radius:10px;background:#fff}.scanHistory>button{width:100%;min-height:44px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;border:0;border-radius:10px;background:#f3f8ff;color:#173f64;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}.scanHistory>button strong{color:#075dcc;font-size:18px}.historyContent{padding:4px 12px 10px}.historyContent>p{margin:9px 0;color:#60758a;font-size:13px}.historyError{color:#a51d26!important}.historyRow{padding:10px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e5ebf2}.historyRow strong,.historyRow span{display:block}.historyRow strong{color:#263f59;font-size:13px}.historyRow span{margin-top:3px;color:#60758a;font-size:12px}.historyRow a{color:#075dcc;font-size:12px;font-weight:900;text-decoration:none;white-space:nowrap}
+
         .actions {
           margin-top: 12px;
 
@@ -895,7 +967,13 @@ function formatScanDate(
     return value;
   }
 
-  return date.toLocaleString();
+  return new Intl.DateTimeFormat("ka-GE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function serviceLabel(item: ProfileCardItem) {
