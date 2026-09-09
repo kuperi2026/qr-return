@@ -5,6 +5,7 @@ type ProfileFor = "self" | "other" | "";
 type Props = {
   tagCode: string;
   setTagCode: (value: string) => void;
+  tagPrefilled: boolean;
 
   profileFor: ProfileFor;
   setProfileFor: (value: ProfileFor) => void;
@@ -16,6 +17,7 @@ type Props = {
 export default function EmergencyStep1({
   tagCode,
   setTagCode,
+  tagPrefilled,
   profileFor,
   setProfileFor,
   onBack,
@@ -58,6 +60,7 @@ export default function EmergencyStep1({
             }
             placeholder="მაგ. EMR-000123"
             autoComplete="off"
+            readOnly={tagPrefilled}
           />
         </div>
 
@@ -65,12 +68,15 @@ export default function EmergencyStep1({
           <span>REQUIRED</span>
 
           <strong>
-            თითოეულ სამაჯურს საკუთარი QR კოდი აქვს
+            {tagPrefilled
+              ? "QR კოდი ავტომატურად ჩაიწერა"
+              : "თითოეულ სამაჯურს საკუთარი QR კოდი აქვს"}
           </strong>
 
           <p>
-            კოდი დაფიქსირდება კონკრეტულ Emergency
-            პროფილზე და სხვა კატეგორიად აღარ შეიცვლება.
+            {tagPrefilled
+              ? "კოდის ხელით შეყვანა აღარ გჭირდებათ."
+              : "კოდი დაფიქსირდება კონკრეტულ Emergency პროფილზე და სხვა კატეგორიად აღარ შეიცვლება."}
           </p>
         </div>
       </div>
