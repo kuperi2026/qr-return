@@ -550,18 +550,8 @@ export default function MyProfilesPage() {
             href="/"
             className="brand"
           >
-            <span className="brandMark">
-              QR
-            </span>
-
-            <span className="brandText">
-              <strong>
-                QR RETURN
-              </strong>
-
-              <small>
-                დაცული QR კავშირი
-              </small>
+            <span className="brandStatement">
+              დაცული QR კავშირი
             </span>
           </Link>
 
@@ -600,14 +590,8 @@ export default function MyProfilesPage() {
               მფლობელის სივრცე
             </span>
 
-            <h1>
-              ჩემი QR პროფილები
-            </h1>
-
             <p>
-              მართეთ ყველა თქვენი
-              QR RETURN პროფილი ერთ
-              სივრცეში.
+              მართეთ თქვენს მიერ შექმნილი პროფილები ერთ სივრცეში.
             </p>
           </div>
 
@@ -857,67 +841,11 @@ export default function MyProfilesPage() {
             none;
         }
 
-        .brandMark {
-          width:
-            40px;
-
-          height:
-            40px;
-
-          display:
-            grid;
-
-          place-items:
-            center;
-
-          border-radius:
-            10px;
-
-          background:
-            #1266e9;
-
-          color:
-            #ffffff;
-
-          font-size:
-            11px;
-
-          font-weight:
-            950;
-        }
-
-        .brandText strong,
-        .brandText small {
-          display:
-            block;
-        }
-
-        .brandText strong {
-          color:
-            #172b43;
-
-          font-size:
-            15px;
-
-          font-weight:
-            950;
-        }
-
-        .brandText small {
-          margin-top:
-            2px;
-
-          color:
-            #8a98a7;
-
-          font-size:
-            7px;
-
-          font-weight:
-            850;
-
-          letter-spacing:
-            1px;
+        .brandStatement {
+          color: #ffffff;
+          font-size: 17px;
+          font-weight: 900;
+          line-height: 1.3;
         }
 
         .headerRight {
@@ -931,27 +859,27 @@ export default function MyProfilesPage() {
             8px;
         }
 
-        .plansButton{min-height:38px;padding:0 13px;display:inline-flex;align-items:center;border:1px solid #b8d2f4;border-radius:9px;background:#eaf3ff;color:#0647c8;text-decoration:none;font-size:11px;font-weight:900}
+        .plansButton{min-height:42px;padding:0 15px;display:inline-flex;align-items:center;border:1px solid #b8d2f4;border-radius:10px;background:#eaf3ff;color:#0647c8;text-decoration:none;font-size:14px;font-weight:900}
         .createdNotice{width:calc(100% - 48px);max-width:1120px;margin:0 auto 16px;padding:14px 16px;border:1px solid #9fd8bc;border-radius:12px;background:#eaf8f1;color:#087443;font-size:14px;font-weight:850}
 
         .email {
-          max-width:
-            190px;
+          max-width: 230px;
+          min-height: 42px;
+          padding: 0 13px;
 
-          overflow:
-            hidden;
+          display: inline-flex;
+          align-items: center;
+          overflow: hidden;
 
-          color:
-            #8391a0;
+          border: 1px solid rgba(255,255,255,.28);
+          border-radius: 10px;
+          background: rgba(255,255,255,.12);
+          color: #ffffff;
 
-          font-size:
-            9px;
-
-          text-overflow:
-            ellipsis;
-
-          white-space:
-            nowrap;
+          font-size: 13px;
+          font-weight: 700;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .logout {
@@ -978,7 +906,7 @@ export default function MyProfilesPage() {
             inherit;
 
           font-size:
-            9px;
+            13px;
 
           font-weight:
             850;
@@ -1013,7 +941,7 @@ export default function MyProfilesPage() {
             #ffffff;
 
           font-size:
-            9px;
+            13px;
 
           font-weight:
             900;
@@ -1063,10 +991,10 @@ export default function MyProfilesPage() {
 
         .eyebrow {
           color:
-            #1266e9;
+            #b9ddfc;
 
           font-size:
-            8px;
+            13px;
 
           font-weight:
             900;
@@ -1075,29 +1003,16 @@ export default function MyProfilesPage() {
             1.4px;
         }
 
-        .hero h1 {
+         .hero p {
           margin:
-            7px 0 0;
+            10px 0 0;
 
           color:
-            #172b43;
+            #ffffff;
 
           font-size:
-            32px;
-
-          font-weight:
-            950;
-        }
-
-        .hero p {
-          margin:
-            7px 0 0;
-
-          color:
-            #7b8b9c;
-
-          font-size:
-            11px;
+            17px;
+          font-weight: 700;
 
           line-height:
             1.5;
@@ -1274,7 +1189,8 @@ export default function MyProfilesPage() {
             inherit;
 
           font-size:
-            11px;
+            15px;
+          font-weight: 600;
         }
 
         .toolbar select {
@@ -1304,10 +1220,10 @@ export default function MyProfilesPage() {
             inherit;
 
           font-size:
-            10px;
+            14px;
 
           font-weight:
-            750;
+            800;
 
           outline:
             none;
@@ -1491,7 +1407,7 @@ export default function MyProfilesPage() {
             10px;
         }
 
-        .brandText strong,.hero h1{color:#fff}.brandText small,.email,.hero p{color:rgba(255,255,255,.74)}.eyebrow{color:#b9ddfc;font-size:11px}.hero p{font-size:14px}.header{border-bottom-color:rgba(255,255,255,.22)}.logout{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff}.totalBox span{font-size:10px}.toolbar{border-radius:14px}.profileGrid{gap:18px}
+        .brandStatement,.email,.hero p{color:#fff}.eyebrow{color:#b9ddfc;font-size:11px}.hero p{font-size:14px}.header{border-bottom-color:rgba(255,255,255,.22)}.logout{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff}.totalBox span{font-size:10px}.toolbar{border-radius:14px}.profileGrid{gap:18px}
 
         @media (
           max-width:
@@ -1532,7 +1448,6 @@ export default function MyProfilesPage() {
               66px;
           }
 
-          .brandText small,
           .email,
           .logout {
             display:
