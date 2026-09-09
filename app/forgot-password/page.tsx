@@ -106,10 +106,6 @@ export default function ForgotPasswordPage() {
           <div className="card">
             {!sent ? (
               <>
-                <span className="eyebrow">
-                  PASSWORD RECOVERY
-                </span>
-
                 <h1>
                   პაროლის აღდგენა
                 </h1>
@@ -485,7 +481,7 @@ export default function ForgotPasswordPage() {
 
           color: #64788c;
 
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 750;
 
           text-align: center;
