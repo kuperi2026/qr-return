@@ -414,15 +414,6 @@ export default function OwnerChatInboxPage() {
   return (
     <main className="page">
       <header className="header">
-        <a href="/account" className="brand">
-          <div className="logo">QR</div>
-
-          <div>
-            <strong>QR RETURN</strong>
-            <small>OWNER INBOX</small>
-          </div>
-        </a>
-
         <div className="headerRight">
           <a href="/account" className="accountButton">
             ← {ka ? "ჩემი ანგარიში" : "My Account"}
@@ -449,6 +440,12 @@ export default function OwnerChatInboxPage() {
       </header>
 
       <section className="container">
+        <div className="operatorCard">
+          <span className="operatorAvatar">👩🏻‍💻</span>
+          <span className="operatorCopy"><strong>24/7</strong><span>ოპერატორი</span></span>
+          <span className="onlineDot">● ონლაინ</span>
+        </div>
+
         <div className="pageTitle">
           <div>
             <span>QR RETURN LIVE CHAT</span>
@@ -786,7 +783,11 @@ function Styles() {
 
       body {
         font-family: Inter, Arial, sans-serif;
-        background: #f7f9fc;
+        background:
+          radial-gradient(circle at 12% 10%, rgba(104,190,255,.58) 0, rgba(104,190,255,0) 30%),
+          radial-gradient(circle at 88% 22%, rgba(48,112,238,.62) 0, rgba(48,112,238,0) 34%),
+          linear-gradient(145deg,#07388e 0%,#0b64d8 48%,#052a70 100%);
+        background-attachment: fixed;
         color: #101828;
       }
 
@@ -824,8 +825,8 @@ function Styles() {
         margin: auto;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
+        justify-content: flex-end;
+        border-bottom: 1px solid rgba(255,255,255,.3);
       }
 
       .brand {
@@ -876,7 +877,10 @@ function Styles() {
       }
 
       .accountButton {
-        color: #667085;
+        padding: 9px 12px;
+        border-radius: 10px;
+        background: white;
+        color: #0754bd;
         font-size: 10px;
         font-weight: 800;
         text-decoration: none;
@@ -905,6 +909,10 @@ function Styles() {
         color: #1465e8;
       }
 
+      .operatorCard{margin:0 0 16px;padding:12px 16px;display:flex;align-items:center;gap:13px;max-width:420px;border:1px solid rgba(255,255,255,.78);border-radius:18px;background:linear-gradient(135deg,#fff 0%,#eaf5ff 100%);box-shadow:0 14px 34px rgba(0,24,74,.25)}
+      .operatorAvatar{width:58px;height:58px;display:grid;place-items:center;flex:0 0 58px;border-radius:50%;background:linear-gradient(145deg,#dceeff,#fff);font-size:34px}
+      .operatorCopy{flex:1;color:#12315f}.operatorCopy strong{display:block;color:#0754bd;font-size:25px;line-height:1}.operatorCopy span{display:block;margin-top:5px;font-size:14px;font-weight:850}.onlineDot{color:#078a52;font-size:12px;font-weight:900}
+
       .container {
         width: calc(100% - 30px);
         max-width: 1180px;
@@ -921,7 +929,7 @@ function Styles() {
       }
 
       .pageTitle span {
-        color: #7655f7;
+        color: #c8dcff;
         font-size: 9px;
         font-weight: 900;
         letter-spacing: 1.4px;
@@ -929,12 +937,13 @@ function Styles() {
 
       .pageTitle h1 {
         margin: 5px 0;
+        color: white;
         font-size: 32px;
       }
 
       .pageTitle p {
         margin: 0;
-        color: #667085;
+        color: rgba(255,255,255,.78);
         font-size: 11px;
       }
 
@@ -960,7 +969,7 @@ function Styles() {
       }
 
       .inbox {
-        min-height: 650px;
+        min-height: 560px;
         display: grid;
         grid-template-columns: 350px 1fr;
         overflow: hidden;
@@ -1194,7 +1203,7 @@ function Styles() {
       }
 
       .messages {
-        height: 455px;
+        height: 390px;
         padding: 18px;
         overflow-y: auto;
         background: #fafbfc;
