@@ -331,16 +331,7 @@ export default function AdminPage() {
                             <strong>{ka ? "დაამატეთ ელ-ფოსტა, რომელსაც ამ პროფილის მართვის უფლებას ანიჭებთ." : "Add the email authorized to manage this profile."}</strong>
                             <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
                           </label>
-                          <button type="button" className="applyAllButton" onClick={() => {
-                            const sharedEmail=current.adminEmail;
-                            setProfileAccess(existing => {
-                              const next={...existing};
-                              profiles.forEach(item => next[item.id]={...(next[item.id]??emptyProfileAccess()),selected:true,adminEmail:sharedEmail});
-                              return next;
-                            });
-                          }}>{ka ? "ეს ელ-ფოსტა ყველა პროფილზე გამოიყენე" : "Use this email for every profile"}</button>
                           <div className="profilePermissionGrid">
-                          <MiniPermission label={ka ? "ნახვა" : "View"} value={current.can_view_profiles} locked onChange={() => {}} />
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
                           <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
                           <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
@@ -966,7 +957,6 @@ export default function AdminPage() {
         .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
         .profileEmailField strong{display:block;margin-bottom:10px;color:#0a58ca;font-size:15px;line-height:1.5}
         .profileEmailField input{background:#fff;font-size:16px}
-        .applyAllButton{margin-top:10px;padding:9px 12px;border:1px solid #a9c9f4;border-radius:9px;background:#eaf3ff;color:#0647c8;font-size:13px;font-weight:850;cursor:pointer}
         .profilePermissionGrid {
           padding: 14px;
           display: grid;
