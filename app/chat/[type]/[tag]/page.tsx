@@ -656,8 +656,11 @@ export default function FinderLiveChatPage() {
         body {
           font-family: Arial, sans-serif;
           background:
-            radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),
-            linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
+            radial-gradient(circle at 12% 10%, rgba(104,190,255,.58) 0, rgba(104,190,255,0) 30%),
+            radial-gradient(circle at 88% 22%, rgba(48,112,238,.62) 0, rgba(48,112,238,0) 34%),
+            radial-gradient(circle at 50% 105%, rgba(2,24,83,.9) 0, rgba(2,24,83,0) 48%),
+            linear-gradient(145deg, #07388e 0%, #0b64d8 48%, #052a70 100%);
+          background-attachment: fixed;
           color: #101828;
         }
 
@@ -673,7 +676,8 @@ export default function FinderLiveChatPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(255,255,255,.22);
+          border-bottom: 1px solid rgba(255,255,255,.3);
+          backdrop-filter: blur(14px);
         }
 
         .brand {
@@ -689,8 +693,9 @@ export default function FinderLiveChatPage() {
           display: grid;
           place-items: center;
           border-radius: 13px;
-          background: #1465e8;
+          background: linear-gradient(135deg,#1769e8 0%,#0747c9 100%);
           color: white;
+          box-shadow: 0 7px 18px rgba(7,71,201,.22);
           font-weight: 900;
         }
 
@@ -714,7 +719,7 @@ export default function FinderLiveChatPage() {
 
         .wrap {
           width: calc(100% - 24px);
-          max-width: 700px;
+          max-width: 760px;
           margin: auto;
           padding: 30px 0 60px;
         }
@@ -730,10 +735,12 @@ export default function FinderLiveChatPage() {
 
         .card {
           overflow: hidden;
-          border: 1px solid #e4e7ec;
-          border-radius: 22px;
-          background: white;
-          box-shadow: 0 24px 65px rgba(0,24,58,.28);
+          border: 1px solid rgba(255,255,255,.72);
+          border-radius: 24px;
+          background: #ffffff;
+          box-shadow:
+            0 32px 90px rgba(1,20,66,.38),
+            0 8px 24px rgba(5,44,118,.2);
         }
 
         .chatHead {
@@ -741,7 +748,8 @@ export default function FinderLiveChatPage() {
           display: flex;
           gap: 13px;
           align-items: center;
-          border-bottom: 1px solid #e4e7ec;
+          border-bottom: 1px solid #dbe7f5;
+          background: linear-gradient(135deg,#ffffff 0%,#eef6ff 100%);
         }
 
         .icon {
@@ -800,7 +808,9 @@ export default function FinderLiveChatPage() {
           min-height: 350px;
           padding: 20px 18px;
           overflow-y: auto;
-          background: #fafbfc;
+          background:
+            radial-gradient(circle at 15% 10%,rgba(79,159,255,.09),transparent 30%),
+            linear-gradient(180deg,#f8fbff 0%,#eef5fd 100%);
         }
 
         .empty {
