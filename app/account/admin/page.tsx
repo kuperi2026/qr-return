@@ -355,7 +355,7 @@ export default function AdminPage() {
                           <p className="adminLinkNote">{ka ? "ელ-ფოსტა თანაადმინისტრატორის ანგარიშს დაუკავშირდება." : "The email will be linked to the co-administrator account."}</p>
                           {profiles.length > 1 && (
                             <label className="copyProfileField">
-                              <span>{ka ? "იგივე თანაადმინისტრატორი და იგივე უფლებები სხვა პროფილზეც" : "Use the same co-administrator and permissions for another profile"}</span>
+                              <span>{ka ? "თუ იმავე თანაადმინისტრატორის დამატება სხვა პროფილებზეც, იგივე უფლებებით გსურთ, მონიშნეთ სასურველი პროფილები. სხვა შემთხვევაში შესაბამის პროფილში ინფორმაცია ცალკე შეავსეთ." : "To add the same co-administrator to other profiles with the same permissions, select the desired profiles. Otherwise, enter the information separately in the relevant profile."}</span>
                               <select defaultValue="" onChange={(event) => {
                                 const targetId = Number(event.target.value);
                                 if (!targetId) return;
