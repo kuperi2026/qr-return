@@ -34,6 +34,8 @@ type OwnerProfile = {
 
 type ProfileAccess = {
   selected: boolean;
+  adminEmail: string;
+  active: boolean;
   can_view_profiles: boolean;
   can_edit_profiles: boolean;
   can_manage_lost_mode: boolean;
@@ -48,6 +50,8 @@ type ProfilePermission = Exclude<keyof ProfileAccess, "selected">;
 
 const emptyProfileAccess = (): ProfileAccess => ({
   selected: false,
+  adminEmail: "",
+  active: true,
   can_view_profiles: true,
   can_edit_profiles: false,
   can_manage_lost_mode: false,
@@ -92,251 +96,40 @@ export default function AdminPage() {
   }, []);
 
   async function loadAdmin() {
-    setLoading(true);
-    setError("");
-
+    setLoading(true); setError("");
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      const { data, error: adminError } = await supabase
-        .from("owner_admins")
-        .select(`
-          id,
-          owner_id,
-          admin_user_id,
-          admin_email,
-          can_view_profiles,
-          can_edit_profiles,
-          can_manage_lost_mode,
-          can_manage_visibility,
-          can_manage_contacts,
-          can_manage_location,
-          can_manage_additional_contact,
-          can_use_live_chat,
-          active
-        `)
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (adminError) {
-        throw adminError;
-      }
-
-      if (data) {
-        const record = data as AdminRecord;
-
-        setAdmin(record);
-        setEmail(record.admin_email);
-
-        setCanViewProfiles(record.can_view_profiles);
-        setCanEditProfiles(record.can_edit_profiles);
-        setCanManageLostMode(record.can_manage_lost_mode);
-        setCanManageVisibility(record.can_manage_visibility);
-        setCanManageContacts(record.can_manage_contacts);
-        setCanManageLocation(record.can_manage_location);
-        setCanManageAdditionalContact(
-          record.can_manage_additional_contact
-        );
-        setCanUseLiveChat(record.can_use_live_chat);
-
-        setActive(record.active);
-      }
-
-      const { data: profileRows, error: profilesError } = await supabase
-        .from("item")
-        .select("id, item_name, item_type, pet_type, tag_code, photo")
-        .eq("owner_id", user.id)
-        .order("id", { ascending: true });
-
-      if (profilesError) throw profilesError;
-
-      const ownerProfiles = (profileRows ?? []) as OwnerProfile[];
-      setProfiles(ownerProfiles);
-
-      const nextAccess: Record<number, ProfileAccess> = {};
-      ownerProfiles.forEach((profile) => {
-        nextAccess[profile.id] = emptyProfileAccess();
-      });
-
-      if (data) {
-        const { data: accessRows, error: accessError } = await supabase
-          .from("owner_admin_profile_access")
-          .select("item_id, can_view_profiles, can_edit_profiles, can_manage_lost_mode, can_manage_visibility, can_manage_contacts, can_manage_location, can_manage_additional_contact, can_use_live_chat")
-          .eq("owner_admin_id", data.id);
-
-        if (accessError) throw accessError;
-
-        (accessRows ?? []).forEach((row) => {
-          nextAccess[row.item_id] = { ...row, selected: true } as ProfileAccess;
-        });
-      }
-
-      const requestedProfileId = Number(
-        new URLSearchParams(window.location.search).get("profile")
-      );
-
-      if (
-        Number.isFinite(requestedProfileId) &&
-        ownerProfiles.some((profile) => profile.id === requestedProfileId)
-      ) {
-        nextAccess[requestedProfileId] = {
-          ...(nextAccess[requestedProfileId] ?? emptyProfileAccess()),
-          selected: true,
-        };
-      }
-
-      setProfileAccess(nextAccess);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "ადმინისტრატორის ინფორმაციის ჩატვირთვა ვერ მოხერხდა."
-          : "Could not load administrator."
-      );
-    } finally {
-      setLoading(false);
-    }
+      const { data:{user}, error:userError }=await supabase.auth.getUser();
+      if(userError||!user){window.location.href="/login";return;}
+      const {data:profileRows,error:profilesError}=await supabase.from("item").select("id,item_name,item_type,pet_type,tag_code,photo").eq("owner_id",user.id).order("id");
+      if(profilesError) throw profilesError;
+      const ownerProfiles=(profileRows??[]) as OwnerProfile[]; setProfiles(ownerProfiles);
+      const {data:rows,error:rowsError}=await supabase.from("profile_co_admins").select("*").eq("owner_id",user.id);
+      if(rowsError) throw rowsError;
+      const next:Record<number,ProfileAccess>={}; ownerProfiles.forEach(p=>next[p.id]=emptyProfileAccess());
+      (rows??[]).forEach(row=>next[row.item_id]={selected:true,adminEmail:row.admin_email,active:row.active,can_view_profiles:true,can_edit_profiles:row.can_edit_profiles,can_manage_lost_mode:row.can_manage_lost_mode,can_manage_visibility:row.can_manage_visibility,can_manage_contacts:row.can_manage_contacts,can_manage_location:row.can_manage_location,can_manage_additional_contact:row.can_manage_additional_contact,can_use_live_chat:row.can_use_live_chat});
+      const requested=Number(new URLSearchParams(window.location.search).get("profile"));
+      if(Number.isFinite(requested)&&ownerProfiles.some(p=>p.id===requested)) next[requested]={...(next[requested]??emptyProfileAccess()),selected:true};
+      setProfileAccess(next);
+    } catch(err){setError(err instanceof Error?err.message:"მონაცემების ჩატვირთვა ვერ მოხერხდა.");}
+    finally{setLoading(false);}
   }
 
-  async function saveAdmin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (!cleanEmail) {
-      setError(
-        ka
-          ? "თანაადმინისტრატორის ელ-ფოსტა სავალდებულოა."
-          : "Administrator email is required."
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      if (cleanEmail === user.email?.toLowerCase()) {
-        setError(
-          ka
-            ? "საკუთარ თავს ადმინისტრატორად ვერ დაამატებთ."
-            : "You cannot add yourself as the administrator."
-        );
-        return;
-      }
-
-      const payload = {
-        owner_id: user.id,
-        admin_email: cleanEmail,
-
-        can_view_profiles: canViewProfiles,
-        can_edit_profiles: canEditProfiles,
-        can_manage_lost_mode: canManageLostMode,
-        can_manage_visibility: canManageVisibility,
-        can_manage_contacts: canManageContacts,
-        can_manage_location: canManageLocation,
-        can_manage_additional_contact: canManageAdditionalContact,
-        can_use_live_chat: canUseLiveChat,
-
-        active,
-        updated_at: new Date().toISOString(),
-      };
-
-      let savedAdmin: AdminRecord;
-
-      if (admin) {
-        const { data, error: updateError } = await supabase
-          .from("owner_admins")
-          .update(payload)
-          .eq("id", admin.id)
-          .eq("owner_id", user.id)
-          .select()
-          .single();
-
-        if (updateError) {
-          throw updateError;
-        }
-
-        savedAdmin = data as AdminRecord;
-        setAdmin(savedAdmin);
-      } else {
-        const { data, error: insertError } = await supabase
-          .from("owner_admins")
-          .insert(payload)
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        savedAdmin = data as AdminRecord;
-        setAdmin(savedAdmin);
-      }
-
-      const selectedAccess = profiles
-        .filter((profile) => profileAccess[profile.id]?.selected)
-        .map((profile) => ({
-          owner_admin_id: savedAdmin.id,
-          owner_id: user.id,
-          item_id: profile.id,
-          ...profileAccess[profile.id],
-          selected: undefined,
-          updated_at: new Date().toISOString(),
-        }));
-
-      const { error: clearAccessError } = await supabase
-        .from("owner_admin_profile_access")
-        .delete()
-        .eq("owner_admin_id", savedAdmin.id);
-
-      if (clearAccessError) throw clearAccessError;
-
-      if (selectedAccess.length > 0) {
-        const cleanAccess = selectedAccess.map(({ selected: _selected, ...row }) => row);
-        const { error: accessSaveError } = await supabase
-          .from("owner_admin_profile_access")
-          .insert(cleanAccess);
-        if (accessSaveError) throw accessSaveError;
-      }
-
-      setSuccess(
-        ka
-          ? "ადმინისტრატორის პარამეტრები წარმატებით შეინახა."
-          : "Administrator settings saved successfully."
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "ადმინისტრატორის შენახვა ვერ მოხერხდა."
-          : "Could not save administrator."
-      );
-    } finally {
-      setSaving(false);
-    }
+  async function saveAdmin(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();setError("");setSuccess("");setSaving(true);
+    try{
+      const {data:{user},error:userError}=await supabase.auth.getUser();
+      if(userError||!user){window.location.href="/login";return;}
+      const chosen=profiles.filter(p=>profileAccess[p.id]?.selected);
+      if(!chosen.length) throw new Error("აირჩიეთ მინიმუმ ერთი QR პროფილი.");
+      const payload=chosen.map(p=>{const a=profileAccess[p.id],mail=a.adminEmail.trim().toLowerCase();
+        if(!mail) throw new Error(`${p.item_name||"QR პროფილი"} — დაამატეთ ელ-ფოსტა.`);
+        if(mail===user.email?.toLowerCase()) throw new Error("საკუთარ თავს თანაადმინისტრატორად ვერ დაამატებთ.");
+        return {owner_id:user.id,item_id:p.id,admin_email:mail,active:a.active,can_view_profiles:true,can_edit_profiles:a.can_edit_profiles,can_manage_lost_mode:a.can_manage_lost_mode,can_manage_visibility:a.can_manage_visibility,can_manage_contacts:a.can_manage_contacts,can_manage_location:a.can_manage_location,can_manage_additional_contact:a.can_manage_additional_contact,can_use_live_chat:a.can_use_live_chat,updated_at:new Date().toISOString()};});
+      const {error:saveError}=await supabase.from("profile_co_admins").upsert(payload,{onConflict:"item_id"});
+      if(saveError) throw saveError;
+      setSuccess("თანაადმინისტრატორები და უფლებები წარმატებით შეინახა.");await loadAdmin();
+    }catch(err){setError(err instanceof Error?err.message:"შენახვა ვერ მოხერხდა.");}
+    finally{setSaving(false);}
   }
 
   async function removeAdmin() {
