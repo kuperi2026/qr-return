@@ -51,8 +51,6 @@ export default function EmergencyStep2({
   return (
     <>
       <div className="heading">
-        <div className="headingIcon">👤</div>
-
         <div>
           <h1>შემქმნელის ინფორმაცია</h1>
 
