@@ -1157,9 +1157,9 @@ export default function RegistrationFlow({
               {meta.slogan}
             </strong>
 
-            <p>
-              {meta.subline}
-            </p>
+            {meta.subline && (
+              <p>{meta.subline}</p>
+            )}
           </div>
         </section>
 
@@ -1416,13 +1416,14 @@ export default function RegistrationFlow({
         }
 
         .marketingLine > span {
-          font-size: 30px;
+          font-size: 36px;
         }
 
         .marketingLine strong {
           display: block;
 
-          font-size: 14px;
+          font-size: 19px;
+          line-height: 1.45;
         }
 
         .marketingLine p {
@@ -1527,11 +1528,11 @@ export default function RegistrationFlow({
           }
 
           .marketingLine > span {
-            font-size: 27px;
+            font-size: 32px;
           }
 
           .marketingLine strong {
-            font-size: 13px;
+            font-size: 17px;
           }
 
           .marketingLine p {
