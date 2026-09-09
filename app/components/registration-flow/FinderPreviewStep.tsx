@@ -229,9 +229,10 @@ export default function FinderPreviewStep({
         .previewTitle p {
           margin: 5px 0 0;
 
-          color: #718397;
+          color: #4f6478;
 
-          font-size: 12px;
+          font-size: 14px;
+          font-weight: 600;
           line-height: 1.45;
         }
 
