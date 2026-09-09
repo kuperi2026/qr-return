@@ -369,28 +369,7 @@ export default function FinderLiveChatPage() {
   return (
     <main className="page">
       <header className="topbar">
-        <a
-          className="brand"
-          href={`/scan/${encodeURIComponent(
-            tagCode
-          )}`}
-        >
-          <span className="logo">
-            QR
-          </span>
-
-          <span>
-            <strong>
-              QR RETURN
-            </strong>
-
-            <small>
-              დაცული ჩატი
-            </small>
-          </span>
-        </a>
-
-<span className="secureBadge">🔒 უსაფრთხო კავშირი</span>
+        <span className="secureBadge">🔒 უსაფრთხო კავშირი</span>
       </header>
 
       <section className="wrap">
@@ -729,7 +708,7 @@ export default function FinderLiveChatPage() {
           margin: auto;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-end;
           border-bottom: 1px solid rgba(255,255,255,.3);
           backdrop-filter: blur(14px);
         }
