@@ -288,42 +288,6 @@ export default function AdminPage() {
 
         <form onSubmit={saveAdmin}>
           <section className="card">
-            <div className="cardTitle">
-              <div className="adminAvatar">
-                {admin ? "👤" : "+"}
-              </div>
-
-              <div>
-                {admin && (
-                  <span>
-                    {ka ? "დამატებული თანაადმინისტრატორი" : "CURRENT CO-ADMINISTRATOR"}
-                  </span>
-                )}
-
-                <h2>
-                  {admin
-                    ? admin.admin_email
-                    : ka
-                    ? "დაამატეთ ელ-ფოსტა, რომელსაც ანგარიშის მართვის უფლებას ანიჭებთ."
-                    : "Add the email address of the person you authorize to manage the account."}
-                </h2>
-              </div>
-            </div>
-
-            <label className="emailField">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
-                required
-              />
-
-
-            </label>
-          </section>
-
-          <section className="card">
             <div className="permissionsHeader">
               <div>
                 <h2>{ka ? "თანაადმინისტრატორის წვდომა QR პროფილებზე" : "Co-administrator access to QR profiles"}</h2>
@@ -333,27 +297,6 @@ export default function AdminPage() {
                     : "Select the QR profile or profiles that the co-administrator will be allowed to manage."}
                 </p>
               </div>
-              {profiles.length > 0 && (
-                <button
-                  type="button"
-                  className="selectAllButton"
-                  onClick={() => {
-                    const allSelected = profiles.every((profile) => profileAccess[profile.id]?.selected);
-                    const next: Record<number, ProfileAccess> = {};
-                    profiles.forEach((profile) => {
-                      next[profile.id] = {
-                        ...(profileAccess[profile.id] ?? emptyProfileAccess()),
-                        selected: !allSelected,
-                      };
-                    });
-                    setProfileAccess((current) => ({ ...current, ...next }));
-                  }}
-                >
-                  {profiles.every((profile) => profileAccess[profile.id]?.selected)
-                    ? ka ? "ყველას მოხსნა" : "Clear all"
-                    : ka ? "ყველას არჩევა" : "Select all"}
-                </button>
-              )}
             </div>
 
             {profiles.length === 0 ? (
@@ -383,15 +326,29 @@ export default function AdminPage() {
                       </button>
 
                       {current.selected && (
-                        <div className="profilePermissionGrid">
+                        <div className="profileAdminPanel">
+                          <label className="profileEmailField">
+                            <strong>{ka ? "დაამატეთ ელ-ფოსტა, რომელსაც ამ პროფილის მართვის უფლებას ანიჭებთ." : "Add the email authorized to manage this profile."}</strong>
+                            <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
+                          </label>
+                          <button type="button" className="applyAllButton" onClick={() => {
+                            const sharedEmail=current.adminEmail;
+                            setProfileAccess(existing => {
+                              const next={...existing};
+                              profiles.forEach(item => next[item.id]={...(next[item.id]??emptyProfileAccess()),selected:true,adminEmail:sharedEmail});
+                              return next;
+                            });
+                          }}>{ka ? "ეს ელ-ფოსტა ყველა პროფილზე გამოიყენე" : "Use this email for every profile"}</button>
+                          <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "ნახვა" : "View"} value={current.can_view_profiles} locked onChange={() => {}} />
-                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} disabled={!canEditProfiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
-                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} disabled={!canManageLostMode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
-                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} disabled={!canManageVisibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
-                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} disabled={!canManageContacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
-                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} disabled={!canManageLocation} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
-                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} disabled={!canManageAdditionalContact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
-                          <MiniPermission label={ka ? "პირდაპირი ჩათი" : "Live Chat"} value={current.can_use_live_chat} disabled={!canUseLiveChat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
+                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
+                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
+                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
+                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
+                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
+                          <MiniPermission label={ka ? "პირდაპირი ჩათი" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                          </div>
                         </div>
                       )}
                     </article>
@@ -401,216 +358,7 @@ export default function AdminPage() {
             )}
           </section>
 
-          <section className="card">
-            <div className="permissionsHeader">
-              <div>
-                <h2>
-                  {ka
-                    ? "თანაადმინისტრატორის უფლებები"
-                    : "Co-administrator permissions"}
-                </h2>
-
-                <p>
-                  {ka
-                    ? "თავად განსაზღვრეთ, რა ინფორმაციის ნახვა ან მართვა შეეძლება თანაადმინისტრატორს. თითოეული უფლება ცალ-ცალკე ირთვება."
-                    : "Choose what information the co-administrator can view or manage. Each permission is enabled separately."}
-                </p>
-              </div>
-            </div>
-
-            <div className="permissionList">
-              <PermissionToggle
-                icon=""
-                title={
-                  ka
-                    ? "QR პროფილების ნახვა"
-                    : "View QR profiles"
-                }
-                description={
-                  ka
-                    ? "ნახოს თქვენ მიერ არჩეული QR პროფილების ძირითადი ინფორმაცია."
-                    : "View your pet and item QR profiles."
-                }
-                value={canViewProfiles}
-                onChange={setCanViewProfiles}
-                locked
-              />
-
-              <PermissionToggle
-                icon="✏️"
-                title={
-                  ka
-                    ? "პროფილების რედაქტირება"
-                    : "Edit profiles"
-                }
-                description={
-                  ka
-                    ? "შეცვალოს თქვენ მიერ არჩეულ QR პროფილში მითითებული ინფორმაცია."
-                    : "Edit pet or item profile information."
-                }
-                value={canEditProfiles}
-                onChange={setCanEditProfiles}
-              />
-
-              <PermissionToggle
-                icon="🚨"
-                title={
-                  ka
-                    ? "დაკარგვის რეჟიმის მართვა"
-                    : "Manage Lost Mode"
-                }
-                description={
-                  ka
-                    ? "ჩართოს დაკარგვის რეჟიმი ან მონიშნოს QR პროფილი უსაფრთხოდ."
-                    : "Mark a profile as lost or safe."
-                }
-                value={canManageLostMode}
-                onChange={setCanManageLostMode}
-              />
-
-              <PermissionToggle
-                icon=""
-                title={
-                  ka
-                    ? "მპოვნელისთვის ხილვადობის მართვა"
-                    : "Manage finder visibility"
-                }
-                description={
-                  ka
-                    ? "განსაზღვროს, რომელი ინფორმაცია გამოჩნდება QR კოდის მპოვნელისთვის."
-                    : "Control which information the finder can see."
-                }
-                value={canManageVisibility}
-                onChange={setCanManageVisibility}
-              />
-
-              <PermissionToggle
-                icon="📞"
-                title={
-                  ka
-                    ? "საკონტაქტო საშუალებების მართვა"
-                    : "Manage contact methods"
-                }
-                description={
-                  ka
-                    ? "მართოს მპოვნელისთვის ხელმისაწვდომი სატელეფონო და ჩათის საკონტაქტო საშუალებები."
-                    : "Manage Phone, Live Chat and other contact options."
-                }
-                value={canManageContacts}
-                onChange={setCanManageContacts}
-              />
-
-              <PermissionToggle
-                icon="📍"
-                title={
-                  ka
-                    ? "ლოკაციის გაზიარების მართვა"
-                    : "Manage location sharing"
-                }
-                description={
-                  ka
-                    ? "ჩართოს ან გამორთოს მპოვნელის მიერ ლოკაციის გაზიარების შესაძლებლობა."
-                    : "Enable or disable finder location sharing."
-                }
-                value={canManageLocation}
-                onChange={setCanManageLocation}
-              />
-
-              <PermissionToggle
-                icon="👥"
-                title={
-                  ka
-                    ? "დამატებითი საკონტაქტო პირის მართვა"
-                    : "Manage additional contact"
-                }
-                description={
-                  ka
-                    ? "არჩეულ QR პროფილზე დაამატოს ან შეცვალოს დამატებითი საკონტაქტო პირი."
-                    : "Manage the additional contact for a QR profile."
-                }
-                value={canManageAdditionalContact}
-                onChange={setCanManageAdditionalContact}
-              />
-
-              <PermissionToggle
-                icon="💬"
-                title={
-                  ka
-                    ? "პირდაპირი ჩათის გამოყენება"
-                    : "Use Live Chat"
-                }
-                description={
-                  ka
-                    ? "ნახოს მპოვნელის შეტყობინებები და უპასუხოს პირდაპირი ჩათიდან."
-                    : "View and answer finder Live Chat messages."
-                }
-                value={canUseLiveChat}
-                onChange={setCanUseLiveChat}
-              />
-            </div>
-          </section>
-
-          <section className="card">
-            <div className="accountAccess">
-              <div>
-                <span className="eyebrow">
-                  {ka ? "წვდომა" : "ACCESS"}
-                </span>
-
-                <h2>
-                  {ka
-                    ? "Admin-ის საერთო წვდომა"
-                    : "Administrator access"}
-                </h2>
-
-                <p>
-                  {ka
-                    ? "შეგიძლიათ დროებით გაუთიშოთ Admin-ს მთელი წვდომა მისი წაშლის გარეშე."
-                    : "Temporarily disable all admin access without removing the administrator."}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className={`bigToggle ${active ? "on" : ""}`}
-                onClick={() => setActive((current) => !current)}
-              >
-                <span />
-              </button>
-            </div>
-
-            <div
-              className={`accessStatus ${
-                active ? "activeStatus" : "inactiveStatus"
-              }`}
-            >
-              {active
-                ? ka
-                  ? "● Admin აქტიურია"
-                  : "● Admin access is ON"
-                : ka
-                ? "● Admin გათიშულია"
-                : "● Admin access is OFF"}
-            </div>
-          </section>
-
           <div className="actions">
-            {admin && (
-              <button
-                type="button"
-                className="removeButton"
-                onClick={removeAdmin}
-                disabled={removing}
-              >
-                {removing
-                  ? ka
-                    ? "იშლება..."
-                    : "Removing..."
-                  : ka
-                  ? "Admin-ის წაშლა"
-                  : "Remove Admin"}
-              </button>
-            )}
 
             <div className="rightActions">
               <a href="/account" className="cancelButton">
@@ -626,13 +374,7 @@ export default function AdminPage() {
                   ? ka
                     ? "ინახება..."
                     : "Saving..."
-                  : admin
-                  ? ka
-                    ? "ცვლილებების შენახვა"
-                    : "Save changes"
-                  : ka
-                  ? "Admin-ის დამატება"
-                  : "Add Admin"}
+                  : ka ? "თანაადმინისტრატორების შენახვა" : "Save co-administrators"}
               </button>
             </div>
           </div>
@@ -1221,6 +963,10 @@ export default function AdminPage() {
           color: white;
         }
 
+        .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
+        .profileEmailField strong{display:block;margin-bottom:10px;color:#0a58ca;font-size:15px;line-height:1.5}
+        .profileEmailField input{background:#fff;font-size:16px}
+        .applyAllButton{margin-top:10px;padding:9px 12px;border:1px solid #a9c9f4;border-radius:9px;background:#eaf3ff;color:#0647c8;font-size:13px;font-weight:850;cursor:pointer}
         .profilePermissionGrid {
           padding: 14px;
           display: grid;
