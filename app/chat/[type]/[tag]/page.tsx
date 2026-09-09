@@ -89,6 +89,18 @@ const typeMap: Record<
     ka: "ავტომობილი",
     en: "Vehicle",
   },
+
+  emergency: {
+    icon: "🩺",
+    ka: "Emergency პროფილი",
+    en: "Emergency profile",
+  },
+
+  pet: {
+    icon: "🐾",
+    ka: "ცხოველი",
+    en: "Pet",
+  },
 };
 
 export default function FinderLiveChatPage() {
