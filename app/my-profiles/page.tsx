@@ -714,6 +714,10 @@ export default function MyProfilesPage() {
                 <option value="parking">
                   ავტომობილი
                 </option>
+
+                <option value="emergency">
+                  ემერჯენსი სამაჯური
+                </option>
               </select>
             </section>
           )}

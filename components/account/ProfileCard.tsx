@@ -918,6 +918,9 @@ function getLabel(
 
       parking:
         "ავტომობილი",
+
+      emergency:
+        "ემერჯენსი სამაჯური",
     };
 
   return (
@@ -944,6 +947,7 @@ function getIcon(
       suitcase: "🧳",
       luggage: "🧳",
       parking: "🚘",
+      emergency: "🆘",
     };
 
   return (
