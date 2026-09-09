@@ -516,22 +516,10 @@ export default function ProductStep({
       {/* FINDER VIEW */}
 
       {formPage === 3 && <section className="formSection">
-        <div className="sectionHeader">
-          <span>
-            03
-          </span>
-
-          <div>
-            <strong>
-              რას დაინახავს მპოვნელი
-            </strong>
-
-            <p>
-              სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
-              დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
-            </p>
-          </div>
-        </div>
+        <p className="finderVisibilityIntro">
+          სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
+          დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
+        </p>
 
         <div className="visibilityGrid">
           <VisibilityToggle
@@ -947,6 +935,14 @@ export default function ProductStep({
             );
         }
 
+        .finderVisibilityIntro {
+          margin: 0 0 16px;
+          color: #285782;
+          font-size: 15px;
+          font-weight: 700;
+          line-height: 1.55;
+        }
+
         .visibilityGrid {
           display: grid;
 
@@ -974,7 +970,7 @@ export default function ProductStep({
 
         .backButton,
         .primaryButton {
-          min-height: 54px;
+          min-height: 50px;
 
           padding:
             0 18px;
@@ -994,7 +990,7 @@ export default function ProductStep({
 
           font-family: inherit;
 
-          font-size: 17px;
+          font-size: 15px;
 
           font-weight: 850;
 
