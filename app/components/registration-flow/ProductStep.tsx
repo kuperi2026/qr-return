@@ -345,23 +345,9 @@ export default function ProductStep({
 
       {formPage === 2 && <>
       <section className="formSection">
-        <div className="sectionHeader">
-          <span>
-            02
-          </span>
-
-          <div>
-            <strong>
-              ფოტო
-            </strong>
-
-            <p>
-              კარგი ფოტო მპოვნელისთვის
-              ამოცნობას მნიშვნელოვნად
-              ამარტივებს.
-            </p>
-          </div>
-        </div>
+        <p className="sectionIntro">
+          ფოტო მპოვნელისთვის ამოცნობას მნიშვნელოვნად ამარტივებს.
+        </p>
 
         <PhotoUploader
           preview={
@@ -400,11 +386,7 @@ export default function ProductStep({
               დამატებითი ინფორმაცია
             </strong>
 
-            <p>
-              დაამატეთ ის ინფორმაცია,
-              რომელიც მპოვნელისთვის
-              სასარგებლო იქნება.
-            </p>
+
           </div>
         </div>
 
@@ -545,8 +527,8 @@ export default function ProductStep({
             </strong>
 
             <p>
-              სახელი, გვარი და ტელეფონის ნომერი ყოველთვის ხილულია.
-              დანარჩენ ინფორმაციას თქვენ აკონტროლებთ.
+              სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
+              დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
             </p>
           </div>
         </div>
