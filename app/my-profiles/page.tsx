@@ -619,7 +619,7 @@ export default function MyProfilesPage() {
 
           <div className="totalBox">
             <span>
-              სულ პროფილები
+              პროფილების რაოდენობა
             </span>
 
             <strong>
