@@ -218,7 +218,7 @@ export default function AdminPage() {
     if (!cleanEmail) {
       setError(
         ka
-          ? "ადმინისტრატორის ელფოსტა სავალდებულოა."
+          ? "თანაადმინისტრატორის ელ-ფოსტა სავალდებულოა."
           : "Administrator email is required."
       );
       return;
