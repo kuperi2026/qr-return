@@ -84,24 +84,6 @@ export default function ForgotPasswordPage() {
           QR
         </div>
 
-        <header className="header">
-          <a href="/" className="brand">
-            <span className="brandIcon">
-              QR
-            </span>
-
-            <span>
-              <strong>
-                QR RETURN
-              </strong>
-
-              <small>
-                SMART QR CONNECTION
-              </small>
-            </span>
-          </a>
-        </header>
-
         <section className="center">
           <div className="card">
             {!sent ? (
