@@ -773,9 +773,10 @@ export default function ProductStep({
 
           margin: 7px 0 0;
 
-          color: #718397;
+          color: #4f6478;
 
-          font-size: 14px;
+          font-size: 15px;
+          font-weight: 600;
           line-height: 1.55;
         }
 
@@ -830,9 +831,10 @@ export default function ProductStep({
 
           margin: 3px 0 0;
 
-          color: #8190a0;
+          color: #4f6478;
 
-          font-size: 12px;
+          font-size: 14px;
+          font-weight: 600;
           line-height: 1.45;
         }
 
