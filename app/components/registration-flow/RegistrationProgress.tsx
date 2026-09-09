@@ -132,15 +132,15 @@ export default function RegistrationProgress({
               0.52
             );
 
-          font-size: 13px;
-          font-weight: 800;
+          font-size: 16px;
+          font-weight: 850;
 
           white-space: nowrap;
         }
 
         .stepCircle {
-          width: 32px;
-          height: 32px;
+          width: 38px;
+          height: 38px;
 
           display: grid;
           place-items: center;
@@ -156,7 +156,7 @@ export default function RegistrationProgress({
 
           border-radius: 50%;
 
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 900;
         }
 
@@ -199,11 +199,16 @@ export default function RegistrationProgress({
           max-width: 600px
         ) {
           .progress {
-            max-width: 320px;
+            max-width: 390px;
+          }
+
+          .progressStep {
+            gap: 5px;
+            font-size: 12px;
           }
 
           .progressStep span {
-            display: none;
+            display: inline;
           }
 
           .line {
