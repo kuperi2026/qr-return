@@ -83,9 +83,9 @@ export default function VisibilityToggle({
       <style jsx>{`
         .visibilityRow {
           width: 100%;
-          min-height: 78px;
+          min-height: 66px;
 
-          padding: 14px 15px;
+          padding: 11px 12px;
 
           display: flex;
           align-items: center;
@@ -122,7 +122,7 @@ export default function VisibilityToggle({
         .labelLine strong {
           color: #1d5f9c;
 
-          font-size: 17px;
+          font-size: 15px;
           font-weight: 850;
 
           line-height: 1.25;
@@ -137,7 +137,7 @@ export default function VisibilityToggle({
 
           color: #0647c8;
 
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 900;
 
           letter-spacing: 0.25px;
@@ -150,17 +150,17 @@ export default function VisibilityToggle({
 
           color: #4d7194;
 
-          font-size: 14px;
+          font-size: 10px;
 
-          line-height: 1.5;
+          line-height: 1.45;
         }
 
         .toggleButton,
         .lockedToggle {
           flex: 0 0 auto;
 
-          min-width: 82px;
-          height: 38px;
+          min-width: 76px;
+          height: 34px;
 
           padding: 4px 6px;
 
@@ -290,14 +290,14 @@ export default function VisibilityToggle({
           max-width: 520px
         ) {
           .visibilityRow {
-            min-height: 72px;
+            min-height: 64px;
 
-            padding: 12px;
+            padding: 10px;
           }
 
           .visibilityText p {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
           }
 
           .toggleButton,
