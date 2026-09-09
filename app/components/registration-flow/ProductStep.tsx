@@ -94,11 +94,11 @@ export default function ProductStep({
           {meta.label}
         </h1>
 
-        <p>
-          {getProductFormText(
-            type
-          )}
-        </p>
+        {type !== "suitcase" && (
+          <p>
+            {getProductFormText(type)}
+          </p>
+        )}
       </div>
 
       {/* BASIC INFO */}
@@ -545,11 +545,8 @@ export default function ProductStep({
             </strong>
 
             <p>
-              სახელი, გვარი და
-              ტელეფონის ნომერი ყოველთვის
-              ხილულია. დანარჩენი
-              ინფორმაცია თქვენ
-              აკონტროლებთ.
+              სახელი, გვარი და ტელეფონის ნომერი ყოველთვის ხილულია.
+              დანარჩენ ინფორმაციას თქვენ აკონტროლებთ.
             </p>
           </div>
         </div>
@@ -572,8 +569,8 @@ export default function ProductStep({
           />
 
           <VisibilityToggle
-            label="ელფოსტა"
-            description="აჩვენეთ თქვენი ელფოსტა მპოვნელისთვის."
+            label="ელ-ფოსტა"
+            description="აჩვენეთ თქვენი ელ-ფოსტა მპოვნელისთვის."
             value={
               draft.showEmail
             }
@@ -808,7 +805,7 @@ export default function ProductStep({
 
           color: #0647c8;
 
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 900;
         }
 
@@ -817,7 +814,7 @@ export default function ProductStep({
 
           color: #304a65;
 
-          font-size: 15px;
+          font-size: 19px;
           font-weight: 850;
         }
 
@@ -828,9 +825,9 @@ export default function ProductStep({
 
           color: #4f6478;
 
-          font-size: 14px;
-          font-weight: 600;
-          line-height: 1.45;
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.55;
         }
 
         .sectionIntro {
@@ -995,7 +992,7 @@ export default function ProductStep({
 
         .backButton,
         .primaryButton {
-          min-height: 47px;
+          min-height: 54px;
 
           padding:
             0 18px;
@@ -1015,7 +1012,7 @@ export default function ProductStep({
 
           font-family: inherit;
 
-          font-size: 14px;
+          font-size: 17px;
 
           font-weight: 850;
 
