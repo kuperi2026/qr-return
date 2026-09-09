@@ -54,28 +54,12 @@ export default function EmergencyStep2({
         <div className="headingIcon">👤</div>
 
         <div>
-          <span className="eyebrow">
-            PROFILE CREATOR
-          </span>
-
           <h1>შემქმნელის ინფორმაცია</h1>
 
           <p>
-            ეს არის იმ ადამიანის ინფორმაცია, ვინც Emergency
-            პროფილს ქმნის და მართავს.
+            შეავსეთ Emergency პროფილის მმართველის
+            საკონტაქტო ინფორმაცია.
           </p>
-        </div>
-      </div>
-
-      <div className="topSummary">
-        <div className="summaryItem">
-          <span>PROFILE FOR</span>
-
-          <strong>
-            {profileFor === "self"
-              ? "ჩემთვის"
-              : "სხვა პირისთვის"}
-          </strong>
         </div>
       </div>
 
