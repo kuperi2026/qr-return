@@ -334,9 +334,9 @@ export default function OwnerStep({
         .finderNotice {
           width: 100%;
 
-          margin-top: 16px;
+          margin-top: 18px;
 
-          padding: 10px 12px;
+          padding: 16px 17px;
 
           display: grid;
 
@@ -350,11 +350,11 @@ export default function OwnerStep({
           box-sizing: border-box;
 
           border:
-            1px solid #e1e8f0;
+            1px solid #b9d4f5;
 
           border-radius: 10px;
 
-          background: #f8fafc;
+          background: #eef6ff;
         }
 
         .finderIcon {
@@ -378,20 +378,20 @@ export default function OwnerStep({
         .finderText strong {
           display: block;
 
-          color: #344f6a;
+          color: #173a67;
 
-          font-size: 12px;
+          font-size: 17px;
           font-weight: 850;
         }
 
         .finderText p {
           margin: 2px 0 0;
 
-          color: #718397;
+          color: #405b78;
 
-          font-size: 11px;
+          font-size: 15px;
 
-          line-height: 1.4;
+          line-height: 1.6;
         }
 
         .actions {
