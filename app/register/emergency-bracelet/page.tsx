@@ -2118,6 +2118,10 @@ export default function EmergencyBraceletPage() {
           gap: 10px;
         }
 
+        .emergencyStep1Actions {
+          margin-top: 32px;
+        }
+
         .secondaryButton,
         .primaryButton,
         .createButton {
