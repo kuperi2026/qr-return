@@ -239,17 +239,6 @@ export default function EmergencyStep6({
           </strong>
         </div>
 
-        <div className="summaryItem">
-          <span>
-            PROFILE FOR
-          </span>
-
-          <strong>
-            {profileFor === "self"
-              ? "ჩემთვის"
-              : "სხვა პირისთვის"}
-          </strong>
-        </div>
       </div>
 
       <div className="finalNotice">
