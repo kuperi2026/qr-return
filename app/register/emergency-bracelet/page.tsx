@@ -92,6 +92,11 @@ export default function EmergencyBraceletPage() {
   ] = useState("");
 
   const [
+    tagPrefilled,
+    setTagPrefilled,
+  ] = useState(false);
+
+  const [
     profileFor,
     setProfileFor,
   ] = useState<ProfileFor>("");
@@ -267,6 +272,17 @@ export default function EmergencyBraceletPage() {
 
   useEffect(() => {
     loadOwnerAccount();
+
+    const params = new URLSearchParams(window.location.search);
+    const incomingTag =
+      params.get("tag") ||
+      params.get("tag_code") ||
+      params.get("code");
+
+    if (incomingTag?.trim()) {
+      setTagCode(incomingTag.trim().toUpperCase());
+      setTagPrefilled(true);
+    }
   }, []);
 
   async function loadOwnerAccount() {
@@ -1000,6 +1016,7 @@ export default function EmergencyBraceletPage() {
             <EmergencyStep1
               tagCode={tagCode}
               setTagCode={setTagCode}
+              tagPrefilled={tagPrefilled}
               profileFor={profileFor}
               setProfileFor={
                 handleProfileForChange
