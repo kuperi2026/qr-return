@@ -340,8 +340,9 @@ export default function AccountSignupForm() {
         .signupForm :global(.field small) {
           display: block;
           margin-top: 6px;
-          color: #929eac;
-          font-size: 8px;
+          color: #4f6478;
+          font-size: 13px;
+          font-weight: 600;
           line-height: 1.45;
         }
 
@@ -473,8 +474,9 @@ export default function AccountSignupForm() {
           align-items: center;
           gap: 6px;
 
-          color: #8290a0;
-          font-size: 10px;
+          color: #4f6478;
+          font-size: 13px;
+          font-weight: 600;
         }
 
         .loginLink a {
@@ -486,8 +488,9 @@ export default function AccountSignupForm() {
         .requiredNote {
           margin: 22px 0 0;
           text-align: center;
-          color: #9aa6b4;
-          font-size: 8px;
+          color: #4f6478;
+          font-size: 13px;
+          font-weight: 600;
         }
 
         .requiredNote span {
