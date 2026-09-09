@@ -258,34 +258,19 @@ export default function LoginPage() {
               QR
             </span>
 
-            <span className="brandText">
-              <strong>
-                QR RETURN
-              </strong>
-
-              <small>
-                SMART QR CONNECTION
-              </small>
+            <span className="brandMessage">
+              ერთი ანგარიშიდან მართეთ თქვენი ყველა QR პროფილი.
             </span>
           </a>
         </header>
 
         <section className="center">
           <div className="card">
-            <span className="eyebrow">
-              QR ანგარიში
-            </span>
-
-            <h1>
+             <h1>
               შედით თქვენს ანგარიშში
             </h1>
 
-            <p className="description">
-              ერთი ანგარიშიდან მართეთ
-              თქვენი ყველა QR პროფილი.
-            </p>
-
-            {registered && (
+             {registered && (
               <div className="successNotice">
                 ✓ ანგარიში შექმნილია.
                 შედით და გააგრძელეთ
@@ -517,28 +502,14 @@ export default function LoginPage() {
           font-weight: 950;
         }
 
-        .brandText strong,
-        .brandText small {
-          display: block;
-        }
+        .brandMessage {
+          max-width: 430px;
 
-        .brandText strong {
           color: #ffffff;
 
-          font-size: 17px;
-          font-weight: 900;
-        }
-
-        .brandText small {
-          margin-top: 2px;
-
-          color:
-            rgba(255, 255, 255, 0.67);
-
-          font-size: 9px;
+          font-size: 15px;
           font-weight: 800;
-
-          letter-spacing: 0.6px;
+          line-height: 1.4;
         }
 
         .center {
@@ -845,8 +816,8 @@ export default function LoginPage() {
         }
 
         @media (max-width: 520px) {
-          .brandText small {
-            display: none;
+          .brandMessage {
+            font-size: 13px;
           }
 
           .card {
