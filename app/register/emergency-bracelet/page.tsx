@@ -993,10 +993,6 @@ export default function EmergencyBraceletPage() {
           )}
 
           <div className="progressRow">
-            <span>
-              EMERGENCY REGISTRATION
-            </span>
-
             <div className="progressTrack">
               <div
                 className="progressFill"
@@ -1704,16 +1700,24 @@ export default function EmergencyBraceletPage() {
         }
 
         .emergencyChoiceHeading {
+          width: 100%;
           flex-direction: column;
           justify-content: center;
+          gap: 0;
           text-align: center;
+        }
+
+        .emergencyChoiceHeading .headingIcon {
+          margin-bottom: 18px;
         }
 
         .emergencyChoiceHeading h1 {
           max-width: 620px;
+          margin: 0 auto;
         }
 
         .emergencySignals {
+          margin-top: 22px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1734,8 +1738,8 @@ export default function EmergencyBraceletPage() {
 
         .emergencyChoiceGrid {
           width: 100%;
-          max-width: 620px;
-          margin: 28px auto 0;
+          max-width: 560px;
+          margin: 36px auto 0;
         }
 
         .emergencyChoice {
