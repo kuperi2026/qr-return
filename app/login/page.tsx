@@ -483,7 +483,7 @@ export default function LoginPage() {
           align-items: center;
           gap: 12px;
 
-          transform: translateY(6px);
+          transform: translateY(12px);
 
           text-decoration: none;
         }
