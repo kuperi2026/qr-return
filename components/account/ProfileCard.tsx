@@ -218,7 +218,7 @@ export default function ProfileCard({
 
           <div className="stat">
             <span>
-              ბოლო სკანირება
+              ბოლო სკანირების თარიღი
             </span>
 
             <strong className="date">
@@ -515,7 +515,7 @@ export default function ProfileCard({
 
         .content {
           padding:
-            15px 16px 16px;
+            19px 18px 20px;
         }
 
         .titleRow {
@@ -578,7 +578,7 @@ export default function ProfileCard({
         }
 
         .tagBox {
-          margin-top: 13px;
+          margin-top: 17px;
 
           padding:
             9px 11px;
@@ -626,23 +626,23 @@ export default function ProfileCard({
         }
 
         .stats {
-          margin-top: 9px;
+          margin-top: 15px;
 
           display: grid;
 
           grid-template-columns: repeat(2,minmax(0,1fr));
 
-          gap: 7px;
+          gap: 12px;
         }
 
         .lostMode{margin-top:12px;margin-bottom:14px;padding:13px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#183f63;font-size:14px;font-weight:950}.lostModeText strong{margin-top:4px;color:#4f6478;font-size:12px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
-        .serviceBox{margin-top:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{grid-column:1/-1;padding:13px 16px;border-radius:9px;background:#075dcc;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
+        .serviceBox{margin-top:16px;padding:17px;display:grid;grid-template-columns:1fr 1fr;align-items:center;column-gap:15px;row-gap:14px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{grid-column:1/-1;padding:13px 16px;border-radius:9px;background:#075dcc;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
 
         .stat {
           min-width: 0;
 
           padding:
-            8px 9px;
+            12px 11px;
 
           border-radius:
             9px;
@@ -666,7 +666,7 @@ export default function ProfileCard({
         }
 
         .stat strong {
-          margin-top: 3px;
+          margin-top: 7px;
 
           color:
             #344f69;
@@ -757,10 +757,10 @@ export default function ProfileCard({
           font-weight: 900;
         }
 
-        .scanHistory{margin-top:10px;border:1px solid #d7e3ef;border-radius:10px;background:#fff}.scanHistory>button{width:100%;min-height:44px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;border:0;border-radius:10px;background:#f3f8ff;color:#173f64;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}.scanHistory>button strong{color:#075dcc;font-size:18px}.historyContent{padding:4px 12px 10px}.historyContent>p{margin:9px 0;color:#60758a;font-size:13px}.historyError{color:#a51d26!important}.historyRow{padding:10px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e5ebf2}.historyRow strong,.historyRow span{display:block}.historyRow strong{color:#263f59;font-size:13px}.historyRow span{margin-top:3px;color:#60758a;font-size:12px}.historyRow a{color:#075dcc;font-size:12px;font-weight:900;text-decoration:none;white-space:nowrap}
+        .scanHistory{margin-top:15px;border:1px solid #d7e3ef;border-radius:10px;background:#fff}.scanHistory>button{width:100%;min-height:44px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;border:0;border-radius:10px;background:#f3f8ff;color:#173f64;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}.scanHistory>button strong{color:#075dcc;font-size:18px}.historyContent{padding:4px 12px 10px}.historyContent>p{margin:9px 0;color:#60758a;font-size:13px}.historyError{color:#a51d26!important}.historyRow{padding:10px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e5ebf2}.historyRow strong,.historyRow span{display:block}.historyRow strong{color:#263f59;font-size:13px}.historyRow span{margin-top:3px;color:#60758a;font-size:12px}.historyRow a{color:#075dcc;font-size:12px;font-weight:900;text-decoration:none;white-space:nowrap}
 
         .actions {
-          margin-top: 12px;
+          margin-top: 16px;
 
           display: grid;
 
@@ -773,7 +773,7 @@ export default function ProfileCard({
               )
             );
 
-          gap: 7px;
+          gap: 11px;
         }
 
         .actions
@@ -953,7 +953,7 @@ function formatScanDate(
   value?: string | null
 ) {
   if (!value) {
-    return "ჯერ არ ყოფილა";
+    return "—";
   }
 
   const date =
