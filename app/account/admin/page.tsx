@@ -214,6 +214,44 @@ export default function AdminPage() {
     }
   }
 
+  async function removeProfileAdmin(itemId: number, profileName: string) {
+    const confirmed = window.confirm(
+      ka
+        ? `ნამდვილად გსურთ „${profileName}“ პროფილიდან თანაადმინისტრატორის წაშლა?`
+        : `Remove the co-administrator from “${profileName}”?`
+    );
+    if (!confirmed) return;
+
+    setRemoving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("profile_co_admins")
+        .delete()
+        .eq("owner_id", user.id)
+        .eq("item_id", itemId);
+      if (deleteError) throw deleteError;
+
+      setProfileAccess((current) => ({
+        ...current,
+        [itemId]: emptyProfileAccess(),
+      }));
+      setSuccess(ka ? "თანაადმინისტრატორი წარმატებით წაიშალა." : "Co-administrator removed.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : ka ? "წაშლა ვერ მოხერხდა." : "Could not remove co-administrator.");
+    } finally {
+      setRemoving(false);
+    }
+  }
+
   function updateProfileAccess(itemId: number, change: Partial<ProfileAccess>) {
     setProfileAccess((current) => ({
       ...current,
@@ -372,6 +410,16 @@ export default function AdminPage() {
                               </select>
                             </label>
                           )}
+                          <button
+                            type="button"
+                            className="profileRemoveButton"
+                            disabled={removing}
+                            onClick={() => removeProfileAdmin(profile.id, title)}
+                          >
+                            {removing
+                              ? ka ? "იშლება..." : "Removing..."
+                              : ka ? "თანაადმინისტრატორის წაშლა" : "Remove co-administrator"}
+                          </button>
                           <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
                           <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
@@ -1003,6 +1051,8 @@ export default function AdminPage() {
         .copyProfileField{display:block;margin-top:16px;padding:14px;border:1px solid #b9d4f5;border-radius:11px;background:#eef6ff}
         .copyProfileField span{display:block;margin-bottom:8px;color:#173a67;font-size:14px;font-weight:850}
         .copyProfileField select{width:100%;min-height:46px;padding:0 12px;border:1px solid #a9c9f4;border-radius:9px;background:#fff;color:#173a67;font-size:15px}
+        .profileRemoveButton{margin-top:16px;min-height:44px;padding:0 14px;border:1px solid #f0a7a2;border-radius:10px;background:#fff1f0;color:#b42318;font-size:14px;font-weight:850;cursor:pointer}
+        .profileRemoveButton:disabled{opacity:.6;cursor:not-allowed}
         .profilePermissionGrid {
           padding: 14px;
           display: grid;
