@@ -3,10 +3,6 @@
 type ProfileFor = "self" | "other" | "";
 
 type Props = {
-  tagCode: string;
-  setTagCode: (value: string) => void;
-  tagPrefilled: boolean;
-
   profileFor: ProfileFor;
   setProfileFor: (value: ProfileFor) => void;
 
@@ -15,17 +11,12 @@ type Props = {
 };
 
 export default function EmergencyStep1({
-  tagCode,
-  setTagCode,
-  tagPrefilled,
   profileFor,
   setProfileFor,
   onBack,
   onNext,
 }: Props) {
-  const ready =
-    tagCode.trim() !== "" &&
-    profileFor !== "";
+  const ready = profileFor !== "";
 
   return (
     <>
@@ -40,43 +31,7 @@ export default function EmergencyStep1({
           <h1>ვისთვის ქმნით პროფილს?</h1>
 
           <p>
-            აირჩიეთ პროფილის ტიპი და შეიყვანეთ თქვენი
-            Emergency Bracelet-ის QR კოდი.
-          </p>
-        </div>
-      </div>
-
-      <div className="qrSection">
-        <div className="field">
-          <label>QR კოდი *</label>
-
-          <input
-            type="text"
-            value={tagCode}
-            onChange={(event) =>
-              setTagCode(
-                event.target.value.toUpperCase()
-              )
-            }
-            placeholder="მაგ. EMR-000123"
-            autoComplete="off"
-            readOnly={tagPrefilled}
-          />
-        </div>
-
-        <div className="qrHelp">
-          <span>REQUIRED</span>
-
-          <strong>
-            {tagPrefilled
-              ? "QR კოდი ავტომატურად ჩაიწერა"
-              : "თითოეულ სამაჯურს საკუთარი QR კოდი აქვს"}
-          </strong>
-
-          <p>
-            {tagPrefilled
-              ? "კოდის ხელით შეყვანა აღარ გჭირდებათ."
-              : "კოდი დაფიქსირდება კონკრეტულ Emergency პროფილზე და სხვა კატეგორიად აღარ შეიცვლება."}
+            აირჩიეთ, ვისთვის ქმნით Emergency პროფილს.
           </p>
         </div>
       </div>
@@ -147,22 +102,6 @@ export default function EmergencyStep1({
             პირის Emergency Bracelet.
           </p>
         </button>
-      </div>
-
-      <div className="infoBox">
-        <div className="infoIcon">i</div>
-
-        <div>
-          <strong>
-            QR კოდი ორივე შემთხვევაში სავალდებულოა
-          </strong>
-
-          <p>
-            შემდეგ ეტაპზე პროფილის მმართველის
-            ინფორმაცია გამოყენებული იქნება Owner
-            Account-იდან.
-          </p>
-        </div>
       </div>
 
       <div className="actions emergencyStep1Actions">
