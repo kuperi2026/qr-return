@@ -88,6 +88,7 @@ export default function AdminPage() {
   const [profiles, setProfiles] = useState<OwnerProfile[]>([]);
   const [profileAccess, setProfileAccess] = useState<Record<number, ProfileAccess>>({});
   const [editingProfiles, setEditingProfiles] = useState<Record<number, boolean>>({});
+  const [openProfileId, setOpenProfileId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -115,7 +116,10 @@ export default function AdminPage() {
       const next:Record<number,ProfileAccess>={}; ownerProfiles.forEach(p=>next[p.id]=emptyProfileAccess());
       (rows??[]).forEach(row=>next[row.item_id]={selected:true,adminEmail:row.admin_email,adminFirstName:row.admin_first_name??"",adminLastName:row.admin_last_name??"",adminPhone:row.admin_phone??"",active:row.active,can_view_profiles:true,can_edit_profiles:row.can_edit_profiles,can_manage_lost_mode:row.can_manage_lost_mode,can_manage_visibility:row.can_manage_visibility,can_manage_contacts:row.can_manage_contacts,can_manage_location:row.can_manage_location,can_manage_additional_contact:row.can_manage_additional_contact,can_use_live_chat:row.can_use_live_chat});
       const requested=Number(new URLSearchParams(window.location.search).get("profile"));
-      if(Number.isFinite(requested)&&ownerProfiles.some(p=>p.id===requested)) next[requested]={...(next[requested]??emptyProfileAccess()),selected:true};
+      if(Number.isFinite(requested)&&ownerProfiles.some(p=>p.id===requested)) {
+        next[requested]={...(next[requested]??emptyProfileAccess()),selected:true};
+        setOpenProfileId(requested);
+      }
       setProfileAccess(next);
     } catch(err){setError(err instanceof Error?err.message:"მონაცემების ჩატვირთვა ვერ მოხერხდა.");}
     finally{setLoading(false);}
@@ -357,21 +361,24 @@ export default function AdminPage() {
                   const icon = profile.pet_type === "dog" ? "🐶" : profile.pet_type === "cat" ? "🐱" : "🏷️";
 
                   return (
-                    <article className={`productAccessCard ${current.selected ? "selected" : ""}`} key={profile.id}>
+                    <article className={`productAccessCard ${openProfileId === profile.id ? "selected" : ""}`} key={profile.id}>
                       <button
                         type="button"
                         className="productSelector"
-                        onClick={() => updateProfileAccess(profile.id, { selected: !current.selected })}
+                        onClick={() => {
+                          setOpenProfileId((opened) => opened === profile.id ? null : profile.id);
+                          if (!current.selected) updateProfileAccess(profile.id, { selected: true });
+                        }}
                       >
                         <span className="productIcon">{profile.photo ? <img src={profile.photo} alt="" /> : icon}</span>
                         <span className="productIdentity">
                           <strong>{title}</strong>
                           <small>{profile.tag_code ? `QR · ${profile.tag_code}` : (ka ? "QR პროფილი" : "QR profile")}</small>
                         </span>
-                        <span className="productCheck">{current.selected ? "✓" : "+"}</span>
+                        <span className="productCheck">{openProfileId === profile.id ? "−" : current.selected ? "✓" : "+"}</span>
                       </button>
 
-                      {current.selected && (
+                      {openProfileId === profile.id && (
                         <div className="profileAdminPanel">
                           <div className="profileAdminHeading">
                             <h3 className="profileAdminTitle">{ka ? "თანაადმინისტრატორის მონაცემები და უფლებები" : "Co-administrator details and permissions"}</h3>
