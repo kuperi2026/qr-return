@@ -376,9 +376,10 @@ export default function ForgotPasswordPage() {
         .description {
           margin: 8px 0 0;
 
-          color: #78899a;
+          color: #4f6478;
 
-          font-size: 13px;
+          font-size: 15px;
+          font-weight: 600;
           line-height: 1.55;
         }
 
