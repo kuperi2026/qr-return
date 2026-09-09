@@ -1314,15 +1314,18 @@ export default function MyProfilesPage() {
         }
 
         .profileGrid {
+          max-width:
+            1240px;
+
           margin-top:
-            14px;
+            18px;
 
           display:
             grid;
 
           grid-template-columns:
             repeat(
-              3,
+              2,
               minmax(
                 0,
                 1fr
@@ -1330,7 +1333,7 @@ export default function MyProfilesPage() {
             );
 
           gap:
-            14px;
+            20px;
         }
 
         .emptyState,
