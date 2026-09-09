@@ -985,7 +985,7 @@ export default function EmergencyBraceletPage() {
           </a>
         </header>
 
-        <section className="card">
+        <section className={step === 1 ? "card emergencyChoiceCard" : "card"}>
           {saveError && (
             <div className="errorBox">
               {saveError}
@@ -1518,6 +1518,13 @@ export default function EmergencyBraceletPage() {
           background: #ffffff;
           box-shadow:
             0 20px 48px rgba(0,24,77,.23);
+        }
+
+        .emergencyChoiceCard {
+          max-width: 700px;
+          margin-top: clamp(56px, 10vh, 110px);
+          padding-top: 40px;
+          padding-bottom: 36px;
         }
 
         .errorBox {
@@ -2274,6 +2281,12 @@ export default function EmergencyBraceletPage() {
             margin-top: 17px;
             padding: 18px 14px;
             border-radius: 15px;
+          }
+
+          .emergencyChoiceCard {
+            margin-top: 38px;
+            padding-top: 32px;
+            padding-bottom: 28px;
           }
 
           .heading h1 {
