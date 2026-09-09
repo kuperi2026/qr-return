@@ -1133,25 +1133,6 @@ export default function RegistrationFlow({
 
         <header className="registrationHeader">
           <a
-            href="/"
-            className="brand"
-          >
-            <span className="brandMark">
-              QR
-            </span>
-
-            <span className="brandText">
-              <strong>
-                QR RETURN
-              </strong>
-
-              <small>
-                SMART LOST &amp; FOUND
-              </small>
-            </span>
-          </a>
-
-          <a
             href="/register"
             className="changeProduct"
           >

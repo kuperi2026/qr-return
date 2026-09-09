@@ -285,6 +285,13 @@ export default function ProfileCard({
 
         <div className="actions">
           <Link
+            className="adminButton"
+            href={`/account/admin?profile=${encodeURIComponent(item.id)}`}
+          >
+            + ადმინის დამატება
+          </Link>
+
+          <Link
             className="secondaryButton"
             href={`/profile/${encodeURIComponent(item.tagCode || "")}/edit`}
           >
@@ -811,6 +818,22 @@ export default function ProfileCard({
         }
 
         .actions button{grid-column:1/-1;border:1px solid #b8cce3;background:#eef5ff;color:#0a4c8a;font-family:inherit;cursor:pointer}.actions .deleteButton{border-color:#efc4c7;background:#fff5f5;color:#a51d26}.actions .deleteButton:disabled{opacity:.6;cursor:wait}.deleteError{margin-top:7px;padding:9px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:12px;font-weight:800}
+
+        .actions
+        :global(
+          .adminButton
+        ) {
+          grid-column: 1 / -1;
+
+          border:
+            1px solid #b9d8c8;
+
+          background:
+            #edf9f2;
+
+          color:
+            #087443;
+        }
 
         .actions
         :global(

@@ -179,6 +179,20 @@ export default function AdminPage() {
         });
       }
 
+      const requestedProfileId = Number(
+        new URLSearchParams(window.location.search).get("profile")
+      );
+
+      if (
+        Number.isFinite(requestedProfileId) &&
+        ownerProfiles.some((profile) => profile.id === requestedProfileId)
+      ) {
+        nextAccess[requestedProfileId] = {
+          ...(nextAccess[requestedProfileId] ?? emptyProfileAccess()),
+          selected: true,
+        };
+      }
+
       setProfileAccess(nextAccess);
     } catch (err) {
       setError(
