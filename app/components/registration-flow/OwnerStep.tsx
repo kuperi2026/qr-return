@@ -158,9 +158,10 @@ export default function OwnerStep({
         .stepTitle p {
           margin: 6px 0 0;
 
-          color: #718397;
+          color: #4f6478;
 
-          font-size: 13px;
+          font-size: 15px;
+          font-weight: 600;
 
           line-height: 1.5;
         }
@@ -222,9 +223,10 @@ export default function OwnerStep({
         .accountNotice p {
           margin: 2px 0 0;
 
-          color: #7b8da0;
+          color: #4f6478;
 
-          font-size: 11px;
+          font-size: 13px;
+          font-weight: 600;
 
           line-height: 1.4;
         }
