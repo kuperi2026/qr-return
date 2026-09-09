@@ -1,8 +1,9 @@
 "use client";
 
-import type {
-  ChangeEvent,
-  ReactNode,
+import {
+  useState,
+  type ChangeEvent,
+  type ReactNode,
 } from "react";
 
 import PhotoUploader from "./PhotoUploader";
@@ -61,6 +62,8 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
+  const [formPage, setFormPage] = useState<1 | 2 | 3>(1);
+
   const pet =
     isPetType(type);
 
@@ -100,7 +103,7 @@ export default function ProductStep({
 
       {/* BASIC INFO */}
 
-      <section className="formSection">
+      {formPage === 1 && <section className="formSection">
         <div className="sectionHeader">
           <span>
             01
@@ -111,11 +114,7 @@ export default function ProductStep({
               ძირითადი ინფორმაცია
             </strong>
 
-            <p>
-              შეავსეთ პროდუქტის ან
-              ცხოველის ამოსაცნობად საჭირო
-              ინფორმაცია.
-            </p>
+            {!pet && <p>შეავსეთ ნივთის ამოსაცნობად საჭირო ინფორმაცია.</p>}
           </div>
         </div>
 
@@ -348,10 +347,11 @@ export default function ProductStep({
             </Field>
           )}
         </div>
-      </section>
+      </section>}
 
       {/* PHOTO */}
 
+      {formPage === 2 && <>
       <section className="formSection">
         <div className="sectionHeader">
           <span>
@@ -537,13 +537,14 @@ export default function ProductStep({
           </Field>
         </div>
       </section>
+      </>}
 
       {/* FINDER VIEW */}
 
-      <section className="formSection">
+      {formPage === 3 && <section className="formSection">
         <div className="sectionHeader">
           <span>
-            04
+            03
           </span>
 
           <div>
@@ -710,7 +711,7 @@ export default function ProductStep({
             }
           />
         </div>
-      </section>
+      </section>}
 
       {/* ACTIONS */}
 
@@ -718,9 +719,10 @@ export default function ProductStep({
         <button
           type="button"
           className="backButton"
-          onClick={
-            onBack
-          }
+          onClick={() => {
+            if (formPage === 1) onBack();
+            else setFormPage((formPage - 1) as 1 | 2);
+          }}
         >
           ← უკან
         </button>
@@ -728,11 +730,12 @@ export default function ProductStep({
         <button
           type="button"
           className="primaryButton"
-          onClick={
-            onNext
-          }
+          onClick={() => {
+            if (formPage === 3) onNext();
+            else setFormPage((formPage + 1) as 2 | 3);
+          }}
         >
-          შემოწმება
+          {formPage === 3 ? "შემოწმება" : "გაგრძელება"}
 
           <span>
             →

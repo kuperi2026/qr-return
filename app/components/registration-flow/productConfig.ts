@@ -143,11 +143,11 @@ export function getProductFormText(
   type: ProductType
 ) {
   if (type === "dog") {
-    return "გთხოვთ შეავსოთ ძაღლის შესახებ ინფორმაცია.";
+    return "შეავსეთ ცხოველის ამოსაცნობად საჭირო ინფორმაცია.";
   }
 
   if (type === "cat") {
-    return "გთხოვთ შეავსოთ კატის შესახებ ინფორმაცია.";
+    return "შეავსეთ ცხოველის ამოსაცნობად საჭირო ინფორმაცია.";
   }
 
   return `გთხოვთ შეავსოთ ${PRODUCT_META[type].label}ს შესახებ ინფორმაცია.`;
