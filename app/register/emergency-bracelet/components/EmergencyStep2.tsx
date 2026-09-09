@@ -14,6 +14,8 @@ type Props = {
   setOwnerEmail: (value: string) => void;
 
   tagCode: string;
+  setTagCode: (value: string) => void;
+  tagPrefilled: boolean;
 
   onBack: () => void;
   onNext: () => void;
@@ -33,11 +35,14 @@ export default function EmergencyStep2({
   setOwnerEmail,
 
   tagCode,
+  setTagCode,
+  tagPrefilled,
 
   onBack,
   onNext,
 }: Props) {
   const ready =
+    tagCode.trim() !== "" &&
     ownerFirstName.trim() !== "" &&
     ownerLastName.trim() !== "" &&
     ownerPhone.trim() !== "" &&
@@ -64,11 +69,6 @@ export default function EmergencyStep2({
 
       <div className="topSummary">
         <div className="summaryItem">
-          <span>QR CODE</span>
-          <strong>{tagCode || "—"}</strong>
-        </div>
-
-        <div className="summaryItem">
           <span>PROFILE FOR</span>
 
           <strong>
@@ -76,6 +76,44 @@ export default function EmergencyStep2({
               ? "ჩემთვის"
               : "სხვა პირისთვის"}
           </strong>
+        </div>
+      </div>
+
+      <div className="qrSection">
+        <div className="field">
+          <label>QR / Tag Code *</label>
+
+          <input
+            type="text"
+            value={tagCode}
+            onChange={(event) =>
+              setTagCode(
+                event.target.value
+                  .toUpperCase()
+                  .replace(/\s/g, "")
+              )
+            }
+            placeholder="მაგ. EMR-000123"
+            autoCapitalize="characters"
+            autoComplete="off"
+            readOnly={tagPrefilled}
+          />
+        </div>
+
+        <div className="qrHelp">
+          <span>სავალდებულო</span>
+
+          <strong>
+            {tagPrefilled
+              ? "QR კოდი ავტომატურად ჩაიწერა"
+              : "თითოეულ სამაჯურს საკუთარი QR კოდი აქვს"}
+          </strong>
+
+          <p>
+            {tagPrefilled
+              ? "კოდის ხელით შეყვანა აღარ გჭირდებათ."
+              : "შეიყვანეთ Emergency Bracelet-ზე მითითებული კოდი."}
+          </p>
         </div>
       </div>
 
