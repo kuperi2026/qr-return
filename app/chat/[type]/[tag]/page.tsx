@@ -334,6 +334,7 @@ export default function FinderLiveChatPage() {
       }
     } else {
       setText("");
+      setShowEmojis(false);
 
       await loadMessages(
         true
