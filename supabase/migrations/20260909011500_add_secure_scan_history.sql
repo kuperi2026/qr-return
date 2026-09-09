@@ -33,15 +33,14 @@ begin
   values (v_item.id, false);
 
   if v_item.owner_id is not null then
-    insert into public.notifications (user_id, type, title, message, item_id, read, metadata)
+    insert into public.notifications (user_id, type, title, message, read, metadata)
     values (
       v_item.owner_id,
       'scan',
       'QR კოდი დასკანირდა',
       coalesce(v_item.item_name, 'QR პროფილი') || ' — დაფიქსირდა ახალი სკანირება.',
-      v_item.id,
       false,
-      jsonb_build_object('tag_code', v_item.tag_code, 'profile_type', v_item.item_type, 'event', 'scan')
+      jsonb_build_object('tag_code', v_item.tag_code, 'profile_type', v_item.item_type, 'event', 'scan', 'item_id', v_item.id)
     );
   end if;
 end;
