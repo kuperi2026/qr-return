@@ -57,8 +57,7 @@ export const PRODUCT_META: Record<
     emoji: "🧳",
     slogan:
       "იმოგზაურეთ მშვიდად — ჭკვიანი QR იარლიყი მოგზაურობის მოყვარულთათვის!",
-    subline:
-      "ერთი QR მპოვნელიდან მფლობელამდე.",
+    subline: "",
   },
   parking: {
     label: "მანქანა / Parking",
