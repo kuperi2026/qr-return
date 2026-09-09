@@ -481,7 +481,9 @@ export default function LoginPage() {
         .brand {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
+
+          transform: translateY(6px);
 
           text-decoration: none;
         }
@@ -498,7 +500,7 @@ export default function LoginPage() {
           background: #ffffff;
           color: #0647c8;
 
-          font-size: 11px;
+          font-size: 15px;
           font-weight: 950;
         }
 
@@ -507,7 +509,7 @@ export default function LoginPage() {
 
           color: #ffffff;
 
-          font-size: 15px;
+          font-size: 17px;
           font-weight: 800;
           line-height: 1.4;
         }
@@ -817,7 +819,7 @@ export default function LoginPage() {
 
         @media (max-width: 520px) {
           .brandMessage {
-            font-size: 13px;
+            font-size: 15px;
           }
 
           .card {
