@@ -1703,6 +1703,58 @@ export default function EmergencyBraceletPage() {
           gap: 13px;
         }
 
+        .emergencyChoiceHeading {
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .emergencyChoiceHeading h1 {
+          max-width: 620px;
+        }
+
+        .emergencySignals {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .emergencySignals span {
+          padding: 6px 10px;
+          border: 1px solid #c5d8f5;
+          border-radius: 999px;
+          background: #edf4ff;
+          color: #0747c9;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .65px;
+        }
+
+        .emergencyChoiceGrid {
+          width: 100%;
+          max-width: 620px;
+          margin: 28px auto 0;
+        }
+
+        .emergencyChoice {
+          min-height: 150px;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .emergencyChoice .choiceIcon {
+          font-size: 34px;
+          line-height: 1;
+        }
+
+        .emergencyChoice h2 {
+          margin-top: 12px;
+          font-size: 18px;
+        }
+
         .choice {
           min-height: 124px;
           padding: 14px 15px;
