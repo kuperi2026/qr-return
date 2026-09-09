@@ -501,15 +501,11 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <span>
-                  {admin
-                    ? ka
-                      ? "დამატებული ადმინისტრატორი"
-                      : "CURRENT ADMIN"
-                    : ka
-                    ? "ახალი ადმინისტრატორი"
-                    : "NEW ADMIN"}
-                </span>
+                {admin && (
+                  <span>
+                    {ka ? "დამატებული თანაადმინისტრატორი" : "CURRENT CO-ADMINISTRATOR"}
+                  </span>
+                )}
 
                 <h2>
                   {admin
@@ -539,8 +535,8 @@ export default function AdminPage() {
 
               <small>
                 {ka
-                  ? "ეს იქნება იმ ადამიანის ელფოსტა, რომელსაც ანგარიშის მართვის უფლებას აძლევთ."
-                  : "Enter the email of the person you want to authorize."}
+                  ? "ელ-ფოსტა, რომელსაც ანგარიშის მართვის უფლებას აძლევთ."
+                  : "The email address of the person you authorize to manage the account."}
               </small>
             </label>
           </section>
@@ -548,12 +544,11 @@ export default function AdminPage() {
           <section className="card">
             <div className="permissionsHeader">
               <div>
-                <span className="eyebrow">{ka ? "პროდუქტები" : "PRODUCTS"}</span>
-                <h2>{ka ? "რომელ პროფილებზე ექნება წვდომა?" : "Which profiles can the Admin access?"}</h2>
+                <h2>{ka ? "თანაადმინისტრატორის წვდომა QR პროფილებზე" : "Co-administrator access to QR profiles"}</h2>
                 <p>
                   {ka
-                    ? `აირჩიეთ ერთი, რამდენიმე ან ყველა. ამჟამად გაქვთ ${profiles.length} QR პროფილი.`
-                    : `Choose one, several or all. You currently have ${profiles.length} QR profiles.`}
+                    ? "აირჩიეთ QR პროფილი ან პროფილები, რომელთა მართვის უფლებასაც თანაადმინისტრატორს ანიჭებთ."
+                    : "Select the QR profile or profiles that the co-administrator will be allowed to manage."}
                 </p>
               </div>
               {profiles.length > 0 && (
@@ -627,27 +622,23 @@ export default function AdminPage() {
           <section className="card">
             <div className="permissionsHeader">
               <div>
-                <span className="eyebrow">
-                  {ka ? "უფლებები" : "PERMISSIONS"}
-                </span>
-
                 <h2>
                   {ka
-                    ? "რისი უფლება ექნება Admin-ს?"
-                    : "What can this Admin do?"}
+                    ? "თანაადმინისტრატორის უფლებები"
+                    : "Co-administrator permissions"}
                 </h2>
 
                 <p>
                   {ka
-                    ? "ყველა უფლება დამოუკიდებელია. ჩართეთ მხოლოდ ის, რაც ნამდვილად გსურთ."
-                    : "Every permission is independent. Enable only what you want to allow."}
+                    ? "თავად განსაზღვრეთ, რა ინფორმაციის ნახვა ან მართვა შეეძლება თანაადმინისტრატორს. თითოეული უფლება ცალ-ცალკე ირთვება."
+                    : "Choose what information the co-administrator can view or manage. Each permission is enabled separately."}
                 </p>
               </div>
             </div>
 
             <div className="permissionList">
               <PermissionToggle
-                icon="👁️"
+                icon=""
                 title={
                   ka
                     ? "QR პროფილების ნახვა"
@@ -655,7 +646,7 @@ export default function AdminPage() {
                 }
                 description={
                   ka
-                    ? "დაინახოს თქვენი ძაღლის, კატის და ნივთების პროფილები."
+                    ? "ნახოს თქვენ მიერ არჩეული QR პროფილების ძირითადი ინფორმაცია."
                     : "View your pet and item QR profiles."
                 }
                 value={canViewProfiles}
@@ -696,7 +687,7 @@ export default function AdminPage() {
               />
 
               <PermissionToggle
-                icon="👁"
+                icon=""
                 title={
                   ka
                     ? "მპოვნელისთვის ხილვადობის მართვა"
@@ -1036,15 +1027,16 @@ export default function AdminPage() {
         }
 
         .importantNotice strong {
-          color: #344054;
-          font-size: 13px;
+          color: #173a67;
+          font-size: 17px;
+          line-height: 1.4;
         }
 
         .importantNotice p {
-          margin: 5px 0 0;
-          color: #667085;
-          font-size: 12px;
-          line-height: 1.55;
+          margin: 7px 0 0;
+          color: #405b78;
+          font-size: 15px;
+          line-height: 1.6;
         }
 
         form {
@@ -1106,10 +1098,11 @@ export default function AdminPage() {
 
         label small {
           display: block;
-          margin-top: 6px;
-          color: #98a2b3;
-          font-size: 10px;
-          line-height: 1.5;
+          margin-top: 8px;
+          color: #52677f;
+          font-size: 15px;
+          font-weight: 650;
+          line-height: 1.55;
         }
 
         input {
@@ -1168,15 +1161,16 @@ export default function AdminPage() {
 
         .permissionText strong {
           display: block;
-          color: #344054;
-          font-size: 13px;
+          color: #173a67;
+          font-size: 16px;
+          line-height: 1.4;
         }
 
         .permissionText p {
-          margin: 4px 0 0;
-          color: #98a2b3;
-          font-size: 11px;
-          line-height: 1.45;
+          margin: 6px 0 0;
+          color: #52677f;
+          font-size: 14px;
+          line-height: 1.55;
         }
 
         .toggle {
@@ -1580,7 +1574,7 @@ function PermissionToggle({
 }) {
   return (
     <div className="permissionRow">
-      <div className="permissionIcon">{icon}</div>
+      {icon && <div className="permissionIcon">{icon}</div>
 
       <div className="permissionText">
         <strong>{title}</strong>
