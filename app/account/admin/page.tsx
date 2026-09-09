@@ -353,6 +353,25 @@ export default function AdminPage() {
                             </label>
                           </div>
                           <p className="adminLinkNote">{ka ? "ელ-ფოსტა თანაადმინისტრატორის ანგარიშს დაუკავშირდება." : "The email will be linked to the co-administrator account."}</p>
+                          {profiles.length > 1 && (
+                            <label className="copyProfileField">
+                              <span>{ka ? "იგივე თანაადმინისტრატორი და იგივე უფლებები სხვა პროფილზეც" : "Use the same co-administrator and permissions for another profile"}</span>
+                              <select defaultValue="" onChange={(event) => {
+                                const targetId = Number(event.target.value);
+                                if (!targetId) return;
+                                setProfileAccess((existing) => ({
+                                  ...existing,
+                                  [targetId]: { ...current, selected: true }
+                                }));
+                                event.target.value = "";
+                              }}>
+                                <option value="">{ka ? "აირჩიეთ სხვა QR პროფილი" : "Select another QR profile"}</option>
+                                {profiles.filter((item) => item.id !== profile.id).map((item) => (
+                                  <option key={item.id} value={item.id}>{item.item_name || (ka ? "უსახელო პროფილი" : "Unnamed profile")}</option>
+                                ))}
+                              </select>
+                            </label>
+                          )}
                           <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
                           <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
@@ -981,6 +1000,9 @@ export default function AdminPage() {
         .profileContactGrid label span{font-size:14px;color:#24486f;font-weight:800}
         .profileContactGrid input{background:#fff;font-size:16px}
         .adminLinkNote{margin:10px 0 0;color:#0a58ca;font-size:14px;font-weight:700}
+        .copyProfileField{display:block;margin-top:16px;padding:14px;border:1px solid #b9d4f5;border-radius:11px;background:#eef6ff}
+        .copyProfileField span{display:block;margin-bottom:8px;color:#173a67;font-size:14px;font-weight:850}
+        .copyProfileField select{width:100%;min-height:46px;padding:0 12px;border:1px solid #a9c9f4;border-radius:9px;background:#fff;color:#173a67;font-size:15px}
         .profilePermissionGrid {
           padding: 14px;
           display: grid;
