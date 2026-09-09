@@ -35,6 +35,9 @@ type OwnerProfile = {
 type ProfileAccess = {
   selected: boolean;
   adminEmail: string;
+  adminFirstName: string;
+  adminLastName: string;
+  adminPhone: string;
   active: boolean;
   can_view_profiles: boolean;
   can_edit_profiles: boolean;
@@ -51,6 +54,9 @@ type ProfilePermission = Exclude<keyof ProfileAccess, "selected">;
 const emptyProfileAccess = (): ProfileAccess => ({
   selected: false,
   adminEmail: "",
+  adminFirstName: "",
+  adminLastName: "",
+  adminPhone: "",
   active: true,
   can_view_profiles: true,
   can_edit_profiles: false,
@@ -106,7 +112,7 @@ export default function AdminPage() {
       const {data:rows,error:rowsError}=await supabase.from("profile_co_admins").select("*").eq("owner_id",user.id);
       if(rowsError) throw rowsError;
       const next:Record<number,ProfileAccess>={}; ownerProfiles.forEach(p=>next[p.id]=emptyProfileAccess());
-      (rows??[]).forEach(row=>next[row.item_id]={selected:true,adminEmail:row.admin_email,active:row.active,can_view_profiles:true,can_edit_profiles:row.can_edit_profiles,can_manage_lost_mode:row.can_manage_lost_mode,can_manage_visibility:row.can_manage_visibility,can_manage_contacts:row.can_manage_contacts,can_manage_location:row.can_manage_location,can_manage_additional_contact:row.can_manage_additional_contact,can_use_live_chat:row.can_use_live_chat});
+      (rows??[]).forEach(row=>next[row.item_id]={selected:true,adminEmail:row.admin_email,adminFirstName:row.admin_first_name??"",adminLastName:row.admin_last_name??"",adminPhone:row.admin_phone??"",active:row.active,can_view_profiles:true,can_edit_profiles:row.can_edit_profiles,can_manage_lost_mode:row.can_manage_lost_mode,can_manage_visibility:row.can_manage_visibility,can_manage_contacts:row.can_manage_contacts,can_manage_location:row.can_manage_location,can_manage_additional_contact:row.can_manage_additional_contact,can_use_live_chat:row.can_use_live_chat});
       const requested=Number(new URLSearchParams(window.location.search).get("profile"));
       if(Number.isFinite(requested)&&ownerProfiles.some(p=>p.id===requested)) next[requested]={...(next[requested]??emptyProfileAccess()),selected:true};
       setProfileAccess(next);
@@ -122,9 +128,10 @@ export default function AdminPage() {
       const chosen=profiles.filter(p=>profileAccess[p.id]?.selected);
       if(!chosen.length) throw new Error("აირჩიეთ მინიმუმ ერთი QR პროფილი.");
       const payload=chosen.map(p=>{const a=profileAccess[p.id],mail=a.adminEmail.trim().toLowerCase();
+        if(!a.adminFirstName.trim()||!a.adminLastName.trim()||!a.adminPhone.trim()) throw new Error(`${p.item_name||"QR პროფილი"} — შეავსეთ თანაადმინისტრატორის სახელი, გვარი და ტელეფონი.`);
         if(!mail) throw new Error(`${p.item_name||"QR პროფილი"} — დაამატეთ ელ-ფოსტა.`);
         if(mail===user.email?.toLowerCase()) throw new Error("საკუთარ თავს თანაადმინისტრატორად ვერ დაამატებთ.");
-        return {owner_id:user.id,item_id:p.id,admin_email:mail,active:a.active,can_view_profiles:true,can_edit_profiles:a.can_edit_profiles,can_manage_lost_mode:a.can_manage_lost_mode,can_manage_visibility:a.can_manage_visibility,can_manage_contacts:a.can_manage_contacts,can_manage_location:a.can_manage_location,can_manage_additional_contact:a.can_manage_additional_contact,can_use_live_chat:a.can_use_live_chat,updated_at:new Date().toISOString()};});
+        return {owner_id:user.id,item_id:p.id,admin_email:mail,admin_first_name:a.adminFirstName.trim(),admin_last_name:a.adminLastName.trim(),admin_phone:a.adminPhone.trim(),active:a.active,can_view_profiles:true,can_edit_profiles:a.can_edit_profiles,can_manage_lost_mode:a.can_manage_lost_mode,can_manage_visibility:a.can_manage_visibility,can_manage_contacts:a.can_manage_contacts,can_manage_location:a.can_manage_location,can_manage_additional_contact:a.can_manage_additional_contact,can_use_live_chat:a.can_use_live_chat,updated_at:new Date().toISOString()};});
       const {error:saveError}=await supabase.from("profile_co_admins").upsert(payload,{onConflict:"item_id"});
       if(saveError) throw saveError;
       setSuccess("თანაადმინისტრატორები და უფლებები წარმატებით შეინახა.");await loadAdmin();
@@ -327,10 +334,25 @@ export default function AdminPage() {
 
                       {current.selected && (
                         <div className="profileAdminPanel">
-                          <label className="profileEmailField">
-                            <strong>{ka ? "დაამატეთ ელ-ფოსტა, რომელსაც ამ პროფილის მართვის უფლებას ანიჭებთ." : "Add the email authorized to manage this profile."}</strong>
-                            <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
-                          </label>
+                          <div className="profileContactGrid">
+                            <label>
+                              <span>{ka ? "სახელი" : "First name"} *</span>
+                              <input value={current.adminFirstName} onChange={(e) => updateProfileAccess(profile.id, { adminFirstName: e.target.value })} required />
+                            </label>
+                            <label>
+                              <span>{ka ? "გვარი" : "Last name"} *</span>
+                              <input value={current.adminLastName} onChange={(e) => updateProfileAccess(profile.id, { adminLastName: e.target.value })} required />
+                            </label>
+                            <label>
+                              <span>{ka ? "ტელეფონის ნომერი" : "Phone number"} *</span>
+                              <input type="tel" value={current.adminPhone} onChange={(e) => updateProfileAccess(profile.id, { adminPhone: e.target.value })} placeholder="+995 5XX XX XX XX" required />
+                            </label>
+                            <label className="profileEmailField">
+                              <span>{ka ? "ელ-ფოსტა" : "Email"} *</span>
+                              <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
+                            </label>
+                          </div>
+                          <p className="adminLinkNote">{ka ? "ელ-ფოსტა თანაადმინისტრატორის ანგარიშს დაუკავშირდება." : "The email will be linked to the co-administrator account."}</p>
                           <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
                           <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
@@ -955,8 +977,10 @@ export default function AdminPage() {
         }
 
         .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
-        .profileEmailField strong{display:block;margin-bottom:10px;color:#0a58ca;font-size:15px;line-height:1.5}
-        .profileEmailField input{background:#fff;font-size:16px}
+        .profileContactGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .profileContactGrid label span{font-size:14px;color:#24486f;font-weight:800}
+        .profileContactGrid input{background:#fff;font-size:16px}
+        .adminLinkNote{margin:10px 0 0;color:#0a58ca;font-size:14px;font-weight:700}
         .profilePermissionGrid {
           padding: 14px;
           display: grid;
@@ -1055,7 +1079,8 @@ export default function AdminPage() {
             width: 100%;
           }
 
-          .profilePermissionGrid {
+          .profilePermissionGrid,
+          .profileContactGrid {
             grid-template-columns: 1fr;
           }
         }
