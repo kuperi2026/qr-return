@@ -31,6 +31,7 @@ type ChatMessage = {
   sender_role: "finder" | "owner" | "admin";
   message_text: string;
   created_at: string;
+  read_at: string | null;
 };
 
 const CHAT_EMOJIS = ["😀","😃","😄","😁","😊","🙂","😉","😍","🥰","😘","😇","🤗","🤔","😢","😭","😮","😅","😂","🤣","🙏","❤️","🧡","💛","💚","💙","💜","👍","👎","👏","🙌","👋","🤝","💪","✅","❗","❓","🎉","🚨","📍","🏠","🚗","🔑","🐶","🐱","🐾","📞","💬","✨"];
@@ -157,7 +158,7 @@ export default function OwnerChatInboxPage() {
     }
 
     const { data, error: rpcError } = await supabase.rpc(
-      "owner_get_chat_messages",
+      "owner_get_chat_messages_v2",
       {
         p_profile_id: thread.profile_id,
         p_finder_session: thread.finder_session,
@@ -667,9 +668,16 @@ export default function OwnerChatInboxPage() {
                             )}
 
 
-                            <time>
-                              {formatTime(message.created_at)}
-                            </time>
+                            <div className="messageMeta">
+                              <time>{formatTime(message.created_at)}</time>
+                              {mine && (
+                                <span className={message.read_at ? "seen" : "delivered"}>
+                                  {message.read_at
+                                    ? ka ? "✓✓ ნანახია" : "✓✓ Seen"
+                                    : ka ? "✓ მიწოდებულია" : "✓ Delivered"}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -701,6 +709,12 @@ export default function OwnerChatInboxPage() {
                     onChange={(event) =>
                       setText(event.target.value)
                     }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        event.currentTarget.form?.requestSubmit();
+                      }
+                    }}
                     maxLength={2000}
                     disabled={sending}
                     placeholder={
@@ -1237,6 +1251,20 @@ function Styles() {
         background: #1465e8;
         color: white;
       }
+
+      .messageMeta {
+        margin-top: 5px;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 11px;
+        opacity: .84;
+      }
+
+      .messageMeta time { font-size: 11px; }
+      .seen { color: #c4e2ff; font-weight: 800; }
+      .delivered { color: rgba(255,255,255,.8); font-weight: 750; }
 
       .locationLink {
         display: inline-flex;
