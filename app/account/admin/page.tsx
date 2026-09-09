@@ -511,20 +511,13 @@ export default function AdminPage() {
                   {admin
                     ? admin.admin_email
                     : ka
-                    ? "თანაადმინისტრატორის მონაცემები"
-                    : "Co-administrator details"}
+                    ? "დაამატეთ ელ-ფოსტა, რომელსაც ანგარიშის მართვის უფლებას ანიჭებთ."
+                    : "Add the email address of the person you authorize to manage the account."}
                 </h2>
               </div>
             </div>
 
             <label className="emailField">
-              <span>
-                {ka
-                  ? "თანაადმინისტრატორის ელ-ფოსტა"
-                  : "Co-administrator email"}{" "}
-                *
-              </span>
-
               <input
                 type="email"
                 value={email}
@@ -533,11 +526,7 @@ export default function AdminPage() {
                 required
               />
 
-              <small>
-                {ka
-                  ? "ელ-ფოსტა, რომელსაც ანგარიშის მართვის უფლებას აძლევთ."
-                  : "The email address of the person you authorize to manage the account."}
-              </small>
+
             </label>
           </section>
 
@@ -545,9 +534,9 @@ export default function AdminPage() {
             <div className="permissionsHeader">
               <div>
                 <h2>{ka ? "თანაადმინისტრატორის წვდომა QR პროფილებზე" : "Co-administrator access to QR profiles"}</h2>
-                <p>
+                <p className="profileAccessIntro">
                   {ka
-                    ? "აირჩიეთ QR პროფილი ან პროფილები, რომელთა მართვის უფლებასაც თანაადმინისტრატორს ანიჭებთ."
+                    ? "აირჩიეთ QR პროფილი ან პროფილები, რომელთა მართვის უფლებას თანაადმინისტრატორს ანიჭებთ."
                     : "Select the QR profile or profiles that the co-administrator will be allowed to manage."}
                 </p>
               </div>
@@ -1131,6 +1120,12 @@ export default function AdminPage() {
           color: #52677f;
           font-size: 16px;
           line-height: 1.6;
+        }
+
+        .profileAccessIntro {
+          color: #0a58ca !important;
+          font-size: 16px !important;
+          font-weight: 750;
         }
 
         .permissionList {
