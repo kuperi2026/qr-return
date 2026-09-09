@@ -215,6 +215,7 @@ export default function OwnerChatInboxPage() {
       setError(rpcError.message);
     } else {
       setText("");
+      setShowEmojis(false);
 
       await loadMessages(selected, true);
       await loadThreads();
