@@ -823,6 +823,13 @@ export default function EmergencyBraceletPage() {
             .delete()
             .eq("id", profile.id);
 
+          await supabase
+            .from("item")
+            .delete()
+            .eq("owner_id", ownerId)
+            .eq("tag_code", normalizedTag)
+            .eq("item_type", "emergency");
+
           throw new Error(
             "QR კოდის გააქტიურება ვერ მოხერხდა."
           );
@@ -833,8 +840,7 @@ export default function EmergencyBraceletPage() {
         "Emergency პროფილი წარმატებით შეიქმნა."
       );
 
-      window.location.href =
-        `/emergency/${encodeURIComponent(normalizedTag)}`;
+      window.location.href = "/my-profiles";
     } catch (error) {
       console.error(
         "CREATE EMERGENCY PROFILE ERROR:",
