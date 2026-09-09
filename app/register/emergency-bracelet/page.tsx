@@ -956,7 +956,7 @@ export default function EmergencyBraceletPage() {
 
   return (
     <>
-      <main className="page">
+      <main className={step === 1 ? "page emergencyChoicePage" : "page"}>
         <header className="topbar">
           <a
             href="/"
@@ -1439,6 +1439,15 @@ export default function EmergencyBraceletPage() {
             "Segoe UI",
             Arial,
             sans-serif;
+        }
+
+        .emergencyChoicePage {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .emergencyChoicePage .emergencyChoiceCard {
+          margin: auto;
         }
 
         .topbar {
