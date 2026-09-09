@@ -390,10 +390,7 @@ export default function FinderLiveChatPage() {
           </span>
         </a>
 
-        <span className="secureBadge">
-          <span className="operatorIcon" aria-hidden="true">👩‍💻</span>
-          <span><strong>24/7</strong><small>ოპერატორი</small></span>
-        </span>
+<span className="secureBadge">🔒 უსაფრთხო კავშირი</span>
       </header>
 
       <section className="wrap">
@@ -406,6 +403,15 @@ export default function FinderLiveChatPage() {
           >
             ← {ka ? "QR პროფილზე დაბრუნება" : "Back to QR profile"}
           </a>
+        </div>
+
+        <div className="operatorCard">
+          <span className="operatorAvatar" aria-hidden="true">👩🏻‍💻</span>
+          <span className="operatorCopy">
+            <strong>24/7</strong>
+            <span>ოპერატორი</span>
+          </span>
+          <span className="onlineDot">● ონლაინ</span>
         </div>
 
         <div className="card">
@@ -763,8 +769,36 @@ export default function FinderLiveChatPage() {
           font-weight: 900;
         }
 
-        .secureBadge{padding:7px 11px 7px 8px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.38);border-radius:14px;color:#fff;background:rgba(255,255,255,.15);box-shadow:0 8px 22px rgba(0,25,78,.2);font-size:13px;font-weight:850;backdrop-filter:blur(12px)}
-        .secureBadge strong,.secureBadge small{display:block}.secureBadge strong{font-size:15px;line-height:1}.secureBadge small{margin-top:3px;color:rgba(255,255,255,.78);font-size:9px}.operatorIcon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#fff;font-size:20px;box-shadow:0 4px 12px rgba(0,33,92,.2)}
+        .secureBadge{padding:9px 12px;border:1px solid rgba(255,255,255,.3);border-radius:12px;color:#fff;background:rgba(255,255,255,.1);font-size:12px;font-weight:850}
+
+        .operatorCard {
+          margin: 0 0 12px;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          border: 1px solid rgba(255,255,255,.78);
+          border-radius: 18px;
+          background: linear-gradient(135deg,#ffffff 0%,#eaf5ff 100%);
+          box-shadow: 0 14px 34px rgba(0,24,74,.25);
+        }
+
+        .operatorAvatar {
+          width: 58px;
+          height: 58px;
+          display: grid;
+          place-items: center;
+          flex: 0 0 58px;
+          border-radius: 50%;
+          background: linear-gradient(145deg,#dceeff,#ffffff);
+          box-shadow: inset 0 0 0 2px #fff,0 6px 16px rgba(11,85,188,.2);
+          font-size: 34px;
+        }
+
+        .operatorCopy { flex: 1; color: #12315f; }
+        .operatorCopy strong { display: block; color: #0754bd; font-size: 25px; line-height: 1; }
+        .operatorCopy span { display: block; margin-top: 5px; font-size: 14px; font-weight: 850; }
+        .onlineDot { color: #078a52; font-size: 12px; font-weight: 900; }
 
         .wrap {
           width: calc(100% - 24px);
@@ -1010,7 +1044,7 @@ export default function FinderLiveChatPage() {
         .title small{font-size:12px}.title h1{font-size:24px}.title p{font-size:13px}.live{font-size:12px}.notice{font-size:14px}.sender{font-size:12px}.bubble{font-size:16px}.locationLink{font-size:13px}.bubble time{font-size:11px}.error{font-size:14px}.composer textarea{font-size:16px}.composer button{font-size:15px}
 
         @media (max-width: 600px) {
-          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:5px 8px 5px 6px;font-size:10px}.secureBadge strong{font-size:13px}.secureBadge small{font-size:8px}.operatorIcon{width:29px;height:29px;font-size:17px}.wrap{width:calc(100% - 22px);padding:10px 0 0}.backLine{margin:0 0 9px}.back{min-height:36px;padding:0 12px;font-size:12px}.card{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:13px 14px}.icon{width:44px;height:44px;flex:0 0 44px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:310px;min-height:230px;flex:none;padding:14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:48px;max-height:100px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
+          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.operatorCard{padding:10px 13px;border-radius:16px}.operatorAvatar{width:50px;height:50px;flex-basis:50px;font-size:29px}.operatorCopy strong{font-size:22px}.operatorCopy span{font-size:13px}.onlineDot{font-size:10px}.wrap{width:calc(100% - 22px);padding:10px 0 0}.backLine{margin:0 0 9px}.back{min-height:36px;padding:0 12px;font-size:12px}.card{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:13px 14px}.icon{width:44px;height:44px;flex:0 0 44px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:310px;min-height:230px;flex:none;padding:14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:48px;max-height:100px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
           .chatHead {
             flex-wrap: wrap;
           }
