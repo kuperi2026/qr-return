@@ -595,7 +595,7 @@ export default function FinderPage() {
                 {profile.live_chat_enabled ===
                   true && (
                   <a
-                    href={`/chat/finder/${encodeURIComponent(profile.tag_code)}`}
+                    href={`/chat/${encodeURIComponent(profile.item_type === "pet" ? profile.pet_type || "pet" : profile.item_type)}/${encodeURIComponent(profile.tag_code)}`}
                     className="secondaryButton"
                   >
                     ჩატი
