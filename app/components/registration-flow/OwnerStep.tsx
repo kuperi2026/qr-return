@@ -118,7 +118,7 @@ export default function OwnerStep({
 
           <p>
             სახელი, გვარი და ტელეფონი ყოველთვის ხილულია.
-            ელფოსტის ჩვენებას თქვენ აკონტროლებთ.
+            ელ-ფოსტის ჩვენებას თქვენ აკონტროლებთ.
           </p>
         </div>
       </div>
@@ -350,11 +350,12 @@ export default function OwnerStep({
           box-sizing: border-box;
 
           border:
-            1px solid #b9d4f5;
+            1px solid #0a58ca;
 
-          border-radius: 10px;
+          border-radius: 12px;
 
-          background: #eef6ff;
+          background: #0a58ca;
+          box-shadow: 0 10px 24px rgba(10, 88, 202, 0.2);
         }
 
         .finderIcon {
@@ -367,9 +368,9 @@ export default function OwnerStep({
 
           border-radius: 50%;
 
-          background: #eaf2ff;
+          background: #ffffff;
 
-          color: #0647c8;
+          color: #0a58ca;
 
           font-size: 12px;
           font-weight: 900;
@@ -378,18 +379,18 @@ export default function OwnerStep({
         .finderText strong {
           display: block;
 
-          color: #173a67;
+          color: #ffffff;
 
-          font-size: 17px;
+          font-size: 18px;
           font-weight: 850;
         }
 
         .finderText p {
           margin: 2px 0 0;
 
-          color: #405b78;
+          color: #ffffff;
 
-          font-size: 15px;
+          font-size: 16px;
 
           line-height: 1.6;
         }
