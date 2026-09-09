@@ -350,12 +350,12 @@ export default function OwnerStep({
           box-sizing: border-box;
 
           border:
-            1px solid #0a58ca;
+            1px solid #b9d4f5;
 
-          border-radius: 12px;
+          border-radius: 11px;
 
-          background: #0a58ca;
-          box-shadow: 0 10px 24px rgba(10, 88, 202, 0.2);
+          background: #eef6ff;
+          box-shadow: none;
         }
 
         .finderIcon {
@@ -368,7 +368,7 @@ export default function OwnerStep({
 
           border-radius: 50%;
 
-          background: #ffffff;
+          background: #dbeaff;
 
           color: #0a58ca;
 
@@ -379,7 +379,7 @@ export default function OwnerStep({
         .finderText strong {
           display: block;
 
-          color: #ffffff;
+          color: #173a67;
 
           font-size: 15px;
           font-weight: 850;
@@ -388,7 +388,7 @@ export default function OwnerStep({
         .finderText p {
           margin: 2px 0 0;
 
-          color: #ffffff;
+          color: #405f7f;
 
           font-size: 14px;
 
