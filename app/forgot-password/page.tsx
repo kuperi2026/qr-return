@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
     const cleanEmail = email.trim().toLowerCase();
 
     if (!cleanEmail) {
-      setErrorMessage("შეიყვანეთ ელფოსტა.");
+      setErrorMessage("შეიყვანეთ ელ-ფოსტა.");
       return;
     }
 
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
 
                 <p className="description">
                   შეიყვანეთ თქვენს ანგარიშზე
-                  რეგისტრირებული ელფოსტა.
+                  რეგისტრირებული ელ-ფოსტა.
                 </p>
 
                 {errorMessage && (
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
                 <form onSubmit={handleSubmit}>
                   <div className="field">
                     <label htmlFor="email">
-                      ელფოსტა
+                      ელ-ფოსტა
                     </label>
 
                     <input
@@ -177,7 +177,7 @@ export default function ForgotPasswordPage() {
                 </h1>
 
                 <p>
-                  შეამოწმეთ ელფოსტა და
+                  შეამოწმეთ ელ-ფოსტა და
                   გახსენით პაროლის აღდგენის
                   ბმული.
                 </p>
