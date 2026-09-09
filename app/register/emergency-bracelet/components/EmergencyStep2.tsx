@@ -100,34 +100,20 @@ export default function EmergencyStep2({
           />
         </div>
 
-        <div className="qrHelp">
-          <span>სავალდებულო</span>
+        <div className="qrHelp qrProfileRule">
+          <span>REQUIRED</span>
 
           <strong>
-            {tagPrefilled
-              ? "QR კოდი ავტომატურად ჩაიწერა"
-              : "თითოეულ სამაჯურს საკუთარი QR კოდი აქვს"}
+            თითოეულ სამაჯურს საკუთარი QR კოდი აქვს
           </strong>
 
           <p>
-            {tagPrefilled
-              ? "კოდის ხელით შეყვანა აღარ გჭირდებათ."
-              : "შეიყვანეთ Emergency Bracelet-ზე მითითებული კოდი."}
+            Emergency პროფილი სხვა პირზე არ გადადის.
+            რეგისტრაციის შემდეგ სახელისა და გვარის შეცვლა
+            მხოლოდ ერთხელაა შესაძლებელი; შემდეგ პროფილში
+            სხვა პირის მონაცემების შეტანა შეუძლებელია.
           </p>
         </div>
-      </div>
-
-      <div className="nameWarning">
-        <div>!</div>
-
-        <p>
-          <strong>
-            სახელი შეიყვანეთ ყურადღებით.
-          </strong>{" "}
-          Emergency პროფილის შექმნის შემდეგ სახელის შეცვლა
-          შესაძლებელი იქნება მხოლოდ ერთხელ, დამატებითი
-          იდენტიფიკაციის შემდეგ.
-        </p>
       </div>
 
       <div className="formGrid">
