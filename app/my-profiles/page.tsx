@@ -1102,10 +1102,10 @@ export default function MyProfilesPage() {
             block;
 
           color:
-            #8a98a7;
+            #263f59;
 
           font-size:
-            7px;
+            12px;
 
           font-weight:
             900;
@@ -1119,7 +1119,7 @@ export default function MyProfilesPage() {
             3px;
 
           color:
-            #1266e9;
+            #0647c8;
 
           font-size:
             22px;
