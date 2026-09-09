@@ -87,6 +87,7 @@ export default function AdminPage() {
   const [active, setActive] = useState(true);
   const [profiles, setProfiles] = useState<OwnerProfile[]>([]);
   const [profileAccess, setProfileAccess] = useState<Record<number, ProfileAccess>>({});
+  const [editingProfiles, setEditingProfiles] = useState<Record<number, boolean>>({});
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -372,24 +373,38 @@ export default function AdminPage() {
 
                       {current.selected && (
                         <div className="profileAdminPanel">
-                          <h3 className="profileAdminTitle">{ka ? "თანაადმინისტრატორის მონაცემები და უფლებები" : "Co-administrator details and permissions"}</h3>
+                          <div className="profileAdminHeading">
+                            <h3 className="profileAdminTitle">{ka ? "თანაადმინისტრატორის მონაცემები და უფლებები" : "Co-administrator details and permissions"}</h3>
+                            <button
+                              type="button"
+                              className="editProfileAdminButton"
+                              onClick={() => setEditingProfiles((currentEditing) => ({
+                                ...currentEditing,
+                                [profile.id]: !currentEditing[profile.id],
+                              }))}
+                            >
+                              {editingProfiles[profile.id]
+                                ? ka ? "რედაქტირება ჩართულია" : "Editing enabled"
+                                : ka ? "რედაქტირება" : "Edit"}
+                            </button>
+                          </div>
                           <p className="profileEditNote">{ka ? "შეგიძლიათ შეცვალოთ ნებისმიერი მონაცემი ან მინიჭებული უფლება." : "You can edit any detail or assigned permission."}</p>
                           <div className="profileContactGrid">
                             <label>
                               <span>{ka ? "სახელი" : "First name"} *</span>
-                              <input value={current.adminFirstName} onChange={(e) => updateProfileAccess(profile.id, { adminFirstName: e.target.value })} required />
+                              <input value={current.adminFirstName} onChange={(e) => updateProfileAccess(profile.id, { adminFirstName: e.target.value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
                             </label>
                             <label>
                               <span>{ka ? "გვარი" : "Last name"} *</span>
-                              <input value={current.adminLastName} onChange={(e) => updateProfileAccess(profile.id, { adminLastName: e.target.value })} required />
+                              <input value={current.adminLastName} onChange={(e) => updateProfileAccess(profile.id, { adminLastName: e.target.value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
                             </label>
                             <label>
                               <span>{ka ? "ტელეფონის ნომერი" : "Phone number"} *</span>
-                              <input type="tel" value={current.adminPhone} onChange={(e) => updateProfileAccess(profile.id, { adminPhone: e.target.value })} placeholder="+995 5XX XX XX XX" required />
+                              <input type="tel" value={current.adminPhone} onChange={(e) => updateProfileAccess(profile.id, { adminPhone: e.target.value })} placeholder="+995 5XX XX XX XX" disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
                             </label>
                             <label className="profileEmailField">
                               <span>{ka ? "ელ-ფოსტა" : "Email"} *</span>
-                              <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
+                              <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
                             </label>
                           </div>
                           <p className="adminLinkNote">{ka ? "ელ-ფოსტა თანაადმინისტრატორის ანგარიშს დაუკავშირდება." : "The email will be linked to the co-administrator account."}</p>
@@ -423,13 +438,13 @@ export default function AdminPage() {
                               : ka ? "თანაადმინისტრატორის წაშლა" : "Remove co-administrator"}
                           </button>
                           <div className="profilePermissionGrid">
-                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
-                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
-                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
-                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
-                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
-                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
-                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
                           </div>
                         </div>
                       )}
@@ -1046,7 +1061,11 @@ export default function AdminPage() {
         }
 
         .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
+        .profileAdminHeading{display:flex;align-items:center;justify-content:space-between;gap:14px}
         .profileAdminTitle{margin:0;color:#173a67;font-size:20px;line-height:1.35}
+        .editProfileAdminButton{flex:0 0 auto;min-height:42px;padding:0 15px;border:1px solid #8bb8ee;border-radius:10px;background:#0a58ca;color:#fff;font-size:14px;font-weight:900;cursor:pointer}
+        .editProfileAdminButton:hover{background:#0849a8}
+        .profileContactGrid input:disabled{background:#eef2f6;color:#667085;cursor:not-allowed}
         .profileEditNote{margin:6px 0 16px;color:#52677f;font-size:14px;line-height:1.55}
         .profileContactGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
         .profileContactGrid label span{font-size:14px;color:#24486f;font-weight:800}
