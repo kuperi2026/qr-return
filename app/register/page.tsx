@@ -71,7 +71,7 @@ export default function RegisterPage() {
         .intro { text-align: center; }
         .intro > span { color: #1266e9; font-size: 9px; font-weight: 900; letter-spacing: 1.4px; }
         .intro h1 { margin: 7px 0 0; color: #172b43; font-size: clamp(25px,3vw,34px); line-height: 1.1; }
-        .intro p { margin: 8px 0 0; color: #77889b; font-size: 11px; }
+        .intro p { margin: 8px 0 0; color: #4f6478; font-size: 15px; font-weight: 600; line-height: 1.5; }
         .productsGrid { margin-top: 24px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
         .productCard { min-height: 112px; padding: 16px; display: grid; grid-template-columns: 48px minmax(0,1fr) 28px; align-items: center; gap: 12px; border: 1px solid #d8e5f6; border-radius: 16px; background: linear-gradient(145deg,#fff,#f5f9ff); color: #203951; text-decoration: none; box-shadow: 0 8px 20px rgba(29,72,128,.06); transition: .18s ease; }
         .productCard:hover { transform: translateY(-2px); border-color: #9fc2f1; box-shadow: 0 12px 24px rgba(29,72,128,.11); }
@@ -79,9 +79,9 @@ export default function RegisterPage() {
         .productIcon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 13px; background: white; font-size: 24px; box-shadow: 0 5px 14px rgba(19,75,157,.08); }
         .productCard strong { font-size: 14px; line-height: 1.3; }
         .arrow { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #1266e9; color: white; font-weight: 900; }
-        .bottomInfo { margin-top: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-radius: 11px; background: #f2f7ff; color: #61758d; }
+        .bottomInfo { margin-top: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-radius: 11px; background: #f2f7ff; color: #4f6478; }
         .bottomInfo > span { width: 24px; height: 24px; flex: 0 0 24px; display: grid; place-items: center; border-radius: 50%; background: #1266e9; color: white; font-size: 11px; font-weight: 900; }
-        .bottomInfo p { margin: 0; font-size: 10px; line-height: 1.45; }
+        .bottomInfo p { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.45; }
         .bottomInfo strong { color: #29435f; }
         @media (max-width: 900px) { .productsGrid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
         @media (max-width: 560px) {
