@@ -117,7 +117,7 @@ export default function OwnerStep({
           <strong>Finder View</strong>
 
           <p>
-            სახელი, გვარი და ტელეფონი ყოველთვის ხილულია.
+            სახელი, გვარი და მობილურის ნომერი ყოველთვის ხილულია.
             ელ-ფოსტის ჩვენებას თქვენ აკონტროლებთ.
           </p>
         </div>
@@ -336,7 +336,7 @@ export default function OwnerStep({
 
           margin-top: 18px;
 
-          padding: 16px 17px;
+          padding: 11px 13px;
 
           display: grid;
 
@@ -381,7 +381,7 @@ export default function OwnerStep({
 
           color: #ffffff;
 
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 850;
         }
 
@@ -390,7 +390,7 @@ export default function OwnerStep({
 
           color: #ffffff;
 
-          font-size: 16px;
+          font-size: 14px;
 
           line-height: 1.6;
         }
