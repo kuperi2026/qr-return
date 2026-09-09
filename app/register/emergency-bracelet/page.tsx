@@ -1656,8 +1656,8 @@ export default function EmergencyBraceletPage() {
         .qrSection {
           margin-top: 19px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 13px;
+          grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr);
+          gap: 15px;
           align-items: end;
         }
 
@@ -1667,6 +1667,11 @@ export default function EmergencyBraceletPage() {
           border: 1px solid #cbdcf4;
           border-radius: 10px;
           background: #f2f6fc;
+        }
+
+        .qrProfileRule {
+          min-height: 104px;
+          padding: 13px 16px;
         }
 
         .qrHelp span {
