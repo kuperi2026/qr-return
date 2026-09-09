@@ -432,14 +432,7 @@ export default function AdminPage() {
   return (
     <main className="page">
       <header className="header">
-        <a href="/account" className="brand">
-          <div className="logo">QR</div>
-
-          <div>
-            <strong>QR RETURN</strong>
-            <small>ADMIN ACCESS</small>
-          </div>
-        </a>
+        <div aria-hidden="true" />
 
         <div className="languages">
           <button
@@ -466,20 +459,16 @@ export default function AdminPage() {
         </a>
 
         <div className="heading">
-          <div className="eyebrow">
-            {ka ? "დამატებითი ადმინისტრატორი" : "SECONDARY ADMIN"}
-          </div>
-
           <h1>
             {ka
-              ? "ადმინისტრატორის მართვა"
-              : "Manage administrator"}
+              ? "თანაადმინისტრატორის რეგისტრაცია და უფლებები"
+              : "Co-administrator registration and permissions"}
           </h1>
 
           <p>
             {ka
-              ? "თქვენს ანგარიშს შეიძლება ჰყავდეს მაქსიმუმ ერთი დამატებითი ადმინისტრატორი. თავად გადაწყვიტეთ, რისი უფლება ექნება."
-              : "Your account can have one secondary administrator. You decide exactly what they are allowed to manage."}
+              ? "თითოეულ QR პროფილზე შეგიძლიათ დაამატოთ მხოლოდ ერთი თანაადმინისტრატორი. თავად განსაზღვრავთ, რომელ პროფილზე ექნება წვდომა და რა მოქმედებების შესრულება შეეძლება."
+              : "You can add only one co-administrator to each QR profile. You decide which profile they can access and which actions they can perform."}
           </p>
         </div>
 
