@@ -476,7 +476,7 @@ export default function EmergencyProfilePage() {
                     profile.emergency_contact_live_chat_enabled ===
                     true
                   }
-                  chatHref={`/app/live-chat/emergency/${encodeURIComponent(profile.tag_code)}`}
+                  chatHref={`/chat/emergency/${encodeURIComponent(profile.tag_code)}`}
                   lang={lang}
                 />
               </section>
@@ -510,7 +510,7 @@ export default function EmergencyProfilePage() {
                     profile.second_contact_live_chat_enabled ===
                     true
                   }
-                  chatHref={`/app/live-chat/emergency/${encodeURIComponent(profile.tag_code)}`}
+                  chatHref={`/chat/emergency/${encodeURIComponent(profile.tag_code)}`}
                   lang={lang}
                 />
               </section>
