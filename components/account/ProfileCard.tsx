@@ -35,14 +35,18 @@ export type ProfileCardItem = {
 type Props = {
   item: ProfileCardItem;
   onLostChange?: (item: ProfileCardItem, nextLost: boolean) => Promise<void>;
+  onDelete?: (item: ProfileCardItem) => Promise<void>;
 };
 
 export default function ProfileCard({
   item,
   onLostChange,
+  onDelete,
 }: Props) {
   const [changingLost, setChangingLost] = useState(false);
   const [lostError, setLostError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const type = getType(item);
 
   const label =
@@ -114,34 +118,6 @@ export default function ProfileCard({
       </div>
 
       <div className="content">
-        <div className="titleRow">
-          <div>
-            <span className="eyebrow">
-              QR RETURN პროფილი
-            </span>
-
-            <h3>
-              {item.name ||
-                label}
-            </h3>
-          </div>
-
-          <div className="icon">
-            {getIcon(type)}
-          </div>
-        </div>
-
-        <div className="tagBox">
-          <span>
-            QR კოდი
-          </span>
-
-          <strong>
-            {item.tagCode ||
-              "—"}
-          </strong>
-        </div>
-
         <div className={item.lost ? "lostMode isLost" : "lostMode"}>
           <div className="lostModeText">
             <span>{item.lost ? "დაკარგვის რეჟიმი ჩართულია" : "დაკარგვის რეჟიმი"}</span>
@@ -164,6 +140,23 @@ export default function ProfileCard({
         </div>
         {lostError && <div className="lostError">{lostError}</div>}
 
+        <div className="titleRow">
+          <h3>
+            {item.name || label}
+          </h3>
+        </div>
+
+        <div className="tagBox">
+          <span>
+            QR კოდი
+          </span>
+
+          <strong>
+            {item.tagCode ||
+              "—"}
+          </strong>
+        </div>
+
         <div className={`serviceBox ${item.serviceStatus || "trial"}`}>
           <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
           <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
@@ -173,19 +166,19 @@ export default function ProfileCard({
         <div className="stats">
           <div className="stat">
             <span>
-              სულ დასკანირდა
+              სკანირებების რაოდენობა
             </span>
 
             <strong>
               {item.scanCount
                 ? `${item.scanCount}-ჯერ`
-                : "ჯერ არცერთხელ"}
+                : "0"}
             </strong>
           </div>
 
           <div className="stat">
             <span>
-              ბოლო აქტივობა
+              ბოლო სკანირება
             </span>
 
             <strong className="date">
@@ -233,7 +226,7 @@ export default function ProfileCard({
               )}`}
               target="_blank"
             >
-              ნახვა როგორც მპოვნელი ↗
+              პროფილი მპოვნელისთვის ↗
             </Link>
           )}
 
@@ -246,7 +239,28 @@ export default function ProfileCard({
               QR კოდის ჩამოტვირთვა ↓
             </button>
           )}
+
+          {onDelete && (
+            <button
+              type="button"
+              className="deleteButton"
+              disabled={deleting}
+              onClick={async () => {
+                if (deleting) return;
+                const confirmed = window.confirm(`ნამდვილად გსურთ „${item.name || label}“ პროფილის წაშლა? ამ მოქმედების გაუქმება შეუძლებელია.`);
+                if (!confirmed) return;
+                setDeleteError("");
+                setDeleting(true);
+                try { await onDelete(item); }
+                catch (error) { setDeleteError(error instanceof Error ? error.message : "პროფილის წაშლა ვერ მოხერხდა."); }
+                finally { setDeleting(false); }
+              }}
+            >
+              {deleting ? "იშლება..." : "პროფილის წაშლა"}
+            </button>
+          )}
         </div>
+        {deleteError && <div className="deleteError">{deleteError}</div>}
       </div>
 
       <style jsx>{`
@@ -379,7 +393,7 @@ export default function ProfileCard({
           backdrop-filter:
             blur(8px);
 
-          font-size: 12px;
+          font-size: 14px;
 
           font-weight: 900;
         }
@@ -467,7 +481,7 @@ export default function ProfileCard({
           color:
             #263f59;
 
-          font-size: 21px;
+          font-size: 25px;
 
           font-weight: 900;
 
@@ -517,20 +531,20 @@ export default function ProfileCard({
 
         .tagBox span {
           color:
-            #8a98a6;
+            #075dcc;
 
-          font-size: 11px;
+          font-size: 14px;
 
           font-weight: 900;
         }
 
         .tagBox strong {
-          margin-top: 3px;
+          margin-top: 4px;
 
           color:
-            #31506b;
+            #172f48;
 
-          font-size: 14px;
+          font-size: 18px;
 
           font-weight: 850;
 
@@ -551,8 +565,8 @@ export default function ProfileCard({
           gap: 7px;
         }
 
-        .lostMode{margin-top:10px;padding:11px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#244765;font-size:12px;font-weight:950}.lostModeText strong{margin-top:3px;color:#71869a;font-size:10px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
-        .serviceBox{margin-top:9px;padding:11px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#71869a;font-size:10px;font-weight:850}.serviceBox>div strong{margin-top:3px;color:#234d73;font-size:12px;line-height:1.3}.serviceBox>a{padding:9px 10px;border-radius:9px;background:#fff;color:#075dcc;text-decoration:none;font-size:11px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
+        .lostMode{margin-bottom:14px;padding:13px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#183f63;font-size:14px;font-weight:950}.lostModeText strong{margin-top:4px;color:#4f6478;font-size:12px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
+        .serviceBox{margin-top:12px;padding:15px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{padding:11px 13px;border-radius:9px;background:#075dcc;color:#fff;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
 
         .stat {
           min-width: 0;
@@ -574,9 +588,9 @@ export default function ProfileCard({
 
         .stat span {
           color:
-            #8d9baa;
+            #4f6478;
 
-          font-size: 11px;
+          font-size: 13px;
 
           font-weight: 900;
         }
@@ -721,7 +735,7 @@ export default function ProfileCard({
           font-weight: 850;
         }
 
-        .actions button{grid-column:1/-1;border:1px solid #b8cce3;background:#eef5ff;color:#0a4c8a;font-family:inherit;cursor:pointer}
+        .actions button{grid-column:1/-1;border:1px solid #b8cce3;background:#eef5ff;color:#0a4c8a;font-family:inherit;cursor:pointer}.actions .deleteButton{border-color:#efc4c7;background:#fff5f5;color:#a51d26}.actions .deleteButton:disabled{opacity:.6;cursor:wait}.deleteError{margin-top:7px;padding:9px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:12px;font-weight:800}
 
         .actions
         :global(
@@ -867,7 +881,7 @@ function formatScanDate(
   value?: string | null
 ) {
   if (!value) {
-    return "ჯერ არ დასკანერებულა";
+    return "სკანირება არ დაფიქსირებულა";
   }
 
   const date =
