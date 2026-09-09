@@ -1427,18 +1427,11 @@ export default function RegistrationFlow({
         }
 
         .marketingLine p {
-          margin:
-            2px 0 0;
-
-          color:
-            rgba(
-              255,
-              255,
-              255,
-              0.7
-            );
-
-          font-size: 11px;
+          margin: 9px 0 0;
+          color: rgba(255, 255, 255, 0.94);
+          font-size: 15px;
+          font-weight: 700;
+          line-height: 1.5;
         }
 
         .registrationCard {
@@ -1536,7 +1529,8 @@ export default function RegistrationFlow({
           }
 
           .marketingLine p {
-            font-size: 11px;
+            margin-top: 8px;
+            font-size: 14px;
           }
         }
       `}</style>
