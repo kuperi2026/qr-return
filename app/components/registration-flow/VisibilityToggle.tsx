@@ -83,9 +83,9 @@ export default function VisibilityToggle({
       <style jsx>{`
         .visibilityRow {
           width: 100%;
-          min-height: 56px;
+          min-height: 78px;
 
-          padding: 8px 10px;
+          padding: 14px 15px;
 
           display: flex;
           align-items: center;
@@ -95,10 +95,10 @@ export default function VisibilityToggle({
 
           box-sizing: border-box;
 
-          border: 1px solid #dfe7ef;
+          border: 1px solid #b9d4f5;
           border-radius: 10px;
 
-          background: #ffffff;
+          background: #f7fbff;
         }
 
         .visibilityRow.locked {
@@ -120,9 +120,9 @@ export default function VisibilityToggle({
         }
 
         .labelLine strong {
-          color: #29445f;
+          color: #1d5f9c;
 
-          font-size: 12px;
+          font-size: 17px;
           font-weight: 850;
 
           line-height: 1.25;
@@ -137,7 +137,7 @@ export default function VisibilityToggle({
 
           color: #0647c8;
 
-          font-size: 7px;
+          font-size: 10px;
           font-weight: 900;
 
           letter-spacing: 0.25px;
@@ -148,19 +148,19 @@ export default function VisibilityToggle({
         .visibilityText p {
           margin: 2px 0 0;
 
-          color: #8090a0;
+          color: #4d7194;
 
-          font-size: 10px;
+          font-size: 14px;
 
-          line-height: 1.3;
+          line-height: 1.5;
         }
 
         .toggleButton,
         .lockedToggle {
           flex: 0 0 auto;
 
-          min-width: 72px;
-          height: 32px;
+          min-width: 82px;
+          height: 38px;
 
           padding: 4px 6px;
 
@@ -273,7 +273,7 @@ export default function VisibilityToggle({
         .lockedToggle strong {
           min-width: 20px;
 
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 900;
         }
 
@@ -290,13 +290,14 @@ export default function VisibilityToggle({
           max-width: 520px
         ) {
           .visibilityRow {
-            min-height: 54px;
+            min-height: 72px;
 
-            padding: 8px 9px;
+            padding: 12px;
           }
 
           .visibilityText p {
-            display: none;
+            display: block;
+            font-size: 13px;
           }
 
           .toggleButton,
