@@ -878,7 +878,7 @@ export default function AdminPage() {
         }
 
         body {
-          background: #f7f9fc;
+          background: #063b72;
         }
 
         input,
@@ -891,17 +891,8 @@ export default function AdminPage() {
           color: #101828;
           font-family: Inter, Arial, sans-serif;
           background:
-            radial-gradient(
-              circle at 8% 10%,
-              rgba(20, 101, 232, 0.08),
-              transparent 28%
-            ),
-            radial-gradient(
-              circle at 94% 8%,
-              rgba(118, 85, 247, 0.08),
-              transparent 28%
-            ),
-            #f7f9fc;
+            radial-gradient(circle at 21% 17%, rgba(78, 166, 238, 0.3), transparent 30%),
+            linear-gradient(180deg, #0a4c8a 0%, #063b72 100%);
         }
 
         .header {
@@ -912,7 +903,7 @@ export default function AdminPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid #e4e7ec;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.22);
         }
 
         .brand {
@@ -984,7 +975,7 @@ export default function AdminPage() {
         }
 
         .back {
-          color: #667085;
+          color: #d9edff;
           font-size: 13px;
           font-weight: 800;
           text-decoration: none;
@@ -1003,11 +994,18 @@ export default function AdminPage() {
 
         .heading h1 {
           margin: 8px 0 11px;
+          color: #ffffff;
           font-size: clamp(38px, 5vw, 48px);
           letter-spacing: -2px;
         }
 
-        .heading p,
+        .heading p {
+          margin: 0;
+          color: #e2f1ff;
+          font-size: 16px;
+          line-height: 1.65;
+        }
+
         .permissionsHeader p,
         .accountAccess p {
           margin: 0;
@@ -1024,7 +1022,7 @@ export default function AdminPage() {
           gap: 13px;
           border: 1px solid #dbe7ff;
           border-radius: 15px;
-          background: #f5f9ff;
+          background: #ffffff;
         }
 
         .noticeIcon {
