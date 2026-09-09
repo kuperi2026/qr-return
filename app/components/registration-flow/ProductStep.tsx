@@ -104,19 +104,11 @@ export default function ProductStep({
       {/* BASIC INFO */}
 
       {formPage === 1 && <section className="formSection">
-        <div className="sectionHeader">
-          <span>
-            01
-          </span>
-
-          <div>
-            <strong>
-              ძირითადი ინფორმაცია
-            </strong>
-
-            {!pet && <p>შეავსეთ ნივთის ამოსაცნობად საჭირო ინფორმაცია.</p>}
-          </div>
-        </div>
+        {!pet && (
+          <p className="sectionIntro">
+            შეავსეთ ნივთის ამოსაცნობად საჭირო ინფორმაცია.
+          </p>
+        )}
 
         <div className="formGrid">
           <Field
@@ -776,10 +768,10 @@ export default function ProductStep({
 
           margin: 7px 0 0;
 
-          color: #4f6478;
+          color: #173a67;
 
-          font-size: 15px;
-          font-weight: 600;
+          font-size: 18px;
+          font-weight: 750;
           line-height: 1.55;
         }
 
@@ -841,6 +833,14 @@ export default function ProductStep({
           line-height: 1.45;
         }
 
+        .sectionIntro {
+          margin: 0 0 18px;
+          color: #285782;
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.55;
+        }
+
         .formGrid {
           width: 100%;
 
@@ -878,9 +878,9 @@ export default function ProductStep({
           margin:
             0 0 7px 2px;
 
-          color: #344e68;
+          color: #173a67;
 
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 800;
 
           line-height: 19px;
@@ -910,9 +910,9 @@ export default function ProductStep({
 
           font-family: inherit;
 
-          font-size: 15px;
+          font-size: 16px;
 
-          font-weight: 500;
+          font-weight: 550;
 
           outline: none;
 
