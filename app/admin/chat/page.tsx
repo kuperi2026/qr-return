@@ -630,6 +630,12 @@ export default function AdminChatPage() {
       </header>
 
       <div className="shell">
+        <div className="operatorCard">
+          <span className="operatorAvatar">👩🏻‍💻</span>
+          <span className="operatorCopy"><strong>24/7</strong><span>ოპერატორი</span></span>
+          <span className="onlineDot">● ონლაინ</span>
+        </div>
+
         <header className="heading">
           <div>
             <span className="eyebrow">
@@ -1125,7 +1131,11 @@ export default function AdminChatPage() {
 
         body {
           color: #202b37;
-          background: #f4f6f8;
+          background:
+            radial-gradient(circle at 12% 10%,rgba(104,190,255,.58) 0,rgba(104,190,255,0) 30%),
+            radial-gradient(circle at 88% 22%,rgba(48,112,238,.62) 0,rgba(48,112,238,0) 34%),
+            linear-gradient(145deg,#07388e 0%,#0b64d8 48%,#052a70 100%);
+          background-attachment: fixed;
           font-family: Arial, sans-serif;
         }
 
@@ -1153,7 +1163,7 @@ export default function AdminChatPage() {
           gap: 20px;
 
           border-bottom:
-            1px solid #dfe4e8;
+            1px solid rgba(255,255,255,.3);
         }
 
         .brand {
@@ -1259,6 +1269,10 @@ export default function AdminChatPage() {
           background: white;
         }
 
+        .operatorCard{margin:0 0 16px;padding:12px 16px;display:flex;align-items:center;gap:13px;max-width:420px;border:1px solid rgba(255,255,255,.78);border-radius:18px;background:linear-gradient(135deg,#fff 0%,#eaf5ff 100%);box-shadow:0 14px 34px rgba(0,24,74,.25)}
+        .operatorAvatar{width:58px;height:58px;display:grid;place-items:center;flex:0 0 58px;border-radius:50%;background:linear-gradient(145deg,#dceeff,#fff);font-size:34px}
+        .operatorCopy{flex:1;color:#12315f}.operatorCopy strong{display:block;color:#0754bd;font-size:25px;line-height:1}.operatorCopy span{display:block;margin-top:5px;font-size:14px;font-weight:850}.onlineDot{color:#078a52;font-size:12px;font-weight:900}
+
         .shell {
           width: calc(100% - 36px);
           max-width: 1280px;
@@ -1302,7 +1316,7 @@ export default function AdminChatPage() {
 
           margin: 8px 0 0;
 
-          color: #7c8791;
+          color: rgba(255,255,255,.78);
 
           font-size: 9px;
           line-height: 1.65;
