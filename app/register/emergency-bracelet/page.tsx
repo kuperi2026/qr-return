@@ -1578,8 +1578,9 @@ export default function EmergencyBraceletPage() {
 
         .heading p {
           margin: 4px 0 0;
-          color: #718397;
-          font-size: 14px;
+          color: #4f6478;
+          font-size: 15px;
+          font-weight: 600;
           line-height: 1.45;
         }
 
@@ -1661,8 +1662,9 @@ export default function EmergencyBraceletPage() {
 
         .qrHelp p {
           margin: 3px 0 0;
-          color: #718397;
-          font-size: 11px;
+          color: #4f6478;
+          font-size: 13px;
+          font-weight: 600;
           line-height: 1.4;
         }
 
@@ -1775,7 +1777,7 @@ export default function EmergencyBraceletPage() {
         .finalNotice p,
         .nameWarning p {
           margin: 2px 0 0;
-          color: #718397;
+          color: #4f6478;
           font-size: 12px;
           line-height: 1.45;
         }
@@ -1914,7 +1916,7 @@ export default function EmergencyBraceletPage() {
 
         .optionalBox p {
           margin: 2px 0 0;
-          color: #7a8999;
+          color: #4f6478;
           font-size: 10px;
         }
 
@@ -1942,7 +1944,7 @@ export default function EmergencyBraceletPage() {
           border: 1px solid #d5e0eb;
           border-radius: 999px;
           background: #f4f6f9;
-          color: #8090a0;
+          color: #4f6478;
           font-size: 10px;
           font-weight: 900;
           cursor: pointer;
@@ -2002,7 +2004,7 @@ export default function EmergencyBraceletPage() {
           border: 1px solid #d3dde7;
           border-radius: 999px;
           background: #f3f5f8;
-          color: #82909e;
+          color: #4f6478;
           font-size: 9px;
           font-weight: 900;
           cursor: pointer;
@@ -2061,7 +2063,7 @@ export default function EmergencyBraceletPage() {
         }
 
         .previewRow span {
-          color: #7b8b9c;
+          color: #4f6478;
           font-size: 10px;
         }
 
