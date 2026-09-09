@@ -1574,7 +1574,7 @@ function PermissionToggle({
 }) {
   return (
     <div className="permissionRow">
-      {icon && <div className="permissionIcon">{icon}</div>
+      {icon && <div className="permissionIcon">{icon}</div>}
 
       <div className="permissionText">
         <strong>{title}</strong>
