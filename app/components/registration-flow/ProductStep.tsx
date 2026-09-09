@@ -94,7 +94,7 @@ export default function ProductStep({
           {meta.label}
         </h1>
 
-        {type !== "suitcase" && (
+        {!["suitcase", "keys"].includes(type) && (
           <p>
             {getProductFormText(type)}
           </p>
