@@ -390,31 +390,28 @@ export default function FinderLiveChatPage() {
           </span>
         </a>
 
-        <span className="secureBadge">🔒 უსაფრთხო კავშირი</span>
+        <span className="secureBadge"><strong>24/7</strong> · უსაფრთხო კავშირი</span>
       </header>
 
       <section className="wrap">
+        <div className="backLine">
+          <a
+            className="back"
+            href={`/scan/${encodeURIComponent(
+              tagCode
+            )}`}
+          >
+            ← {ka ? "QR პროფილზე დაბრუნება" : "Back to QR profile"}
+          </a>
+        </div>
+
         <div className="card">
-          <div className="cardNav">
-            <a
-              className="back"
-              href={`/scan/${encodeURIComponent(
-                tagCode
-              )}`}
-            >
-              ← {ka ? "QR პროფილზე დაბრუნება" : "Back to QR profile"}
-            </a>
-          </div>
           <div className="chatHead">
             <div className="icon">
               {category.icon}
             </div>
 
             <div className="title">
-              <small>
-                QR RETURN • დაცული ჩატი
-              </small>
-
               <h1>
                 {ka
                   ? category.ka
@@ -767,40 +764,40 @@ export default function FinderLiveChatPage() {
 
         .wrap {
           width: calc(100% - 24px);
-          max-width: 650px;
+          max-width: 580px;
           margin: auto;
           padding: 22px 0 42px;
         }
 
-        .cardNav {
-          padding: 10px 16px;
-          border-bottom: 1px solid #dbe7f5;
-          background: #f7faff;
+        .backLine {
+          margin: 0 0 12px;
+          padding-left: 3px;
         }
 
         .back {
           display: inline-flex;
           align-items: center;
-          color: #0b55bc;
+          color: #ffffff;
           text-decoration: none;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 850;
+          text-shadow: 0 1px 10px rgba(0,0,0,.16);
         }
 
-        .back:hover { color: #073b91; }
+        .back:hover { color: #dbeafe; }
 
         .card {
           overflow: hidden;
           border: 1px solid rgba(255,255,255,.72);
-          border-radius: 24px;
+          border-radius: 20px;
           background: #ffffff;
           box-shadow:
-            0 32px 90px rgba(1,20,66,.38),
-            0 8px 24px rgba(5,44,118,.2);
+            0 24px 64px rgba(1,20,66,.34),
+            0 6px 18px rgba(5,44,118,.18);
         }
 
         .chatHead {
-          padding: 18px;
+          padding: 14px 16px;
           display: flex;
           gap: 13px;
           align-items: center;
@@ -809,13 +806,13 @@ export default function FinderLiveChatPage() {
         }
 
         .icon {
-          width: 55px;
-          height: 55px;
+          width: 46px;
+          height: 46px;
           display: grid;
           place-items: center;
-          border-radius: 15px;
+          border-radius: 13px;
           background: #eef4ff;
-          font-size: 28px;
+          font-size: 23px;
         }
 
         .title {
@@ -829,7 +826,7 @@ export default function FinderLiveChatPage() {
         }
 
         .title h1 {
-          margin: 4px 0 2px;
+          margin: 0 0 2px;
           font-size: 20px;
         }
 
@@ -860,9 +857,9 @@ export default function FinderLiveChatPage() {
         }
 
         .messages {
-          height: min(46vh, 390px);
-          min-height: 270px;
-          padding: 20px 18px;
+          height: min(42vh, 320px);
+          min-height: 230px;
+          padding: 16px;
           overflow-y: auto;
           background:
             radial-gradient(circle at 15% 10%,rgba(79,159,255,.09),transparent 30%),
@@ -1001,7 +998,7 @@ export default function FinderLiveChatPage() {
         .title small{font-size:12px}.title h1{font-size:24px}.title p{font-size:13px}.live{font-size:12px}.notice{font-size:14px}.sender{font-size:12px}.bubble{font-size:16px}.locationLink{font-size:13px}.bubble time{font-size:11px}.error{font-size:14px}.composer textarea{font-size:16px}.composer button{font-size:15px}
 
         @media (max-width: 600px) {
-          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.cardNav{padding:9px 14px}.back{font-size:13px}.card{min-height:calc(100dvh - 126px);display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
+          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.backLine{margin:0 3px 10px}.back{font-size:13px}.card{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:13px 14px}.icon{width:44px;height:44px;flex:0 0 44px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:310px;min-height:230px;flex:none;padding:14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:48px;max-height:100px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
           .chatHead {
             flex-wrap: wrap;
           }
