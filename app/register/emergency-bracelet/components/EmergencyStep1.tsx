@@ -165,7 +165,7 @@ export default function EmergencyStep1({
         </div>
       </div>
 
-      <div className="actions">
+      <div className="actions emergencyStep1Actions">
         <button
           type="button"
           className="secondaryButton"
