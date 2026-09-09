@@ -273,7 +273,7 @@ export default function LoginPage() {
         <section className="center">
           <div className="card">
             <span className="eyebrow">
-              QR RETURN ანგარიში
+              QR ანგარიში
             </span>
 
             <h1>
@@ -305,7 +305,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin}>
               <div className="field">
                 <label htmlFor="email">
-                  ელფოსტა
+                  ელ-ფოსტა
                 </label>
 
                 <input
@@ -382,8 +382,7 @@ export default function LoginPage() {
                   }
                 />
                 <span>
-                  დამიმახსოვრე ამ მოწყობილობაზე
-                  <small>შემდეგ შესვლაზე ელფოსტა ავტომატურად ჩაიწერება</small>
+                  პაროლის დამახსოვრება
                 </span>
               </label>
 
@@ -574,7 +573,7 @@ export default function LoginPage() {
         .eyebrow {
           display: block;
 
-          margin-bottom: 6px;
+          margin-bottom: 10px;
 
           color: #0647c8;
 
@@ -596,7 +595,7 @@ export default function LoginPage() {
         }
 
         .description {
-          margin: 8px 0 0;
+          margin: 12px 0 0;
 
           color: #78899a;
 
@@ -638,7 +637,7 @@ export default function LoginPage() {
 
           color: #42576b;
 
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 850;
         }
 
@@ -659,7 +658,7 @@ export default function LoginPage() {
         .forgot {
           color: #0647c8;
 
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 800;
 
           text-decoration: none;
@@ -714,7 +713,7 @@ export default function LoginPage() {
           align-items: flex-start;
           gap: 10px;
           color: #42576b;
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 850;
           line-height: 1.35;
           cursor: pointer;
@@ -757,7 +756,7 @@ export default function LoginPage() {
           color: #0647c8;
 
           font-family: inherit;
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 850;
 
           cursor: pointer;
@@ -834,7 +833,7 @@ export default function LoginPage() {
 
           color: #718396;
 
-          font-size: 12px;
+          font-size: 14px;
         }
 
         .signup a {
