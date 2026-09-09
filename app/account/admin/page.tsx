@@ -478,13 +478,13 @@ export default function AdminPage() {
           <div>
             <strong>
               {ka
-                ? "Owner ყოველთვის მთავარი მმართველია"
+                ? "მფლობელი ყოველთვის მთავარი მმართველია"
                 : "The Owner always remains in control"}
             </strong>
 
             <p>
               {ka
-                ? "ადმინისტრატორს არ შეუძლია სხვა Admin-ის დამატება, თქვენი უსაფრთხოების მონაცემების შეცვლა, ანგარიშის წაშლა ან Owner-ის შეცვლა."
+                ? "თანაადმინისტრატორს არ შეუძლია სხვა ადმინისტრატორის დამატება, უსაფრთხოების მონაცემების შეცვლა, ანგარიშის წაშლა ან მფლობელის ჩანაცვლება."
                 : "The administrator cannot add another admin, change your security information, delete your account or replace the Owner."}
             </p>
           </div>
@@ -511,8 +511,8 @@ export default function AdminPage() {
                   {admin
                     ? admin.admin_email
                     : ka
-                    ? "დაამატეთ ადმინისტრატორი"
-                    : "Add administrator"}
+                    ? "თანაადმინისტრატორის მონაცემები"
+                    : "Co-administrator details"}
                 </h2>
               </div>
             </div>
@@ -520,8 +520,8 @@ export default function AdminPage() {
             <label className="emailField">
               <span>
                 {ka
-                  ? "ადმინისტრატორის ელფოსტა"
-                  : "Administrator email"}{" "}
+                  ? "თანაადმინისტრატორის ელ-ფოსტა"
+                  : "Co-administrator email"}{" "}
                 *
               </span>
 
@@ -604,12 +604,12 @@ export default function AdminPage() {
                         <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "ნახვა" : "View"} value={current.can_view_profiles} locked onChange={() => {}} />
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} disabled={!canEditProfiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
-                          <MiniPermission label="Lost Mode" value={current.can_manage_lost_mode} disabled={!canManageLostMode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
+                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} disabled={!canManageLostMode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
                           <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} disabled={!canManageVisibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
                           <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} disabled={!canManageContacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
                           <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} disabled={!canManageLocation} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
                           <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} disabled={!canManageAdditionalContact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
-                          <MiniPermission label="Live Chat" value={current.can_use_live_chat} disabled={!canUseLiveChat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                          <MiniPermission label={ka ? "პირდაპირი ჩათი" : "Live Chat"} value={current.can_use_live_chat} disabled={!canUseLiveChat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
                         </div>
                       )}
                     </article>
@@ -663,7 +663,7 @@ export default function AdminPage() {
                 }
                 description={
                   ka
-                    ? "შეცვალოს ძაღლის, კატის ან ნივთის ინფორმაცია."
+                    ? "შეცვალოს თქვენ მიერ არჩეულ QR პროფილში მითითებული ინფორმაცია."
                     : "Edit pet or item profile information."
                 }
                 value={canEditProfiles}
@@ -674,12 +674,12 @@ export default function AdminPage() {
                 icon="🚨"
                 title={
                   ka
-                    ? "Lost Mode-ის მართვა"
+                    ? "დაკარგვის რეჟიმის მართვა"
                     : "Manage Lost Mode"
                 }
                 description={
                   ka
-                    ? "მონიშნოს პროფილი დაკარგულად ან უსაფრთხოდ."
+                    ? "ჩართოს დაკარგვის რეჟიმი ან მონიშნოს QR პროფილი უსაფრთხოდ."
                     : "Mark a profile as lost or safe."
                 }
                 value={canManageLostMode}
@@ -695,7 +695,7 @@ export default function AdminPage() {
                 }
                 description={
                   ka
-                    ? "შეცვალოს, რა ინფორმაცია გამოუჩნდება QR-ის მპოვნელს."
+                    ? "განსაზღვროს, რომელი ინფორმაცია გამოჩნდება QR კოდის მპოვნელისთვის."
                     : "Control which information the finder can see."
                 }
                 value={canManageVisibility}
@@ -706,12 +706,12 @@ export default function AdminPage() {
                 icon="📞"
                 title={
                   ka
-                    ? "კონტაქტის მეთოდების მართვა"
+                    ? "საკონტაქტო საშუალებების მართვა"
                     : "Manage contact methods"
                 }
                 description={
                   ka
-                    ? "მართოს ტელეფონი, Live Chat და სხვა საკონტაქტო მეთოდები."
+                    ? "მართოს მპოვნელისთვის ხელმისაწვდომი სატელეფონო და ჩათის საკონტაქტო საშუალებები."
                     : "Manage Phone, Live Chat and other contact options."
                 }
                 value={canManageContacts}
@@ -722,12 +722,12 @@ export default function AdminPage() {
                 icon="📍"
                 title={
                   ka
-                    ? "Location Sharing-ის მართვა"
+                    ? "ლოკაციის გაზიარების მართვა"
                     : "Manage location sharing"
                 }
                 description={
                   ka
-                    ? "ჩართოს ან გამორთოს მპოვნელის ლოკაციის გაზიარება."
+                    ? "ჩართოს ან გამორთოს მპოვნელის მიერ ლოკაციის გაზიარების შესაძლებლობა."
                     : "Enable or disable finder location sharing."
                 }
                 value={canManageLocation}
@@ -743,7 +743,7 @@ export default function AdminPage() {
                 }
                 description={
                   ka
-                    ? "კონკრეტულ QR პროფილზე დაამატოს ან შეცვალოს დამატებითი საკონტაქტო პირი."
+                    ? "არჩეულ QR პროფილზე დაამატოს ან შეცვალოს დამატებითი საკონტაქტო პირი."
                     : "Manage the additional contact for a QR profile."
                 }
                 value={canManageAdditionalContact}
@@ -754,12 +754,12 @@ export default function AdminPage() {
                 icon="💬"
                 title={
                   ka
-                    ? "Live Chat-ის გამოყენება"
+                    ? "პირდაპირი ჩათის გამოყენება"
                     : "Use Live Chat"
                 }
                 description={
                   ka
-                    ? "ნახოს და უპასუხოს მპოვნელის Live Chat შეტყობინებებს."
+                    ? "ნახოს მპოვნელის შეტყობინებები და უპასუხოს პირდაპირი ჩათიდან."
                     : "View and answer finder Live Chat messages."
                 }
                 value={canUseLiveChat}
@@ -1121,8 +1121,16 @@ export default function AdminPage() {
 
         .permissionsHeader h2,
         .accountAccess h2 {
-          margin: 7px 0;
-          font-size: 23px;
+          margin: 7px 0 9px;
+          color: #173a67;
+          font-size: 26px;
+          line-height: 1.3;
+        }
+
+        .permissionsHeader p {
+          color: #52677f;
+          font-size: 16px;
+          line-height: 1.6;
         }
 
         .permissionList {
@@ -1132,7 +1140,7 @@ export default function AdminPage() {
         }
 
         .permissionRow {
-          padding: 17px 0;
+          padding: 21px 0;
           display: flex;
           align-items: center;
           gap: 13px;
@@ -1151,8 +1159,9 @@ export default function AdminPage() {
           display: grid;
           place-items: center;
           border-radius: 12px;
-          background: #f2f4f7;
-          font-size: 18px;
+          background: #eaf3ff;
+          color: #0a58ca;
+          font-size: 21px;
         }
 
         .permissionText {
@@ -1162,15 +1171,15 @@ export default function AdminPage() {
         .permissionText strong {
           display: block;
           color: #173a67;
-          font-size: 16px;
+          font-size: 17px;
           line-height: 1.4;
         }
 
         .permissionText p {
           margin: 6px 0 0;
           color: #52677f;
-          font-size: 14px;
-          line-height: 1.55;
+          font-size: 15px;
+          line-height: 1.6;
         }
 
         .toggle {
