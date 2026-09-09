@@ -118,6 +118,12 @@ export default function ProfileCard({
       </div>
 
       <div className="content">
+        <div className="titleRow">
+          <h3>
+            {item.name || label}
+          </h3>
+        </div>
+
         <div className={item.lost ? "lostMode isLost" : "lostMode"}>
           <div className="lostModeText">
             <span>{item.lost ? "დაკარგვის რეჟიმი ჩართულია" : "დაკარგვის რეჟიმი"}</span>
@@ -139,12 +145,6 @@ export default function ProfileCard({
           </button>
         </div>
         {lostError && <div className="lostError">{lostError}</div>}
-
-        <div className="titleRow">
-          <h3>
-            {item.name || label}
-          </h3>
-        </div>
 
         <div className="tagBox">
           <span>
@@ -565,8 +565,8 @@ export default function ProfileCard({
           gap: 7px;
         }
 
-        .lostMode{margin-bottom:14px;padding:13px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#183f63;font-size:14px;font-weight:950}.lostModeText strong{margin-top:4px;color:#4f6478;font-size:12px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
-        .serviceBox{margin-top:12px;padding:15px;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{padding:11px 13px;border-radius:9px;background:#075dcc;color:#fff;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
+        .lostMode{margin-top:12px;margin-bottom:14px;padding:13px;display:flex;align-items:center;gap:10px;border:1px solid #d8e5f2;border-radius:11px;background:#f8fbff}.lostMode.isLost{border-color:#f0b9bd;background:#fff3f3}.lostModeText{min-width:0;flex:1}.lostModeText span,.lostModeText strong{display:block}.lostModeText span{color:#183f63;font-size:14px;font-weight:950}.lostModeText strong{margin-top:4px;color:#4f6478;font-size:12px;line-height:1.35}.lostMode button{min-width:72px;min-height:35px;padding:0 11px;border:0;border-radius:9px;background:#1266e9;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer}.lostMode.isLost button{background:#fff;color:#b4232c;border:1px solid #e8aeb3}.lostMode button:disabled{opacity:.6;cursor:wait}.lostError{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff0f0;color:#a51d26;font-size:11px;font-weight:800}
+        .serviceBox{margin-top:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:9px;border:1px solid #cfe0f3;border-radius:11px;background:#eef6ff}.serviceBox>div span,.serviceBox>div strong{display:block}.serviceBox>div span{color:#4f6478;font-size:13px;font-weight:900}.serviceBox>div strong{margin-top:5px;color:#173f64;font-size:15px;line-height:1.3}.serviceBox>a{grid-column:1/-1;padding:13px 16px;border-radius:9px;background:#075dcc;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}.serviceBox.active{border-color:#b9e7ce;background:#edfaf3}.serviceBox.expired{border-color:#f0cccc;background:#fff4f4}@media(max-width:430px){.serviceBox{grid-template-columns:1fr 1fr}.serviceBox>a{grid-column:1/-1;text-align:center}.lostMode{align-items:flex-start}.lostMode button{min-width:68px}}
 
         .stat {
           min-width: 0;
@@ -743,13 +743,13 @@ export default function ProfileCard({
         ) {
           border:
             1px solid
-            #d9e3ec;
+            #7aacef;
 
           background:
-            #ffffff;
+            #eaf3ff;
 
           color:
-            #587086;
+            #075dcc;
         }
 
         .actions
@@ -881,7 +881,7 @@ function formatScanDate(
   value?: string | null
 ) {
   if (!value) {
-    return "სკანირება არ დაფიქსირებულა";
+    return "ჯერ არ ყოფილა";
   }
 
   const date =
