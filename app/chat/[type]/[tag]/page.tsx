@@ -21,6 +21,7 @@ type ChatMessage = {
   sender_role: "finder" | "owner" | "admin";
   message_text: string;
   created_at: string;
+  read_at: string | null;
 };
 
 const CHAT_EMOJIS = ["😀","😃","😄","😁","😊","🙂","😉","😍","🥰","😘","😇","🤗","🤔","😢","😭","😮","😅","😂","🤣","🙏","❤️","🧡","💛","💚","💙","💜","👍","👎","👏","🙌","👋","🤝","💪","✅","❗","❓","🎉","🚨","📍","🏠","🚗","🔑","🐶","🐱","🐾","📞","💬","✨"];
@@ -213,7 +214,7 @@ export default function FinderLiveChatPage() {
       error: rpcError,
     } =
       await supabase.rpc(
-        "finder_get_chat_messages",
+        "finder_get_chat_messages_v2",
         {
           p_tag_code:
             tagCode,
@@ -393,19 +394,17 @@ export default function FinderLiveChatPage() {
       </header>
 
       <section className="wrap">
-        <a
-          className="back"
-          href={`/scan/${encodeURIComponent(
-            tagCode
-          )}`}
-        >
-          ←{" "}
-          {ka
-            ? "QR პროფილზე დაბრუნება"
-            : "Back to QR profile"}
-        </a>
-
         <div className="card">
+          <div className="cardNav">
+            <a
+              className="back"
+              href={`/scan/${encodeURIComponent(
+                tagCode
+              )}`}
+            >
+              ← {ka ? "QR პროფილზე დაბრუნება" : "Back to QR profile"}
+            </a>
+          </div>
           <div className="chatHead">
             <div className="icon">
               {category.icon}
@@ -537,11 +536,18 @@ export default function FinderLiveChatPage() {
                             )}
 
 
-                            <time>
-                              {formatTime(
-                                message.created_at
+                            <div className="messageMeta">
+                              <time>
+                                {formatTime(message.created_at)}
+                              </time>
+                              {mine && (
+                                <span className={message.read_at ? "seen" : "delivered"}>
+                                  {message.read_at
+                                    ? ka ? "✓✓ ნანახია" : "✓✓ Seen"
+                                    : ka ? "✓ მიწოდებულია" : "✓ Delivered"}
+                                </span>
                               )}
-                            </time>
+                            </div>
                           </div>
                         </div>
                       );
@@ -608,6 +614,12 @@ export default function FinderLiveChatPage() {
                         .value
                     )
                   }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      event.currentTarget.form?.requestSubmit();
+                    }
+                  }}
                   maxLength={
                     2000
                   }
@@ -755,32 +767,27 @@ export default function FinderLiveChatPage() {
 
         .wrap {
           width: calc(100% - 24px);
-          max-width: 760px;
+          max-width: 650px;
           margin: auto;
-          padding: 30px 0 60px;
+          padding: 22px 0 42px;
+        }
+
+        .cardNav {
+          padding: 10px 16px;
+          border-bottom: 1px solid #dbe7f5;
+          background: #f7faff;
         }
 
         .back {
           display: inline-flex;
           align-items: center;
-          min-height: 46px;
-          margin: 0 0 18px;
-          padding: 0 18px;
-          border: 2px solid rgba(255,255,255,.92);
-          border-radius: 14px;
-          background: #ffffff;
-          color: #073b91;
-          box-shadow: 0 10px 28px rgba(1,20,66,.28);
+          color: #0b55bc;
           text-decoration: none;
-          font-size: 16px;
-          font-weight: 900;
-          letter-spacing: .01em;
+          font-size: 13px;
+          font-weight: 850;
         }
 
-        .back:hover {
-          background: #eef6ff;
-          transform: translateY(-1px);
-        }
+        .back:hover { color: #073b91; }
 
         .card {
           overflow: hidden;
@@ -853,8 +860,8 @@ export default function FinderLiveChatPage() {
         }
 
         .messages {
-          height: min(54vh, 500px);
-          min-height: 350px;
+          height: min(46vh, 390px);
+          min-height: 270px;
           padding: 20px 18px;
           overflow-y: auto;
           background:
@@ -923,13 +930,19 @@ export default function FinderLiveChatPage() {
           text-decoration: none;
         }
 
-        .bubble time {
-          display: block;
+        .messageMeta {
           margin-top: 5px;
-          font-size: 8px;
-          text-align: right;
-          opacity: 0.7;
+          display: flex;
+          gap: 7px;
+          align-items: center;
+          justify-content: flex-end;
+          font-size: 11px;
+          opacity: .82;
         }
+
+        .bubble time { font-size: 11px; }
+        .seen { color: #b9ddff; font-weight: 800; }
+        .delivered { color: rgba(255,255,255,.78); font-weight: 750; }
 
         .error {
           margin: 0 18px 10px;
@@ -988,7 +1001,7 @@ export default function FinderLiveChatPage() {
         .title small{font-size:12px}.title h1{font-size:24px}.title p{font-size:13px}.live{font-size:12px}.notice{font-size:14px}.sender{font-size:12px}.bubble{font-size:16px}.locationLink{font-size:13px}.bubble time{font-size:11px}.error{font-size:14px}.composer textarea{font-size:16px}.composer button{font-size:15px}
 
         @media (max-width: 600px) {
-          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.back{width:max-content;min-height:44px;margin:0 4px 14px;padding:0 15px;font-size:15px}.card{min-height:calc(100dvh - 126px);display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
+          .page{min-height:100dvh;padding-bottom:24px}.page::before{width:300px;height:300px;top:70px;left:-175px;border-width:52px}.page::after{width:250px;height:250px;right:-100px;bottom:-45px;background-size:18px 18px}.topbar{width:calc(100% - 28px);min-height:64px}.secureBadge{padding:7px 8px;font-size:10px}.wrap{width:calc(100% - 22px);padding:20px 0 0}.cardNav{padding:9px 14px}.back{font-size:13px}.card{min-height:calc(100dvh - 126px);display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.78);border-radius:22px;box-shadow:0 24px 60px rgba(1,18,61,.42)}.chatHead{padding:16px}.icon{width:48px;height:48px;flex:0 0 48px}.notice{margin:12px 14px 0;font-size:12px}.messages{height:auto;min-height:280px;flex:1;padding:16px 14px}.composer{position:sticky;bottom:0;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-radius:0 0 22px 22px;background:rgba(255,255,255,.97)}.composer textarea{min-height:54px;max-height:120px;resize:none}.composer button{min-height:50px}.bubble{max-width:90%;font-size:15px}
           .chatHead {
             flex-wrap: wrap;
           }
