@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { encodeChatMedia } from "@/lib/chatMedia";
 
@@ -17,9 +17,18 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const releaseRequestedRef = useRef(false);
+  const discardRecordingRef = useRef(false);
+  const timerRef = useRef<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) window.clearInterval(timerRef.current);
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   async function upload(file: File | Blob, type: "image" | "audio", name: string) {
     const limit = type === "image" ? MAX_IMAGE : MAX_AUDIO;
@@ -46,7 +55,7 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
 
   async function startRecording() {
     if (recording || disabled || uploading) return;
-    releaseRequestedRef.current = false;
+    discardRecordingRef.current = false;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") { onError("ამ ბრაუზერში ხმოვანი შეტყობინება არ არის მხარდაჭერილი."); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -55,36 +64,59 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
       recorderRef.current = recorder;
       recorder.ondataavailable = (event) => { if (event.data.size) chunksRef.current.push(event.data); };
       recorder.onstop = async () => {
-        setRecording(false); streamRef.current?.getTracks().forEach((track) => track.stop());
+        if (timerRef.current !== null) window.clearInterval(timerRef.current);
+        timerRef.current = null;
+        setRecording(false); setRecordingSeconds(0);
+        streamRef.current?.getTracks().forEach((track) => track.stop());
         const mime = recorder.mimeType || "audio/webm";
         const blob = new Blob(chunksRef.current, { type: mime });
-        if (blob.size) await upload(blob, "audio", `ხმოვანი-${Date.now()}.webm`);
+        if (!discardRecordingRef.current && blob.size) {
+          await upload(blob, "audio", `ხმოვანი-${Date.now()}.webm`);
+        }
       };
-      recorder.start(); setRecording(true); onError("");
-      if (releaseRequestedRef.current) recorder.stop();
+      recorder.start(); setRecording(true); setRecordingSeconds(0); onError("");
+      timerRef.current = window.setInterval(() => {
+        setRecordingSeconds((seconds) => seconds + 1);
+      }, 1000);
     } catch { onError("მიკროფონზე წვდომა ვერ მივიღეთ. ბრაუზერში მიკროფონის ნებართვა ჩართეთ."); }
   }
 
-  function stopRecording() {
-    releaseRequestedRef.current = true;
+  function stopRecording(send: boolean) {
+    discardRecordingRef.current = !send;
     if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+  }
+
+  function formatRecordingTime(seconds: number) {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
   }
 
   const busy = disabled || uploading;
   return <>
     <input ref={photoRef} className="chatMediaInput" type="file" accept="image/*" onChange={choosePhoto} />
     <button type="button" className="mediaButton" disabled={busy || recording} onClick={() => photoRef.current?.click()} aria-label="ფოტოს გაგზავნა">{uploading ? "…" : "📷"}</button>
-    <button
-      type="button"
-      className={`mediaButton ${recording ? "recording" : ""}`}
-      disabled={busy && !recording}
-      onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); void startRecording(); }}
-      onPointerUp={(event) => { event.preventDefault(); stopRecording(); }}
-      onPointerCancel={stopRecording}
-      onKeyDown={(event) => { if ((event.key === " " || event.key === "Enter") && !event.repeat) void startRecording(); }}
-      onKeyUp={(event) => { if (event.key === " " || event.key === "Enter") stopRecording(); }}
-      aria-label="დააჭირეთ და გეჭიროთ ხმოვანი შეტყობინების ჩასაწერად"
-      title="დააჭირეთ და გეჭიროთ — გაშვებისას ავტომატურად გაიგზავნება"
-    >{recording ? "●" : "🎙️"}</button>
+    {!recording ? (
+      <button
+        type="button"
+        className="mediaButton"
+        disabled={busy}
+        onClick={() => void startRecording()}
+        aria-label="ხმოვანი შეტყობინების ჩაწერა"
+        title="დააჭირეთ ერთხელ ჩაწერის დასაწყებად"
+      >🎙️</button>
+    ) : (
+      <div className="voiceRecordingControls" role="status" aria-label="ხმოვანი შეტყობინება იწერება">
+        <span className="voiceRecordingTime">● {formatRecordingTime(recordingSeconds)}</span>
+        <button type="button" className="voiceCancelButton" onClick={() => stopRecording(false)} aria-label="ჩაწერის გაუქმება">✕</button>
+        <button type="button" className="voiceSendButton" onClick={() => stopRecording(true)} aria-label="ხმოვანი შეტყობინების გაგზავნა">➤</button>
+      </div>
+    )}
+    <style jsx>{`
+      .voiceRecordingControls { min-height: 48px; padding: 5px 6px 5px 12px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #fecaca; border-radius: 999px; background: #fff1f2; }
+      .voiceRecordingTime { min-width: 52px; color: #dc2626; font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
+      .voiceRecordingControls button { width: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 900; }
+      .voiceCancelButton { background: #ffffff; color: #64748b; }
+      .voiceSendButton { background: #1266e9; color: #ffffff; }
+    `}</style>
   </>;
 }
