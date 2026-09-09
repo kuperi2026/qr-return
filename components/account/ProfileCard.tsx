@@ -200,7 +200,6 @@ export default function ProfileCard({
           <div><span>მომსახურება</span><strong>{serviceLabel(item)}</strong></div>
           <div><span>დასრულების თარიღი</span><strong>{formatServiceDate(item.serviceExpiresAt || item.trialEndsAt)}</strong></div>
           <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა →</Link>
-          <Link href="/account/subscriptions#history">შეძენების ისტორია</Link>
         </div>
 
         <div className="stats">
@@ -382,7 +381,7 @@ export default function ProfileCard({
         .visual {
           position: relative;
 
-          height: 148px;
+          height: 180px;
 
           overflow: hidden;
 
@@ -844,7 +843,7 @@ export default function ProfileCard({
         ) {
           .visual {
             height:
-              135px;
+              155px;
           }
 
           .content {
@@ -986,5 +985,11 @@ function formatServiceDate(value?: string | null) {
   if (!value) return "ჯერ არ არის მითითებული";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("ka-GE", { day:"numeric", month:"long", year:"numeric" }).format(date);
+  return new Intl.DateTimeFormat("ka-GE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
