@@ -32,22 +32,6 @@ export default function PhotoUploader({
     <>
       <section className="photoSection">
         <div className="photoHeader">
-          <div>
-            <span className="eyebrow">
-              PHOTO
-            </span>
-
-            <h2>
-              ფოტოს დამატება
-            </h2>
-
-            <p>
-              დაამატეთ ფოტო, რათა მპოვნელმა
-              უფრო მარტივად ამოიცნოს თქვენი
-              ცხოველი ან ნივთი.
-            </p>
-          </div>
-
           <button
             type="button"
             className={
@@ -78,10 +62,6 @@ export default function PhotoUploader({
             <div className="uploadIcon">
               +
             </div>
-
-            <strong>
-              ფოტოს დამატება
-            </strong>
 
             <p>
               დააჭირეთ ფოტოს ასარჩევად
@@ -317,7 +297,9 @@ export default function PhotoUploader({
 
           color: #718397;
 
-          font-size: 13px;
+          color: #1d5f9c;
+          font-size: 17px;
+          font-weight: 800;
         }
 
         .uploadBox small {
@@ -325,7 +307,9 @@ export default function PhotoUploader({
 
           color: #8a99a9;
 
-          font-size: 11px;
+          color: #0a58ca;
+          font-size: 14px;
+          font-weight: 750;
         }
 
         .previewCard {
