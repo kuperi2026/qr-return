@@ -1014,9 +1014,6 @@ export default function EmergencyBraceletPage() {
 
           {step === 1 && (
             <EmergencyStep1
-              tagCode={tagCode}
-              setTagCode={setTagCode}
-              tagPrefilled={tagPrefilled}
               profileFor={profileFor}
               setProfileFor={
                 handleProfileForChange
@@ -1059,6 +1056,8 @@ export default function EmergencyBraceletPage() {
                 setOwnerEmail
               }
               tagCode={tagCode}
+              setTagCode={setTagCode}
+              tagPrefilled={tagPrefilled}
               onBack={() =>
                 goToStep(1)
               }
