@@ -20,87 +20,55 @@ export default function EmergencyStep1({
 
   return (
     <>
-      <div className="heading">
-        <div className="headingIcon">+</div>
+      <div className="heading emergencyChoiceHeading">
+        <div className="headingIcon">✚</div>
 
-        <div>
-          <span className="eyebrow">
-            EMERGENCY PROFILE
-          </span>
+        <h1>
+          აირჩიეთ, ვისთვის ქმნით Emergency პროფილს.
+        </h1>
 
-          <h1>ვისთვის ქმნით პროფილს?</h1>
-
-          <p>
-            აირჩიეთ, ვისთვის ქმნით Emergency პროფილს.
-          </p>
+        <div className="emergencySignals" aria-label="Emergency პროფილის ნიშნები">
+          <span>SOS</span>
+          <span>MEDICAL ID</span>
+          <span>24/7</span>
         </div>
       </div>
 
-      <div className="choiceGrid">
+      <div className="choiceGrid emergencyChoiceGrid">
         <button
           type="button"
           className={
             profileFor === "self"
-              ? "choice active"
-              : "choice"
+              ? "choice emergencyChoice active"
+              : "choice emergencyChoice"
           }
           onClick={() =>
             setProfileFor("self")
           }
         >
-          <div className="choiceTop">
-            <span>01</span>
-
-            <div className="choiceCircle">
-              {profileFor === "self"
-                ? "✓"
-                : "→"}
-            </div>
-          </div>
-
           <div className="choiceIcon">
             👤
           </div>
 
-          <h2>ჩემთვის</h2>
-
-          <p>
-            Emergency Bracelet და პროფილი
-            განკუთვნილია თქვენთვის.
-          </p>
+          <h2>პირველი პირისთვის</h2>
         </button>
 
         <button
           type="button"
           className={
             profileFor === "other"
-              ? "choice active"
-              : "choice"
+              ? "choice emergencyChoice active"
+              : "choice emergencyChoice"
           }
           onClick={() =>
             setProfileFor("other")
           }
         >
-          <div className="choiceTop">
-            <span>02</span>
-
-            <div className="choiceCircle">
-              {profileFor === "other"
-                ? "✓"
-                : "→"}
-            </div>
-          </div>
-
           <div className="choiceIcon">
             👥
           </div>
 
-          <h2>სხვა პირისთვის</h2>
-
-          <p>
-            ბავშვის, ოჯახის წევრის, მოხუცის ან სხვა
-            პირის Emergency Bracelet.
-          </p>
+          <h2>მესამე პირისთვის</h2>
         </button>
       </div>
 
