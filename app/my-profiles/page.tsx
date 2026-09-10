@@ -19,6 +19,7 @@ import {
 import ProfileCard, {
   type ProfileCardItem,
 } from "@/components/account/ProfileCard";
+import AiRecoveryCommandCenter from "@/app/components/account/AiRecoveryCommandCenter";
 
 type ItemRow = {
   id: string;
@@ -629,6 +630,22 @@ export default function MyProfilesPage() {
         </section>
 
         {createdMessage && <section className="createdNotice">✓ {createdMessage}</section>}
+
+        {!errorMessage && profiles.length > 0 && (
+          <AiRecoveryCommandCenter
+            profiles={profiles.map((profile) => ({
+              id: profile.id,
+              tagCode: profile.tag_code,
+              name: profile.item_name,
+              type: profile.item_type || profile.pet_type,
+              scanCount: profile.scan_count,
+              lastScannedAt: profile.last_scanned_at,
+              latitude: profile.last_scan_latitude,
+              longitude: profile.last_scan_longitude,
+              lost: profile.lost,
+            }))}
+          />
+        )}
 
         {errorMessage && (
           <section className="errorBox">
