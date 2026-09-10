@@ -133,7 +133,7 @@ export default function AiFinderGuide({
           <h2>{emergency ? "SOS ასისტენტი" : "როგორ დაგეხმაროთ?"}</h2>
           <p>
             {emergency
-              ? "აირჩიეთ სიტუაცია. გადაუდებელ შემთხვევაში პირველ რიგში დარეკეთ 911-ზე."
+              ? "აირჩიეთ სიტუაცია. გადაუდებელ შემთხვევაში პირველ რიგში დარეკეთ 112-ზე."
               : `სისტემამ ამოიცნო ${categoryLabel(normalized)} პროფილი${lostMode ? " და აქტიური Lost Mode" : ""}. აირჩიეთ შესაბამისი მოქმედება.`}
           </p>
         </div>
@@ -182,7 +182,7 @@ export default function AiFinderGuide({
           <p>{analysis.recommended_action_ka}</p>
           {analysis.safety_warning_ka && <div className="aiWarning">⚠ {analysis.safety_warning_ka}</div>}
           <div className="aiCtas">
-            {analysis.urgency === "emergency" && <a className="aiEmergency" href="tel:911">☎ 911</a>}
+            {analysis.urgency === "emergency" && <a className="aiEmergency" href="tel:112">☎ 112</a>}
             {canShareLocation && onShareLocation && <button type="button" onClick={onShareLocation}>📍 ლოკაცია</button>}
             {chatHref && <a href={chatLink}>💬 პირადი ჩათი</a>}
             {phone && <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>📞 დარეკვა</a>}
@@ -197,7 +197,7 @@ export default function AiFinderGuide({
             <strong>{selected.message}</strong>
           </div>
           <div className="aiCtas">
-            {emergency && selected.urgent && <a className="aiEmergency" href="tel:911">☎ 911</a>}
+            {emergency && selected.urgent && <a className="aiEmergency" href="tel:112">☎ 112</a>}
             {canShareLocation && onShareLocation && (
               <button type="button" onClick={onShareLocation}>📍 ლოკაცია</button>
             )}
