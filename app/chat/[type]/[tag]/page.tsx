@@ -138,6 +138,9 @@ export default function FinderLiveChatPage() {
       null
     );
 
+  const suggestionAppliedRef =
+    useRef(false);
+
   const rawType =
     Array.isArray(params.type)
       ? params.type[0]
@@ -175,6 +178,15 @@ export default function FinderLiveChatPage() {
       },
     [profileType]
   );
+
+  useEffect(() => {
+    if (suggestionAppliedRef.current) return;
+    const suggestion = new URLSearchParams(window.location.search).get("suggestion");
+    if (suggestion) {
+      setText(suggestion.slice(0, 2000));
+      suggestionAppliedRef.current = true;
+    }
+  }, []);
 
   useEffect(() => {
     if (!tagCode) {
