@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+type ChatAlert = {
+  title: string;
+  message: string;
+  href: string;
+};
 
 const NAV_ITEMS = [
   { href: "/app/dashboard", icon: "home", label: "მთავარი" },
@@ -16,6 +23,8 @@ export default function PremiumAppShell() {
   const pathname = usePathname();
   const [appMode, setAppMode] = useState(false);
   const [online, setOnline] = useState(true);
+  const [chatAlert, setChatAlert] = useState<ChatAlert | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
 
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
@@ -39,6 +48,78 @@ export default function PremiumAppShell() {
   const ownerArea = pathname.startsWith("/app/") || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || registrationArea;
 
   useEffect(() => {
+    if (typeof Notification !== "undefined") setNotificationPermission(Notification.permission);
+  }, []);
+
+  useEffect(() => {
+    if (!appMode || !ownerArea) return;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_KEY;
+    if (!url || !key) return;
+
+    const supabase = createClient(url, key);
+    let cancelled = false;
+    const channel = supabase.channel("kompasi-owner-chat-alerts");
+
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data: items } = await supabase
+        .from("item")
+        .select("id,tag_code,item_type,pet_type,item_name")
+        .eq("owner_id", user.id);
+      if (!items?.length || cancelled) return;
+
+      const ownedItems = new Map(items.map((item) => [item.id, item]));
+      channel
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+          const message = payload.new as {
+            item_id?: string;
+            sender_role?: string;
+            message_text?: string;
+            message?: string;
+          };
+          if (!message.item_id || message.sender_role === "owner") return;
+          const item = ownedItems.get(message.item_id);
+          if (!item) return;
+
+          const type = item.item_type || item.pet_type || "item";
+          const title = `${item.item_name || "QR პროფილი"}: ახალი შეტყობინება`;
+          const body = message.message_text || message.message || "მპოვნელი დაგიკავშირდათ ჩატში.";
+          const href = `/chat/${type}/${item.tag_code}`;
+          setChatAlert({ title, message: body, href });
+          navigator.vibrate?.([180, 90, 180]);
+
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            try {
+              const notification = new Notification(title, { body, icon: "/app-icons/app-icon.svg", tag: `chat-${message.item_id}` });
+              notification.onclick = () => {
+                window.focus();
+                window.location.assign(href);
+                notification.close();
+              };
+            } catch {
+              // The in-app alert remains visible on mobile browsers that disallow this constructor.
+            }
+          }
+        })
+        .subscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, [appMode, ownerArea]);
+
+  const enableNotifications = async () => {
+    if (typeof Notification === "undefined") return;
+    setNotificationPermission(await Notification.requestPermission());
+  };
+
+  useEffect(() => {
     document.body.classList.toggle("kompasiAppMode", appMode && ownerArea);
     document.body.classList.toggle("kompasiAppRegistration", appMode && registrationArea);
     return () => {
@@ -52,6 +133,18 @@ export default function PremiumAppShell() {
   return (
     <>
       {!online && <div className="offlinePill">◌ ინტერნეტთან კავშირი შეწყდა</div>}
+      {notificationPermission === "default" && (
+        <button className="notificationPill" type="button" onClick={enableNotifications}>♢ ჩართეთ ჩატის შეტყობინებები</button>
+      )}
+      {chatAlert && (
+        <aside className="chatAlert" role="status" aria-live="polite">
+          <Link href={chatAlert.href} onClick={() => setChatAlert(null)}>
+            <b>{chatAlert.title}</b>
+            <span>{chatAlert.message}</span>
+          </Link>
+          <button type="button" aria-label="შეტყობინების დახურვა" onClick={() => setChatAlert(null)}>×</button>
+        </aside>
+      )}
       <nav className="appDock" aria-label="KOMPASI აპის ნავიგაცია">
         {NAV_ITEMS.map((item) => {
           const active = item.href === "/my-profiles" || item.href === "/app/dashboard"
@@ -95,6 +188,10 @@ export default function PremiumAppShell() {
         @media(max-width:600px){body.kompasiAppRegistration .actions,body.kompasiAppRegistration .finalActions{display:grid!important;grid-template-columns:1fr!important}body.kompasiAppRegistration .choice{min-height:74px!important;padding:12px!important}}
         .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
         .appDock a{position:relative;min-width:0;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:13px;color:#728398;text-decoration:none;transition:160ms ease}.navIcon{width:21px;height:21px;display:grid;place-items:center}.navIcon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.appDock a small{max-width:100%;overflow:hidden;font-size:8px;font-weight:800;letter-spacing:.05px;text-overflow:ellipsis;white-space:nowrap}.appDock a.active{color:#075dce}.appDock a.active::after{content:"";position:absolute;bottom:1px;width:16px;height:2px;border-radius:999px;background:#176be5}.appDock a.primary{width:48px;height:48px;margin:0 auto;border-radius:15px;background:linear-gradient(145deg,#0c74ee,#3158d8 55%,#6549df);color:#fff;box-shadow:0 8px 19px rgba(32,87,210,.31)}.appDock a.primary .navIcon{width:22px;height:22px}.appDock a.primary small{color:#fff;font-size:7px}.appDock a.primary::after{display:none}.offlinePill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1100;padding:8px 13px;border:1px solid #f5d08c;border-radius:999px;background:#fff7e6;color:#925d06;box-shadow:0 9px 25px rgba(60,35,0,.16);font:800 11px/1.2 Arial,sans-serif;transform:translateX(-50%)}
+        .notificationPill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1090;padding:9px 13px;border:1px solid #bcd4f3;border-radius:999px;background:#f6faff;color:#0b5dbc;box-shadow:0 9px 25px rgba(13,69,139,.14);font:800 10px/1.2 Arial,sans-serif;transform:translateX(-50%)}
+        .offlinePill+.notificationPill{top:max(48px,calc(env(safe-area-inset-top) + 48px))}
+        .chatAlert{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));z-index:1200;width:min(450px,calc(100% - 24px));display:flex;align-items:flex-start;gap:10px;padding:13px 12px 13px 15px;border:1px solid #c7ddf7;border-radius:16px;background:rgba(250,253,255,.97);box-shadow:0 16px 42px rgba(5,53,115,.24);backdrop-filter:blur(18px);transform:translateX(-50%)}
+        .chatAlert a{min-width:0;flex:1;color:#173652;text-decoration:none}.chatAlert b,.chatAlert span{display:block}.chatAlert b{font-size:11px}.chatAlert span{margin-top:4px;overflow:hidden;color:#657b90;font-size:9px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}.chatAlert button{width:27px;height:27px;border:0;border-radius:9px;background:#edf4fc;color:#52708e;font-size:18px;line-height:1}
       `}</style>
     </>
   );
