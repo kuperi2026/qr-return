@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "KOMPASI — დაცული QR კავშირი",
     short_name: "KOMPASI",
     description: "მართეთ QR პროფილები, სკანირებები, Lost Mode და უსაფრთხო კავშირი ერთ სივრცეში.",
-    start_url: "/my-profiles?source=app",
+    start_url: "/app?source=installed",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",
