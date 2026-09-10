@@ -1,356 +1,41 @@
 "use client";
+
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
-import AppAiAssistant from "@/app/components/app/AppAiAssistant";
 
-type Item = {
-  id: string;
-  tag_code: string | null;
-  item_name: string | null;
-  scan_count: number | null;
-  last_scanned_at: string | null;
-  lost: boolean | null;
-};
+type Item = { id: string; scan_count: number | null; lost: boolean | null };
+
 export default function Dashboard() {
-  const router = useRouter(),
-    [items, setItems] = useState<Item[]>([]),
-    [email, setEmail] = useState("");
+  const router = useRouter();
+  const [items, setItems] = useState<Item[]>([]);
+  const [email, setEmail] = useState("");
+
   useEffect(() => {
-    const u = process.env.NEXT_PUBLIC_SUPABASE_URL,
-      k =
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_KEY;
-    if (!u || !k) return;
-    const sb = createClient(u, k);
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_KEY;
+    if (!url || !key) return;
+    const supabase = createClient(url, key);
     void (async () => {
-      const {
-        data: { user },
-      } = await sb.auth.getUser();
-      if (!user) {
-        router.replace("/login?source=app");
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.replace("/app"); return; }
       setEmail(user.email || "");
-      const { data } = await sb
-        .from("item")
-        .select("id,tag_code,item_name,scan_count,last_scanned_at,lost")
-        .eq("owner_id", user.id);
+      const { data } = await supabase.from("item").select("id,scan_count,lost").eq("owner_id", user.id);
       setItems((data || []) as Item[]);
     })();
   }, [router]);
-  const scans = items.reduce((n, p) => n + (p.scan_count || 0), 0),
-    lost = items.filter((p) => p.lost).length;
-  const latest = useMemo(
-    () =>
-      [...items]
-        .filter((p) => p.last_scanned_at)
-        .sort(
-          (a, b) =>
-            new Date(b.last_scanned_at || 0).getTime() -
-            new Date(a.last_scanned_at || 0).getTime(),
-        )[0],
-    [items],
-  );
-  return (
-    <main className="dash">
-      <div className="dw">
-        <header>
-          <Link href="/app/dashboard" className="db">
-            <img src="/app-icons/app-icon.svg" alt="" />
-            <span>
-              <b>KOMPASI</b>
-              <small>დაცული QR კავშირი</small>
-            </span>
-          </Link>
-          <Link href="/account/notifications" className="bell">
-            ♢
-          </Link>
-        </header>
-        <section className="hero">
-          <div>
-            <small>მფლობელის სივრცე</small>
-            <h1>მოგესალმებით</h1>
-            <p>{email || "თქვენი მნიშვნელოვანი ყოველთვის ახლოსაა."}</p>
-          </div>
-          <i>✦</i>
-        </section>
-        <section className="stats">
-          <Link href="/app/profiles">
-            <small>პროფილები</small>
-            <b>{items.length}</b>
-            <span>ყველას ნახვა →</span>
-          </Link>
-          <Link href="/app/profiles">
-            <small>სკანირებები</small>
-            <b>{scans}</b>
-            <span>{latest?.item_name || "აქტივობა არ არის"}</span>
-          </Link>
-          <Link href="/app/profiles">
-            <small>Lost Mode</small>
-            <b className={lost ? "red" : ""}>{lost}</b>
-            <span>{lost ? "საჭიროა ყურადღება" : "ყველაფერი დაცულია"}</span>
-          </Link>
-        </section>
-        <AppAiAssistant />
-        <div className="title">
-          <b>სწრაფი მოქმედებები</b>
-          <small>გაიხსნება მხოლოდ არჩევის შემდეგ</small>
-        </div>
-        <section className="quick">
-          <Link href="/app/products">
-            <i>⌁</i>
-            <span>
-              <b>პროდუქტები</b>
-              <small>8 კატეგორია და რეგისტრაცია</small>
-            </span>
-            <em>›</em>
-          </Link>
-          <Link href="/app/profiles">
-            <i>▦</i>
-            <span>
-              <b>QR პროფილები</b>
-              <small>მართვა და სტატუსები</small>
-            </span>
-            <em>›</em>
-          </Link>
-          <Link href="/app/chat">
-            <i>◌</i>
-            <span>
-              <b>Live Chat</b>
-              <small>უსაფრთხო საუბრები</small>
-            </span>
-            <em>›</em>
-          </Link>
-          <Link href="/app/account">
-            <i>◇</i>
-            <span>
-              <b>მომსახურება</b>
-              <small>პაკეტები და ანგარიში</small>
-            </span>
-            <em>›</em>
-          </Link>
-        </section>
-      </div>
-      <style jsx global>{`
-        .dash {
-          min-height: 100vh;
-          background:
-            radial-gradient(circle at 50% 0, #dcecff, transparent 28%), #f4f7fb;
-          color: #153451;
-          font-family:
-            Inter,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Arial,
-            sans-serif;
-        }
-        .dw {
-          width: min(560px, 100%);
-          margin: auto;
-          padding: 0 13px 94px;
-        }
-        .dash header {
-          height: 67px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .db {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          color: #153451;
-          text-decoration: none;
-        }
-        .db img {
-          width: 36px;
-          height: 36px;
-          border-radius: 11px;
-        }
-        .db b,
-        .db small {
-          display: block;
-        }
-        .db b {
-          font-size: 13px;
-          letter-spacing: 1px;
-        }
-        .db small {
-          margin-top: 2px;
-          color: #6c8197;
-          font-size: 8px;
-        }
-        .bell {
-          width: 37px;
-          height: 37px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #d5e2ef;
-          border-radius: 11px;
-          background: #fff;
-          color: #1761bb;
-          text-decoration: none;
-          font-size: 19px;
-        }
-        .hero {
-          min-height: 126px;
-          padding: 23px 20px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-radius: 21px;
-          background: linear-gradient(140deg, #062f68, #0865d3);
-          color: #fff;
-          box-shadow: 0 14px 32px #0b4eaa2b;
-        }
-        .hero small {
-          color: #b9d9fa;
-          font-size: 8px;
-          font-weight: 850;
-          letter-spacing: 1px;
-        }
-        .hero h1 {
-          margin: 6px 0 0;
-          font-size: 24px;
-          letter-spacing: -0.4px;
-        }
-        .hero p {
-          margin: 7px 0 0;
-          max-width: 250px;
-          overflow: hidden;
-          color: #d6e9fc;
-          font-size: 9px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .hero > i {
-          width: 46px;
-          height: 46px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #ffffff38;
-          border-radius: 15px;
-          background: #ffffff18;
-          font-size: 20px;
-          font-style: normal;
-        }
-        .stats {
-          margin-top: 10px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 7px;
-        }
-        .stats a {
-          min-width: 0;
-          min-height: 91px;
-          padding: 12px;
-          border: 1px solid #dae5ef;
-          border-radius: 15px;
-          background: #fff;
-          color: #173652;
-          text-decoration: none;
-          box-shadow: 0 6px 18px #173f6d0c;
-        }
-        .stats small,
-        .stats b,
-        .stats span {
-          display: block;
-        }
-        .stats small {
-          color: #71869a;
-          font-size: 7px;
-          font-weight: 850;
-        }
-        .stats b {
-          margin-top: 7px;
-          color: #0b61c9;
-          font-size: 20px;
-        }
-        .stats b.red {
-          color: #d43e49;
-        }
-        .stats span {
-          margin-top: 6px;
-          overflow: hidden;
-          color: #788b9e;
-          font-size: 7px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .title {
-          margin: 19px 3px 9px;
-          display: flex;
-          align-items: end;
-          justify-content: space-between;
-        }
-        .title b {
-          font-size: 12px;
-        }
-        .title small {
-          color: #8597aa;
-          font-size: 7px;
-        }
-        .quick {
-          display: grid;
-          gap: 7px;
-        }
-        .quick a {
-          min-height: 61px;
-          padding: 10px 13px;
-          display: flex;
-          align-items: center;
-          gap: 11px;
-          border: 1px solid #dce6f0;
-          border-radius: 15px;
-          background: #fff;
-          color: #173652;
-          text-decoration: none;
-        }
-        .quick i {
-          width: 39px;
-          height: 39px;
-          display: grid;
-          place-items: center;
-          border-radius: 11px;
-          background: #eaf3ff;
-          color: #0d63c9;
-          font-size: 18px;
-          font-style: normal;
-        }
-        .quick span {
-          flex: 1;
-        }
-        .quick b,
-        .quick small {
-          display: block;
-        }
-        .quick b {
-          font-size: 10px;
-        }
-        .quick small {
-          margin-top: 4px;
-          color: #778b9e;
-          font-size: 8px;
-        }
-        .quick em {
-          color: #1761bd;
-          font-size: 20px;
-          font-style: normal;
-        }
-        @media (max-width: 380px) {
-          .title small {
-            display: none;
-          }
-          .stats a {
-            padding: 10px 8px;
-          }
-        }
-        .dash{background:radial-gradient(circle at 20% 8%,rgba(75,166,240,.34),transparent 30%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);color:#fff}.db{color:#fff}.db small{color:#c5def5}.bell{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff}.hero{background:linear-gradient(135deg,#ffffff,#eaf4ff);color:#123a61}.hero small{color:#1761bd;font-size:11px}.hero p{color:#58738d;font-size:12px}.hero>i{border-color:#bfd6ee;background:#e1efff;color:#1761bd}.stats a:nth-child(1){border-color:#b9ddff;background:linear-gradient(145deg,#e7f4ff,#fff)}.stats a:nth-child(2){border-color:#bfe7d2;background:linear-gradient(145deg,#e9faf1,#fff)}.stats a:nth-child(3){border-color:#e6c8ef;background:linear-gradient(145deg,#f8edff,#fff)}.stats small{font-size:10px}.stats span{font-size:9px}.title b{font-size:15px}.title small{color:#c3d9ed;font-size:10px}.quick a:nth-child(1) i{background:#e5f1ff;color:#075dcc}.quick a:nth-child(2) i{background:#e8f8ef;color:#08784a}.quick a:nth-child(3) i{background:#f3eaff;color:#7044bb}.quick a:nth-child(4) i{background:#fff2df;color:#ad6800}.quick b{font-size:13px}.quick small{font-size:10px}.quick a{min-height:68px}.dw{padding-left:15px;padding-right:15px}
-      `}</style>
-    </main>
-  );
+
+  const scans = items.reduce((total, item) => total + (item.scan_count || 0), 0);
+  const lost = items.filter((item) => item.lost).length;
+
+  return <main className="simpleDash"><div className="dashWrap">
+    <header><Link href="/app/dashboard" className="brand"><img src="/app-icons/app-icon.svg" alt="" /><span><b>KOMPASI</b><small>დაცული QR კავშირი</small></span></Link><Link href="/account/notifications" className="notifications" aria-label="შეტყობინებები">♢</Link></header>
+    <section className="welcome"><span className="welcomeIcon">✦</span><div><small>მფლობელის სივრცე</small><h1>მოგესალმებით</h1><p>{email || "თქვენი მნიშვნელოვანი ყოველთვის ახლოსაა"}</p></div></section>
+    <section className="miniStatus" aria-label="ანგარიშის მოკლე სტატუსი"><div className="blue"><i>⌁</i><span><b>{items.length}</b><small>პროფილი</small></span></div><div className="green"><i>⌖</i><span><b>{scans}</b><small>სკანირება</small></span></div><div className={lost ? "red" : "violet"}><i>!</i><span><b>{lost}</b><small>Lost Mode</small></span></div></section>
+    <p className="hint"><span>＋</span> ახალი პროფილის დასამატებლად ქვედა მენიუში დააჭირეთ „პროდუქტებს“.</p>
+    <section className="compactActions"><Link href="/app/chat"><i>◌</i><span><b>Live Chat</b><small>მპოვნელის შეტყობინებები</small></span><em>›</em></Link><Link href="/app/account"><i>◇</i><span><b>მომსახურება და პაკეტები</b><small>ანგარიში და პირობები</small></span><em>›</em></Link></section>
+  </div><style jsx global>{`
+    *{box-sizing:border-box}.simpleDash{min-height:100vh;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);color:#fff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}.dashWrap{width:min(560px,100%);margin:auto;padding:0 16px 100px}.simpleDash header{height:70px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}.brand img{width:38px;height:38px;border-radius:12px;box-shadow:0 7px 18px rgba(4,39,79,.24)}.brand b,.brand small{display:block}.brand b{font-size:15px;letter-spacing:1.1px}.brand small{margin-top:2px;color:#cae2f7;font-size:10px}.notifications{width:39px;height:39px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.35);border-radius:12px;background:rgba(255,255,255,.14);color:#fff;text-decoration:none;font-size:20px}.welcome{padding:18px 2px 16px;display:flex;align-items:center;gap:13px}.welcomeIcon{width:45px;height:45px;display:grid;place-items:center;flex:0 0 45px;border:1px solid rgba(255,255,255,.28);border-radius:14px;background:rgba(255,255,255,.13);font-size:19px}.welcome small{color:#c7e1f7;font-size:10px;font-weight:800}.welcome h1{margin:3px 0 0;font-size:22px}.welcome p{max-width:330px;margin:4px 0 0;overflow:hidden;color:#d9ebfa;font-size:11px;text-overflow:ellipsis;white-space:nowrap}.miniStatus{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.miniStatus>div{min-width:0;min-height:63px;padding:10px;display:flex;align-items:center;gap:8px;border-radius:14px;color:#173652}.miniStatus i{width:31px;height:31px;display:grid;place-items:center;flex:0 0 31px;border-radius:9px;background:rgba(255,255,255,.72);font-size:14px;font-style:normal;font-weight:900}.miniStatus b,.miniStatus small{display:block}.miniStatus b{font-size:16px}.miniStatus small{margin-top:2px;font-size:8px;font-weight:800;white-space:nowrap}.miniStatus .blue{background:#dceeff}.miniStatus .green{background:#dcf5e8}.miniStatus .violet{background:#eee4ff}.miniStatus .red{background:#ffe0e3;color:#a51f2a}.hint{margin:14px 0 17px;padding:11px 12px;display:flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.22);border-radius:12px;background:rgba(255,255,255,.1);color:#e0eef9;font-size:10px;line-height:1.45}.hint span{font-size:17px;font-weight:900}.compactActions{display:grid;gap:9px}.compactActions a{min-height:67px;padding:11px 13px;display:flex;align-items:center;gap:11px;border:1px solid #dce6f0;border-radius:15px;background:#fff;color:#173652;text-decoration:none;box-shadow:0 8px 22px rgba(1,30,66,.14)}.compactActions i{width:40px;height:40px;display:grid;place-items:center;flex:0 0 40px;border-radius:11px;font-size:18px;font-style:normal}.compactActions a:first-child i{background:#e6f1ff;color:#075dcc}.compactActions a:last-child i{background:#fff0d9;color:#a45f00}.compactActions span{min-width:0;flex:1}.compactActions b,.compactActions small{display:block}.compactActions b{font-size:13px}.compactActions small{margin-top:4px;color:#74899d;font-size:10px}.compactActions em{color:#1761bd;font-size:20px;font-style:normal}@media(max-width:360px){.dashWrap{padding-left:11px;padding-right:11px}.miniStatus{gap:5px}.miniStatus>div{padding:8px 6px;gap:5px}.miniStatus i{width:27px;height:27px;flex-basis:27px}.miniStatus small{font-size:7px}}
+  `}</style></main>;
 }
