@@ -1541,7 +1541,7 @@ export default function RegistrationFlow({
       `}</style>
       <style jsx global>{`
         @media (max-width: 600px) {
-          .registrationPage.appRegistration { padding: 0 10px 22px; }
+          .registrationPage.appRegistration { padding: 0 10px 22px; background:#edf7ff; }.registrationPage.appRegistration button,.registrationPage.appRegistration a,.registrationPage.appRegistration input,.registrationPage.appRegistration select,.registrationPage.appRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
           .registrationPage.appRegistration .registrationHeader { min-height: 52px; }
           .registrationPage.appRegistration .changeProduct { padding: 7px 9px; font-size: 10px; }
           .registrationPage.appRegistration .progress { padding-top: 12px; }
