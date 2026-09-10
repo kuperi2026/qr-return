@@ -40,7 +40,7 @@ export default function Products() {
         .pc {
           min-height: 100vh;
           background:
-            radial-gradient(circle at 50% 0, #deedff, transparent 28%), #f4f7fb;
+            radial-gradient(circle at 50% 0, #deedff, transparent 28%), #edf7ff;
           color: #173652;
           font-family: Inter, Arial, sans-serif;
         }

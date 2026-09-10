@@ -47,7 +47,7 @@ export default function ProductType() {
       <style jsx global>{`
         .th {
           min-height: 100vh;
-          background: #f4f7fb;
+          background: #edf7ff;
           color: #173652;
           font-family: Inter, Arial, sans-serif;
         }
