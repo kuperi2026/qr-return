@@ -39,6 +39,7 @@ const supabase =
 ========================================================= */
 
 export default function EmergencyBraceletPage() {
+  const [isAppRegistration, setIsAppRegistration] = useState(false);
   const [step, setStep] =
     useState(1);
 
@@ -269,6 +270,10 @@ export default function EmergencyBraceletPage() {
   /* =========================================================
      LOAD OWNER
   ========================================================= */
+
+  useEffect(() => {
+    setIsAppRegistration(new URLSearchParams(window.location.search).get("source") === "app");
+  }, []);
 
   useEffect(() => {
     loadOwnerAccount();
@@ -956,7 +961,7 @@ export default function EmergencyBraceletPage() {
 
   return (
     <>
-      <main className={step === 1 ? "page emergencyChoicePage" : "page"}>
+      <main className={`${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
         <header className="topbar">
           <a
             href="/"
@@ -978,7 +983,7 @@ export default function EmergencyBraceletPage() {
           </a>
 
           <a
-            href="/account"
+            href={isAppRegistration ? "/app/profiles" : "/account"}
             className="topButton"
           >
             ← ჩემი პროფილები
@@ -2304,6 +2309,102 @@ export default function EmergencyBraceletPage() {
 
           .heading p {
             font-size: 13px;
+          }
+
+          .page.appRegistration {
+            padding: 0 10px 22px;
+          }
+
+          .page.appRegistration .topbar {
+            height: 52px;
+          }
+
+          .page.appRegistration .brandMark {
+            width: 34px;
+            height: 34px;
+            font-size: 11px;
+          }
+
+          .page.appRegistration .brandText strong {
+            font-size: 14px;
+          }
+
+          .page.appRegistration .brandText span {
+            display: none;
+          }
+
+          .page.appRegistration .topButton {
+            min-height: 34px;
+            padding: 0 9px;
+            font-size: 10px;
+          }
+
+          .page.appRegistration .card,
+          .page.appRegistration .emergencyChoiceCard {
+            margin-top: 12px;
+            padding: 14px 12px;
+            border-radius: 14px;
+          }
+
+          .page.appRegistration .heading {
+            margin-top: 12px;
+            gap: 9px;
+          }
+
+          .page.appRegistration .headingIcon {
+            width: 38px;
+            height: 38px;
+            flex-basis: 38px;
+            font-size: 16px;
+          }
+
+          .page.appRegistration .heading h1 {
+            font-size: 19px;
+          }
+
+          .page.appRegistration .heading p {
+            font-size: 11px;
+            line-height: 1.4;
+          }
+
+          .page.appRegistration .formGrid,
+          .page.appRegistration .textareaGrid {
+            margin-top: 12px;
+            gap: 10px;
+          }
+
+          .page.appRegistration .field label {
+            margin-bottom: 5px;
+            font-size: 11px;
+          }
+
+          .page.appRegistration .field input,
+          .page.appRegistration .field select {
+            height: 44px;
+            padding: 0 11px;
+            font-size: 16px;
+          }
+
+          .page.appRegistration .field textarea {
+            min-height: 72px;
+            padding: 10px 11px;
+            font-size: 16px;
+          }
+
+          .page.appRegistration .choice {
+            min-height: 106px;
+            padding: 12px;
+          }
+
+          .page.appRegistration .emergencyChoice {
+            min-height: 118px;
+          }
+
+          .page.appRegistration .actions,
+          .page.appRegistration .finalActions,
+          .page.appRegistration .emergencyStep1Actions {
+            margin-top: 14px;
+            gap: 8px;
           }
 
           .choiceGrid,
