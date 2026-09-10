@@ -41,7 +41,7 @@ function Base() {
     <style jsx global>{`
       .sub {
         min-height: 100vh;
-        background: #f4f7fb;
+        background: #edf7ff;
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
