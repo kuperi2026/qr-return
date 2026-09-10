@@ -15,6 +15,15 @@ function fallbackAnalysis(message: string, category: string) {
   const high = emergency || /urgent|immediately|blocked|accident|სასწრაფ|დაუყოვნებლივ|მიშლის ხელს|ავარია/.test(lower);
   const suspicious = suspiciousPatterns.some((pattern) => pattern.test(message));
 
+  const categoryAdvice: Record<string, string> = {
+    dog: "ჩართეთ Lost Mode, გადაამოწმეთ ბოლო სკანირება და მპოვნელს დაუკავშირდით დაცული ჩათით. ნუ მიუახლოვდებით შეშინებულ ან აგრესიულ ცხოველს ძალით.",
+    cat: "ჩართეთ Lost Mode, შეამოწმეთ ახლო დამალვის ადგილები და მპოვნელს დაუკავშირდით დაცული ჩათით. კატას ნუ დაედევნებით და მიეცით მშვიდად მიახლოების საშუალება.",
+    parking: "გამოიყენეთ დაცული ჩათი მძღოლთან დასაკავშირებლად. არ გააზიაროთ მანქანის ან მფლობელის პირადი მონაცემები საჯაროდ.",
+    keys: "გამოიყენეთ დაცული ჩათი და შეთანხმდით საჯარო, უსაფრთხო ადგილზე დაბრუნებაზე. არ გაამჟღავნოთ მისამართი ან გასაღების დანიშნულება.",
+    wallet: "არ გააზიაროთ ბარათის ნომრები, პირადი დოკუმენტები ან ფოტოები. გამოიყენეთ მხოლოდ დაცული ჩათი და უსაფრთხო დაბრუნების ადგილი.",
+    bag: "არ გახსნათ ან არ გაავრცელოთ ჩანთის პირადი შიგთავსი. მფლობელს დაუკავშირდით დაცული ჩათით და შეთანხმდით უსაფრთხო დაბრუნებაზე.",
+    suitcase: "შეინახეთ ჩემოდანი უსაფრთხო ადგილზე, გამოიყენეთ დაცული ჩათი და საჭიროების შემთხვევაში მიმართეთ აეროპორტის ან ტრანსპორტის Lost & Found სამსახურს.",
+  };
   return {
     detected_language: /[ა-ჰ]/.test(message) ? "ka" : "unknown",
     urgency: emergency ? "emergency" : high ? "high" : "medium",
@@ -24,7 +33,7 @@ function fallbackAnalysis(message: string, category: string) {
       ? "დარეკეთ 112-ზე და შემდეგ დაუკავშირდით Emergency კონტაქტს."
       : suspicious
       ? "არ გააზიაროთ ფინანსური მონაცემები, პაროლი ან ერთჯერადი კოდი. გამოიყენეთ მხოლოდ დაცული ჩათი."
-      : "დაუკავშირდით მფლობელს დაცული ჩათით და საჭიროების შემთხვევაში გაუზიარეთ მდებარეობა.",
+      : categoryAdvice[category] || "დაუკავშირდით მფლობელს დაცული ჩათით და საჭიროების შემთხვევაში გაუზიარეთ მდებარეობა.",
     suggested_message_ka: message,
     suspicious,
     safety_warning_ka: suspicious
@@ -53,6 +62,7 @@ export async function POST(request: NextRequest) {
     const message = typeof body?.message === "string" ? body.message.trim().slice(0, 1000) : "";
     const category = typeof body?.category === "string" ? body.category.trim().toLowerCase().slice(0, 40) : "item";
     const lostMode = body?.lostMode === true;
+    const subjectMode = body?.subjectMode === "other" ? "other" : "self";
 
     if (message.length < 2) {
       return NextResponse.json({ error: "აღწერეთ სიტუაცია." }, { status: 400 });
@@ -73,7 +83,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model,
         store: false,
-        instructions: `You are KOMPASI's safety routing engine for Georgia. Analyze a finder's message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies in Georgia, recommend 112 first. Return concise Georgian output and preserve the original meaning in any translation.`,
+        instructions: `You are KOMPASI's safety routing engine for Georgia. Analyze a message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. For emergency profiles, the bracelet is managed by ${subjectMode === "other" ? "a third party on behalf of the wearer" : "the wearer personally"}; keep advice clear about which person should act and never confuse the wearer with the manager or emergency contact. For pets, prioritize calm handling and animal safety. For wallets and keys, protect identity, address, access, and financial data. For luggage and bags, protect contents and recommend official lost-and-found channels when relevant. For parking, facilitate contact without exposing vehicle-owner data. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies in Georgia, recommend 112 first, then an emergency contact. Return concise Georgian output and preserve the original meaning in any translation.`,
         input: message,
         text: {
           format: {
