@@ -1,4 +1,4 @@
-const CACHE = "kompasi-static-v2";
+const CACHE = "kompasi-static-v3";
 const STATIC_FILES = ["/app-icons/app-icon.svg", "/offline"];
 
 self.addEventListener("install", (event) => {
@@ -8,9 +8,17 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
+    Promise.all([
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith("kompasi-") && key !== CACHE)
+            .map((key) => caches.delete(key))
+        )
+      ),
+      self.clients.claim(),
+    ])
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
