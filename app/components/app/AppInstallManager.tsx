@@ -27,7 +27,7 @@ export default function AppInstallManager() {
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);
   }, []);
 
-  const ownerArea = pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/");
+  const ownerArea = pathname === "/app" || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/");
   if (!ownerArea || !visible || !promptEvent) return null;
 
   async function install() {
