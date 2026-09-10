@@ -1,5 +1,5 @@
-const CACHE = "kompasi-static-v1";
-const STATIC_FILES = ["/app-icons/app-icon.svg"];
+const CACHE = "kompasi-static-v2";
+const STATIC_FILES = ["/app-icons/app-icon.svg", "/offline"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(STATIC_FILES)));
@@ -18,6 +18,11 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(fetch(request).catch(() => caches.match("/offline")));
+    return;
+  }
 
   const safeAsset = ["image", "style", "script", "font"].includes(request.destination);
   if (!safeAsset) return;
