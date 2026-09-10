@@ -1,10 +1,31 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./product-grid.css";
+import AppInstallManager from "@/app/components/app/AppInstallManager";
 
 export const metadata: Metadata = {
-  title: "QR Return | Lost & Found",
+  title: "KOMPASI | დაცული QR კავშირი",
   description:
-    "Smart QR solution for returning lost pets, keys, wallets, bags and luggage.",
+    "QR პროფილების, დაკარგული ნივთებისა და უსაფრთხო კავშირის ერთიანი სისტემა.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "KOMPASI",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "KOMPASI",
+  },
+  icons: {
+    icon: [
+      { url: "/app-icons/app-icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/app-icons/app-icon.svg", type: "image/svg+xml" }],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#075ee5",
 };
 
 export default function RootLayout({
@@ -24,6 +45,7 @@ export default function RootLayout({
         }}
       >
         {children}
+        <AppInstallManager />
       </body>
     </html>
   );
