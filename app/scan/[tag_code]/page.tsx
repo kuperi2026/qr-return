@@ -10,6 +10,7 @@ import {
 } from "@/lib/geolocation";
 import { getFinderSession } from "@/lib/finderSession";
 import QRScanTracker from "@/components/QRScanTracker";
+import AiFinderGuide from "@/app/components/ai/AiFinderGuide";
 
 type FinderProfile = {
   id: string;
@@ -530,6 +531,20 @@ export default function FinderPage() {
                   />
                 )}
             </section>
+
+            <AiFinderGuide
+              category={category}
+              tagCode={profile.tag_code}
+              lostMode={profile.active === true}
+              phone={profile.owner_phone}
+              chatHref={
+                profile.live_chat_enabled === true
+                  ? `/chat/${encodeURIComponent(profile.item_type === "pet" ? profile.pet_type || "pet" : profile.item_type)}/${encodeURIComponent(profile.tag_code)}`
+                  : null
+              }
+              canShareLocation={profile.location_sharing_enabled === true}
+              onShareLocation={() => void shareLocation()}
+            />
 
             <section className="section">
               <div className="sectionHeading">
