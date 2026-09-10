@@ -21,8 +21,12 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/app"); return; }
       setEmail(user.email || "");
-      const { data } = await supabase.from("item").select("id,scan_count,lost").eq("owner_id", user.id);
-      setItems((data || []) as Item[]);
+      const [{ data: products }, { data: emergencyProfiles }] = await Promise.all([
+        supabase.from("item").select("id,scan_count,lost").eq("owner_id", user.id),
+        supabase.from("emergency_profiles").select("id,missing_mode").eq("owner_id", user.id),
+      ]);
+      const emergencyItems = ((emergencyProfiles || []) as Array<{ id: string; missing_mode: boolean | null }>).map((profile) => ({ id: profile.id, scan_count: 0, lost: profile.missing_mode }));
+      setItems([...(products || []) as Item[], ...emergencyItems]);
     })();
   }, [router]);
 
