@@ -17,7 +17,9 @@ type Profile = {
   href: string;
   emergency?: boolean;
 };
-const label = (p: Profile) => p.item_type || p.pet_type || "QR პროფილი";
+const category = (p: Profile) => p.item_type === "pet" && p.pet_type ? p.pet_type : p.item_type || p.pet_type || "item";
+const labels: Record<string, string> = { dog: "ძაღლი", cat: "კატა", parking: "ავტომობილი / Parking", suitcase: "ჩემოდანი", luggage: "ჩემოდანი", keys: "გასაღები", wallet: "საფულე", bag: "ჩანთა", emergency: "Emergency" };
+const label = (p: Profile) => labels[category(p)] || "QR პროფილი";
 const icons: Record<string, string> = {
   dog: "🐕", cat: "🐈", parking: "🚘", suitcase: "🧳", luggage: "🧳",
   keys: "🔑", wallet: "👛", bag: "👜", emergency: "✚",
@@ -114,7 +116,7 @@ export default function AppProfiles() {
                   {p.photo ? (
                     <img src={p.photo} alt="" />
                   ) : (
-                    <span>{icons[label(p).toLowerCase()] || "⌁"}</span>
+                    <span>{icons[category(p)] || "⌁"}</span>
                   )}
                 </div>
                 <div className="info">

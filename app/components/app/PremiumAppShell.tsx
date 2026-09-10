@@ -66,13 +66,14 @@ export default function PremiumAppShell() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || cancelled) return;
-      const { data: items } = await supabase
-        .from("item")
-        .select("id,tag_code,item_type,pet_type,item_name")
-        .eq("owner_id", user.id);
-      if (!items?.length || cancelled) return;
+      const [{ data: items }, { data: emergencyProfiles }] = await Promise.all([
+        supabase.from("item").select("id,tag_code,item_type,pet_type,item_name").eq("owner_id", user.id),
+        supabase.from("emergency_profiles").select("id,tag_code,first_name,last_name").eq("owner_id", user.id),
+      ]);
+      if (cancelled) return;
 
-      const ownedItems = new Map(items.map((item) => [item.id, item]));
+      const ownedItems = new Map((items || []).map((item) => [item.id, item]));
+      const emergencyByTag = new Map((emergencyProfiles || []).map((profile) => [profile.tag_code, profile]));
       channel
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
           const message = payload.new as {
@@ -102,6 +103,26 @@ export default function PremiumAppShell() {
               };
             } catch {
               // The in-app alert remains visible on mobile browsers that disallow this constructor.
+            }
+          }
+        })
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_chat_messages" }, (payload) => {
+          const message = payload.new as { profile_type?: string; tag_code?: string; sender_type?: string; message?: string };
+          if (message.profile_type !== "emergency" || !message.tag_code || message.sender_type === "owner") return;
+          const profile = emergencyByTag.get(message.tag_code);
+          if (!profile) return;
+          const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Emergency პროფილი";
+          const title = `${name}: ახალი Emergency შეტყობინება`;
+          const body = message.message || "მპოვნელი Emergency ჩატში დაგიკავშირდათ.";
+          const href = `/app/live-chat/emergency/${encodeURIComponent(message.tag_code)}`;
+          setChatAlert({ title, message: body, href });
+          navigator.vibrate?.([220, 90, 220]);
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            try {
+              const notification = new Notification(title, { body, icon: "/app-icons/app-icon.svg", tag: `emergency-chat-${message.tag_code}` });
+              notification.onclick = () => { window.focus(); window.location.assign(href); notification.close(); };
+            } catch {
+              // The in-app alert remains available when system notifications are unavailable.
             }
           }
         })
