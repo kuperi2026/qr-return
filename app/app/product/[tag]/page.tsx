@@ -16,6 +16,18 @@ type Item = {
   scan_count: number | null;
   last_scanned_at: string | null;
 };
+type ProductAction = {
+  icon: string;
+  title: string;
+  description: string;
+  href: string;
+  tone?: "danger" | "chat";
+};
+type ActionGroup = {
+  title: string;
+  description: string;
+  actions: ProductAction[];
+};
 const names: Record<string, [string, string]> = {
   dog: ["🐕", "ძაღლი"],
   cat: ["🐈", "კატა"],
@@ -64,26 +76,42 @@ export default function ProductCenter() {
   if (!p) return <main className="centerState">პროფილი ვერ მოიძებნა.</main>;
   const type = p.item_type || p.pet_type || "item",
     m = names[type] || ["⌁", "QR პროფილი"];
-  const actions = [
-    ["▤", "პროფილის ინფორმაცია", "ყველა შენახული მონაცემი", "/profile/" + tag],
-    ["✎", "რედაქტირება", "ინფორმაციის შეცვლა", "/profile/" + tag + "/edit"],
-    ["!", "Lost Mode", "დაკარგვის რეჟიმის მართვა", "/profile/" + tag],
-    ["◉", "პროფილი მპოვნელისთვის", "Finder View", "/scan/" + tag],
-    ["◌", "Live Chat", "მპოვნელთან საუბარი", "/chat/" + type + "/" + tag],
-    ["⌖", "სკანირებები", "რაოდენობა, დრო და ლოკაცია", "/profile/" + tag],
-    [
-      "◇",
-      "მომსახურება და პაკეტი",
-      "ვადა და განახლება",
-      "/account/subscriptions?profile=" + p.id,
-    ],
-    [
-      "♙",
-      "თანაადმინისტრატორი",
-      "უფლებები და მონაცემები",
-      "/account/admin?profile=" + p.id,
-    ],
-    ["⌄", "QR კოდის ჩამოტვირთვა", "QR ფაილის მართვა", "/profile/" + tag],
+  const groups: ActionGroup[] = [
+    {
+      title: "პროფილი და ინფორმაცია",
+      description: "მართეთ მონაცემები და ის, რასაც მპოვნელი დაინახავს",
+      actions: [
+        { icon: "▤", title: "პროფილის ინფორმაცია", description: "ყველა შენახული მონაცემის ნახვა", href: "/profile/" + tag },
+        { icon: "✎", title: "ინფორმაციის რედაქტირება", description: m[1] + "ს მონაცემებისა და ფოტოს შეცვლა", href: "/profile/" + tag + "/edit" },
+        { icon: "◐", title: "ხილვადობა და კონფიდენციალურობა", description: "აირჩიეთ, რას დაინახავს QR-ის დამსკანირებელი", href: "/profile/" + tag + "/edit#visibility" },
+        { icon: "◉", title: "პროფილი მპოვნელისთვის", description: "ნახეთ საჯარო QR პროფილი მპოვნელის თვალით", href: "/scan/" + tag },
+      ],
+    },
+    {
+      title: "დაცვა და დაბრუნება",
+      description: "დაკარგვის რეჟიმი, QR და სკანირების აქტივობა",
+      actions: [
+        { icon: "!", title: "Lost Mode", description: "ჩართეთ ან გამორთეთ დაკარგვის რეჟიმი", href: "/profile/" + tag, tone: "danger" },
+        { icon: "⌖", title: "სკანირებები და მდებარეობა", description: "რაოდენობა, ბოლო დრო და გაზიარებული ლოკაცია", href: "/profile/" + tag },
+        { icon: "⌄", title: "QR კოდის მართვა", description: "QR-ის ნახვა და ფაილის ჩამოტვირთვა", href: "/profile/" + tag },
+      ],
+    },
+    {
+      title: "კავშირი",
+      description: "მპოვნელის შეტყობინებები და პროფილზე წვდომა",
+      actions: [
+        { icon: "◌", title: "Live Chat", description: "გახსენით მპოვნელთან უსაფრთხო საუბარი", href: "/chat/" + type + "/" + tag, tone: "chat" },
+        { icon: "♢", title: "შეტყობინებები", description: "სკანები, ჩატი და მნიშვნელოვანი აქტივობა", href: "/account/notifications?profile=" + p.id },
+        { icon: "♙", title: "თანაადმინისტრატორი", description: "დაამატეთ სანდო ადამიანი და მართეთ უფლებები", href: "/account/admin?profile=" + p.id },
+      ],
+    },
+    {
+      title: "მომსახურება",
+      description: "პროდუქტის პაკეტი და განახლება",
+      actions: [
+        { icon: "◇", title: "მომსახურება და პაკეტი", description: "ნახეთ ვადა, პირობები და განახლება", href: "/account/subscriptions?profile=" + p.id },
+      ],
+    },
   ];
   return (
     <main className="cc">
@@ -123,21 +151,31 @@ export default function ProductCenter() {
         </section>
         <AppAiAssistant />
         <div className="title">
-          <b>პროფილის მართვა</b>
-          <small>აირჩიეთ საჭირო მოქმედება</small>
+          <b>{m[1]}ს მართვა</b>
+          <small>ყველაფერი ერთ სივრცეში</small>
         </div>
-        <section className="actionGrid">
-          {actions.map(([i, a, b, h]) => (
-            <Link href={h} key={a}>
-              <i>{i}</i>
-              <span>
-                <b>{a}</b>
-                <small>{b}</small>
-              </span>
-              <em>›</em>
-            </Link>
+        <div className="actionGroups">
+          {groups.map((group) => (
+            <section className="actionGroup" key={group.title}>
+              <header>
+                <b>{group.title}</b>
+                <small>{group.description}</small>
+              </header>
+              <div className="actionList">
+                {group.actions.map((action) => (
+                  <Link href={action.href} key={action.title} className={action.tone || ""}>
+                    <i>{action.icon}</i>
+                    <span>
+                      <b>{action.title}</b>
+                      <small>{action.description}</small>
+                    </span>
+                    <em>›</em>
+                  </Link>
+                ))}
+              </div>
+            </section>
           ))}
-        </section>
+        </div>
       </div>
       <style jsx global>{`
         .centerState {
@@ -258,24 +296,49 @@ export default function ProductCenter() {
           color: #8395a7;
           font-size: 7px;
         }
-        .actionGrid {
+        .actionGroups {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 7px;
+          gap: 12px;
         }
-        .actionGrid a {
-          min-height: 72px;
-          padding: 11px;
+        .actionGroup {
+          overflow: hidden;
+          border: 1px solid #dce6f0;
+          border-radius: 17px;
+          background: #fff;
+          box-shadow: 0 7px 20px #173f6d0d;
+        }
+        .actionGroup > header {
+          padding: 13px 14px 11px;
+          border-bottom: 1px solid #e8eef5;
+          background: linear-gradient(135deg, #f8fbff, #f1f6fc);
+        }
+        .actionGroup > header b,
+        .actionGroup > header small {
+          display: block;
+        }
+        .actionGroup > header b {
+          font-size: 10px;
+        }
+        .actionGroup > header small {
+          margin-top: 4px;
+          color: #7c8fa2;
+          font-size: 7px;
+          line-height: 1.35;
+        }
+        .actionList a {
+          min-height: 64px;
+          padding: 10px 12px;
           display: flex;
           align-items: center;
           gap: 9px;
-          border: 1px solid #dce6f0;
-          border-radius: 15px;
-          background: #fff;
+          border-bottom: 1px solid #edf1f5;
           color: #173652;
           text-decoration: none;
         }
-        .actionGrid i {
+        .actionList a:last-child {
+          border-bottom: 0;
+        }
+        .actionList i {
           width: 36px;
           height: 36px;
           display: grid;
@@ -287,32 +350,38 @@ export default function ProductCenter() {
           font-size: 15px;
           font-style: normal;
         }
-        .actionGrid span {
+        .actionList a.danger i {
+          background: #fff0f1;
+          color: #c43643;
+        }
+        .actionList a.chat i {
+          background: #e8f8f1;
+          color: #087b4b;
+        }
+        .actionList span {
           min-width: 0;
           flex: 1;
         }
-        .actionGrid b,
-        .actionGrid small {
+        .actionList b,
+        .actionList small {
           display: block;
         }
-        .actionGrid b {
-          font-size: 9px;
+        .actionList b {
+          font-size: 10px;
           line-height: 1.25;
         }
-        .actionGrid small {
+        .actionList small {
           margin-top: 4px;
           color: #778b9e;
-          font-size: 7px;
+          font-size: 8px;
+          line-height: 1.35;
         }
-        .actionGrid > a > em {
+        .actionList > a > em {
           color: #1761bd;
           font-size: 18px;
           font-style: normal;
         }
         @media (max-width: 375px) {
-          .actionGrid {
-            grid-template-columns: 1fr;
-          }
           .title small {
             display: none;
           }
