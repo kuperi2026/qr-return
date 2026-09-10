@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
   category: string;
@@ -95,6 +95,16 @@ export default function AiFinderGuide({
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const suggestedMessage = analysis?.suggested_message_ka || selected?.message || "";
   const chatLink = suggestedMessage && chatHref
@@ -103,7 +113,7 @@ export default function AiFinderGuide({
 
   async function analyzeSituation() {
     const clean = situation.trim();
-    if (clean.length < 2 || analyzing) return;
+    if (clean.length < 2 || analyzing || !consent) return;
     setAnalyzing(true);
     setAnalysisError("");
     setAnalysis(null);
@@ -121,6 +131,57 @@ export default function AiFinderGuide({
       setAnalysisError(error instanceof Error ? error.message : "AI ანალიზი დროებით მიუწვდომელია.");
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function startVoice() {
+    if (!consent) {
+      setAnalysisError("ხმოვანი AI-ის გამოყენებამდე მონიშნეთ თანხმობა.");
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setAnalysisError("ამ ბრაუზერში მიკროფონი არ არის მხარდაჭერილი.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      chunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      recorder.ondataavailable = (event) => { if (event.data.size) chunksRef.current.push(event.data); };
+      recorder.onstop = () => void transcribeVoice(recorder.mimeType || "audio/webm");
+      recorder.start();
+      setRecording(true);
+      setAnalysisError("");
+    } catch {
+      setAnalysisError("მიკროფონზე წვდომა ვერ მივიღეთ. ბრაუზერში ჩართეთ ნებართვა.");
+    }
+  }
+
+  function stopVoice() {
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+    setRecording(false);
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+  }
+
+  async function transcribeVoice(mimeType: string) {
+    const blob = new Blob(chunksRef.current, { type: mimeType });
+    if (!blob.size) return;
+    setTranscribing(true);
+    try {
+      const form = new FormData();
+      form.set("audio", blob, "finder-voice.webm");
+      form.set("consent", "true");
+      const response = await fetch("/api/ai/voice", { method: "POST", body: form });
+      const result = await response.json();
+      if (!response.ok || !result.text) throw new Error(result.error || "ხმის ამოცნობა ვერ შესრულდა.");
+      setSituation(String(result.text).slice(0, 1000));
+      setAnalysisError("");
+    } catch (error) {
+      setAnalysisError(error instanceof Error ? error.message : "ხმოვანი AI დროებით მიუწვდომელია.");
+    } finally {
+      setTranscribing(false);
     }
   }
 
@@ -164,10 +225,17 @@ export default function AiFinderGuide({
             placeholder={emergency ? "მაგალითად: ადამიანი უგონოდაა..." : "მაგალითად: მანქანა გასასვლელს კეტავს..."}
             maxLength={1000}
           />
-          <button type="button" onClick={() => void analyzeSituation()} disabled={analyzing || situation.trim().length < 2}>
+          <button type="button" className={`aiVoice ${recording ? "recording" : ""}`} onClick={() => recording ? stopVoice() : void startVoice()} disabled={transcribing}>
+            {transcribing ? "ხმა მუშავდება..." : recording ? "■ დასრულება" : "🎙️ ხმოვანი AI"}
+          </button>
+          <button type="button" onClick={() => void analyzeSituation()} disabled={analyzing || situation.trim().length < 2 || !consent}>
             {analyzing ? "AI აანალიზებს..." : "AI ანალიზი"}
           </button>
         </div>
+        <label className="aiConsent">
+          <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+          <span>თანახმა ვარ, მპოვნელის ტექსტი ან ხმა AI ანალიზისა და თარგმნისთვის OpenAI-ს გადაეცეს.</span>
+        </label>
         <small>არ ჩაწეროთ პაროლი, საბანკო მონაცემები ან ერთჯერადი კოდი.</small>
       </div>
 
@@ -212,7 +280,7 @@ export default function AiFinderGuide({
         .aiGuideHead{display:flex;align-items:center;gap:13px}.aiGuideHead>div:nth-child(2){flex:1}.aiOrb{width:52px;height:52px;display:grid;place-items:center;flex:0 0 52px;border-radius:16px;background:linear-gradient(135deg,#0b68e8,#7048e8);color:#fff;font-size:18px;font-weight:950;box-shadow:0 8px 20px rgba(25,91,214,.25)}
         .aiGuideHead small,.aiNext small{color:#7755e8;font-size:10px;font-weight:950;letter-spacing:.8px}.aiGuideHead h2{margin:4px 0;font-size:21px}.aiGuideHead p{margin:0;color:#5a6d84;font-size:13px;line-height:1.45}.aiReady{padding:7px 10px;border-radius:999px;background:#e9fbf2;color:#08754a;font-size:10px;font-weight:900}
         .aiActions{margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.aiAction{min-height:76px;padding:10px;border:1px solid #d4e1f4;border-radius:14px;background:#fff;color:#24415f;cursor:pointer;text-align:left}.aiAction span{display:block;font-size:21px}.aiAction strong{display:block;margin-top:6px;font-size:12px;line-height:1.25}.aiAction:hover,.aiAction.selected{border-color:#1769e8;box-shadow:0 0 0 2px rgba(23,105,232,.12)}.aiAction.urgent.selected{border-color:#d92d20;background:#fff7f6}
-        .aiDescribe{margin-top:15px}.aiDescribe label{display:block;margin-bottom:7px;color:#17324f;font-size:13px;font-weight:900}.aiInputRow{display:grid;grid-template-columns:1fr auto;gap:8px}.aiInputRow textarea{min-height:70px;padding:11px;border:1px solid #cbd9ed;border-radius:12px;background:#fff;color:#17324f;font:inherit;resize:vertical}.aiInputRow button{padding:0 15px;border:0;border-radius:12px;background:#1769e8;color:#fff;font-weight:900;cursor:pointer}.aiInputRow button:disabled{opacity:.55;cursor:default}.aiDescribe>small{display:block;margin-top:6px;color:#75869a;font-size:10px}.aiError{margin-top:10px;padding:10px;border-radius:10px;background:#fff1f0;color:#b42318;font-size:12px}.aiAnalysis{margin-top:13px;padding:14px;border-radius:15px;background:#102f61;color:#fff}.aiAnalysis.high{background:#8b4513}.aiAnalysis.emergency,.aiAnalysis.suspicious{background:#8f1d1d}.aiAnalysisTop{display:flex;justify-content:space-between;gap:10px}.aiAnalysisTop span{font-size:10px;font-weight:900;opacity:.75}.aiAnalysis p{margin:8px 0 0;font-size:13px;line-height:1.5}.aiWarning{margin-top:9px;padding:9px;border-radius:9px;background:rgba(255,255,255,.14);font-size:12px;font-weight:800}.aiNext{margin-top:13px;padding:14px;border-radius:15px;background:#102f61;color:#fff}.aiNext small{color:#acd0ff}.aiNext strong{display:block;margin-top:4px;font-size:13px;line-height:1.45}.aiCtas{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}.aiCtas a,.aiCtas button{min-height:39px;padding:0 12px;display:inline-flex;align-items:center;border:0;border-radius:10px;background:#fff;color:#0b55bc;text-decoration:none;font-size:12px;font-weight:900;cursor:pointer}.aiCtas .aiEmergency{background:#d92d20;color:#fff}
+        .aiDescribe{margin-top:15px}.aiDescribe label{display:block;margin-bottom:7px;color:#17324f;font-size:13px;font-weight:900}.aiInputRow{display:grid;grid-template-columns:1fr auto auto;gap:8px}.aiInputRow textarea{min-height:70px;padding:11px;border:1px solid #cbd9ed;border-radius:12px;background:#fff;color:#17324f;font:inherit;resize:vertical}.aiInputRow button{padding:0 15px;border:0;border-radius:12px;background:#1769e8;color:#fff;font-weight:900;cursor:pointer}.aiInputRow .aiVoice{background:#eef5ff;color:#0b58c7;border:1px solid #bfd5f3}.aiInputRow .aiVoice.recording{background:#fff0f0;color:#c9252d;border-color:#f0b5b9}.aiInputRow button:disabled{opacity:.55;cursor:default}.aiConsent{margin-top:10px;display:flex!important;align-items:flex-start;gap:8px;color:#425d77!important;font-size:11px!important;font-weight:750!important;line-height:1.45}.aiConsent input{width:17px;height:17px;flex:0 0 17px;accent-color:#1769e8}.aiDescribe>small{display:block;margin-top:6px;color:#75869a;font-size:10px}.aiError{margin-top:10px;padding:10px;border-radius:10px;background:#fff1f0;color:#b42318;font-size:12px}.aiAnalysis{margin-top:13px;padding:14px;border-radius:15px;background:#102f61;color:#fff}.aiAnalysis.high{background:#8b4513}.aiAnalysis.emergency,.aiAnalysis.suspicious{background:#8f1d1d}.aiAnalysisTop{display:flex;justify-content:space-between;gap:10px}.aiAnalysisTop span{font-size:10px;font-weight:900;opacity:.75}.aiAnalysis p{margin:8px 0 0;font-size:13px;line-height:1.5}.aiWarning{margin-top:9px;padding:9px;border-radius:9px;background:rgba(255,255,255,.14);font-size:12px;font-weight:800}.aiNext{margin-top:13px;padding:14px;border-radius:15px;background:#102f61;color:#fff}.aiNext small{color:#acd0ff}.aiNext strong{display:block;margin-top:4px;font-size:13px;line-height:1.45}.aiCtas{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}.aiCtas a,.aiCtas button{min-height:39px;padding:0 12px;display:inline-flex;align-items:center;border:0;border-radius:10px;background:#fff;color:#0b55bc;text-decoration:none;font-size:12px;font-weight:900;cursor:pointer}.aiCtas .aiEmergency{background:#d92d20;color:#fff}
         @media(max-width:620px){.aiInputRow{grid-template-columns:1fr}.aiInputRow button{min-height:44px}.aiGuide{padding:16px}.aiGuideHead{align-items:flex-start;flex-wrap:wrap}.aiOrb{width:46px;height:46px;flex-basis:46px}.aiReady{margin-left:59px;margin-top:-8px}.aiActions{grid-template-columns:1fr}.aiAction{min-height:58px;display:flex;align-items:center;gap:10px}.aiAction span,.aiAction strong{margin:0}.aiCtas{display:grid;grid-template-columns:1fr 1fr}.aiCtas a,.aiCtas button{justify-content:center}}
       `}</style>
     </section>
