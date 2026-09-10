@@ -1,8 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 export default function AppHome() {
+  const router = useRouter();
+
+  useEffect(() => {
+    window.localStorage.setItem("kompasi-app-mode", "1");
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_KEY;
+    if (!url || !key) return;
+    const supabase = createClient(url, key);
+    void supabase.auth.getUser().then(({ data }) => {
+      if (data.user) router.replace("/app/dashboard");
+    });
+  }, [router]);
+
   return (
     <main className="appEntry">
       <div className="entryWrap">
