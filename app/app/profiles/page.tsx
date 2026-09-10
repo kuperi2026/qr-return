@@ -14,8 +14,14 @@ type Profile = {
   active: boolean | null;
   lost: boolean | null;
   scan_count: number | null;
+  href: string;
+  emergency?: boolean;
 };
 const label = (p: Profile) => p.item_type || p.pet_type || "QR პროფილი";
+const icons: Record<string, string> = {
+  dog: "🐕", cat: "🐈", parking: "🚘", suitcase: "🧳", luggage: "🧳",
+  keys: "🔑", wallet: "👛", bag: "👜", emergency: "✚",
+};
 
 export default function AppProfiles() {
   const router = useRouter();
@@ -38,13 +44,35 @@ export default function AppProfiles() {
         router.replace("/login?source=app");
         return;
       }
-      const { data } = await sb
-        .from("item")
-        .select(
-          "id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count",
-        )
-        .eq("owner_id", user.id);
-      setItems((data || []) as Profile[]);
+      const [{ data: products }, { data: emergencyProfiles }] = await Promise.all([
+        sb.from("item")
+          .select("id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count")
+          .eq("owner_id", user.id),
+        sb.from("emergency_profiles")
+          .select("id,tag_code,first_name,last_name,photo_url,active,missing_mode")
+          .eq("owner_id", user.id),
+      ]);
+      const regular = ((products || []) as Omit<Profile, "href">[]).map((profile) => ({
+        ...profile,
+        href: "/app/product/" + profile.tag_code,
+      }));
+      const emergency = ((emergencyProfiles || []) as Array<{
+        id: string; tag_code: string | null; first_name: string | null; last_name: string | null;
+        photo_url: string | null; active: boolean | null; missing_mode: boolean | null;
+      }>).map((profile): Profile => ({
+        id: profile.id,
+        tag_code: profile.tag_code,
+        item_type: "emergency",
+        pet_type: null,
+        item_name: [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Emergency პროფილი",
+        photo: profile.photo_url,
+        active: profile.active,
+        lost: profile.missing_mode,
+        scan_count: null,
+        href: "/app/emergency/" + profile.id,
+        emergency: true,
+      }));
+      setItems([...regular, ...emergency]);
       setLoading(false);
     })();
   }, [router]);
@@ -86,7 +114,7 @@ export default function AppProfiles() {
                   {p.photo ? (
                     <img src={p.photo} alt="" />
                   ) : (
-                    <span>{label(p).includes("dog") ? "🐕" : "⌁"}</span>
+                    <span>{icons[label(p).toLowerCase()] || "⌁"}</span>
                   )}
                 </div>
                 <div className="info">
@@ -99,7 +127,7 @@ export default function AppProfiles() {
                 <div className={p.lost ? "lost" : "active"}>
                   {p.lost ? "დაკარგულია" : "აქტიური"}
                 </div>
-                <Link className="open" href={"/app/product/" + p.tag_code}>
+                <Link className="open" href={p.href}>
                   ›
                 </Link>
               </article>
