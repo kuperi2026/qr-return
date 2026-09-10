@@ -451,7 +451,7 @@ function Styles() {
           Helvetica,
           sans-serif;
 
-        background: #f4f7fb;
+        background: #edf7ff;
         color: #1d3149;
       }
 
@@ -710,7 +710,7 @@ function Styles() {
 
         padding: 25px;
 
-        background: #f4f7fb;
+        background: #edf7ff;
 
         text-align: center;
       }
