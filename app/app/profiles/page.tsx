@@ -146,7 +146,7 @@ function Style() {
     <style jsx global>{`
       .ap {
         min-height: 100vh;
-        background: #f4f7fb;
+        background: #edf7ff;
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
@@ -207,8 +207,8 @@ function Style() {
       }
       .ap article {
         position: relative;
-        min-height: 79px;
-        padding: 10px 38px 10px 10px;
+        min-height: 66px;
+        padding: 7px 44px 7px 8px;
         display: flex;
         align-items: center;
         gap: 11px;
@@ -218,11 +218,11 @@ function Style() {
         box-shadow: 0 6px 18px #173f6d0d;
       }
       .photo {
-        width: 53px;
-        height: 53px;
+        width: 46px;
+        height: 46px;
         display: grid;
         place-items: center;
-        flex: 0 0 53px;
+        flex: 0 0 46px;
         overflow: hidden;
         border-radius: 13px;
         background: #edf4fc;
@@ -278,11 +278,17 @@ function Style() {
       }
       .open {
         position: absolute;
-        right: 12px;
-        bottom: 16px;
-        color: #1761bd;
+        right: 9px;
+        bottom: 18px;
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: #19a66a;
+        color: #ffffff;
         text-decoration: none;
-        font-size: 24px;
+        font-size: 20px;
       }
       .empty {
         margin-top: 25px;
