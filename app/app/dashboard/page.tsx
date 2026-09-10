@@ -349,6 +349,7 @@ export default function Dashboard() {
             padding: 10px 8px;
           }
         }
+        .dash{background:radial-gradient(circle at 20% 8%,rgba(75,166,240,.34),transparent 30%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);color:#fff}.db{color:#fff}.db small{color:#c5def5}.bell{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff}.hero{background:linear-gradient(135deg,#ffffff,#eaf4ff);color:#123a61}.hero small{color:#1761bd;font-size:11px}.hero p{color:#58738d;font-size:12px}.hero>i{border-color:#bfd6ee;background:#e1efff;color:#1761bd}.stats a:nth-child(1){border-color:#b9ddff;background:linear-gradient(145deg,#e7f4ff,#fff)}.stats a:nth-child(2){border-color:#bfe7d2;background:linear-gradient(145deg,#e9faf1,#fff)}.stats a:nth-child(3){border-color:#e6c8ef;background:linear-gradient(145deg,#f8edff,#fff)}.stats small{font-size:10px}.stats span{font-size:9px}.title b{font-size:15px}.title small{color:#c3d9ed;font-size:10px}.quick a:nth-child(1) i{background:#e5f1ff;color:#075dcc}.quick a:nth-child(2) i{background:#e8f8ef;color:#08784a}.quick a:nth-child(3) i{background:#f3eaff;color:#7044bb}.quick a:nth-child(4) i{background:#fff2df;color:#ad6800}.quick b{font-size:13px}.quick small{font-size:10px}.quick a{min-height:68px}.dw{padding-left:15px;padding-right:15px}
       `}</style>
     </main>
   );

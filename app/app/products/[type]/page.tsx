@@ -79,8 +79,8 @@ export default function ProductType() {
         </header>
         <Link className="new" href={register}>
           <span>
-            <small>ახალი QR პროფილი</small>
-            <b>{m[1]}ს რეგისტრაცია</b>
+            <small>{m[1]}ს კატეგორია</small>
+            <b>პროფილის რეგისტრაცია</b>
           </span>
           <em>＋</em>
         </Link>
