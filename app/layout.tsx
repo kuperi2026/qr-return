@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./product-grid.css";
 import AppInstallManager from "@/app/components/app/AppInstallManager";
+import PremiumAppShell from "@/app/components/app/PremiumAppShell";
 
 export const metadata: Metadata = {
   title: "KOMPASI | დაცული QR კავშირი",
@@ -45,6 +46,7 @@ export default function RootLayout({
         }}
       >
         {children}
+        <PremiumAppShell />
         <AppInstallManager />
       </body>
     </html>
