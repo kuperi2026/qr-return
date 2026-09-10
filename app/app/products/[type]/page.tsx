@@ -1,18 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-type Item = {
-  id: string;
-  tag_code: string | null;
-  item_type: string | null;
-  pet_type: string | null;
-  item_name: string | null;
-  photo: string | null;
-  active: boolean | null;
-  lost: boolean | null;
-};
+import { useParams } from "next/navigation";
 const meta: Record<string, [string, string, string]> = {
   dog: ["🐕", "ძაღლი", "Lost Mode და AI Photo Match"],
   cat: ["🐈", "კატა", "Lost Mode და AI Photo Match"],
@@ -24,42 +12,8 @@ const meta: Record<string, [string, string, string]> = {
   emergency: ["✚", "Emergency", "SOS Assistant და 112"],
 };
 export default function ProductType() {
-  const { type } = useParams<{ type: string }>(),
-    router = useRouter(),
-    m = meta[type] || ["⌁", "პროდუქტი", "KOMPASI AI"],
-    [items, setItems] = useState<Item[]>([]),
-    [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const u = process.env.NEXT_PUBLIC_SUPABASE_URL,
-      k =
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_KEY;
-    if (!u || !k) return setLoading(false);
-    const sb = createClient(u, k);
-    void (async () => {
-      const {
-        data: { user },
-      } = await sb.auth.getUser();
-      if (!user) {
-        router.replace("/login?source=app");
-        return;
-      }
-      const { data } = await sb
-        .from("item")
-        .select("id,tag_code,item_type,pet_type,item_name,photo,active,lost")
-        .eq("owner_id", user.id);
-      setItems(
-        ((data || []) as Item[]).filter(
-          (p) =>
-            p.item_type === type ||
-            p.pet_type === type ||
-            (type === "suitcase" && p.item_type === "luggage"),
-        ),
-      );
-      setLoading(false);
-    })();
-  }, [router, type]);
+  const { type } = useParams<{ type: string }>();
+  const m = meta[type] || ["⌁", "პროდუქტი", "KOMPASI AI"];
   const register =
     type === "emergency"
       ? "/register/emergency-bracelet?source=app"
@@ -84,36 +38,11 @@ export default function ProductType() {
           </span>
           <em>＋</em>
         </Link>
-        <div className="title">
-          <b>რეგისტრირებული პროფილები</b>
-          <small>{items.length}</small>
+        <div className="empty registration-note">
+          <b>აქ მხოლოდ ახალი პროფილის რეგისტრაცია ხდება</b>
+          <span>რეგისტრირებული პროფილები და მართვის ყველა ღილაკი თავმოყრილია „პროფილებში“.</span>
+          <Link href="/app/profiles">ჩემი პროფილების მართვა →</Link>
         </div>
-        {loading ? (
-          <p className="empty">იტვირთება…</p>
-        ) : items.length === 0 ? (
-          <div className="empty">
-            <b>ჯერ არ გაქვთ რეგისტრირებული პროფილი</b>
-            <span>დაიწყეთ ახალი რეგისტრაცია ზედა ღილაკით.</span>
-          </div>
-        ) : (
-          <section>
-            {items.map((p) => (
-              <Link href={"/app/product/" + p.tag_code} key={p.id}>
-                <div className="photo">
-                  {p.photo ? <img src={p.photo} alt="" /> : <span>{m[0]}</span>}
-                </div>
-                <div>
-                  <small>QR {p.tag_code || "—"}</small>
-                  <b>{p.item_name || m[1]}</b>
-                  <em className={p.lost ? "lost" : "ok"}>
-                    {p.lost ? "Lost Mode" : "აქტიური"}
-                  </em>
-                </div>
-                <strong>›</strong>
-              </Link>
-            ))}
-          </section>
-        )}
       </div>
       <style jsx global>{`
         .th {
