@@ -11,7 +11,7 @@ const suspiciousPatterns = [
 
 function fallbackAnalysis(message: string, category: string) {
   const lower = message.toLowerCase();
-  const emergency = /911|unconscious|not breathing|bleeding|seizure|უგონ|არ სუნთქავს|სისხლ|კრუნჩხვ/.test(lower);
+  const emergency = /112|unconscious|not breathing|bleeding|seizure|უგონ|არ სუნთქავს|სისხლ|კრუნჩხვ/.test(lower);
   const high = emergency || /urgent|immediately|blocked|accident|სასწრაფ|დაუყოვნებლივ|მიშლის ხელს|ავარია/.test(lower);
   const suspicious = suspiciousPatterns.some((pattern) => pattern.test(message));
 
@@ -21,7 +21,7 @@ function fallbackAnalysis(message: string, category: string) {
     intent: category === "parking" ? "vehicle_issue" : category === "emergency" ? "emergency_help" : "found_item",
     summary_ka: message.slice(0, 220),
     recommended_action_ka: emergency
-      ? "დარეკეთ 911-ზე და შემდეგ დაუკავშირდით Emergency კონტაქტს."
+      ? "დარეკეთ 112-ზე და შემდეგ დაუკავშირდით Emergency კონტაქტს."
       : suspicious
       ? "არ გააზიაროთ ფინანსური მონაცემები, პაროლი ან ერთჯერადი კოდი. გამოიყენეთ მხოლოდ დაცული ჩათი."
       : "დაუკავშირდით მფლობელს დაცული ჩათით და საჭიროების შემთხვევაში გაუზიარეთ მდებარეობა.",
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model,
         store: false,
-        instructions: `You are QR RETURN's safety routing engine. Analyze a finder's message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies, recommend local emergency services (911 in the US) first. Return concise Georgian output and preserve the original meaning in any translation.`,
+        instructions: `You are QR RETURN's safety routing engine. Analyze a finder's message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies, recommend local emergency services (112 in the US) first. Return concise Georgian output and preserve the original meaning in any translation.`,
         input: message,
         text: {
           format: {
