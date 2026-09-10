@@ -200,9 +200,9 @@ export default function PremiumAppShell() {
         body.kompasiAppRegistration .cardHeader p,body.kompasiAppRegistration .sectionHeader p{font-size:9px!important}
         body.kompasiAppRegistration .grid,body.kompasiAppRegistration .formGrid,body.kompasiAppRegistration .textareaGrid,body.kompasiAppRegistration .visibilityLayout,body.kompasiAppRegistration .choiceGrid,body.kompasiAppRegistration .relationshipGrid{grid-template-columns:1fr!important;gap:11px!important}
         body.kompasiAppRegistration .qrBox,body.kompasiAppRegistration .qrSection,body.kompasiAppRegistration .infoBox,body.kompasiAppRegistration .optionalBox{margin-top:14px!important;padding:13px!important;border-radius:12px!important}
-        body.kompasiAppRegistration input,body.kompasiAppRegistration select{min-height:46px!important;font-size:13px!important}
-        body.kompasiAppRegistration textarea{min-height:90px!important;font-size:13px!important}
-        body.kompasiAppRegistration label{font-size:10px!important}
+        body.kompasiAppRegistration input,body.kompasiAppRegistration select{min-height:44px!important;font-size:16px!important}
+        body.kompasiAppRegistration textarea{min-height:74px!important;font-size:16px!important}
+        body.kompasiAppRegistration label{font-size:10px!important}body.kompasiAppRegistration button,body.kompasiAppRegistration a,body.kompasiAppRegistration input,body.kompasiAppRegistration select,body.kompasiAppRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
         body.kompasiAppRegistration .actions,body.kompasiAppRegistration .bottomBar,body.kompasiAppRegistration .finalActions{gap:8px!important}
         body.kompasiAppRegistration .actions button,body.kompasiAppRegistration .actions a,body.kompasiAppRegistration .primaryButton,body.kompasiAppRegistration .secondaryButton,body.kompasiAppRegistration .createButton{min-height:45px!important;border-radius:11px!important;font-size:10px!important}
         body.kompasiAppRegistration .progressRow{width:min(560px,100%)!important;margin-left:auto!important;margin-right:auto!important}
