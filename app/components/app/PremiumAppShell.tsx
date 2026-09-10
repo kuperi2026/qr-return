@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
-  { href: "/my-profiles", icon: "home", label: "პროფილები" },
-  { href: "/account/chat", icon: "chat", label: "ჩათი" },
+  { href: "/app/dashboard", icon: "home", label: "მთავარი" },
+  { href: "/my-profiles", icon: "profiles", label: "პროფილები" },
   { href: "/register", icon: "plus", label: "დამატება", primary: true },
-  { href: "/account/notifications", icon: "bell", label: "სიახლეები" },
+  { href: "/account/chat", icon: "chat", label: "ჩათი" },
   { href: "/account/profile", icon: "user", label: "ანგარიში" },
 ];
 
@@ -21,7 +21,8 @@ export default function PremiumAppShell() {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
       Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
     const preview = new URLSearchParams(window.location.search).get("app_preview") === "1";
-    setAppMode(standalone || preview);
+    const savedApp = window.localStorage.getItem("kompasi-app-mode") === "1";
+    setAppMode(standalone || preview || savedApp);
     setOnline(navigator.onLine);
 
     const goOnline = () => setOnline(true);
@@ -34,7 +35,7 @@ export default function PremiumAppShell() {
     };
   }, []);
 
-  const ownerArea = pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/register");
+  const ownerArea = pathname === "/my-profiles" || pathname.startsWith("/app/dashboard") || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/register");
 
   useEffect(() => {
     document.body.classList.toggle("kompasiAppMode", appMode && ownerArea);
@@ -48,7 +49,7 @@ export default function PremiumAppShell() {
       {!online && <div className="offlinePill">◌ ინტერნეტთან კავშირი შეწყდა</div>}
       <nav className="appDock" aria-label="KOMPASI აპის ნავიგაცია">
         {NAV_ITEMS.map((item) => {
-          const active = item.href === "/my-profiles"
+          const active = item.href === "/my-profiles" || item.href === "/app/dashboard"
             ? pathname === item.href
             : pathname.startsWith(item.href);
           return (
@@ -71,6 +72,7 @@ export default function PremiumAppShell() {
 function NavIcon({ name }: { name: string }) {
   if (name === "home") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10.5 8.5-7 8.5 7"/><path d="M5.5 9.5v10h13v-10M9.5 19.5v-6h5v6"/></svg>;
   if (name === "chat") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 9 9 0 0 1-3.5-.7L4 20l1.5-4A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg>;
+  if (name === "profiles") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>;
   if (name === "plus") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>;
   if (name === "bell") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 8h18c0-1-3-1-3-8Z"/><path d="M10 20h4"/></svg>;
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>;
