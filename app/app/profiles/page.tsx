@@ -74,7 +74,11 @@ export default function AppProfiles() {
         href: "/app/emergency/" + profile.id,
         emergency: true,
       }));
-      setItems([...regular, ...emergency]);
+      const emergencyCodes = new Set(emergency.map((profile) => profile.tag_code?.trim().toUpperCase()).filter(Boolean));
+      const uniqueRegular = regular.filter((profile) =>
+        profile.item_type !== "emergency" || !emergencyCodes.has(profile.tag_code?.trim().toUpperCase()),
+      );
+      setItems([...uniqueRegular, ...emergency]);
       setLoading(false);
     })();
   }, [router]);
@@ -149,10 +153,10 @@ function Style() {
         overflow-x: hidden;
         background: #edf7ff;
         color: #173652;
-        font-family: Inter, Arial, sans-serif;
+        font-family: "Noto Sans Georgian", "Sylfaen", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       }
       .aw {
-        width: min(560px, 100%);
+        width: min(500px, 100%);
         margin: auto;
         padding: 22px 13px 94px;
       }
@@ -163,7 +167,7 @@ function Style() {
       }
       .ap header small {
         color: #71869a;
-        font-size: 8px;
+        font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.8px;
       }
@@ -199,7 +203,7 @@ function Style() {
         border: 0;
         outline: 0;
         background: transparent;
-        font-size: 11px;
+        font-size: 14px;
       }
       .ap section {
         margin-top: 11px;
@@ -208,8 +212,8 @@ function Style() {
       }
       .ap article {
         position: relative;
-        min-height: 58px;
-        padding: 6px 42px 6px 7px;
+        min-height: 76px;
+        padding: 10px 46px 10px 10px;
         display: flex;
         align-items: center;
         gap: 11px;
@@ -219,11 +223,11 @@ function Style() {
         box-shadow: 0 6px 18px #173f6d0d;
       }
       .ap .photo {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
         display: grid;
         place-items: center;
-        flex: 0 0 40px;
+        flex: 0 0 48px;
         overflow: hidden;
         border-radius: 13px;
         background: #edf4fc;
@@ -245,19 +249,21 @@ function Style() {
       }
       .ap .info small {
         color: #71869a;
-        font-size: 8px;
+        font-size: 11px;
       }
       .ap .info b {
         margin-top: 3px;
         overflow: hidden;
-        font-size: 10px;
+        font-size: 15px;
+        line-height: 1.3;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       .ap .info span {
         margin-top: 5px;
         color: #7b8fa2;
-        font-size: 8px;
+        font-size: 11px;
+        line-height: 1.35;
       }
       .ap article > .active,
       .ap article > .lost {
@@ -266,7 +272,7 @@ function Style() {
         top: 6px;
         padding: 4px 6px;
         border-radius: 999px;
-        font-size: 7px;
+        font-size: 9px;
         font-weight: 850;
       }
       .ap article > .active {
