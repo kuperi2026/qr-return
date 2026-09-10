@@ -3,10 +3,10 @@
 import Link from "next/link";
 
 const actions = [
-  { href: "/my-profiles", icon: "▦", title: "QR პროფილები", text: "ნახვა და მართვა" },
-  { href: "/account/chat", icon: "◌", title: "Live Chat", text: "შეტყობინებების ნახვა" },
-  { href: "/account/notifications", icon: "♢", title: "სიახლეები", text: "ბოლო აქტივობა" },
-  { href: "/account/subscriptions", icon: "◇", title: "მომსახურება", text: "პაკეტები და ვადები" },
+  { href: "/app/profiles", icon: "▦", title: "QR პროფილები", text: "ნახვა და მართვა" },
+  { href: "/app/chat", icon: "◌", title: "Live Chat", text: "შეტყობინებების ნახვა" },
+  { href: "/app/account", icon: "♢", title: "სიახლეები", text: "ბოლო აქტივობა" },
+  { href: "/app/account", icon: "◇", title: "მომსახურება", text: "პაკეტები და ვადები" },
 ];
 
 export default function AppDashboard() {
@@ -21,7 +21,7 @@ export default function AppDashboard() {
         </section>
         <section className="status">
           <div><i/><span><small>სისტემა</small><b>ყველაფერი დაცულია</b></span></div>
-          <Link href="/my-profiles">პროფილების ნახვა →</Link>
+          <Link href="/app/profiles">პროფილების ნახვა →</Link>
         </section>
         <div className="sectionTitle"><span>სწრაფი წვდომა</span><small>ინფორმაცია გაიხსნება არჩევის შემდეგ</small></div>
         <section className="actions">{actions.map(item=><Link href={item.href} key={item.title}><i>{item.icon}</i><span><b>{item.title}</b><small>{item.text}</small></span><em>›</em></Link>)}</section>
