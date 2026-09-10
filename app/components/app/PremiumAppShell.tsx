@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/app/dashboard", icon: "home", label: "მთავარი" },
-  { href: "/my-profiles", icon: "profiles", label: "პროფილები" },
-  { href: "/register", icon: "plus", label: "დამატება", primary: true },
-  { href: "/account/chat", icon: "chat", label: "ჩათი" },
-  { href: "/account/profile", icon: "user", label: "ანგარიში" },
+  { href: "/app/profiles", icon: "profiles", label: "პროფილები" },
+  { href: "/app/add", icon: "plus", label: "დამატება", primary: true },
+  { href: "/app/chat", icon: "chat", label: "ჩათი" },
+  { href: "/app/account", icon: "user", label: "ანგარიში" },
 ];
 
 export default function PremiumAppShell() {
@@ -35,7 +35,7 @@ export default function PremiumAppShell() {
     };
   }, []);
 
-  const ownerArea = pathname === "/my-profiles" || pathname.startsWith("/app/dashboard") || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/register");
+  const ownerArea = pathname.startsWith("/app/") || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/register");
 
   useEffect(() => {
     document.body.classList.toggle("kompasiAppMode", appMode && ownerArea);
