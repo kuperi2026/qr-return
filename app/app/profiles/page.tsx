@@ -146,6 +146,7 @@ function Style() {
     <style jsx global>{`
       .ap {
         min-height: 100vh;
+        overflow-x: hidden;
         background: #edf7ff;
         color: #173652;
         font-family: Inter, Arial, sans-serif;
@@ -207,8 +208,8 @@ function Style() {
       }
       .ap article {
         position: relative;
-        min-height: 66px;
-        padding: 7px 44px 7px 8px;
+        min-height: 58px;
+        padding: 6px 42px 6px 7px;
         display: flex;
         align-items: center;
         gap: 11px;
@@ -217,69 +218,69 @@ function Style() {
         background: #fff;
         box-shadow: 0 6px 18px #173f6d0d;
       }
-      .photo {
-        width: 46px;
-        height: 46px;
+      .ap .photo {
+        width: 40px;
+        height: 40px;
         display: grid;
         place-items: center;
-        flex: 0 0 46px;
+        flex: 0 0 40px;
         overflow: hidden;
         border-radius: 13px;
         background: #edf4fc;
         font-size: 22px;
       }
-      .photo img {
+      .ap .photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
-      .info {
+      .ap .info {
         min-width: 0;
         flex: 1;
       }
-      .info small,
-      .info b,
-      .info span {
+      .ap .info small,
+      .ap .info b,
+      .ap .info span {
         display: block;
       }
-      .info small {
+      .ap .info small {
         color: #71869a;
         font-size: 8px;
       }
-      .info b {
+      .ap .info b {
         margin-top: 3px;
         overflow: hidden;
-        font-size: 12px;
+        font-size: 10px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .info span {
+      .ap .info span {
         margin-top: 5px;
         color: #7b8fa2;
         font-size: 8px;
       }
-      .active,
-      .lost {
+      .ap article > .active,
+      .ap article > .lost {
         position: absolute;
         right: 34px;
-        top: 10px;
+        top: 6px;
         padding: 4px 6px;
         border-radius: 999px;
         font-size: 7px;
         font-weight: 850;
       }
-      .active {
+      .ap article > .active {
         background: #e6f8ef;
         color: #08784a;
       }
-      .lost {
+      .ap article > .lost {
         background: #fff0f0;
         color: #bd3434;
       }
-      .open {
+      .ap .open {
         position: absolute;
         right: 9px;
-        bottom: 18px;
+        top: 50%;
         width: 28px;
         height: 28px;
         display: grid;
@@ -288,7 +289,9 @@ function Style() {
         background: #19a66a;
         color: #ffffff;
         text-decoration: none;
-        font-size: 20px;
+        font-size: 18px;
+        line-height: 1;
+        transform: translateY(-50%);
       }
       .empty {
         margin-top: 25px;
