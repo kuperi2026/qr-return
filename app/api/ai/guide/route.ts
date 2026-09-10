@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model,
         store: false,
-        instructions: `You are QR RETURN's safety routing engine. Analyze a finder's message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies, recommend local emergency services (112 in the US) first. Return concise Georgian output and preserve the original meaning in any translation.`,
+        instructions: `You are KOMPASI's safety routing engine for Georgia. Analyze a finder's message for a ${category} QR profile. Lost Mode is ${lostMode ? "active" : "inactive"}. Never reveal or request private data, passwords, verification codes, financial details, or hidden medical data. Do not diagnose or give medical treatment. For immediate danger or medical emergencies in Georgia, recommend 112 first. Return concise Georgian output and preserve the original meaning in any translation.`,
         input: message,
         text: {
           format: {
