@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const NAV_ITEMS = [
   { href: "/app/dashboard", icon: "home", label: "მთავარი" },
   { href: "/app/profiles", icon: "profiles", label: "პროფილები" },
-  { href: "/app/add", icon: "plus", label: "დამატება", primary: true },
+  { href: "/app/products", icon: "plus", label: "პროდუქტები", primary: true },
   { href: "/app/chat", icon: "chat", label: "ჩათი" },
   { href: "/app/account", icon: "user", label: "ანგარიში" },
 ];
