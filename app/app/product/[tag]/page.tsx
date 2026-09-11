@@ -62,6 +62,7 @@ export default function ProductProfile() {
   const [openPanel, setOpenPanel] = useState<string | null>(null);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("panel") === "lost") setOpenPanel("lost");
     const supabase = createSupabase(); setSb(supabase);
     if (!supabase) { setLoading(false); return; }
     void (async () => {
