@@ -467,9 +467,9 @@ export default function OwnerChatInboxPage() {
 
       <section className="container">
         <div className="operatorCard">
-          <span className="operatorAvatar">👩🏻‍💻</span>
-          <span className="operatorCopy"><strong>24/7</strong><span>ოპერატორი</span></span>
-          <span className="onlineDot">● ონლაინ</span>
+          <span className="operatorAvatar">⌁</span>
+          <span className="operatorCopy"><strong>პირდაპირი კავშირი</strong><span>უპასუხეთ მპოვნელს უსაფრთხო ჩატში</span></span>
+          <span className="onlineDot">● LIVE</span>
         </div>
 
         <div className="pageTitle">
@@ -580,6 +580,7 @@ export default function OwnerChatInboxPage() {
                               ? "ახალი საუბარი"
                               : "New conversation")}
                         </p>
+                        <span className="threadReply">გახსნა და პასუხი →</span>
                       </div>
                     </button>
                   );
@@ -910,9 +911,9 @@ function Styles() {
         color: #1465e8;
       }
 
-      .operatorCard{margin:0 0 16px;padding:12px 16px;display:flex;align-items:center;gap:13px;max-width:420px;border:1px solid rgba(255,255,255,.78);border-radius:18px;background:linear-gradient(135deg,#fff 0%,#eaf5ff 100%);box-shadow:0 14px 34px rgba(0,24,74,.25)}
-      .operatorAvatar{width:58px;height:58px;display:grid;place-items:center;flex:0 0 58px;border-radius:50%;background:linear-gradient(145deg,#dceeff,#fff);font-size:34px}
-      .operatorCopy{flex:1;color:#12315f}.operatorCopy strong{display:block;color:#0754bd;font-size:25px;line-height:1}.operatorCopy span{display:block;margin-top:5px;font-size:14px;font-weight:850}.onlineDot{color:#078a52;font-size:12px;font-weight:900}
+      .operatorCard{position:relative;margin:0 0 16px;padding:14px 15px;display:flex;align-items:center;gap:12px;max-width:480px;overflow:hidden;border:1px solid rgba(255,255,255,.34);border-radius:19px;background:linear-gradient(135deg,#126fe5,#6950d8 58%,#0aa875);color:#fff;box-shadow:0 15px 36px rgba(0,24,74,.3)}.operatorCard:after{content:"";position:absolute;right:-28px;top:-45px;width:120px;height:120px;border:18px solid rgba(255,255,255,.09);border-radius:50%}
+      .operatorAvatar{width:50px;height:50px;display:grid;place-items:center;flex:0 0 50px;border:1px solid rgba(255,255,255,.45);border-radius:15px;background:rgba(255,255,255,.17);color:#fff;font-size:28px;font-weight:950;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
+      .operatorCopy{position:relative;z-index:1;min-width:0;flex:1;color:#fff}.operatorCopy strong{display:block;color:#fff;font-size:15px;line-height:1.2}.operatorCopy span{display:block;margin-top:5px;color:#e1eeff;font-size:10px;font-weight:750}.onlineDot{position:relative;z-index:1;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:8px;font-weight:900}
 
       .container {
         width: calc(100% - 30px);
@@ -1087,6 +1088,7 @@ function Styles() {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .threadReply{display:inline-block;margin-top:7px;color:#e06f18;font-size:9px;font-weight:900}
 
       .noThreads {
         padding: 70px 25px;
@@ -1388,6 +1390,7 @@ function Styles() {
         .threadList {
           max-height:none;
         }
+        .thread{min-height:104px;padding:14px}.threadReply{padding:5px 8px;border-radius:8px;background:#fff1e5;color:#b85a10}
 
         .messages {
           height: 420px;
