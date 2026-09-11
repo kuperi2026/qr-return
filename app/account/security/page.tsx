@@ -239,10 +239,10 @@ export default function SecurityPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page accountSecurityPage">
       <header className="header">
         <a
-          href="/account"
+          href="/app/account?source=app"
           className="brand"
         >
           <div className="logo">
@@ -293,7 +293,7 @@ export default function SecurityPage() {
 
       <section className="container">
         <a
-          href="/account"
+          href="/app/account?source=app"
           className="back"
         >
           ←{" "}
@@ -468,7 +468,7 @@ export default function SecurityPage() {
               </div>
             </div>
 
-            <a className="comingSoon" href="/account/profile">✉ {ka ? "პაროლის შეცვლის ბმულის მიღება" : "Get password reset link"} →</a>
+            <a className="comingSoon" href="/account/profile?source=app">✉ {ka ? "პაროლის შეცვლის ბმულის მიღება" : "Get password reset link"} →</a>
           </section>
 
           {error && (
@@ -484,7 +484,7 @@ export default function SecurityPage() {
           )}
 
           <div className="actions">
-            <a href="/account">
+            <a href="/app/account?source=app">
               {ka
                 ? "გაუქმება"
                 : "Cancel"}

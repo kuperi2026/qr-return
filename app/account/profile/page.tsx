@@ -229,7 +229,7 @@ export default function OwnerProfileEditPage() {
   return (
     <main className="page ownerProfilePage">
       <header className="header">
-        <a href="/account" className="brand">
+        <a href="/app/account?source=app" className="brand">
           <div className="logo">QR</div>
 
           <div>
@@ -258,7 +258,7 @@ export default function OwnerProfileEditPage() {
       </header>
 
       <section className="container">
-        <a href="/account" className="back">
+        <a href="/app/account?source=app" className="back">
           ← {ka ? "მფლობელის ანგარიში" : "Owner account"}
         </a>
 
@@ -454,7 +454,7 @@ export default function OwnerProfileEditPage() {
               </p>
             </div>
 
-            <a href="/account/security">
+            <a href="/account/security?source=app">
               🔐 {ka ? "უსაფრთხოების მართვა" : "Manage security"} →
             </a>
           </section>
@@ -488,7 +488,7 @@ export default function OwnerProfileEditPage() {
           )}
 
           <div className="actions">
-            <a href="/account">
+            <a href="/app/account?source=app">
               {ka ? "გაუქმება" : "Cancel"}
             </a>
 

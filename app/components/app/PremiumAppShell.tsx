@@ -32,6 +32,7 @@ export default function PremiumAppShell() {
     const params = new URLSearchParams(window.location.search);
     const preview = params.get("app_preview") === "1" || params.get("source") === "app";
     const savedApp = window.localStorage.getItem("kompasi-app-mode") === "1";
+    if (standalone || preview) window.localStorage.setItem("kompasi-app-mode", "1");
     setAppMode(standalone || preview || savedApp);
     setOnline(navigator.onLine);
 
@@ -263,6 +264,17 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .ownerProfilePage .card{padding:16px 14px!important;box-shadow:0 10px 25px rgba(1,30,66,.16)!important}
         body.kompasiAppMode .ownerProfilePage .twoColumns{grid-template-columns:1fr!important}
         body.kompasiAppMode .ownerProfilePage input{max-width:100%!important}
+        body.kompasiAppMode .accountSecurityPage{width:100%!important;overflow-x:hidden!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
+        body.kompasiAppMode .accountSecurityPage .header{display:none!important}
+        body.kompasiAppMode .accountSecurityPage .container{width:min(480px,calc(100% - 24px))!important;max-width:480px!important;margin:0 auto!important;padding:22px 0 96px!important;overflow:hidden!important}
+        body.kompasiAppMode .accountSecurityPage .back{color:#d7ecff!important}
+        body.kompasiAppMode .accountSecurityPage .heading{margin:22px 0 16px!important;color:#fff!important}
+        body.kompasiAppMode .accountSecurityPage .heading h1{color:#fff!important;font-size:25px!important}
+        body.kompasiAppMode .accountSecurityPage .heading p{color:#d7ecff!important;font-size:11px!important}
+        body.kompasiAppMode .accountSecurityPage .securityIcon{width:54px!important;height:54px!important;flex-basis:54px!important;border-radius:15px!important}
+        body.kompasiAppMode .accountSecurityPage .importantNotice,body.kompasiAppMode .accountSecurityPage .card{width:100%!important;margin-left:0!important;margin-right:0!important;padding:16px 14px!important;border-radius:16px!important;box-shadow:0 10px 25px rgba(1,30,66,.16)!important}
+        body.kompasiAppMode .accountSecurityPage form{width:100%!important;gap:11px!important;overflow:hidden!important}
+        body.kompasiAppMode .accountSecurityPage input{max-width:100%!important}
         body.kompasiAppMode .ownerChatPage{width:100%!important;overflow-x:hidden!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
         body.kompasiAppMode .ownerChatPage .header{display:none!important}
         body.kompasiAppMode .ownerChatPage .container{width:min(520px,calc(100% - 20px))!important;max-width:520px!important;margin:0 auto!important;padding:22px 0 96px!important;overflow:hidden!important}
