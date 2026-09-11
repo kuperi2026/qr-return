@@ -1185,6 +1185,14 @@ export default function AccountNotificationsPage() {
           }
         }
       `}</style>
+      <style jsx global>{`
+        body.kompasiAppMode .accountNotificationsPage{background:linear-gradient(180deg,#0a4c8a 0,#0a4c8a 238px,#eef6fd 238px)!important;font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif}
+        body.kompasiAppMode .accountNotificationsPage .topbar{border-color:rgba(255,255,255,.25)!important}body.kompasiAppMode .accountNotificationsPage .brand strong,body.kompasiAppMode .accountNotificationsPage .brand small{color:#fff!important}body.kompasiAppMode .accountNotificationsPage .topActions>a{display:none!important}
+        body.kompasiAppMode .accountNotificationsPage .shell{width:calc(100% - 24px)!important;max-width:560px!important;padding:25px 0 110px!important}body.kompasiAppMode .accountNotificationsPage .heading h1{color:#fff!important;font-size:29px!important;letter-spacing:-.6px!important}body.kompasiAppMode .accountNotificationsPage .heading p{color:#d7eaff!important;font-size:11px!important}body.kompasiAppMode .accountNotificationsPage .eyebrow{color:#b9dbff!important;font-size:9px!important}
+        body.kompasiAppMode .accountNotificationsPage .stats{grid-template-columns:repeat(3,1fr)!important;gap:7px!important;margin-top:19px!important}body.kompasiAppMode .accountNotificationsPage .stat{min-height:65px!important;border:0!important;border-radius:14px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 8px 20px rgba(3,38,82,.12)!important}body.kompasiAppMode .accountNotificationsPage .filters{padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;font-size:9px!important}
+        body.kompasiAppMode .accountNotificationsPage .list{gap:8px!important}body.kompasiAppMode .accountNotificationsPage .list .card{border:0!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(17,61,105,.08)!important}body.kompasiAppMode .accountNotificationsPage .list .unread{border-left:4px solid #ef654c!important;background:#fff!important}body.kompasiAppMode .accountNotificationsPage .list .icon{border-radius:13px!important;background:#e8f3ff!important}
+        @media(max-width:600px){body.kompasiAppMode .accountNotificationsPage .topbar{width:calc(100% - 24px)!important}.accountNotificationsPage .heading{gap:10px!important}.accountNotificationsPage .markAll{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.14)!important;color:#fff!important}}
+      `}</style>
     </main>
   );
 }
