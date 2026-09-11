@@ -345,9 +345,9 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .free b{font-size:27px!important;line-height:1!important}
         body.kompasiAppMode .subscriptionsPage .free span{font-size:14px!important;font-weight:850!important;letter-spacing:.15px!important}
         body.kompasiAppMode .subscriptionsPage .panel h2:not(:first-child){margin:22px 0 12px!important;padding:11px 12px!important;border:1px solid #d5e5f4!important;border-radius:12px!important;background:linear-gradient(100deg,#e8f3ff,#f3efff)!important;color:#173652!important;box-shadow:0 5px 14px rgba(23,63,109,.07)!important}
-        body.kompasiAppMode .subscriptionsPage .period:nth-child(n){border-color:#d7c9f3!important;background:linear-gradient(145deg,#f0eaff,#fcfaff)!important}
-        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) span{color:#6847c6!important}
-        body.kompasiAppMode .subscriptionsPage .period.active{border:1px solid #7655d9!important;background:linear-gradient(145deg,#7655d9,#5d3fc1)!important;color:#fff!important;box-shadow:0 10px 24px rgba(88,61,182,.3),inset 0 1px 0 rgba(255,255,255,.25)!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n){border:1px solid rgba(255,255,255,.3)!important;background:linear-gradient(120deg,#0b74e5,#13a66b)!important;color:#fff!important;box-shadow:0 8px 19px rgba(4,70,117,.2),inset 0 1px 0 rgba(255,255,255,.22)!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) span{color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .period.active{border:2px solid #fff!important;background:linear-gradient(120deg,#0b74e5,#13a66b)!important;color:#fff!important;box-shadow:0 11px 25px rgba(4,70,117,.32),0 0 0 3px rgba(19,166,107,.2),inset 0 1px 0 rgba(255,255,255,.3)!important}
         body.kompasiAppMode .subscriptionsPage .period.active span{color:#fff!important}
         body.kompasiAppMode .subscriptionsPage .summary{border:1px solid rgba(129,238,219,.25)!important;background:radial-gradient(circle at 92% 5%,rgba(25,210,177,.3),transparent 35%),linear-gradient(145deg,#322267 0%,#183f72 52%,#075f65 100%)!important;box-shadow:0 16px 34px rgba(27,20,81,.32),inset 0 1px 0 rgba(255,255,255,.14)!important}
         body.kompasiAppMode .subscriptionsPage .summary>small{color:#9af1df!important}
