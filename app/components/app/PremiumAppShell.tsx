@@ -185,17 +185,33 @@ export default function PremiumAppShell() {
         body.kompasiAppRegistration .actions,body.kompasiAppRegistration .bottomBar,body.kompasiAppRegistration .finalActions{gap:8px!important}
         body.kompasiAppRegistration .actions button,body.kompasiAppRegistration .actions a,body.kompasiAppRegistration .primaryButton,body.kompasiAppRegistration .secondaryButton,body.kompasiAppRegistration .createButton{min-height:45px!important;border-radius:11px!important;font-size:10px!important}
         body.kompasiAppRegistration .progressRow{width:min(560px,100%)!important;margin-left:auto!important;margin-right:auto!important}
-        body.kompasiAppMode .subscriptionsPage{padding-bottom:94px!important}
-        body.kompasiAppMode .subscriptionsPage .topbar{width:min(560px,100%)!important;min-height:62px!important;padding:0 13px!important}
-        body.kompasiAppMode .subscriptionsPage .shell{width:min(560px,calc(100% - 20px))!important;margin:16px auto 0!important}
-        body.kompasiAppMode .subscriptionsPage .intro{padding:0 3px!important;display:block!important}
-        body.kompasiAppMode .subscriptionsPage .intro h1{font-size:22px!important}
-        body.kompasiAppMode .subscriptionsPage .intro p{font-size:11px!important}
-        body.kompasiAppMode .subscriptionsPage .free{width:100%!important;margin-top:12px!important;padding:11px!important}
-        body.kompasiAppMode .subscriptionsPage .layout{grid-template-columns:1fr!important;margin-top:12px!important;padding:10px!important}
+        body.kompasiAppMode .subscriptionsPage{padding-bottom:100px!important;background:linear-gradient(180deg,#e9f4ff 0%,#f6faff 36%,#eef2f6 100%)!important;color:#173652!important}
+        body.kompasiAppMode .subscriptionsPage .topbar{display:none!important}
+        body.kompasiAppMode .subscriptionsPage .shell{width:min(520px,calc(100% - 20px))!important;margin:0 auto!important;padding-top:22px!important}
+        body.kompasiAppMode .subscriptionsPage .intro{padding:0 4px!important;display:block!important;color:#173652!important}
+        body.kompasiAppMode .subscriptionsPage .intro small{color:#1761bd!important;font-size:10px!important}
+        body.kompasiAppMode .subscriptionsPage .intro h1{margin-top:6px!important;color:#173652!important;font-size:24px!important;line-height:1.2!important}
+        body.kompasiAppMode .subscriptionsPage .intro p{color:#647b91!important;font-size:12px!important;line-height:1.5!important}
+        body.kompasiAppMode .subscriptionsPage .free{width:100%!important;margin-top:13px!important;padding:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;border-radius:13px!important;background:linear-gradient(135deg,#075dcc,#159b65)!important}
+        body.kompasiAppMode .subscriptionsPage .free b{font-size:22px!important}
+        body.kompasiAppMode .subscriptionsPage .free span{margin:0!important;font-size:11px!important}
+        body.kompasiAppMode .subscriptionsPage .layout{display:block!important;margin-top:12px!important;padding:11px!important;border-radius:16px!important;background:#fff!important;box-shadow:0 10px 26px rgba(23,63,109,.1)!important}
+        body.kompasiAppMode .subscriptionsPage .panel{padding:2px!important}
+        body.kompasiAppMode .subscriptionsPage .panel h2{font-size:15px!important}
         body.kompasiAppMode .subscriptionsPage .profiles{grid-template-columns:1fr!important}
-        body.kompasiAppMode .subscriptionsPage .summary{position:static!important;padding:16px 13px!important}
-        body.kompasiAppMode .subscriptionsPage .prices{padding:16px 0!important}
+        body.kompasiAppMode .subscriptionsPage .profile{min-height:62px!important}
+        body.kompasiAppMode .subscriptionsPage .periods{display:flex!important;gap:7px!important;overflow-x:auto!important;padding:2px 1px 10px!important;scroll-snap-type:x mandatory!important}
+        body.kompasiAppMode .subscriptionsPage .period{min-width:112px!important;min-height:78px!important;flex:0 0 112px!important;padding:10px 6px!important;scroll-snap-align:start!important}
+        body.kompasiAppMode .subscriptionsPage .period b{font-size:13px!important}
+        body.kompasiAppMode .subscriptionsPage .period span{margin-top:5px!important;font-size:21px!important}
+        body.kompasiAppMode .subscriptionsPage .summary{position:static!important;margin-top:12px!important;padding:17px 14px!important;border-radius:14px!important}
+        body.kompasiAppMode .subscriptionsPage .summary h2{font-size:18px!important}
+        body.kompasiAppMode .subscriptionsPage .line{font-size:12px!important}
+        body.kompasiAppMode .subscriptionsPage .total strong{font-size:30px!important}
+        body.kompasiAppMode .subscriptionsPage .purchaseHistory{margin-top:12px!important;padding:15px 12px!important;border-radius:14px!important}
+        body.kompasiAppMode .subscriptionsPage .historyHeading h2{font-size:17px!important}
+        body.kompasiAppMode .subscriptionsPage .historyList article{grid-template-columns:1fr auto!important}
+        body.kompasiAppMode .subscriptionsPage .prices{display:none!important}
         @media(max-width:600px){body.kompasiAppRegistration .actions,body.kompasiAppRegistration .finalActions{display:grid!important;grid-template-columns:1fr!important}body.kompasiAppRegistration .choice{min-height:74px!important;padding:12px!important}}
         .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
         .appDock a{position:relative;min-width:0;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:13px;color:#728398;text-decoration:none;transition:160ms ease}.navIcon{width:21px;height:21px;display:grid;place-items:center}.navIcon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.appDock a small{max-width:100%;overflow:hidden;font-size:8px;font-weight:800;letter-spacing:.05px;text-overflow:ellipsis;white-space:nowrap}.appDock a.active{color:#075dce}.appDock a.active::after{content:"";position:absolute;bottom:1px;width:16px;height:2px;border-radius:999px;background:#176be5}.appDock a.primary{width:48px;height:48px;margin:0 auto;border-radius:15px;background:linear-gradient(145deg,#0c74ee,#3158d8 55%,#6549df);color:#fff;box-shadow:0 8px 19px rgba(32,87,210,.31)}.appDock a.primary .navIcon{width:22px;height:22px}.appDock a.primary small{color:#fff;font-size:7px}.appDock a.primary::after{display:none}.offlinePill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1100;padding:8px 13px;border:1px solid #f5d08c;border-radius:999px;background:#fff7e6;color:#925d06;box-shadow:0 9px 25px rgba(60,35,0,.16);font:800 11px/1.2 Arial,sans-serif;transform:translateX(-50%)}

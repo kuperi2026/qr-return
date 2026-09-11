@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 const hub = [
-  ["＋", "პროფილის რეგისტრაცია", "დაამატეთ ახალი QR პროფილი", "/app/add", "blue"],
-  ["▤", "პროფილების მართვა", "ნახეთ და მართეთ რეგისტრირებული პროფილები", "/app/profiles", "green"],
-  ["◇", "მომსახურება და პაკეტები", "ვადები, ტარიფები და ისტორია", "/account/subscriptions", "gold"],
+  ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/app/add", "blue"],
+  ["▤", "პროფილების მართვა", "უკვე შექმნილი პროფილების ნახვა და მართვა", "/app/profiles", "green"],
+  ["◇", "მომსახურება და პაკეტები", "მართეთ მომსახურების ვადა და პაკეტი", "/account/subscriptions?source=app", "gold"],
 ];
 export default function Products() {
   return (
     <main className="pc">
       <div className="pw">
         <header>
-          <small>KOMPASI HUB</small>
-          <h1>ჰაბი</h1>
-          <p>პროფილის დამატება, მართვა და მომსახურება ერთ სივრცეში.</p>
+          <small>KOMPASI</small>
+          <h1>აირჩიეთ სასურველი მოქმედება</h1>
+          <p>ყველაფერი, რაც თქვენი QR პროფილების სამართავად გჭირდებათ.</p>
         </header>
         <section>
           {hub.map(([icon, name, note, href, color]) => (
@@ -32,7 +32,8 @@ export default function Products() {
         .pc {
           min-height: 100vh;
           background:
-            radial-gradient(circle at 50% 0, #deedff, transparent 28%), #f4f7fb;
+            radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%),
+            linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
           color: #173652;
           font-family: Inter, Arial, sans-serif;
         }
@@ -43,18 +44,20 @@ export default function Products() {
         }
         .pc header small {
           color: #1761bd;
-          font-size: 8px;
+          font-size: 11px;
           font-weight: 950;
           letter-spacing: 1px;
         }
         .pc h1 {
           margin: 5px 0 0;
-          font-size: 24px;
+          max-width: 420px;
+          font-size: 27px;
+          line-height: 1.18;
         }
         .pc header p {
           margin: 8px 0 0;
           color: #6e8398;
-          font-size: 10px;
+          font-size: 13px;
           line-height: 1.5;
         }
         .pc section {
@@ -64,24 +67,24 @@ export default function Products() {
           gap: 8px;
         }
         .pc section a {
-          min-height: 82px;
-          padding: 14px;
+          min-height: 94px;
+          padding: 16px;
           display: flex;
           align-items: center;
           gap: 10px;
           border: 1px solid #d9e5f0;
-          border-radius: 17px;
+          border-radius: 18px;
           background: #fff;
           color: #173652;
           text-decoration: none;
-          box-shadow: 0 7px 20px #173f6d0d;
+          box-shadow: 0 10px 25px rgba(23,63,109,.09);
         }
         .pc section i {
-          width: 44px;
-          height: 44px;
+          width: 50px;
+          height: 50px;
           display: grid;
           place-items: center;
-          flex: 0 0 44px;
+          flex: 0 0 50px;
           border-radius: 13px;
           background: #edf5ff;
           font-size: 21px;
@@ -96,12 +99,13 @@ export default function Products() {
           display: block;
         }
         .pc section b {
-          font-size: 14px;
+          font-size: 16px;
         }
         .pc section small {
           margin-top: 5px;
           color: #778b9e;
-          font-size: 10px;
+          font-size: 12px;
+          line-height: 1.45;
           line-height: 1.3;
         }
         .pc section em {
