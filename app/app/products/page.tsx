@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 const hub = [
   ["＋", "პროფილის რეგისტრაცია", "დაამატეთ ახალი QR პროფილი", "/app/add", "blue"],
