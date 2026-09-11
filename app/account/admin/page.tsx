@@ -87,7 +87,6 @@ export default function AdminPage() {
   const [active, setActive] = useState(true);
   const [profiles, setProfiles] = useState<OwnerProfile[]>([]);
   const [profileAccess, setProfileAccess] = useState<Record<number, ProfileAccess>>({});
-  const [editingProfiles, setEditingProfiles] = useState<Record<number, boolean>>({});
   const [openProfileId, setOpenProfileId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -304,33 +303,15 @@ export default function AdminPage() {
         <div className="heading">
           <h1>
             {ka
-              ? "თანაადმინისტრატორის რეგისტრაცია და უფლებები"
+              ? "სანდო პირი და უფლებები"
               : "Co-administrator registration and permissions"}
           </h1>
 
           <p>
             {ka
-              ? "თითოეულ QR პროფილზე შეგიძლიათ დაამატოთ მხოლოდ ერთი თანაადმინისტრატორი. თავად განსაზღვრავთ, რომელ პროფილზე ექნება წვდომა და რა მოქმედებების შესრულება შეეძლება."
+              ? "აირჩიეთ პროფილი, შეიყვანეთ სანდო პირის აუცილებელი მონაცემები და მონიშნეთ მისთვის საჭირო უფლებები."
               : "You can add only one co-administrator to each QR profile. You decide which profile they can access and which actions they can perform."}
           </p>
-        </div>
-
-        <div className="importantNotice">
-          <div className="noticeIcon">🔐</div>
-
-          <div>
-            <strong>
-              {ka
-                ? "მფლობელი ყოველთვის მთავარი მმართველია"
-                : "The Owner always remains in control"}
-            </strong>
-
-            <p>
-              {ka
-                ? "თანაადმინისტრატორს არ შეუძლია სხვა ადმინისტრატორის დამატება, უსაფრთხოების მონაცემების შეცვლა, ანგარიშის წაშლა ან მფლობელის ჩანაცვლება."
-                : "The administrator cannot add another admin, change your security information, delete your account or replace the Owner."}
-            </p>
-          </div>
         </div>
 
         {error && <div className="errorBox">{error}</div>}
@@ -340,10 +321,10 @@ export default function AdminPage() {
           <section className="card">
             <div className="permissionsHeader">
               <div>
-                <h2>{ka ? "თანაადმინისტრატორის წვდომა QR პროფილებზე" : "Co-administrator access to QR profiles"}</h2>
+                <h2>{ka ? "აირჩიეთ QR პროფილი" : "Choose a QR profile"}</h2>
                 <p className="profileAccessIntro">
                   {ka
-                    ? "აირჩიეთ QR პროფილი ან პროფილები, რომელთა მართვის უფლებას თანაადმინისტრატორს ანიჭებთ."
+                    ? "გახსენით სასურველი პროფილი და შეავსეთ მხოლოდ აუცილებელი ველები."
                     : "Select the QR profile or profiles that the co-administrator will be allowed to manage."}
                 </p>
               </div>
@@ -380,60 +361,26 @@ export default function AdminPage() {
 
                       {openProfileId === profile.id && (
                         <div className="profileAdminPanel">
-                          <div className="profileAdminHeading">
-                            <h3 className="profileAdminTitle">{ka ? "თანაადმინისტრატორის მონაცემები და უფლებები" : "Co-administrator details and permissions"}</h3>
-                            <button
-                              type="button"
-                              className="editProfileAdminButton"
-                              onClick={() => setEditingProfiles((currentEditing) => ({
-                                ...currentEditing,
-                                [profile.id]: !currentEditing[profile.id],
-                              }))}
-                            >
-                              {editingProfiles[profile.id]
-                                ? ka ? "რედაქტირება ჩართულია" : "Editing enabled"
-                                : ka ? "რედაქტირება" : "Edit"}
-                            </button>
-                          </div>
-                          <p className="profileEditNote">{ka ? "შეგიძლიათ შეცვალოთ ნებისმიერი მონაცემი ან მინიჭებული უფლება." : "You can edit any detail or assigned permission."}</p>
+                          <div className="profileAdminHeading"><h3 className="profileAdminTitle">{ka ? "სანდო პირის მონაცემები" : "Trusted person details"}</h3></div>
                           <div className="profileContactGrid">
                             <label>
                               <span>{ka ? "სახელი" : "First name"} *</span>
-                              <input value={current.adminFirstName} onChange={(e) => updateProfileAccess(profile.id, { adminFirstName: e.target.value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
+                              <input value={current.adminFirstName} onChange={(e) => updateProfileAccess(profile.id, { adminFirstName: e.target.value })} required />
                             </label>
                             <label>
                               <span>{ka ? "გვარი" : "Last name"} *</span>
-                              <input value={current.adminLastName} onChange={(e) => updateProfileAccess(profile.id, { adminLastName: e.target.value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
+                              <input value={current.adminLastName} onChange={(e) => updateProfileAccess(profile.id, { adminLastName: e.target.value })} required />
                             </label>
                             <label>
                               <span>{ka ? "ტელეფონის ნომერი" : "Phone number"} *</span>
-                              <input type="tel" value={current.adminPhone} onChange={(e) => updateProfileAccess(profile.id, { adminPhone: e.target.value })} placeholder="+995 5XX XX XX XX" disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
+                              <input type="tel" value={current.adminPhone} onChange={(e) => updateProfileAccess(profile.id, { adminPhone: e.target.value })} placeholder="+995 5XX XX XX XX" required />
                             </label>
                             <label className="profileEmailField">
                               <span>{ka ? "ელ-ფოსტა" : "Email"} *</span>
-                              <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} required />
+                              <input type="email" value={current.adminEmail} onChange={(e) => updateProfileAccess(profile.id, { adminEmail: e.target.value })} placeholder="admin@example.com" required />
                             </label>
                           </div>
-                          <p className="adminLinkNote">{ka ? "ელ-ფოსტა თანაადმინისტრატორის ანგარიშს დაუკავშირდება." : "The email will be linked to the co-administrator account."}</p>
-                          {profiles.length > 1 && (
-                            <label className="copyProfileField">
-                              <span>{ka ? "თუ იმავე თანაადმინისტრატორის დამატება სხვა პროფილებზეც, იგივე უფლებებით გსურთ, მონიშნეთ სასურველი პროფილები. სხვა შემთხვევაში შესაბამის პროფილში ინფორმაცია ცალკე შეავსეთ." : "To add the same co-administrator to other profiles with the same permissions, select the desired profiles. Otherwise, enter the information separately in the relevant profile."}</span>
-                              <select defaultValue="" onChange={(event) => {
-                                const targetId = Number(event.target.value);
-                                if (!targetId) return;
-                                setProfileAccess((existing) => ({
-                                  ...existing,
-                                  [targetId]: { ...current, selected: true }
-                                }));
-                                event.target.value = "";
-                              }}>
-                                <option value="">{ka ? "აირჩიეთ სხვა QR პროფილი" : "Select another QR profile"}</option>
-                                {profiles.filter((item) => item.id !== profile.id).map((item) => (
-                                  <option key={item.id} value={item.id}>{item.item_name || (ka ? "უსახელო პროფილი" : "Unnamed profile")}</option>
-                                ))}
-                              </select>
-                            </label>
-                          )}
+                          <p className="adminLinkNote">{ka ? "ელ-ფოსტა სანდო პირის ანგარიშს უსაფრთხოდ დაუკავშირდება." : "The email will securely link to the trusted person's account."}</p>
                           <button
                             type="button"
                             className="profileRemoveButton"
@@ -445,13 +392,13 @@ export default function AdminPage() {
                               : ka ? "თანაადმინისტრატორის წაშლა" : "Remove co-administrator"}
                           </button>
                           <div className="profilePermissionGrid">
-                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
-                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} disabled={Boolean(current.adminEmail) && !editingProfiles[profile.id]} />
+                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
+                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
+                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
+                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
+                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
+                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
+                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
                           </div>
                         </div>
                       )}

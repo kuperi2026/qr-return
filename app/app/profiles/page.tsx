@@ -99,6 +99,9 @@ export default function AppProfiles() {
                 <div className={p.lost ? "lost" : "active"}>
                   {p.lost ? "დაკარგულია" : "აქტიური"}
                 </div>
+                <Link className={`lostQuick ${p.lost ? "enabled" : ""}`} href={`/app/product/${p.tag_code}?panel=lost`}>
+                  ! Lost Mode
+                </Link>
                 <Link className="open" href={"/app/product/" + p.tag_code}>
                   ›
                 </Link>
@@ -265,6 +268,7 @@ function Style() {
         text-decoration: none;
         font-size: 24px;
       }
+      .lostQuick{position:absolute;right:37px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
       .empty {
         margin-top: 25px;
         display: grid;
