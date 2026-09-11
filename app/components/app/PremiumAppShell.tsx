@@ -220,6 +220,21 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .purchaseHistory{margin-top:12px!important;padding:15px 12px!important;border-radius:14px!important}
         body.kompasiAppMode .subscriptionsPage .historyHeading h2{font-size:17px!important}
         body.kompasiAppMode .subscriptionsPage .historyList article{grid-template-columns:1fr auto!important}
+        body.kompasiAppMode .subscriptionsPage .appBack{width:max-content!important;margin:0 0 15px 3px!important;padding:8px 11px!important;display:block!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:10px!important;background:rgba(255,255,255,.12)!important;color:#fff!important;text-decoration:none!important;font-size:11px!important;font-weight:850!important}
+        body.kompasiAppMode .subscriptionsPage .layout{padding:12px!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:17px!important;background:#f8fbff!important;box-shadow:0 12px 30px rgba(1,30,66,.2)!important}
+        body.kompasiAppMode .subscriptionsPage .panel h2{margin:4px 0 11px!important;font-size:15px!important}
+        body.kompasiAppMode .subscriptionsPage .stepNumber{width:30px!important;height:30px!important;margin-right:7px!important;border-radius:9px!important;background:#0b65d4!important;color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .profile{min-height:64px!important;padding:9px!important;border-radius:11px!important}
+        body.kompasiAppMode .subscriptionsPage .profile .icon{width:39px!important;height:39px!important;font-size:20px!important}
+        body.kompasiAppMode .subscriptionsPage .profile b{font-size:13px!important}
+        body.kompasiAppMode .subscriptionsPage .profile small{font-size:10px!important}
+        body.kompasiAppMode .subscriptionsPage .periods{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;overflow:visible!important;padding:1px 0 8px!important}
+        body.kompasiAppMode .subscriptionsPage .period{width:100%!important;min-width:0!important;min-height:80px!important;flex:none!important;padding:10px 6px!important}
+        body.kompasiAppMode .subscriptionsPage .summary{margin-top:14px!important;background:#082f59!important}
+        body.kompasiAppMode .subscriptionsPage .summary>small{color:#89c2ff!important;font-size:10px!important}
+        body.kompasiAppMode .subscriptionsPage .purchaseHistory{border:0!important;background:#fff!important;box-shadow:0 10px 24px rgba(1,30,66,.16)!important}
+        body.kompasiAppMode .subscriptionsPage .historyHeading>span{font-size:9px!important}
+        body.kompasiAppMode .subscriptionsPage .historyList article{padding:11px!important;border-radius:10px!important}
         body.kompasiAppMode .subscriptionsPage .prices{display:none!important}
         @media(max-width:600px){body.kompasiAppRegistration .actions,body.kompasiAppRegistration .finalActions{display:grid!important;grid-template-columns:1fr!important}body.kompasiAppRegistration .choice{min-height:74px!important;padding:12px!important}}
         .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
