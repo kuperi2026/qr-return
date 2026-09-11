@@ -33,9 +33,9 @@ export default function Products() {
           min-height: 100vh;
           overflow-x: hidden;
           background:
-            radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%),
-            linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
-          color: #173652;
+            radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),
+            linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
+          color: #fff;
           font-family: Inter, Arial, sans-serif;
         }
         .pc, .pc * {
@@ -47,7 +47,7 @@ export default function Products() {
           padding: 25px 0 94px;
         }
         .pc header small {
-          color: #1761bd;
+          color: #bdddff;
           font-size: 11px;
           font-weight: 950;
           letter-spacing: 1px;
@@ -60,7 +60,7 @@ export default function Products() {
         }
         .pc header p {
           margin: 8px 0 0;
-          color: #6e8398;
+          color: #d7ecff;
           font-size: 13px;
           line-height: 1.5;
         }

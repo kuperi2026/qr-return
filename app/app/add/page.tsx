@@ -42,8 +42,8 @@ function Base() {
       .sub {
         min-height: 100vh;
         overflow-x: hidden;
-        background: radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%), linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
-        color: #173652;
+        background: radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%), linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
+        color: #fff;
         font-family: Inter, Arial, sans-serif;
       }
       .sub, .sub * {
@@ -55,7 +55,7 @@ function Base() {
         padding: 24px 0 94px;
       }
       .sub header small {
-        color: #71869a;
+        color: #bdddff;
         font-size: 11px;
         font-weight: 850;
         letter-spacing: 1px;
@@ -66,7 +66,7 @@ function Base() {
       }
       .sub header p {
         margin: 8px 0 0;
-        color: #708599;
+        color: #d7ecff;
         font-size: 13px;
         line-height: 1.5;
       }
