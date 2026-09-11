@@ -116,7 +116,7 @@ function Style() {
     <style jsx global>{`
       .ap {
         min-height: 100vh;
-        background: #f4f7fb;
+        background: #ffffff;
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
@@ -132,13 +132,14 @@ function Style() {
       }
       .ap header small {
         color: #71869a;
-        font-size: 8px;
+        font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.8px;
       }
       .ap h1 {
         margin: 4px 0 0;
-        font-size: 22px;
+        color: #0a4c8a;
+        font-size: 27px;
       }
       .ap header > a {
         width: 40px;
@@ -160,7 +161,7 @@ function Style() {
         gap: 9px;
         border: 1px solid #dbe5ef;
         border-radius: 13px;
-        background: #fff;
+        background: #f7fbff;
         color: #6f8498;
       }
       .search input {
@@ -168,7 +169,7 @@ function Style() {
         border: 0;
         outline: 0;
         background: transparent;
-        font-size: 11px;
+        font-size: 14px;
       }
       .ap section {
         margin-top: 11px;
@@ -184,8 +185,8 @@ function Style() {
         gap: 11px;
         border: 1px solid #dce6f0;
         border-radius: 16px;
-        background: #fff;
-        box-shadow: 0 6px 18px #173f6d0d;
+        background: #f9fbfd;
+        box-shadow: 0 6px 18px rgba(10,76,138,.07);
       }
       .photo {
         width: 53px;
@@ -214,19 +215,19 @@ function Style() {
       }
       .info small {
         color: #71869a;
-        font-size: 8px;
+        font-size: 11px;
       }
       .info b {
         margin-top: 3px;
         overflow: hidden;
-        font-size: 12px;
+        font-size: 16px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       .info span {
         margin-top: 5px;
         color: #7b8fa2;
-        font-size: 8px;
+        font-size: 11px;
       }
       .active,
       .lost {
@@ -235,7 +236,7 @@ function Style() {
         top: 10px;
         padding: 4px 6px;
         border-radius: 999px;
-        font-size: 7px;
+        font-size: 9px;
         font-weight: 850;
       }
       .active {
