@@ -1,35 +1,25 @@
-"use client";
-
 import Link from "next/link";
-const products = [
-  ["dog", "🐕", "ძაღლი", "Lost Mode · Photo Match"],
-  ["cat", "🐈", "კატა", "Lost Mode · Photo Match"],
-  ["parking", "🚘", "ავტომობილი", "AI Parking Assistant"],
-  ["suitcase", "🧳", "ჩემოდანი", "AI Finder · თარგმანი"],
-  ["keys", "🔑", "გასაღები", "AI Finder Assistant"],
-  ["wallet", "👛", "საფულე", "უსაფრთხო კავშირი"],
-  ["bag", "👜", "ჩანთა", "AI Finder · თარგმანი"],
-  ["emergency", "✚", "Emergency", "SOS Assistant · 112"],
+const hub = [
+  ["＋", "პროფილის რეგისტრაცია", "დაამატეთ ახალი QR პროფილი", "/app/add", "blue"],
+  ["▤", "პროფილების მართვა", "ნახეთ და მართეთ რეგისტრირებული პროფილები", "/app/profiles", "green"],
+  ["◇", "მომსახურება და პაკეტები", "ვადები, ტარიფები და ისტორია", "/account/subscriptions", "gold"],
 ];
 export default function Products() {
   return (
     <main className="pc">
       <div className="pw">
         <header>
-          <small>KOMPASI PRODUCTS</small>
-          <h1>პროდუქტები</h1>
-          <p>
-            აირჩიეთ კატეგორია და დაარეგისტრირეთ ახალი პროფილი.
-            არსებული პროფილების მართვა ხელმისაწვდომია „პროფილებში“.
-          </p>
+          <small>KOMPASI HUB</small>
+          <h1>ჰაბი</h1>
+          <p>პროფილის დამატება, მართვა და მომსახურება ერთ სივრცეში.</p>
         </header>
         <section>
-          {products.map(([type, icon, name, ai]) => (
-            <Link href={"/app/products/" + type} key={type}>
+          {hub.map(([icon, name, note, href, color]) => (
+            <Link href={href} key={name} className={color}>
               <i>{icon}</i>
               <span>
                 <b>{name}</b>
-                <small>{ai}</small>
+                <small>{note}</small>
               </span>
               <em>›</em>
             </Link>
@@ -40,7 +30,7 @@ export default function Products() {
         .pc {
           min-height: 100vh;
           background:
-            radial-gradient(circle at 50% 0, #deedff, transparent 28%), #edf7ff;
+            radial-gradient(circle at 50% 0, #deedff, transparent 28%), #f4f7fb;
           color: #173652;
           font-family: Inter, Arial, sans-serif;
         }
@@ -68,12 +58,12 @@ export default function Products() {
         .pc section {
           margin-top: 18px;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr;
           gap: 8px;
         }
         .pc section a {
-          min-height: 91px;
-          padding: 13px;
+          min-height: 82px;
+          padding: 14px;
           display: flex;
           align-items: center;
           gap: 10px;
@@ -104,12 +94,12 @@ export default function Products() {
           display: block;
         }
         .pc section b {
-          font-size: 10px;
+          font-size: 14px;
         }
         .pc section small {
           margin-top: 5px;
           color: #778b9e;
-          font-size: 7px;
+          font-size: 10px;
           line-height: 1.3;
         }
         .pc section em {
@@ -117,6 +107,8 @@ export default function Products() {
           font-size: 20px;
           font-style: normal;
         }
+        .pc section a.green i{background:#e6f8ef;color:#08784a}
+        .pc section a.gold i{background:#fff2db;color:#9a6100}
         @media (max-width: 380px) {
           .pc section {
             grid-template-columns: 1fr;
