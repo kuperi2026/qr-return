@@ -52,6 +52,7 @@ export default function OwnerChatInboxPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [conversationView, setConversationView] = useState<"active" | "history">("active");
   const [selected, setSelected] = useState<ChatThread | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -393,6 +394,14 @@ export default function OwnerChatInboxPage() {
     );
   }, [selected, ka]);
 
+  const visibleThreads = useMemo(() => {
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return threads.filter((thread) => {
+      const recent = !thread.last_message_at || new Date(thread.last_message_at).getTime() >= cutoff;
+      return conversationView === "active" ? recent : !recent;
+    });
+  }, [threads, conversationView]);
+
   if (loading) {
     return (
       <main className="statePage">
@@ -412,7 +421,7 @@ export default function OwnerChatInboxPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page ownerChatPage">
       <header className="header">
         <div className="headerRight">
           <a href="/account" className="accountButton">
@@ -490,7 +499,12 @@ export default function OwnerChatInboxPage() {
               <span>{threads.length}</span>
             </div>
 
-            {threads.length === 0 ? (
+            <div className="conversationTabs">
+              <button type="button" className={conversationView === "active" ? "active" : ""} onClick={() => setConversationView("active")}>აქტიური</button>
+              <button type="button" className={conversationView === "history" ? "active" : ""} onClick={() => setConversationView("history")}>ისტორია</button>
+            </div>
+
+            {visibleThreads.length === 0 ? (
               <div className="noThreads">
                 <div>💬</div>
 
@@ -508,7 +522,7 @@ export default function OwnerChatInboxPage() {
               </div>
             ) : (
               <div className="threadList">
-                {threads.map((thread) => {
+                {visibleThreads.map((thread) => {
                   const active =
                     selected?.profile_id === thread.profile_id &&
                     selected?.finder_session === thread.finder_session;
@@ -764,6 +778,7 @@ export default function OwnerChatInboxPage() {
       </section>
 
       <Styles />
+      <style jsx>{`.conversationTabs{margin:0 10px 9px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:11px;background:#edf3f9}.conversationTabs button{min-height:34px;border:0;border-radius:8px;background:transparent;color:#6a7f93;font:850 10px Inter,Arial;cursor:pointer}.conversationTabs button.active{background:#fff;color:#075dcc;box-shadow:0 3px 9px rgba(23,63,109,.1)}`}</style>
     </main>
   );
 }

@@ -62,7 +62,7 @@ export default function PremiumAppShell() {
 
     const supabase = createClient(url, key);
     let cancelled = false;
-    const channel = supabase.channel("kompasi-owner-chat-alerts");
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -74,8 +74,8 @@ export default function PremiumAppShell() {
       if (!items?.length || cancelled) return;
 
       const ownedItems = new Map(items.map((item) => [item.id, item]));
-      channel
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+      channel = supabase.channel(`kompasi-owner-chat-alerts-${user.id}`);
+      const handleMessage = (payload: { new: Record<string, unknown> }) => {
           const message = payload.new as {
             item_id?: string;
             sender_role?: string;
@@ -105,13 +105,16 @@ export default function PremiumAppShell() {
               // The in-app alert remains visible on mobile browsers that disallow this constructor.
             }
           }
-        })
-        .subscribe();
+        };
+      items.forEach((item) => {
+        channel!.on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `item_id=eq.${item.id}` }, handleMessage);
+      });
+      channel.subscribe();
     })();
 
     return () => {
       cancelled = true;
-      void supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [appMode, ownerArea]);
 
@@ -260,6 +263,14 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .ownerProfilePage .card{padding:16px 14px!important;box-shadow:0 10px 25px rgba(1,30,66,.16)!important}
         body.kompasiAppMode .ownerProfilePage .twoColumns{grid-template-columns:1fr!important}
         body.kompasiAppMode .ownerProfilePage input{max-width:100%!important}
+        body.kompasiAppMode .ownerChatPage{width:100%!important;overflow-x:hidden!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
+        body.kompasiAppMode .ownerChatPage .header{display:none!important}
+        body.kompasiAppMode .ownerChatPage .container{width:min(520px,calc(100% - 20px))!important;max-width:520px!important;margin:0 auto!important;padding:22px 0 96px!important;overflow:hidden!important}
+        body.kompasiAppMode .ownerChatPage .operatorCard{border:1px solid rgba(255,255,255,.3)!important;background:linear-gradient(135deg,#6b4bd2,#176fe1 55%,#0b9d72)!important;color:#fff!important}
+        body.kompasiAppMode .ownerChatPage .pageTitle h1,body.kompasiAppMode .ownerChatPage .pageTitle p,body.kompasiAppMode .ownerChatPage .pageTitle>div>span{color:#fff!important}
+        body.kompasiAppMode .ownerChatPage .inbox{width:100%!important;min-width:0!important;overflow:hidden!important;border-radius:19px!important;box-shadow:0 16px 35px rgba(1,30,66,.25)!important}
+        body.kompasiAppMode .ownerChatPage .sidebar,body.kompasiAppMode .ownerChatPage .chatPanel{min-width:0!important}
+        body.kompasiAppMode .ownerChatPage .threadList{max-height:270px!important}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps{margin:16px 0 12px;padding:5px;display:grid!important;grid-template-columns:repeat(3,1fr);gap:5px;border:1px solid rgba(255,255,255,.26);border-radius:15px;background:rgba(4,40,82,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(12px)}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button{min-width:0;min-height:52px;padding:6px 3px;display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;background:transparent;color:#cfe6ff;font-family:inherit;cursor:pointer}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button span{width:22px;height:22px;display:grid;place-items:center;flex:0 0 22px;border:1px solid rgba(255,255,255,.35);border-radius:50%;font-size:10px;font-weight:950}
