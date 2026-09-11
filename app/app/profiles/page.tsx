@@ -116,14 +116,18 @@ function Style() {
     <style jsx global>{`
       .ap {
         min-height: 100vh;
+        overflow-x: hidden;
         background: #ffffff;
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
+      .ap, .ap * {
+        box-sizing: border-box;
+      }
       .aw {
-        width: min(560px, 100%);
+        width: min(480px, calc(100% - 24px));
         margin: auto;
-        padding: 22px 13px 94px;
+        padding: 22px 0 94px;
       }
       .ap header {
         display: flex;
@@ -173,11 +177,16 @@ function Style() {
       }
       .ap section {
         margin-top: 11px;
+        width: 100%;
+        max-width: 100%;
         display: grid;
         gap: 8px;
+        overflow: hidden;
       }
       .ap article {
         position: relative;
+        width: 100%;
+        min-width: 0;
         min-height: 79px;
         padding: 10px 38px 10px 10px;
         display: flex;
