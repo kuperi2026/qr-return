@@ -54,6 +54,7 @@ export default function OwnerChatInboxPage() {
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [conversationView, setConversationView] = useState<"all" | "recent">("all");
   const [selected, setSelected] = useState<ChatThread | null>(null);
+  const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const [text, setText] = useState("");
@@ -156,6 +157,7 @@ export default function OwnerChatInboxPage() {
 
       if (requested) {
         setSelected(requested);
+        setMobileConversationOpen(true);
       } else if (!selected && result.length > 0) {
         setSelected(result[0]);
       }
@@ -502,7 +504,7 @@ export default function OwnerChatInboxPage() {
           </div>
         )}
 
-        <div className="inbox">
+        <div className={`inbox ${mobileConversationOpen ? "mobileChatOpen" : ""}`}>
           <aside className="sidebar">
             <div className="sidebarTitle">
               <strong>
@@ -550,6 +552,7 @@ export default function OwnerChatInboxPage() {
                       onClick={() => {
                         setSelected(thread);
                         setMessages([]);
+                        setMobileConversationOpen(true);
                       }}
                     >
                       <div className="threadIcon">
@@ -605,6 +608,7 @@ export default function OwnerChatInboxPage() {
             ) : (
               <>
                 <div className="chatHeader">
+                  <button type="button" className="mobileChatBack" onClick={() => setMobileConversationOpen(false)} aria-label="საუბრების სიაში დაბრუნება">‹</button>
                   <div className="chatItemIcon">
                     {getIcon(selected)}
                   </div>
@@ -1143,6 +1147,8 @@ function Styles() {
         border-bottom: 1px solid #e4e7ec;
       }
 
+      .mobileChatBack{display:none;width:38px;height:38px;place-items:center;flex:0 0 38px;border:1px solid #d7e4f3;border-radius:11px;background:#f2f7fd;color:#1761bd;font-size:26px;font-weight:900}
+
       .chatItemIcon {
         width: 48px;
         height: 48px;
@@ -1372,13 +1378,15 @@ function Styles() {
           grid-template-columns: 1fr;
         }
 
+        .inbox .chatPanel{display:none}.inbox.mobileChatOpen .sidebar{display:none}.inbox.mobileChatOpen .chatPanel{display:flex}.inbox.mobileChatOpen .mobileChatBack{display:grid}
+
         .sidebar {
           border-right: 0;
           border-bottom: 1px solid #e4e7ec;
         }
 
         .threadList {
-          max-height: 250px;
+          max-height:none;
         }
 
         .messages {
