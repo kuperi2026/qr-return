@@ -322,7 +322,7 @@ export default function SecurityPage() {
 
             <p>
               {ka
-                ? "პირადი ნომერი და კოდური სიტყვა მპოვნელისთვის არასდროს გამოჩნდება და გამოიყენება მხოლოდ ანგარიშის იდენტიფიკაციისთვის."
+                ? "უსაფრთხოების მონაცემები მპოვნელისთვის არასდროს გამოჩნდება და გამოიყენება მხოლოდ ანგარიშის დასაცავად."
                 : "Your personal ID and code word are never shown to finders and are used only for account identity verification."}
             </p>
           </div>
@@ -342,7 +342,7 @@ export default function SecurityPage() {
 
             <p>
               {ka
-                ? "არსებული პირადი ნომერი და კოდური სიტყვა აქ არ ჩანს. შეგიძლიათ მხოლოდ ახალი მნიშვნელობით ჩაანაცვლოთ."
+                ? "სრული პირადი ნომერი აღარ გამოიყენება. მომავალ იდენტიფიკაციაში დაშვებული იქნება მხოლოდ ბოლო 4 ციფრი და მომხმარებელი მას თვითონ ვერ შეცვლის."
                 : "Your existing personal ID and code word are not displayed here. You can only replace them with new values."}
             </p>
           </div>
@@ -353,7 +353,7 @@ export default function SecurityPage() {
             updateSecurity
           }
         >
-          <section className="card">
+          <section className="card identityLockCard">
             <div className="sectionTitle">
               <span>
                 01
@@ -362,65 +362,19 @@ export default function SecurityPage() {
               <div>
                 <h2>
                   {ka
-                    ? "პირადი ნომრის შეცვლა"
-                    : "Update Personal ID"}
+                    ? "პირადი ნომრის ბოლო 4 ციფრი"
+                    : "Last 4 digits of personal ID"}
                 </h2>
 
                 <p>
                   {ka
-                    ? "თუ პირადი ნომრის შეცვლა არ გსურთ, ეს ველები ცარიელი დატოვეთ."
-                    : "Leave these fields empty if you do not want to change your personal ID."}
+                    ? "ეს მონაცემი მხოლოდ იდენტიფიკაციისთვის იქნება და ამ გვერდიდან ვერ შეიცვლება."
+                    : "This value is for verification only and cannot be edited here."}
                 </p>
               </div>
             </div>
 
-            <label>
-              <span>
-                {ka
-                  ? "ახალი პირადი ნომერი"
-                  : "New personal ID"}
-              </span>
-
-              <input
-                type="password"
-                value={
-                  personalId
-                }
-                onChange={(
-                  e
-                ) =>
-                  setPersonalId(
-                    e.target
-                      .value
-                  )
-                }
-                autoComplete="off"
-              />
-            </label>
-
-            <label>
-              <span>
-                {ka
-                  ? "გაიმეორეთ პირადი ნომერი"
-                  : "Confirm personal ID"}
-              </span>
-
-              <input
-                type="password"
-                value={
-                  confirmPersonalId
-                }
-                onChange={(
-                  e
-                ) =>
-                  setConfirmPersonalId(
-                    e.target
-                      .value
-                  )
-                }
-                autoComplete="off"
-              />
-            </label>
+            <div className="comingSoon">🔒 {ka ? "არ არის მითითებული · რედაქტირება დაბლოკილია" : "Not set · editing is locked"}</div>
           </section>
 
           <section className="card">
@@ -508,18 +462,13 @@ export default function SecurityPage() {
 
                 <p>
                   {ka
-                    ? "Email verification/reset ფუნქციას შემდეგ ეტაპზე ჩავრთავთ. მანამდე პაროლის ავტომატური შეცვლა კოდური სიტყვით არ იმუშავებს."
+                    ? "პაროლი იცვლება მხოლოდ თქვენს Login ელფოსტაზე გაგზავნილი დაცული ბმულით."
                     : "Email verification/reset will be enabled later. Automatic password reset using only the code word is intentionally disabled for now."}
                 </p>
               </div>
             </div>
 
-            <div className="comingSoon">
-              🔒{" "}
-              {ka
-                ? "Email Reset — მოგვიანებით გააქტიურდება"
-                : "Email Reset — coming later"}
-            </div>
+            <a className="comingSoon" href="/account/profile">✉ {ka ? "პაროლის შეცვლის ბმულის მიღება" : "Get password reset link"} →</a>
           </section>
 
           {error && (
