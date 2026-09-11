@@ -117,8 +117,8 @@ function Style() {
       .ap {
         min-height: 100vh;
         overflow-x: hidden;
-        background: #ffffff;
-        color: #173652;
+        background: radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%), linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
+        color: #fff;
         font-family: Inter, Arial, sans-serif;
       }
       .ap, .ap * {
@@ -135,14 +135,14 @@ function Style() {
         justify-content: space-between;
       }
       .ap header small {
-        color: #71869a;
+        color: #bdddff;
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.8px;
       }
       .ap h1 {
         margin: 4px 0 0;
-        color: #0a4c8a;
+        color: #ffffff;
         font-size: 27px;
       }
       .ap header > a {
@@ -187,6 +187,7 @@ function Style() {
         position: relative;
         width: 100%;
         min-width: 0;
+        color: #173652;
         min-height: 79px;
         padding: 10px 38px 10px 10px;
         display: flex;
