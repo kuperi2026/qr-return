@@ -52,6 +52,7 @@ export default function SubscriptionsPage() {
   const [history, setHistory] = useState<ServiceRequest[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [appStep, setAppStep] = useState<1 | 2 | 3>(1);
 
   useEffect(() => { void (async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -100,7 +101,7 @@ export default function SubscriptionsPage() {
     finally { setSubmitting(false); }
   }
 
-  return <main className="subscriptionsPage">
+  return <main className="subscriptionsPage" data-app-step={appStep}>
     <header className="topbar">
       <Link href="/my-profiles" className="brand"><span>QR</span><div><strong>QR RETURN</strong><small>მფლობელის სივრცე</small></div></Link>
       <Link href="/my-profiles" className="back">← ჩემს პროფილებზე დაბრუნება</Link>
@@ -110,20 +111,31 @@ export default function SubscriptionsPage() {
       <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
       <div className="intro"><div><small>მომსახურება და პაკეტები</small><h1>გააგრძელეთ თქვენი QR პროფილის მომსახურება</h1><p>აირჩიეთ პროფილი და სასურველი ვადა. თანხა ჩამოიჭრება მხოლოდ მოთხოვნის დადასტურების შემდეგ.</p></div><div className="free"><b>2 თვე</b><span>უფასო პერიოდი</span></div></div>
 
+      <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
+        {([1, 2, 3] as const).map((step) => (
+          <button key={step} type="button" className={appStep === step ? "active" : appStep > step ? "done" : ""} onClick={() => setAppStep(step)}>
+            <span>{appStep > step ? "✓" : step}</span>
+            <b>{step === 1 ? "პროფილი" : step === 2 ? "ვადა" : "შეჯამება"}</b>
+          </button>
+        ))}
+      </nav>
+
       <div className="layout">
         <section className="panel">
-          <h2><span className="stepNumber">1</span> აირჩიეთ პროფილი</h2>
+          <div className="checkoutStage profileStage"><h2><span className="stepNumber">1</span> აირჩიეთ პროფილი</h2>
           {loading ? <div className="state">პროფილები იტვირთება...</div> : profiles.length ? <div className="profiles">{profiles.map((profile) => {
             const meta = PRODUCTS.find((item) => item.type === normalizeType(profile));
             const selected = selectedProfiles.includes(profile.id);
             return <button key={profile.id} className={selected ? "profile selected" : "profile"} onClick={() => toggleProfile(profile.id)}><span className="icon">{meta?.icon || "🏷️"}</span><span><b>{profile.item_name || meta?.name || "QR პროფილი"}</b><small>{meta?.name} · {profile.tag_code}</small></span><i>{selected ? "✓" : ""}</i></button>;
           })}</div> : <div className="state">ჯერ QR პროფილი არ გაქვს. <Link href="/register">პროფილის დამატება</Link></div>}
+          <button type="button" className="appNext" disabled={!selectedProfiles.length} onClick={() => setAppStep(2)}>ვადის არჩევა <span>→</span></button></div>
 
-          <h2><span className="stepNumber">2</span> აირჩიეთ მომსახურების ვადა</h2>
+          <div className="checkoutStage periodStage"><h2><span className="stepNumber">2</span> აირჩიეთ მომსახურების ვადა</h2>
           <div className="periods">{PERIODS.map((item) => { const sum = selectedItems.reduce((amount, profile) => amount + (PRODUCTS.find((p) => p.type === normalizeType(profile))?.prices[item.value] || 0), 0); return <button key={item.value} className={period === item.value ? "period active" : "period"} onClick={() => setPeriod(item.value)}><b>{item.label}</b><span>{selectedItems.length ? `${sum} ₾` : "—"}</span>{item.value === "12" && <em>საუკეთესო ფასი</em>}</button>; })}</div>
+          <div className="appStageActions"><button type="button" className="appPrevious" onClick={() => setAppStep(1)}>← უკან</button><button type="button" className="appNext" onClick={() => setAppStep(3)}>შეჯამება <span>→</span></button></div></div>
         </section>
 
-        <aside className="summary">
+        <aside className="summary checkoutStage summaryStage">
           <small>თქვენი არჩევანი</small><h2>{selectedItems.length ? `${selectedItems.length} არჩეული პროფილი` : "აირჩიეთ პროფილი"}</h2>
           {selectedItems.length > 0 && <div className="chosen">{selectedItems.map((profile) => { const meta = PRODUCTS.find((item) => item.type === normalizeType(profile)); return <div key={profile.id}><span>{meta?.icon} {profile.item_name || meta?.name}</span><b>{meta?.prices[period] || 0} ₾</b></div>; })}</div>}
           <div className="line"><span>არჩეული ვადა</span><b>{PERIODS.find((item) => item.value === period)?.label}</b></div>
@@ -135,6 +147,7 @@ export default function SubscriptionsPage() {
           {error && <div className="requestError">{error}</div>}
           <button disabled={!selectedItems.length || submitting} onClick={requestActivation}>{submitting ? "მოთხოვნა იგზავნება..." : "გააქტიურების მოთხოვნა"}</button>
           <p>მომსახურება ჩაირთვება QR RETURN-ის დადასტურების შემდეგ.</p>
+          <button type="button" className="appPrevious summaryPrevious" onClick={() => setAppStep(2)}>← ვადის შეცვლა</button>
         </aside>
       </div>
 
@@ -176,6 +189,7 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
+      .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious{display:none}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:9px;display:flex;gap:18px;border-top:1px solid #e3eaf2}.historyDates span{margin:0!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{flex-direction:column;gap:5px}}
 
       .stepNumber{width:27px;height:27px;margin-right:5px;display:inline-grid;place-items:center;border-radius:8px;background:#eaf3ff;color:#0966db;font-size:13px}.requestSuccess,.requestError{margin-top:14px;padding:11px 12px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.45}.requestSuccess{background:#e8f8f0;color:#087443}.requestError{background:#fff0f0;color:#b42318}
