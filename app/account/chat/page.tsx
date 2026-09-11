@@ -580,7 +580,7 @@ export default function OwnerChatInboxPage() {
                               ? "ახალი საუბარი"
                               : "New conversation")}
                         </p>
-                        <span className="threadReply">გახსნა და პასუხი →</span>
+                        <span className="threadReply" aria-hidden="true">›</span>
                       </div>
                     </button>
                   );
@@ -1088,7 +1088,7 @@ function Styles() {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .threadReply{display:inline-block;margin-top:7px;color:#e06f18;font-size:9px;font-weight:900}
+      .threadReply{position:absolute;right:12px;bottom:12px;width:29px;height:29px;display:grid;place-items:center;border:1px solid #cfe0f2;border-radius:10px;background:#fff;color:#1761bd;font-size:21px;font-weight:900;box-shadow:0 4px 10px rgba(23,63,109,.08)}
 
       .noThreads {
         padding: 70px 25px;
@@ -1390,7 +1390,7 @@ function Styles() {
         .threadList {
           max-height:none;
         }
-        .thread{min-height:104px;padding:14px}.threadReply{padding:5px 8px;border-radius:8px;background:#fff1e5;color:#b85a10}
+        .thread{position:relative;min-height:92px;padding:14px 50px 14px 14px}.threadReply{right:12px;bottom:12px}
 
         .messages {
           height: 420px;
