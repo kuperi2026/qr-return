@@ -32,6 +32,8 @@ export default function OwnerProfileEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -192,6 +194,19 @@ export default function OwnerProfileEditPage() {
     }
   }
 
+  async function sendPasswordReset() {
+    if (!owner?.email || resettingPassword) return;
+    setResettingPassword(true);
+    setPasswordMessage("");
+    setError("");
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(owner.email, {
+      redirectTo: `${window.location.origin}/app/reset-password`,
+    });
+    if (resetError) setError(resetError.message);
+    else setPasswordMessage(ka ? "პაროლის შეცვლის ბმული გამოგზავნილია ელფოსტაზე." : "A password reset link was sent to your email.");
+    setResettingPassword(false);
+  }
+
   if (loading) {
     return (
       <main className="statePage">
@@ -212,7 +227,7 @@ export default function OwnerProfileEditPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page ownerProfilePage">
       <header className="header">
         <a href="/account" className="brand">
           <div className="logo">QR</div>
@@ -442,6 +457,22 @@ export default function OwnerProfileEditPage() {
             <a href="/account/security">
               🔐 {ka ? "უსაფრთხოების მართვა" : "Manage security"} →
             </a>
+          </section>
+
+          <section className="card loginCard">
+            <div className="sectionTitle">
+              <span>02</span>
+              <h2>{ka ? "Login და პაროლი" : "Login and password"}</h2>
+            </div>
+            <div className="loginRows">
+              <div><small>{ka ? "Login ელფოსტა" : "Login email"}</small><strong>{owner.email}</strong></div>
+              <div><small>{ka ? "პაროლი" : "Password"}</small><strong>••••••••••</strong></div>
+            </div>
+            <p>{ka ? "უსაფრთხოების გამო არსებული პაროლი არ ინახება წაკითხვადი სახით. მისი შეცვლა შეგიძლიათ დაცული ბმულით." : "For security, your current password cannot be displayed. Change it using a secure email link."}</p>
+            <button type="button" onClick={sendPasswordReset} disabled={resettingPassword}>
+              {resettingPassword ? (ka ? "იგზავნება..." : "Sending...") : (ka ? "პაროლის შეცვლის ბმულის გაგზავნა" : "Send password reset link")}
+            </button>
+            {passwordMessage && <div className="passwordMessage">✓ {passwordMessage}</div>}
           </section>
 
           {error && (
@@ -822,6 +853,8 @@ export default function OwnerProfileEditPage() {
           font-size: 19px;
         }
 
+        .loginRows{display:grid;grid-template-columns:1fr 1fr;gap:10px}.loginRows>div{padding:13px;border:1px solid #dce6f0;border-radius:12px;background:#f7faff}.loginRows small,.loginRows strong{display:block}.loginRows small{color:#71869a;font-size:10px}.loginRows strong{margin-top:5px;overflow:hidden;color:#173652;font-size:13px;text-overflow:ellipsis;white-space:nowrap}.loginCard>p{color:#667085;font-size:10px;line-height:1.5}.loginCard>button{min-height:45px;padding:0 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#1465e8,#7655f7);color:#fff;font-size:11px;font-weight:900;cursor:pointer}.passwordMessage{margin-top:10px;padding:10px;border-radius:10px;background:#e8f8f0;color:#087443;font-size:10px;font-weight:850}
+
         .securityLinkCard p {
           margin: 0;
           color: #667085;
@@ -899,6 +932,10 @@ export default function OwnerProfileEditPage() {
 
         @media (max-width: 620px) {
           .twoColumns {
+            grid-template-columns: 1fr;
+          }
+
+          .loginRows {
             grid-template-columns: 1fr;
           }
 
