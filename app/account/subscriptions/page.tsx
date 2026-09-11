@@ -107,6 +107,7 @@ export default function SubscriptionsPage() {
     </header>
 
     <section className="shell">
+      <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
       <div className="intro"><div><small>მომსახურება და პაკეტები</small><h1>გააგრძელეთ თქვენი QR პროფილის მომსახურება</h1><p>აირჩიეთ პროფილი და სასურველი ვადა. თანხა ჩამოიჭრება მხოლოდ მოთხოვნის დადასტურების შემდეგ.</p></div><div className="free"><b>2 თვე</b><span>უფასო პერიოდი</span></div></div>
 
       <div className="layout">
