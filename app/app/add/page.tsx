@@ -41,29 +41,29 @@ function Base() {
     <style jsx global>{`
       .sub {
         min-height: 100vh;
-        background: #edf7ff;
+        background: radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%), linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
       .subw {
-        width: min(560px, 100%);
+        width: min(520px, 100%);
         margin: auto;
         padding: 24px 13px 94px;
       }
       .sub header small {
         color: #71869a;
-        font-size: 8px;
+        font-size: 11px;
         font-weight: 850;
         letter-spacing: 1px;
       }
       .sub h1 {
         margin: 5px 0 0;
-        font-size: 23px;
+        font-size: 27px;
       }
       .sub header p {
         margin: 8px 0 0;
         color: #708599;
-        font-size: 10px;
+        font-size: 13px;
         line-height: 1.5;
       }
       .typegrid {
@@ -73,8 +73,8 @@ function Base() {
         gap: 8px;
       }
       .typegrid a {
-        min-height: 82px;
-        padding: 13px;
+        min-height: 72px;
+        padding: 11px 12px;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -96,10 +96,16 @@ function Base() {
       }
       .typegrid b {
         flex: 1;
-        font-size: 10px;
+        font-size: 14px;
       }
       .typegrid em {
-        color: #1763c2;
+        width: 29px;
+        height: 29px;
+        display:grid;
+        place-items:center;
+        border-radius:9px;
+        background:#159b65;
+        color: #fff;
         font-size: 20px;
         font-style: normal;
       }
