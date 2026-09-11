@@ -1,4 +1,4 @@
-const CACHE = "kompasi-static-v3";
+const CACHE = "kompasi-static-v4";
 const STATIC_FILES = ["/app-icons/app-icon.svg", "/offline"];
 
 self.addEventListener("install", (event) => {
