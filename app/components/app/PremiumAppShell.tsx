@@ -13,7 +13,6 @@ type ChatAlert = {
 
 const NAV_ITEMS = [
   { href: "/app/dashboard", icon: "home", label: "მთავარი" },
-  { href: "/app/profiles", icon: "profiles", label: "პროფილები" },
   { href: "/app/products", icon: "plus", label: "ჰაბი", primary: true },
   { href: "/app/chat", icon: "chat", label: "ჩათი" },
   { href: "/app/account", icon: "user", label: "ანგარიში" },
@@ -161,12 +160,12 @@ export default function PremiumAppShell() {
       </nav>
       <style jsx global>{`
         body.kompasiAppMode{padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}
-        body.kompasiAppRegistration{overflow-x:hidden!important;background:#edf7ff!important}
+        body.kompasiAppRegistration{overflow-x:hidden!important;background:#063b72!important}
         body.kompasiAppRegistration *{min-width:0;box-sizing:border-box}
-        body.kompasiAppRegistration .page{width:100%!important;min-height:100vh!important;overflow-x:hidden!important;padding:0 12px 100px!important;background:radial-gradient(circle at 10% 0,rgba(71,157,235,.22),transparent 32%),linear-gradient(180deg,#eaf5ff 0%,#f7fbff 48%,#eef2f6 100%)!important}
-        body.kompasiAppRegistration .registrationPage{width:100%!important;min-height:100vh!important;overflow-x:hidden!important;padding:0 12px 100px!important;background:radial-gradient(circle at 10% 0,rgba(71,157,235,.22),transparent 32%),linear-gradient(180deg,#eaf5ff 0%,#f7fbff 48%,#eef2f6 100%)!important;color:#173652!important}
+        body.kompasiAppRegistration .page{width:100%!important;min-height:100vh!important;overflow-x:hidden!important;padding:0 12px 100px!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
+        body.kompasiAppRegistration .registrationPage{width:100%!important;min-height:100vh!important;overflow-x:hidden!important;padding:0 12px 100px!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important;color:#173652!important}
         body.kompasiAppRegistration .emojiBackground{display:none!important}
-        body.kompasiAppRegistration .topbar,body.kompasiAppRegistration .registrationHeader{width:min(520px,100%)!important;max-width:520px!important;height:60px!important;min-height:60px!important;margin:0 auto!important;padding:0 4px!important;border-bottom:1px solid #d6e3ef!important}
+        body.kompasiAppRegistration .topbar,body.kompasiAppRegistration .registrationHeader{width:min(520px,100%)!important;max-width:520px!important;height:60px!important;min-height:60px!important;margin:0 auto!important;padding:0 4px!important;border-bottom:1px solid rgba(255,255,255,.22)!important}
         body.kompasiAppRegistration .changeProduct{border:1px solid #c9daea!important;background:#fff!important;color:#1761bd!important;font-size:10px!important}
         body.kompasiAppRegistration .topbar .brandMark{width:36px!important;height:36px!important;border-radius:10px!important;font-size:12px!important}
         body.kompasiAppRegistration .topbar .brandText strong{color:#173652!important;font-size:12px!important}
@@ -195,13 +194,13 @@ export default function PremiumAppShell() {
         body.kompasiAppRegistration .actions button,body.kompasiAppRegistration .actions a,body.kompasiAppRegistration .primaryButton,body.kompasiAppRegistration .secondaryButton,body.kompasiAppRegistration .createButton{min-height:46px!important;border-radius:11px!important;font-size:11px!important}
         body.kompasiAppRegistration .actions button:last-child,body.kompasiAppRegistration .primaryButton,body.kompasiAppRegistration .createButton{border-color:#159b65!important;background:#159b65!important;color:#fff!important;box-shadow:0 7px 16px rgba(21,155,101,.2)!important}
         body.kompasiAppRegistration .progressRow{width:min(560px,100%)!important;margin-left:auto!important;margin-right:auto!important}
-        body.kompasiAppMode .subscriptionsPage{padding-bottom:100px!important;background:linear-gradient(180deg,#e9f4ff 0%,#f6faff 36%,#eef2f6 100%)!important;color:#173652!important}
+        body.kompasiAppMode .subscriptionsPage{padding-bottom:100px!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important;color:#173652!important}
         body.kompasiAppMode .subscriptionsPage .topbar{display:none!important}
         body.kompasiAppMode .subscriptionsPage .shell{width:min(520px,calc(100% - 20px))!important;margin:0 auto!important;padding-top:22px!important}
-        body.kompasiAppMode .subscriptionsPage .intro{padding:0 4px!important;display:block!important;color:#173652!important}
-        body.kompasiAppMode .subscriptionsPage .intro small{color:#1761bd!important;font-size:10px!important}
-        body.kompasiAppMode .subscriptionsPage .intro h1{margin-top:6px!important;color:#173652!important;font-size:24px!important;line-height:1.2!important}
-        body.kompasiAppMode .subscriptionsPage .intro p{color:#647b91!important;font-size:12px!important;line-height:1.5!important}
+        body.kompasiAppMode .subscriptionsPage .intro{padding:0 4px!important;display:block!important;color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .intro small{color:#bdddff!important;font-size:10px!important}
+        body.kompasiAppMode .subscriptionsPage .intro h1{margin-top:6px!important;color:#fff!important;font-size:24px!important;line-height:1.2!important}
+        body.kompasiAppMode .subscriptionsPage .intro p{color:#d7ecff!important;font-size:12px!important;line-height:1.5!important}
         body.kompasiAppMode .subscriptionsPage .free{width:100%!important;margin-top:13px!important;padding:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;border-radius:13px!important;background:linear-gradient(135deg,#075dcc,#159b65)!important}
         body.kompasiAppMode .subscriptionsPage .free b{font-size:22px!important}
         body.kompasiAppMode .subscriptionsPage .free span{margin:0!important;font-size:11px!important}
@@ -223,7 +222,7 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .historyList article{grid-template-columns:1fr auto!important}
         body.kompasiAppMode .subscriptionsPage .prices{display:none!important}
         @media(max-width:600px){body.kompasiAppRegistration .actions,body.kompasiAppRegistration .finalActions{display:grid!important;grid-template-columns:1fr!important}body.kompasiAppRegistration .choice{min-height:74px!important;padding:12px!important}}
-        .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
+        .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
         .appDock a{position:relative;min-width:0;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:13px;color:#728398;text-decoration:none;transition:160ms ease}.navIcon{width:21px;height:21px;display:grid;place-items:center}.navIcon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.appDock a small{max-width:100%;overflow:hidden;font-size:8px;font-weight:800;letter-spacing:.05px;text-overflow:ellipsis;white-space:nowrap}.appDock a.active{color:#075dce}.appDock a.active::after{content:"";position:absolute;bottom:1px;width:16px;height:2px;border-radius:999px;background:#176be5}.appDock a.primary{width:48px;height:48px;margin:0 auto;border-radius:15px;background:linear-gradient(145deg,#0c74ee,#3158d8 55%,#6549df);color:#fff;box-shadow:0 8px 19px rgba(32,87,210,.31)}.appDock a.primary .navIcon{width:22px;height:22px}.appDock a.primary small{color:#fff;font-size:7px}.appDock a.primary::after{display:none}.offlinePill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1100;padding:8px 13px;border:1px solid #f5d08c;border-radius:999px;background:#fff7e6;color:#925d06;box-shadow:0 9px 25px rgba(60,35,0,.16);font:800 11px/1.2 Arial,sans-serif;transform:translateX(-50%)}
         .notificationPill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1090;padding:9px 13px;border:1px solid #bcd4f3;border-radius:999px;background:#f6faff;color:#0b5dbc;box-shadow:0 9px 25px rgba(13,69,139,.14);font:800 10px/1.2 Arial,sans-serif;transform:translateX(-50%)}
         .offlinePill+.notificationPill{top:max(48px,calc(env(safe-area-inset-top) + 48px))}
