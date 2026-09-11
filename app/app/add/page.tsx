@@ -70,14 +70,17 @@ function Base() {
       .typegrid {
         margin-top: 17px;
         display: grid;
-        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 7px;
+        overflow: hidden;
       }
       .typegrid a {
         width: 100%;
         min-width: 0;
-        min-height: 62px;
-        padding: 8px 10px;
+        min-height: 58px;
+        padding: 7px 8px;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -89,34 +92,35 @@ function Base() {
         box-shadow: 0 6px 17px #173f6d0c;
       }
       .typegrid span {
-        width: 38px;
-        height: 38px;
+        width: 34px;
+        height: 34px;
         display: grid;
         place-items: center;
-        border-radius: 10px;
+        flex: 0 0 34px;
+        border-radius: 9px;
         background: #edf5ff;
-        font-size: 18px;
+        font-size: 17px;
       }
       .typegrid b {
+        min-width: 0;
         flex: 1;
         font-size: 14px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
       }
       .typegrid em {
-        width: 29px;
-        height: 29px;
+        width: 26px;
+        height: 26px;
         display:grid;
         place-items:center;
         border-radius:9px;
         background:#159b65;
         color: #fff;
-        font-size: 20px;
+        flex:0 0 26px;
+        font-size: 18px;
         font-style: normal;
       }
-      @media (max-width: 350px) {
-        .typegrid {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 330px) {.subw{padding-left:9px;padding-right:9px}.typegrid{gap:5px}.typegrid a{padding-left:6px;padding-right:6px}.typegrid b{font-size:12px}}
     `}</style>
   );
 }
