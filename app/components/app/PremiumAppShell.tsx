@@ -29,7 +29,8 @@ export default function PremiumAppShell() {
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
       Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
-    const preview = new URLSearchParams(window.location.search).get("app_preview") === "1";
+    const params = new URLSearchParams(window.location.search);
+    const preview = params.get("app_preview") === "1" || params.get("source") === "app";
     const savedApp = window.localStorage.getItem("kompasi-app-mode") === "1";
     setAppMode(standalone || preview || savedApp);
     setOnline(navigator.onLine);
