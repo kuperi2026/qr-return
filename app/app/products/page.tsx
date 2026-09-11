@@ -4,6 +4,8 @@ import Link from "next/link";
 const hub = [
   ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/app/add", "blue"],
   ["▤", "პროფილების მართვა", "უკვე შექმნილი პროფილების ნახვა და მართვა", "/app/profiles", "green"],
+  ["♧", "თანაადმინისტრატორი", "დაამატეთ სანდო პირი და მართეთ მისი უფლებები", "/account/admin?source=app", "violet"],
+  ["▣", "პროდუქტების მაღაზია", "QR სტიკერები, ბრელოკები, ბარათები და დამცავი აქსესუარები", "/app/store", "rose"],
   ["◇", "მომსახურება და პაკეტები", "მართეთ მომსახურების ვადა და პაკეტი", "/account/subscriptions?source=app", "gold"],
 ];
 export default function Products() {
@@ -11,8 +13,8 @@ export default function Products() {
     <main className="pc">
       <div className="pw">
         <header>
-          <small>KOMPASI</small>
-          <h1>აირჩიეთ სასურველი მოქმედება</h1>
+          <small>KOMPASI HUB</small>
+          <h1>თქვენი QR სივრცე</h1>
           <p>ყველაფერი, რაც თქვენი QR პროფილების სამართავად გჭირდებათ.</p>
         </header>
         <section>
@@ -83,7 +85,7 @@ export default function Products() {
           gap: 10px;
           border: 1px solid #d9e5f0;
           border-radius: 18px;
-          background: #fff;
+          background: linear-gradient(145deg,#fff,#f7fbff);
           color: #173652;
           text-decoration: none;
           box-shadow: 0 10px 25px rgba(23,63,109,.09);
@@ -123,7 +125,10 @@ export default function Products() {
           font-style: normal;
         }
         .pc section a.green i{background:#e6f8ef;color:#08784a}
+        .pc section a.violet i{background:#f0eaff;color:#6847c6}
+        .pc section a.rose i{background:#ffeaf2;color:#bd356b}
         .pc section a.gold i{background:#fff2db;color:#9a6100}
+        .pc section a:hover{border-color:#b9d8f8;transform:translateY(-1px);box-shadow:0 14px 30px rgba(4,42,91,.16)}
         @media (max-width: 380px) {
           .pc section {
             grid-template-columns: 1fr;
