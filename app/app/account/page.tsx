@@ -2,7 +2,7 @@
 import Link from "next/link";
 const Base = () => (
   <style jsx global>{`
-    .sub{min-height:100vh;background:#edf7ff;color:#173652;font-family:Inter,Arial,sans-serif}
+    .sub{min-height:100vh;background:#f4f7fb;color:#173652;font-family:Inter,Arial,sans-serif}
     .subw{width:min(560px,100%);margin:auto;padding:24px 13px 94px}
     .sub header small{color:#71869a;font-size:8px;font-weight:850;letter-spacing:1px}
     .sub h1{margin:5px 0 0;font-size:23px}
@@ -10,7 +10,6 @@ const Base = () => (
   `}</style>
 );
 const links = [
-  ["მომსახურება და პაკეტები", "ვადები და ტარიფები", "/account/subscriptions"],
   ["შეტყობინებები", "ბოლო აქტივობა", "/account/notifications"],
   ["პირადი ინფორმაცია", "ანგარიშის მონაცემები", "/account/profile"],
   ["უსაფრთხოება", "პაროლი და დაცვა", "/account/security"],
