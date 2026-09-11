@@ -46,10 +46,13 @@ function Base() {
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
+      .sub, .sub * {
+        box-sizing: border-box;
+      }
       .subw {
-        width: min(480px, 100%);
+        width: min(480px, calc(100% - 24px));
         margin: auto;
-        padding: 24px 13px 94px;
+        padding: 24px 0 94px;
       }
       .sub header small {
         color: #71869a;
