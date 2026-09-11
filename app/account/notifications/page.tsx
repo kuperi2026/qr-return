@@ -465,7 +465,7 @@ export default function AccountNotificationsPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page accountNotificationsPage">
       <header className="topbar">
         <Link
           href="/my-profiles"

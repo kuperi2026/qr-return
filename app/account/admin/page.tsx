@@ -273,7 +273,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page accountAdminPage">
       <header className="header">
         <div aria-hidden="true" />
 
