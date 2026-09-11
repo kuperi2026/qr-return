@@ -31,16 +31,20 @@ export default function Products() {
       <style jsx global>{`
         .pc {
           min-height: 100vh;
+          overflow-x: hidden;
           background:
             radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%),
             linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
           color: #173652;
           font-family: Inter, Arial, sans-serif;
         }
+        .pc, .pc * {
+          box-sizing: border-box;
+        }
         .pw {
-          width: min(560px, 100%);
+          width: min(480px, calc(100% - 24px));
           margin: auto;
-          padding: 25px 13px 94px;
+          padding: 25px 0 94px;
         }
         .pc header small {
           color: #1761bd;
@@ -62,11 +66,16 @@ export default function Products() {
         }
         .pc section {
           margin-top: 18px;
+          width: 100%;
+          max-width: 100%;
           display: grid;
           grid-template-columns: 1fr;
           gap: 8px;
+          overflow: hidden;
         }
         .pc section a {
+          width: 100%;
+          min-width: 0;
           min-height: 94px;
           padding: 16px;
           display: flex;
