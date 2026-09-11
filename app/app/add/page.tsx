@@ -41,12 +41,13 @@ function Base() {
     <style jsx global>{`
       .sub {
         min-height: 100vh;
+        overflow-x: hidden;
         background: radial-gradient(circle at 10% 0, rgba(71,157,235,.24), transparent 34%), linear-gradient(180deg,#eaf5ff 0%,#f7fbff 45%,#eef2f6 100%);
         color: #173652;
         font-family: Inter, Arial, sans-serif;
       }
       .subw {
-        width: min(520px, 100%);
+        width: min(480px, 100%);
         margin: auto;
         padding: 24px 13px 94px;
       }
@@ -69,30 +70,32 @@ function Base() {
       .typegrid {
         margin-top: 17px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        grid-template-columns: 1fr;
+        gap: 7px;
       }
       .typegrid a {
-        min-height: 72px;
-        padding: 11px 12px;
+        width: 100%;
+        min-width: 0;
+        min-height: 62px;
+        padding: 8px 10px;
         display: flex;
         align-items: center;
         gap: 10px;
         border: 1px solid #dce6f0;
-        border-radius: 16px;
+        border-radius: 13px;
         background: #fff;
         color: #173652;
         text-decoration: none;
         box-shadow: 0 6px 17px #173f6d0c;
       }
       .typegrid span {
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
         display: grid;
         place-items: center;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #edf5ff;
-        font-size: 20px;
+        font-size: 18px;
       }
       .typegrid b {
         flex: 1;
