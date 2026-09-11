@@ -14,7 +14,7 @@ type ChatAlert = {
 const NAV_ITEMS = [
   { href: "/app/dashboard", icon: "home", label: "მთავარი" },
   { href: "/app/profiles", icon: "profiles", label: "პროფილები" },
-  { href: "/app/products", icon: "plus", label: "პროდუქტები", primary: true },
+  { href: "/app/products", icon: "plus", label: "ჰაბი", primary: true },
   { href: "/app/chat", icon: "chat", label: "ჩათი" },
   { href: "/app/account", icon: "user", label: "ანგარიში" },
 ];
@@ -66,14 +66,13 @@ export default function PremiumAppShell() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || cancelled) return;
-      const [{ data: items }, { data: emergencyProfiles }] = await Promise.all([
-        supabase.from("item").select("id,tag_code,item_type,pet_type,item_name").eq("owner_id", user.id),
-        supabase.from("emergency_profiles").select("id,tag_code,first_name,last_name").eq("owner_id", user.id),
-      ]);
-      if (cancelled) return;
+      const { data: items } = await supabase
+        .from("item")
+        .select("id,tag_code,item_type,pet_type,item_name")
+        .eq("owner_id", user.id);
+      if (!items?.length || cancelled) return;
 
-      const ownedItems = new Map((items || []).map((item) => [item.id, item]));
-      const emergencyByTag = new Map((emergencyProfiles || []).map((profile) => [profile.tag_code, profile]));
+      const ownedItems = new Map(items.map((item) => [item.id, item]));
       channel
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
           const message = payload.new as {
@@ -103,26 +102,6 @@ export default function PremiumAppShell() {
               };
             } catch {
               // The in-app alert remains visible on mobile browsers that disallow this constructor.
-            }
-          }
-        })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_chat_messages" }, (payload) => {
-          const message = payload.new as { profile_type?: string; tag_code?: string; sender_type?: string; message?: string };
-          if (message.profile_type !== "emergency" || !message.tag_code || message.sender_type === "owner") return;
-          const profile = emergencyByTag.get(message.tag_code);
-          if (!profile) return;
-          const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Emergency პროფილი";
-          const title = `${name}: ახალი Emergency შეტყობინება`;
-          const body = message.message || "მპოვნელი Emergency ჩატში დაგიკავშირდათ.";
-          const href = `/app/live-chat/emergency/${encodeURIComponent(message.tag_code)}`;
-          setChatAlert({ title, message: body, href });
-          navigator.vibrate?.([220, 90, 220]);
-          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-            try {
-              const notification = new Notification(title, { body, icon: "/app-icons/app-icon.svg", tag: `emergency-chat-${message.tag_code}` });
-              notification.onclick = () => { window.focus(); window.location.assign(href); notification.close(); };
-            } catch {
-              // The in-app alert remains available when system notifications are unavailable.
             }
           }
         })
@@ -200,12 +179,23 @@ export default function PremiumAppShell() {
         body.kompasiAppRegistration .cardHeader p,body.kompasiAppRegistration .sectionHeader p{font-size:9px!important}
         body.kompasiAppRegistration .grid,body.kompasiAppRegistration .formGrid,body.kompasiAppRegistration .textareaGrid,body.kompasiAppRegistration .visibilityLayout,body.kompasiAppRegistration .choiceGrid,body.kompasiAppRegistration .relationshipGrid{grid-template-columns:1fr!important;gap:11px!important}
         body.kompasiAppRegistration .qrBox,body.kompasiAppRegistration .qrSection,body.kompasiAppRegistration .infoBox,body.kompasiAppRegistration .optionalBox{margin-top:14px!important;padding:13px!important;border-radius:12px!important}
-        body.kompasiAppRegistration input,body.kompasiAppRegistration select{min-height:44px!important;font-size:16px!important}
-        body.kompasiAppRegistration textarea{min-height:74px!important;font-size:16px!important}
-        body.kompasiAppRegistration label{font-size:10px!important}body.kompasiAppRegistration button,body.kompasiAppRegistration a,body.kompasiAppRegistration input,body.kompasiAppRegistration select,body.kompasiAppRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+        body.kompasiAppRegistration input,body.kompasiAppRegistration select{min-height:46px!important;font-size:13px!important}
+        body.kompasiAppRegistration textarea{min-height:90px!important;font-size:13px!important}
+        body.kompasiAppRegistration label{font-size:10px!important}
         body.kompasiAppRegistration .actions,body.kompasiAppRegistration .bottomBar,body.kompasiAppRegistration .finalActions{gap:8px!important}
         body.kompasiAppRegistration .actions button,body.kompasiAppRegistration .actions a,body.kompasiAppRegistration .primaryButton,body.kompasiAppRegistration .secondaryButton,body.kompasiAppRegistration .createButton{min-height:45px!important;border-radius:11px!important;font-size:10px!important}
         body.kompasiAppRegistration .progressRow{width:min(560px,100%)!important;margin-left:auto!important;margin-right:auto!important}
+        body.kompasiAppMode .subscriptionsPage{padding-bottom:94px!important}
+        body.kompasiAppMode .subscriptionsPage .topbar{width:min(560px,100%)!important;min-height:62px!important;padding:0 13px!important}
+        body.kompasiAppMode .subscriptionsPage .shell{width:min(560px,calc(100% - 20px))!important;margin:16px auto 0!important}
+        body.kompasiAppMode .subscriptionsPage .intro{padding:0 3px!important;display:block!important}
+        body.kompasiAppMode .subscriptionsPage .intro h1{font-size:22px!important}
+        body.kompasiAppMode .subscriptionsPage .intro p{font-size:11px!important}
+        body.kompasiAppMode .subscriptionsPage .free{width:100%!important;margin-top:12px!important;padding:11px!important}
+        body.kompasiAppMode .subscriptionsPage .layout{grid-template-columns:1fr!important;margin-top:12px!important;padding:10px!important}
+        body.kompasiAppMode .subscriptionsPage .profiles{grid-template-columns:1fr!important}
+        body.kompasiAppMode .subscriptionsPage .summary{position:static!important;padding:16px 13px!important}
+        body.kompasiAppMode .subscriptionsPage .prices{padding:16px 0!important}
         @media(max-width:600px){body.kompasiAppRegistration .actions,body.kompasiAppRegistration .finalActions{display:grid!important;grid-template-columns:1fr!important}body.kompasiAppRegistration .choice{min-height:74px!important;padding:12px!important}}
         .appDock{position:fixed;left:50%;bottom:max(7px,env(safe-area-inset-bottom));z-index:990;width:min(480px,calc(100% - 16px));height:62px;padding:5px 8px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(250,253,255,.93);box-shadow:0 14px 38px rgba(2,28,70,.24),inset 0 1px 0 #fff;backdrop-filter:blur(22px) saturate(145%);transform:translateX(-50%)}
         .appDock a{position:relative;min-width:0;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:13px;color:#728398;text-decoration:none;transition:160ms ease}.navIcon{width:21px;height:21px;display:grid;place-items:center}.navIcon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.appDock a small{max-width:100%;overflow:hidden;font-size:8px;font-weight:800;letter-spacing:.05px;text-overflow:ellipsis;white-space:nowrap}.appDock a.active{color:#075dce}.appDock a.active::after{content:"";position:absolute;bottom:1px;width:16px;height:2px;border-radius:999px;background:#176be5}.appDock a.primary{width:48px;height:48px;margin:0 auto;border-radius:15px;background:linear-gradient(145deg,#0c74ee,#3158d8 55%,#6549df);color:#fff;box-shadow:0 8px 19px rgba(32,87,210,.31)}.appDock a.primary .navIcon{width:22px;height:22px}.appDock a.primary small{color:#fff;font-size:7px}.appDock a.primary::after{display:none}.offlinePill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1100;padding:8px 13px;border:1px solid #f5d08c;border-radius:999px;background:#fff7e6;color:#925d06;box-shadow:0 9px 25px rgba(60,35,0,.16);font:800 11px/1.2 Arial,sans-serif;transform:translateX(-50%)}
