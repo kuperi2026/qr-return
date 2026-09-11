@@ -14,16 +14,8 @@ type Profile = {
   active: boolean | null;
   lost: boolean | null;
   scan_count: number | null;
-  href: string;
-  emergency?: boolean;
 };
-const category = (p: Profile) => p.item_type === "pet" && p.pet_type ? p.pet_type : p.item_type || p.pet_type || "item";
-const labels: Record<string, string> = { dog: "ძაღლი", cat: "კატა", parking: "ავტომობილი / Parking", suitcase: "ჩემოდანი", luggage: "ჩემოდანი", keys: "გასაღები", wallet: "საფულე", bag: "ჩანთა", emergency: "Emergency" };
-const label = (p: Profile) => labels[category(p)] || "QR პროფილი";
-const icons: Record<string, string> = {
-  dog: "🐕", cat: "🐈", parking: "🚘", suitcase: "🧳", luggage: "🧳",
-  keys: "🔑", wallet: "👛", bag: "👜", emergency: "✚",
-};
+const label = (p: Profile) => p.item_type || p.pet_type || "QR პროფილი";
 
 export default function AppProfiles() {
   const router = useRouter();
@@ -46,39 +38,13 @@ export default function AppProfiles() {
         router.replace("/login?source=app");
         return;
       }
-      const [{ data: products }, { data: emergencyProfiles }] = await Promise.all([
-        sb.from("item")
-          .select("id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count")
-          .eq("owner_id", user.id),
-        sb.from("emergency_profiles")
-          .select("id,tag_code,first_name,last_name,photo_url,active,missing_mode")
-          .eq("owner_id", user.id),
-      ]);
-      const regular = ((products || []) as Omit<Profile, "href">[]).map((profile) => ({
-        ...profile,
-        href: "/app/product/" + profile.tag_code,
-      }));
-      const emergency = ((emergencyProfiles || []) as Array<{
-        id: string; tag_code: string | null; first_name: string | null; last_name: string | null;
-        photo_url: string | null; active: boolean | null; missing_mode: boolean | null;
-      }>).map((profile): Profile => ({
-        id: profile.id,
-        tag_code: profile.tag_code,
-        item_type: "emergency",
-        pet_type: null,
-        item_name: [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Emergency პროფილი",
-        photo: profile.photo_url,
-        active: profile.active,
-        lost: profile.missing_mode,
-        scan_count: null,
-        href: "/app/emergency/" + profile.id,
-        emergency: true,
-      }));
-      const emergencyCodes = new Set(emergency.map((profile) => profile.tag_code?.trim().toUpperCase()).filter(Boolean));
-      const uniqueRegular = regular.filter((profile) =>
-        profile.item_type !== "emergency" || !emergencyCodes.has(profile.tag_code?.trim().toUpperCase()),
-      );
-      setItems([...uniqueRegular, ...emergency]);
+      const { data } = await sb
+        .from("item")
+        .select(
+          "id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count",
+        )
+        .eq("owner_id", user.id);
+      setItems((data || []) as Profile[]);
       setLoading(false);
     })();
   }, [router]);
@@ -95,7 +61,7 @@ export default function AppProfiles() {
             <small>მფლობელის სივრცე</small>
             <h1>QR პროფილები</h1>
           </div>
-          <Link href="/app/products">＋</Link>
+          <Link href="/app/add" aria-label="ახალი პროფილის რეგისტრაცია">＋</Link>
         </header>
         <div className="search">
           ⌕
@@ -120,7 +86,7 @@ export default function AppProfiles() {
                   {p.photo ? (
                     <img src={p.photo} alt="" />
                   ) : (
-                    <span>{icons[category(p)] || "⌁"}</span>
+                    <span>{label(p).includes("dog") ? "🐕" : "⌁"}</span>
                   )}
                 </div>
                 <div className="info">
@@ -133,7 +99,7 @@ export default function AppProfiles() {
                 <div className={p.lost ? "lost" : "active"}>
                   {p.lost ? "დაკარგულია" : "აქტიური"}
                 </div>
-                <Link className="open" href={p.href}>
+                <Link className="open" href={"/app/product/" + p.tag_code}>
                   ›
                 </Link>
               </article>
@@ -150,13 +116,12 @@ function Style() {
     <style jsx global>{`
       .ap {
         min-height: 100vh;
-        overflow-x: hidden;
-        background: #edf7ff;
+        background: #f4f7fb;
         color: #173652;
-        font-family: "Noto Sans Georgian", "Sylfaen", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        font-family: Inter, Arial, sans-serif;
       }
       .aw {
-        width: min(500px, 100%);
+        width: min(560px, 100%);
         margin: auto;
         padding: 22px 13px 94px;
       }
@@ -167,7 +132,7 @@ function Style() {
       }
       .ap header small {
         color: #71869a;
-        font-size: 11px;
+        font-size: 8px;
         font-weight: 800;
         letter-spacing: 0.8px;
       }
@@ -203,7 +168,7 @@ function Style() {
         border: 0;
         outline: 0;
         background: transparent;
-        font-size: 14px;
+        font-size: 11px;
       }
       .ap section {
         margin-top: 11px;
@@ -212,8 +177,8 @@ function Style() {
       }
       .ap article {
         position: relative;
-        min-height: 76px;
-        padding: 10px 46px 10px 10px;
+        min-height: 79px;
+        padding: 10px 38px 10px 10px;
         display: flex;
         align-items: center;
         gap: 11px;
@@ -222,82 +187,72 @@ function Style() {
         background: #fff;
         box-shadow: 0 6px 18px #173f6d0d;
       }
-      .ap .photo {
-        width: 48px;
-        height: 48px;
+      .photo {
+        width: 53px;
+        height: 53px;
         display: grid;
         place-items: center;
-        flex: 0 0 48px;
+        flex: 0 0 53px;
         overflow: hidden;
         border-radius: 13px;
         background: #edf4fc;
         font-size: 22px;
       }
-      .ap .photo img {
+      .photo img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
-      .ap .info {
+      .info {
         min-width: 0;
         flex: 1;
       }
-      .ap .info small,
-      .ap .info b,
-      .ap .info span {
+      .info small,
+      .info b,
+      .info span {
         display: block;
       }
-      .ap .info small {
+      .info small {
         color: #71869a;
-        font-size: 11px;
+        font-size: 8px;
       }
-      .ap .info b {
+      .info b {
         margin-top: 3px;
         overflow: hidden;
-        font-size: 15px;
-        line-height: 1.3;
+        font-size: 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .ap .info span {
+      .info span {
         margin-top: 5px;
         color: #7b8fa2;
-        font-size: 11px;
-        line-height: 1.35;
+        font-size: 8px;
       }
-      .ap article > .active,
-      .ap article > .lost {
+      .active,
+      .lost {
         position: absolute;
         right: 34px;
-        top: 6px;
+        top: 10px;
         padding: 4px 6px;
         border-radius: 999px;
-        font-size: 9px;
+        font-size: 7px;
         font-weight: 850;
       }
-      .ap article > .active {
+      .active {
         background: #e6f8ef;
         color: #08784a;
       }
-      .ap article > .lost {
+      .lost {
         background: #fff0f0;
         color: #bd3434;
       }
-      .ap .open {
+      .open {
         position: absolute;
-        right: 9px;
-        top: 50%;
-        width: 28px;
-        height: 28px;
-        display: grid;
-        place-items: center;
-        border-radius: 9px;
-        background: #19a66a;
-        color: #ffffff;
+        right: 12px;
+        bottom: 16px;
+        color: #1761bd;
         text-decoration: none;
-        font-size: 18px;
-        line-height: 1;
-        transform: translateY(-50%);
+        font-size: 24px;
       }
       .empty {
         margin-top: 25px;
