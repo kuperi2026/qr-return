@@ -61,6 +61,8 @@ export default function LoginPage() {
     setNextPath,
   ] = useState("/account");
 
+  const [appMode, setAppMode] = useState(false);
+
   /*
    * აქ ვკითხულობთ URL პარამეტრებს
    * useSearchParams-ის გარეშე.
@@ -106,6 +108,7 @@ export default function LoginPage() {
 
     if (appSource) {
       window.localStorage.setItem("kompasi-app-mode", "1");
+      setAppMode(true);
       setNextPath("/app/dashboard");
     } else if (
       requestedNext &&
@@ -239,7 +242,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <main className="page">
+      <main className={`page ${appMode ? "appAuth" : ""}`}>
         <div
           className="decor decorOne"
           aria-hidden="true"
@@ -256,7 +259,7 @@ export default function LoginPage() {
 
         <header className="header">
           <a
-            href="/"
+            href={appMode ? "/app" : "/"}
             className="brand"
           >
             <span className="brandIcon">
@@ -320,7 +323,7 @@ export default function LoginPage() {
                   </label>
 
                   <a
-                    href="/forgot-password"
+                    href={appMode ? "/forgot-password?source=app" : "/forgot-password"}
                     className="forgot"
                   >
                     დაგავიწყდათ პაროლი?
@@ -398,7 +401,7 @@ export default function LoginPage() {
                 არ გაქვთ ანგარიში?
               </span>
 
-              <a href="/signup">
+              <a href={appMode ? "/signup?source=app" : "/signup"}>
                 რეგისტრაცია
               </a>
             </div>
@@ -821,6 +824,27 @@ export default function LoginPage() {
 
           text-decoration: none;
         }
+
+        .page.appAuth {
+          padding: 0 12px 28px;
+          overflow-x: hidden;
+          background:
+            radial-gradient(circle at 18% 3%, rgba(83, 185, 255, .45), transparent 29%),
+            linear-gradient(165deg, #0b579b 0%, #073f78 50%, #052d59 100%);
+        }
+
+        .appAuth .decor { display: none; }
+        .appAuth .header { width: min(480px, 100%); height: 72px; justify-content: center; }
+        .appAuth .brand { transform: none; }
+        .appAuth .brandIcon { width: 38px; height: 38px; border-radius: 12px; }
+        .appAuth .brandMessage { max-width: 245px; font-size: 12px; line-height: 1.35; }
+        .appAuth .center { min-height: calc(100vh - 72px); padding: 18px 0 32px; align-items: start; }
+        .appAuth .card { max-width: 480px; padding: 24px 18px 20px; border: 1px solid rgba(255,255,255,.8); border-radius: 21px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
+        .appAuth h1 { font-size: 23px; text-align: center; }
+        .appAuth .field { margin-top: 17px; }
+        .appAuth input { height: 50px; border-radius: 12px; font-size: 16px; }
+        .appAuth .submit { height: 50px; border-radius: 12px; background: linear-gradient(120deg,#0b74e5,#13a66b); }
+        .appAuth .signup { font-size: 12px; }
 
         @media (max-width: 520px) {
           .brandMessage {

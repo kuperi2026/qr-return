@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabase() {
@@ -19,9 +19,8 @@ function getSupabase() {
 }
 
 function getSafeNextPath() {
-  const requested = new URLSearchParams(
-    window.location.search
-  ).get("next");
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("next");
 
   if (
     requested?.startsWith("/") &&
@@ -30,7 +29,7 @@ function getSafeNextPath() {
     return requested;
   }
 
-  return "/register";
+  return params.get("source") === "app" ? "/app/products" : "/register";
 }
 
 export default function SignupPage() {
@@ -48,6 +47,13 @@ export default function SignupPage() {
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [appMode, setAppMode] = useState(false);
+
+  useEffect(() => {
+    const isApp = new URLSearchParams(window.location.search).get("source") === "app";
+    setAppMode(isApp);
+    if (isApp) window.localStorage.setItem("kompasi-app-mode", "1");
+  }, []);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -184,7 +190,7 @@ export default function SignupPage() {
       window.location.assign(
         `/login?registered=1&email=${encodeURIComponent(
           cleanEmail
-        )}&next=${encodeURIComponent(getSafeNextPath())}`
+        )}&next=${encodeURIComponent(getSafeNextPath())}${appMode ? "&source=app" : ""}`
       );
     } catch (error) {
       console.error(
@@ -221,7 +227,7 @@ export default function SignupPage() {
 
   return (
     <>
-      <main className="page">
+      <main className={`page ${appMode ? "appAuth" : ""}`}>
         <div className="decor decor1">
           QR
         </div>
@@ -235,7 +241,7 @@ export default function SignupPage() {
         </div>
 
         <header className="header">
-          <a href="/" className="brand">
+          <a href={appMode ? "/app" : "/"} className="brand">
             <span className="brandIcon">
               QR
             </span>
@@ -252,7 +258,7 @@ export default function SignupPage() {
           </a>
 
           <a
-            href="/login"
+            href={appMode ? "/login?source=app" : "/login"}
             className="loginButton"
           >
             შესვლა
@@ -504,7 +510,7 @@ export default function SignupPage() {
             <div className="bottom">
               უკვე გაქვთ ანგარიში?
 
-              <a href="/login">
+              <a href={appMode ? "/login?source=app" : "/login"}>
                 შესვლა
               </a>
             </div>
@@ -1054,6 +1060,31 @@ export default function SignupPage() {
           font-weight: 850;
           text-decoration: none;
         }
+
+        .page.appAuth {
+          padding: 0 12px 30px;
+          overflow-x: hidden;
+          background:
+            radial-gradient(circle at 18% 3%, rgba(83, 185, 255, .45), transparent 29%),
+            linear-gradient(165deg, #0b579b 0%, #073f78 50%, #052d59 100%);
+        }
+
+        .appAuth .decor { display: none; }
+        .appAuth .header { width: min(480px, 100%); height: 70px; }
+        .appAuth .brandIcon { width: 38px; height: 38px; border-radius: 12px; }
+        .appAuth .brand strong { font-size: 15px; }
+        .appAuth .loginButton { min-width: 72px; height: 37px; border-radius: 11px; font-size: 11px; }
+        .appAuth .layout { width: min(480px, 100%); padding-top: 16px; display: block; }
+        .appAuth .intro { display: none; }
+        .appAuth .card { width: 100%; max-width: 480px; padding: 22px 17px 19px; border: 1px solid rgba(255,255,255,.82); border-radius: 21px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
+        .appAuth .cardHeader { margin-bottom: 17px; text-align: center; }
+        .appAuth .cardHeader h2 { font-size: 21px; }
+        .appAuth .cardHeader p { font-size: 11px; }
+        .appAuth .grid { grid-template-columns: 1fr; gap: 13px; }
+        .appAuth .field.full { grid-column: auto; }
+        .appAuth .field input, .appAuth .passwordField input { height: 50px !important; min-height: 50px !important; max-height: 50px !important; border-radius: 12px; font-size: 16px !important; }
+        .appAuth .submit { height: 51px; border-radius: 12px; background: linear-gradient(120deg,#0b74e5,#13a66b); box-shadow: 0 9px 20px rgba(4,70,117,.24); }
+        .appAuth .bottom { font-size: 12px; }
 
         /* MOBILE */
 
