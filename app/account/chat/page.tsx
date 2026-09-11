@@ -52,7 +52,7 @@ export default function OwnerChatInboxPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
-  const [conversationView, setConversationView] = useState<"active" | "history">("active");
+  const [conversationView, setConversationView] = useState<"all" | "recent">("all");
   const [selected, setSelected] = useState<ChatThread | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -89,6 +89,22 @@ export default function OwnerChatInboxPage() {
     return () => {
       window.clearInterval(timer);
     };
+  }, [selected]);
+
+  useEffect(() => {
+    if (!selected) return;
+    const channel = supabase
+      .channel(`owner-thread-${selected.profile_id}-${selected.finder_session}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages", filter: `item_id=eq.${selected.profile_id}` },
+        () => {
+          void loadMessages(selected, true);
+          void loadThreads();
+        }
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }, [selected]);
 
   useEffect(() => {
@@ -396,10 +412,9 @@ export default function OwnerChatInboxPage() {
 
   const visibleThreads = useMemo(() => {
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    return threads.filter((thread) => {
-      const recent = !thread.last_message_at || new Date(thread.last_message_at).getTime() >= cutoff;
-      return conversationView === "active" ? recent : !recent;
-    });
+    return conversationView === "all"
+      ? threads
+      : threads.filter((thread) => !thread.last_message_at || new Date(thread.last_message_at).getTime() >= cutoff);
   }, [threads, conversationView]);
 
   if (loading) {
@@ -500,8 +515,8 @@ export default function OwnerChatInboxPage() {
             </div>
 
             <div className="conversationTabs">
-              <button type="button" className={conversationView === "active" ? "active" : ""} onClick={() => setConversationView("active")}>აქტიური</button>
-              <button type="button" className={conversationView === "history" ? "active" : ""} onClick={() => setConversationView("history")}>ისტორია</button>
+              <button type="button" className={conversationView === "all" ? "active" : ""} onClick={() => setConversationView("all")}>ყველა</button>
+              <button type="button" className={conversationView === "recent" ? "active" : ""} onClick={() => setConversationView("recent")}>ბოლო 30 დღე</button>
             </div>
 
             {visibleThreads.length === 0 ? (
@@ -702,74 +717,41 @@ export default function OwnerChatInboxPage() {
                   className="composer"
                   onSubmit={sendMessage}
                 >
-                  <div className="emojiWrap">
-                    <button type="button" className="emojiButton" aria-label="სმაილების არჩევა" aria-expanded={showEmojis} onClick={() => setShowEmojis((value) => !value)}>😊</button>
-                    {showEmojis && (
-                      <div className="emojiPicker">
-                        {CHAT_EMOJIS.map((emoji) => (
-                          <button key={emoji} type="button" onClick={() => setText((value) => `${value}${emoji}`)}>{emoji}</button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="composerTools">
+                    <div className="emojiWrap">
+                      <button type="button" className="emojiButton" aria-label="სმაილების არჩევა" aria-expanded={showEmojis} onClick={() => setShowEmojis((value) => !value)}>😊</button>
+                      {showEmojis && (
+                        <div className="emojiPicker">
+                          {CHAT_EMOJIS.map((emoji) => (
+                            <button key={emoji} type="button" onClick={() => setText((value) => `${value}${emoji}`)}>{emoji}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <ChatMediaButtons tagCode={selected.tag_code} sessionId={selected.finder_session} disabled={sending} onSend={sendPayload} onError={setError} />
+                    <button type="button" className="locationButton" onClick={() => void shareOwnerLocation()} disabled={locationSending || sending} aria-label="ლოკაციის გაზიარება">
+                      {locationSending ? "…" : "📍"}
+                    </button>
                   </div>
 
-                  <ChatMediaButtons tagCode={selected.tag_code} sessionId={selected.finder_session} disabled={sending} onSend={sendPayload} onError={setError} />
-
-                  <textarea
-                    value={text}
-                    onChange={(event) =>
-                      setText(event.target.value)
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        event.currentTarget.form?.requestSubmit();
-                      }
-                    }}
-                    maxLength={2000}
-                    disabled={sending}
-                    placeholder={
-                      ka
-                        ? "მიწერეთ მპოვნელს..."
-                        : "Reply to the finder..."
-                    }
-                  />
-
-                  <button
-                    type="button"
-                    className="locationButton"
-                    onClick={() =>
-                      void shareOwnerLocation()
-                    }
-                    disabled={
-                      locationSending ||
-                      sending
-                    }
-                  >
-                    {locationSending
-                      ? ka
-                        ? "GPS მუშავდება..."
-                        : "Getting GPS..."
-                      : ka
-                      ? "📍 ლოკაცია"
-                      : "📍 Location"}
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={
-                      sending ||
-                      !text.trim()
-                    }
-                  >
-                    {sending
-                      ? ka
-                        ? "იგზავნება..."
-                        : "Sending..."
-                      : ka
-                      ? "გაგზავნა"
-                      : "Send"}
-                  </button>
+                  <div className="composerInputRow">
+                    <textarea
+                      value={text}
+                      onChange={(event) => setText(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          event.currentTarget.form?.requestSubmit();
+                        }
+                      }}
+                      maxLength={2000}
+                      disabled={sending}
+                      placeholder={ka ? "მიწერეთ მპოვნელს..." : "Reply to the finder..."}
+                    />
+                    <button className="sendButton" type="submit" disabled={sending || !text.trim()} aria-label="შეტყობინების გაგზავნა">
+                      {sending ? "…" : "➤"}
+                    </button>
+                  </div>
                 </form>
               </>
             )}
@@ -1313,11 +1295,13 @@ function Styles() {
       .composer {
         position: relative;
         padding: 13px 17px;
-        display: flex;
-        align-items: flex-end;
+        display: grid;
         gap: 9px;
         border-top: 1px solid #e4e7ec;
+        background:linear-gradient(145deg,#fff,#f5f9ff);
       }
+
+      .composerTools{display:flex;align-items:center;gap:8px}.composerInputRow{display:flex;align-items:flex-end;gap:9px}
 
       .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton,.composer .mediaButton{width:46px;min-height:46px;padding:0;border:1px solid #cbdcf7;background:#eef4ff;color:#1266e9;font-size:24px}.emojiPicker{position:absolute;left:0;bottom:54px;z-index:20;width:336px;max-width:calc(100vw - 40px);max-height:260px;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:7px;border:1px solid #d8e2ef;border-radius:16px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:38px;padding:0;border:0;background:transparent;color:inherit;font-size:25px}.chatMediaInput{display:none}.composer .mediaButton.recording{background:#fee4e2;color:#d92d20;animation:pulse 1s infinite}.chatMediaImage{display:block;max-width:min(300px,65vw);max-height:320px;border-radius:12px;object-fit:cover}.chatMediaAudio{width:min(290px,65vw);height:40px}.chatMediaLink{display:block}@keyframes pulse{50%{opacity:.55}}
 
@@ -1350,10 +1334,14 @@ function Styles() {
       }
 
       .composer .locationButton {
+        width:46px;
+        min-height:46px;
+        padding:0;
         border: 1px solid #cbdcf7;
         background: #eef4ff;
         color: #1266e9;
       }
+      .composer .sendButton{width:50px;min-height:50px;padding:0;flex:0 0 50px;border-radius:14px;background:linear-gradient(135deg,#0b74e5,#13a66b);font-size:20px;box-shadow:0 8px 18px rgba(4,70,117,.22)}
 
       .composer button:disabled {
         opacity: 0.5;
@@ -1431,18 +1419,16 @@ function Styles() {
 
         .composer {
           padding: 10px;
-          align-items: stretch;
-          flex-direction: column;
+          gap:8px;
         }
 
-        .composer button {
-          width: 100%;
-        }
+        .composerTools{width:100%;overflow:visible}.composerInputRow{width:100%}.composerInputRow textarea{min-width:0;min-height:52px}.composer .sendButton{width:50px}
 
         .bubble {
           max-width: 88%;
         }
       }
+      @media (orientation:landscape) and (max-height:560px){.ownerChatPage .operatorCard{display:none}.ownerChatPage .container{padding-top:12px!important}.ownerChatPage .pageTitle{margin-bottom:10px}.ownerChatPage .messages{height:230px}.composer{grid-template-columns:auto minmax(0,1fr);align-items:end}.composerTools{align-self:end}.composerInputRow{min-width:0}}
     `}</style>
   );
 }

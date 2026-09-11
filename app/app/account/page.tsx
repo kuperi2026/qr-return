@@ -10,10 +10,8 @@ const Base = () => (
   `}</style>
 );
 const links = [
-  ["♢", "შეტყობინებები", "ბოლო აქტივობა", "/account/notifications?source=app", "blue"],
   ["◉", "პირადი ინფორმაცია", "Login, პაროლი და ანგარიშის მონაცემები", "/account/profile?source=app", "violet"],
   ["⌾", "უსაფრთხოება", "პაროლი, კოდური სიტყვა და დაცვა", "/account/security?source=app", "green"],
-  ["♧", "თანაადმინისტრატორი", "წვდომები და უფლებები", "/account/admin?source=app", "gold"],
 ];
 export default function Account() {
   return (
