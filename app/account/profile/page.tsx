@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import PlansMenu from "@/app/components/home/PlansMenu";
 
@@ -29,6 +29,7 @@ export default function OwnerProfileEditPage() {
 
   const [photo, setPhoto] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -303,18 +304,19 @@ export default function OwnerProfileEditPage() {
         </div>
 
         <form onSubmit={saveOwner}>
-          <section className="card">
+          <section className="card ownerIdentityCard">
             <div className="profileTop">
-              <div className="photoWrap">
-                {photo ? (
+              <button type="button" className="photoWrap" onClick={() => photoInputRef.current?.click()} aria-label={ka ? "პროფილის ფოტოს შეცვლა" : "Change profile photo"}>
+                {photoFile || photo ? (
                   <img
-                    src={photo}
+                    src={photoFile ? URL.createObjectURL(photoFile) : photo}
                     alt={`${firstName} ${lastName}`}
                   />
                 ) : (
                   <div className="photoPlaceholder">👤</div>
                 )}
-              </div>
+                <span className="photoEdit">＋</span>
+              </button>
 
               <div>
                 <span className="eyebrow">
@@ -326,22 +328,10 @@ export default function OwnerProfileEditPage() {
                 </h2>
 
                 <p>{owner.email}</p>
+                <button type="button" className="changePhoto" onClick={() => photoInputRef.current?.click()}>{photoFile ? (ka ? "ახალი ფოტო არჩეულია" : "New photo selected") : (ka ? "ფოტოს შეცვლა" : "Change photo")}</button>
               </div>
             </div>
-
-            <label>
-              <span>
-                {ka ? "პროფილის ფოტო" : "Profile photo"}
-              </span>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setPhotoFile(e.target.files?.[0] ?? null)
-                }
-              />
-            </label>
+            <input ref={photoInputRef} className="hiddenPhotoInput" type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} />
           </section>
 
           <section className="card">
@@ -728,6 +718,10 @@ export default function OwnerProfileEditPage() {
           box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
         }
 
+        .ownerIdentityCard{position:relative;overflow:hidden;border:0;background:linear-gradient(135deg,#073f91 0%,#0b6fd1 64%,#079a75 100%);color:#fff;box-shadow:0 18px 42px rgba(5,61,125,.22)}
+        .ownerIdentityCard:after{content:"";position:absolute;right:-55px;top:-72px;width:180px;height:180px;border:28px solid rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
+        .ownerIdentityCard .eyebrow{color:#cfe9ff}.ownerIdentityCard .profileTop h2{color:#fff}.ownerIdentityCard .profileTop p{color:#dceeff;font-size:12px}.hiddenPhotoInput{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}.changePhoto{margin-top:10px;padding:7px 10px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:rgba(255,255,255,.13);color:#fff;font-size:10px;font-weight:900;cursor:pointer}
+
         .profileTop {
           display: flex;
           align-items: center;
@@ -740,7 +734,15 @@ export default function OwnerProfileEditPage() {
           flex: 0 0 82px;
           overflow: hidden;
           border-radius: 20px;
+          position:relative;
+          padding:0;
+          border:3px solid rgba(255,255,255,.8);
+          background:#eaf4ff;
+          cursor:pointer;
+          box-shadow:0 9px 24px rgba(0,28,68,.22);
         }
+
+        .photoEdit{position:absolute;right:3px;bottom:3px;width:25px;height:25px;display:grid;place-items:center;border:2px solid #fff;border-radius:50%;background:#ff7a4d;color:#fff;font-size:16px;font-weight:900}
 
         .photoWrap img,
         .photoPlaceholder {

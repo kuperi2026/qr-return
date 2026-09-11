@@ -65,6 +65,10 @@ export default function OwnerChatInboxPage() {
   const [sending, setSending] = useState(false);
   const [locationSending, setLocationSending] =
     useState(false);
+  const [automationOpen, setAutomationOpen] = useState(false);
+  const [automationEnabled, setAutomationEnabled] = useState(false);
+  const [automationMessage, setAutomationMessage] = useState("მოგესალმებით! ახლა შეიძლება მაშინვე ვერ გიპასუხოთ. გთხოვთ, მოკლედ მომწეროთ რა იპოვეთ და სად — პასუხს მალე დაგიბრუნებთ.");
+  const [automationSaving, setAutomationSaving] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -131,7 +135,20 @@ export default function OwnerChatInboxPage() {
     const requestedSession =
       new URLSearchParams(window.location.search).get("session") || "";
 
-    await loadThreads(requestedSession);
+    await Promise.all([loadThreads(requestedSession), loadAutomation()]);
+  }
+
+  async function loadAutomation() {
+    const { data } = await supabase.rpc("owner_get_chat_automation");
+    const setting = Array.isArray(data) ? data[0] : null;
+    if (setting) { setAutomationEnabled(Boolean(setting.enabled)); setAutomationMessage(setting.welcome_message || automationMessage); }
+  }
+
+  async function saveAutomation() {
+    setAutomationSaving(true); setError("");
+    const { error: automationError } = await supabase.rpc("owner_update_chat_automation", { p_enabled: automationEnabled, p_welcome_message: automationMessage.trim() });
+    if (automationError) setError(automationError.message); else setAutomationOpen(false);
+    setAutomationSaving(false);
   }
 
   async function loadThreads(requestedSession = "") {
@@ -516,6 +533,18 @@ export default function OwnerChatInboxPage() {
               <span>{threads.length}</span>
             </div>
 
+            <section className={`aiReception ${automationOpen ? "open" : ""}`}>
+              <button type="button" className="aiReceptionHead" onClick={() => setAutomationOpen((value) => !value)}>
+                <span className="aiSpark">✦</span><span><strong>AI მისალმება</strong><small>{automationEnabled ? "აქტიურია · პირველ შეტყობინებაზე პასუხობს" : "გამორთულია"}</small></span><em>{automationOpen ? "⌃" : "⌄"}</em>
+              </button>
+              {automationOpen && <div className="aiReceptionBody">
+                <label className="automationSwitch"><span><b>ავტომატური პირველი პასუხი</b><small>მპოვნელი პასუხს მიიღებს მაშინაც, როცა აპში არ ხართ.</small></span><input type="checkbox" checked={automationEnabled} onChange={(event) => setAutomationEnabled(event.target.checked)} /></label>
+                <label className="automationText"><span>მისალმების ტექსტი</span><textarea value={automationMessage} onChange={(event) => setAutomationMessage(event.target.value)} maxLength={500} /></label>
+                <button type="button" className="saveAutomation" onClick={() => void saveAutomation()} disabled={automationSaving || automationMessage.trim().length < 10}>{automationSaving ? "ინახება…" : "AI მისალმების შენახვა"}</button>
+                <p>✦ იგზავნება მხოლოდ ერთხელ — ახალი საუბრის პირველ შეტყობინებაზე.</p>
+              </div>}
+            </section>
+
             <div className="conversationTabs">
               <button type="button" className={conversationView === "all" ? "active" : ""} onClick={() => setConversationView("all")}>ყველა</button>
               <button type="button" className={conversationView === "recent" ? "active" : ""} onClick={() => setConversationView("recent")}>ბოლო 30 დღე</button>
@@ -767,6 +796,7 @@ export default function OwnerChatInboxPage() {
       <Styles />
       <style jsx global>{`
         .conversationTabs{margin:0 12px 8px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:12px;background:#edf3f9}.conversationTabs button{min-height:36px;border:0;border-radius:9px;background:transparent;color:#6a7f93;font:850 10px Inter,Arial;cursor:pointer}.conversationTabs button.active{background:#fff;color:#075dcc;box-shadow:0 3px 9px rgba(23,63,109,.1)}
+        .aiReception{margin:0 10px 10px;overflow:hidden;border:1px solid #cfe0f3;border-radius:14px;background:#f4f9ff}.aiReceptionHead{width:100%;min-height:58px;padding:9px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#173652;text-align:left}.aiSpark{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:11px;background:#0b70d7;color:#fff;font-size:17px}.aiReceptionHead>span:nth-child(2){min-width:0;flex:1}.aiReceptionHead strong,.aiReceptionHead small{display:block}.aiReceptionHead strong{font-size:12px}.aiReceptionHead small{margin-top:3px;color:#668096;font-size:8px}.aiReceptionHead em{font-style:normal}.aiReceptionBody{padding:0 10px 11px}.automationSwitch{padding:10px;display:flex;align-items:center;gap:8px;border-radius:10px;background:#fff}.automationSwitch>span{min-width:0;flex:1}.automationSwitch b,.automationSwitch small{display:block}.automationSwitch b{font-size:10px}.automationSwitch small{margin-top:3px;color:#71869a;font-size:8px;line-height:1.35}.automationSwitch input{width:40px;height:22px;accent-color:#0b74e5}.automationText{display:block;margin-top:9px}.automationText>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.automationText textarea{width:100%;min-height:82px;padding:9px;border:1px solid #ccdeef;border-radius:10px;background:#fff;color:#173652;font-size:10px;line-height:1.5;resize:none}.saveAutomation{width:100%;min-height:40px;margin-top:8px;border:0;border-radius:10px;background:#0b70d7;color:#fff;font-size:10px;font-weight:900}.aiReceptionBody>p{margin:7px 2px 0;color:#71869a;font-size:8px;line-height:1.4}
         body.kompasiAppMode .ownerChatPage .operatorCard{max-width:100%!important;margin-bottom:12px!important;padding:12px 14px!important;border-radius:17px!important;background:#116fd3!important}
         body.kompasiAppMode .ownerChatPage .pageTitle{margin-bottom:14px!important}.ownerChatPage .pageTitle h1{font-size:28px!important}.ownerChatPage .pageTitle p{font-size:11px!important}
         body.kompasiAppMode .ownerChatPage .inbox{min-height:590px!important;border:0!important;border-radius:22px!important;background:#fff!important;box-shadow:0 18px 44px rgba(1,24,58,.28)!important}
