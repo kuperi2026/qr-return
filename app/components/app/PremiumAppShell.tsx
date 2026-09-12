@@ -344,7 +344,7 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .ownerChatPage .inbox{width:100%!important;min-width:0!important;overflow:hidden!important;border-radius:19px!important;box-shadow:0 16px 35px rgba(1,30,66,.25)!important}
         body.kompasiAppMode .ownerChatPage .sidebar,body.kompasiAppMode .ownerChatPage .chatPanel{min-width:0!important}
         body.kompasiAppMode .ownerChatPage .threadList{max-height:270px!important}
-        body.kompasiAppMode .subscriptionsPage .appCheckoutSteps{margin:16px 0 12px;padding:5px;display:grid!important;grid-template-columns:repeat(2,1fr);gap:5px;border:1px solid rgba(255,255,255,.26);border-radius:15px;background:rgba(4,40,82,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(12px)}
+        body.kompasiAppMode .subscriptionsPage .appCheckoutSteps{margin:16px 0 12px;padding:5px;display:grid!important;grid-template-columns:repeat(3,1fr);gap:5px;border:1px solid rgba(255,255,255,.26);border-radius:15px;background:rgba(4,40,82,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(12px)}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button{min-width:0;min-height:52px;padding:6px 3px;display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;background:transparent;color:#cfe6ff;font-family:inherit;cursor:pointer}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button span{width:22px;height:22px;display:grid;place-items:center;flex:0 0 22px;border:1px solid rgba(255,255,255,.35);border-radius:50%;font-size:10px;font-weight:950}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button b{overflow:hidden;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
@@ -352,15 +352,15 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button.active span{border-color:#7157d9;background:#7157d9;color:#fff}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button.done{color:#fff}
         body.kompasiAppMode .subscriptionsPage .appCheckoutSteps button.done span{border-color:#12a66a;background:#12a66a;color:#fff}
-        body.kompasiAppMode .subscriptionsPage[data-app-step="1"] .summaryStage,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .panel,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .profileStage,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .periodStage{display:none!important}
+        body.kompasiAppMode .subscriptionsPage[data-app-step="1"] .periodStage,body.kompasiAppMode .subscriptionsPage[data-app-step="1"] .summaryStage,body.kompasiAppMode .subscriptionsPage[data-app-step="2"] .profileStage,body.kompasiAppMode .subscriptionsPage[data-app-step="2"] .summaryStage,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .panel,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .profileStage,body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .periodStage{display:none!important}
         body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .layout{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
         body.kompasiAppMode .subscriptionsPage[data-app-step="3"] .summaryStage{display:block!important;margin-top:0!important}
-        body.kompasiAppMode .subscriptionsPage[data-app-step="1"] .purchaseHistory{display:none!important}
+        body.kompasiAppMode .subscriptionsPage[data-app-step="1"] .purchaseHistory,body.kompasiAppMode .subscriptionsPage[data-app-step="2"] .purchaseHistory{display:none!important}
         body.kompasiAppMode .subscriptionsPage .appNext,body.kompasiAppMode .subscriptionsPage .appPrevious{min-height:47px;padding:0 15px;border:0;border-radius:12px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
         body.kompasiAppMode .subscriptionsPage .appNext,body.kompasiAppMode .subscriptionsPage .summaryPrevious{display:block!important}
         body.kompasiAppMode .subscriptionsPage .appNext{width:100%;margin-top:15px;background:linear-gradient(135deg,#7157d9,#6547c7)!important;color:#fff!important;box-shadow:0 8px 18px rgba(87,62,180,.24)}
         body.kompasiAppMode .subscriptionsPage .appNext:disabled{opacity:.45;box-shadow:none}
-        body.kompasiAppMode .subscriptionsPage .appStageActions{margin-top:15px;display:block!important}
+        body.kompasiAppMode .subscriptionsPage .appStageActions{margin-top:15px;display:grid!important;grid-template-columns:.75fr 1.25fr;gap:8px}
         body.kompasiAppMode .subscriptionsPage .appStageActions .appNext{margin-top:0}
         body.kompasiAppMode .subscriptionsPage .appPrevious{border:1px solid #d5e2ef;background:#fff;color:#4d657d}
         body.kompasiAppMode .subscriptionsPage .summaryPrevious{width:100%;margin-top:8px!important;border:1px solid rgba(255,255,255,.25)!important;background:rgba(255,255,255,.09)!important;color:#fff!important;box-shadow:none!important}
