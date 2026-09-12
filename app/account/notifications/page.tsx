@@ -90,6 +90,7 @@ export default function AccountNotificationsPage() {
 
   const [filter, setFilter] =
     useState<Filter>("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   const ka =
     lang === "ka";
@@ -572,7 +573,12 @@ export default function AccountNotificationsPage() {
           )}
         </header>
 
-        <section className="stats">
+        <section className="notificationOverview">
+          <div><span>♢</span><p><small>{ka ? "აქტივობის ცენტრი" : "Activity center"}</small><strong>{unreadCount ? `${unreadCount} ${ka ? "ახალი შეტყობინება" : "new notifications"}` : (ka ? "ყველაფერი წაკითხულია" : "You're all caught up")}</strong></p></div>
+          <button type="button" onClick={() => setShowFilters((value) => !value)}>{ka ? "ფილტრი" : "Filter"} <b>{showFilters ? "⌃" : "⌄"}</b></button>
+        </section>
+
+        <section className="stats" aria-hidden="true">
           <Stat
             label={
               ka
@@ -624,7 +630,7 @@ export default function AccountNotificationsPage() {
           />
         </section>
 
-        <section className="filters">
+        {showFilters && <section className="filters">
           <FilterButton
             active={
               filter === "all"
@@ -703,7 +709,7 @@ export default function AccountNotificationsPage() {
           >
             🛒 Orders
           </FilterButton>
-        </section>
+        </section>}
 
         {error && (
           <div className="error">
@@ -1189,7 +1195,7 @@ export default function AccountNotificationsPage() {
         body.kompasiAppMode .accountNotificationsPage{background:linear-gradient(180deg,#0a4c8a 0,#0a4c8a 238px,#eef6fd 238px)!important;font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif}
         body.kompasiAppMode .accountNotificationsPage .topbar{border-color:rgba(255,255,255,.25)!important}body.kompasiAppMode .accountNotificationsPage .brand strong,body.kompasiAppMode .accountNotificationsPage .brand small{color:#fff!important}body.kompasiAppMode .accountNotificationsPage .topActions>a{display:none!important}
         body.kompasiAppMode .accountNotificationsPage .shell{width:calc(100% - 24px)!important;max-width:560px!important;padding:25px 0 110px!important}body.kompasiAppMode .accountNotificationsPage .heading h1{color:#fff!important;font-size:29px!important;letter-spacing:-.6px!important}body.kompasiAppMode .accountNotificationsPage .heading p{color:#d7eaff!important;font-size:11px!important}body.kompasiAppMode .accountNotificationsPage .eyebrow{color:#b9dbff!important;font-size:9px!important}
-        body.kompasiAppMode .accountNotificationsPage .stats{grid-template-columns:repeat(3,1fr)!important;gap:7px!important;margin-top:19px!important}body.kompasiAppMode .accountNotificationsPage .stat{min-height:65px!important;border:0!important;border-radius:14px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 8px 20px rgba(3,38,82,.12)!important}body.kompasiAppMode .accountNotificationsPage .filters{padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;font-size:9px!important}
+        body.kompasiAppMode .accountNotificationsPage .stats{display:none!important}.notificationOverview{margin-top:18px;padding:12px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,255,255,.72);border-radius:16px;background:#fff;box-shadow:0 10px 24px rgba(3,38,82,.14)}.notificationOverview>div{min-width:0;display:flex;align-items:center;gap:10px}.notificationOverview>div>span{width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:11px;background:#e8f3ff;color:#0866cc;font-size:18px}.notificationOverview p{margin:0}.notificationOverview small,.notificationOverview strong{display:block}.notificationOverview small{color:#71869a;font-size:8px;font-weight:850}.notificationOverview strong{margin-top:3px;color:#173652;font-size:12px}.notificationOverview>button{min-height:38px;padding:0 12px;border:0;border-radius:10px;background:#0b6fd3;color:#fff;font-size:9px;font-weight:900}.notificationOverview>button b{margin-left:5px}body.kompasiAppMode .accountNotificationsPage .filters{margin-top:8px!important;padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;border-color:#d7e4ef!important;background:#f3f7fb!important;color:#526b82!important;font-size:9px!important}body.kompasiAppMode .accountNotificationsPage .filters button.active{border-color:#0b6fd3!important;background:#0b6fd3!important;color:#fff!important}
         body.kompasiAppMode .accountNotificationsPage .list{gap:8px!important}body.kompasiAppMode .accountNotificationsPage .list .card{border:0!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(17,61,105,.08)!important}body.kompasiAppMode .accountNotificationsPage .list .unread{border-left:4px solid #ef654c!important;background:#fff!important}body.kompasiAppMode .accountNotificationsPage .list .icon{border-radius:13px!important;background:#e8f3ff!important}
         @media(max-width:600px){body.kompasiAppMode .accountNotificationsPage .topbar{width:calc(100% - 24px)!important}.accountNotificationsPage .heading{gap:10px!important}.accountNotificationsPage .markAll{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.14)!important;color:#fff!important}}
       `}</style>
@@ -1223,6 +1229,7 @@ function NotificationCard({
       NotificationRow
   ) => Promise<void>;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const ka =
     language === "ka";
 
@@ -1257,22 +1264,6 @@ function NotificationCard({
     "order";
 
   async function handleCardClick() {
-    if (isChat) {
-      await onOpenChat(
-        notification
-      );
-
-      return;
-    }
-
-    if (isOrder) {
-      await onOpenOrder(
-        notification
-      );
-
-      return;
-    }
-
     if (
       !notification.read
     ) {
@@ -1280,6 +1271,7 @@ function NotificationCard({
         notification.id
       );
     }
+    setExpanded((value) => !value);
   }
 
   return (
@@ -1313,14 +1305,10 @@ function NotificationCard({
             </strong>
           </div>
 
-          {!notification.read && (
-            <i>
-              NEW
-            </i>
-          )}
+          <div className="cardState">{!notification.read && <i>NEW</i>}<b>{expanded ? "⌃" : "⌄"}</b></div>
         </div>
 
-        {notification.message && (
+        {expanded && notification.message && (
           <p>
             {
               notification.message
@@ -1328,7 +1316,7 @@ function NotificationCard({
           </p>
         )}
 
-        {isOrder &&
+        {expanded && isOrder &&
           metadata.status && (
             <div className="orderStatus">
               <span>
@@ -1343,7 +1331,7 @@ function NotificationCard({
             </div>
           )}
 
-        {isOrder &&
+        {expanded && isOrder &&
           metadata.tracking_number && (
             <div className="tracking">
               <span>
@@ -1358,7 +1346,7 @@ function NotificationCard({
             </div>
           )}
 
-        <div className="bottom">
+        <div className={`bottom ${expanded ? "expanded" : ""}`}>
           <small>
             {formatNotificationDate(
               notification.created_at,
@@ -1366,7 +1354,7 @@ function NotificationCard({
             )}
           </small>
 
-          <div className="actions">
+          {expanded && <div className="actions">
             {isChat && (
               <button
                 type="button"
@@ -1444,7 +1432,7 @@ function NotificationCard({
                   →
                 </Link>
               )}
-          </div>
+          </div>}
         </div>
       </div>
 
@@ -1471,6 +1459,7 @@ function NotificationCard({
           background: white;
 
           cursor: pointer;
+          min-height: 74px;
         }
 
         .unread {
@@ -1554,6 +1543,8 @@ function NotificationCard({
           font-weight: 900;
         }
 
+        .cardState{display:flex;align-items:center;gap:7px}.cardState>b{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#edf4fb;color:#1761bd;font-size:13px}
+
         p {
           margin:
             7px 0 0;
@@ -1608,7 +1599,7 @@ function NotificationCard({
         }
 
         .bottom {
-          margin-top: 11px;
+          margin-top: 6px;
 
           display: flex;
 
@@ -1621,6 +1612,8 @@ function NotificationCard({
 
           gap: 8px;
         }
+
+        .bottom.expanded{margin-top:11px}
 
         small {
           color: #969fa8;
