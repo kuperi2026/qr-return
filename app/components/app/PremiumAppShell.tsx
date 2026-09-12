@@ -385,10 +385,15 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .free b{font-size:27px!important;line-height:1!important}
         body.kompasiAppMode .subscriptionsPage .free span{font-size:14px!important;font-weight:850!important;letter-spacing:.15px!important}
         body.kompasiAppMode .subscriptionsPage .panel h2:not(:first-child){margin:22px 0 12px!important;padding:11px 12px!important;border:1px solid #d5e5f4!important;border-radius:12px!important;background:linear-gradient(100deg,#e8f3ff,#f3efff)!important;color:#173652!important;box-shadow:0 5px 14px rgba(23,63,109,.07)!important}
-        body.kompasiAppMode .subscriptionsPage .period:nth-child(n){border:1px solid rgba(255,255,255,.3)!important;background:linear-gradient(120deg,#0b74e5,#13a66b)!important;color:#fff!important;box-shadow:0 8px 19px rgba(4,70,117,.2),inset 0 1px 0 rgba(255,255,255,.22)!important}
-        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) span{color:#fff!important}
-        body.kompasiAppMode .subscriptionsPage .period.active{border:2px solid #fff!important;background:linear-gradient(120deg,#0b74e5,#13a66b)!important;color:#fff!important;box-shadow:0 11px 25px rgba(4,70,117,.32),0 0 0 3px rgba(19,166,107,.2),inset 0 1px 0 rgba(255,255,255,.3)!important}
-        body.kompasiAppMode .subscriptionsPage .period.active span{color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n){border:1px solid #d5e5f3!important;background:#fff!important;color:#173652!important;box-shadow:0 6px 16px rgba(4,70,117,.08)!important;text-align:left!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) small{color:#7890a6!important;font-size:9px!important;letter-spacing:.15px!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) b{color:#173652!important;font-size:15px!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n) span{color:#0870dc!important;font-size:24px!important}
+        body.kompasiAppMode .subscriptionsPage .period:nth-child(n)>i{border-color:#c8d9e8!important;background:#f5f9fd!important;color:transparent!important}
+        body.kompasiAppMode .subscriptionsPage .period.active{border:2px solid #fff!important;background:linear-gradient(120deg,#0b74e5,#13a66b)!important;color:#fff!important;transform:translateY(-2px)!important;box-shadow:0 12px 27px rgba(4,70,117,.34),0 0 0 3px rgba(19,166,107,.22),inset 0 1px 0 rgba(255,255,255,.3)!important}
+        body.kompasiAppMode .subscriptionsPage .period.active small{color:#d8f5ed!important}
+        body.kompasiAppMode .subscriptionsPage .period.active b,body.kompasiAppMode .subscriptionsPage .period.active span{color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .period.active>i{border-color:#fff!important;background:#fff!important;color:#07845a!important;box-shadow:0 4px 10px rgba(0,52,75,.18)!important}
         body.kompasiAppMode .subscriptionsPage .summary{border:1px solid rgba(129,238,219,.25)!important;background:radial-gradient(circle at 92% 5%,rgba(25,210,177,.3),transparent 35%),linear-gradient(145deg,#322267 0%,#183f72 52%,#075f65 100%)!important;box-shadow:0 16px 34px rgba(27,20,81,.32),inset 0 1px 0 rgba(255,255,255,.14)!important}
         body.kompasiAppMode .subscriptionsPage .summary>small{color:#9af1df!important}
         body.kompasiAppMode .subscriptionsPage .chosen{background:rgba(255,255,255,.1)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important}
