@@ -209,6 +209,13 @@ export default function PremiumAppShell() {
         body.kompasiAppRegistration .appRegistrationHeroCopy span{order:2!important;display:block!important;margin-top:4px!important;padding:0!important;background:transparent!important;color:#3180c4!important;font-size:10px!important;font-weight:900!important;line-height:1.3!important}
         body.kompasiAppRegistration .appRegistrationHeroCopy h1{order:1!important;margin:0!important;color:#073b70!important;font-size:20px!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.4px!important}
         body.kompasiAppRegistration .appRegistrationHeroCopy p{display:none!important}
+        body.kompasiAppRegistration .registrationHeader{height:50px!important;min-height:50px!important;border-bottom:0!important}
+        body.kompasiAppRegistration .appRegistrationHero{min-height:76px!important;margin:4px auto 8px!important;padding:8px 10px!important;grid-template-columns:58px minmax(0,1fr)!important;gap:10px!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 20px rgba(0,28,67,.16)!important}
+        body.kompasiAppRegistration .appRegistrationHeroImage{width:58px!important;height:58px!important;border-radius:11px!important}
+        body.kompasiAppRegistration .appRegistrationHeroCopy span{display:none!important}
+        body.kompasiAppRegistration .appRegistrationHeroCopy h1{font-size:17px!important;line-height:1.15!important}
+        body.kompasiAppRegistration .registrationCard{margin-top:8px!important}
+        body.kompasiAppRegistration .cardHeader p,body.kompasiAppRegistration .sectionHeader p{display:none!important}
         body.kompasiAppRegistration .registrationCard{margin-top:16px!important;padding:12px!important;overflow:hidden!important;border:1px solid #d6e3ef!important;border-radius:16px!important;background:#fff!important;box-shadow:0 10px 28px rgba(23,63,109,.1)!important}
         body.kompasiAppRegistration .emergencyChoiceCard{margin-top:18px!important}
         body.kompasiAppRegistration .mainCard{padding:19px 14px!important;border-radius:18px!important;box-shadow:0 10px 28px rgba(15,57,105,.1)!important}
