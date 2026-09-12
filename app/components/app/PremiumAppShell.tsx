@@ -58,7 +58,7 @@ export default function PremiumAppShell() {
     if (!appContext) return;
 
     const legacyRoutes: Record<string, string> = {
-      "/my-profiles": "/app/profiles",
+      "/my-profiles": "/app/products",
       "/account": "/app/account",
     };
     const destination = legacyRoutes[pathname];
