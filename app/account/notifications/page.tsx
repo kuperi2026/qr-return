@@ -91,6 +91,7 @@ export default function AccountNotificationsPage() {
   const [filter, setFilter] =
     useState<Filter>("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
 
   const ka =
     lang === "ka";
@@ -405,6 +406,15 @@ export default function AccountNotificationsPage() {
         "order"
     ).length;
 
+  const appGroups = [
+    { id: "unread", icon: "●", title: ka ? "წაუკითხავი" : "Unread", subtitle: ka ? "ახალი და სანახავი" : "New activity", items: notifications.filter((item) => !item.read) },
+    { id: "chat", icon: "◌", title: "Live Chat", subtitle: ka ? "ახალი საუბრები და პასუხები" : "Conversations and replies", items: notifications.filter((item) => item.type === "chat") },
+    { id: "scan", icon: "⌁", title: ka ? "QR სკანირება" : "QR scans", subtitle: ka ? "პროფილების დაფიქსირებული სკანები" : "Detected profile scans", items: notifications.filter((item) => item.type === "scan") },
+    { id: "location", icon: "⌖", title: ka ? "ლოკაცია" : "Location", subtitle: ka ? "გაზიარებული მდებარეობები" : "Shared locations", items: notifications.filter((item) => item.type === "location") },
+    { id: "order", icon: "▣", title: ka ? "შეკვეთები" : "Orders", subtitle: ka ? "სტატუსი და მიწოდება" : "Status and delivery", items: notifications.filter((item) => item.type === "order") },
+    { id: "other", icon: "✦", title: ka ? "სხვა სიახლეები" : "Other updates", subtitle: ka ? "სისტემური და მნიშვნელოვანი ინფორმაცია" : "System and important information", items: notifications.filter((item) => !["chat", "scan", "location", "order"].includes(item.type)) },
+  ];
+
   if (loading) {
     return (
       <main className="loading">
@@ -634,6 +644,21 @@ export default function AccountNotificationsPage() {
           </div>
         )}
 
+        {!error && <section className="appNotificationGroups" aria-label={ka ? "სიახლეების კატეგორიები" : "Notification categories"}>
+          {appGroups.map((group) => {
+            const open = openGroup === group.id;
+            return <article key={group.id} className={`notificationGroup group-${group.id}${open ? " open" : ""}`}>
+              <button type="button" className="notificationGroupButton" aria-expanded={open} onClick={() => setOpenGroup(open ? null : group.id)}>
+                <span className="notificationGroupIcon">{group.icon}</span>
+                <span className="notificationGroupCopy"><b>{group.title}</b><small>{group.subtitle}</small></span>
+                <strong>{group.items.length}</strong>
+                <i>{open ? "⌃" : "⌄"}</i>
+              </button>
+              {open && <div className="notificationGroupBody">{group.items.length ? group.items.map((notification) => <NotificationCard key={`${group.id}-${notification.id}`} notification={notification} language={lang} onRead={markRead} onOpenChat={openChat} onOpenOrder={openOrder} />) : <div className="groupEmpty">{ka ? "ამ კატეგორიაში ახალი ინფორმაცია არ არის." : "There is no activity in this category."}</div>}</div>}
+            </article>;
+          })}
+        </section>}
+
         {!error &&
           filtered.length ===
             0 && (
@@ -691,6 +716,7 @@ export default function AccountNotificationsPage() {
       </div>
 
       <style jsx>{`
+        .appNotificationGroups{display:none}
         .page {
           min-height: 100vh;
 
@@ -1113,6 +1139,9 @@ export default function AccountNotificationsPage() {
         body.kompasiAppMode .accountNotificationsPage .topbar{border-color:rgba(255,255,255,.25)!important}body.kompasiAppMode .accountNotificationsPage .brand strong,body.kompasiAppMode .accountNotificationsPage .brand small{color:#fff!important}body.kompasiAppMode .accountNotificationsPage .topActions>a{display:none!important}
         body.kompasiAppMode .accountNotificationsPage .shell{width:calc(100% - 24px)!important;max-width:520px!important;padding:20px 0 110px!important}.notificationHero{position:relative;overflow:hidden;padding:19px 17px 16px;border:1px solid rgba(255,255,255,.28);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.08));color:#fff;box-shadow:0 20px 45px rgba(1,24,58,.28),inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(14px)}.notificationHero:after{content:"";position:absolute;right:-42px;top:-58px;width:150px;height:150px;border:24px solid rgba(255,255,255,.07);border-radius:50%}.heroTop{position:relative;z-index:1;display:flex;align-items:center;gap:11px}.heroBell{width:47px;height:47px;display:grid;place-items:center;flex:0 0 47px;border:1px solid rgba(255,255,255,.35);border-radius:15px;background:rgba(255,255,255,.15);font-size:23px}.heroTop>div{min-width:0;flex:1}.heroTop small{color:#bfe0ff;font-size:8px;font-weight:900;letter-spacing:1.2px}.heroTop h1{margin:3px 0 0;color:#fff;font-size:25px;letter-spacing:-.4px}.unreadBadge{position:relative;z-index:1;min-width:58px;padding:8px 9px;border-radius:14px;background:#fff;color:#0a4c8a;text-align:center;box-shadow:0 7px 17px rgba(1,25,58,.18)}.unreadBadge b,.unreadBadge small{display:block}.unreadBadge b{font-size:20px}.unreadBadge small{margin-top:1px;color:#69849e;font-size:7px}.notificationHero>p{position:relative;z-index:1;margin:14px 0 0;color:#d9ecff;font-size:11px;line-height:1.5}.heroActions{position:relative;z-index:1;margin-top:14px;display:flex;gap:7px}.heroActions button{min-height:40px;padding:0 11px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid rgba(255,255,255,.32);border-radius:11px;background:rgba(255,255,255,.13);color:#fff;font-size:9px;font-weight:900}.heroActions button:first-child{flex:1;justify-content:flex-start}.heroActions button:first-child b{margin-left:auto}.heroActions button:last-child{background:#fff;color:#0b5db8}body.kompasiAppMode .accountNotificationsPage .stats{display:none!important}body.kompasiAppMode .accountNotificationsPage .filters{margin-top:9px!important;padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border:1px solid #dbe7f2!important;border-radius:14px!important;background:#fff!important;box-shadow:0 9px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;border:0!important;background:#f0f5fa!important;color:#526b82!important;font-size:9px!important}body.kompasiAppMode .accountNotificationsPage .filters button.active{background:#0b6fd3!important;color:#fff!important}
         body.kompasiAppMode .accountNotificationsPage .list{margin-top:12px!important;gap:8px!important}body.kompasiAppMode .accountNotificationsPage .list .card{padding:13px!important;border:1px solid #dce7f1!important;border-radius:17px!important;background:#fff!important;box-shadow:0 7px 20px rgba(17,61,105,.07)!important}body.kompasiAppMode .accountNotificationsPage .list .unread{border-color:#acd2f6!important;background:linear-gradient(135deg,#fff,#f4f9ff)!important;box-shadow:0 9px 23px rgba(10,89,171,.11)!important}body.kompasiAppMode .accountNotificationsPage .list .icon{border-radius:14px!important;box-shadow:inset 0 0 0 1px rgba(35,89,145,.08)!important}body.kompasiAppMode .accountNotificationsPage .list .type-chat .icon{background:#e7f2ff!important}body.kompasiAppMode .accountNotificationsPage .list .type-location .icon{background:#e6f8ef!important}body.kompasiAppMode .accountNotificationsPage .list .type-scan .icon{background:#efeaff!important}body.kompasiAppMode .accountNotificationsPage .list .type-order .icon{background:#fff0ea!important}body.kompasiAppMode .accountNotificationsPage .list .top strong{color:#183953!important;font-size:12px!important}body.kompasiAppMode .accountNotificationsPage .list .top span{color:#2874bf!important;font-size:7px!important}body.kompasiAppMode .accountNotificationsPage .list .cardState>i{background:#0b74d9!important}body.kompasiAppMode .accountNotificationsPage .list .cardState>b{background:#edf4fb!important;color:#1761bd!important}
+        body.kompasiAppMode .accountNotificationsPage .shell>.list,body.kompasiAppMode .accountNotificationsPage .shell>.empty,body.kompasiAppMode .accountNotificationsPage .filters{display:none!important}
+        body.kompasiAppMode .accountNotificationsPage .heroActions button:first-child{display:none!important}body.kompasiAppMode .accountNotificationsPage .heroActions button:last-child{width:100%!important}
+        body.kompasiAppMode .accountNotificationsPage .appNotificationGroups{margin-top:13px;display:grid!important;gap:9px}.notificationGroup{overflow:hidden;border:1px solid #d4e3ef;border-radius:17px;background:#fff;box-shadow:0 8px 21px rgba(4,48,94,.09)}.notificationGroupButton{width:100%;min-height:76px;padding:10px 12px;display:flex;align-items:center;gap:10px;border:0;background:#fff;color:#183b59;text-align:left;font-family:inherit;cursor:pointer}.notificationGroupIcon{width:45px;height:45px;display:grid;place-items:center;flex:0 0 45px;border-radius:14px;background:#e8f3ff;color:#0870d8;font-size:20px;font-weight:950}.notificationGroupCopy{min-width:0;flex:1}.notificationGroupCopy b,.notificationGroupCopy small{display:block}.notificationGroupCopy b{font-size:14px}.notificationGroupCopy small{margin-top:4px;overflow:hidden;color:#71879a;font-size:9px;font-weight:750;text-overflow:ellipsis;white-space:nowrap}.notificationGroupButton>strong{min-width:34px;height:34px;padding:0 7px;display:grid;place-items:center;border-radius:11px;background:#e8f3ff;color:#0870d8;font-size:16px}.notificationGroupButton>i{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#f0f5f9;color:#55748e;font-size:13px;font-style:normal}.notificationGroup.open{border-color:#8fbee9;box-shadow:0 12px 28px rgba(7,73,137,.13)}.notificationGroup.open>.notificationGroupButton{border-bottom:1px solid #dce8f2;background:linear-gradient(135deg,#f4f9ff,#fff)}.notificationGroup.open>.notificationGroupButton>i{background:#0870d8;color:#fff}.group-unread .notificationGroupIcon{background:#fff0e8;color:#e36c28}.group-unread .notificationGroupButton>strong{background:#fff0e8;color:#c85b20}.group-chat .notificationGroupIcon{background:#e8f2ff;color:#156bd1}.group-scan .notificationGroupIcon{background:#f0ebff;color:#6a4bc8}.group-location .notificationGroupIcon{background:#e7f8ef;color:#07845a}.group-order .notificationGroupIcon{background:#fff2e8;color:#bd6128}.notificationGroupBody{padding:9px;display:grid;gap:8px;background:#f5f9fc}.notificationGroupBody .card{margin:0!important;padding:12px!important;border-radius:13px!important;box-shadow:none!important}.groupEmpty{padding:22px 12px;border:1px dashed #c7d9e8;border-radius:11px;background:#fff;color:#71879a;font-size:10px;text-align:center}
         @media(max-width:600px){body.kompasiAppMode .accountNotificationsPage .topbar{width:calc(100% - 24px)!important}.accountNotificationsPage .heading{gap:10px!important}.accountNotificationsPage .markAll{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.14)!important;color:#fff!important}}
       `}</style>
     </main>
