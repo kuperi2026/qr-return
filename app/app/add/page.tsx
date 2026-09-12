@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
 const types = [
-  ["🐕", "ძაღლი", "/register/dog"],
-  ["🐈", "კატა", "/register/cat"],
-  ["🚘", "მანქანა", "/register/car"],
-  ["🧳", "ჩემოდანი", "/register/suitcase"],
-  ["🔑", "გასაღები", "/register/key"],
-  ["👛", "საფულე", "/register/wallet"],
-  ["👜", "ჩანთა", "/register/bag"],
-  ["✚", "Emergency", "/emergency/register"],
+  ["🐕", "ძაღლი", "/register/dog?source=app"],
+  ["🐈", "კატა", "/register/cat?source=app"],
+  ["🚘", "მანქანა", "/register/parking?source=app"],
+  ["🧳", "ჩემოდანი", "/register/suitcase?source=app"],
+  ["🔑", "გასაღები", "/register/keys?source=app"],
+  ["👛", "საფულე", "/register/wallet?source=app"],
+  ["👜", "ჩანთა", "/register/bag?source=app"],
+  ["✚", "Emergency", "/register/emergency-bracelet?source=app"],
 ];
 export default function Add() {
   return (
