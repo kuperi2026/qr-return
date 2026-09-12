@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 type ChatAlert = {
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
 
 export default function PremiumAppShell() {
   const pathname = usePathname();
+  const router = useRouter();
   const [appMode, setAppMode] = useState(false);
   const [online, setOnline] = useState(true);
   const [chatAlert, setChatAlert] = useState<ChatAlert | null>(null);
@@ -48,6 +49,27 @@ export default function PremiumAppShell() {
 
   const registrationArea = pathname.startsWith("/register") || pathname.startsWith("/register-item") || pathname.startsWith("/emergency/register");
   const ownerArea = pathname.startsWith("/app/") || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || registrationArea;
+
+  useLayoutEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches ||
+      Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+    const params = new URLSearchParams(window.location.search);
+    const appContext = standalone || params.get("app_preview") === "1" || params.get("source") === "app" || window.localStorage.getItem("kompasi-app-mode") === "1";
+    if (!appContext) return;
+
+    const legacyRoutes: Record<string, string> = {
+      "/my-profiles": "/app/profiles",
+      "/account": "/app/account",
+    };
+    const destination = legacyRoutes[pathname];
+    if (destination) {
+      document.body.classList.add("kompasiRouteSwitch");
+      router.replace(destination);
+    } else {
+      document.body.classList.remove("kompasiRouteSwitch");
+    }
+    return () => document.body.classList.remove("kompasiRouteSwitch");
+  }, [pathname, router]);
 
   useEffect(() => {
     if (typeof Notification !== "undefined") setNotificationPermission(Notification.permission);
@@ -164,6 +186,7 @@ export default function PremiumAppShell() {
         })}
       </nav>
       <style jsx global>{`
+        body.kompasiRouteSwitch>*{visibility:hidden!important}
         body.kompasiAppMode{padding-bottom:82px!important;overflow-x:hidden!important;overscroll-behavior-x:none!important}
         body.kompasiAppRegistration{overflow-x:hidden!important;background:#063b72!important}
         body.kompasiAppRegistration *{min-width:0;box-sizing:border-box}
