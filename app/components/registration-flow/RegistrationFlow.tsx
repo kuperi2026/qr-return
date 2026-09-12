@@ -26,9 +26,11 @@ import {
 
 import {
   PRODUCT_META,
+  APP_REGISTRATION_HERO,
   isKeysType,
   isPetType,
 } from "./productConfig";
+import Image from "next/image";
 
 type RegistrationFlowProps = {
   type: ProductType;
@@ -90,6 +92,8 @@ export default function RegistrationFlow({
   const [isAppRegistration, setIsAppRegistration] = useState(false);
   const meta =
     PRODUCT_META[type];
+  const appHero =
+    APP_REGISTRATION_HERO[type];
 
   const isPet =
     isPetType(type);
@@ -1144,6 +1148,17 @@ export default function RegistrationFlow({
             სხვა პროდუქტი
           </a>
         </header>
+
+        <section className="appRegistrationHero" aria-label={`${appHero.title} პროფილის რეგისტრაცია`}>
+          <div className="appRegistrationHeroImage">
+            <Image src={appHero.image} alt="" fill sizes="132px" priority />
+          </div>
+          <div className="appRegistrationHeroCopy">
+            <span>{appHero.use}</span>
+            <h1>{appHero.title}</h1>
+            <p>{appHero.promise}</p>
+          </div>
+        </section>
 
         <RegistrationProgress
           step={step}
