@@ -261,6 +261,14 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .profile .icon{width:39px!important;height:39px!important;font-size:20px!important}
         body.kompasiAppMode .subscriptionsPage .profile b{font-size:13px!important}
         body.kompasiAppMode .subscriptionsPage .profile small{font-size:10px!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker{grid-column:1/-1!important;padding:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;background:transparent!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button{min-width:0!important;min-height:48px!important;padding:6px 2px!important;border:1px solid #d4e3ef!important;border-radius:9px!important;background:#fff!important;color:#587187!important;font-family:inherit!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button span,body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button b{display:block!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button span{font-size:8px!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button b{margin-top:4px!important;color:#0870d8!important;font-size:12px!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button.active{border-color:#0870d8!important;background:#0870d8!important;color:#fff!important;box-shadow:0 6px 14px rgba(8,112,216,.18)!important}
+        body.kompasiAppMode .subscriptionsPage .profilePeriodPicker button.active b{color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .desktopProfileTerm,body.kompasiAppMode .subscriptionsPage .repeatedFreePeriod,body.kompasiAppMode .subscriptionsPage .desktopSharedPeriod{display:none!important}
         body.kompasiAppMode .subscriptionsPage .periods{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;overflow:visible!important;padding:1px 0 8px!important}
         body.kompasiAppMode .subscriptionsPage .period{width:100%!important;min-width:0!important;min-height:80px!important;flex:none!important;padding:10px 6px!important}
         body.kompasiAppMode .subscriptionsPage .summary{margin-top:14px!important;background:#082f59!important}
