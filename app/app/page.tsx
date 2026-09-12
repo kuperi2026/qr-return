@@ -18,7 +18,7 @@ export default function AppHome() {
     if (!url || !key) return;
     const supabase = createClient(url, key);
     void supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.replace("/app/dashboard");
+      if (data.user) router.replace("/app/products");
     });
   }, [router]);
 
