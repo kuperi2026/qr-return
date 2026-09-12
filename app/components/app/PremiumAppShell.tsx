@@ -233,6 +233,14 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .topbar{display:none!important}
         body.kompasiAppMode .subscriptionsPage .shell{width:min(520px,calc(100% - 20px))!important;margin:0 auto!important;padding-top:22px!important}
         body.kompasiAppMode .subscriptionsPage .intro{padding:0 4px!important;display:block!important;color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage>.shell>.intro{display:none!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader{display:block!important;color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader>small{color:#bdddff!important;font-size:9px!important;font-weight:900!important;letter-spacing:.8px!important;text-transform:uppercase!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader>h1{margin:6px 0 5px!important;color:#fff!important;font-size:26px!important;line-height:1.15!important;letter-spacing:-.7px!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader>p{margin:0!important;color:#d9ecff!important;font-size:11px!important;line-height:1.45!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader>p b{color:#fff!important}
+        body.kompasiAppMode .subscriptionsPage .appTariffHeader>.purchaseGuide{margin-top:12px!important;border-color:rgba(255,255,255,.55)!important;box-shadow:0 12px 28px rgba(1,27,61,.2)!important}
+        body.kompasiAppMode .subscriptionsPage .liveCalculator>.purchaseGuide{display:none!important}
         body.kompasiAppMode .subscriptionsPage .intro small{color:#bdddff!important;font-size:10px!important}
         body.kompasiAppMode .subscriptionsPage .intro h1{margin-top:6px!important;color:#fff!important;font-size:24px!important;line-height:1.2!important}
         body.kompasiAppMode .subscriptionsPage .intro p{color:#d7ecff!important;font-size:12px!important;line-height:1.5!important}
