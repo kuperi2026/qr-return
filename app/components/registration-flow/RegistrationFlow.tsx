@@ -26,11 +26,9 @@ import {
 
 import {
   PRODUCT_META,
-  APP_REGISTRATION_HERO,
   isKeysType,
   isPetType,
 } from "./productConfig";
-import Image from "next/image";
 
 type RegistrationFlowProps = {
   type: ProductType;
@@ -89,10 +87,9 @@ function getFileExtension(
 export default function RegistrationFlow({
   type,
 }: RegistrationFlowProps) {
+  const [isAppRegistration, setIsAppRegistration] = useState(false);
   const meta =
     PRODUCT_META[type];
-  const appHero =
-    APP_REGISTRATION_HERO[type];
 
   const isPet =
     isPetType(type);
@@ -173,6 +170,10 @@ export default function RegistrationFlow({
         }),
       []
     );
+
+  useEffect(() => {
+    setIsAppRegistration(new URLSearchParams(window.location.search).get("source") === "app");
+  }, []);
 
   useEffect(() => {
     async function loadAccount() {
@@ -1093,7 +1094,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main className="registrationPage">
+      <main className={`registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"
@@ -1143,17 +1144,6 @@ export default function RegistrationFlow({
             სხვა პროდუქტი
           </a>
         </header>
-
-        <section className="appRegistrationHero" aria-label={`${appHero.title} პროფილის რეგისტრაცია`}>
-          <div className="appRegistrationHeroImage">
-            <Image src={appHero.image} alt="" fill sizes="132px" priority />
-          </div>
-          <div className="appRegistrationHeroCopy">
-            <span>{appHero.use}</span>
-            <h1>{appHero.title}</h1>
-            <p>{appHero.promise}</p>
-          </div>
-        </section>
 
         <RegistrationProgress
           step={step}
@@ -1547,6 +1537,39 @@ export default function RegistrationFlow({
             margin-top: 8px;
             font-size: 14px;
           }
+        }
+      `}</style>
+      <style jsx global>{`
+        @media (max-width: 600px) {
+          .registrationPage.appRegistration { padding: 0 10px 22px; background:#edf7ff; }.registrationPage.appRegistration button,.registrationPage.appRegistration a,.registrationPage.appRegistration input,.registrationPage.appRegistration select,.registrationPage.appRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+          .registrationPage.appRegistration .registrationHeader { min-height: 52px; }
+          .registrationPage.appRegistration .changeProduct { padding: 7px 9px; font-size: 10px; }
+          .registrationPage.appRegistration .progress { padding-top: 12px; }
+          .registrationPage.appRegistration .marketingLine { margin: 8px auto; gap: 7px; }
+          .registrationPage.appRegistration .marketingLine > span { font-size: 25px; }
+          .registrationPage.appRegistration .marketingLine strong { font-size: 14px; line-height: 1.3; }
+          .registrationPage.appRegistration .marketingLine p { margin-top: 3px; font-size: 10px; line-height: 1.35; }
+          .registrationPage.appRegistration .registrationCard { padding: 13px 12px; border-radius: 14px; }
+          .registrationPage.appRegistration .stepTitle h1,
+          .registrationPage.appRegistration .previewTitle h1 { font-size: 19px; }
+          .registrationPage.appRegistration .stepTitle p,
+          .registrationPage.appRegistration .previewTitle p { font-size: 11px; line-height: 1.4; }
+          .registrationPage.appRegistration .formGrid { gap: 10px; }
+          .registrationPage.appRegistration .field label { margin-bottom: 5px; font-size: 11px; }
+          .registrationPage.appRegistration .field input,
+          .registrationPage.appRegistration .field select { min-height: 0; height: 44px; padding: 0 11px; font-size: 16px; }
+          .registrationPage.appRegistration .field textarea { min-height: 72px; padding: 10px 11px; font-size: 16px; }
+          .registrationPage.appRegistration .accountNotice,
+          .registrationPage.appRegistration .finderNotice { padding: 9px 10px; }
+          .registrationPage.appRegistration .actions,
+          .registrationPage.appRegistration .previewActions { margin-top: 14px; gap: 8px; }
+          .registrationPage.appRegistration .primaryButton,
+          .registrationPage.appRegistration .secondaryButton,
+          .registrationPage.appRegistration .backButton,
+          .registrationPage.appRegistration .confirmButton { min-height: 44px; padding: 0 13px; font-size: 12px; }
+          .registrationPage.appRegistration .photoSection { padding-top: 12px; }
+          .registrationPage.appRegistration .uploadBox { min-height: 108px; padding: 14px; }
+          .registrationPage.appRegistration .visibilityRow { min-height: 54px; padding: 9px 10px; }
         }
       `}</style>
     </>
