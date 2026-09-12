@@ -538,96 +538,13 @@ export default function AccountNotificationsPage() {
       </header>
 
       <div className="shell">
-        <header className="heading">
-          <div>
-            <span className="eyebrow">
-              QR RETURN ACCOUNT
-            </span>
-
-            <h1>
-              {ka
-                ? "შეტყობინებები"
-                : "Notifications"}
-            </h1>
-
-            <p>
-              {ka
-                ? "QR Scan, ლოკაცია, Live Chat და შეკვეთის სტატუსის ცვლილებები ერთ ადგილას."
-                : "QR scans, shared locations, Live Chat messages, and order status updates in one place."}
-            </p>
+        <section className="notificationHero">
+          <div className="heroTop"><span className="heroBell">♢</span><div><small>KOMPASI SIGNALS</small><h1>{ka ? "სიახლეები" : "Notifications"}</h1></div><span className="unreadBadge"><b>{unreadCount}</b><small>{ka ? "ახალი" : "NEW"}</small></span></div>
+          <p>{unreadCount ? (ka ? "თქვენს QR სივრცეში ახალი აქტივობა დაფიქსირდა." : "New activity was detected in your QR space.") : (ka ? "ყველა შეტყობინება წაკითხულია — მნიშვნელოვანი არაფერი გამოგრჩენიათ." : "Everything is read — you haven't missed anything important.")}</p>
+          <div className="heroActions">
+            <button type="button" onClick={() => setShowFilters((value) => !value)}><span>☷</span>{ka ? "სიახლეების გაფილტვრა" : "Filter activity"}<b>{showFilters ? "⌃" : "⌄"}</b></button>
+            {unreadCount > 0 && <button type="button" onClick={() => void markAllRead()}>✓ {ka ? "ყველას წაკითხვა" : "Mark all read"}</button>}
           </div>
-
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              className="markAll"
-              onClick={() =>
-                void markAllRead()
-              }
-            >
-              ✓{" "}
-              {ka
-                ? "ყველას წაკითხულად მონიშვნა"
-                : "Mark all read"}
-            </button>
-          )}
-        </header>
-
-        <section className="notificationOverview">
-          <div><span>♢</span><p><small>{ka ? "აქტივობის ცენტრი" : "Activity center"}</small><strong>{unreadCount ? `${unreadCount} ${ka ? "ახალი შეტყობინება" : "new notifications"}` : (ka ? "ყველაფერი წაკითხულია" : "You're all caught up")}</strong></p></div>
-          <button type="button" onClick={() => setShowFilters((value) => !value)}>{ka ? "ფილტრი" : "Filter"} <b>{showFilters ? "⌃" : "⌄"}</b></button>
-        </section>
-
-        <section className="stats" aria-hidden="true">
-          <Stat
-            label={
-              ka
-                ? "ყველა"
-                : "Total"
-            }
-            value={
-              notifications.length
-            }
-          />
-
-          <Stat
-            label={
-              ka
-                ? "წაუკითხავი"
-                : "Unread"
-            }
-            value={
-              unreadCount
-            }
-          />
-
-          <Stat
-            label="QR SCANS"
-            value={
-              scanCount
-            }
-          />
-
-          <Stat
-            label="LOCATIONS"
-            value={
-              locationCount
-            }
-          />
-
-          <Stat
-            label="LIVE CHAT"
-            value={
-              chatCount
-            }
-          />
-
-          <Stat
-            label="ORDERS"
-            value={
-              orderCount
-            }
-          />
         </section>
 
         {showFilters && <section className="filters">
@@ -1192,11 +1109,10 @@ export default function AccountNotificationsPage() {
         }
       `}</style>
       <style jsx global>{`
-        body.kompasiAppMode .accountNotificationsPage{background:linear-gradient(180deg,#0a4c8a 0,#0a4c8a 238px,#eef6fd 238px)!important;font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif}
+        body.kompasiAppMode .accountNotificationsPage{background:radial-gradient(circle at 82% 2%,rgba(42,139,231,.35),transparent 28%),linear-gradient(180deg,#073f7b 0,#0a4c8a 265px,#eef5fb 265px)!important;font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif}
         body.kompasiAppMode .accountNotificationsPage .topbar{border-color:rgba(255,255,255,.25)!important}body.kompasiAppMode .accountNotificationsPage .brand strong,body.kompasiAppMode .accountNotificationsPage .brand small{color:#fff!important}body.kompasiAppMode .accountNotificationsPage .topActions>a{display:none!important}
-        body.kompasiAppMode .accountNotificationsPage .shell{width:calc(100% - 24px)!important;max-width:560px!important;padding:25px 0 110px!important}body.kompasiAppMode .accountNotificationsPage .heading h1{color:#fff!important;font-size:29px!important;letter-spacing:-.6px!important}body.kompasiAppMode .accountNotificationsPage .heading p{color:#d7eaff!important;font-size:11px!important}body.kompasiAppMode .accountNotificationsPage .eyebrow{color:#b9dbff!important;font-size:9px!important}
-        body.kompasiAppMode .accountNotificationsPage .stats{display:none!important}.notificationOverview{margin-top:18px;padding:12px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,255,255,.72);border-radius:16px;background:#fff;box-shadow:0 10px 24px rgba(3,38,82,.14)}.notificationOverview>div{min-width:0;display:flex;align-items:center;gap:10px}.notificationOverview>div>span{width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:11px;background:#e8f3ff;color:#0866cc;font-size:18px}.notificationOverview p{margin:0}.notificationOverview small,.notificationOverview strong{display:block}.notificationOverview small{color:#71869a;font-size:8px;font-weight:850}.notificationOverview strong{margin-top:3px;color:#173652;font-size:12px}.notificationOverview>button{min-height:38px;padding:0 12px;border:0;border-radius:10px;background:#0b6fd3;color:#fff;font-size:9px;font-weight:900}.notificationOverview>button b{margin-left:5px}body.kompasiAppMode .accountNotificationsPage .filters{margin-top:8px!important;padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border:0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;border-color:#d7e4ef!important;background:#f3f7fb!important;color:#526b82!important;font-size:9px!important}body.kompasiAppMode .accountNotificationsPage .filters button.active{border-color:#0b6fd3!important;background:#0b6fd3!important;color:#fff!important}
-        body.kompasiAppMode .accountNotificationsPage .list{gap:8px!important}body.kompasiAppMode .accountNotificationsPage .list .card{border:0!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(17,61,105,.08)!important}body.kompasiAppMode .accountNotificationsPage .list .unread{border-left:4px solid #ef654c!important;background:#fff!important}body.kompasiAppMode .accountNotificationsPage .list .icon{border-radius:13px!important;background:#e8f3ff!important}
+        body.kompasiAppMode .accountNotificationsPage .shell{width:calc(100% - 24px)!important;max-width:520px!important;padding:20px 0 110px!important}.notificationHero{position:relative;overflow:hidden;padding:19px 17px 16px;border:1px solid rgba(255,255,255,.28);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.08));color:#fff;box-shadow:0 20px 45px rgba(1,24,58,.28),inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(14px)}.notificationHero:after{content:"";position:absolute;right:-42px;top:-58px;width:150px;height:150px;border:24px solid rgba(255,255,255,.07);border-radius:50%}.heroTop{position:relative;z-index:1;display:flex;align-items:center;gap:11px}.heroBell{width:47px;height:47px;display:grid;place-items:center;flex:0 0 47px;border:1px solid rgba(255,255,255,.35);border-radius:15px;background:rgba(255,255,255,.15);font-size:23px}.heroTop>div{min-width:0;flex:1}.heroTop small{color:#bfe0ff;font-size:8px;font-weight:900;letter-spacing:1.2px}.heroTop h1{margin:3px 0 0;color:#fff;font-size:25px;letter-spacing:-.4px}.unreadBadge{position:relative;z-index:1;min-width:58px;padding:8px 9px;border-radius:14px;background:#fff;color:#0a4c8a;text-align:center;box-shadow:0 7px 17px rgba(1,25,58,.18)}.unreadBadge b,.unreadBadge small{display:block}.unreadBadge b{font-size:20px}.unreadBadge small{margin-top:1px;color:#69849e;font-size:7px}.notificationHero>p{position:relative;z-index:1;margin:14px 0 0;color:#d9ecff;font-size:11px;line-height:1.5}.heroActions{position:relative;z-index:1;margin-top:14px;display:flex;gap:7px}.heroActions button{min-height:40px;padding:0 11px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid rgba(255,255,255,.32);border-radius:11px;background:rgba(255,255,255,.13);color:#fff;font-size:9px;font-weight:900}.heroActions button:first-child{flex:1;justify-content:flex-start}.heroActions button:first-child b{margin-left:auto}.heroActions button:last-child{background:#fff;color:#0b5db8}body.kompasiAppMode .accountNotificationsPage .stats{display:none!important}body.kompasiAppMode .accountNotificationsPage .filters{margin-top:9px!important;padding:7px!important;flex-wrap:nowrap!important;overflow-x:auto!important;border:1px solid #dbe7f2!important;border-radius:14px!important;background:#fff!important;box-shadow:0 9px 22px rgba(3,38,82,.1)!important;scrollbar-width:none}body.kompasiAppMode .accountNotificationsPage .filters button{flex:0 0 auto!important;min-height:36px!important;border:0!important;background:#f0f5fa!important;color:#526b82!important;font-size:9px!important}body.kompasiAppMode .accountNotificationsPage .filters button.active{background:#0b6fd3!important;color:#fff!important}
+        body.kompasiAppMode .accountNotificationsPage .list{margin-top:12px!important;gap:8px!important}body.kompasiAppMode .accountNotificationsPage .list .card{padding:13px!important;border:1px solid #dce7f1!important;border-radius:17px!important;background:#fff!important;box-shadow:0 7px 20px rgba(17,61,105,.07)!important}body.kompasiAppMode .accountNotificationsPage .list .unread{border-color:#acd2f6!important;background:linear-gradient(135deg,#fff,#f4f9ff)!important;box-shadow:0 9px 23px rgba(10,89,171,.11)!important}body.kompasiAppMode .accountNotificationsPage .list .icon{border-radius:14px!important;box-shadow:inset 0 0 0 1px rgba(35,89,145,.08)!important}body.kompasiAppMode .accountNotificationsPage .list .type-chat .icon{background:#e7f2ff!important}body.kompasiAppMode .accountNotificationsPage .list .type-location .icon{background:#e6f8ef!important}body.kompasiAppMode .accountNotificationsPage .list .type-scan .icon{background:#efeaff!important}body.kompasiAppMode .accountNotificationsPage .list .type-order .icon{background:#fff0ea!important}body.kompasiAppMode .accountNotificationsPage .list .top strong{color:#183953!important;font-size:12px!important}body.kompasiAppMode .accountNotificationsPage .list .top span{color:#2874bf!important;font-size:7px!important}body.kompasiAppMode .accountNotificationsPage .list .cardState>i{background:#0b74d9!important}body.kompasiAppMode .accountNotificationsPage .list .cardState>b{background:#edf4fb!important;color:#1761bd!important}
         @media(max-width:600px){body.kompasiAppMode .accountNotificationsPage .topbar{width:calc(100% - 24px)!important}.accountNotificationsPage .heading{gap:10px!important}.accountNotificationsPage .markAll{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.14)!important;color:#fff!important}}
       `}</style>
     </main>
@@ -1278,8 +1194,8 @@ function NotificationCard({
     <article
       className={
         notification.read
-          ? "card"
-          : "card unread"
+          ? `card type-${notification.type}`
+          : `card unread type-${notification.type}`
       }
       onClick={() =>
         void handleCardClick()
@@ -1483,6 +1399,8 @@ function NotificationCard({
 
           font-size: 18px;
         }
+
+        .type-chat .icon{background:#e7f2ff;color:#0967cf}.type-location .icon{background:#e7f8f0;color:#078457}.type-scan .icon{background:#f0ebff;color:#6848c7}.type-order .icon{background:#fff0ea;color:#c45d34}
 
         .content {
           min-width: 0;
