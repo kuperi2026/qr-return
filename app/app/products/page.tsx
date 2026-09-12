@@ -7,7 +7,6 @@ const hub = [
   ["♧", "სანდო პირი და უფლებები", "მიანიჭეთ არჩეულ პროფილზე უსაფრთხო წვდომა", "/account/admin?source=app", "violet"],
   ["▣", "QR პროდუქტების შეკვეთა", "აირჩიეთ და ონლაინ შეიძინეთ საჭირო QR პროდუქტი", "/app/store", "rose"],
   ["◇", "მომსახურება და პაკეტები", "მართეთ მომსახურების ვადა და პაკეტი", "/account/subscriptions?source=app", "gold"],
-  ["▶", "ვიდეო ინსტრუქციები", "ნახეთ, როგორ აირჩიოთ ვადა, პაკეტი და დაასრულოთ შეკვეთა", "/app/guides", "video"],
 ];
 export default function Products() {
   return (
@@ -129,15 +128,6 @@ export default function Products() {
         .pc section a.violet i{background:#f0eaff;color:#6847c6}
         .pc section a.rose i{background:#ffeaf2;color:#bd356b}
         .pc section a.gold i{background:#fff2db;color:#9a6100}
-        .pc section a.video {
-          border-color: rgba(255,255,255,.22);
-          background: linear-gradient(135deg,#186bd4,#5849d8);
-          color: #fff;
-          box-shadow: 0 14px 30px rgba(13,42,126,.3);
-        }
-        .pc section a.video i{background:rgba(255,255,255,.18);color:#fff}
-        .pc section a.video small{color:#e7efff}
-        .pc section a.video em{color:#fff}
         .pc section a:hover{border-color:#b9d8f8;transform:translateY(-1px);box-shadow:0 14px 30px rgba(4,42,91,.16)}
         @media (max-width: 380px) {
           .pc section {
