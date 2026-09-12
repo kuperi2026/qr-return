@@ -374,6 +374,7 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .appNext,body.kompasiAppMode .subscriptionsPage .appPrevious{min-height:47px;padding:0 15px;border:0;border-radius:12px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer}
         body.kompasiAppMode .subscriptionsPage .appNext,body.kompasiAppMode .subscriptionsPage .summaryPrevious{display:block!important}
         body.kompasiAppMode .subscriptionsPage .liveCalculator{display:block!important}
+        body.kompasiAppMode .subscriptionsPage .profileStage>.profilePicker{display:none!important}
         body.kompasiAppMode .subscriptionsPage .appNext{width:100%;margin-top:15px;background:linear-gradient(135deg,#7157d9,#6547c7)!important;color:#fff!important;box-shadow:0 8px 18px rgba(87,62,180,.24)}
         body.kompasiAppMode .subscriptionsPage .appNext:disabled{opacity:.45;box-shadow:none}
         body.kompasiAppMode .subscriptionsPage .appStageActions{margin-top:15px;display:grid!important;grid-template-columns:.75fr 1.25fr;gap:8px}
