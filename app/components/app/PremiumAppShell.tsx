@@ -383,8 +383,8 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .subscriptionsPage .purchaseHistory{background:linear-gradient(155deg,#fff,#f4f8fd)!important;box-shadow:0 14px 32px rgba(1,30,66,.22)!important}
         body.kompasiAppMode .subscriptionsPage .historyHeading>span{background:#e8f2ff!important;color:#075dcc!important}
         body.kompasiAppMode .subscriptionsPage .historyList article{border-color:#dce8f3!important;background:rgba(255,255,255,.86)!important}
-        body.kompasiAppMode .subscriptionsPage .free b{font-size:27px!important;line-height:1!important}
-        body.kompasiAppMode .subscriptionsPage .free span{font-size:14px!important;font-weight:850!important;letter-spacing:.15px!important}
+        body.kompasiAppMode .subscriptionsPage .free b{font-size:17px!important;line-height:1.15!important}
+        body.kompasiAppMode .subscriptionsPage .free span{font-size:11px!important;font-weight:800!important;letter-spacing:.1px!important}
         body.kompasiAppMode .subscriptionsPage .panel h2:not(:first-child){margin:22px 0 12px!important;padding:11px 12px!important;border:1px solid #d5e5f4!important;border-radius:12px!important;background:linear-gradient(100deg,#e8f3ff,#f3efff)!important;color:#173652!important;box-shadow:0 5px 14px rgba(23,63,109,.07)!important}
         body.kompasiAppMode .subscriptionsPage .period:nth-child(n){border:1px solid #d5e5f3!important;background:#fff!important;color:#173652!important;box-shadow:0 6px 16px rgba(4,70,117,.08)!important;text-align:left!important}
         body.kompasiAppMode .subscriptionsPage .period:nth-child(n) small{color:#7890a6!important;font-size:9px!important;letter-spacing:.15px!important}
