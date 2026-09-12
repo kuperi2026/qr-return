@@ -109,7 +109,7 @@ export default function LoginPage() {
     if (appSource) {
       window.localStorage.setItem("kompasi-app-mode", "1");
       setAppMode(true);
-      setNextPath("/app/dashboard");
+      setNextPath("/app/products");
     } else if (
       requestedNext &&
       requestedNext.startsWith("/") &&
