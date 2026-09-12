@@ -134,10 +134,10 @@ export default function SubscriptionsPage() {
       <div className="intro"><div><small>მომსახურება და პაკეტები</small><h1>გააგრძელეთ თქვენი QR პროფილის მომსახურება</h1><p>აირჩიეთ პროფილი და სასურველი ვადა. თანხა ჩამოიჭრება მხოლოდ მოთხოვნის დადასტურების შემდეგ.</p></div><div className="free"><b>2 თვე</b><span>უფასო პერიოდი</span></div></div>
 
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
-        {([1, 2, 3] as const).map((step) => (
+        {([1, 3] as const).map((step) => (
           <button key={step} type="button" className={appStep === step ? "active" : appStep > step ? "done" : ""} onClick={() => setAppStep(step)}>
-            <span>{appStep > step ? "✓" : step}</span>
-            <b>{step === 1 ? "პროფილი" : step === 2 ? "ვადა" : "შეჯამება"}</b>
+            <span>{appStep > step ? "✓" : step === 1 ? "1" : "2"}</span>
+            <b>{step === 1 ? "არჩევანი და ფასი" : "შეჯამება"}</b>
           </button>
         ))}
       </nav>
@@ -162,19 +162,12 @@ export default function SubscriptionsPage() {
               })}</div>
             </section>)}
           </div> : <div className="state">ჯერ QR პროფილი არ გაქვს. <Link href="/register">პროფილის დამატება</Link></div>}
-          <button type="button" className="appNext" disabled={!selectedProfiles.length} onClick={() => setAppStep(2)}>ვადის არჩევა <span>→</span></button></div>
+          </div>
 
           <div className="checkoutStage periodStage"><h2><span className="stepNumber">2</span> აირჩიეთ მომსახურების ვადა</h2>
-          <details className="inlineProfileEditor">
-            <summary><span><small>არჩეული პროფილი</small><b>{selectedItems.map((profile) => profile.item_name || profile.tag_code).join(", ")}</b></span><strong>შეცვლა⌄</strong></summary>
-            <div className="inlineProfileEditorBody">
-              <div className="categoryTabs" role="tablist" aria-label="პროფილის კატეგორიები">{profileGroups.map((group) => <button key={group.type} type="button" role="tab" aria-selected={openCategory === group.type} className={openCategory === group.type ? "categoryTab active" : "categoryTab"} onClick={() => setOpenCategory(group.type)}><span className="groupIcon">{group.icon}</span><span className="groupTitle"><b>{group.label}</b><small>{group.profiles.length} პროფილი</small></span></button>)}</div>
-              {profileGroups.map((group) => group.type === openCategory && <div key={group.type} className="profiles">{group.profiles.map((profile) => { const meta = PRODUCTS.find((item) => item.type === normalizeType(profile)); const selected = selectedProfiles.includes(profile.id); return <button key={profile.id} type="button" className={selected ? "profile selected" : "profile"} onClick={() => toggleProfile(profile.id)}><span className="icon">{meta?.icon || "🏷️"}</span><span><b>{profile.item_name || meta?.name || "QR პროფილი"}</b><small>{meta?.name} · {profile.tag_code}</small></span><i>{selected ? "✓" : ""}</i></button>; })}</div>)}
-            </div>
-          </details>
           <div className="periods">{PERIODS.map((item) => { const sum = selectedItems.reduce((amount, profile) => amount + (PRODUCTS.find((p) => p.type === normalizeType(profile))?.prices[item.value] || 0), 0); const active = period === item.value; return <button key={item.value} className={active ? "period active" : "period"} aria-pressed={active} onClick={() => setPeriod(item.value)}><i aria-hidden="true">{active ? "✓" : ""}</i><small>მომსახურების ვადა</small><b>{item.label}</b><span>{selectedItems.length ? `${sum} ₾` : "—"}</span></button>; })}</div>
           <details className="appPriceCatalog"><summary>ყველა პროდუქტის ფასი <span>⌄</span></summary><div className="appPriceRows"><div className="appPriceHeader"><b>პროდუქტი</b><span>1 თვე</span><span>3 თვე</span><span>6 თვე</span><span>1 წელი</span></div>{PRODUCTS.map((item) => <article key={item.type}><b>{item.icon} {item.name}</b>{PERIODS.map((p) => <span key={p.value}>{item.prices[p.value]}₾</span>)}</article>)}</div></details>
-          <div className="appStageActions"><button type="button" className="appPrevious" onClick={() => setAppStep(1)}>← უკან</button><button type="button" className="appNext" disabled={!selectedProfiles.length} onClick={() => setAppStep(3)}>შეჯამება <span>→</span></button></div></div>
+          <div className="appStageActions"><button type="button" className="appNext" disabled={!selectedProfiles.length} onClick={() => setAppStep(3)}>შეჯამება <span>→</span></button></div></div>
         </section>
 
         <aside className="summary checkoutStage summaryStage">
