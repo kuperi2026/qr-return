@@ -18,6 +18,7 @@ type ChatThread = {
   finder_session: string;
   last_message: string | null;
   last_message_at: string | null;
+  finder_last_active: string | null;
   message_count: number;
 };
 
@@ -27,6 +28,7 @@ type ChatMessage = {
   message_text: string;
   created_at: string;
   read_at: string | null;
+  edited_at: string | null;
 };
 
 const CHAT_EMOJIS = ["😀","😃","😄","😁","😊","🙂","😉","😍","🥰","😘","😇","🤗","🤔","😢","😭","😮","😅","😂","🤣","🙏","❤️","🧡","💛","💚","💙","💜","👍","👎","👏","🙌","👋","🤝","💪","✅","❗","❓","🎉","🚨","📍","🏠","🚗","🔑","🐶","🐱","🐾","📞","💬","✨"];
@@ -47,12 +49,12 @@ export default function OwnerChatInboxPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
-  const [conversationView, setConversationView] = useState<"all" | "recent">("all");
   const [selected, setSelected] = useState<ChatThread | null>(null);
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [showEmojis, setShowEmojis] = useState(false);
 
   const [loading, setLoading] = useState(true);
@@ -234,6 +236,22 @@ export default function OwnerChatInboxPage() {
     await sendPayload(clean);
   }
 
+  async function saveEdit() {
+    if (!editingId || !text.trim() || sending) return;
+    setSending(true); setError("");
+    const { error: editError } = await supabase.rpc("owner_edit_chat_message", { p_message_id: editingId, p_message: text.trim() });
+    if (editError) setError(editError.message);
+    else { setEditingId(null); setText(""); if (selected) await loadMessages(selected, true); }
+    setSending(false);
+  }
+
+  async function deleteConversation() {
+    if (!selected || !window.confirm(ka ? "წავშალოთ ეს საუბარი? აღდგენა შეუძლებელი იქნება." : "Delete this conversation? This cannot be undone.")) return;
+    const { error: deleteError } = await supabase.rpc("owner_delete_chat_thread", { p_profile_id: selected.profile_id, p_finder_session: selected.finder_session });
+    if (deleteError) { setError(deleteError.message); return; }
+    setSelected(null); setMessages([]); setMobileConversationOpen(false); await loadThreads();
+  }
+
   async function sendPayload(clean: string): Promise<boolean> {
     if (!selected || !clean || sending) return false;
     setSending(true); setError("");
@@ -334,12 +352,7 @@ export default function OwnerChatInboxPage() {
     );
   }, [selected, ka]);
 
-  const visibleThreads = useMemo(() => {
-    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    return conversationView === "all"
-      ? threads
-      : threads.filter((thread) => !thread.last_message_at || new Date(thread.last_message_at).getTime() >= cutoff);
-  }, [threads, conversationView]);
+  const visibleThreads = threads;
 
   if (loading) {
     return (
@@ -451,11 +464,6 @@ export default function OwnerChatInboxPage() {
               </div>}
             </section>
 
-            <div className="conversationTabs">
-              <button type="button" className={conversationView === "all" ? "active" : ""} onClick={() => setConversationView("all")}>ყველა</button>
-              <button type="button" className={conversationView === "recent" ? "active" : ""} onClick={() => setConversationView("recent")}>ბოლო 30 დღე</button>
-            </div>
-
             {visibleThreads.length === 0 ? (
               <div className="noThreads">
                 <div>💬</div>
@@ -500,6 +508,7 @@ export default function OwnerChatInboxPage() {
                           <strong>
                             {thread.item_name || thread.tag_code}
                           </strong>
+                          <small>{thread.finder_last_active ? `${ka ? "ბოლოს აქტიური" : "Last active"} · ${formatDate(thread.finder_last_active)}` : ""}</small>
 
                           <time>
                             {formatDate(thread.last_message_at)}
@@ -565,8 +574,9 @@ export default function OwnerChatInboxPage() {
                   </div>
 
                   <div className="liveStatus">
-                    ● LIVE
+                    {selected.finder_last_active ? `${ka ? "ბოლოს აქტიური" : "Last active"} · ${formatDate(selected.finder_last_active)}` : "● LIVE"}
                   </div>
+                  <button type="button" className="deleteChat" onClick={() => void deleteConversation()} aria-label={ka ? "ჩათის წაშლა" : "Delete chat"}>⌫</button>
                 </div>
 
                 <div className="privacyNotice">
@@ -644,7 +654,9 @@ export default function OwnerChatInboxPage() {
                                     : ka ? "✓ მიწოდებულია" : "✓ Delivered"}
                                 </span>
                               )}
+                              {message.edited_at && <span>{ka ? "რედაქტირებულია" : "Edited"}</span>}
                             </div>
+                            {mine && <button type="button" className="editMessage" onClick={() => { setEditingId(message.id); setText(message.message_text); }}>{ka ? "რედაქტირება" : "Edit"}</button>}
                           </div>
                         </div>
                       );
@@ -656,7 +668,7 @@ export default function OwnerChatInboxPage() {
 
                 <form
                   className="composer"
-                  onSubmit={sendMessage}
+                  onSubmit={(event) => { if (editingId) { event.preventDefault(); void saveEdit(); } else void sendMessage(event); }}
                 >
                   <div className="composerTools">
                     <div className="emojiWrap">
@@ -685,10 +697,11 @@ export default function OwnerChatInboxPage() {
                       }}
                       maxLength={2000}
                       disabled={sending}
-                      placeholder={ka ? "მიწერეთ მპოვნელს..." : "Reply to the finder..."}
+                      placeholder={editingId ? (ka ? "შეცვალეთ შეტყობინება..." : "Edit message...") : (ka ? "მიწერეთ მპოვნელს..." : "Reply to the finder...")}
                     />
+                    {editingId && <button type="button" className="cancelEdit" onClick={() => { setEditingId(null); setText(""); }}>×</button>}
                     <button className="sendButton" type="submit" disabled={sending || !text.trim()} aria-label="შეტყობინების გაგზავნა">
-                      {sending ? "…" : "➤"}
+                      {sending ? "…" : editingId ? "✓" : "➤"}
                     </button>
                   </div>
                 </form>
@@ -707,7 +720,8 @@ export default function OwnerChatInboxPage() {
         body.kompasiAppMode .ownerChatPage .thread{min-height:76px!important;padding:10px 46px 10px 11px!important;border-color:#e7edf3!important}.ownerChatPage .thread.active{background:#eaf4ff!important}.ownerChatPage .threadIcon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}.ownerChatPage .threadTop strong{font-size:14px!important}.ownerChatPage .thread p{font-size:12px!important;line-height:1.35!important}
         html body.kompasiAppMode .ownerChatPage .messages{background:linear-gradient(160deg,#edf9f7 0%,#f7f5fc 52%,#ffffff 100%)!important}.ownerChatPage .bubble{border-radius:17px 17px 17px 5px!important;background:#fff!important;color:#20364a!important;font-size:15px!important;line-height:1.45!important;box-shadow:0 2px 8px rgba(22,78,85,.1)!important}.ownerChatPage .messageRow.mine .bubble{border-radius:17px 17px 5px 17px!important;background:linear-gradient(135deg,#087f91,#159b79)!important;color:#fff!important;box-shadow:none!important}.ownerChatPage .messageMeta time{font-size:12px!important}.ownerChatPage .messageMeta span{font-size:11px!important}
         body.kompasiAppMode .ownerChatPage .composer textarea{border:1px solid #dbe4ec!important;border-radius:16px!important;background:#f7f9fb!important;font-size:15px!important}.ownerChatPage .composer .sendButton{border-radius:14px!important;background:#0a67c7!important}.ownerChatPage .aiReception{display:block!important}.aiLanguage{margin-top:9px}.aiLanguage>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.aiLanguage>div{display:grid;grid-template-columns:1fr 1fr;gap:6px}.aiLanguage button{min-height:36px;border:1px solid #c9dced;border-radius:9px;background:#fff;color:#075dcc;font-size:10px;font-weight:900;cursor:pointer}
-        .conversationTabs{margin:0 12px 8px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:12px;background:#edf3f9}.conversationTabs button{min-height:36px;border:0;border-radius:9px;background:transparent;color:#6a7f93;font:850 10px Inter,Arial;cursor:pointer}.conversationTabs button.active{background:#fff;color:#075dcc;box-shadow:0 3px 9px rgba(23,63,109,.1)}
+        .deleteChat{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border:1px solid #ffd1d1;border-radius:11px;background:#fff2f2;color:#c53636;font-size:18px;cursor:pointer}.editMessage{margin-top:5px;padding:2px 0;border:0;background:transparent;color:inherit;font-size:10px;font-weight:800;opacity:.72;cursor:pointer}.cancelEdit{width:42px;min-height:48px;border:1px solid #d6e0e8;border-radius:14px;background:#fff;color:#64788a;font-size:22px}.threadTop small{display:block;margin-top:3px;color:#668096;font-size:9px;font-weight:700}.liveStatus{max-width:150px;line-height:1.25;text-align:center}
+        .conversationTabs{display:none!important}
         .aiReception{margin:0 10px 10px;overflow:hidden;border:1px solid #cfe0f3;border-radius:14px;background:#f4f9ff}.aiReceptionHead{width:100%;min-height:58px;padding:9px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#173652;text-align:left}.aiSpark{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:11px;background:#0b70d7;color:#fff;font-size:17px}.aiReceptionHead>span:nth-child(2){min-width:0;flex:1}.aiReceptionHead strong,.aiReceptionHead small{display:block}.aiReceptionHead strong{font-size:12px}.aiReceptionHead small{margin-top:3px;color:#668096;font-size:8px}.aiReceptionHead em{font-style:normal}.aiReceptionBody{padding:0 10px 11px}.automationSwitch{padding:10px;display:flex;align-items:center;gap:8px;border-radius:10px;background:#fff}.automationSwitch>span{min-width:0;flex:1}.automationSwitch b,.automationSwitch small{display:block}.automationSwitch b{font-size:10px}.automationSwitch small{margin-top:3px;color:#71869a;font-size:8px;line-height:1.35}.automationSwitch input{width:40px;height:22px;accent-color:#0b74e5}.automationText{display:block;margin-top:9px}.automationText>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.automationText textarea{width:100%;min-height:82px;padding:9px;border:1px solid #ccdeef;border-radius:10px;background:#fff;color:#173652;font-size:10px;line-height:1.5;resize:none}.saveAutomation{width:100%;min-height:40px;margin-top:8px;border:0;border-radius:10px;background:#0b70d7;color:#fff;font-size:10px;font-weight:900}.aiReceptionBody>p{margin:7px 2px 0;color:#71869a;font-size:8px;line-height:1.4}
         body.kompasiAppMode .ownerChatPage .operatorCard{max-width:100%!important;margin-bottom:12px!important;padding:12px 14px!important;border-radius:17px!important;background:#116fd3!important}
         body.kompasiAppMode .ownerChatPage .pageTitle{margin-bottom:14px!important}.ownerChatPage .pageTitle h1{font-size:28px!important}.ownerChatPage .pageTitle p{font-size:11px!important}
