@@ -79,7 +79,7 @@ export default function SubscriptionsPage() {
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
     const initialProfile = rows.find((profile) => profile.id === requestedProfile) || rows[0];
-    setProfiles(rows); setSelectedProfiles(!appContext && initialProfile?.id ? [initialProfile.id] : []);
+    setProfiles(rows); setSelectedProfiles(initialProfile?.id && (!appContext || Number.isFinite(requestedProfile)) ? [initialProfile.id] : []);
     setOpenCategory(initialProfile ? normalizeType(initialProfile) : ""); setLoading(false);
     const { data: requests } = await supabase
       .from("service_activation_requests")
