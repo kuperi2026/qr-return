@@ -17,8 +17,6 @@ export default function Products() {
       <div className="pw">
         <header>
           <small>KOMPASI</small>
-          <h1>კეთილი იყოს თქვენი მობრძანება</h1>
-          <p>შექმენით ახალი ანგარიში ან შედით უკვე არსებულ ანგარიშში.</p>
         </header>
         <section className="authChoice" aria-label="ანგარიშში შესვლა ან რეგისტრაცია">
           <Link href="/signup?source=app" className="registerAction">
@@ -28,7 +26,6 @@ export default function Products() {
             <span><b>შესვლა</b><small>არსებულ ანგარიშში შესვლა</small></span><em>›</em>
           </Link>
         </section>
-        <div className="publicTitle"><b>საჯარო სივრცე</b><small>დათვალიერება ანგარიშის შექმნის გარეშეც შეგიძლიათ</small></div>
         <section>
           {publicHub.map(([icon, name, note, href, color]) => (
             <Link href={href} key={name} className={color}>
@@ -87,15 +84,12 @@ export default function Products() {
           gap: 8px;
           overflow: hidden;
         }
-        .pc .authChoice{margin-top:22px;gap:10px;overflow:visible}
+        .pc .authChoice{margin-top:14px;gap:10px;overflow:visible}
         .pc .authChoice a{min-height:82px;border-color:rgba(255,255,255,.58);box-shadow:0 13px 30px rgba(0,28,67,.2)}
         .pc .authChoice .registerAction{background:#fff;color:#075dcc}
         .pc .authChoice .loginAction{background:rgba(3,48,94,.36);color:#fff}
         .pc .authChoice .loginAction small{color:#d7ecff}
         .pc .authChoice em{font-size:25px}
-        .publicTitle{margin:27px 2px 0;display:flex;flex-direction:column;gap:4px}
-        .publicTitle b{font-size:14px}.publicTitle small{color:#badcff;font-size:11px;line-height:1.4}
-        .publicTitle + section{margin-top:11px}
         body.kompasiPublicEntry{padding-bottom:0!important}
         body.kompasiPublicEntry .appDock,body.kompasiPublicEntry .notificationPill{display:none!important}
         .pc section a {
