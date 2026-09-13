@@ -834,16 +834,16 @@ export default function LoginPage() {
         }
 
         .appAuth .decor { display: none; }
-        .appAuth .header { width: min(480px, 100%); height: 72px; justify-content: center; }
+        .appAuth .header { width: min(480px, 100%); height: 56px; justify-content: center; }
         .appAuth .brand { transform: none; }
         .appAuth .brandIcon { width: 38px; height: 38px; border-radius: 12px; }
-        .appAuth .brandMessage { max-width: 245px; font-size: 12px; line-height: 1.35; }
-        .appAuth .center { min-height: calc(100vh - 72px); padding: 18px 0 32px; align-items: start; }
-        .appAuth .card { max-width: 480px; padding: 24px 18px 20px; border: 1px solid rgba(255,255,255,.8); border-radius: 21px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
-        .appAuth h1 { font-size: 23px; text-align: center; }
-        .appAuth .field { margin-top: 17px; }
-        .appAuth input { height: 50px; border-radius: 12px; font-size: 16px; }
-        .appAuth .submit { height: 50px; border-radius: 12px; background: linear-gradient(120deg,#0b74e5,#13a66b); }
+        .appAuth .brandMessage { display:none; }
+        .appAuth .center { min-height: calc(100vh - 56px); padding: 9px 0 24px; align-items: start; }
+        .appAuth .card { max-width: 440px; padding: 18px 16px 15px; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
+        .appAuth h1 { font-size: 20px; text-align: center; }
+        .appAuth .field { margin-top: 11px; }
+        .appAuth input { height: 44px; border-radius: 10px; font-size: 15px; }
+        .appAuth .submit { height: 45px; margin-top:14px;border-radius: 11px; background: linear-gradient(120deg,#0b74e5,#13a66b); }
         .appAuth .signup { font-size: 12px; }
 
         @media (max-width: 520px) {
@@ -867,6 +867,8 @@ export default function LoginPage() {
 
             font-size: 16px;
           }
+          .page.appAuth .card{padding:17px 13px 14px}
+          .page.appAuth input{height:44px;font-size:15px}
         }
       `}</style>
     </>
