@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-const hub = [
+const privateHub = [
   ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/app/add", "blue"],
   ["▤", "პროფილების მართვა", "უკვე შექმნილი პროფილების ნახვა და მართვა", "/app/profiles", "green"],
   ["♧", "სანდო პირი და უფლებები", "მიანიჭეთ არჩეულ პროფილზე უსაფრთხო წვდომა", "/account/admin?source=app", "violet"],
+];
+
+const publicHub = [
   ["▣", "QR პროდუქტების შეკვეთა", "აირჩიეთ და ონლაინ შეიძინეთ საჭირო QR პროდუქტი", "/app/store", "rose"],
   ["◇", "მომსახურება და პაკეტები", "მართეთ მომსახურების ვადა და პაკეტი", "/account/subscriptions?source=app", "gold"],
 ];
@@ -21,9 +24,13 @@ export default function Products() {
     void supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user)));
   }, []);
 
-  const protectedHref = (href: string) => signedIn === false
+  const protectedHref = (href: string) => signedIn !== true
     ? `/login?source=app&next=${encodeURIComponent(href)}`
     : href;
+
+  const hub = signedIn === true
+    ? [...privateHub, ...publicHub]
+    : publicHub;
 
   return (
     <main className="pc">
@@ -34,8 +41,12 @@ export default function Products() {
           <p>ყველაფერი, რაც თქვენი QR პროფილების სამართავად გჭირდებათ.</p>
         </header>
         <section>
-          {hub.map(([icon, name, note, href, color], index) => (
-            <Link href={index === 3 ? href : protectedHref(href)} key={name} className={color}>
+          {hub.map(([icon, name, note, href, color]) => (
+            <Link
+              href={href === "/app/store" ? href : protectedHref(href)}
+              key={name}
+              className={color}
+            >
               <i>{icon}</i>
               <span>
                 <b>{name}</b>
