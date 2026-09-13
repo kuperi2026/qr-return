@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import Image from "next/image";
-import { APP_REGISTRATION_HERO } from "../../components/registration-flow/productConfig";
 
 import EmergencyStep1 from "./components/EmergencyStep1";
 import EmergencyStep2 from "./components/EmergencyStep2";
@@ -41,7 +39,6 @@ const supabase =
 ========================================================= */
 
 export default function EmergencyBraceletPage() {
-  const appHero = APP_REGISTRATION_HERO.emergency;
   const [isAppRegistration, setIsAppRegistration] = useState(false);
   const [step, setStep] =
     useState(1);
@@ -992,17 +989,6 @@ export default function EmergencyBraceletPage() {
             ← ჩემი პროფილები
           </a>
         </header>
-
-        <section className="appRegistrationHero" aria-label="Emergency პროფილის რეგისტრაცია">
-          <div className="appRegistrationHeroImage">
-            <Image src={appHero.image} alt="" fill sizes="132px" priority />
-          </div>
-          <div className="appRegistrationHeroCopy">
-            <span>{appHero.use}</span>
-            <h1>{appHero.title}</h1>
-            <p>{appHero.promise}</p>
-          </div>
-        </section>
 
         <section className={step === 1 ? "card emergencyChoiceCard" : "card"}>
           {saveError && (
