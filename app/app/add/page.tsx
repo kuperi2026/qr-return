@@ -1,5 +1,8 @@
 "use client";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 const types = [
   ["🐕", "ძაღლი", "/register/dog?source=app"],
   ["🐈", "კატა", "/register/cat?source=app"],
@@ -11,6 +14,14 @@ const types = [
   ["✚", "Emergency", "/register/emergency-bracelet?source=app"],
 ];
 export default function Add() {
+  const router = useRouter();
+
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.replace("/login?source=app&next=%2Fapp%2Fadd");
+    });
+  }, [router]);
+
   return (
     <main className="sub">
       <div className="subw">
