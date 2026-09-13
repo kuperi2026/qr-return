@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 const hub = [
   ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/app/add", "blue"],
   ["▤", "პროფილების მართვა", "უკვე შექმნილი პროფილების ნახვა და მართვა", "/app/profiles", "green"],
@@ -9,17 +11,31 @@ const hub = [
   ["◇", "მომსახურება და პაკეტები", "მართეთ მომსახურების ვადა და პაკეტი", "/account/subscriptions?source=app", "gold"],
 ];
 export default function Products() {
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_KEY;
+    if (!url || !key) { setSignedIn(false); return; }
+    const supabase = createClient(url, key);
+    void supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user)));
+  }, []);
+
+  const protectedHref = (href: string) => signedIn === false
+    ? `/login?source=app&next=${encodeURIComponent(href)}`
+    : href;
+
   return (
     <main className="pc">
       <div className="pw">
         <header>
-          <small>KOMPASI HUB</small>
+          <div className="hubTop"><small>KOMPASI HUB</small><nav>{signedIn ? <Link href="/app/profiles">ჩემი პროფილები</Link> : <><Link href="/login?source=app" className="signIn">შესვლა</Link><Link href="/signup?source=app" className="signUp">რეგისტრაცია</Link></>}</nav></div>
           <h1>თქვენი QR სივრცე</h1>
           <p>ყველაფერი, რაც თქვენი QR პროფილების სამართავად გჭირდებათ.</p>
         </header>
         <section>
-          {hub.map(([icon, name, note, href, color]) => (
-            <Link href={href} key={name} className={color}>
+          {hub.map(([icon, name, note, href, color], index) => (
+            <Link href={index === 3 ? href : protectedHref(href)} key={name} className={color}>
               <i>{icon}</i>
               <span>
                 <b>{name}</b>
@@ -54,6 +70,7 @@ export default function Products() {
           font-weight: 950;
           letter-spacing: 1px;
         }
+        .hubTop{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px}.hubTop nav{display:flex;align-items:center;gap:7px}.hubTop nav a{min-height:35px;padding:0 12px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;font-size:10px;font-weight:900;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}.hubTop nav .signUp{border-color:#fff;background:#fff;color:#075dcc}.hubTop nav .signIn{background:rgba(4,47,94,.22)}
         .pc h1 {
           margin: 5px 0 0;
           max-width: 420px;
@@ -130,6 +147,7 @@ export default function Products() {
         .pc section a.gold i{background:#fff2db;color:#9a6100}
         .pc section a:hover{border-color:#b9d8f8;transform:translateY(-1px);box-shadow:0 14px 30px rgba(4,42,91,.16)}
         @media (max-width: 380px) {
+          .hubTop{align-items:flex-start}.hubTop nav a{min-height:33px;padding:0 9px;font-size:9px}
           .pc section {
             grid-template-columns: 1fr;
           }
