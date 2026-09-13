@@ -364,6 +364,23 @@ export default function PremiumAppShell() {
         body.kompasiAppMode .accountAdminPage .adminLinkNote{font-size:9px!important;line-height:1.4!important}
         body.kompasiAppMode .accountAdminPage .profilePermissionGrid{margin-top:12px!important;padding:10px 0 0!important;grid-template-columns:1fr 1fr!important;gap:7px!important;background:transparent!important}.accountAdminPage .miniPermission{min-height:42px!important;padding:8px!important;font-size:10px!important}.accountAdminPage .miniPermission.on{border-color:#f0a246!important;background:#fff4e6!important;color:#9b5605!important}.accountAdminPage .miniPermission.on .miniPermissionDot{background:#ee8f25!important}
         body.kompasiAppMode .accountAdminPage .profileRemoveButton{width:100%!important;min-height:42px!important;margin-top:12px!important;font-size:10px!important}
+        body.kompasiAppMode .accountAdminPage .card{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+        body.kompasiAppMode .accountAdminPage .permissionsHeader{padding:2px 4px 5px!important}
+        body.kompasiAppMode .accountAdminPage .permissionsHeader h2{color:#fff!important;font-size:18px!important}
+        body.kompasiAppMode .accountAdminPage .permissionsHeader .profileAccessIntro{color:#d8ecff!important;font-size:11px!important}
+        body.kompasiAppMode .accountAdminPage .productAccessList{margin-top:9px!important;gap:10px!important;overflow:visible!important}
+        body.kompasiAppMode .accountAdminPage .productAccessCard{width:100%!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:17px!important;background:#fff!important;box-shadow:0 10px 24px rgba(1,30,66,.18)!important}
+        body.kompasiAppMode .accountAdminPage .productAccessCard.selected{border-color:#7db9f1!important;box-shadow:0 13px 30px rgba(1,30,66,.24)!important}
+        body.kompasiAppMode .accountAdminPage .productSelector{min-height:76px!important;padding:11px 13px!important}
+        body.kompasiAppMode .accountAdminPage .productIdentity strong{overflow:hidden!important;font-size:15px!important;line-height:1.3!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+        body.kompasiAppMode .accountAdminPage .productIdentity small{font-size:10px!important}
+        body.kompasiAppMode .accountAdminPage .profileAdminPanel{padding:14px!important;border-top:1px solid #dbe7f5!important;background:#f7fbff!important}
+        body.kompasiAppMode .accountAdminPage .profileContactGrid{grid-template-columns:1fr!important;gap:11px!important}
+        body.kompasiAppMode .accountAdminPage .profileContactGrid label span{font-size:12px!important}
+        body.kompasiAppMode .accountAdminPage .profileContactGrid input{height:48px!important;font-size:14px!important}
+        body.kompasiAppMode .accountAdminPage .profilePermissionGrid{grid-template-columns:1fr!important;gap:8px!important}
+        body.kompasiAppMode .accountAdminPage .miniPermission{width:100%!important;min-height:50px!important;padding:10px 12px!important;font-size:12px!important;line-height:1.35!important;text-align:left!important}
+        body.kompasiAppMode .accountAdminPage .miniPermissionDot{width:24px!important;height:24px!important;flex:0 0 24px!important}
         body.kompasiAppMode .accountAdminPage .actions{margin-top:-8px!important}.accountAdminPage .rightActions{width:100%!important;display:grid!important;grid-template-columns:.8fr 1.2fr!important}.accountAdminPage .cancelButton,.accountAdminPage .saveButton{width:100%!important;min-height:48px!important;padding:0 8px!important;font-size:11px!important}
         @media(max-width:380px){body.kompasiAppMode .accountAdminPage .profileContactGrid,body.kompasiAppMode .accountAdminPage .profilePermissionGrid{grid-template-columns:1fr!important}}
         body.kompasiAppMode .ownerChatPage{width:100%!important;overflow-x:hidden!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
