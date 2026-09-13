@@ -103,7 +103,7 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
         onClick={() => void startRecording()}
         aria-label="ხმოვანი შეტყობინების ჩაწერა"
         title="დააჭირეთ ერთხელ ჩაწერის დასაწყებად"
-      >🎙️</button>
+      ><svg className="voiceMicIcon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg></button>
     ) : (
       <div className="voiceRecordingControls" role="status" aria-label="ხმოვანი შეტყობინება იწერება">
         <span className="voiceRecordingTime">● {formatRecordingTime(recordingSeconds)}</span>
@@ -117,6 +117,7 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
       .voiceRecordingControls button { width: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 900; }
       .voiceCancelButton { background: #ffffff; color: #64748b; }
       .voiceSendButton { background: #1266e9; color: #ffffff; }
+      .voiceMicIcon { width: 21px; height: 21px; display: block; }
     `}</style>
   </>;
 }
