@@ -172,12 +172,6 @@ export default function PremiumAppShell() {
           <button type="button" aria-label="შეტყობინების დახურვა" onClick={() => setChatAlert(null)}>×</button>
         </aside>
       )}
-      {pathname.startsWith("/account/chat") && (
-        <Link className="companySupportButton" href="/support?source=app" aria-label="კომპანიასთან მიწერა">
-          <span>K</span>
-          <b>კომპანიასთან მიწერა</b>
-        </Link>
-      )}
       <nav className="appDock" aria-label="KOMPASI აპის ნავიგაცია">
         {NAV_ITEMS.map((item) => {
           const active = item.href === "/app/chat"
@@ -196,7 +190,6 @@ export default function PremiumAppShell() {
       <style jsx global>{`
         body.kompasiRouteSwitch>*{visibility:hidden!important}
         body.kompasiAppMode{padding-bottom:82px!important;overflow-x:hidden!important;overscroll-behavior-x:none!important}
-        .companySupportButton{position:fixed;right:14px;bottom:94px;z-index:9998;min-height:46px;padding:7px 13px 7px 8px;display:flex;align-items:center;gap:8px;border:1px solid #b9d9f7;border-radius:23px;background:#fff;color:#075dcc;text-decoration:none;box-shadow:0 8px 24px rgba(3,49,99,.2)}.companySupportButton>span{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#0b70d7;color:#fff;font-size:13px;font-weight:950}.companySupportButton>b{font-size:11px;font-weight:900}
         body.kompasiAppRegistration{overflow-x:hidden!important;background:#063b72!important}
         body.kompasiAppRegistration *{min-width:0;box-sizing:border-box}
         body.kompasiAppRegistration .page{width:100%!important;min-height:100vh!important;overflow-x:hidden!important;padding:0 12px 100px!important;background:radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%)!important}
