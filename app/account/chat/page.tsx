@@ -3,11 +3,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import {
-  formatLocationAccuracy,
-  getPreciseLocation,
-  LocationAccuracyError,
-} from "@/lib/geolocation";
 import ChatMediaButtons from "@/app/components/chat/ChatMediaButtons";
 import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
 import { parseChatMedia } from "@/lib/chatMedia";
@@ -63,8 +58,6 @@ export default function OwnerChatInboxPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [locationSending, setLocationSending] =
-    useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
   const [automationEnabled, setAutomationEnabled] = useState(false);
   const [automationMessage, setAutomationMessage] = useState("მოგესალმებით! ახლა შეიძლება მაშინვე ვერ გიპასუხოთ. გთხოვთ, მოკლედ მომწეროთ რა იპოვეთ და სად — პასუხს მალე დაგიბრუნებთ.");
@@ -110,7 +103,7 @@ export default function OwnerChatInboxPage() {
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `item_id=eq.${selected.profile_id}` },
         () => {
           void loadMessages(selected, true);
-          void loadThreads();
+          void loadThreads("", true);
         }
       )
       .subscribe();
@@ -156,8 +149,8 @@ export default function OwnerChatInboxPage() {
     setAutomationSaving(false);
   }
 
-  async function loadThreads(requestedSession = "") {
-    setLoading(true);
+  async function loadThreads(requestedSession = "", silent = false) {
+    if (!silent) setLoading(true);
 
     const { data, error: rpcError } = await supabase.rpc(
       "owner_get_all_chat_threads"
@@ -187,7 +180,7 @@ export default function OwnerChatInboxPage() {
       setError("");
     }
 
-    setLoading(false);
+    if (!silent) setLoading(false);
   }
 
   async function loadMessages(
@@ -260,104 +253,11 @@ export default function OwnerChatInboxPage() {
       setShowEmojis(false);
 
       await loadMessages(selected, true);
-      await loadThreads();
+      await loadThreads("", true);
     }
 
     setSending(false);
     return !rpcError;
-  }
-
-
-  async function shareOwnerLocation() {
-    if (
-      !selected ||
-      locationSending
-    ) {
-      return;
-    }
-
-    setLocationSending(true);
-    setError("");
-
-    try {
-      const position =
-        await getPreciseLocation();
-
-      const {
-        latitude,
-        longitude,
-        accuracy,
-      } = position.coords;
-
-      const mapsUrl =
-        `https://www.google.com/maps?q=${latitude},${longitude}`;
-
-      const locationMessage = ka
-        ? `📍 მფლობელმა ნებაყოფლობით გააზიარა ლოკაცია (სიზუსტე დაახლოებით ${formatLocationAccuracy(
-            accuracy
-          )} მეტრი): ${mapsUrl}`
-        : `📍 The owner voluntarily shared a location (about ${formatLocationAccuracy(
-            accuracy
-          )} m accuracy): ${mapsUrl}`;
-
-      const { error: rpcError } =
-        await supabase.rpc(
-          "owner_send_chat_message",
-          {
-            p_profile_id:
-              selected.profile_id,
-            p_finder_session:
-              selected.finder_session,
-            p_message:
-              locationMessage,
-          }
-        );
-
-      if (rpcError) {
-        throw rpcError;
-      }
-
-      await loadMessages(
-        selected,
-        true
-      );
-      await loadThreads();
-    } catch (error) {
-      console.error(
-        "Owner location sharing error:",
-        error
-      );
-
-      if (
-        error instanceof
-        LocationAccuracyError
-      ) {
-        setError(
-          ka
-            ? "GPS-ის სიზუსტე არასაკმარისია. გადით ღია სივრცეში, ჩართეთ Precise Location და სცადეთ თავიდან."
-            : "GPS accuracy is too low. Move outdoors, enable Precise Location, and try again."
-        );
-      } else if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === 1
-      ) {
-        setError(
-          ka
-            ? "ჩართეთ Location და Precise Location ნებართვა ბრაუზერის პარამეტრებში."
-            : "Enable Location and Precise Location permission in your browser settings."
-        );
-      } else {
-        setError(
-          ka
-            ? "ლოკაციის გაზიარება ვერ მოხერხდა."
-            : "Could not share location."
-        );
-      }
-    } finally {
-      setLocationSending(false);
-    }
   }
 
   function formatDate(value: string | null) {
@@ -768,9 +668,6 @@ export default function OwnerChatInboxPage() {
                       )}
                     </div>
                     <ChatMediaButtons tagCode={selected.tag_code} sessionId={selected.finder_session} disabled={sending} onSend={sendPayload} onError={setError} />
-                    <button type="button" className="locationButton" onClick={() => void shareOwnerLocation()} disabled={locationSending || sending} aria-label="ლოკაციის გაზიარება">
-                      {locationSending ? "…" : "📍"}
-                    </button>
                   </div>
 
                   <div className="composerInputRow">
@@ -801,6 +698,12 @@ export default function OwnerChatInboxPage() {
 
       <Styles />
       <style jsx global>{`
+        body.kompasiAppMode .ownerChatPage{font-family:"Noto Sans Georgian","Sylfaen",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:#eef3f8!important}
+        body.kompasiAppMode .ownerChatPage .operatorCard{margin-bottom:8px!important;padding:10px 13px!important;border:0!important;border-radius:15px!important;background:#084c8d!important;box-shadow:none!important}
+        body.kompasiAppMode .ownerChatPage .inbox{border:1px solid #d8e3ec!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(13,55,96,.1)!important}
+        body.kompasiAppMode .ownerChatPage .thread{min-height:76px!important;padding:10px 46px 10px 11px!important;border-color:#e7edf3!important}.ownerChatPage .thread.active{background:#eaf4ff!important}.ownerChatPage .threadIcon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}.ownerChatPage .threadTop strong{font-size:14px!important}.ownerChatPage .thread p{font-size:12px!important;line-height:1.35!important}
+        body.kompasiAppMode .ownerChatPage .messages{background:#f2f5f8!important}.ownerChatPage .bubble{border-radius:17px 17px 17px 5px!important;background:#fff!important;color:#20364a!important;font-size:15px!important;line-height:1.45!important;box-shadow:0 2px 7px rgba(22,55,86,.08)!important}.ownerChatPage .messageRow.mine .bubble{border-radius:17px 17px 5px 17px!important;background:#075fbd!important;color:#fff!important;box-shadow:none!important}.ownerChatPage .messageMeta time{font-size:12px!important}.ownerChatPage .messageMeta span{font-size:11px!important}
+        body.kompasiAppMode .ownerChatPage .composer textarea{border:1px solid #dbe4ec!important;border-radius:16px!important;background:#f7f9fb!important;font-size:15px!important}.ownerChatPage .composer .sendButton{border-radius:14px!important;background:#0a67c7!important}.ownerChatPage .aiReception{display:none!important}
         .conversationTabs{margin:0 12px 8px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-radius:12px;background:#edf3f9}.conversationTabs button{min-height:36px;border:0;border-radius:9px;background:transparent;color:#6a7f93;font:850 10px Inter,Arial;cursor:pointer}.conversationTabs button.active{background:#fff;color:#075dcc;box-shadow:0 3px 9px rgba(23,63,109,.1)}
         .aiReception{margin:0 10px 10px;overflow:hidden;border:1px solid #cfe0f3;border-radius:14px;background:#f4f9ff}.aiReceptionHead{width:100%;min-height:58px;padding:9px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#173652;text-align:left}.aiSpark{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:11px;background:#0b70d7;color:#fff;font-size:17px}.aiReceptionHead>span:nth-child(2){min-width:0;flex:1}.aiReceptionHead strong,.aiReceptionHead small{display:block}.aiReceptionHead strong{font-size:12px}.aiReceptionHead small{margin-top:3px;color:#668096;font-size:8px}.aiReceptionHead em{font-style:normal}.aiReceptionBody{padding:0 10px 11px}.automationSwitch{padding:10px;display:flex;align-items:center;gap:8px;border-radius:10px;background:#fff}.automationSwitch>span{min-width:0;flex:1}.automationSwitch b,.automationSwitch small{display:block}.automationSwitch b{font-size:10px}.automationSwitch small{margin-top:3px;color:#71869a;font-size:8px;line-height:1.35}.automationSwitch input{width:40px;height:22px;accent-color:#0b74e5}.automationText{display:block;margin-top:9px}.automationText>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.automationText textarea{width:100%;min-height:82px;padding:9px;border:1px solid #ccdeef;border-radius:10px;background:#fff;color:#173652;font-size:10px;line-height:1.5;resize:none}.saveAutomation{width:100%;min-height:40px;margin-top:8px;border:0;border-radius:10px;background:#0b70d7;color:#fff;font-size:10px;font-weight:900}.aiReceptionBody>p{margin:7px 2px 0;color:#71869a;font-size:8px;line-height:1.4}
         body.kompasiAppMode .ownerChatPage .operatorCard{max-width:100%!important;margin-bottom:12px!important;padding:12px 14px!important;border-radius:17px!important;background:#116fd3!important}
