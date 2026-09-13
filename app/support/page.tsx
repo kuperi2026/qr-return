@@ -4,6 +4,7 @@ import {
   ChangeEvent,
   FormEvent,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -67,6 +68,8 @@ export default function SupportPage() {
     useRef<HTMLInputElement | null>(null);
 
   const bottomRef =
+    useRef<HTMLDivElement | null>(null);
+  const messagesRef =
     useRef<HTMLDivElement | null>(null);
 
   const ka = lang === "ka";
@@ -284,10 +287,9 @@ export default function SupportPage() {
     };
   }, [conversation]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   function selectFile(
@@ -603,7 +605,7 @@ export default function SupportPage() {
             </a>
           </div>
 
-          <div className="messages">
+          <div className="messages" ref={messagesRef}>
             {loading && (
               <div className="loading">
                 <div className="loader" />
