@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+
 const publicHub = [
   ["▣", "QR პროდუქტების შეკვეთა", "აირჩიეთ და ონლაინ შეიძინეთ საჭირო QR პროდუქტი", "/app/store", "rose"],
   ["◇", "მომსახურება და პაკეტები", "გაეცანით მომსახურების პირობებსა და პაკეტებს", "/login?source=app&next=%2Faccount%2Fsubscriptions%3Fsource%3Dapp", "gold"],
@@ -20,10 +21,10 @@ export default function Products() {
         </header>
         <section className="authChoice" aria-label="ანგარიშში შესვლა ან რეგისტრაცია">
           <Link href="/signup?source=app" className="registerAction">
-            <span><b>რეგისტრაცია</b><small>ახალი ანგარიშის შექმნა</small></span><em>›</em>
+            <b>რეგისტრაცია</b><em>›</em>
           </Link>
           <Link href="/login?source=app" className="loginAction">
-            <span><b>შესვლა</b><small>არსებულ ანგარიშში შესვლა</small></span><em>›</em>
+            <b>შესვლა</b><em>›</em>
           </Link>
         </section>
         <section>
@@ -85,7 +86,7 @@ export default function Products() {
           overflow: hidden;
         }
         .pc .authChoice{margin-top:14px;gap:10px;overflow:visible}
-        .pc .authChoice a{min-height:82px;border-color:rgba(255,255,255,.58);box-shadow:0 13px 30px rgba(0,28,67,.2)}
+        .pc .authChoice a{min-height:68px;justify-content:space-between;border-color:rgba(255,255,255,.58);box-shadow:0 13px 30px rgba(0,28,67,.2)}
         .pc .authChoice .registerAction{background:#fff;color:#075dcc}
         .pc .authChoice .loginAction{background:rgba(3,48,94,.36);color:#fff}
         .pc .authChoice .loginAction small{color:#d7ecff}
