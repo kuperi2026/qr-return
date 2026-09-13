@@ -29,7 +29,7 @@ function getSafeNextPath() {
     return requested;
   }
 
-  return params.get("source") === "app" ? "/app/products" : "/register";
+  return params.get("source") === "app" ? "/app/profiles" : "/register";
 }
 
 export default function SignupPage() {
