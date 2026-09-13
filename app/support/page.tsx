@@ -1232,6 +1232,69 @@ export default function SupportPage() {
           font-size: 10px;
         }
 
+        body.kompasiAppMode .supportPage {
+          width: calc(100% - 16px);
+          max-width: 520px;
+          padding: 10px 0 105px;
+        }
+
+        body.kompasiAppMode .supportPage .agentCard {
+          padding: 11px 13px;
+          gap: 10px;
+          border-color: #c7def4;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #0a68c8, #084e9e);
+          color: white;
+          box-shadow: 0 10px 25px rgba(4, 52, 105, .18);
+        }
+
+        body.kompasiAppMode .supportPage .agentSvg {
+          width: 52px;
+          height: 52px;
+          flex-basis: 52px;
+        }
+
+        body.kompasiAppMode .supportPage .agentCard h1 {
+          margin: 3px 0 0;
+          font-size: 14px;
+        }
+
+        body.kompasiAppMode .supportPage .agentCard p {
+          display: none;
+        }
+
+        body.kompasiAppMode .supportPage .online {
+          color: #cce7ff;
+          font-size: 8px;
+        }
+
+        body.kompasiAppMode .supportPage .chat {
+          margin-top: 8px;
+          border: 0;
+          border-radius: 20px;
+          box-shadow: 0 13px 34px rgba(4, 45, 89, .16);
+        }
+
+        body.kompasiAppMode .supportPage .chatHead {
+          min-height: 58px;
+          padding: 10px 14px;
+        }
+
+        body.kompasiAppMode .supportPage .messages {
+          min-height: 330px;
+          background: #f5f8fc;
+        }
+
+        body.kompasiAppMode .supportPage .composer textarea {
+          border-radius: 18px;
+          background: #f0f3f7;
+        }
+
+        body.kompasiAppMode .supportPage .send {
+          border-radius: 13px;
+          background: #0b74e5;
+        }
+
         @media (max-width: 560px) {
           .supportPage {
             padding-top: 19px;
