@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 const Base = () => (
@@ -19,6 +19,12 @@ const links = [
 export default function Account() {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.replace("/login?source=app&next=%2Fapp%2Faccount");
+    });
+  }, [router]);
 
   async function signOut() {
     if (signingOut) return;
