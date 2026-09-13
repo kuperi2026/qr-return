@@ -700,7 +700,8 @@ export default function OwnerChatInboxPage() {
 
       <Styles />
       <style jsx global>{`
-        body.kompasiAppMode .ownerChatPage{font-family:"Noto Sans Georgian","Sylfaen",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:#eef3f8!important}
+        body.kompasiAppMode{background:#f4f7fa!important}
+        body.kompasiAppMode .ownerChatPage{font-family:"Noto Sans Georgian","Sylfaen",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:#f4f7fa!important}
         body.kompasiAppMode .ownerChatPage .operatorCard{margin-bottom:8px!important;padding:10px 13px!important;border:0!important;border-radius:15px!important;background:#084c8d!important;box-shadow:none!important}
         body.kompasiAppMode .ownerChatPage .inbox{border:1px solid #d8e3ec!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(13,55,96,.1)!important}
         body.kompasiAppMode .ownerChatPage .thread{min-height:76px!important;padding:10px 46px 10px 11px!important;border-color:#e7edf3!important}.ownerChatPage .thread.active{background:#eaf4ff!important}.ownerChatPage .threadIcon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}.ownerChatPage .threadTop strong{font-size:14px!important}.ownerChatPage .thread p{font-size:12px!important;line-height:1.35!important}
