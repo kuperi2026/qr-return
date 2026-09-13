@@ -109,8 +109,9 @@ export default function LoginPage() {
     if (appSource) {
       window.localStorage.setItem("kompasi-app-mode", "1");
       setAppMode(true);
-      setNextPath("/app/profiles");
-    } else if (
+    }
+
+    if (
       requestedNext &&
       requestedNext.startsWith("/") &&
       !requestedNext.startsWith("//")
@@ -118,6 +119,8 @@ export default function LoginPage() {
       setNextPath(
         requestedNext
       );
+    } else if (appSource) {
+      setNextPath("/app/profiles");
     } else {
       setNextPath(
         "/account"
