@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { formatLocationAccuracy, getPreciseLocation, LocationAccuracyError } from "@/lib/geolocation";
+import { formatLocationAccuracy } from "@/lib/geolocation";
 import ChatMediaButtons from "@/app/components/chat/ChatMediaButtons";
 import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
 import { parseChatMedia } from "@/lib/chatMedia";
@@ -296,7 +296,14 @@ export default function OwnerChatInboxPage() {
     if (!selected || locationSending || sending) return;
     setLocationSending(true); setError("");
     try {
-      const position = await getPreciseLocation({ maximumAccuracy: Number.MAX_SAFE_INTEGER, timeout: 15000 });
+      if (!navigator.geolocation) throw new Error("unsupported");
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 60000,
+        });
+      });
       const { latitude, longitude, accuracy } = position.coords;
       const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
       const message = ka
@@ -304,13 +311,11 @@ export default function OwnerChatInboxPage() {
         : `📍 Location shared (about ${formatLocationAccuracy(accuracy)} m accuracy): ${mapsUrl}`;
       await sendPayload(message);
     } catch (locationError) {
-      if (locationError instanceof LocationAccuracyError) {
-        const message = ka ? "ლოკაცია ვერ განისაზღვრა. ჩართეთ ტელეფონში Location და სცადეთ თავიდან." : "Location could not be determined. Enable Location on your phone and try again.";
-        setError(message); window.alert(message);
-      } else {
-        const message = ka ? "ლოკაციის გაზიარებისთვის აპს მდებარეობის ნებართვა მიეცით." : "Allow location access to share your location.";
-        setError(message); window.alert(message);
-      }
+      const denied = typeof locationError === "object" && locationError !== null && "code" in locationError && locationError.code === 1;
+      const message = denied
+        ? (ka ? "Location ნებართვა გამორთულია. ტელეფონში: Settings → Apps → KOMPASI → Permissions → Location → Allow." : "Location permission is off. Open Settings → Apps → KOMPASI → Permissions → Location → Allow.")
+        : (ka ? "ტელეფონში ჩართეთ Location/GPS და კიდევ ერთხელ დააჭირეთ ლოკაციის ღილაკს." : "Turn on Location/GPS and tap the location button again.");
+      setError(message); window.alert(message);
     } finally {
       setLocationSending(false);
     }
@@ -764,6 +769,7 @@ export default function OwnerChatInboxPage() {
         .conversationTabs{display:none!important}
         body.kompasiAppMode .ownerChatPage>.container>.errorBox{display:none!important}
         .ownerChatPage .locationButton{padding:0!important;display:grid!important;place-items:center!important;line-height:0!important}.ownerChatPage .locationButton svg{width:20px;height:20px;display:block;margin:0!important;transform:none!important}
+        html body.kompasiAppMode .ownerChatPage .inbox.mobileChatOpen .chatPanel .composer{bottom:18px!important;background:transparent!important}
         .ownerChatPage .composerTools>.mediaButton:nth-of-type(2){margin-left:auto!important}
         .aiReception{margin:0 10px 10px;overflow:hidden;border:1px solid #cfe0f3;border-radius:14px;background:#f4f9ff}.aiReceptionHead{width:100%;min-height:58px;padding:9px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#173652;text-align:left}.aiSpark{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:11px;background:#0b70d7;color:#fff;font-size:17px}.aiReceptionHead>span:nth-child(2){min-width:0;flex:1}.aiReceptionHead strong,.aiReceptionHead small{display:block}.aiReceptionHead strong{font-size:12px}.aiReceptionHead small{margin-top:3px;color:#668096;font-size:8px}.aiReceptionHead em{font-style:normal}.aiReceptionBody{padding:0 10px 11px}.automationSwitch{padding:10px;display:flex;align-items:center;gap:8px;border-radius:10px;background:#fff}.automationSwitch>span{min-width:0;flex:1}.automationSwitch b,.automationSwitch small{display:block}.automationSwitch b{font-size:10px}.automationSwitch small{margin-top:3px;color:#71869a;font-size:8px;line-height:1.35}.automationSwitch input{width:40px;height:22px;accent-color:#0b74e5}.automationText{display:block;margin-top:9px}.automationText>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.automationText textarea{width:100%;min-height:82px;padding:9px;border:1px solid #ccdeef;border-radius:10px;background:#fff;color:#173652;font-size:10px;line-height:1.5;resize:none}.saveAutomation{width:100%;min-height:40px;margin-top:8px;border:0;border-radius:10px;background:#0b70d7;color:#fff;font-size:10px;font-weight:900}.aiReceptionBody>p{margin:7px 2px 0;color:#71869a;font-size:8px;line-height:1.4}
         body.kompasiAppMode .ownerChatPage .operatorCard{max-width:100%!important;margin-bottom:12px!important;padding:12px 14px!important;border-radius:17px!important;background:#116fd3!important}
