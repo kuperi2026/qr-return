@@ -27,28 +27,53 @@ Deno.serve(async (request: Request) => {
   }
 
   const body = await request.json().catch(() => ({}));
-  const messageId = Number(body?.message_id);
-  if (!Number.isSafeInteger(messageId)) return new Response("Invalid message", { status: 400 });
+  let ownerId = "";
+  let title = "KOMPASI";
+  let notificationBody = "ახალი შეტყობინება მიიღეთ.";
+  let url = "/account/notifications";
+  let tag = "kompasi-notification";
 
-  const { data: message } = await admin
-    .from("chat_messages")
-    .select("id,item_id,sender_role,message_text,message")
-    .eq("id", messageId)
-    .eq("sender_role", "finder")
-    .maybeSingle();
-  if (!message) return new Response("Ignored", { status: 202 });
-
-  const { data: item } = await admin
-    .from("item")
-    .select("owner_id,tag_code,item_type,pet_type,item_name")
-    .eq("id", message.item_id)
-    .maybeSingle();
-  if (!item?.owner_id) return new Response("No owner", { status: 202 });
+  if (body?.notification_id) {
+    const { data: notification } = await admin
+      .from("notifications")
+      .select("id,user_id,type,title,message,order_id,metadata")
+      .eq("id", String(body.notification_id))
+      .maybeSingle();
+    if (!notification?.user_id) return new Response("Ignored", { status: 202 });
+    ownerId = notification.user_id;
+    title = notification.title || title;
+    notificationBody = notification.message || notificationBody;
+    tag = `notification-${notification.id}`;
+    url = notification.type === "chat" ? "/app/chat" :
+      notification.order_id ? `/account/orders?order=${notification.order_id}` :
+      "/account/notifications";
+  } else {
+    const messageId = Number(body?.message_id);
+    if (!Number.isSafeInteger(messageId)) return new Response("Invalid message", { status: 400 });
+    const { data: message } = await admin
+      .from("chat_messages")
+      .select("id,item_id,sender_role,message_text,message")
+      .eq("id", messageId)
+      .eq("sender_role", "finder")
+      .maybeSingle();
+    if (!message) return new Response("Ignored", { status: 202 });
+    const { data: item } = await admin
+      .from("item")
+      .select("owner_id,tag_code,item_type,pet_type,item_name")
+      .eq("id", message.item_id)
+      .maybeSingle();
+    if (!item?.owner_id) return new Response("No owner", { status: 202 });
+    ownerId = item.owner_id;
+    title = `${item.item_name || "QR პროფილი"}: ახალი შეტყობინება`;
+    notificationBody = message.message_text || message.message || "მპოვნელი დაგიკავშირდათ ჩატში.";
+    url = `/app/chat?profile=${encodeURIComponent(String(item.tag_code || ""))}`;
+    tag = `chat-${message.item_id}`;
+  }
 
   const { data: subscriptions } = await admin
     .from("push_subscriptions")
     .select("endpoint,p256dh,auth")
-    .eq("user_id", item.owner_id);
+    .eq("user_id", ownerId);
   if (!subscriptions?.length) return new Response("No subscriptions", { status: 202 });
 
   webpush.setVapidDetails(
@@ -57,13 +82,11 @@ Deno.serve(async (request: Request) => {
     config.vapid_private_key,
   );
 
-  const type = item.item_type || item.pet_type || "item";
   const payload = JSON.stringify({
-    title: `${item.item_name || "QR პროფილი"}: ახალი შეტყობინება`,
-    body: message.message_text || message.message || "მპოვნელი დაგიკავშირდათ ჩატში.",
-    url: `/app/chat?profile=${encodeURIComponent(String(item.tag_code || ""))}`,
-    tag: `chat-${message.item_id}`,
-    type,
+    title,
+    body: notificationBody,
+    url,
+    tag,
   });
 
   await Promise.allSettled((subscriptions as PushSubscriptionRow[]).map(async (subscription) => {
