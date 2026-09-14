@@ -19,6 +19,14 @@ const NAV_ITEMS = [
   { href: "/app/account", icon: "user", label: "ანგარიში" },
 ];
 
+const PUSH_PUBLIC_KEY = "BBTajNjhpEI1CwktS02wqbOzPwhybb6b45TSYXp5-w9DZaGOkFS7t88Lee28gAUAanfE3gmawKKSG2yi_Ljkaew";
+
+function pushKeyBytes(value: string) {
+  const padding = "=".repeat((4 - value.length % 4) % 4);
+  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+  return Uint8Array.from(window.atob(base64), (character) => character.charCodeAt(0));
+}
+
 export default function PremiumAppShell() {
   const pathname = usePathname();
   const router = useRouter();
@@ -26,6 +34,7 @@ export default function PremiumAppShell() {
   const [online, setOnline] = useState(true);
   const [chatAlert, setChatAlert] = useState<ChatAlert | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [pushEnabled, setPushEnabled] = useState(false);
 
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
@@ -72,7 +81,13 @@ export default function PremiumAppShell() {
   }, [pathname, router]);
 
   useEffect(() => {
-    if (typeof Notification !== "undefined") setNotificationPermission(Notification.permission);
+    if (typeof Notification === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    setNotificationPermission(Notification.permission);
+    if (Notification.permission === "granted") {
+      void navigator.serviceWorker.ready
+        .then((registration) => registration.pushManager.getSubscription())
+        .then((subscription) => setPushEnabled(Boolean(subscription)));
+    }
   }, []);
 
   useEffect(() => {
@@ -116,16 +131,17 @@ export default function PremiumAppShell() {
           setChatAlert({ title, message: body, href });
           navigator.vibrate?.([180, 90, 180]);
 
-          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          if (!pushEnabled && typeof Notification !== "undefined" && Notification.permission === "granted") {
             try {
-              const notification = new Notification(title, { body, icon: "/app-icons/app-icon.svg", tag: `chat-${message.item_id}` });
-              notification.onclick = () => {
-                window.focus();
-                window.location.assign(href);
-                notification.close();
-              };
+              void navigator.serviceWorker.ready.then((registration) => registration.showNotification(title, {
+                body,
+                icon: "/app-icons/app-icon.svg",
+                badge: "/app-icons/app-icon.svg",
+                tag: `chat-${message.item_id}`,
+                data: { url: href },
+              }));
             } catch {
-              // The in-app alert remains visible on mobile browsers that disallow this constructor.
+              // The in-app alert remains visible when system notifications are unavailable.
             }
           }
         };
@@ -139,11 +155,56 @@ export default function PremiumAppShell() {
       cancelled = true;
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [appMode, ownerArea]);
+  }, [appMode, ownerArea, pushEnabled]);
 
   const enableNotifications = async () => {
-    if (typeof Notification === "undefined") return;
-    setNotificationPermission(await Notification.requestPermission());
+    if (typeof Notification === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      window.alert("ამ მოწყობილობაზე Push შეტყობინებები არ არის მხარდაჭერილი.");
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    if (permission !== "granted") {
+      window.alert("შეტყობინებების მისაღებად ტელეფონის პარამეტრებში Notifications ნებართვა ჩართეთ.");
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription() ||
+        await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: pushKeyBytes(PUSH_PUBLIC_KEY),
+        });
+      const json = subscription.toJSON();
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) throw new Error("Invalid push subscription");
+
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_KEY;
+      if (!url || !key) throw new Error("Supabase is unavailable");
+      const supabase = createClient(url, key);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sign in required");
+      const { error } = await supabase.from("push_subscriptions").upsert({
+        user_id: user.id,
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "endpoint" });
+      if (error) throw error;
+      setPushEnabled(true);
+      await registration.showNotification("შეტყობინებები ჩართულია", {
+        body: "ახალი ჩათის შეტყობინება აპის დახურვის დროსაც მოგივათ.",
+        icon: "/app-icons/app-icon.svg",
+        badge: "/app-icons/app-icon.svg",
+        tag: "kompasi-push-enabled",
+      });
+    } catch {
+      window.alert("შეტყობინებების ჩართვა ვერ მოხერხდა. სცადეთ აპის ხელახლა გახსნა.");
+    }
   };
 
   useEffect(() => {
@@ -160,8 +221,8 @@ export default function PremiumAppShell() {
   return (
     <>
       {!online && <div className="offlinePill">◌ ინტერნეტთან კავშირი შეწყდა</div>}
-      {notificationPermission === "default" && (
-        <button className="notificationPill" type="button" onClick={enableNotifications}>♢ ჩართეთ ჩატის შეტყობინებები</button>
+      {!pushEnabled && notificationPermission !== "unsupported" && (
+        <button className="notificationPill" type="button" onClick={enableNotifications}>🔔 შეტყობინებების ჩართვა</button>
       )}
       {chatAlert && (
         <aside className="chatAlert" role="status" aria-live="polite">
