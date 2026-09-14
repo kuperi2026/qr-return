@@ -43,8 +43,9 @@ export default function PremiumAppShell() {
     const params = new URLSearchParams(window.location.search);
     const preview = params.get("app_preview") === "1" || params.get("source") === "app";
     const savedApp = window.localStorage.getItem("kompasi-app-mode") === "1";
+    const websiteChat = pathname.startsWith("/account/chat") && !standalone && !preview;
     if (standalone || preview) window.localStorage.setItem("kompasi-app-mode", "1");
-    setAppMode(standalone || preview || savedApp);
+    setAppMode(websiteChat ? false : standalone || preview || savedApp);
     setOnline(navigator.onLine);
 
     const goOnline = () => setOnline(true);
@@ -55,7 +56,7 @@ export default function PremiumAppShell() {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
     };
-  }, []);
+  }, [pathname]);
 
   const registrationArea = pathname.startsWith("/register") || pathname.startsWith("/register-item") || pathname.startsWith("/emergency/register");
   const ownerArea = pathname.startsWith("/app/") || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/support") || registrationArea;
