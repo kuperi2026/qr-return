@@ -8,6 +8,7 @@ import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
 import { parseChatMedia } from "@/lib/chatMedia";
 
 type Lang = "ka" | "en";
+type ChatTheme = "blue" | "ocean" | "violet" | "rose";
 
 type ChatThread = {
   profile_id: string;
@@ -47,6 +48,7 @@ export default function OwnerChatInboxPage() {
   const router = useRouter();
 
   const [lang, setLang] = useState<Lang>("ka");
+  const [chatTheme, setChatTheme] = useState<ChatTheme>("blue");
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [selected, setSelected] = useState<ChatThread | null>(null);
@@ -75,6 +77,16 @@ export default function OwnerChatInboxPage() {
   useEffect(() => {
     void checkUser();
   }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("kompasi-chat-theme") as ChatTheme | null;
+    if (saved && ["blue", "ocean", "violet", "rose"].includes(saved)) setChatTheme(saved);
+  }, []);
+
+  function chooseTheme(theme: ChatTheme) {
+    setChatTheme(theme);
+    window.localStorage.setItem("kompasi-chat-theme", theme);
+  }
 
   useEffect(() => {
     document.body.classList.add("kompasiChatOpen");
@@ -373,7 +385,7 @@ export default function OwnerChatInboxPage() {
   }
 
   return (
-    <main className="page ownerChatPage">
+    <main className={`page ownerChatPage theme-${chatTheme}`}>
       <header className="header">
         <div className="headerRight">
           <a href="/account" className="accountButton">
@@ -405,6 +417,14 @@ export default function OwnerChatInboxPage() {
           <span className="operatorAvatar">⌁</span>
           <span className="operatorCopy"><strong>პირდაპირი კავშირი</strong><span>უპასუხეთ მპოვნელს უსაფრთხო ჩატში</span></span>
           <span className="onlineDot">● LIVE</span>
+        </div>
+
+        <div className="themePicker" aria-label={ka ? "ჩათის ფერის არჩევა" : "Choose chat color"}>
+          <span>{ka ? "ფერი" : "Color"}</span>
+          <button type="button" className={`blue ${chatTheme === "blue" ? "active" : ""}`} onClick={() => chooseTheme("blue")} aria-label="ლურჯი" />
+          <button type="button" className={`ocean ${chatTheme === "ocean" ? "active" : ""}`} onClick={() => chooseTheme("ocean")} aria-label="ზღვისფერი" />
+          <button type="button" className={`violet ${chatTheme === "violet" ? "active" : ""}`} onClick={() => chooseTheme("violet")} aria-label="იისფერი" />
+          <button type="button" className={`rose ${chatTheme === "rose" ? "active" : ""}`} onClick={() => chooseTheme("rose")} aria-label="ვარდისფერი" />
         </div>
 
         <div className="pageTitle">
@@ -508,7 +528,7 @@ export default function OwnerChatInboxPage() {
                           <strong>
                             {thread.item_name || thread.tag_code}
                           </strong>
-                          <small>{thread.finder_last_active ? `${ka ? "ბოლოს აქტიური" : "Last active"} · ${formatDate(thread.finder_last_active)}` : ""}</small>
+                          <small>{thread.finder_last_active ? `${ka ? "აქტიური:" : "Active:"} ${formatDate(thread.finder_last_active)}` : ""}</small>
 
                           <time>
                             {formatDate(thread.last_message_at)}
@@ -574,7 +594,7 @@ export default function OwnerChatInboxPage() {
                   </div>
 
                   <div className="liveStatus">
-                    {selected.finder_last_active ? `${ka ? "ბოლოს აქტიური" : "Last active"} · ${formatDate(selected.finder_last_active)}` : "● LIVE"}
+                    {selected.finder_last_active ? `${ka ? "აქტიური:" : "Active:"} ${formatDate(selected.finder_last_active)}` : "● LIVE"}
                   </div>
                   <button type="button" className="deleteChat" onClick={() => void deleteConversation()} aria-label={ka ? "ჩათის წაშლა" : "Delete chat"}>⌫</button>
                 </div>
@@ -713,6 +733,10 @@ export default function OwnerChatInboxPage() {
 
       <Styles />
       <style jsx global>{`
+        .themePicker{margin:-1px 0 9px;padding:7px 10px;display:flex;align-items:center;justify-content:flex-end;gap:8px;border:1px solid rgba(255,255,255,.62);border-radius:13px;background:rgba(255,255,255,.78);box-shadow:0 5px 16px rgba(25,64,101,.08)}.themePicker>span{margin-right:auto;color:#3d5871;font-size:12px;font-weight:900}.themePicker button{width:25px;height:25px;padding:0;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #c7d5e2;cursor:pointer}.themePicker button.active{box-shadow:0 0 0 2px #163d63,0 3px 8px rgba(15,52,88,.18);transform:scale(1.08)}.themePicker .blue{background:linear-gradient(135deg,#126bd1,#dceeff)}.themePicker .ocean{background:linear-gradient(135deg,#078899,#bdebe4)}.themePicker .violet{background:linear-gradient(135deg,#7254c7,#e6dcff)}.themePicker .rose{background:linear-gradient(135deg,#cf6681,#ffe0e8)}
+        html body.kompasiAppMode .ownerChatPage.theme-blue{background:radial-gradient(circle at 88% 8%,rgba(118,89,205,.13),transparent 24%),radial-gradient(circle at 8% 78%,rgba(30,170,123,.12),transparent 28%),linear-gradient(155deg,#0757a6 0%,#78b9eb 24%,#e3f1fb 52%,#fff 82%)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean{background:linear-gradient(155deg,#087f91 0%,#70c6cb 26%,#e3f4f2 57%,#fff 84%)!important}html body.kompasiAppMode .ownerChatPage.theme-violet{background:linear-gradient(155deg,#5642a4 0%,#a696dd 25%,#eeeafd 58%,#fff 84%)!important}html body.kompasiAppMode .ownerChatPage.theme-rose{background:linear-gradient(155deg,#a94d68 0%,#e6a4b6 25%,#fbe9ee 58%,#fff 84%)!important}
+        html body.kompasiAppMode .ownerChatPage.theme-blue .messageRow.mine .bubble{background:linear-gradient(135deg,#075fbd,#1584cf)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean .messageRow.mine .bubble{background:linear-gradient(135deg,#087f91,#159b79)!important}html body.kompasiAppMode .ownerChatPage.theme-violet .messageRow.mine .bubble{background:linear-gradient(135deg,#6247b2,#8565d2)!important}html body.kompasiAppMode .ownerChatPage.theme-rose .messageRow.mine .bubble{background:linear-gradient(135deg,#b84f6c,#d7748d)!important}
+        html body.kompasiAppMode .ownerChatPage .sender{font-size:13px!important;font-weight:900!important;line-height:1.35!important}html body.kompasiAppMode .ownerChatPage .messageText{font-size:16px!important;line-height:1.5!important}
         body.kompasiAppMode{background:#f7fbfc!important}
         body.kompasiAppMode .ownerChatPage{font-family:"Noto Sans Georgian","Sylfaen",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;background:radial-gradient(circle at 88% 8%,rgba(117,88,214,.14),transparent 25%),radial-gradient(circle at 10% 70%,rgba(31,190,147,.14),transparent 30%),linear-gradient(155deg,#087f91 0%,#6fc6cb 22%,#d9f0ef 48%,#ffffff 78%)!important}
         body.kompasiAppMode .ownerChatPage .operatorCard{margin-bottom:8px!important;padding:10px 13px!important;border:0!important;border-radius:15px!important;background:#084c8d!important;box-shadow:none!important}
