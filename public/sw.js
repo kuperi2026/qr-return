@@ -1,4 +1,4 @@
-const CACHE = "kompasi-static-v4";
+const CACHE = "kompasi-static-v5";
 const STATIC_FILES = ["/app-icons/app-icon.svg", "/offline"];
 
 self.addEventListener("install", (event) => {
@@ -42,5 +42,39 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(() => caches.match(request))
+  );
+});
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "ახალი შეტყობინება" };
+  }
+
+  event.waitUntil(self.registration.showNotification(data.title || "KOMPASI", {
+    body: data.body || "ახალი ჩათის შეტყობინება მიიღეთ.",
+    icon: "/app-icons/app-icon.svg",
+    badge: "/app-icons/app-icon.svg",
+    tag: data.tag || "kompasi-chat",
+    data: { url: data.url || "/app/chat" },
+    vibrate: [180, 90, 180],
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || "/app/chat", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow ? self.clients.openWindow(url) : undefined;
+    })
   );
 });
