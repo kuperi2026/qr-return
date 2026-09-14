@@ -51,6 +51,7 @@ export default function OwnerChatInboxPage() {
   const [lang, setLang] = useState<Lang>("ka");
   const [chatTheme, setChatTheme] = useState<ChatTheme>("blue");
   const [themeOpen, setThemeOpen] = useState(false);
+  const [isAppChat, setIsAppChat] = useState(true);
 
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [selected, setSelected] = useState<ChatThread | null>(null);
@@ -84,6 +85,10 @@ export default function OwnerChatInboxPage() {
   useEffect(() => {
     const saved = window.localStorage.getItem("kompasi-chat-theme") as ChatTheme | null;
     if (saved && ["blue", "ocean", "violet", "red"].includes(saved)) setChatTheme(saved);
+    const params = new URLSearchParams(window.location.search);
+    const standalone = window.matchMedia("(display-mode: standalone)").matches ||
+      Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+    setIsAppChat(standalone || params.get("source") === "app" || params.get("app_preview") === "1");
   }, []);
 
   function chooseTheme(theme: ChatTheme) {
@@ -406,7 +411,7 @@ export default function OwnerChatInboxPage() {
   }
 
   return (
-    <main className={`page ownerChatPage theme-${chatTheme}`}>
+    <main className={`page ownerChatPage ${isAppChat ? "appChatView" : "websiteChatView"} theme-${chatTheme}`}>
       <header className="header">
         <div className="headerRight">
           <a href="/account" className="accountButton">
@@ -723,6 +728,11 @@ export default function OwnerChatInboxPage() {
                         {(["blue", "ocean", "violet", "red"] as ChatTheme[]).map((theme) => <button key={theme} type="button" className={theme} onClick={() => { chooseTheme(theme); setThemeOpen(false); }} aria-label={theme} />)}
                       </div>}
                     </div>
+                    <div className="websiteThemePicker" aria-label={ka ? "ჩათის ფერის შეცვლა" : "Change chat color"}>
+                      {(["blue", "ocean", "violet", "red"] as ChatTheme[]).map((theme) => (
+                        <button key={theme} type="button" className={`${theme} ${chatTheme === theme ? "active" : ""}`} onClick={() => chooseTheme(theme)} aria-label={theme} />
+                      ))}
+                    </div>
                     <button type="button" className="locationButton" onClick={() => void shareOwnerLocation()} disabled={locationSending || sending} aria-label={ka ? "ლოკაციის გაზიარება" : "Share location"} title={ka ? "ლოკაციის გაზიარება" : "Share location"}>{locationSending ? "…" : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>}</button>
                   </div>
 
@@ -825,6 +835,7 @@ export default function OwnerChatInboxPage() {
         body:not(.kompasiAppMode) .ownerChatPage .themeOptions button{width:16px;height:16px;min-height:16px;flex:0 0 16px}
 
         @media(max-width:800px){body.kompasiAppMode.kompasiChatOpen{height:100dvh!important;overflow:hidden!important}body.kompasiAppMode .ownerChatPage{height:calc(100dvh - 82px)!important;min-height:0!important;overflow:hidden!important;overscroll-behavior:none!important}body.kompasiAppMode .ownerChatPage .container{width:calc(100% - 16px)!important;height:100%!important;min-height:0!important;padding:10px 0 8px!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.ownerChatPage .operatorCard{min-height:64px!important;flex:0 0 64px!important;margin-bottom:8px!important}.ownerChatPage .operatorCopy strong{font-size:13px!important}.ownerChatPage .operatorCopy span{font-size:9px!important}.ownerChatPage .pageTitle{display:none!important}.ownerChatPage .inbox{height:auto!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important}.ownerChatPage .sidebar,.ownerChatPage .chatPanel{height:100%!important;min-height:0!important;overflow:hidden!important}.ownerChatPage .sidebar{display:flex!important;flex-direction:column!important}.ownerChatPage .inbox.mobileChatOpen .sidebar{display:none!important}.ownerChatPage .sidebarTitle,.ownerChatPage .conversationTabs,.ownerChatPage .aiReception{flex:0 0 auto!important}.ownerChatPage .threadList{max-height:none!important;height:auto!important;min-height:0!important;flex:1 1 0!important;overflow-y:auto!important;overscroll-behavior:contain!important}.ownerChatPage .inbox.mobileChatOpen .chatPanel{position:relative!important;height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important}.ownerChatPage .chatHeader{position:relative!important;top:auto!important;flex:0 0 68px!important}.ownerChatPage .messages{height:auto!important;min-height:0!important;flex:1 1 0!important;padding-bottom:120px!important;overflow-y:auto!important;overscroll-behavior:contain!important}.ownerChatPage .inbox.mobileChatOpen .composer{position:absolute!important;right:0!important;bottom:8px!important;left:0!important;z-index:8!important;width:100%!important;height:104px!important;margin:0!important;padding:6px 8px 8px!important;display:flex!important;flex-direction:column!important;gap:6px!important;transform:none!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}.ownerChatPage .composerTools{width:100%!important;height:40px!important;display:flex!important;align-items:center!important;gap:6px!important}.ownerChatPage .composerTools>.mediaButton:nth-of-type(2){margin-left:auto!important}.ownerChatPage .composerInputRow{width:100%!important;height:50px!important;display:flex!important;align-items:center!important;gap:7px!important}.ownerChatPage .composer .emojiButton,.ownerChatPage .composer .mediaButton,.ownerChatPage .composer .locationButton{width:40px!important;min-height:40px!important}.ownerChatPage .composer textarea{width:auto!important;height:50px!important;min-height:50px!important;max-height:50px!important;flex:1 1 auto!important;padding:13px 15px!important;overflow-y:auto!important;resize:none!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(163,190,214,.55)!important}.ownerChatPage .composer .sendButton{width:48px!important;min-height:48px!important;flex:0 0 48px!important}.ownerChatPage .composerInputRow>.cancelEdit{width:38px!important;min-height:38px!important;flex:0 0 38px!important}.ownerChatPage .composer:has(.voiceRecordingControls) .composerInputRow{visibility:hidden!important}.ownerChatPage .composer .voiceRecordingControls{position:absolute!important;right:8px!important;bottom:8px!important;left:8px!important;z-index:3!important;height:50px!important;min-height:50px!important;padding:5px 6px 5px 14px!important;display:flex!important;border:1px solid rgba(163,190,214,.55)!important;border-radius:18px!important;background:rgba(255,255,255,.9)!important;box-shadow:none!important}.ownerChatPage .composer .voiceRecordingTime{margin-right:auto!important;font-size:14px!important}.ownerChatPage .composer .voiceRecordingControls button{width:38px!important;min-height:38px!important}}
+        .websiteThemePicker{display:none}.ownerChatPage.websiteChatView .compactThemePicker{display:none!important}.ownerChatPage.websiteChatView .websiteThemePicker{height:36px;padding:0 5px;display:flex;align-items:center;gap:5px;border:1px solid #d8e5f0;border-radius:10px;background:#f6fafe}.ownerChatPage.websiteChatView .websiteThemePicker button{width:12px;height:12px;min-height:12px;padding:0;border:1px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #b7c8d7;cursor:pointer}.ownerChatPage.websiteChatView .websiteThemePicker button.active{box-shadow:0 0 0 2px #fff,0 0 0 3px #1768ad}.ownerChatPage.websiteChatView .websiteThemePicker .blue{background:#1673ce}.ownerChatPage.websiteChatView .websiteThemePicker .ocean{background:#138865}.ownerChatPage.websiteChatView .websiteThemePicker .violet{background:#7759c9}.ownerChatPage.websiteChatView .websiteThemePicker .red{background:#c23a42}
       `}</style>
     </main>
   );
