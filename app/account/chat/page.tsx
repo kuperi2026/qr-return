@@ -310,20 +310,6 @@ export default function OwnerChatInboxPage() {
     }
   }
 
-  function formatTime(value: string) {
-    try {
-      return new Intl.DateTimeFormat(
-        ka ? "ka-GE" : "en-US",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      ).format(new Date(value));
-    } catch {
-      return "";
-    }
-  }
-
   function getIcon(thread: ChatThread) {
     if (thread.pet_type === "dog") {
       return "🐶";
@@ -666,7 +652,7 @@ export default function OwnerChatInboxPage() {
 
 
                             <div className="messageMeta">
-                              <time>{formatTime(message.created_at)}</time>
+                              <time>{formatDate(message.created_at)}</time>
                               {mine && (
                                 <span className={message.read_at ? "seen" : "delivered"}>
                                   {message.read_at
