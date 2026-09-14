@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { formatLocationAccuracy, getPreciseLocation, LocationAccuracyError } from "@/lib/geolocation";
 import ChatMediaButtons from "@/app/components/chat/ChatMediaButtons";
 import ChatMessageMedia from "@/app/components/chat/ChatMessageMedia";
 import { parseChatMedia } from "@/lib/chatMedia";
@@ -62,6 +63,7 @@ export default function OwnerChatInboxPage() {
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [locationSending, setLocationSending] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
   const [automationEnabled, setAutomationEnabled] = useState(false);
   const [automationMessage, setAutomationMessage] = useState("მოგესალმებით! ახლა შეიძლება მაშინვე ვერ გიპასუხოთ. გთხოვთ, მოკლედ მომწეროთ რა იპოვეთ და სად — პასუხს მალე დაგიბრუნებთ.");
@@ -288,6 +290,28 @@ export default function OwnerChatInboxPage() {
 
     setSending(false);
     return !rpcError;
+  }
+
+  async function shareOwnerLocation() {
+    if (!selected || locationSending || sending) return;
+    setLocationSending(true); setError("");
+    try {
+      const position = await getPreciseLocation();
+      const { latitude, longitude, accuracy } = position.coords;
+      const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      const message = ka
+        ? `📍 მდებარეობა გაზიარებულია (სიზუსტე დაახლოებით ${formatLocationAccuracy(accuracy)} მ): ${mapsUrl}`
+        : `📍 Location shared (about ${formatLocationAccuracy(accuracy)} m accuracy): ${mapsUrl}`;
+      await sendPayload(message);
+    } catch (locationError) {
+      if (locationError instanceof LocationAccuracyError) {
+        setError(ka ? "ლოკაციის სიზუსტე არასაკმარისია. ჩართეთ Precise Location და სცადეთ თავიდან." : "Location accuracy is too low. Enable Precise Location and try again.");
+      } else {
+        setError(ka ? "ლოკაციის გაზიარებისთვის ჩართეთ მდებარეობის ნებართვა." : "Enable location permission to share your location.");
+      }
+    } finally {
+      setLocationSending(false);
+    }
   }
 
   function formatDate(value: string | null) {
@@ -687,6 +711,7 @@ export default function OwnerChatInboxPage() {
                       )}
                     </div>
                     <ChatMediaButtons tagCode={selected.tag_code} sessionId={selected.finder_session} disabled={sending} onSend={sendPayload} onError={setError} />
+                    <button type="button" className="locationButton" onClick={() => void shareOwnerLocation()} disabled={locationSending || sending} aria-label={ka ? "ლოკაციის გაზიარება" : "Share location"} title={ka ? "ლოკაციის გაზიარება" : "Share location"}>{locationSending ? "…" : "📍"}</button>
                   </div>
 
                   <div className="composerInputRow">
