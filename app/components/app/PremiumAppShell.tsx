@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { createPortal } from "react-dom";
 
 type ChatAlert = {
   title: string;
@@ -218,12 +219,19 @@ export default function PremiumAppShell() {
 
   if (!appMode || !ownerArea) return null;
 
+  const notificationControl = notificationPermission !== "unsupported" ? (
+    <button className={`notificationPill ${pushEnabled ? "pushEnabled" : ""}`} type="button" onClick={enableNotifications}>
+      {pushEnabled ? "✓ Push ჩართულია" : "🔔 შეტყობინებების ჩართვა"}
+    </button>
+  ) : null;
+  const chatPushSlot = typeof document !== "undefined" && (pathname.startsWith("/account/chat") || pathname.startsWith("/app/chat"))
+    ? document.getElementById("chat-push-slot")
+    : null;
+
   return (
     <>
       {!online && <div className="offlinePill">◌ ინტერნეტთან კავშირი შეწყდა</div>}
-      {!pushEnabled && notificationPermission !== "unsupported" && (
-        <button className="notificationPill" type="button" onClick={enableNotifications}>🔔 შეტყობინებების ჩართვა</button>
-      )}
+      {chatPushSlot ? createPortal(notificationControl, chatPushSlot) : notificationControl}
       {chatAlert && (
         <aside className="chatAlert" role="status" aria-live="polite">
           <Link href={chatAlert.href} onClick={() => setChatAlert(null)}>
@@ -516,7 +524,10 @@ export default function PremiumAppShell() {
         .appDock{position:fixed!important;right:0!important;bottom:0!important;left:0!important;z-index:990;box-sizing:border-box!important;width:min(520px,100%);height:82px!important;min-height:82px!important;max-height:82px!important;margin:0 auto;padding:11px 9px 9px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:60px;align-items:start;overflow:hidden;border:1px solid #185f9f;border-bottom:0;border-radius:25px 25px 0 0;background:#0a4c8a;box-shadow:0 -12px 34px rgba(1,20,55,.3),inset 0 1px 0 rgba(255,255,255,.22);transform:translate3d(0,0,0)!important;isolation:isolate;contain:strict;backface-visibility:hidden;-webkit-backface-visibility:hidden;backdrop-filter:none}
         .appDock:before,.appDock:after{content:"";position:absolute;top:0;z-index:3;width:31px;height:18px;background:#fff;pointer-events:none}.appDock:before{left:0;clip-path:polygon(0 0,100% 0,0 100%)}.appDock:after{right:0;clip-path:polygon(0 0,100% 0,100% 100%)}.appDock a{position:relative;z-index:1;box-sizing:border-box!important;min-width:0;width:100%;height:60px!important;min-height:60px!important;max-height:60px!important;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;border-radius:15px;background:transparent;color:#cfe7ff;text-decoration:none;transition:color .16s ease;transform:none!important}.appDock a:before{display:none!important}.navIcon{width:22px;height:22px;display:grid;place-items:center}.navIcon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.appDock a small{max-width:100%;overflow:hidden;color:inherit;font-size:10px;font-weight:900;letter-spacing:0;text-overflow:ellipsis;white-space:nowrap}.appDock a:nth-child(n){color:#cfe7ff}.appDock a.active{background:transparent;color:#fff;box-shadow:none}.appDock a.active::after{content:"";position:absolute;bottom:2px;width:19px;height:3px;border-radius:999px;background:#ef5f45}.appDock a.primary{width:100%;height:60px!important;margin:0;border:0;border-radius:15px;background:rgba(33,132,232,.72);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.24)}.appDock a.primary .navIcon{width:25px;height:25px}.appDock a.primary .navIcon svg{width:25px;height:25px}.appDock a.primary small{color:#fff;font-size:11px}.appDock a.primary.active{background:rgba(33,132,232,.72)}.appDock a.primary::after{display:none}.offlinePill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1100;padding:8px 13px;border:1px solid #f5d08c;border-radius:999px;background:#fff7e6;color:#925d06;box-shadow:0 9px 25px rgba(60,35,0,.16);font:800 11px/1.2 Arial,sans-serif;transform:translateX(-50%)}
         .notificationPill{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));z-index:1090;padding:9px 13px;border:1px solid #bcd4f3;border-radius:999px;background:#f6faff;color:#0b5dbc;box-shadow:0 9px 25px rgba(13,69,139,.14);font:800 10px/1.2 Arial,sans-serif;transform:translateX(-50%)}
+        .notificationPill.pushEnabled{border-color:#b9e4d1;background:#eefbf5;color:#087956}
+        .chatPushSlot{min-height:42px;margin:-2px 0 8px}.chatPushSlot .notificationPill{position:static;width:100%;min-height:42px;transform:none;box-shadow:0 5px 16px rgba(13,69,139,.09)}
         .offlinePill+.notificationPill{top:max(48px,calc(env(safe-area-inset-top) + 48px))}
+        @media(max-width:800px){body.kompasiKeyboardOpen .appDock{display:none!important}body.kompasiKeyboardOpen{padding-bottom:0!important}body.kompasiKeyboardOpen .ownerChatPage{height:100dvh!important}}
         .chatAlert{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));z-index:1200;width:min(450px,calc(100% - 24px));display:flex;align-items:flex-start;gap:10px;padding:13px 12px 13px 15px;border:1px solid #c7ddf7;border-radius:16px;background:rgba(250,253,255,.97);box-shadow:0 16px 42px rgba(5,53,115,.24);backdrop-filter:blur(18px);transform:translateX(-50%)}
         .chatAlert a{min-width:0;flex:1;color:#173652;text-decoration:none}.chatAlert b,.chatAlert span{display:block}.chatAlert b{font-size:11px}.chatAlert span{margin-top:4px;overflow:hidden;color:#657b90;font-size:9px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}.chatAlert button{width:27px;height:27px;border:0;border-radius:9px;background:#edf4fc;color:#52708e;font-size:18px;line-height:1}
       `}</style>
