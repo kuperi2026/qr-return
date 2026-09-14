@@ -670,7 +670,7 @@ export default function OwnerChatInboxPage() {
                               {mine && (
                                 <span className={message.read_at ? "seen" : "delivered"}>
                                   {message.read_at
-                                    ? `${ka ? "✓✓ ნახა" : "✓✓ Seen"} · ${formatDate(message.read_at)}`
+                                    ? `${ka ? "✓✓ წაიკითხა" : "✓✓ Read"} · ${formatDate(message.read_at)}`
                                     : ka ? "✓ მიწოდებულია" : "✓ Delivered"}
                                 </span>
                               )}
