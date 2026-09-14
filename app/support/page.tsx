@@ -820,8 +820,11 @@ export default function SupportPage() {
             #f6f8fc;
           color: #101828;
           font-family:
+            "Noto Sans Georgian",
             Inter,
+            "Segoe UI",
             Arial,
+            "Sylfaen",
             sans-serif;
         }
 
