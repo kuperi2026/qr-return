@@ -674,7 +674,6 @@ export default function OwnerChatInboxPage() {
                                     : ka ? "✓ მიწოდებულია" : "✓ Delivered"}
                                 </span>
                               )}
-                              {message.edited_at && <span>{ka ? "რედაქტირებულია" : "Edited"}</span>}
                             </div>
                             {mine && <button type="button" className="editMessage" onClick={() => { setEditingId(message.id); setText(message.message_text); }}>{ka ? "რედაქტირება" : "Edit"}</button>}
                           </div>
