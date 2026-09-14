@@ -117,7 +117,8 @@ export default function ChatMediaButtons({ tagCode, sessionId, disabled, onSend,
       .voiceRecordingControls button { width: 38px; min-height: 38px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 900; }
       .voiceCancelButton { background: #ffffff; color: #64748b; }
       .voiceSendButton { background: #1266e9; color: #ffffff; }
-      .voiceMicIcon { width: 21px; height: 21px; display: block; }
+      .mediaButton:has(.voiceMicIcon) { display: inline-grid; place-items: center; line-height: 0; }
+      .voiceMicIcon { width: 20px; height: 20px; display: block; margin: 0; transform: none; }
     `}</style>
   </>;
 }
