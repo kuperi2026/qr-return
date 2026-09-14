@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
 
 const hub = [
   ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/login?source=app&next=%2Fapp%2Fadd", "blue"],
@@ -11,11 +10,6 @@ const hub = [
   ["◇", "მომსახურება და პაკეტები", "გაეცანით მომსახურების პირობებსა და პაკეტებს", "/login?source=app&next=%2Faccount%2Fsubscriptions%3Fsource%3Dapp", "gold"],
 ];
 export default function Products() {
-  useEffect(() => {
-    document.body.classList.add("kompasiPublicEntry");
-    return () => document.body.classList.remove("kompasiPublicEntry");
-  }, []);
-
   return (
     <main className="pc">
       <div className="pw">
@@ -94,8 +88,6 @@ export default function Products() {
         .pc .authChoice .loginAction{background:rgba(3,48,94,.36);color:#fff}
         .pc .authChoice .loginAction small{color:#d7ecff}
         .pc .authChoice em{font-size:25px}
-        body.kompasiPublicEntry{padding-bottom:0!important}
-        body.kompasiPublicEntry .appDock,body.kompasiPublicEntry .notificationPill{display:none!important}
         .pc section a {
           width: 100%;
           min-width: 0;
