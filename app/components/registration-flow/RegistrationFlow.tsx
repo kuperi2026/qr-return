@@ -204,8 +204,13 @@ export default function RegistrationFlow({
           error ||
           !user
         ) {
+          const appRegistration =
+            new URLSearchParams(window.location.search).get("source") === "app";
+
           window.location.assign(
-            "/login"
+            appRegistration
+              ? `/login?source=app&next=${encodeURIComponent(`/register/${type}?source=app`)}`
+              : "/login"
           );
 
           return;
@@ -1540,15 +1545,17 @@ export default function RegistrationFlow({
       `}</style>
       <style jsx global>{`
         @media (max-width: 600px) {
-          .registrationPage.appRegistration { padding: 0 10px 22px; background:#edf7ff; }.registrationPage.appRegistration button,.registrationPage.appRegistration a,.registrationPage.appRegistration input,.registrationPage.appRegistration select,.registrationPage.appRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-          .registrationPage.appRegistration .registrationHeader { min-height: 52px; }
-          .registrationPage.appRegistration .changeProduct { padding: 7px 9px; font-size: 10px; }
+          .registrationPage.appRegistration { padding: 0 10px 22px; background:radial-gradient(circle at 12% 0%,rgba(66,173,255,.28),transparent 27%),linear-gradient(180deg,#eaf7ff 0%,#f8fcff 48%,#eef8f5 100%); }
+          .registrationPage.appRegistration button,.registrationPage.appRegistration a,.registrationPage.appRegistration input,.registrationPage.appRegistration select,.registrationPage.appRegistration textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+          .registrationPage.appRegistration .emojiBackground span { opacity:.035; filter:none; }
+          .registrationPage.appRegistration .registrationHeader { min-height: 52px; border-bottom:1px solid rgba(18,91,151,.13); }
+          .registrationPage.appRegistration .changeProduct { padding: 7px 9px; border-color:#b9d9ef; background:rgba(255,255,255,.72); color:#0b5ca8; font-size: 10px; box-shadow:0 5px 14px rgba(7,63,111,.08); }
           .registrationPage.appRegistration .progress { padding-top: 12px; }
-          .registrationPage.appRegistration .marketingLine { margin: 8px auto; gap: 7px; }
+          .registrationPage.appRegistration .marketingLine { margin: 8px auto; gap: 7px; color:#123d5c; }
           .registrationPage.appRegistration .marketingLine > span { font-size: 25px; }
           .registrationPage.appRegistration .marketingLine strong { font-size: 14px; line-height: 1.3; }
-          .registrationPage.appRegistration .marketingLine p { margin-top: 3px; font-size: 10px; line-height: 1.35; }
-          .registrationPage.appRegistration .registrationCard { padding: 13px 12px; border-radius: 14px; }
+          .registrationPage.appRegistration .marketingLine p { margin-top: 3px; color:#57758b; font-size: 10px; line-height: 1.35; }
+          .registrationPage.appRegistration .registrationCard { padding: 13px 12px; border:1px solid rgba(142,190,219,.42); border-radius: 16px; background:rgba(255,255,255,.96); box-shadow:0 18px 44px rgba(7,54,95,.14); }
           .registrationPage.appRegistration .stepTitle h1,
           .registrationPage.appRegistration .previewTitle h1 { font-size: 19px; }
           .registrationPage.appRegistration .stepTitle p,
@@ -1556,19 +1563,26 @@ export default function RegistrationFlow({
           .registrationPage.appRegistration .formGrid { gap: 10px; }
           .registrationPage.appRegistration .field label { margin-bottom: 5px; font-size: 11px; }
           .registrationPage.appRegistration .field input,
-          .registrationPage.appRegistration .field select { min-height: 0; height: 44px; padding: 0 11px; font-size: 16px; }
-          .registrationPage.appRegistration .field textarea { min-height: 72px; padding: 10px 11px; font-size: 16px; }
+          .registrationPage.appRegistration .field select { min-height: 0; height: 44px; padding: 0 11px; border-color:#c8ddea; background:#f8fcff; font-size: 16px; }
+          .registrationPage.appRegistration .field textarea { min-height: 72px; padding: 10px 11px; border-color:#c8ddea; background:#f8fcff; font-size: 16px; }
+          .registrationPage.appRegistration .field input:focus,
+          .registrationPage.appRegistration .field select:focus,
+          .registrationPage.appRegistration .field textarea:focus { border-color:#1680d4; background:#fff; box-shadow:0 0 0 4px rgba(22,128,212,.1); }
           .registrationPage.appRegistration .accountNotice,
-          .registrationPage.appRegistration .finderNotice { padding: 9px 10px; }
+          .registrationPage.appRegistration .finderNotice { padding: 9px 10px; border-color:#bfe7d3; background:#effbf5; }
           .registrationPage.appRegistration .actions,
           .registrationPage.appRegistration .previewActions { margin-top: 14px; gap: 8px; }
           .registrationPage.appRegistration .primaryButton,
           .registrationPage.appRegistration .secondaryButton,
           .registrationPage.appRegistration .backButton,
           .registrationPage.appRegistration .confirmButton { min-height: 44px; padding: 0 13px; font-size: 12px; }
+          .registrationPage.appRegistration .primaryButton,
+          .registrationPage.appRegistration .confirmButton { background:#0aa369; box-shadow:0 9px 20px rgba(10,163,105,.22); }
+          .registrationPage.appRegistration .backButton,
+          .registrationPage.appRegistration .secondaryButton { border-color:#bcd6e8; background:#edf7ff; color:#0b5ca8; }
           .registrationPage.appRegistration .photoSection { padding-top: 12px; }
-          .registrationPage.appRegistration .uploadBox { min-height: 108px; padding: 14px; }
-          .registrationPage.appRegistration .visibilityRow { min-height: 54px; padding: 9px 10px; }
+          .registrationPage.appRegistration .uploadBox { min-height: 108px; padding: 14px; border-color:#b9d9ee; background:linear-gradient(145deg,#f4faff,#eef9f5); }
+          .registrationPage.appRegistration .visibilityRow { min-height: 54px; padding: 9px 10px; border-color:#d4e4ed; background:#fbfdff; }
         }
       `}</style>
     </>
