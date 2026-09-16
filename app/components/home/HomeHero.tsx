@@ -106,9 +106,15 @@ export default function HomeHero({ ka }: { ka: boolean }) {
       <div className="homeHeroInner">
         <div className="heroStage">
           <article className="ecosystemCircle">
-            <h1>{ka ? <>მართე ყველა პროდუქტი ერთი ანგარიშიდან. განაახლე ინფორმაცია ნებისმიერ დროს და თავად გადაწყვიტე, QR კოდის დასკანერებისას რა დამატებით ინფორმაციას მიაწვდი მპოვნელს.</> : <>Manage every product from one account. Update information at any time and choose what a finder sees when they scan the QR code.</>}</h1>
+            <h1>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h1>
+            <p>{ka ? "მართე ყველა პროდუქტი ერთი ანგარიშიდან. განაახლე ინფორმაცია ნებისმიერ დროს და თავად გადაწყვიტე, რას ნახავს მპოვნელი." : "Manage every product from one account. Update your information any time and choose what a finder sees."}</p>
           </article>
+        </div>
 
+        <section className="productShowcase" aria-label={ka ? "KOMPASI პროდუქტები" : "KOMPASI products"}>
+          <div className="productHeading">
+            <span className="productEyebrow"><img src="/home/kompasi-logo.svg" alt="" width="24" height="24" /> KOMPASI · PRODUCTS</span>
+          </div>
           <div className="heroSupport">
             <details className="supportCard">
               <summary><span aria-hidden="true">✦</span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true">+</b></summary>
@@ -116,13 +122,6 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             </details>
             <a className="supportCard supportLink" href="/book-call"><span aria-hidden="true">📞</span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true">→</b></a>
             <a className="supportCard supportLink" href="/support"><span aria-hidden="true">💬</span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true">→</b></a>
-          </div>
-        </div>
-
-        <section className="productShowcase" aria-label={ka ? "KOMPASI პროდუქტები" : "KOMPASI products"}>
-          <div className="productHeading">
-            <span className="productEyebrow"><img src="/home/kompasi-logo.svg" alt="" width="24" height="24" /> KOMPASI · PRODUCTS</span>
-            <h2>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h2>
           </div>
           <div className="productRail">
           <article className="dogProduct emergencyProduct">
@@ -258,6 +257,22 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         .bottomAccountNote{width:min(1100px,calc(100% - 40px));margin:14px auto 0;padding:11px 16px;color:#173652;text-align:center}.bottomAccountNote p{color:#173652;font-size:14px}.bottomAccountNote em{color:#b5253b}
         @media(max-width:900px){.heroStage{height:auto;min-height:0;padding:18px 16px;gap:12px;flex-direction:column}.heroStage .heroSupport{position:static;transform:none;width:min(520px,calc(100% - 28px));grid-template-columns:1fr;gap:6px}.heroWidePhoto{height:170px}.productRail{grid-template-columns:repeat(8,145px);gap:20px}.productRail>.dogProduct{min-width:145px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:145px;max-width:145px;border-radius:50%}}
         @media(max-width:700px){.heroStage{padding:14px 14px}.ecosystemCircle h1{font-size:24px}.heroWidePhoto{height:150px}.productShowcase{width:calc(100vw - 28px);margin:0 auto;padding:12px 0 8px}.productHeading{margin-bottom:9px}.productHeading h2{font-size:23px}.productRail{grid-template-columns:repeat(8,136px);gap:18px;overflow-x:auto}.productRail>.dogProduct{min-width:136px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:136px;max-width:136px;border-radius:50%}.productRail>.dogProduct .dogCopy,.productRail>.catProduct .dogCopy{min-height:106px;padding-top:10px}.productRail>.dogProduct .dogCopy h3{font-size:13px}.heroActions{grid-template-columns:repeat(2,1fr)}.heroActions a{min-height:44px}.bottomAccountNote{margin-top:14px}}
+
+        /* Compact headline and the three original actions immediately above products. */
+        .heroStage{min-height:0;padding:25px 18px;background:#17659f}
+        .ecosystemCircle h1{font-size:clamp(24px,2.2vw,32px);line-height:1.23}
+        .ecosystemCircle h1 strong{display:inline;margin-left:5px;color:#ffe3a7;font-weight:750}
+        .ecosystemCircle p{max-width:760px;margin:9px auto 0;color:#e0effa;font-size:14px;line-height:1.5}
+        .productShowcase{padding:12px 0 8px}.productHeading{margin:0 0 9px}.productHeading .productEyebrow{margin:0;color:#17659f;font-size:11px}
+        .heroSupport{position:static;width:100%;max-width:none;margin:0 0 12px;transform:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+        .heroSupport .supportCard{min-width:0;min-height:56px;border:1px solid #c5dded;border-radius:11px;color:#123e68;background:#eaf4fc;box-shadow:none;backdrop-filter:none}
+        .heroSupport .supportCard:nth-child(2){border-color:#ead9b2;background:#fff5df;color:#725318}
+        .heroSupport .supportCard:nth-child(3){border-color:#c6e4d4;background:#e9f8ef;color:#195c42}
+        .heroSupport .supportCard summary,.heroSupport .supportLink{min-height:54px;padding:8px 13px;display:grid;grid-template-columns:24px minmax(0,1fr) 18px;gap:9px;align-items:center;color:inherit;background:transparent}
+        .heroSupport .supportCard strong,.heroSupport .supportCard small{color:inherit}.heroSupport .supportCard small{font-size:11px;opacity:.75}
+        .heroSupport .supportCard p{padding:0 13px 12px;color:#345b79}
+        .heroSupport .supportCard b{font-size:18px}.productRail{margin-top:0}
+        @media(max-width:760px){.heroStage{padding:22px 16px}.ecosystemCircle h1{font-size:24px}.ecosystemCircle p{font-size:12px}.heroSupport{grid-template-columns:1fr;gap:7px;margin-bottom:10px}.heroSupport .supportCard,.heroSupport .supportCard summary,.heroSupport .supportLink{min-height:46px}.productShowcase{padding-top:11px}}
       `}</style>
     </section>
   );
