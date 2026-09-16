@@ -4,17 +4,16 @@
 .productRail{max-width:1380px!important;column-gap:36px!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:300px!important}.productRail .dogProduct:nth-child(3) .dogVisual img,.productRail .dogProduct:nth-child(4) .dogVisual img,.productRail .dogProduct:nth-child(5) .dogVisual img,.productRail .dogProduct:nth-child(6) .dogVisual img,.productRail .dogProduct:nth-child(7) .dogVisual img{object-fit:cover!important;object-position:68% center!important}.productRail .dogProduct:nth-child(6) .dogVisual img{object-position:64% center!important}@media(max-width:1100px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:250px!important}}@media(max-width:900px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:235px!important}}@media(max-width:520px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:175px!important}}
 .productHeading h2{max-width:950px!important;font-size:0!important;line-height:1.45!important}.productHeading h2::after{content:"მართე ყველა პროდუქტი ერთი ანგარიშიდან. განაახლე ინფორმაცია ნებისმიერ დროს და თავად გადაწყვიტე, QR კოდის დასკანერებისას რა დამატებითი ინფორმაცია მიაწოდო მპოვნელს.";display:block;font-size:clamp(20px,2vw,29px);font-weight:inherit;line-height:1.42;letter-spacing:-.65px}@media(max-width:700px){.productHeading h2::after{font-size:21px;line-height:1.45;letter-spacing:-.35px}}
 
-
-/* Homepage-only FickleFlight-inspired palette.
-   Layout, copy, product artwork and internal routes remain unchanged. */
+/* Homepage-only FickleFlight-inspired composition.
+   Existing copy, product assets, interactions and internal routes stay unchanged. */
 .homePalette {
-  background: #f5f9ff !important;
+  background: #f4f8fc !important;
 }
 
 .homePalette .homeHeader {
   background: #ffffff !important;
-  border-bottom-color: #dbe7f3 !important;
-  box-shadow: 0 8px 26px rgba(8, 67, 122, 0.07) !important;
+  border-bottom-color: #dce7f1 !important;
+  box-shadow: 0 5px 18px rgba(7, 63, 112, 0.07) !important;
 }
 
 .homePalette .homeBrandLogo {
@@ -24,74 +23,174 @@
 
 .homePalette .homeBrand strong,
 .homePalette .homeNav button {
-  color: #083b70 !important;
+  color: #0a3b6b !important;
 }
 
-.homePalette .homeBrand span {
-  color: #6d88a2 !important;
-}
-
+.homePalette .homeBrand span,
 .homePalette .homeLanguages button {
-  color: #8195a9 !important;
+  color: #71879b !important;
 }
 
 .homePalette .homeLanguages button.activeLanguage {
-  color: #0879c9 !important;
+  color: #087bc8 !important;
 }
 
 .homePalette .homeLanguages span {
-  background: #cbd9e6 !important;
+  background: #ccdae6 !important;
 }
 
 .homePalette .homeAuth,
 .homePalette .homeAdmin {
   color: #ffffff !important;
-  background: #1299e8 !important;
-  border-color: #1299e8 !important;
-  box-shadow: 0 8px 18px rgba(18, 153, 232, 0.18) !important;
+  background: #159be7 !important;
+  border-color: #159be7 !important;
+  box-shadow: 0 8px 18px rgba(21, 155, 231, 0.18) !important;
 }
 
 .homePalette .homeAuth[href="/login"] {
-  color: #083b70 !important;
+  color: #0a3b6b !important;
   background: #ffffff !important;
-  border-color: #9eb5c9 !important;
+  border-color: #9bb1c5 !important;
   box-shadow: none !important;
 }
 
+/* Compact blue hero panel, matching the reference composition. */
 .homePalette .homeHero {
+  padding: 24px 0 0 !important;
+  color: #ffffff !important;
+  background: #f4f8fc !important;
+}
+
+.homePalette .homeHeroInner {
+  max-width: none !important;
+}
+
+.homePalette .heroStage {
+  width: min(1380px, calc(100vw - 40px)) !important;
+  min-height: 420px !important;
+  margin: 0 auto !important;
+  padding: 54px 76px !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  border-radius: 22px 22px 0 0 !important;
   background:
-    radial-gradient(circle at 18% 14%, rgba(68, 190, 255, 0.42), transparent 31%),
-    linear-gradient(180deg, #118fd6 0%, #086dbb 47%, #07549d 100%) !important;
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,.16) 1px, transparent 1.5px) 0 0 / 17px 17px,
+    radial-gradient(circle at 18% 16%, rgba(76,190,255,.38), transparent 34%),
+    linear-gradient(135deg, #118fd6 0%, #0873bd 55%, #07549d 100%) !important;
+  box-shadow: 0 22px 50px rgba(8, 72, 128, .16) !important;
 }
 
 .homePalette .ecosystemCircle {
   border-color: #ffad32 !important;
   box-shadow:
-    0 22px 55px rgba(0, 38, 82, 0.24),
-    0 0 0 6px rgba(255, 173, 50, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    0 22px 55px rgba(0, 38, 82, .24),
+    0 0 0 6px rgba(255, 173, 50, .12),
+    inset 0 1px 0 rgba(255,255,255,.25) !important;
 }
 
 .homePalette .ecosystemCircle h1 strong,
-.homePalette .stageAccent p em,
-.homePalette .bottomAccountNote em,
-.homePalette .productDetailsBody strong,
-.homePalette .productDetailsBody b {
-  color: #ffe2aa !important;
+.homePalette .stageAccent p em {
+  color: #ffe0a3 !important;
 }
 
-.homePalette .dogCopy:before {
+/* The eight existing cards now sit in the large white field from the reference. */
+.homePalette .productShowcase {
+  width: min(1380px, calc(100vw - 40px)) !important;
+  margin: 0 auto !important;
+  padding: 58px 40px 64px !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  overflow: visible !important;
+  color: #0b3d6c !important;
+  background: #ffffff !important;
+  border: 1px solid #e1eaf2 !important;
+  border-top: 0 !important;
+  border-radius: 0 0 22px 22px !important;
+  box-shadow: 0 22px 50px rgba(8, 72, 128, .1) !important;
+}
+
+.homePalette .productHeading span {
+  color: #5d89ad !important;
+}
+
+.homePalette .productHeading h2 {
+  color: #0a3b6b !important;
+}
+
+.homePalette .productRail .dogVisual,
+.homePalette .productRail .catProduct .dogVisual {
+  border-color: #ffffff !important;
+  box-shadow:
+    0 15px 32px rgba(9, 65, 111, .18),
+    0 0 0 1px #d9e6f1 !important;
+}
+
+.homePalette .productRail .dogCopy,
+.homePalette .productRail .catProduct .dogCopy {
+  color: #0a3b6b !important;
+}
+
+.homePalette .productRail .dogCopy h3 {
+  text-shadow: none !important;
+}
+
+.homePalette .productRail .dogCopy:before {
   background: #ffad32 !important;
 }
 
-.homePalette .dogCopy a,
-.homePalette .productDetails summary .summaryAction {
+.homePalette .productRail .dogCopy a {
+  color: #ffffff !important;
   background: #ff9f1c !important;
-  box-shadow: 0 10px 22px rgba(206, 116, 0, 0.25) !important;
+  box-shadow: 0 10px 22px rgba(211, 122, 0, .22) !important;
+}
+
+.homePalette .productDetails summary {
+  color: #0a3b6b !important;
+  background: #f5f9fd !important;
+  border-color: #d7e5f0 !important;
+  box-shadow: 0 8px 20px rgba(8, 72, 128, .08) !important;
 }
 
 .homePalette .productDetails summary .summaryIcon {
-  color: #ffd07a !important;
+  color: #f39a17 !important;
+}
+
+.homePalette .productDetails summary .summaryAction {
+  color: #ffffff !important;
+  background: #159be7 !important;
+  box-shadow: 0 7px 16px rgba(21, 155, 231, .22) !important;
+}
+
+.homePalette .productDetailsBody {
+  color: #163f63 !important;
+  background: #f7fbff !important;
+  border-color: #d7e5f0 !important;
+  box-shadow: 0 15px 32px rgba(8, 72, 128, .1) !important;
+}
+
+.homePalette .productDetailsBody h4 {
+  border-bottom-color: #d7e5f0 !important;
+}
+
+.homePalette .productDetailsBody strong,
+.homePalette .productDetailsBody b {
+  color: #0875bd !important;
+}
+
+/* Existing owner/finder actions remain directly under the card field. */
+.homePalette .heroActions,
+.homePalette .bottomAccountNote {
+  width: min(1120px, calc(100vw - 40px)) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.homePalette .heroActions {
+  margin-top: 28px !important;
+}
+
+.homePalette .heroActions a {
+  border-color: #b8cee0 !important;
 }
 
 .homePalette .primaryAction {
@@ -101,8 +200,25 @@
 
 .homePalette .secondaryAction {
   color: #ffffff !important;
-  background: #ff9f1c !important;
-  border-color: #ffb64c !important;
+  background: #159be7 !important;
+  border-color: #159be7 !important;
+}
+
+.homePalette .bottomAccountNote {
+  margin-top: 24px !important;
+  margin-bottom: 70px !important;
+  color: #0a3b6b !important;
+  background: #ffffff !important;
+  border-color: #d7e5f0 !important;
+  box-shadow: 0 12px 30px rgba(8, 72, 128, .08) !important;
+}
+
+.homePalette .bottomAccountNote p {
+  color: #0a3b6b !important;
+}
+
+.homePalette .bottomAccountNote em {
+  color: #0875bd !important;
 }
 
 .homePalette .footer {
@@ -123,10 +239,50 @@
 }
 
 .homePalette .footerBottom {
-  border-top-color: rgba(255, 255, 255, 0.16) !important;
+  border-top-color: rgba(255,255,255,.16) !important;
   color: #9ebad1 !important;
 }
 
 .homePalette .footerBottom a {
-  border-color: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255,255,255,.28) !important;
+}
+
+@media (max-width: 900px) {
+  .homePalette .heroStage {
+    width: calc(100vw - 24px) !important;
+    padding: 46px 28px !important;
+  }
+
+  .homePalette .productShowcase {
+    width: calc(100vw - 24px) !important;
+    padding: 42px 24px 48px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .homePalette .homeHero {
+    padding-top: 12px !important;
+  }
+
+  .homePalette .heroStage {
+    width: calc(100vw - 20px) !important;
+    padding: 34px 18px 40px !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .homePalette .productShowcase {
+    width: calc(100vw - 20px) !important;
+    margin-top: 0 !important;
+    padding: 38px 14px 42px !important;
+    border-radius: 0 0 18px 18px !important;
+  }
+
+  .homePalette .productRail {
+    margin-top: 28px !important;
+  }
+
+  .homePalette .heroActions,
+  .homePalette .bottomAccountNote {
+    width: calc(100vw - 28px) !important;
+  }
 }
