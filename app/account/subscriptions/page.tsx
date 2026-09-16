@@ -79,7 +79,7 @@ export default function SubscriptionsPage() {
   useEffect(() => { void (async () => {
     const params = new URLSearchParams(window.location.search);
     const appContext = params.get("source") === "app" || params.get("app_preview") === "1" || window.localStorage.getItem("kompasi-app-mode") === "1";
-    setIsAppPricing(appContext);
+    // Use the same explicit profile + period selection model on web and in the app.\n    setIsAppPricing(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       if (appContext) { setLoading(false); return; }
@@ -289,7 +289,7 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
-      .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay,.liveCalculator{display:none}
+      .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay{display:none}\n      .liveCalculator{display:block}.profilePicker,.periodStage{display:none}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e3eaf2}.historyDates>div{padding:10px;border:1px solid #dce8f2;border-radius:10px;background:#fff}.historyDates small,.historyDates strong{display:block}.historyDates small{color:#71879a!important;font-size:9px!important;font-weight:850}.historyDates strong{margin-top:4px;color:#19476b!important;font-size:12px!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{grid-template-columns:1fr 1fr;gap:7px}}
 
       .stepNumber{width:27px;height:27px;margin-right:5px;display:inline-grid;place-items:center;border-radius:8px;background:#eaf3ff;color:#0966db;font-size:13px}.requestSuccess,.requestError{margin-top:14px;padding:11px 12px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.45}.requestSuccess{background:#e8f8f0;color:#087443}.requestError{background:#fff0f0;color:#b42318}
