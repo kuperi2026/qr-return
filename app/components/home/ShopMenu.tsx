@@ -47,8 +47,8 @@ export default function ShopMenu({
             }}
           >
             {ka
-              ? "აირჩიეთ QR RETURN თქვენი საჭიროებისთვის."
-              : "Choose QR RETURN for your needs."}
+              ? "აირჩიეთ KOMPASI თქვენი საჭიროებისთვის."
+              : "Choose KOMPASI for your needs."}
           </h2>
         </div>
 
@@ -93,8 +93,8 @@ export default function ShopMenu({
 
             <p style={paragraphStyle}>
               {ka
-                ? "იხილეთ QR RETURN-ის პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
-                : "Explore QR RETURN products for belongings, pets and Emergency use."}
+                ? "იხილეთ KOMPASI-ის პროდუქტები ნივთებისთვის, ცხოველებისა და Emergency გამოყენებისთვის."
+                : "Explore KOMPASI products for belongings, pets and Emergency use."}
             </p>
 
             <strong style={linkStyle}>
