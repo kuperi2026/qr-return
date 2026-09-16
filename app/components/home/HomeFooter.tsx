@@ -8,8 +8,8 @@ export default function HomeFooter({ ka }: { ka: boolean }) {
       <div className="footerTop">
         <div className="brandColumn">
           <a href="/" className="brand">
-            <span className="logo">QR</span>
-            <span><strong>QR RETURN</strong><small>SMART LOST &amp; FOUND</small></span>
+            <span className="logo"><img src="/home/kompasi-logo.svg" alt="" width="47" height="47" /></span>
+            <span><strong>KOMPASI</strong><small>SMART LOST &amp; FOUND</small></span>
           </a>
           <p>{ka ? "მყისიერი კავშირი — საჭირო დროს, საჭირო ადამიანთან." : "An instant connection — at the right time, with the right person."}</p>
         </div>
@@ -41,7 +41,7 @@ export default function HomeFooter({ ka }: { ka: boolean }) {
       <FAQMenu ka={ka} />
 
       <div className="footerBottom">
-        <span>© {new Date().getFullYear()} QR RETURN</span>
+        <span>© {new Date().getFullYear()} KOMPASI</span>
         <span>{ka ? "ყველა უფლება დაცულია." : "All rights reserved."}</span>
         <div><a href="#" aria-label="Facebook">f</a><a href="#" aria-label="Instagram">◎</a><a href="#" aria-label="TikTok">♪</a></div>
       </div>
@@ -52,6 +52,7 @@ export default function HomeFooter({ ka }: { ka: boolean }) {
         @media(max-width:540px){.footer{padding:50px 20px 22px}.footerTop{grid-template-columns:1fr;gap:34px}.brandColumn{padding-bottom:8px}.footer h3{margin-bottom:15px}.footerBottom{margin-top:40px;grid-template-columns:1fr}.footerBottom div{justify-content:flex-start}}
         .footer{padding-top:34px}.footerTop{gap:28px}.footerBottom{margin-top:28px}.brandColumn p{margin-top:12px}
         @media(max-width:540px){.footer{padding-top:28px}.footerTop{gap:20px}.footerBottom{margin-top:22px}}
+        .logo{background:transparent;border-radius:12px;overflow:hidden}.logo img{width:100%;height:100%;object-fit:contain}
       `}</style>
     </footer>
   );
