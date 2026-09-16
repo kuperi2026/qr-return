@@ -190,15 +190,15 @@ export default function VisibilityToggle({
         }
 
         .toggleButton.on {
-          border-color: #bfd2ed;
+          border-color: #9edbc1;
 
-          background: #eef5ff;
+          background: #eaf9f2;
         }
 
         .lockedToggle {
-          border: 1px solid #c8daf4;
+          border: 1px solid #9edbc1;
 
-          background: #eef5ff;
+          background: #eaf9f2;
         }
 
         .toggleTrack,
@@ -222,11 +222,11 @@ export default function VisibilityToggle({
 
         .toggleButton.on
         .toggleTrack {
-          background: #0647c8;
+          background: #0aa369;
         }
 
         .lockedTrack {
-          background: #0647c8;
+          background: #0aa369;
         }
 
         .toggleDot,
@@ -283,7 +283,7 @@ export default function VisibilityToggle({
 
         .toggleButton.on strong,
         .lockedToggle strong {
-          color: #0647c8;
+          color: #08784a;
         }
 
         @media (
