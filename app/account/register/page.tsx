@@ -13,6 +13,7 @@ export default function AccountRegisterPage() {
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [personalIdLast4, setPersonalIdLast4] = useState("");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,6 +36,7 @@ export default function AccountRegisterPage() {
       !firstName.trim() ||
       !lastName.trim() ||
       !email.trim() ||
+      !personalIdLast4 ||
       !password
     ) {
       setError(
@@ -43,6 +45,15 @@ export default function AccountRegisterPage() {
           : "Please complete all required fields."
       );
 
+      return;
+    }
+
+    if (!/^\d{4}$/.test(personalIdLast4)) {
+      setError(
+        ka
+          ? "გთხოვთ შეიყვანოთ პირადი ნომრის ზუსტად ბოლო 4 ციფრი."
+          : "Please enter exactly the last 4 digits of your personal ID."
+      );
       return;
     }
 
@@ -75,6 +86,14 @@ export default function AccountRegisterPage() {
       } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          data: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            phone: phone.trim(),
+            personal_id_last4: personalIdLast4,
+          },
+        },
       });
 
       if (signUpError) {
@@ -252,6 +271,37 @@ export default function AccountRegisterPage() {
                 }
                 autoComplete="family-name"
               />
+            </Field>
+          </div>
+
+          <div className="grid">
+            <Field
+              label={
+                ka
+                  ? "პირადი ნომრის ბოლო 4 ციფრი *"
+                  : "Last 4 digits of personal ID *"
+              }
+            >
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
+                maxLength={4}
+                value={personalIdLast4}
+                onChange={(event) =>
+                  setPersonalIdLast4(
+                    event.target.value.replace(/\D/g, "").slice(0, 4)
+                  )
+                }
+                autoComplete="off"
+                placeholder="••••"
+                aria-describedby="personal-id-last4-help"
+              />
+              <small id="personal-id-last4-help">
+                {ka
+                  ? "შეიყვანეთ მხოლოდ ბოლო 4 ციფრი — სრული პირადი ნომერი არ შეიყვანოთ."
+                  : "Enter only the last 4 digits — never enter your full personal ID."}
+              </small>
             </Field>
           </div>
 
