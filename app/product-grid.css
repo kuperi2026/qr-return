@@ -1,29 +1,31 @@
 /* Carry the original blue masthead into the product area without a blank break. */
 .homePalette .homeHero.homeHero {
-  background: #edf7ff;
+  background: linear-gradient(180deg, #287fba 0%, #d8effe 35%, #f5fbff 100%);
 }
 .homePalette .homeHero .heroStage {
+  padding: 42px 18px 24px;
   background:
     radial-gradient(circle, rgba(255,255,255,.22) 1px, transparent 1.5px) 0 0 / 19px 19px,
-    linear-gradient(115deg, #168bc6, #176bab 55%, #105295);
+    linear-gradient(180deg, #168bc6 0%, #176bab 62%, #6db9dd 100%);
 }
 .homePalette .homeHero .productShowcase {
   box-sizing: border-box;
   width: 100%;
   margin: 0;
-  padding: 12px max(14px, calc((100vw - 1320px) / 2)) 8px;
-  background: linear-gradient(180deg, #e2f3ff 0%, #f5faff 145px, #edf7ff 100%);
+  padding: 16px max(14px, calc((100vw - 1320px) / 2)) 16px;
+  background: linear-gradient(180deg, #6db9dd 0%, #e2f3ff 74px, #f5faff 180px, #edf7ff 100%);
 }
 .homePalette .homeHero .heroSupport {
   max-width: 1120px;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 25px;
 }
 /* The eight original circular photos appear in two rows of four. */
 .homePalette .homeHero .productRail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px 20px;
+  gap: 38px 20px;
   width: 100%;
   max-width: 1220px;
   margin: 0 auto;
@@ -52,10 +54,19 @@
   font-size: 15px;
   line-height: 1.35;
 }
+.homePalette .homeHero .productRail .dogVisual,
+.homePalette .homeHero .productRail .dogVisual img {
+  animation: none !important;
+  transform: none !important;
+  will-change: auto;
+}
+.homePalette .homeHero .productRail > .dogProduct:hover {
+  transform: none !important;
+}
 @media (max-width: 900px) {
   .homePalette .homeHero .productRail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px 14px;
+    gap: 30px 14px;
   }
   .homePalette .homeHero .productRail > .dogProduct .dogVisual {
     width: min(100%, 205px) !important;
@@ -63,8 +74,11 @@
   }
 }
 @media (max-width: 520px) {
+  .homePalette .homeHero .heroStage {
+    padding: 31px 16px 20px;
+  }
   .homePalette .homeHero .productRail {
-    gap: 17px 10px;
+    gap: 26px 10px;
   }
   .homePalette .homeHero .productRail > .dogProduct .dogVisual {
     width: min(100%, 165px) !important;
