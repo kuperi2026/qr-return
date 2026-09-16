@@ -1,5 +1,26 @@
-/* Homepage product photos keep their original circular presentation. */
-.homePalette .productRail {
+/* Carry the original blue masthead into the product area without a blank break. */
+.homePalette .homeHero.homeHero {
+  background: #edf7ff;
+}
+.homePalette .homeHero .heroStage {
+  background:
+    radial-gradient(circle, rgba(255,255,255,.22) 1px, transparent 1.5px) 0 0 / 19px 19px,
+    linear-gradient(115deg, #168bc6, #176bab 55%, #105295);
+}
+.homePalette .homeHero .productShowcase {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 12px max(14px, calc((100vw - 1320px) / 2)) 8px;
+  background: linear-gradient(180deg, #e2f3ff 0%, #f5faff 145px, #edf7ff 100%);
+}
+.homePalette .homeHero .heroSupport {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* The eight original circular photos appear in two rows of four. */
+.homePalette .homeHero .productRail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px 20px;
@@ -8,46 +29,48 @@
   margin: 0 auto;
   overflow: visible;
 }
-.homePalette .productRail > .dogProduct {
-  min-width: 0;
+.homePalette .homeHero .productRail > .dogProduct {
+  min-width: 0 !important;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.homePalette .productRail > .dogProduct .dogVisual {
-  width: min(100%, 245px);
-  max-width: 245px;
+.homePalette .homeHero .productRail > .dogProduct .dogVisual {
+  width: min(100%, 245px) !important;
+  max-width: 245px !important;
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
 }
-.homePalette .productRail > .dogProduct .dogCopy {
-  min-height: 0;
+.homePalette .homeHero .productRail > .dogProduct .dogCopy {
+  min-height: 0 !important;
   max-width: 245px;
   padding-top: 12px;
 }
-.homePalette .productRail > .dogProduct .dogCopy h3 {
+.homePalette .homeHero .productRail > .dogProduct .dogCopy h3 {
   font-size: 15px;
   line-height: 1.35;
 }
 @media (max-width: 900px) {
-  .homePalette .productRail {
+  .homePalette .homeHero .productRail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 14px;
   }
-  .homePalette .productRail > .dogProduct .dogVisual {
-    width: min(100%, 205px);
+  .homePalette .homeHero .productRail > .dogProduct .dogVisual {
+    width: min(100%, 205px) !important;
+    max-width: 205px !important;
   }
 }
 @media (max-width: 520px) {
-  .homePalette .productRail {
+  .homePalette .homeHero .productRail {
     gap: 17px 10px;
   }
-  .homePalette .productRail > .dogProduct .dogVisual {
-    width: min(100%, 165px);
+  .homePalette .homeHero .productRail > .dogProduct .dogVisual {
+    width: min(100%, 165px) !important;
+    max-width: 165px !important;
   }
-  .homePalette .productRail > .dogProduct .dogCopy h3 {
+  .homePalette .homeHero .productRail > .dogProduct .dogCopy h3 {
     font-size: 13px;
   }
 }
