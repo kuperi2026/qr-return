@@ -286,8 +286,11 @@ export default function LoginPage() {
                 <span className="productMark markKeys">
                   <svg viewBox="0 0 32 32"><circle cx="10" cy="12" r="5"/><path d="m14 16 12 12m-5-5 3-3m-7-1 3-3"/></svg>
                 </span>
-                <span className="productMark markPet">
-                  <svg viewBox="0 0 32 32"><circle cx="9" cy="9" r="3"/><circle cx="23" cy="9" r="3"/><circle cx="6" cy="17" r="3"/><circle cx="26" cy="17" r="3"/><path d="M10 24c0-5 3-8 6-8s6 3 6 8c0 3-3 5-6 5s-6-2-6-5Z"/></svg>
+                <span className="productMark markDog">
+                  <svg viewBox="0 0 32 32"><path d="M9 10 5 7v8c0 2 1 3 3 4v3c0 5 3 7 8 7s8-2 8-7v-3c2-1 3-2 3-4V7l-4 3c-2-2-12-2-14 0Z"/><circle cx="12" cy="17" r="1"/><circle cx="20" cy="17" r="1"/><path d="M14 22h4l-2 2-2-2Z"/></svg>
+                </span>
+                <span className="productMark markCat">
+                  <svg viewBox="0 0 32 32"><path d="m8 12 1-8 6 5h2l6-5 1 8c2 2 3 4 3 7 0 6-4 10-11 10S5 25 5 19c0-3 1-5 3-7Z"/><circle cx="12" cy="18" r="1"/><circle cx="20" cy="18" r="1"/><path d="m14 22 2 1 2-1M9 22l-5 1m19-1 5 1"/></svg>
                 </span>
                 <span className="productMark markCase">
                   <svg viewBox="0 0 32 32"><rect x="6" y="9" width="20" height="19" rx="4"/><path d="M12 9V6c0-1 1-2 2-2h4c1 0 2 1 2 2v3M11 15v7m10-7v7"/></svg>
@@ -295,12 +298,19 @@ export default function LoginPage() {
                 <span className="productMark markWallet">
                   <svg viewBox="0 0 32 32"><path d="M5 9c0-2 2-4 4-4h16v22H9c-2 0-4-2-4-4V9Z"/><path d="M20 14h8v8h-8c-2 0-3-2-3-4s1-4 3-4Z"/><circle cx="21" cy="18" r="1"/></svg>
                 </span>
+                <span className="productMark markBag">
+                  <svg viewBox="0 0 32 32"><path d="M6 11h20l2 17H4l2-17Z"/><path d="M11 12V9c0-3 2-5 5-5s5 2 5 5v3"/></svg>
+                </span>
+                <span className="productMark markParking">
+                  <svg viewBox="0 0 32 32"><rect x="5" y="4" width="22" height="24" rx="6"/><path d="M13 23V9h5c4 0 6 2 6 5s-2 5-6 5h-5m0-5h5"/></svg>
+                </span>
                 <span className="productMark markEmergency">
                   <svg viewBox="0 0 32 32"><rect x="4" y="9" width="24" height="14" rx="7"/><path d="M16 12v8m-4-4h8"/></svg>
                 </span>
                 <span className="sceneDot dotOne" />
                 <span className="sceneDot dotTwo" />
                 <span className="sceneQr">
+                  <i />
                   <svg viewBox="0 0 40 40">
                     <path d="M4 4h11v11H4zm4 4v3h3V8zM25 4h11v11H25zm4 4v3h3V8zM4 25h11v11H4zm4 4v3h3v-3z" fillRule="evenodd" />
                     <path d="M19 4h3v6h-3zm0 10h7v4h-7zm11 4h6v4h-6zm-11 4h4v5h-4zm7 3h4v4h-4zm7 1h3v10h-3zM19 31h10v5H19z" />
@@ -874,8 +884,8 @@ export default function LoginPage() {
         .appAuth .brandMessage { display:none; }
         .appAuth .center { min-height: 100vh; padding: 24px 0; align-items: start; }
         .appAuth .card { max-width: 440px; padding: 18px 16px 15px; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
-        .productScene{position:relative;height:164px;margin:-3px -2px 14px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.9) 0 13%,transparent 32%),radial-gradient(circle at 15% 8%,rgba(61,159,231,.19),transparent 35%),linear-gradient(155deg,#edf9ff 0%,#dceff9 52%,#e7f7f1 100%)}
-        .productScene:before,.productScene:after{content:"";position:absolute;border:1px solid rgba(25,117,181,.13);border-radius:50%}.productScene:before{width:210px;height:210px;left:-79px;top:-130px}.productScene:after{width:170px;height:170px;right:-85px;bottom:-117px}.flightPath{position:absolute;inset:0;width:100%;height:100%}.flightPath path{stroke:rgba(10,111,177,.25);stroke-width:1.35;stroke-linecap:round;stroke-dasharray:3 7}.productMark{position:absolute;width:43px;height:43px;display:grid;place-items:center;color:#0b609b;filter:drop-shadow(0 8px 7px rgba(13,82,127,.16));transform:rotate(var(--turn))}.productMark:before{content:"";position:absolute;inset:4px;border-radius:50%;background:rgba(255,255,255,.88);box-shadow:inset 0 0 0 1px rgba(255,255,255,.95)}.productMark svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.markKeys{--turn:-13deg;left:6%;top:58%}.markPet{--turn:7deg;left:23%;top:14%;color:#078b6d}.markCase{--turn:-5deg;right:23%;top:13%;color:#6653ca}.markWallet{--turn:11deg;right:5%;top:55%;color:#bb651c}.markEmergency{--turn:-7deg;left:48.5%;bottom:3%;color:#bd3650}.sceneQr{position:absolute;left:50%;top:46%;width:60px;height:60px;display:grid;place-items:center;transform:translate(-50%,-50%) rotate(5deg);border:6px solid rgba(255,255,255,.96);border-radius:18px;background:linear-gradient(145deg,#0873c9,#079b78);color:#fff;box-shadow:0 16px 30px rgba(5,75,123,.25),inset 0 1px 0 rgba(255,255,255,.25)}.sceneQr:after{content:"";position:absolute;right:-9px;top:21px;width:9px;height:16px;border-radius:0 8px 8px 0;background:#fff}.sceneQr svg{width:34px;height:34px;fill:currentColor;transform:rotate(-5deg)}.sceneDot{position:absolute;width:5px;height:5px;border-radius:50%;background:#2db999;box-shadow:0 0 0 5px rgba(45,185,153,.1)}.dotOne{left:17%;top:30%}.dotTwo{right:16%;bottom:28%;width:4px;height:4px;background:#368bdd;box-shadow:0 0 0 4px rgba(54,139,221,.1)}
+        .productScene{position:relative;height:188px;margin:-3px -2px 14px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 47%,rgba(255,255,255,.94) 0 12%,transparent 30%),radial-gradient(circle at 15% 8%,rgba(61,159,231,.19),transparent 35%),linear-gradient(155deg,#edf9ff 0%,#dceff9 52%,#e7f7f1 100%)}
+        .productScene:before,.productScene:after{content:"";position:absolute;border:1px solid rgba(25,117,181,.13);border-radius:50%}.productScene:before{width:220px;height:220px;left:-85px;top:-137px}.productScene:after{width:180px;height:180px;right:-91px;bottom:-122px}.flightPath{position:absolute;inset:0;width:100%;height:100%}.flightPath path{stroke:rgba(10,111,177,.25);stroke-width:1.35;stroke-linecap:round;stroke-dasharray:3 7}.productMark{position:absolute;width:40px;height:40px;display:grid;place-items:center;color:#0b609b;filter:drop-shadow(0 7px 7px rgba(13,82,127,.15));transform:rotate(var(--turn))}.productMark:before{content:"";position:absolute;inset:3px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px rgba(255,255,255,.98)}.productMark svg{position:relative;z-index:1;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.markKeys{--turn:-13deg;left:5%;top:58%}.markDog{--turn:7deg;left:19%;top:9%;color:#078b6d}.markCat{--turn:-6deg;left:25%;bottom:4%;color:#217fbd}.markCase{--turn:-5deg;right:20%;top:8%;color:#6653ca}.markWallet{--turn:11deg;right:4%;top:54%;color:#bb651c}.markBag{--turn:8deg;right:25%;bottom:3%;color:#c44271}.markParking{--turn:-8deg;left:4%;top:17%;color:#2678d4}.markEmergency{--turn:-7deg;right:4%;top:13%;color:#bd3650}.sceneQr{position:absolute;left:50%;top:47%;width:68px;height:76px;display:grid;place-items:center;transform:translate(-50%,-50%) rotate(5deg);border:6px solid rgba(255,255,255,.97);border-radius:19px;background:linear-gradient(145deg,#0873c9,#079b78);color:#fff;box-shadow:0 18px 32px rgba(5,75,123,.27),inset 0 1px 0 rgba(255,255,255,.25)}.sceneQr:before{content:"";position:absolute;top:6px;left:50%;width:8px;height:8px;transform:translateX(-50%);border:2px solid rgba(255,255,255,.9);border-radius:50%}.sceneQr:after{content:"";position:absolute;right:-9px;top:29px;width:9px;height:17px;border-radius:0 8px 8px 0;background:#fff}.sceneQr i{position:absolute;top:-13px;left:50%;width:24px;height:19px;transform:translateX(-50%);border:2px solid rgba(14,91,139,.3);border-bottom:0;border-radius:12px 12px 0 0}.sceneQr svg{width:36px;height:36px;margin-top:10px;fill:currentColor;transform:rotate(-5deg)}.sceneDot{position:absolute;width:5px;height:5px;border-radius:50%;background:#2db999;box-shadow:0 0 0 5px rgba(45,185,153,.1)}.dotOne{left:15%;top:47%}.dotTwo{right:16%;bottom:31%;width:4px;height:4px;background:#368bdd;box-shadow:0 0 0 4px rgba(54,139,221,.1)}
         .appAuth h1 { font-size: 20px; text-align: center; }
         .appAuth .field { margin-top: 11px; }
         .appAuth input { height: 44px; border-radius: 10px; font-size: 15px; }
