@@ -35,9 +35,10 @@ export default function HomePage() {
 
   return (
     <main
+      className="homePalette"
       style={{
         minHeight: "100vh",
-        background: "#0A4C8A",
+        background: "#F5F9FF",
       }}
     >
       <HomeHeader
