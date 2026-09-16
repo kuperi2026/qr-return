@@ -43,9 +43,8 @@ export default function PremiumAppShell() {
     const params = new URLSearchParams(window.location.search);
     const preview = params.get("app_preview") === "1" || params.get("source") === "app";
     const savedApp = window.localStorage.getItem("kompasi-app-mode") === "1";
-    const websiteChat = pathname.startsWith("/account/chat") && !standalone && !preview;
     if (standalone || preview) window.localStorage.setItem("kompasi-app-mode", "1");
-    setAppMode(websiteChat ? false : standalone || preview || savedApp);
+    setAppMode(standalone || preview || savedApp);
     setOnline(navigator.onLine);
 
     const goOnline = () => setOnline(true);
@@ -56,10 +55,32 @@ export default function PremiumAppShell() {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
     };
-  }, [pathname]);
+  }, []);
 
   const registrationArea = pathname.startsWith("/register") || pathname.startsWith("/register-item") || pathname.startsWith("/emergency/register");
   const ownerArea = pathname.startsWith("/app/") || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/") || pathname.startsWith("/support") || registrationArea;
+
+  useEffect(() => {
+    if (!appMode || !ownerArea || !window.visualViewport) return;
+    const viewport = window.visualViewport;
+    const updateViewport = () => {
+      const visibleHeight = Math.round(viewport.height);
+      const keyboardInset = Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop));
+      document.documentElement.style.setProperty("--kompasi-visible-height", `${visibleHeight}px`);
+      document.documentElement.style.setProperty("--kompasi-keyboard-inset", `${keyboardInset}px`);
+      document.body.classList.toggle("kompasiKeyboardOpen", keyboardInset > 120);
+    };
+    updateViewport();
+    viewport.addEventListener("resize", updateViewport);
+    viewport.addEventListener("scroll", updateViewport);
+    return () => {
+      viewport.removeEventListener("resize", updateViewport);
+      viewport.removeEventListener("scroll", updateViewport);
+      document.documentElement.style.removeProperty("--kompasi-visible-height");
+      document.documentElement.style.removeProperty("--kompasi-keyboard-inset");
+      document.body.classList.remove("kompasiKeyboardOpen");
+    };
+  }, [appMode, ownerArea]);
 
   useLayoutEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
@@ -528,7 +549,7 @@ export default function PremiumAppShell() {
         .notificationPill.pushEnabled{border-color:#b9e4d1;background:#eefbf5;color:#087956}
         .chatPushSlot{min-height:42px;margin:-2px 0 8px}.chatPushSlot .notificationPill{position:static;width:100%;min-height:42px;transform:none;box-shadow:0 5px 16px rgba(13,69,139,.09)}
         .offlinePill+.notificationPill{top:max(48px,calc(env(safe-area-inset-top) + 48px))}
-        @media(max-width:800px){body.kompasiKeyboardOpen .appDock{display:none!important}body.kompasiKeyboardOpen{padding-bottom:0!important}body.kompasiKeyboardOpen .ownerChatPage{height:100dvh!important}}
+        @media(max-width:800px){body.kompasiKeyboardOpen .appDock{display:grid!important;bottom:var(--kompasi-keyboard-inset,0px)!important}body.kompasiKeyboardOpen{padding-bottom:82px!important;overflow:hidden!important}body.kompasiKeyboardOpen .ownerChatPage{height:calc(var(--kompasi-visible-height,100dvh) - 82px)!important}}
         .chatAlert{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));z-index:1200;width:min(450px,calc(100% - 24px));display:flex;align-items:flex-start;gap:10px;padding:13px 12px 13px 15px;border:1px solid #c7ddf7;border-radius:16px;background:rgba(250,253,255,.97);box-shadow:0 16px 42px rgba(5,53,115,.24);backdrop-filter:blur(18px);transform:translateX(-50%)}
         .chatAlert a{min-width:0;flex:1;color:#173652;text-decoration:none}.chatAlert b,.chatAlert span{display:block}.chatAlert b{font-size:11px}.chatAlert span{margin-top:4px;overflow:hidden;color:#657b90;font-size:9px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}.chatAlert button{width:27px;height:27px;border:0;border-radius:9px;background:#edf4fc;color:#52708e;font-size:18px;line-height:1}
       `}</style>
