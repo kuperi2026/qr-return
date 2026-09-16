@@ -26,7 +26,7 @@ export default function HomeLowerSection({ ka }: { ka: boolean }) {
 
       <div className="benefitArea">
         <div className="benefitIntro">
-          <span>QR RETURN</span>
+          <span>KOMPASI</span>
           <h2>{ka ? "საჭირო ფუნქციები — ზედმეტი სირთულის გარეშე" : "Essential features without unnecessary complexity"}</h2>
           <p>{ka ? "ერთი სისტემა ნივთებისთვის, ოთხფეხა მეგობრებისთვის, ავტომობილებისა და Emergency პროფილებისთვის." : "One system for belongings, pets, vehicles and Emergency profiles."}</p>
         </div>
