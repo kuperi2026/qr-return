@@ -439,7 +439,6 @@ export default function OwnerChatInboxPage() {
           <span className="operatorCopy"><strong>პირდაპირი კავშირი</strong><span>უპასუხეთ მპოვნელს უსაფრთხო ჩატში</span></span>
           <span className="onlineDot">● LIVE</span>
         </div>
-        <div id="chat-push-slot" className="chatPushSlot" />
 
         <div className="pageTitle">
           <div>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { createPortal } from "react-dom";
 
 type ChatAlert = {
   title: string;
@@ -241,19 +240,9 @@ export default function PremiumAppShell() {
 
   if (!appMode || !ownerArea) return null;
 
-  const notificationControl = notificationPermission !== "unsupported" ? (
-    <button className={`notificationPill ${pushEnabled ? "pushEnabled" : ""}`} type="button" onClick={enableNotifications}>
-      {pushEnabled ? "✓ Push ჩართულია" : "🔔 შეტყობინებების ჩართვა"}
-    </button>
-  ) : null;
-  const chatPushSlot = typeof document !== "undefined" && (pathname.startsWith("/account/chat") || pathname.startsWith("/app/chat"))
-    ? document.getElementById("chat-push-slot")
-    : null;
-
   return (
     <>
       {!online && <div className="offlinePill">◌ ინტერნეტთან კავშირი შეწყდა</div>}
-      {chatPushSlot ? createPortal(notificationControl, chatPushSlot) : notificationControl}
       {chatAlert && (
         <aside className="chatAlert" role="status" aria-live="polite">
           <Link href={chatAlert.href} onClick={() => setChatAlert(null)}>
