@@ -106,7 +106,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
       <div className="homeHeroInner">
         <div className="heroStage">
           <article className="ecosystemCircle">
-            <h1>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h1>
+            <h1>{ka ? "ერთი სისტემა — ყველაფრისთვის, რაც მნიშვნელოვანია." : "One system — for everything that matters."}</h1>
           </article>
 
           <div className="heroSupport">
@@ -123,7 +123,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         <section className="productShowcase" aria-label={ka ? "QR RETURN პროდუქტები" : "QR RETURN products"}>
           <div className="productHeading">
             <span>QR RETURN · PRODUCTS</span>
-            <h2>{ka ? "ერთი სისტემა — ყველაფრისთვის, რაც მნიშვნელოვანია." : "One system — for everything that matters."}</h2>
+            <h2>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h2>
           </div>
           <div className="productRail">
           <article className="dogProduct emergencyProduct">
@@ -243,24 +243,24 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         /* Compact masthead and the original circular eight-product gallery. */
         .homeHero{min-height:0;padding:0 0 20px;background:#fff;color:#173652;overflow:hidden}
         .homeHeroInner{max-width:none}
-        .heroStage{height:210px;min-height:0;box-sizing:border-box;padding:15px 20px 62px;display:flex;justify-content:center;align-items:center;gap:0;transform:none;background:#17659f}
+        .heroStage{height:170px;min-height:0;box-sizing:border-box;padding:12px 20px 55px;display:flex;justify-content:center;align-items:center;gap:0;transform:none;background:#17659f}
         .ecosystemCircle{max-width:900px;width:auto;aspect-ratio:auto;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;transform:none;text-align:center}
         .ecosystemCircle:before,.ecosystemCircle:after{display:none}
-        .ecosystemCircle h1{max-width:900px;font-size:clamp(26px,2.6vw,37px);font-weight:400;line-height:1.17;letter-spacing:0}.ecosystemCircle h1 strong{display:block;margin:0;color:#fff;font-weight:400}
-        .heroWidePhoto{height:210px;overflow:hidden;background:#b5d7f2}.heroWidePhoto img{width:100%;height:100%;object-fit:cover;object-position:center 48%;display:block}
+        .ecosystemCircle h1{max-width:900px;font-size:clamp(25px,2.5vw,35px);font-weight:450;line-height:1.18;letter-spacing:-.35px}.ecosystemCircle h1 strong{display:block;margin:0;color:#fff;font-weight:400}
+        .heroWidePhoto{height:170px;overflow:hidden;background:#b5d7f2}.heroWidePhoto img{width:100%;height:100%;object-fit:cover;object-position:center 48%;display:block}
         .heroStage .heroSupport{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:min(1080px,calc(100% - 60px));max-width:none;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
         .heroStage .supportCard{min-height:44px;border:1px solid rgba(255,255,255,.42);border-radius:10px;color:#fff;background:rgba(255,255,255,.11);box-shadow:none}.heroStage .supportCard summary,.heroStage .supportLink{min-height:44px;padding:5px 12px;display:grid;grid-template-columns:24px 1fr 18px;gap:8px;align-items:center;color:#fff}.heroStage .supportCard strong,.heroStage .supportCard small{color:#fff}.heroStage .supportCard small{font-size:11px;opacity:.8}.heroStage .supportCard p{padding:0 12px 12px;color:#fff}
-        .productShowcase{width:min(1320px,calc(100% - 32px));min-height:0;margin:0 auto;padding:18px 0 12px;transform:none;overflow:visible;background:none;box-shadow:none;border-radius:0}
-        .productHeading{width:100%;min-height:0;margin:0 0 14px;padding:0;display:block;text-align:center;border:0}.productHeading span{display:block;margin:0 0 5px;color:#17659f;font-size:11px;letter-spacing:1.5px}.productHeading h2{max-width:100%;margin:0;color:#173652;font-size:clamp(23px,2.25vw,30px);font-weight:400;line-height:1.18;text-align:center}
+        .productShowcase{width:min(1320px,calc(100% - 32px));min-height:0;margin:0 auto;padding:14px 0 8px;transform:none;overflow:visible;background:none;box-shadow:none;border-radius:0}
+        .productHeading{width:100%;min-height:0;margin:0 0 10px;padding:0;display:block;text-align:center;border:0}.productHeading span{display:block;margin:0 0 4px;color:#17659f;font-size:11px;letter-spacing:1.5px}.productHeading h2{max-width:100%;margin:0;color:#173652;font-size:clamp(23px,2.25vw,30px);font-weight:450;line-height:1.18;text-align:center}.productHeading h2 strong{color:#17659f;font-weight:750}
         .productRail{margin:0 auto;padding:8px 4px 16px;display:grid;grid-template-columns:repeat(8,minmax(136px,1fr));grid-template-rows:auto;gap:22px;overflow-x:auto;align-items:start;scroll-snap-type:x proximity}
         .productRail>.dogProduct{width:auto;min-width:136px;padding:0;display:flex;flex-direction:column;align-items:center;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none;cursor:auto}.productRail>.dogProduct:hover{transform:translateY(-5px)}
         .productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:100%;max-width:158px;height:auto;min-height:0;aspect-ratio:1;margin:0;order:1;overflow:hidden;border:3px solid rgba(255,255,255,.82);border-radius:50%;background:#dcefff;box-shadow:0 14px 30px rgba(0,20,50,.28),0 0 0 5px rgba(255,255,255,.08)}
         .productRail>.dogProduct .dogVisual img{width:100%;height:100%;object-fit:cover;object-position:center;animation:existingPhoneZoom 9s cubic-bezier(.35,.72,.2,1) infinite}
-        .productName{display:none!important}.productRail>.dogProduct .dogCopy,.productRail>.catProduct .dogCopy{width:100%;min-height:142px;padding:16px 2px 0;order:2;display:flex;flex-direction:column;align-items:center;color:#173652;text-align:center}.productRail>.dogProduct .dogCopy:before{width:30px;margin-bottom:11px}.productRail>.dogProduct .dogCopy h3{margin:0;color:#173652;font-size:14px;line-height:1.35;letter-spacing:-.15px;text-shadow:none}.productRail>.dogProduct .dogCopy a{min-width:94px;min-height:38px;margin-top:auto;padding:0 11px;gap:11px;border-radius:10px;font-size:12px}
+        .productName{display:none!important}.productRail>.dogProduct .dogCopy,.productRail>.catProduct .dogCopy{width:100%;min-height:108px;padding:11px 2px 0;order:2;display:flex;flex-direction:column;align-items:center;color:#173652;text-align:center}.productRail>.dogProduct .dogCopy:before{width:30px;margin-bottom:8px}.productRail>.dogProduct .dogCopy h3{margin:0;color:#173652;font-size:14px;line-height:1.35;letter-spacing:-.15px;text-shadow:none}.productRail>.dogProduct .dogCopy a{min-width:94px;min-height:34px;margin-top:10px;padding:0 11px;gap:11px;border-radius:10px;font-size:12px}
         .heroActions{width:min(700px,calc(100% - 40px));margin:14px auto 0;gap:9px}.heroActions a{min-height:46px}.primaryAction{color:#fff;background:#17659f;border-color:#17659f!important}.secondaryAction{color:#17659f;background:white;border-color:#17659f!important}
         .bottomAccountNote{width:min(1100px,calc(100% - 40px));margin:14px auto 0;padding:11px 16px;color:#173652;text-align:center}.bottomAccountNote p{color:#173652;font-size:14px}.bottomAccountNote em{color:#b5253b}
-        @media(max-width:900px){.heroStage{height:auto;min-height:0;padding:22px 16px;gap:16px;flex-direction:column}.heroStage .heroSupport{position:static;transform:none;width:min(520px,calc(100% - 28px));grid-template-columns:1fr;gap:6px}.heroWidePhoto{height:190px}.productRail{grid-template-columns:repeat(8,145px);gap:20px}.productRail>.dogProduct{min-width:145px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:145px;max-width:145px;border-radius:50%}}
-        @media(max-width:700px){.heroStage{padding:18px 14px}.ecosystemCircle h1{font-size:25px}.heroWidePhoto{height:160px}.productShowcase{width:calc(100vw - 28px);margin:0 auto;padding:16px 0 10px}.productHeading{margin-bottom:13px}.productHeading h2{font-size:23px}.productRail{grid-template-columns:repeat(8,136px);gap:18px;overflow-x:auto}.productRail>.dogProduct{min-width:136px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:136px;max-width:136px;border-radius:50%}.productRail>.dogProduct .dogCopy,.productRail>.catProduct .dogCopy{min-height:138px;padding-top:14px}.productRail>.dogProduct .dogCopy h3{font-size:13px}.heroActions{grid-template-columns:repeat(2,1fr)}.heroActions a{min-height:44px}.bottomAccountNote{margin-top:14px}}
+        @media(max-width:900px){.heroStage{height:auto;min-height:0;padding:18px 16px;gap:12px;flex-direction:column}.heroStage .heroSupport{position:static;transform:none;width:min(520px,calc(100% - 28px));grid-template-columns:1fr;gap:6px}.heroWidePhoto{height:170px}.productRail{grid-template-columns:repeat(8,145px);gap:20px}.productRail>.dogProduct{min-width:145px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:145px;max-width:145px;border-radius:50%}}
+        @media(max-width:700px){.heroStage{padding:14px 14px}.ecosystemCircle h1{font-size:24px}.heroWidePhoto{height:150px}.productShowcase{width:calc(100vw - 28px);margin:0 auto;padding:12px 0 8px}.productHeading{margin-bottom:9px}.productHeading h2{font-size:23px}.productRail{grid-template-columns:repeat(8,136px);gap:18px;overflow-x:auto}.productRail>.dogProduct{min-width:136px}.productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:136px;max-width:136px;border-radius:50%}.productRail>.dogProduct .dogCopy,.productRail>.catProduct .dogCopy{min-height:106px;padding-top:10px}.productRail>.dogProduct .dogCopy h3{font-size:13px}.heroActions{grid-template-columns:repeat(2,1fr)}.heroActions a{min-height:44px}.bottomAccountNote{margin-top:14px}}
       `}</style>
     </section>
   );
