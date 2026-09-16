@@ -277,6 +277,30 @@ export default function LoginPage() {
 
         <section className="center">
           <div className="card">
+            {appMode && (
+              <div className="productScene" aria-hidden="true">
+                <svg className="flightPath" viewBox="0 0 390 150" fill="none">
+                  <path d="M18 105C84 29 132 127 194 73C255 19 300 44 372 17" />
+                  <path d="M39 130C112 91 173 145 240 100C286 69 320 75 365 59" />
+                </svg>
+                <span className="productMark markKeys">
+                  <svg viewBox="0 0 32 32"><circle cx="10" cy="12" r="5"/><path d="m14 16 12 12m-5-5 3-3m-7-1 3-3"/></svg>
+                </span>
+                <span className="productMark markPet">
+                  <svg viewBox="0 0 32 32"><circle cx="9" cy="9" r="3"/><circle cx="23" cy="9" r="3"/><circle cx="6" cy="17" r="3"/><circle cx="26" cy="17" r="3"/><path d="M10 24c0-5 3-8 6-8s6 3 6 8c0 3-3 5-6 5s-6-2-6-5Z"/></svg>
+                </span>
+                <span className="productMark markCase">
+                  <svg viewBox="0 0 32 32"><rect x="6" y="9" width="20" height="19" rx="4"/><path d="M12 9V6c0-1 1-2 2-2h4c1 0 2 1 2 2v3M11 15v7m10-7v7"/></svg>
+                </span>
+                <span className="productMark markWallet">
+                  <svg viewBox="0 0 32 32"><path d="M5 9c0-2 2-4 4-4h16v22H9c-2 0-4-2-4-4V9Z"/><path d="M20 14h8v8h-8c-2 0-3-2-3-4s1-4 3-4Z"/><circle cx="21" cy="18" r="1"/></svg>
+                </span>
+                <span className="productMark markEmergency">
+                  <svg viewBox="0 0 32 32"><rect x="4" y="9" width="24" height="14" rx="7"/><path d="M16 12v8m-4-4h8"/></svg>
+                </span>
+                <span className="sceneQr"><b>⌁</b></span>
+              </div>
+            )}
              <h1>
               შედით თქვენს ანგარიშში
             </h1>
@@ -843,6 +867,8 @@ export default function LoginPage() {
         .appAuth .brandMessage { display:none; }
         .appAuth .center { min-height: 100vh; padding: 24px 0; align-items: start; }
         .appAuth .card { max-width: 440px; padding: 18px 16px 15px; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
+        .productScene{position:relative;height:154px;margin:-3px -2px 14px;overflow:hidden;border-radius:15px;background:radial-gradient(circle at 50% 48%,rgba(64,178,244,.27),transparent 31%),linear-gradient(150deg,#eaf7ff 0%,#d9f0fb 52%,#eaf7f3 100%)}
+        .productScene:before,.productScene:after{content:"";position:absolute;border:1px solid rgba(25,117,181,.13);border-radius:50%}.productScene:before{width:190px;height:190px;left:-68px;top:-111px}.productScene:after{width:150px;height:150px;right:-73px;bottom:-104px}.flightPath{position:absolute;inset:0;width:100%;height:100%}.flightPath path{stroke:rgba(10,111,177,.26);stroke-width:1.5;stroke-linecap:round;stroke-dasharray:4 7}.productMark{position:absolute;width:39px;height:39px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.92);border-radius:13px;background:rgba(255,255,255,.7);color:#0b609b;box-shadow:0 9px 20px rgba(13,82,127,.14);backdrop-filter:blur(7px);transform:rotate(var(--turn))}.productMark svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.markKeys{--turn:-11deg;left:8%;top:56%}.markPet{--turn:8deg;left:25%;top:17%;color:#0b9375}.markCase{--turn:-5deg;right:25%;top:16%;color:#7564d7}.markWallet{--turn:9deg;right:7%;top:53%;color:#c56e22}.markEmergency{--turn:-7deg;left:49%;bottom:8%;color:#c63f55}.sceneQr{position:absolute;left:50%;top:47%;width:52px;height:52px;display:grid;place-items:center;transform:translate(-50%,-50%) rotate(4deg);border:5px solid rgba(255,255,255,.86);border-radius:15px;background:linear-gradient(145deg,#0b6fc5,#0aa17d);color:#fff;box-shadow:0 13px 25px rgba(5,75,123,.25)}.sceneQr b{font-size:25px;transform:rotate(-4deg)}
         .appAuth h1 { font-size: 20px; text-align: center; }
         .appAuth .field { margin-top: 11px; }
         .appAuth input { height: 44px; border-radius: 10px; font-size: 15px; }
