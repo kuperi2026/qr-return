@@ -37,7 +37,7 @@ export default function ContactMenu({
               letterSpacing: "1px",
             }}
           >
-            04 · QR RETURN SUPPORT
+            04 · KOMPASI SUPPORT
           </span>
 
           <h2
@@ -82,8 +82,8 @@ export default function ContactMenu({
 
             <p style={paragraphStyle}>
               {ka
-                ? "გახსენით QR RETURN-ის მხარდაჭერის Live Chat და მოგვწერეთ თქვენი საკითხის შესახებ."
-                : "Open QR RETURN Support Live Chat."}
+                ? "გახსენით KOMPASI-ის მხარდაჭერის Live Chat და მოგვწერეთ თქვენი საკითხის შესახებ."
+                : "Open KOMPASI Support Live Chat."}
             </p>
 
             <strong style={linkStyle}>
@@ -97,13 +97,13 @@ export default function ContactMenu({
             </span>
 
             <h3 style={headingStyle}>
-              QR RETURN Support
+              KOMPASI Support
             </h3>
 
             <p style={paragraphStyle}>
               {ka
-                ? "QR RETURN-ის მხარდაჭერის საკონტაქტო ტელეფონის ნომერი აქ განთავსდება."
-                : "QR RETURN support phone number will appear here."}
+                ? "KOMPASI-ის მხარდაჭერის საკონტაქტო ტელეფონის ნომერი აქ განთავსდება."
+                : "KOMPASI support phone number will appear here."}
             </p>
           </div>
         </div>
