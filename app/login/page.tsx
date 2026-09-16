@@ -837,16 +837,17 @@ export default function LoginPage() {
         }
 
         .appAuth .decor { display: none; }
-        .appAuth .header { width: min(480px, 100%); height: 56px; justify-content: center; }
+        .appAuth .header { display: none; }
         .appAuth .brand { transform: none; }
         .appAuth .brandIcon { width: 38px; height: 38px; border-radius: 12px; }
         .appAuth .brandMessage { display:none; }
-        .appAuth .center { min-height: calc(100vh - 56px); padding: 9px 0 24px; align-items: start; }
+        .appAuth .center { min-height: 100vh; padding: 24px 0; align-items: start; }
         .appAuth .card { max-width: 440px; padding: 18px 16px 15px; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; box-shadow: 0 18px 42px rgba(1,24,58,.28); }
         .appAuth h1 { font-size: 20px; text-align: center; }
         .appAuth .field { margin-top: 11px; }
         .appAuth input { height: 44px; border-radius: 10px; font-size: 15px; }
-        .appAuth .submit { height: 45px; margin-top:14px;border-radius: 11px; background: linear-gradient(120deg,#0b74e5,#13a66b); }
+        .appAuth .submit { height: 45px; margin-top:14px;border-radius: 11px; background: #0aa369; box-shadow: 0 8px 19px rgba(10,163,105,.22); }
+        .appAuth .submit:hover:not(:disabled) { background: #078a58; }
         .appAuth .signup { font-size: 12px; }
 
         @media (max-width: 520px) {
