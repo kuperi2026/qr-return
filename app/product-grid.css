@@ -1,432 +1,53 @@
-.productRail{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:1260px!important;justify-content:space-between!important;column-gap:60px!important;row-gap:68px!important;overflow:visible!important}.productRail .dogProduct{min-width:0!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:245px!important}.productRail .dogVisual img{animation:circleProductMotion 7s ease-in-out infinite!important;object-fit:contain!important;object-position:center!important}.productRail .dogProduct:nth-child(even) .dogVisual img{animation-delay:-3.5s!important}.productRail .dogCopy,.productRail .catProduct .dogCopy{max-width:235px!important;min-height:132px!important}@keyframes circleProductMotion{0%,100%{transform:scale(.97)}50%{transform:scale(1.025)}}@media(prefers-reduced-motion:reduce){.productRail .dogVisual img{animation:none!important;transform:scale(1)!important}}@media(max-width:900px){.productRail{grid-template-columns:repeat(2,minmax(150px,1fr))!important;max-width:610px!important;gap:50px 40px!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{width:100%!important;max-width:215px!important}}@media(max-width:520px){.productRail{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:40px 16px!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:166px!important}.productRail .dogCopy,.productRail .catProduct .dogCopy{min-height:145px!important}.productRail .dogCopy h3{font-size:12.5px!important}}
-.emergencyProduct .dogVisual{background:#dcefff url('/home/emergency-profile.svg') center/100% no-repeat!important;animation:emergencyPhoneMotion 7s ease-in-out infinite!important}.emergencyProduct .dogVisual img{opacity:0!important}@keyframes emergencyPhoneMotion{0%,100%{background-size:97%}50%{background-size:104%}}@media(prefers-reduced-motion:reduce){.emergencyProduct .dogVisual{animation:none!important;background-size:100%!important}}
-.productRail{max-width:1340px!important;column-gap:44px!important;row-gap:72px!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:280px!important}.productRail .dogCopy,.productRail .catProduct .dogCopy{width:100%!important;max-width:275px!important;min-height:154px!important;padding-top:20px!important}.productRail .dogCopy h3{font-size:17px!important;line-height:1.4!important}.productRail .dogCopy a{min-width:110px!important;min-height:44px!important;padding:0 14px!important;font-size:14px!important}.productRail .dogVisual:hover img,.emergencyProduct .dogVisual:hover{animation-play-state:paused!important}@media(max-width:1100px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:235px!important}.productRail .dogCopy h3{font-size:15px!important}}@media(max-width:900px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:225px!important}.productRail .dogCopy,.productRail .catProduct .dogCopy{max-width:230px!important}.productRail .dogCopy h3{font-size:15px!important}}@media(max-width:520px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:172px!important}.productRail .dogCopy,.productRail .catProduct .dogCopy{min-height:158px!important;padding-top:16px!important}.productRail .dogCopy h3{font-size:14px!important}.productRail .dogCopy a{min-width:102px!important;min-height:42px!important;font-size:13px!important}}
-.productRail{max-width:1380px!important;column-gap:36px!important}.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:300px!important}.productRail .dogProduct:nth-child(3) .dogVisual img,.productRail .dogProduct:nth-child(4) .dogVisual img,.productRail .dogProduct:nth-child(5) .dogVisual img,.productRail .dogProduct:nth-child(6) .dogVisual img,.productRail .dogProduct:nth-child(7) .dogVisual img{object-fit:cover!important;object-position:68% center!important}.productRail .dogProduct:nth-child(6) .dogVisual img{object-position:64% center!important}@media(max-width:1100px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:250px!important}}@media(max-width:900px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:235px!important}}@media(max-width:520px){.productRail .dogVisual,.productRail .catProduct .dogVisual{max-width:175px!important}}
-.productHeading h2{max-width:950px!important;font-size:0!important;line-height:1.45!important}.productHeading h2::after{content:"მართე ყველა პროდუქტი ერთი ანგარიშიდან. განაახლე ინფორმაცია ნებისმიერ დროს და თავად გადაწყვიტე, QR კოდის დასკანერებისას რა დამატებითი ინფორმაცია მიაწოდო მპოვნელს.";display:block;font-size:clamp(20px,2vw,29px);font-weight:inherit;line-height:1.42;letter-spacing:-.65px}@media(max-width:700px){.productHeading h2::after{font-size:21px;line-height:1.45;letter-spacing:-.35px}}
-
-/* Homepage-only reconstruction of the supplied FickleFlight composition.
-   Existing QR RETURN copy, cards, imagery, links and internal pages stay unchanged. */
-.homePalette {
-  background: #f3f5f7 !important;
-}
-
-.homePalette .homeHeader {
-  background: #ffffff !important;
-  border-bottom: 1px solid #e2e8ee !important;
-  box-shadow: none !important;
-}
-
-.homePalette .homeHeaderInner {
-  min-height: 72px !important;
-}
-
-.homePalette .homeBrandLogo {
-  color: #ffffff !important;
-  background: #159be7 !important;
-}
-
-.homePalette .homeBrand strong,
-.homePalette .homeNav button {
-  color: #173b5c !important;
-}
-
-.homePalette .homeBrand span,
-.homePalette .homeLanguages button {
-  color: #7d8d9b !important;
-}
-
-.homePalette .homeLanguages button.activeLanguage {
-  color: #0878bf !important;
-}
-
-.homePalette .homeLanguages span {
-  background: #d3dde5 !important;
-}
-
-.homePalette .homeAuth,
-.homePalette .homeAdmin {
-  color: #ffffff !important;
-  background: #159be7 !important;
-  border-color: #159be7 !important;
-  box-shadow: none !important;
-}
-
-.homePalette .homeAuth[href="/login"] {
-  color: #173b5c !important;
-  background: #ffffff !important;
-  border-color: #9caeba !important;
-}
-
-/* Blue rectangular hero, centered headline and white horizontal action bar. */
-.homePalette .homeHero {
-  min-height: auto !important;
-  padding: 0 !important;
-  color: #ffffff !important;
-  background: #f3f5f7 !important;
-}
-
-.homePalette .homeHeroInner {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.homePalette .heroStage {
-  width: 100% !important;
-  min-height: 430px !important;
-  margin: 0 !important;
-  padding: 70px 40px 92px !important;
-  box-sizing: border-box !important;
-  position: relative !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 34px !important;
-  transform: none !important;
-  border-radius: 0 !important;
-  background:
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,.12) 1px, transparent 1.4px) 0 0 / 15px 15px,
-    linear-gradient(135deg, #0f92d3 0%, #0876bb 52%, #07549c 100%) !important;
-  box-shadow: none !important;
-}
-
-.homePalette .heroStage::before,
-.homePalette .heroStage::after {
-  content: "" !important;
-  position: absolute !important;
-  z-index: 0 !important;
-  bottom: -44px !important;
-  height: 104px !important;
-  border-radius: 999px !important;
-  background: #d9eff9 !important;
-  box-shadow:
-    78px -24px 0 8px #e8f6fc,
-    158px 4px 0 22px #d9eff9,
-    250px -17px 0 13px #e8f6fc,
-    350px 8px 0 28px #d9eff9 !important;
-}
-
-.homePalette .heroStage::before {
-  left: -42px !important;
-  width: 130px !important;
-}
-
-.homePalette .heroStage::after {
-  right: 278px !important;
-  width: 120px !important;
-  transform: scale(.9) !important;
-}
-
-.homePalette .ecosystemCircle {
-  width: auto !important;
-  max-width: 850px !important;
-  aspect-ratio: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 2 !important;
-  display: block !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  transform: none !important;
-}
-
-.homePalette .ecosystemCircle::before {
-  display: none !important;
-}
-
-.homePalette .ecosystemCircle h1 {
-  max-width: 850px !important;
-  margin: 0 !important;
-  color: #ffffff !important;
-  font-size: clamp(34px, 4vw, 56px) !important;
-  line-height: 1.12 !important;
-  letter-spacing: -1.5px !important;
-  text-align: center !important;
-  text-shadow: 0 3px 14px rgba(0, 47, 92, .16) !important;
-}
-
-.homePalette .ecosystemCircle h1 strong {
-  display: inline !important;
-  margin: 0 0 0 8px !important;
-  color: #ffe3a7 !important;
-}
-
-.homePalette .heroSupport {
-  width: min(880px, calc(100vw - 60px)) !important;
-  max-width: 880px !important;
-  z-index: 2 !important;
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 0 !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(255,255,255,.7) !important;
-  border-radius: 8px !important;
-  background: #ffffff !important;
-  box-shadow: 0 13px 30px rgba(0, 55, 103, .17) !important;
-}
-
-.homePalette .supportCard {
-  border: 0 !important;
-  border-right: 1px solid #dbe5ec !important;
-  border-radius: 0 !important;
-  color: #173b5c !important;
-  background: #ffffff !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-
-.homePalette .supportCard summary,
-.homePalette .supportLink {
-  min-height: 68px !important;
-  padding: 0 18px !important;
-  color: #173b5c !important;
-  background: #ffffff !important;
-}
-
-.homePalette .supportCard p {
-  color: #60788c !important;
-  background: #ffffff !important;
-}
-
-.homePalette .supportLink:hover {
-  transform: none !important;
-  background: #f5f9fc !important;
-}
-
-.homePalette .supportLink small {
-  color: #6d879b !important;
-}
-
-/* White content field containing the eight existing product cards. */
-.homePalette .productShowcase {
-  width: min(1380px, calc(100vw - 48px)) !important;
-  margin: 0 auto !important;
-  padding: 54px 38px 68px !important;
-  box-sizing: border-box !important;
-  transform: none !important;
-  overflow: visible !important;
-  color: #173b5c !important;
-  background: #ffffff !important;
-  border-radius: 0 0 8px 8px !important;
-  box-shadow: 0 14px 34px rgba(25, 67, 100, .08) !important;
-}
-
-.homePalette .productHeading {
-  align-items: center !important;
-}
-
-.homePalette .productHeading span {
-  color: #6f8ba1 !important;
-}
-
-.homePalette .productHeading h2 {
-  color: #173b5c !important;
-}
-
+/* Homepage product photos keep their original circular presentation. */
 .homePalette .productRail {
-  margin-top: 42px !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  column-gap: 40px !important;
-  row-gap: 66px !important;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 20px;
+  width: 100%;
+  max-width: 1220px;
+  margin: 0 auto;
+  overflow: visible;
 }
-
-.homePalette .productRail .dogVisual,
-.homePalette .productRail .catProduct .dogVisual {
-  border-color: #ffffff !important;
-  box-shadow:
-    0 14px 30px rgba(20, 66, 103, .15),
-    0 0 0 1px #dce7ef !important;
+.homePalette .productRail > .dogProduct {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-
-.homePalette .productRail .dogCopy,
-.homePalette .productRail .catProduct .dogCopy {
-  color: #173b5c !important;
+.homePalette .productRail > .dogProduct .dogVisual {
+  width: min(100%, 245px);
+  max-width: 245px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
 }
-
-.homePalette .productRail .dogCopy h3 {
-  text-shadow: none !important;
+.homePalette .productRail > .dogProduct .dogCopy {
+  min-height: 0;
+  max-width: 245px;
+  padding-top: 12px;
 }
-
-.homePalette .productRail .dogCopy::before {
-  background: #ffad32 !important;
+.homePalette .productRail > .dogProduct .dogCopy h3 {
+  font-size: 15px;
+  line-height: 1.35;
 }
-
-.homePalette .productRail .dogCopy a {
-  color: #ffffff !important;
-  background: #ff9f1c !important;
-  box-shadow: 0 9px 20px rgba(203, 119, 0, .2) !important;
-}
-
-.homePalette .productDetails summary {
-  color: #173b5c !important;
-  background: #f6f9fb !important;
-  border-color: #dae5ed !important;
-  box-shadow: none !important;
-}
-
-.homePalette .productDetails summary .summaryIcon {
-  color: #f39a17 !important;
-}
-
-.homePalette .productDetails summary .summaryAction {
-  color: #ffffff !important;
-  background: #159be7 !important;
-  box-shadow: none !important;
-}
-
-.homePalette .productDetailsBody {
-  color: #173b5c !important;
-  background: #f7fafc !important;
-  border-color: #dce6ed !important;
-  box-shadow: none !important;
-}
-
-.homePalette .productDetailsBody h4 {
-  border-bottom-color: #dce6ed !important;
-}
-
-.homePalette .productDetailsBody strong,
-.homePalette .productDetailsBody b {
-  color: #0876bb !important;
-}
-
-/* Existing two actions and account note remain below the white product field. */
-.homePalette .heroActions,
-.homePalette .bottomAccountNote {
-  width: min(1120px, calc(100vw - 48px)) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-.homePalette .heroActions {
-  margin-top: 28px !important;
-}
-
-.homePalette .heroActions a {
-  border-color: #bfd0dc !important;
-}
-
-.homePalette .primaryAction {
-  color: #07549c !important;
-  background: #ffffff !important;
-}
-
-.homePalette .secondaryAction {
-  color: #ffffff !important;
-  background: #159be7 !important;
-  border-color: #159be7 !important;
-}
-
-.homePalette .bottomAccountNote {
-  margin-top: 24px !important;
-  margin-bottom: 62px !important;
-  color: #173b5c !important;
-  background: #ffffff !important;
-  border-color: #dce6ed !important;
-  box-shadow: 0 10px 25px rgba(25, 67, 100, .07) !important;
-}
-
-.homePalette .bottomAccountNote p {
-  color: #173b5c !important;
-}
-
-.homePalette .bottomAccountNote em {
-  color: #0876bb !important;
-}
-
-.homePalette .footer {
-  background: #073565 !important;
-}
-
-.homePalette .footer .logo {
-  color: #0878bf !important;
-}
-
-.homePalette .footer .brand small {
-  color: #91d5fa !important;
-}
-
-.homePalette .footer .brandColumn p,
-.homePalette .footer nav a {
-  color: #bed5e7 !important;
-}
-
-.homePalette .footerBottom {
-  border-top-color: rgba(255,255,255,.16) !important;
-  color: #9fb9cf !important;
-}
-
-.homePalette .footerBottom a {
-  border-color: rgba(255,255,255,.28) !important;
-}
-
 @media (max-width: 900px) {
-  .homePalette .heroStage {
-    min-height: 450px !important;
-    padding: 62px 24px 92px !important;
-  }
-
-  .homePalette .heroSupport {
-    grid-template-columns: 1fr !important;
-    max-width: 540px !important;
-  }
-
-  .homePalette .supportCard {
-    border-right: 0 !important;
-    border-bottom: 1px solid #dbe5ec !important;
-  }
-
-  .homePalette .productShowcase {
-    width: calc(100vw - 24px) !important;
-    padding: 46px 24px 54px !important;
-  }
-
   .homePalette .productRail {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 14px;
+  }
+  .homePalette .productRail > .dogProduct .dogVisual {
+    width: min(100%, 205px);
   }
 }
-
-@media (max-width: 700px) {
-  .homePalette .heroStage {
-    min-height: auto !important;
-    padding: 48px 16px 82px !important;
-  }
-
-  .homePalette .ecosystemCircle h1 {
-    font-size: clamp(30px, 10vw, 42px) !important;
-  }
-
-  .homePalette .heroSupport {
-    width: calc(100vw - 32px) !important;
-  }
-
-  .homePalette .productShowcase {
-    width: calc(100vw - 20px) !important;
-    padding: 38px 14px 46px !important;
-  }
-
-  .homePalette .productHeading {
-    display: block !important;
-    text-align: center !important;
-  }
-
-  .homePalette .productHeading h2 {
-    margin-top: 10px !important;
-    text-align: center !important;
-  }
-
+@media (max-width: 520px) {
   .homePalette .productRail {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 42px 16px !important;
-    overflow: visible !important;
+    gap: 17px 10px;
   }
-
-  .homePalette .heroActions,
-  .homePalette .bottomAccountNote {
-    width: calc(100vw - 28px) !important;
+  .homePalette .productRail > .dogProduct .dogVisual {
+    width: min(100%, 165px);
+  }
+  .homePalette .productRail > .dogProduct .dogCopy h3 {
+    font-size: 13px;
   }
 }
