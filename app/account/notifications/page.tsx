@@ -263,6 +263,42 @@ export default function AccountNotificationsPage() {
     }
   }
 
+  async function deleteNotification(id: string) {
+    if (!window.confirm(ka ? "წავშალოთ ეს შეტყობინება?" : "Delete this notification?")) return;
+
+    const { error: deleteError } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      setError(ka ? "შეტყობინების წაშლა ვერ მოხერხდა." : "Could not delete notification.");
+      return;
+    }
+
+    setNotifications((current) => current.filter((item) => item.id !== id));
+  }
+
+  async function deleteAllNotifications() {
+    if (!notifications.length) return;
+    if (!window.confirm(ka ? "წავშალოთ ყველა შეტყობინება? ამ მოქმედების გაუქმება შეუძლებელია." : "Delete all notifications? This cannot be undone.")) return;
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return;
+
+    const { error: deleteError } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("user_id", user.id);
+
+    if (deleteError) {
+      setError(ka ? "შეტყობინებების წაშლა ვერ მოხერხდა." : "Could not delete notifications.");
+      return;
+    }
+
+    setNotifications([]);
+  }
+
   async function openChat(
     notification:
       NotificationRow
@@ -554,6 +590,7 @@ export default function AccountNotificationsPage() {
           <div className="heroActions">
             <button type="button" onClick={() => setShowFilters((value) => !value)}><span>☷</span>{ka ? "სიახლეების გაფილტვრა" : "Filter activity"}<b>{showFilters ? "⌃" : "⌄"}</b></button>
             {unreadCount > 0 && <button type="button" onClick={() => void markAllRead()}>✓ {ka ? "ყველას წაკითხვა" : "Mark all read"}</button>}
+            {notifications.length > 0 && <button type="button" className="deleteAll" onClick={() => void deleteAllNotifications()}>⌫ {ka ? "ყველას წაშლა" : "Delete all"}</button>}
           </div>
         </section>
 
@@ -654,7 +691,7 @@ export default function AccountNotificationsPage() {
                 <strong>{group.items.length}</strong>
                 <i>{open ? "⌃" : "⌄"}</i>
               </button>
-              {open && <div className="notificationGroupBody">{group.items.length ? group.items.map((notification) => <NotificationCard key={`${group.id}-${notification.id}`} notification={notification} language={lang} onRead={markRead} onOpenChat={openChat} onOpenOrder={openOrder} />) : <div className="groupEmpty">{ka ? "ამ კატეგორიაში ახალი ინფორმაცია არ არის." : "There is no activity in this category."}</div>}</div>}
+              {open && <div className="notificationGroupBody">{group.items.length ? group.items.map((notification) => <NotificationCard key={`${group.id}-${notification.id}`} notification={notification} language={lang} onRead={markRead} onOpenChat={openChat} onOpenOrder={openOrder} onDelete={deleteNotification} />) : <div className="groupEmpty">{ka ? "ამ კატეგორიაში ახალი ინფორმაცია არ არის." : "There is no activity in this category."}</div>}</div>}
             </article>;
           })}
         </section>}
@@ -708,6 +745,7 @@ export default function AccountNotificationsPage() {
                     onOpenOrder={
                       openOrder
                     }
+                    onDelete={deleteNotification}
                   />
                 )
               )}
@@ -1155,6 +1193,7 @@ function NotificationCard({
   onRead,
   onOpenChat,
   onOpenOrder,
+  onDelete,
 }: {
   notification:
     NotificationRow;
@@ -1174,6 +1213,8 @@ function NotificationCard({
     notification:
       NotificationRow
   ) => Promise<void>;
+
+  onDelete: (id: string) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const ka =
@@ -1251,7 +1292,21 @@ function NotificationCard({
             </strong>
           </div>
 
-          <div className="cardState">{!notification.read && <i>NEW</i>}<b>{expanded ? "⌃" : "⌄"}</b></div>
+          <div className="cardState">
+            {!notification.read && <i>NEW</i>}
+            <button
+              type="button"
+              className="deleteNotification"
+              aria-label={ka ? "შეტყობინების წაშლა" : "Delete notification"}
+              onClick={(event) => {
+                event.stopPropagation();
+                void onDelete(notification.id);
+              }}
+            >
+              ⌫
+            </button>
+            <b>{expanded ? "⌃" : "⌄"}</b>
+          </div>
         </div>
 
         {expanded && notification.message && (
@@ -1491,7 +1546,7 @@ function NotificationCard({
           font-weight: 900;
         }
 
-        .cardState{display:flex;align-items:center;gap:7px}.cardState>b{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#edf4fb;color:#1761bd;font-size:13px}
+        .cardState{display:flex;align-items:center;gap:7px}.cardState>b{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#edf4fb;color:#1761bd;font-size:13px}.deleteNotification{width:28px;height:28px;display:grid;place-items:center;border:1px solid #f1c9cd;border-radius:9px;background:#fff5f5;color:#b33f49;font-size:14px;font-weight:900;cursor:pointer}.deleteNotification:hover{background:#ffe8ea}.heroActions .deleteAll{border-color:rgba(255,205,210,.7);background:rgba(156,31,49,.2);color:#fff}
 
         p {
           margin:
