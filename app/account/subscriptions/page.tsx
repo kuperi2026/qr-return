@@ -81,7 +81,11 @@ export default function SubscriptionsPage() {
     const appContext = params.get("source") === "app" || params.get("app_preview") === "1" || window.localStorage.getItem("kompasi-app-mode") === "1";
     setIsAppPricing(appContext);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.replace("/login"); return; }
+    if (!user) {
+      if (appContext) { setLoading(false); return; }
+      router.replace("/login");
+      return;
+    }
     const { data } = await supabase.from("item").select("id,tag_code,item_name,item_type,pet_type,created_at").eq("owner_id", user.id).order("created_at", { ascending: false });
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
