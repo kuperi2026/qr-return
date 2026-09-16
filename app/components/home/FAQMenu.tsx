@@ -1,28 +1,28 @@
 "use client";
 
 const FAQ_KA = [
-  ["რა არის QR RETURN?", "QR RETURN არის QR-ზე დაფუძნებული სისტემა ნივთების, ცხოველების, ავტომობილებისა და Emergency პროფილებისთვის. QR კოდის დასკანერების შემდეგ მპოვნელს შეუძლია უსაფრთხოდ დაუკავშირდეს მფლობელს."],
+  ["რა არის KOMPASI?", "KOMPASI არის QR-ზე დაფუძნებული სისტემა ნივთების, ცხოველების, ავტომობილებისა და Emergency პროფილებისთვის. QR კოდის დასკანერების შემდეგ მპოვნელს შეუძლია უსაფრთხოდ დაუკავშირდეს მფლობელს."],
   ["სჭირდება მპოვნელს რეგისტრაცია ან აპლიკაცია?", "არა. მპოვნელს არ სჭირდება რეგისტრაცია ან აპლიკაციის ჩამოტვირთვა — საკმარისია QR კოდის დასკანერება ნებისმიერი სმარტფონით."],
   ["ვინ განსაზღვრავს ხილულ ინფორმაციას?", "პროფილის მფლობელი თავად ირჩევს, რომელი დამატებითი ინფორმაცია გამოჩნდეს QR კოდის დასკანერებისას. სავალდებულო საკონტაქტო ინფორმაცია უზრუნველყოფს უსაფრთხო და რეალურ კავშირს."],
-  ["შეიძლება რამდენიმე QR პროფილის მართვა?", "დიახ. ერთი ანგარიშიდან შეგიძლიათ მართოთ ყველა თქვენი QR RETURN პროდუქტი და განაახლოთ მათი ინფორმაცია ნებისმიერ დროს."],
+  ["შეიძლება რამდენიმე QR პროფილის მართვა?", "დიახ. ერთი ანგარიშიდან შეგიძლიათ მართოთ ყველა თქვენი KOMPASI პროდუქტი და განაახლოთ მათი ინფორმაცია ნებისმიერ დროს."],
   ["რა არის Lost Mode?", "Lost Mode პროფილს ანიჭებს სტატუსს „დაიკარგა“. მისი გააქტიურების შემდეგ მპოვნელი ხედავს თქვენს შეტყობინებას და თქვენ იღებთ ინფორმაციას QR კოდის დასკანერების შესახებ."],
   ["შეუძლია მპოვნელს ლოკაციის გაზიარება?", "დიახ. მპოვნელს შეუძლია სურვილის შემთხვევაში ერთი მოქმედებით გამოგიგზავნოთ ზუსტი ლოკაცია. ლოკაცია მისი თანხმობის გარეშე არ იგზავნება."],
-  ["როგორ დამიკავშირდება მპოვნელი?", "პროფილის პარამეტრების მიხედვით, მპოვნელს შეუძლია დაგიკავშირდეთ ზარით ან QR RETURN-ის დაცული ჩატით."],
+  ["როგორ დამიკავშირდება მპოვნელი?", "პროფილის პარამეტრების მიხედვით, მპოვნელს შეუძლია დაგიკავშირდეთ ზარით ან KOMPASI-ის დაცული ჩატით."],
   ["შეიძლება QR კოდის სხვა პროდუქტზე გადატანა?", "შეგიძლიათ პროფილის მონაცემები განაახლოთ და QR კოდი იმავე კატეგორიის სხვა პროდუქტს დაუკავშიროთ. კატეგორიის შეცვლა რეგისტრაციის შემდეგ შეუძლებელია."],
   ["რატომ არ იცვლება პროდუქტის კატეგორია?", "კატეგორია პირველადი რეგისტრაციისას ფიქსირდება, რათა თითოეული QR კოდი სწორ პროგრამასა და შესაბამის მონაცემთა სტრუქტურას დაუკავშირდეს."],
   ["შეიძლება დამატებითი ადმინისტრატორის დამატება?", "დიახ. ერთ პროდუქტზე შეგიძლიათ დაამატოთ ერთი სანდო ადმინისტრატორი და თავად განსაზღვროთ, რომელი ფუნქციების მართვის უფლება ექნება."],
   ["რით განსხვავდება Emergency პროფილი?", "Emergency პროფილი განკუთვნილია გადაუდებელი შემთხვევებისთვის და შეიძლება მოიცავდეს სისხლის ჯგუფს, მნიშვნელოვან სამედიცინო ინფორმაციასა და Emergency Contact-ს."],
-  ["როგორ მივიღო დახმარება?", "QR RETURN-ის მხარდაჭერა ხელმისაწვდომია ჩატით. ასევე შეგიძლიათ საიტიდან დაჯავშნოთ სატელეფონო ზარი და მიუთითოთ საკითხი, რომელზეც დახმარება გჭირდებათ."],
+  ["როგორ მივიღო დახმარება?", "KOMPASI-ის მხარდაჭერა ხელმისაწვდომია ჩატით. ასევე შეგიძლიათ საიტიდან დაჯავშნოთ სატელეფონო ზარი და მიუთითოთ საკითხი, რომელზეც დახმარება გჭირდებათ."],
 ];
 
 const FAQ_EN = [
-  ["What is QR RETURN?", "QR RETURN is a QR-based system for belongings, pets, vehicles and Emergency profiles. A finder can scan the code and contact the owner safely."],
+  ["What is KOMPASI?", "KOMPASI is a QR-based system for belongings, pets, vehicles and Emergency profiles. A finder can scan the code and contact the owner safely."],
   ["Does the finder need an account or an app?", "No. A finder only needs to scan the QR code with any smartphone."],
   ["Who controls the visible information?", "The profile owner chooses which additional information is visible after a scan."],
-  ["Can I manage multiple QR profiles?", "Yes. You can manage all QR RETURN products from one account and update them at any time."],
+  ["Can I manage multiple QR profiles?", "Yes. You can manage all KOMPASI products from one account and update them at any time."],
   ["What is Lost Mode?", "Lost Mode marks a profile as lost, displays your finder message and lets you receive scan information."],
   ["Can a finder share their location?", "Yes. A finder may voluntarily share their precise location with one action."],
-  ["How can a finder contact me?", "Depending on your settings, a finder can call you or use QR RETURN's protected chat."],
+  ["How can a finder contact me?", "Depending on your settings, a finder can call you or use KOMPASI's protected chat."],
   ["Can I move a QR code to another product?", "You can update the profile for another product in the same category. The category cannot be changed after registration."],
   ["Why is the category locked?", "The category is fixed at registration so each QR code remains connected to the correct program and data structure."],
   ["Can I add another administrator?", "Yes. You can add one trusted administrator per product and choose which permissions to delegate."],
