@@ -523,12 +523,7 @@ export default function MyProfilesPage() {
     if (userError || !user) throw new Error("გთხოვთ, ხელახლა შეხვიდეთ ანგარიშზე.");
 
     const { data, error } = await supabase
-      .from("item")
-      .delete()
-      .eq("id", item.id)
-      .eq("owner_id", user.id)
-      .select("id")
-      .maybeSingle();
+      .rpc("delete_owned_item", { p_item_id: Number(item.id) });
 
     if (error) throw new Error(`პროფილის წაშლა ვერ მოხერხდა: ${error.message}`);
     if (!data) throw new Error("პროფილის წაშლა ვერ დადასტურდა.");
