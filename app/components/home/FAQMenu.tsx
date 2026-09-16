@@ -34,28 +34,28 @@ export default function FAQMenu({ ka }: { ka: boolean }) {
   const items = ka ? FAQ_KA : FAQ_EN;
   return (
     <section id="faq" className="faqSection">
-      <div className="faqWrap">
-        <header>
-          <span>03 · FAQ</span>
-          <h2>{ka ? "ხშირად დასმული კითხვები" : "Frequently Asked Questions"}</h2>
-          <p>{ka ? "დააჭირეთ კითხვას პასუხის სანახავად." : "Select a question to view the answer."}</p>
-          <a href="/support">{ka ? "სხვა კითხვა გაქვს? მოგვწერე" : "Have another question? Contact us"}<b>→</b></a>
-        </header>
-
+      <details className="faqGroup">
+        <summary>{ka ? "ხშირად დასმული კითხვები" : "Frequently Asked Questions"}<span aria-hidden="true">+</span></summary>
         <div className="faqList">
-          {items.map(([question, answer], index) => (
-            <details key={question} open={index === 0}>
-              <summary><span>{String(index + 1).padStart(2, "0")}</span><strong>{question}</strong><b>+</b></summary>
-              <div><p>{answer}</p></div>
+          {items.map(([question, answer]) => (
+            <details key={question}>
+              <summary>{question}<span aria-hidden="true">+</span></summary>
+              <p>{answer}</p>
             </details>
           ))}
         </div>
-      </div>
-
+      </details>
       <style jsx>{`
-        .faqSection{padding:82px 40px 92px;background:#f5f8fc;color:#1d3651;font-family:Arial,Helvetica,sans-serif}.faqWrap{width:100%;max-width:1160px;margin:auto;display:grid;grid-template-columns:.72fr 1.28fr;gap:76px;align-items:start}header{position:sticky;top:26px}header>span{color:#0d61c4;font-size:10px;font-weight:900;letter-spacing:1.5px}h2{max-width:370px;margin:11px 0 0;font-size:clamp(30px,3.7vw,45px);line-height:1.12;letter-spacing:-1.3px}header p{margin:14px 0 0;color:#748497;font-size:13px}header a{width:fit-content;margin-top:28px;padding-bottom:7px;display:flex;align-items:center;gap:18px;border-bottom:2px solid #d93449;color:#173653;font-size:12px;font-weight:900;text-decoration:none}header a b{color:#d93449;font-size:18px}.faqList{border-top:1px solid #cedae7}.faqList details{border-bottom:1px solid #cedae7;background:transparent}.faqList summary{min-height:72px;padding:0 4px;display:grid;grid-template-columns:38px 1fr 34px;align-items:center;gap:13px;cursor:pointer;list-style:none}.faqList summary::-webkit-details-marker{display:none}.faqList summary>span{color:#8b9aad;font-size:10px;font-weight:900}.faqList summary strong{font-size:15px;line-height:1.45}.faqList summary b{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#e5eef9;color:#0d61c4;font-size:19px;transition:transform .2s ease,background .2s ease}.faqList details[open] summary b{transform:rotate(45deg);background:#0d61c4;color:#fff}.faqList details div{padding:0 48px 22px 55px}.faqList details p{max-width:660px;margin:0;color:#687b90;font-size:13px;line-height:1.75;animation:reveal .2s ease-out}@keyframes reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-        .faqSection{padding-top:48px;padding-bottom:54px}.faqWrap{gap:52px}.faqList summary{min-height:58px}.faqList details div{padding-bottom:16px}.faqList details p{line-height:1.6}
-        @media(max-width:800px){.faqSection{padding:40px 18px 46px}.faqWrap{grid-template-columns:1fr;gap:26px}header{position:static}h2{max-width:none}.faqList summary{min-height:56px;grid-template-columns:30px 1fr 30px;gap:9px}.faqList summary strong{font-size:14px}.faqList details div{padding:0 36px 16px 39px}}
+        .faqSection{width:100%;max-width:1160px;margin:28px auto 0;color:#fff;font-family:Arial,Helvetica,sans-serif}
+        summary{list-style:none;cursor:pointer}summary::-webkit-details-marker{display:none}
+        .faqGroup{border-top:1px solid #303b48;border-bottom:1px solid #303b48}
+        .faqGroup>summary{min-height:60px;display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:15px;font-weight:800}
+        summary span{width:26px;height:26px;display:grid;place-items:center;flex:none;border:1px solid #506273;border-radius:50%;font-size:17px;font-weight:400}
+        details[open]>summary>span{transform:rotate(45deg)}
+        .faqList{padding:0 0 18px}.faqList details{border-top:1px solid #303b48}
+        .faqList summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:18px;color:#dbe4ef;font-size:13px;line-height:1.4}
+        .faqList p{max-width:800px;margin:0;padding:0 34px 17px 0;color:#aab7c5;font-size:12px;line-height:1.65}
+        @media(max-width:540px){.faqSection{margin-top:28px}.faqGroup>summary{font-size:14px}.faqList summary{font-size:12px}}
       `}</style>
     </section>
   );
