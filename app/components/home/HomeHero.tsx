@@ -145,7 +145,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             <span>QR RETURN · PRODUCTS</span>
             <h2>{ka ? "ერთი სისტემა — ყველაფრისთვის, რაც მნიშვნელოვანია." : "One system — for everything that matters."}</h2>
           </div>
-          <div className="productRail" ref={productRailRef} onClick={(event) => selectProduct(event.target)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectProduct(event.target); } }}>
+          <div className="productRail" ref={productRailRef} onClick={(event) => selectProduct(event.target)} onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && event.target instanceof Element && event.target.closest(".productRail > .dogProduct") && !event.target.closest("a, details")) { event.preventDefault(); selectProduct(event.target); } }}>
           <div className="productPreview" ref={productPreviewRef} />
           <article className="dogProduct emergencyProduct" role="button" tabIndex={0} aria-pressed={selectedProduct === 0}>
             <div className="dogVisual">
