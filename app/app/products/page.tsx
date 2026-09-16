@@ -4,10 +4,10 @@ import Link from "next/link";
 
 const hub = [
   ["＋", "პროფილის რეგისტრაცია", "აირჩიეთ სასურველი პროფილი და დაიწყეთ რეგისტრაცია", "/app/add", "blue"],
-  ["▤", "პროფილების მართვა", "შექმნილი პროფილების ნახვა და მართვა", "/login?source=app&next=%2Fapp%2Fprofiles", "green"],
-  ["♧", "სანდო პირი და უფლებები", "არჩეულ პროფილზე უსაფრთხო წვდომის მართვა", "/login?source=app&next=%2Faccount%2Fadmin%3Fsource%3Dapp", "violet"],
+  ["▤", "პროფილების მართვა", "შექმნილი პროფილების ნახვა და მართვა", "/app/profiles", "green"],
+  ["♧", "სანდო პირი და უფლებები", "არჩეულ პროფილზე უსაფრთხო წვდომის მართვა", "/account/admin?source=app", "violet"],
   ["▣", "QR პროდუქტების შეკვეთა", "აირჩიეთ და ონლაინ შეიძინეთ საჭირო QR პროდუქტი", "/app/store", "rose"],
-  ["◇", "მომსახურება და პაკეტები", "გაეცანით მომსახურების პირობებსა და პაკეტებს", "/login?source=app&next=%2Faccount%2Fsubscriptions%3Fsource%3Dapp", "gold"],
+  ["◇", "მომსახურება და პაკეტები", "გაეცანით მომსახურების პირობებსა და პაკეტებს", "/account/subscriptions?source=app", "gold"],
 ];
 export default function Products() {
   return (
