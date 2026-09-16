@@ -35,7 +35,7 @@ export default function AboutMenu({
               letterSpacing: "1px",
             }}
           >
-            01 · QR RETURN
+            01 · KOMPASI
           </span>
 
           <h2
@@ -46,7 +46,7 @@ export default function AboutMenu({
               lineHeight: 1.15,
             }}
           >
-            {ka ? "ჩვენ შესახებ" : "About QR RETURN"}
+            {ka ? "ჩვენ შესახებ" : "About KOMPASI"}
           </h2>
         </div>
 
@@ -113,7 +113,7 @@ export default function AboutMenu({
                     opacity: 0.65,
                   }}
                 >
-                  QR RETURN
+                  KOMPASI
                 </small>
               </div>
             </div>
@@ -124,13 +124,13 @@ export default function AboutMenu({
 
             <p style={paragraphStyle}>
               {ka
-                ? "QR RETURN-ის იდეა ერთი მარტივი შეკითხვიდან გაჩნდა: რა ხდება მაშინ, როდესაც ადამიანი კარგავს მისთვის მნიშვნელოვან ნივთს, საყვარელ ცხოველს, ან როდესაც გადაუდებელ სიტუაციაში მის შესახებ აუცილებელი ინფორმაცია ხელმისაწვდომი არ არის?"
-                : "QR RETURN began with one simple question: how can we create the right connection when something important is lost or urgent information is needed?"}
+                ? "KOMPASI-ის იდეა ერთი მარტივი შეკითხვიდან გაჩნდა: რა ხდება მაშინ, როდესაც ადამიანი კარგავს მისთვის მნიშვნელოვან ნივთს, საყვარელ ცხოველს, ან როდესაც გადაუდებელ სიტუაციაში მის შესახებ აუცილებელი ინფორმაცია ხელმისაწვდომი არ არის?"
+                : "KOMPASI began with one simple question: how can we create the right connection when something important is lost or urgent information is needed?"}
             </p>
 
             <p style={paragraphStyle}>
               {ka
-                ? "ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ არ იცის, ვის დაუკავშირდეს. სწორედ ამ პრობლემაზე ფიქრისას გაჩნდა QR RETURN-ის შექმნის იდეა — საჭირო მომენტში ადამიანებს შორის სწორი კავშირი სწრაფად და უსაფრთხოდ შეიქმნას."
+                ? "ხშირად მპოვნელს დახმარება ნამდვილად სურს, მაგრამ არ იცის, ვის დაუკავშირდეს. სწორედ ამ პრობლემაზე ფიქრისას გაჩნდა KOMPASI-ის შექმნის იდეა — საჭირო მომენტში ადამიანებს შორის სწორი კავშირი სწრაფად და უსაფრთხოდ შეიქმნას."
                 : "The idea was to create a simple system that connects people quickly and securely when it matters."}
             </p>
 
@@ -199,8 +199,8 @@ export default function AboutMenu({
 
             <p style={paragraphStyle}>
               {ka
-                ? "ჩვენი ხედვაა QR RETURN გახდეს უნივერსალური სისტემა ნივთების, ცხოველებისა და Emergency პროფილების დასაცავად."
-                : "Our vision is for QR RETURN to become a universal system for belongings, pets and Emergency profiles."}
+                ? "ჩვენი ხედვაა KOMPASI გახდეს უნივერსალური სისტემა ნივთების, ცხოველებისა და Emergency პროფილების დასაცავად."
+                : "Our vision is for KOMPASI to become a universal system for belongings, pets and Emergency profiles."}
             </p>
 
             <p style={paragraphStyle}>
