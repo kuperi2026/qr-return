@@ -100,10 +100,10 @@ function Base() {
         gap: 10px;
         border: 1px solid #dce6f0;
         border-radius: 13px;
-        background: #fff;
+        background: linear-gradient(145deg,#ffffff,#f8fbff);
         color: #173652;
         text-decoration: none;
-        box-shadow: 0 6px 17px #173f6d0c;
+        box-shadow: 0 10px 24px rgba(3,36,76,.12);
       }
       .typegrid span {
         width: 34px;
@@ -112,7 +112,7 @@ function Base() {
         place-items: center;
         flex: 0 0 34px;
         border-radius: 9px;
-        background: #edf5ff;
+        background: #e6f2ff;
         font-size: 17px;
       }
       .typegrid b {
@@ -134,6 +134,10 @@ function Base() {
         font-size: 18px;
         font-style: normal;
       }
+      .typegrid a:nth-child(2n) span { background:#e7f8f1; }
+      .typegrid a:nth-child(3n) span { background:#fff2dc; }
+      .typegrid a:nth-child(4n) span { background:#eeeaff; }
+      .typegrid a:active { transform:scale(.985); }
       @media (max-width: 330px) {.subw{padding-left:9px;padding-right:9px}.typegrid{gap:5px}.typegrid a{padding-left:6px;padding-right:6px}.typegrid b{font-size:12px}}
     `}</style>
   );
