@@ -7,7 +7,7 @@ const hub = [
   ["▤", "პროფილების მართვა", "შექმნილი პროფილების ნახვა და მართვა", "/login?source=app&next=%2Fapp%2Fprofiles", "green"],
   ["♧", "სანდო პირი და უფლებები", "არჩეულ პროფილზე უსაფრთხო წვდომის მართვა", "/login?source=app&next=%2Faccount%2Fadmin%3Fsource%3Dapp", "violet"],
   ["▣", "QR პროდუქტების შეკვეთა", "აირჩიეთ და ონლაინ შეიძინეთ საჭირო QR პროდუქტი", "/app/store", "rose"],
-  ["◇", "მომსახურება და პაკეტები", "გაეცანით მომსახურების პირობებსა და პაკეტებს", "/login?source=app&next=%2Faccount%2Fsubscriptions%3Fsource%3Dapp", "gold"],
+  ["◇", "მომსახურება და პაკეტები", "გაეცანით პაკეტებს რეგისტრაციის გარეშე", "/account/subscriptions?source=app", "gold"],
 ];
 export default function Products() {
   return (
@@ -15,6 +15,8 @@ export default function Products() {
       <div className="pw">
         <header>
           <small>KOMPASI</small>
+          <h1>შენი უსაფრთხო სივრცე</h1>
+          <p>დაათვალიერე ფუნქციები თავისუფლად. რეგისტრაცია დაგჭირდება მხოლოდ პროფილის შექმნისას.</p>
         </header>
         <section className="authChoice" aria-label="ანგარიშში შესვლა ან რეგისტრაცია">
           <Link href="/signup?source=app" className="registerAction">
@@ -41,10 +43,8 @@ export default function Products() {
         .pc {
           min-height: 100vh;
           overflow-x: hidden;
-          background:
-            radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),
-            linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
-          color: #fff;
+          background:radial-gradient(circle at 15% 5%,rgba(115,205,255,.28),transparent 32%),linear-gradient(180deg,#edf8ff 0%,#fbfeff 75%);
+          color: #163a52;
           font-family: Inter, Arial, sans-serif;
         }
         .pc, .pc * {
@@ -56,7 +56,7 @@ export default function Products() {
           padding: 25px 0 94px;
         }
         .pc header small {
-          color: #bdddff;
+          color: #1478d4;
           font-size: 11px;
           font-weight: 950;
           letter-spacing: 1px;
@@ -69,7 +69,7 @@ export default function Products() {
         }
         .pc header p {
           margin: 8px 0 0;
-          color: #d7ecff;
+          color: #758b99;
           font-size: 13px;
           line-height: 1.5;
         }
@@ -83,33 +83,33 @@ export default function Products() {
           overflow: hidden;
         }
         .pc .authChoice{margin-top:14px;gap:10px;overflow:visible}
-        .pc .authChoice a{min-height:68px;justify-content:space-between;border-color:rgba(255,255,255,.58);box-shadow:0 13px 30px rgba(0,28,67,.2)}
-        .pc .authChoice .registerAction{background:#fff;color:#075dcc}
-        .pc .authChoice .loginAction{background:rgba(3,48,94,.36);color:#fff}
-        .pc .authChoice .loginAction small{color:#d7ecff}
+        .pc .authChoice{grid-template-columns:1fr 1fr}
+        .pc .authChoice a{min-height:60px;justify-content:space-between;border-color:#bdd9ec;box-shadow:0 10px 24px rgba(16,59,92,.08)}
+        .pc .authChoice .registerAction{background:#1478d4;color:#fff}
+        .pc .authChoice .loginAction{background:#fff;color:#103b5c}
         .pc .authChoice em{font-size:25px}
         .pc section a {
           width: 100%;
           min-width: 0;
-          min-height: 94px;
-          padding: 16px;
+          min-height: 82px;
+          padding: 13px;
           display: flex;
           align-items: center;
           gap: 10px;
           border: 1px solid #d9e5f0;
-          border-radius: 18px;
-          background: linear-gradient(145deg,#fff,#f7fbff);
+          border-radius: 20px;
+          background:#fff;
           color: #173652;
           text-decoration: none;
-          box-shadow: 0 10px 25px rgba(23,63,109,.09);
+          box-shadow:0 8px 24px rgba(16,59,92,.07);
         }
         .pc section i {
-          width: 50px;
-          height: 50px;
+          width: 46px;
+          height: 46px;
           display: grid;
           place-items: center;
-          flex: 0 0 50px;
-          border-radius: 13px;
+          flex:0 0 46px;
+          border-radius:14px;
           background: #edf5ff;
           font-size: 21px;
           font-style: normal;
