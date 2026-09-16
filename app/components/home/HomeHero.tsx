@@ -109,6 +109,14 @@ export default function HomeHero({ ka }: { ka: boolean }) {
             <h1>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h1>
           </article>
 
+          <div className="heroSupport">
+            <details className="supportCard">
+              <summary><span aria-hidden="true">✦</span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true">+</b></summary>
+              <p>{ka ? "სწრაფი რეგისტრაცია, აპლიკაციის გარეშე სკანირება, კონფიდენციალურობის კონტროლი, Lost Mode და პროფილის მართვა." : "Quick registration, app-free scanning, privacy controls, Lost Mode and profile management."}</p>
+            </details>
+            <a className="supportCard supportLink" href="/book-call"><span aria-hidden="true">📞</span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true">→</b></a>
+            <a className="supportCard supportLink" href="/support"><span aria-hidden="true">💬</span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true">→</b></a>
+          </div>
         </div>
         <div className="heroWidePhoto"><img src="/home/dog-hero.webp" alt={ka ? "ძაღლის QR RETURN პროფილი ტელეფონში" : "QR RETURN dog profile on a phone"} /></div>
 
@@ -201,14 +209,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
           </div>
         </section>
 
-          <div className="heroSupport">
-            <details className="supportCard">
-              <summary><span aria-hidden="true">✦</span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true">+</b></summary>
-              <p>{ka ? "სწრაფი რეგისტრაცია, აპლიკაციის გარეშე სკანირება, კონფიდენციალურობის კონტროლი, Lost Mode და პროფილის მართვა." : "Quick registration, app-free scanning, privacy controls, Lost Mode and profile management."}</p>
-            </details>
-            <a className="supportCard supportLink" href="/book-call"><span aria-hidden="true">📞</span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true">→</b></a>
-            <a className="supportCard supportLink" href="/support"><span aria-hidden="true">💬</span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true">→</b></a>
-          </div>
+
 
         <div className="heroActions">
           <a className="primaryAction" href="/store"><span aria-hidden="true">◆</span>{ka ? "მაღაზია" : "Store"}</a>
@@ -278,6 +279,15 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         @media(max-width:600px){.homeHero{padding:0 0 54px}.heroStage{min-height:300px;padding:30px 18px}.ecosystemCircle h1{font-size:29px}.heroWidePhoto{height:280px}.productHeading h2{font-size:27px}.productRail{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 12px;padding:0;overflow:visible}.productRail>.dogProduct{min-width:0;width:100%}.productRail>.dogProduct .dogVisual{width:100%;aspect-ratio:1.08;border-radius:0}.productRail>.dogProduct .dogCopy{min-height:0;padding-top:12px}.productRail>.dogProduct .dogCopy h3{font-size:14px}.productRail>.dogProduct .dogCopy a{margin-top:9px}.heroSupport{width:calc(100% - 32px);margin-top:40px}.heroActions{grid-template-columns:repeat(2,1fr)}.bottomAccountNote{margin-top:45px}}
         @media(min-width:1001px){.productShowcase{background:#fff;box-shadow:0 20px 56px rgba(0,24,58,.15)}.productRail{gap:12px;grid-template-columns:minmax(0,1fr) repeat(2,minmax(148px,190px))}.productRail>.dogProduct{padding:10px 8px;display:flex;flex-direction:column;justify-content:center;gap:8px;border:1px solid #e4e9ed;border-radius:14px;background:#f7f9fa;cursor:pointer}.productRail>.dogProduct:hover{border-color:#b5cfe0;background:#f1f6f9}.productRail>.dogProduct[aria-pressed="true"]{border-color:#3279ab;background:#e9f3fa;box-shadow:0 0 0 2px rgba(50,121,171,.12)}.productRail>.dogProduct .dogVisual{width:72px;height:72px;flex:none;max-width:100%;border:2px solid white;border-radius:50%;box-shadow:0 7px 14px rgba(10,62,105,.14)}.productRail>.dogProduct .productName{display:block;color:#173652;font-size:14px;font-weight:800;line-height:1.25;text-align:center}.productPreview .productName{display:block;margin-top:22px;color:#d9eeff;font-size:14px;font-weight:850;letter-spacing:.6px;text-align:center}.productPreview .dogCopy{padding-top:10px!important}}
         @media(min-width:1001px){.productShowcase{background:#f4f5f7}.productRail{grid-template-columns:minmax(0,1fr) repeat(2,minmax(170px,220px));grid-template-rows:repeat(4,minmax(125px,auto));gap:12px 14px}.productPreview{margin-right:10px;min-height:536px;background:linear-gradient(145deg,#0a5597,#0d78bb)}.productPreview .dogVisual{width:260px!important;height:260px!important;border-radius:22px!important}.productPreview .dogCopy h3{max-width:470px;font-size:23px!important}.productRail>.dogProduct,.productRail>.dogProduct:first-of-type:not([aria-pressed="true"]){padding:14px;display:flex;flex-direction:row;justify-content:flex-start;gap:13px;border:1px solid #dce3ea;border-radius:15px;background:#fff;box-shadow:none}.productRail>.dogProduct:hover{border-color:#9dc3e1;background:#fff}.productRail>.dogProduct[aria-pressed="true"]{border-color:#5d9bca;background:#fff;box-shadow:0 0 0 2px rgba(35,104,164,.12)}.productRail>.dogProduct .dogVisual{width:76px;height:76px;max-width:none;flex:0 0 76px;border:2px solid #fff;border-radius:13px}.productRail>.dogProduct .productName{min-width:0;color:#173652;font-size:15px;line-height:1.3;text-align:left}.productRail>.dogProduct .dogCopy{display:none!important}}
+        /* Keep existing information and support actions in the top masthead. */
+        .heroStage{position:relative;padding-bottom:94px}
+        .heroStage .heroSupport{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:min(1080px,calc(100% - 60px));max-width:none;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .heroStage .supportCard{min-height:54px;border:1px solid rgba(255,255,255,.42);border-radius:10px;color:#fff;background:rgba(255,255,255,.11);box-shadow:none}
+        .heroStage .supportCard summary,.heroStage .supportLink{min-height:54px;padding:8px 14px;display:grid;grid-template-columns:24px 1fr 18px;gap:8px;align-items:center;color:#fff}
+        .heroStage .supportCard strong,.heroStage .supportCard small{color:#fff}.heroStage .supportCard small{font-size:11px;opacity:.8}.heroStage .supportCard p{padding:0 14px 12px;color:#fff}
+        .heroStage .supportCard summary>b,.heroStage .supportLink>b{font-size:18px}
+        .productShowcase{padding-top:44px;padding-bottom:24px}.heroActions{margin-top:28px}.bottomAccountNote{margin-top:32px}.homeHero{padding-bottom:48px}
+        @media(max-width:900px){.heroStage{padding-bottom:26px;gap:20px}.heroStage .heroSupport{position:static;transform:none;width:min(520px,calc(100% - 28px));grid-template-columns:1fr;gap:8px}.heroStage .supportCard,.heroStage .supportCard summary,.heroStage .supportLink{min-height:48px}}
       `}</style>
     </section>
   );
