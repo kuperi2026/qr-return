@@ -1,5 +1,7 @@
 "use client";
 
+import FAQMenu from "./FAQMenu";
+
 export default function HomeFooter({ ka }: { ka: boolean }) {
   return (
     <footer className="footer">
@@ -35,6 +37,8 @@ export default function HomeFooter({ ka }: { ka: boolean }) {
           <a href="/terms">{ka ? "წესები და პირობები" : "Terms & conditions"}</a>
         </nav>
       </div>
+
+      <FAQMenu ka={ka} />
 
       <div className="footerBottom">
         <span>© {new Date().getFullYear()} QR RETURN</span>
