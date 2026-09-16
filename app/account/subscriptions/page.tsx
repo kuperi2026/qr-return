@@ -20,12 +20,6 @@ type ServiceRequest = {
   service_expires_at: string | null;
 };
 
-const SERVICE_LEVELS = [
-  { name: "Nice", price: "4.90", note: "ძირითადი დაცვა", tone: "nice" },
-  { name: "Premium", price: "9.90", note: "Lost Mode და შეტყობინებები", tone: "premium" },
-  { name: "Amazing", price: "17.90", note: "ოჯახისა და ბევრი პროფილისთვის", tone: "amazing" },
-] as const;
-
 const PERIODS: { value: Period; label: string }[] = [
   { value: "1", label: "1 თვე" }, { value: "3", label: "3 თვე" },
   { value: "6", label: "6 თვე" }, { value: "12", label: "1 წელი" },
@@ -74,18 +68,13 @@ export default function SubscriptionsPage() {
   const [appStep, setAppStep] = useState<1 | 2 | 3>(1);
   const [openCategory, setOpenCategory] = useState("");
   const [openPricingPanel, setOpenPricingPanel] = useState<"prices" | "guide" | null>(null);
-  const [serviceLevel, setServiceLevel] = useState("Premium");
 
   useEffect(() => { void (async () => {
     const params = new URLSearchParams(window.location.search);
     const appContext = params.get("source") === "app" || params.get("app_preview") === "1" || window.localStorage.getItem("kompasi-app-mode") === "1";
-    // Use the same explicit profile + period selection model on web and in the app.\n    setIsAppPricing(true);
+    setIsAppPricing(appContext);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      if (appContext) { setLoading(false); return; }
-      router.replace("/login");
-      return;
-    }
+    if (!user) { router.replace("/login"); return; }
     const { data } = await supabase.from("item").select("id,tag_code,item_name,item_type,pet_type,created_at").eq("owner_id", user.id).order("created_at", { ascending: false });
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
@@ -169,15 +158,9 @@ export default function SubscriptionsPage() {
     <section className="shell">
       <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
       <section className="appTariffHeader">
-        <small>სერვისები</small>
-        <h1>აირჩიე შენი პაკეტი</h1>
-        <p>დაიწყე უფასოდ და შეცვალე ნებისმიერ დროს</p>
-        <div className="appTrial"><b>60 დღე უფასოდ</b><span>გადახდა დაიწყება მხოლოდ საცდელი პერიოდის შემდეგ</span></div>
-        <div className="serviceLevels" aria-label="სერვისის პაკეტები">
-          {SERVICE_LEVELS.map((level) => <button type="button" key={level.name} className={`${level.tone} ${serviceLevel === level.name ? "selected" : ""}`} onClick={() => setServiceLevel(level.name)}>
-            <span><b>{level.name}</b><small>{level.note}</small></span><strong>₾{level.price}<small>/ თვე</small></strong>{serviceLevel === level.name && <em>რჩეული</em>}
-          </button>)}
-        </div>
+        <small>მომსახურება და პაკეტები</small>
+        <h1>ყველა პროდუქტის ტარიფი</h1>
+        <p>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>.</p>
         {isAppPricing && <div className="calendarAdvantage"><span>✦</span><p><b>უპირატესობა</b> შეგიძლიათ რამდენიმე გააქტიურებული პროფილი ერთ შეკვეთაში გააერთიანოთ და თითოეულისთვის განსხვავებული მომსახურების ვადა აირჩიოთ. მაგალითად, ძაღლის პროფილისთვის — 1 თვე, ხოლო Parking QR-ისთვის — 1 წელი.</p></div>}
         <details className="purchaseGuide" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}><summary><span>როგორ ავირჩიოთ პროფილი და ვადა?</span><b>ინსტრუქცია ⌄</b></summary><div><article><i>1</i><p><b>კალენდარში ჩანს რეგისტრირებული პროფილები</b><span>პროფილის ცალკე არჩევა საჭირო არ არის — ყველა შექმნილი QR პროფილი ავტომატურად გამოჩნდება.</span></p></article><article><i>2</i><p><b>ფასზე დაჭერით ირჩევთ ვადას</b><span>სასურველი პროფილის რიგში დააჭირეთ 1, 3, 6 ან 12 თვის ფასს. არჩეულ ფასზე მეორედ დაჭერა არჩევანს მოხსნის.</span></p></article><article><i>3</i><p><b>თითოეულ პროფილს შეიძლება სხვადასხვა ვადა ჰქონდეს</b><span>მაგალითად, ერთ პროფილს 1 თვე, მეორეს 3 თვე და მესამეს 6 თვე. ყველა არჩევანი ერთ შეკვეთაში გაერთიანდება.</span></p></article><article><i>4</i><p><b>შეჯამება და ავტომატური ფასდაკლება</b><span>შეჯამებაში გამოჩნდება თითოეული პროფილი, მისი ვადა და ფასი. 3–4 პროფილი −5% · 5–6 −10% · 7 −12% · 8 ან მეტი −15%.</span></p></article><section className="referencePriceTable" aria-label="ყველა პროდუქტის ტარიფები"><header><span>ყველა პროდუქტის ტარიფი</span><small>საინფორმაციო ცხრილი</small></header><div className="referencePriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <span key={item.value}>{item.label}</span>)}</div>{PRODUCTS.map((product) => <div className="referencePriceRow" key={product.type}><b>{product.icon} {product.name}</b>{PERIODS.map((item) => <span key={item.value}>{product.prices[item.value]}₾</span>)}</div>)}</section><footer>თითოეული QR კოდის გააქტიურებიდან მომსახურებით სარგებლობა პირველი <b>60 დღის განმავლობაში უფასოა</b>. ფასიანი ვადა ამის შემდეგ იწყება.</footer></div></details>
       </section>
@@ -289,7 +272,7 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
-      .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay{display:none}\n      .liveCalculator{display:block}.profilePicker,.periodStage{display:none}
+      .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay,.liveCalculator{display:none}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e3eaf2}.historyDates>div{padding:10px;border:1px solid #dce8f2;border-radius:10px;background:#fff}.historyDates small,.historyDates strong{display:block}.historyDates small{color:#71879a!important;font-size:9px!important;font-weight:850}.historyDates strong{margin-top:4px;color:#19476b!important;font-size:12px!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{grid-template-columns:1fr 1fr;gap:7px}}
 
       .stepNumber{width:27px;height:27px;margin-right:5px;display:inline-grid;place-items:center;border-radius:8px;background:#eaf3ff;color:#0966db;font-size:13px}.requestSuccess,.requestError{margin-top:14px;padding:11px 12px;border-radius:10px;font-size:12px;font-weight:800;line-height:1.45}.requestSuccess{background:#e8f8f0;color:#087443}.requestError{background:#fff0f0;color:#b42318}
@@ -310,18 +293,6 @@ export default function SubscriptionsPage() {
       @media(max-width:760px){.period b{font-size:16px}.period span{font-size:27px}.line{font-size:14px}.line b{font-size:15px}.total strong{font-size:36px}tbody td:not(:first-child){font-size:16px}}
       .priceCalendarHead{font-size:9px!important}.priceCalendar article>button{font-size:12px!important}.appProfileCalendar{margin-top:10px!important;border-top:1px solid #dce8f3}.selectedCalendarProfile{border-color:#0870d8!important;background:#eef7ff!important;box-shadow:0 0 0 1px #0870d8!important}.calendarEmpty{margin-top:10px;padding:18px 12px;display:grid;gap:6px;border:1px dashed #bdd3e6;border-radius:12px;background:#f8fbfe;color:#60798e;text-align:center;font-size:10px}.calendarEmpty b{color:#254b6a;font-size:13px}.calendarEmpty span{line-height:1.45}.calendarEmpty a{min-height:40px;margin-top:5px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#0870d8;color:#fff;font-size:11px;font-weight:900;text-decoration:none}.referencePriceTable{margin-top:3px;padding:9px;overflow:hidden;border:1px solid #cfe0ee;border-radius:12px;background:#fff}.referencePriceTable>header{padding:2px 2px 9px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}.referencePriceTable>header span{color:#214b6c;font-size:11px;font-weight:950}.referencePriceTable>header small{color:#71889b;font-size:7px}.referencePriceHead,.referencePriceRow{display:grid;grid-template-columns:minmax(94px,1.45fr) repeat(4,minmax(38px,.55fr));align-items:center;gap:4px}.referencePriceHead{padding:6px;color:#71879a;background:#edf5fb;font-size:7px}.referencePriceHead span{text-align:center}.referencePriceRow{min-height:39px;padding:5px 6px;border-bottom:1px solid #e4ebf1}.referencePriceRow:last-child{border-bottom:0}.referencePriceRow b{overflow:hidden;color:#31536f;font-size:8px;text-overflow:ellipsis;white-space:nowrap}.referencePriceRow span{color:#0870d8;font-size:10px;font-weight:900;text-align:center}
       .appTariffHeader{display:none}
-      body.kompasiAppMode .subscriptionsPage{background:radial-gradient(circle at 15% 5%,rgba(115,205,255,.25),transparent 32%),linear-gradient(180deg,#f0f9ff 0%,#fbfeff 75%)!important}
-      body.kompasiAppMode .topbar,body.kompasiAppMode .intro{display:none!important}
-      body.kompasiAppMode .shell{width:min(480px,calc(100% - 28px))!important;margin:0 auto!important;padding:25px 0 104px!important}
-      body.kompasiAppMode .appBack{display:inline-flex!important;margin-bottom:15px;color:#1478d4!important;font-size:11px!important;font-weight:900!important;text-decoration:none!important}
-      body.kompasiAppMode .appTariffHeader{display:block!important;color:#163a52!important}
-      body.kompasiAppMode .appTariffHeader>small{color:#1478d4!important;font-size:12px!important;font-weight:900!important}
-      body.kompasiAppMode .appTariffHeader>h1{margin:7px 0 0!important;color:#163a52!important;font-size:27px!important;line-height:1.18!important}
-      body.kompasiAppMode .appTariffHeader>p{margin:8px 0 0!important;color:#758b99!important;font-size:13px!important}
-      .appTrial{margin-top:17px;padding:14px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:18px;background:#103b5c;color:#fff}.appTrial b{padding:7px 9px;border-radius:999px;background:#e5f7f0;color:#16825f;font-size:10px;white-space:nowrap}.appTrial span{color:#cfeaff;font-size:9px;line-height:1.45}.serviceLevels{margin-top:12px;display:grid;gap:8px}.serviceLevels>button{position:relative;width:100%;min-height:77px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #d9e9f2;border-radius:19px;background:#eff7fc;color:#163a52;text-align:left;font:inherit}.serviceLevels>button.premium{background:#eaf5ff}.serviceLevels>button.amazing{border-color:#cfc4ff;background:#f0ecff}.serviceLevels>button.selected{border:2px solid #1478d4;box-shadow:0 7px 18px rgba(20,120,212,.12)}.serviceLevels span b,.serviceLevels span small,.serviceLevels strong small{display:block}.serviceLevels span b{color:#1478d4;font-size:17px}.serviceLevels .amazing span b{color:#7357d9}.serviceLevels span small{margin-top:5px;color:#758b99;font-size:9px}.serviceLevels strong{font-size:19px;text-align:right}.serviceLevels strong small{margin-top:2px;color:#758b99;font-size:8px}.serviceLevels em{position:absolute;left:14px;bottom:6px;padding:3px 7px;border-radius:999px;background:#e5f7f0;color:#16825f;font-size:8px;font-style:normal;font-weight:900}
-      body.kompasiAppMode .layout{margin-top:14px!important;padding:12px!important;border:1px solid #d9e9f2!important;border-radius:20px!important;background:#fff!important;box-shadow:0 8px 24px rgba(16,59,92,.07)!important}
-      body.kompasiAppMode .appCheckoutSteps{margin-top:16px!important}
-      body.kompasiAppMode .prices{display:none!important}
       body.kompasiAppMode .appTariffHeader>.purchaseGuide{overflow:hidden;border:1px solid #c9dced!important;border-radius:16px!important;background:#fff!important;box-shadow:0 12px 26px rgba(1,35,77,.2)!important}
       body.kompasiAppMode .appTariffHeader>.purchaseGuide>summary{min-height:58px!important;padding:0 14px!important;color:#123f66!important;font-size:14px!important;font-weight:950!important}
       body.kompasiAppMode .appTariffHeader>.purchaseGuide>summary b{padding:8px 10px!important;border-radius:10px!important;background:#e7f2ff!important;color:#0768c9!important;font-size:10px!important}
