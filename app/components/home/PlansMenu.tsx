@@ -28,7 +28,7 @@ export default function PlansMenu({ka=true}:{ka?:boolean}) {
   const money=(value:number)=>`${Number.isInteger(value)?value:value.toFixed(2)} ₾`;
 
   return <section className="plansMenu"><div className="plansInner">
-    <div className="plansHead"><div><span>QR RETURN SERVICE</span><h2>{ka?"მომსახურება და პაკეტები":"Service & plans"}</h2><p>{ka?"ყველა ახალი QR პროფილი გააქტიურებიდან პირველი 2 თვე უფასოდ მუშაობს. აირჩიეთ პროდუქტები და კალკულატორი ზუსტ ღირებულებას ავტომატურად გამოთვლის.":"Every new QR profile includes two free months. Select products to calculate the exact price."}</p></div><div className="freeBadge"><strong>2 თვე</strong><small>{ka?"უფასოდ":"free"}</small></div></div>
+    <div className="plansHead"><div><span>KOMPASI SERVICE</span><h2>{ka?"მომსახურება და პაკეტები":"Service & plans"}</h2><p>{ka?"ყველა ახალი QR პროფილი გააქტიურებიდან პირველი 2 თვე უფასოდ მუშაობს. აირჩიეთ პროდუქტები და კალკულატორი ზუსტ ღირებულებას ავტომატურად გამოთვლის.":"Every new QR profile includes two free months. Select products to calculate the exact price."}</p></div><div className="freeBadge"><strong>2 თვე</strong><small>{ka?"უფასოდ":"free"}</small></div></div>
     <div className="calculator">
       <div className="calculatorMain">
         <Title number="01" title="აირჩიეთ პროდუქტები" text="შეგიძლიათ მონიშნოთ ერთი ან რამდენიმე პროდუქტი." />
