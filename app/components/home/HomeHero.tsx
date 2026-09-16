@@ -121,7 +121,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
 
         <section className="productShowcase" aria-label={ka ? "KOMPASI პროდუქტები" : "KOMPASI products"}>
           <div className="productHeading">
-            <span>KOMPASI · PRODUCTS</span>
+            <span className="productEyebrow"><img src="/home/kompasi-logo.svg" alt="" width="24" height="24" /> KOMPASI · PRODUCTS</span>
             <h2>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h2>
           </div>
           <div className="productRail">
@@ -248,7 +248,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
         .heroStage .heroSupport{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:min(1080px,calc(100% - 60px));max-width:none;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
         .heroStage .supportCard{min-height:44px;border:1px solid rgba(255,255,255,.42);border-radius:10px;color:#fff;background:rgba(255,255,255,.11);box-shadow:none}.heroStage .supportCard summary,.heroStage .supportLink{min-height:44px;padding:5px 12px;display:grid;grid-template-columns:24px 1fr 18px;gap:8px;align-items:center;color:#fff}.heroStage .supportCard strong,.heroStage .supportCard small{color:#fff}.heroStage .supportCard small{font-size:11px;opacity:.8}.heroStage .supportCard p{padding:0 12px 12px;color:#fff}
         .productShowcase{width:min(1320px,calc(100% - 32px));min-height:0;margin:0 auto;padding:14px 0 8px;transform:none;overflow:visible;background:none;box-shadow:none;border-radius:0}
-        .productHeading{width:100%;min-height:0;margin:0 0 10px;padding:0;display:block;text-align:center;border:0}.productHeading span{display:block;margin:0 0 4px;color:#17659f;font-size:11px;letter-spacing:1.5px}.productHeading h2{max-width:100%;margin:0;color:#173652;font-size:clamp(23px,2.25vw,30px);font-weight:450;line-height:1.18;text-align:center}.productHeading h2 strong{color:#17659f;font-weight:750}
+        .productHeading{width:100%;min-height:0;margin:0 0 10px;padding:0;display:block;text-align:center;border:0}.productHeading .productEyebrow{margin:0 0 6px;color:#17659f;font-size:11px;letter-spacing:1.5px;display:inline-flex;align-items:center;justify-content:center;gap:8px}.productEyebrow img{width:24px;height:24px;object-fit:contain}.productHeading h2{max-width:100%;margin:0;color:#173652;font-size:clamp(23px,2.25vw,30px);font-weight:450;line-height:1.18;text-align:center}.productHeading h2 strong{color:#17659f;font-weight:750}
         .productRail{margin:0 auto;padding:8px 4px 16px;display:grid;grid-template-columns:repeat(8,minmax(136px,1fr));grid-template-rows:auto;gap:22px;overflow-x:auto;align-items:start;scroll-snap-type:x proximity}
         .productRail>.dogProduct{width:auto;min-width:136px;padding:0;display:flex;flex-direction:column;align-items:center;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none;cursor:auto}.productRail>.dogProduct:hover{transform:translateY(-5px)}
         .productRail>.dogProduct .dogVisual,.productRail>.catProduct .dogVisual{width:100%;max-width:158px;height:auto;min-height:0;aspect-ratio:1;margin:0;order:1;overflow:hidden;border:3px solid rgba(255,255,255,.82);border-radius:50%;background:#dcefff;box-shadow:0 14px 30px rgba(0,20,50,.28),0 0 0 5px rgba(255,255,255,.08)}
