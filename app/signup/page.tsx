@@ -37,6 +37,7 @@ export default function SignupPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [personalIdLast4, setPersonalIdLast4] = useState("");
   const [codeWord, setCodeWord] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -81,6 +82,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (!/^\d{4}$/.test(personalIdLast4)) {
+      setErrorMessage("გთხოვთ შეიყვანოთ პირადი ნომრის ზუსტად ბოლო 4 ციფრი.");
+      return;
+    }
+
     if (!codeWord.trim()) {
       setErrorMessage("გთხოვთ შეიყვანოთ კოდური სიტყვა.");
       return;
@@ -118,6 +124,7 @@ export default function SignupPage() {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
               phone: phone.trim(),
+              personal_id_last4: personalIdLast4,
               code_word: codeWord.trim(),
             },
           },
@@ -392,6 +399,32 @@ export default function SignupPage() {
                     }
                     autoComplete="tel"
                   />
+                </div>
+
+                <div className="field full">
+                  <label htmlFor="personalIdLast4">
+                    პირადი ნომრის ბოლო 4 ციფრი <b>*</b>
+                  </label>
+
+                  <input
+                    id="personalIdLast4"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
+                    value={personalIdLast4}
+                    onChange={(e) =>
+                      setPersonalIdLast4(
+                        e.target.value.replace(/\D/g, "").slice(0, 4)
+                      )
+                    }
+                    autoComplete="off"
+                    placeholder="••••"
+                  />
+
+                  <span className="help">
+                    შეიყვანეთ მხოლოდ ბოლო 4 ციფრი — სრული პირადი ნომერი არ შეიყვანოთ.
+                  </span>
                 </div>
 
                 <div className="field full">
