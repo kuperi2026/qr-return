@@ -1,99 +1,286 @@
 "use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 type Profile = {
-  id: string; tag_code: string | null; item_type: string | null; pet_type: string | null;
-  item_name: string | null; photo: string | null; active: boolean | null;
-  lost: boolean | null; scan_count: number | null;
+  id: string;
+  tag_code: string | null;
+  item_type: string | null;
+  pet_type: string | null;
+  item_name: string | null;
+  photo: string | null;
+  active: boolean | null;
+  lost: boolean | null;
+  scan_count: number | null;
 };
-
-const profileType = (profile: Profile) => profile.item_type || profile.pet_type || "QR პროფილი";
-function profileIcon(profile: Profile) {
-  const type = profileType(profile).toLowerCase();
-  if (type.includes("dog")) return "🐕";
-  if (type.includes("cat")) return "🐈";
-  if (type.includes("suitcase")) return "▣";
-  if (type.includes("emergency")) return "✚";
-  if (type.includes("wallet")) return "▤";
-  return "⌁";
-}
+const label = (p: Profile) => p.item_type || p.pet_type || "QR პროფილი";
 
 export default function AppProfiles() {
   const router = useRouter();
   const [items, setItems] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openId, setOpenId] = useState<string | null>(null);
-
+  const [search, setSearch] = useState("");
   useEffect(() => {
-    void (async () => {
+    (async () => {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_KEY;
+      const key =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_KEY;
       if (!url || !key) return setLoading(false);
-      const supabase = createClient(url, key);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace("/login?source=app&next=%2Fapp%2Fprofiles"); return; }
-      const { data } = await supabase.from("item").select("id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count").eq("owner_id", user.id);
-      const profiles = (data || []) as Profile[];
-      setItems(profiles);
-      setOpenId(profiles[0]?.id || null);
+      const sb = createClient(url, key);
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
+      if (!user) {
+        router.replace("/login?source=app");
+        return;
+      }
+      const { data } = await sb
+        .from("item")
+        .select(
+          "id,tag_code,item_type,pet_type,item_name,photo,active,lost,scan_count",
+        )
+        .eq("owner_id", user.id);
+      setItems((data || []) as Profile[]);
       setLoading(false);
     })();
   }, [router]);
-
-  const lostCount = useMemo(() => items.filter((profile) => profile.lost).length, [items]);
-
+  const visible = items.filter((p) =>
+    (p.item_name + " " + p.tag_code + " " + label(p))
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
   return (
-    <main className="profilesPage">
-      <div className="profilesWrap">
-        <header className="profilesHeader">
-          <div><small>ჩემი სივრცე</small><h1>პროფილების მართვა</h1><p>ყველა შექმნილი QR პროფილი ერთ ადგილას</p></div>
+    <main className="ap">
+      <div className="aw">
+        <header>
+          <div>
+            <small>მფლობელის სივრცე</small>
+            <h1>QR პროფილები</h1>
+          </div>
           <Link href="/app/add" aria-label="ახალი პროფილის რეგისტრაცია">＋</Link>
         </header>
-
-        {!loading && items.length > 0 && (
-          <section className="profilesSummary">
-            <div><b>{items.length} აქტიური პროფილი</b><span>{lostCount ? `${lostCount} პროფილს ჩართული აქვს Lost Mode` : "ყველა პროფილი უსაფრთხოდ არის"}</span></div>
-            <em>{lostCount ? "საჭიროა ყურადღება" : "უსაფრთხოა"}</em>
-          </section>
-        )}
-
-        {loading ? <div className="profilesState">პროფილები იტვირთება…</div> : items.length === 0 ? (
-          <section className="profilesState empty"><b>ჯერ შექმნილი პროფილი არ გაქვს</b><span>დაამატე პირველი QR პროფილი და მართე აქედან.</span><Link href="/app/add">＋ პროფილის დამატება</Link></section>
+        <div className="search">
+          ⌕
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="მოძებნეთ სახელი ან QR კოდი"
+          />
+        </div>
+        {loading ? (
+          <p className="empty">პროფილები იტვირთება…</p>
+        ) : visible.length === 0 ? (
+          <div className="empty">
+            <b>პროფილი ვერ მოიძებნა</b>
+            <span>დაამატეთ ახალი QR პროფილი ქვედა ღილაკით.</span>
+          </div>
         ) : (
-          <section className="profilesList">
-            {items.map((profile) => {
-              const expanded = openId === profile.id;
-              const href = `/app/product/${profile.tag_code}`;
-              return (
-                <article className={`profileCard ${expanded ? "expanded" : ""}`} key={profile.id}>
-                  <button className="profileMain" type="button" onClick={() => setOpenId(expanded ? null : profile.id)} aria-expanded={expanded}>
-                    <span className="profilePhoto">{profile.photo ? <Image src={profile.photo} alt="" fill sizes="48px" unoptimized /> : profileIcon(profile)}</span>
-                    <span className="profileInfo"><small>{profileType(profile)}</small><b>{profile.item_name || "უსახელო პროფილი"}</b><em>QR {profile.tag_code || "—"} · {profile.scan_count || 0} სკანირება</em></span>
-                    <span className={`profileStatus ${profile.lost ? "lost" : "active"}`}>{profile.lost ? "დაკარგულია" : "აქტიური"}</span>
-                    <span className="profileChevron">⌄</span>
-                  </button>
-                  {expanded && (
-                    <div className="profileActions">
-                      <Link href={`${href}?panel=edit`}><span>✎</span><b>რედაქტირება</b></Link>
-                      <Link className={profile.lost ? "lost enabled" : "lost"} href={`${href}?panel=lost`}><span>!</span><b>Lost Mode</b></Link>
-                      <Link href={`${href}?panel=visibility`}><span>◉</span><b>ხილვადობა</b></Link>
-                      <Link className="manage" href={href}>პროფილის სრულად მართვა <span>→</span></Link>
-                    </div>
+          <section>
+            {visible.map((p) => (
+              <article key={p.id}>
+                <div className="photo">
+                  {p.photo ? (
+                    <img src={p.photo} alt="" />
+                  ) : (
+                    <span>{label(p).includes("dog") ? "🐕" : "⌁"}</span>
                   )}
-                </article>
-              );
-            })}
+                </div>
+                <div className="info">
+                  <small>{label(p)}</small>
+                  <b>{p.item_name || "უსახელო პროფილი"}</b>
+                  <span>
+                    QR {p.tag_code || "—"} · {p.scan_count || 0} სკანირება
+                  </span>
+                </div>
+                <div className={p.lost ? "lost" : "active"}>
+                  {p.lost ? "დაკარგულია" : "აქტიური"}
+                </div>
+                <Link className={`lostQuick ${p.lost ? "enabled" : ""}`} href={`/app/product/${p.tag_code}?panel=lost`}>
+                  ! Lost Mode
+                </Link>
+                <Link className="open" href={"/app/product/" + p.tag_code}>
+                  ›
+                </Link>
+              </article>
+            ))}
           </section>
         )}
       </div>
-      <style jsx global>{`
-        .profilesPage,.profilesPage *{box-sizing:border-box}.profilesPage{min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 15% 5%,rgba(115,205,255,.25),transparent 32%),linear-gradient(180deg,#f0f9ff 0%,#fbfeff 75%);color:#163a52;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}.profilesWrap{width:min(480px,calc(100% - 28px));margin:auto;padding:25px 0 104px}.profilesHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.profilesHeader small{color:#1478d4;font-size:12px;font-weight:900}.profilesHeader h1{margin:7px 0 0;font-size:27px;line-height:1.18}.profilesHeader p{margin:8px 0 0;color:#758b99;font-size:13px}.profilesHeader>a{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border-radius:14px;background:#1478d4;color:#fff;text-decoration:none;font-size:25px;box-shadow:0 9px 20px rgba(20,120,212,.22)}.profilesSummary{min-height:70px;margin-top:21px;padding:14px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:20px;background:#103b5c;color:#fff}.profilesSummary b,.profilesSummary span{display:block}.profilesSummary b{font-size:15px}.profilesSummary span{margin-top:5px;color:#cfeaff;font-size:10px}.profilesSummary em{padding:7px 9px;border-radius:999px;background:#e5f7f0;color:#16825f;font-size:10px;font-style:normal;font-weight:900;text-align:center}.profilesList{margin-top:14px;display:grid;gap:10px}.profileCard{overflow:hidden;border:1px solid #d9e9f2;border-radius:20px;background:#fff;box-shadow:0 8px 24px rgba(16,59,92,.06)}.profileMain{position:relative;width:100%;min-height:79px;padding:12px 88px 12px 12px;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#163a52;text-align:left;font:inherit;cursor:pointer}.profilePhoto{position:relative;width:50px;height:50px;display:grid;place-items:center;flex:0 0 50px;overflow:hidden;border-radius:15px;background:#eff7fc;color:#103b5c;font-size:20px;font-weight:900}.profilePhoto img{object-fit:cover}.profileInfo{min-width:0;flex:1}.profileInfo small,.profileInfo b,.profileInfo em{display:block}.profileInfo small{color:#758b99;font-size:10px}.profileInfo b{margin-top:3px;overflow:hidden;font-size:15px;text-overflow:ellipsis;white-space:nowrap}.profileInfo em{margin-top:5px;overflow:hidden;color:#758b99;font-size:9px;font-style:normal;text-overflow:ellipsis;white-space:nowrap}.profileStatus{position:absolute;top:12px;right:13px;padding:6px 8px;border-radius:999px;font-size:9px;font-weight:900}.profileStatus.active{background:#e5f7f0;color:#16825f}.profileStatus.lost{background:#fff4df;color:#b46a10}.profileChevron{position:absolute;right:17px;bottom:12px;color:#1478d4;font-size:17px;font-weight:900;transition:transform .2s}.profileCard.expanded .profileChevron{transform:rotate(180deg)}.profileActions{padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid #d9e9f2}.profileActions>a{min-height:52px;padding:7px 4px;display:grid;place-items:center;align-content:center;gap:3px;border-radius:14px;background:#eff7fc;color:#163a52;text-align:center;text-decoration:none}.profileActions>a>span{color:#1478d4;font-size:15px;font-weight:900}.profileActions>a>b{font-size:9px}.profileActions>a.lost{background:#fff4df}.profileActions>a.lost>span{color:#d78319}.profileActions>a.lost.enabled{background:#fff0f1}.profileActions>a.manage{min-height:42px;grid-column:1/-1;padding:0 13px;display:flex;align-items:center;justify-content:space-between;background:#1478d4;color:#fff;font-size:11px;font-weight:900}.profileActions>a.manage span{color:#fff}.profilesState{margin-top:22px;padding:24px;border:1px dashed #bdd3e6;border-radius:18px;background:#fff;color:#60798e;text-align:center;font-size:12px}.profilesState.empty{display:grid;gap:8px}.profilesState b{color:#254b6a;font-size:15px}.profilesState a{min-height:42px;margin-top:5px;display:grid;place-items:center;border-radius:12px;background:#1478d4;color:#fff;text-decoration:none;font-weight:900}@media(max-width:360px){.profileMain{padding-right:76px}.profilesSummary{align-items:flex-start;flex-direction:column}.profilesSummary em{align-self:flex-start}}
-      `}</style>
+      <Style />
     </main>
+  );
+}
+function Style() {
+  return (
+    <style jsx global>{`
+      .ap {
+        min-height: 100vh;
+        overflow-x: hidden;
+        background: radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%), linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
+        color: #fff;
+        font-family: Inter, Arial, sans-serif;
+      }
+      .ap, .ap * {
+        box-sizing: border-box;
+      }
+      .aw {
+        width: min(480px, calc(100% - 24px));
+        margin: auto;
+        padding: 22px 0 94px;
+      }
+      .ap header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .ap header small {
+        color: #bdddff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+      }
+      .ap h1 {
+        margin: 4px 0 0;
+        color: #ffffff;
+        font-size: 27px;
+      }
+      .ap header > a {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: #0b65d4;
+        color: #fff;
+        text-decoration: none;
+        font-size: 22px;
+      }
+      .search {
+        height: 45px;
+        margin-top: 17px;
+        padding: 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border: 1px solid #dbe5ef;
+        border-radius: 13px;
+        background: #f7fbff;
+        color: #6f8498;
+      }
+      .search input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 14px;
+      }
+      .ap section {
+        margin-top: 11px;
+        width: 100%;
+        max-width: 100%;
+        display: grid;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .ap article {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        color: #173652;
+        min-height: 79px;
+        padding: 10px 38px 10px 10px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        border: 1px solid #dce6f0;
+        border-radius: 16px;
+        background: #f9fbfd;
+        box-shadow: 0 6px 18px rgba(10,76,138,.07);
+      }
+      .photo {
+        width: 53px;
+        height: 53px;
+        display: grid;
+        place-items: center;
+        flex: 0 0 53px;
+        overflow: hidden;
+        border-radius: 13px;
+        background: #edf4fc;
+        font-size: 22px;
+      }
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .info {
+        min-width: 0;
+        flex: 1;
+      }
+      .info small,
+      .info b,
+      .info span {
+        display: block;
+      }
+      .info small {
+        color: #71869a;
+        font-size: 11px;
+      }
+      .info b {
+        margin-top: 3px;
+        overflow: hidden;
+        font-size: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .info span {
+        margin-top: 5px;
+        color: #7b8fa2;
+        font-size: 11px;
+      }
+      .active,
+      .lost {
+        position: absolute;
+        right: 34px;
+        top: 10px;
+        padding: 4px 6px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 850;
+      }
+      .active {
+        background: #e6f8ef;
+        color: #08784a;
+      }
+      .lost {
+        background: #fff0f0;
+        color: #bd3434;
+      }
+      .open {
+        position: absolute;
+        right: 12px;
+        bottom: 16px;
+        color: #1761bd;
+        text-decoration: none;
+        font-size: 24px;
+      }
+      .lostQuick{position:absolute;right:37px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
+      .empty {
+        margin-top: 25px;
+        display: grid;
+        gap: 7px;
+        color: #7a8da0;
+        text-align: center;
+        font-size: 10px;
+      }
+      .empty b {
+        color: #304c68;
+        font-size: 13px;
+      }
+    `}</style>
   );
 }
