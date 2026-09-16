@@ -33,11 +33,11 @@ function getSafeNextPath() {
 }
 
 export default function SignupPage() {
+  const [lang, setLang] = useState<"ka" | "en">("ka");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [personalIdLast4, setPersonalIdLast4] = useState("");
   const [codeWord, setCodeWord] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -54,7 +54,15 @@ export default function SignupPage() {
     const isApp = new URLSearchParams(window.location.search).get("source") === "app";
     setAppMode(isApp);
     if (isApp) window.localStorage.setItem("kompasi-app-mode", "1");
+    const saved = window.localStorage.getItem("kompasi-language");
+    if (saved === "ka" || saved === "en") setLang(saved);
   }, []);
+
+  const ka = lang === "ka";
+  const chooseLanguage = (next: "ka" | "en") => {
+    setLang(next);
+    window.localStorage.setItem("kompasi-language", next);
+  };
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -63,45 +71,40 @@ export default function SignupPage() {
     setErrorMessage("");
 
     if (!firstName.trim()) {
-      setErrorMessage("გთხოვთ შეიყვანოთ სახელი.");
+      setErrorMessage(ka ? "გთხოვთ შეიყვანოთ სახელი." : "Please enter your first name.");
       return;
     }
 
     if (!lastName.trim()) {
-      setErrorMessage("გთხოვთ შეიყვანოთ გვარი.");
+      setErrorMessage(ka ? "გთხოვთ შეიყვანოთ გვარი." : "Please enter your last name.");
       return;
     }
 
     if (!email.trim()) {
-      setErrorMessage("გთხოვთ შეიყვანოთ ელფოსტა.");
+      setErrorMessage(ka ? "გთხოვთ შეიყვანოთ ელფოსტა." : "Please enter your email.");
       return;
     }
 
     if (!phone.trim()) {
-      setErrorMessage("გთხოვთ შეიყვანოთ ტელეფონის ნომერი.");
-      return;
-    }
-
-    if (!/^\d{4}$/.test(personalIdLast4)) {
-      setErrorMessage("გთხოვთ შეიყვანოთ პირადი ნომრის ზუსტად ბოლო 4 ციფრი.");
+      setErrorMessage(ka ? "გთხოვთ შეიყვანოთ ტელეფონის ნომერი." : "Please enter your phone number.");
       return;
     }
 
     if (!codeWord.trim()) {
-      setErrorMessage("გთხოვთ შეიყვანოთ კოდური სიტყვა.");
+      setErrorMessage(ka ? "გთხოვთ შეიყვანოთ კოდური სიტყვა." : "Please enter a security word.");
       return;
     }
 
     if (password.length < 8) {
       setErrorMessage(
-        "პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს."
+        ka ? "პაროლი უნდა შეიცავდეს მინიმუმ 8 სიმბოლოს." : "Password must contain at least 8 characters."
       );
       return;
     }
 
     if (password !== confirmPassword) {
       setErrorMessage(
-        "პაროლები ერთმანეთს არ ემთხვევა."
+        ka ? "პაროლები ერთმანეთს არ ემთხვევა." : "Passwords do not match."
       );
       return;
     }
@@ -124,8 +127,8 @@ export default function SignupPage() {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
               phone: phone.trim(),
-              personal_id_last4: personalIdLast4,
               code_word: codeWord.trim(),
+              language: lang,
             },
           },
         });
@@ -136,7 +139,7 @@ export default function SignupPage() {
 
       if (!data.user) {
         throw new Error(
-          "ანგარიშის შექმნა ვერ მოხერხდა."
+          ka ? "ანგარიშის შექმნა ვერ მოხერხდა." : "We could not create your account."
         );
       }
 
@@ -208,7 +211,7 @@ export default function SignupPage() {
       const message =
         error instanceof Error
           ? error.message
-          : "ანგარიშის შექმნა ვერ მოხერხდა.";
+          : ka ? "ანგარიშის შექმნა ვერ მოხერხდა." : "We could not create your account.";
 
       const lower =
         message.toLowerCase();
@@ -222,7 +225,7 @@ export default function SignupPage() {
         )
       ) {
         setErrorMessage(
-          "ამ ელფოსტით ანგარიში უკვე არსებობს."
+          ka ? "ამ ელფოსტით ანგარიში უკვე არსებობს." : "An account with this email already exists."
         );
       } else {
         setErrorMessage(message);
@@ -268,7 +271,7 @@ export default function SignupPage() {
             href={appMode ? "/login?source=app" : "/login"}
             className="loginButton"
           >
-            შესვლა
+            {ka ? "შესვლა" : "Sign in"}
           </a>
         </header>
 
@@ -282,20 +285,19 @@ export default function SignupPage() {
               </div>
 
               <h1>
-                ყველაფერი იწყება
+                {ka ? "ყველაფერი იწყება" : "Everything starts"}
                 <br />
-                თქვენი ანგარიშით.
+                {ka ? "თქვენი ანგარიშით." : "with your account."}
               </h1>
 
               <div className="line" />
 
               <p>
-                რეგისტრაციის შემდეგ შეძლებთ{" "}
+                {ka ? "რეგისტრაციის შემდეგ შეძლებთ " : "After registration, you can add QR profiles for "}
                 <strong>
-                  ძაღლის, კატის, გასაღების,
-                  საფულის, ჩანთისა და ჩემოდნის
+                  {ka ? "ძაღლის, კატის, გასაღების, საფულის, ჩანთისა და ჩემოდნის" : "dogs, cats, keys, wallets, bags and suitcases"}
                 </strong>{" "}
-                QR პროფილების დამატებას.
+                {ka ? "QR პროფილების დამატებას." : "."}
               </p>
             </div>
           </section>
@@ -303,18 +305,18 @@ export default function SignupPage() {
           {/* FORM */}
 
           <section className="card">
+            <div className="signupLanguages"><button type="button" className={ka ? "active" : ""} onClick={() => chooseLanguage("ka")}>ქართული</button><button type="button" className={!ka ? "active" : ""} onClick={() => chooseLanguage("en")}>English</button></div>
             <div className="cardHeader">
               <span>
                 CREATE ACCOUNT
               </span>
 
               <h2>
-                მფლობელის რეგისტრაცია
+                {ka ? "მფლობელის რეგისტრაცია" : "Owner registration"}
               </h2>
 
               <p>
-                შეიყვანეთ თქვენი ძირითადი
-                ინფორმაცია.
+                {ka ? "შეიყვანეთ თქვენი ძირითადი ინფორმაცია." : "Enter your basic information."}
               </p>
             </div>
 
@@ -331,7 +333,7 @@ export default function SignupPage() {
               <div className="grid">
                 <div className="field">
                   <label htmlFor="firstName">
-                    სახელი <b>*</b>
+                    {ka ? "სახელი" : "First name"} <b>*</b>
                   </label>
 
                   <input
@@ -349,7 +351,7 @@ export default function SignupPage() {
 
                 <div className="field">
                   <label htmlFor="lastName">
-                    გვარი <b>*</b>
+                    {ka ? "გვარი" : "Last name"} <b>*</b>
                   </label>
 
                   <input
@@ -367,7 +369,7 @@ export default function SignupPage() {
 
                 <div className="field">
                   <label htmlFor="email">
-                    ელფოსტა <b>*</b>
+                    {ka ? "ელფოსტა" : "Email"} <b>*</b>
                   </label>
 
                   <input
@@ -385,7 +387,7 @@ export default function SignupPage() {
 
                 <div className="field">
                   <label htmlFor="phone">
-                    ტელეფონის ნომერი <b>*</b>
+                    {ka ? "ტელეფონის ნომერი" : "Phone number"} <b>*</b>
                   </label>
 
                   <input
@@ -402,34 +404,8 @@ export default function SignupPage() {
                 </div>
 
                 <div className="field full">
-                  <label htmlFor="personalIdLast4">
-                    პირადი ნომრის ბოლო 4 ციფრი <b>*</b>
-                  </label>
-
-                  <input
-                    id="personalIdLast4"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]{4}"
-                    maxLength={4}
-                    value={personalIdLast4}
-                    onChange={(e) =>
-                      setPersonalIdLast4(
-                        e.target.value.replace(/\D/g, "").slice(0, 4)
-                      )
-                    }
-                    autoComplete="off"
-                    placeholder="••••"
-                  />
-
-                  <span className="help">
-                    შეიყვანეთ მხოლოდ ბოლო 4 ციფრი — სრული პირადი ნომერი არ შეიყვანოთ.
-                  </span>
-                </div>
-
-                <div className="field full">
                   <label htmlFor="codeWord">
-                    კოდური სიტყვა <b>*</b>
+                    {ka ? "კოდური სიტყვა" : "Security word"} <b>*</b>
                   </label>
 
                   <input
@@ -445,14 +421,13 @@ export default function SignupPage() {
                   />
 
                   <span className="help">
-                    გამოიყენება თქვენი ანგარიშის
-                    იდენტიფიკაციისთვის.
+                    {ka ? "გამოიყენება თქვენი ანგარიშის იდენტიფიკაციისთვის." : "Used to verify your account."}
                   </span>
                 </div>
 
                 <div className="field">
                   <label htmlFor="password">
-                    პაროლი <b>*</b>
+                    {ka ? "პაროლი" : "Password"} <b>*</b>
                   </label>
 
                   <div className="passwordField">
@@ -481,19 +456,19 @@ export default function SignupPage() {
                       }
                     >
                       {showPassword
-                        ? "დამალვა"
-                        : "ნახვა"}
+                        ? (ka ? "დამალვა" : "Hide")
+                        : (ka ? "ნახვა" : "Show")}
                     </button>
                   </div>
 
                   <span className="help">
-                    მინიმუმ 8 სიმბოლო
+                    {ka ? "მინიმუმ 8 სიმბოლო" : "At least 8 characters"}
                   </span>
                 </div>
 
                 <div className="field">
                   <label htmlFor="confirmPassword">
-                    გაიმეორეთ პაროლი <b>*</b>
+                    {ka ? "გაიმეორეთ პაროლი" : "Confirm password"} <b>*</b>
                   </label>
 
                   <div className="passwordField">
@@ -522,8 +497,8 @@ export default function SignupPage() {
                       }
                     >
                       {showConfirmPassword
-                        ? "დამალვა"
-                        : "ნახვა"}
+                        ? (ka ? "დამალვა" : "Hide")
+                        : (ka ? "ნახვა" : "Show")}
                     </button>
                   </div>
                 </div>
@@ -535,16 +510,16 @@ export default function SignupPage() {
                 disabled={loading}
               >
                 {loading
-                  ? "ანგარიში იქმნება..."
-                  : "ანგარიშის შექმნა →"}
+                  ? (ka ? "ანგარიში იქმნება..." : "Creating account...")
+                  : (ka ? "ანგარიშის შექმნა →" : "Create account →")}
               </button>
             </form>
 
             <div className="bottom">
-              უკვე გაქვთ ანგარიში?
+              {ka ? "უკვე გაქვთ ანგარიში?" : "Already have an account?"}
 
               <a href={appMode ? "/login?source=app" : "/login"}>
-                შესვლა
+                {ka ? "შესვლა" : "Sign in"}
               </a>
             </div>
           </section>
@@ -832,6 +807,8 @@ export default function SignupPage() {
             0 20px 48px
             rgba(0, 25, 80, 0.24);
         }
+
+        .signupLanguages{margin:0 0 12px auto;padding:3px;width:max-content;display:flex;border:1px solid #d7e4ee;border-radius:11px;background:#eef5fa}.signupLanguages button{height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#72879a;font:inherit;font-size:9px;font-weight:900;cursor:pointer}.signupLanguages button.active{background:#0a65b5;color:#fff;box-shadow:0 5px 12px rgba(10,101,181,.2)}
 
         .cardHeader > span {
           color: #063B72;
