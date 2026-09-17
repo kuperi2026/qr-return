@@ -92,8 +92,7 @@ function showPlacementResult(){
   result.innerHTML=`<span class="eyebrow">ტესტი დასრულდა</span><div class="result-grade">${recommended}</div><h2>რეკომენდაცია: ${levelNames[recommended]} დონე</h2><p>${s.correct} სწორი პასუხი 12-დან. ხვალინდელი და შემდგომი დავალებები ბავშვის ყოველდღიური შედეგების მიხედვით ავტომატურად მოერგება.</p><div class="result-actions"><button class="primary" onclick="closeTest('placement');chooseGrade()">I კლასის პროგრამა</button><button class="secondary" onclick="closeTest('placement');openSignup()">შედეგის შენახვა</button></div>`;
 }
 function chooseGrade(){
-  document.getElementById('program').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>{const card=document.querySelector('.grade-card');const button=card.querySelector('.expand-btn');if(!card.classList.contains('expanded'))toggleGrade(button);card.style.boxShadow='0 0 0 4px var(--soft),0 20px 46px #21385f18';setTimeout(()=>card.style.boxShadow='',1800)},450);
+  document.getElementById('curriculum').scrollIntoView({behavior:'smooth'});
 }
 
 function localQuestion(grade,day,i){
