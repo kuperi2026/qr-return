@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 type Period = "1" | "3" | "6" | "12";
 type Product = { type: string; icon: string; name: string; prices: Record<Period, number> };
+type EstimateSelection = { period: Period; quantity: number };
 type Profile = { id: number; tag_code: string; item_name: string | null; item_type: string | null; pet_type: string | null; created_at?: string | null };
 type ServiceRequest = {
   id: string;
@@ -52,12 +53,17 @@ function normalizeType(profile: Profile) {
   return value === "key" ? "keys" : value.toLowerCase();
 }
 
+function discountForCount(count: number) {
+  return count >= 8 ? 15 : count === 7 ? 12 : count >= 5 ? 10 : count >= 3 ? 5 : 0;
+}
+
 export default function SubscriptionsPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<number[]>([]);
   const [period, setPeriod] = useState<Period>("6");
   const [profilePeriods, setProfilePeriods] = useState<Record<number, Period>>({});
+  const [estimateSelections, setEstimateSelections] = useState<Record<string, EstimateSelection>>({});
   const [isAppPricing, setIsAppPricing] = useState(false);
   const [hasAccount, setHasAccount] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -110,9 +116,44 @@ export default function SubscriptionsPage() {
   const selectedPeriod = (profileId: number): Period | null => profilePeriods[profileId] || null;
   const subtotal = useMemo(() => selectedItems.reduce((sum, profile) => { const chosenPeriod = profilePeriods[profile.id]; return sum + (chosenPeriod ? (PRODUCTS.find((item) => item.type === normalizeType(profile))?.prices[chosenPeriod] || 0) : 0); }, 0), [selectedItems, profilePeriods]);
   const hasIncompletePeriods = selectedItems.some((profile) => !profilePeriods[profile.id]);
-  const discountPercent = selectedItems.length >= 8 ? 15 : selectedItems.length === 7 ? 12 : selectedItems.length >= 5 ? 10 : selectedItems.length >= 3 ? 5 : 0;
+  const discountPercent = discountForCount(selectedItems.length);
   const discountAmount = Number((subtotal * discountPercent / 100).toFixed(2));
   const total = Number((subtotal - discountAmount).toFixed(2));
+
+  const estimateCount = PRODUCTS.reduce((count, product) => count + (estimateSelections[product.type]?.quantity || 0), 0);
+  const estimateSubtotal = PRODUCTS.reduce((sum, product) => {
+    const selection = estimateSelections[product.type];
+    return sum + (selection ? product.prices[selection.period] * selection.quantity : 0);
+  }, 0);
+  const estimateDiscountPercent = discountForCount(estimateCount);
+  const estimateDiscount = Number((estimateSubtotal * estimateDiscountPercent / 100).toFixed(2));
+  const estimateTotal = Number((estimateSubtotal - estimateDiscount).toFixed(2));
+
+  function chooseEstimate(type: string, chosenPeriod: Period) {
+    setEstimateSelections((current) => {
+      const existing = current[type];
+      if (existing?.period === chosenPeriod) {
+        const next = { ...current };
+        delete next[type];
+        return next;
+      }
+      return { ...current, [type]: { period: chosenPeriod, quantity: existing?.quantity || 1 } };
+    });
+  }
+
+  function changeEstimateQuantity(type: string, delta: number) {
+    setEstimateSelections((current) => {
+      const existing = current[type];
+      if (!existing) return current;
+      const quantity = Math.min(99, existing.quantity + delta);
+      if (quantity < 1) {
+        const next = { ...current };
+        delete next[type];
+        return next;
+      }
+      return { ...current, [type]: { ...existing, quantity } };
+    });
+  }
 
   function toggleProfile(id: number) {
     setSelectedProfiles((current) => {
@@ -187,24 +228,43 @@ export default function SubscriptionsPage() {
               <details className="purchaseGuide webInstruction" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}>
                 <summary><span>როგორ მუშაობს?</span><b>ინსტრუქცია ⌄</b></summary>
                 <div>
-                  <article><i>1</i><p><b>ნახეთ ფასები და თქვენი პროფილები</b><span>ფასების კალენდარში ყველასთვის ჩანს რვავე პროდუქტის ფასი. მის ქვემოთ, „ჩემი პროფილების“ ნაწილში, შესვლის შემდეგ ავტომატურად გამოჩნდება თქვენი დარეგისტრირებული QR პროფილები.</span></p></article>
-                  <article><i>2</i><p><b>აირჩიეთ ვადა თითოეული პროფილისთვის</b><span>სასურველი პროფილის გასწვრივ დააჭირეთ 1, 3, 6 ან 12 თვის ფასს. იმავე ფასზე ხელახლა დაჭერით არჩევანს მოხსნით.</span></p></article>
-                  <article><i>3</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>არჩეული პროფილები მარჯვნივ ერთიან შეჯამებაში გამოჩნდება. 3–4 პროფილზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
+                  <article><i>1</i><p><b>გამოთვალეთ ფასი პროფილის გარეშეც</b><span>ფასების კალენდარში დააჭირეთ სასურველი პროდუქტისა და ვადის ფასს. თუ რამდენიმე ერთნაირი პროდუქტი გჭირდებათ, გაზარდეთ რაოდენობა + ღილაკით. ეს მხოლოდ წინასწარი გამოთვლაა.</span></p></article>
+                  <article><i>2</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>კალკულატორი დაუყოვნებლივ აჩვენებს არჩეულ პროდუქტებს, ფასდაკლებასა და სავარაუდო ჯამს. 3–4 პროდუქტზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
+                  <article><i>3</i><p><b>შემდეგ აირჩიეთ თქვენი პროფილები</b><span>„ჩემი პროფილების“ ნაწილში, ანგარიშში შესვლის შემდეგ, ავტომატურად გამოჩნდება თქვენი დარეგისტრირებული QR პროფილები. თითოეულის ვადა იქ ცალკე აირჩიეთ.</span></p></article>
                   <article><i>4</i><p><b>გააგზავნეთ გააქტიურების მოთხოვნა</b><span>შეამოწმეთ პროფილები, ვადები და საბოლოო თანხა, შემდეგ დააჭირეთ „გააქტიურების მოთხოვნას“. მომსახურება ჩაირთვება QR RETURN-ის დადასტურების შემდეგ.</span></p></article>
                   <footer>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>. ფასიანი ვადა იწყება უფასო პერიოდის დასრულების შემდეგ.</footer>
                 </div>
               </details>
               <section className="publicPriceCalendar" aria-label="ყველა პროდუქტის ფასების კალენდარი">
                 <header><div><small>ფასების კალენდარი</small><h2>ყველა პროდუქტის ფასი</h2></div><span>8 პროდუქტი · 4 ვადა</span></header>
-                <p>ფასების ნახვა ყველას შეუძლია. პროფილის შექმნა ფასების სანახავად საჭირო არ არის.</p>
+                <p>აირჩიეთ პროდუქტი, ვადა და რაოდენობა — სავარაუდო ჯამი მაშინვე დაითვლება. ანგარიშში შესვლა საჭირო არ არის.</p>
                 <div className="publicPriceScroll">
                   <div className="publicPriceGrid publicPriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>
-                  {PRODUCTS.map((product) => <div className={`publicPriceGrid publicPriceRow category-${product.type}`} key={product.type}>
-                    <strong><span>{product.icon}</span>{product.name}</strong>
-                    {PERIODS.map((item) => <span className="publicPriceCell" key={item.value}>{product.prices[item.value]} ₾</span>)}
-                  </div>)}
+                  {PRODUCTS.map((product) => {
+                    const selection = estimateSelections[product.type];
+                    return <div className={`publicPriceGrid publicPriceRow category-${product.type}`} key={product.type}>
+                      <div className="priceProduct"><strong><span>{product.icon}</span>{product.name}</strong>
+                        {selection && <div className="quantityControls" aria-label={`${product.name}: რაოდენობა`}>
+                          <button type="button" aria-label={`${product.name}: რაოდენობის შემცირება`} onClick={() => changeEstimateQuantity(product.type, -1)}>−</button>
+                          <b>{selection.quantity} ცალი</b>
+                          <button type="button" aria-label={`${product.name}: რაოდენობის გაზრდა`} disabled={selection.quantity >= 99} onClick={() => changeEstimateQuantity(product.type, 1)}>+</button>
+                        </div>}
+                      </div>
+                      {PERIODS.map((item) => <button className={`publicPriceCell${selection?.period === item.value ? " selected" : ""}`} type="button" aria-pressed={selection?.period === item.value} aria-label={`${product.name}: ${item.label}, ${product.prices[item.value]} ლარი`} onClick={() => chooseEstimate(product.type, item.value)} key={item.value}>{product.prices[item.value]} ₾</button>)}
+                    </div>;
+                  })}
                 </div>
-                <footer>ფასი კონკრეტული პროდუქტისა და არჩეული ვადის მიხედვით განისაზღვრება.</footer>
+                <div className="estimateSummary" aria-live="polite">
+                  <div><small>ფასის კალკულატორი · წინასწარი გამოთვლა</small><strong>{estimateCount ? `${estimateCount} პროდუქტი` : "აირჩიეთ პროდუქტი და ვადა"}</strong></div>
+                  {estimateCount > 0 && <>
+                    <div className="estimateLines">{PRODUCTS.map((product) => { const selection = estimateSelections[product.type]; return selection ? <div key={product.type}><span>{product.icon} {product.name} · {selection.quantity} ცალი · {PERIODS.find((item) => item.value === selection.period)?.label}</span><b>{product.prices[selection.period] * selection.quantity} ₾</b></div> : null; })}</div>
+                    <div className="estimateLine"><span>საწყისი ჯამი</span><b>{estimateSubtotal} ₾</b></div>
+                    <div className="estimateLine"><span>ფასდაკლება {estimateDiscountPercent ? `(${estimateDiscountPercent}%)` : ""}</span><b>−{estimateDiscount} ₾</b></div>
+                    <div className="estimateTotal"><span>სავარაუდო ჯამი</span><strong>{estimateTotal} ₾</strong></div>
+                    <button type="button" className="estimateClear" onClick={() => setEstimateSelections({})}>არჩევანის გასუფთავება</button>
+                  </>}
+                </div>
+                <footer>ეს გამოთვლა მხოლოდ ფასის გასაგებადაა; პროფილს არ ქმნის და გააქტიურების მოთხოვნას არ აგზავნის.</footer>
               </section>
             </div>
           <section className={isAppPricing ? "liveCalculator" : "liveCalculator webCalendar"} aria-label="დარეგისტრირებული პროფილების არჩევა">
@@ -403,6 +463,26 @@ export default function SubscriptionsPage() {
       .publicPriceRow strong{display:flex;align-items:center;gap:8px;color:#254662;font-size:14px}
       .publicPriceRow strong span{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:#fff;font-size:19px}
       .publicPriceCell{padding:9px 2px;border-radius:9px;background:#fff;color:var(--accent);font-size:15px;font-weight:900;text-align:center;box-shadow:0 2px 7px rgba(20,77,127,.05)}
+      .publicPriceCell{min-height:42px;border:1px solid color-mix(in srgb,var(--accent) 24%,white);font-family:inherit;cursor:pointer;transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
+      .publicPriceCell:hover{transform:translateY(-2px);box-shadow:0 6px 14px color-mix(in srgb,var(--accent) 20%,transparent)}
+      .publicPriceCell.selected{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 5px 13px color-mix(in srgb,var(--accent) 25%,transparent)}
+      .priceProduct{display:grid;gap:5px}
+      .quantityControls{display:flex;align-items:center;gap:6px}
+      .quantityControls button{width:26px;height:26px;border:1px solid color-mix(in srgb,var(--accent) 45%,white);border-radius:7px;background:#fff;color:var(--accent);font-family:inherit;font-size:17px;font-weight:900;cursor:pointer}
+      .quantityControls button:disabled{opacity:.45;cursor:not-allowed}
+      .quantityControls b{color:#47647c;font-size:11px;white-space:nowrap}
+      .estimateSummary{margin:0 12px 12px;padding:15px;border:1px solid #a5ceef;border-radius:14px;background:linear-gradient(135deg,#eaf5ff,#fff);color:#254967}
+      .estimateSummary>div:first-child small,.estimateSummary>div:first-child strong{display:block}
+      .estimateSummary>div:first-child small{color:#427caa;font-size:11px;font-weight:900}
+      .estimateSummary>div:first-child strong{margin-top:4px;font-size:17px}
+      .estimateLines{margin:12px 0 8px;padding:8px 10px;border-radius:10px;background:#fff}
+      .estimateLines>div,.estimateLine,.estimateTotal{display:flex;justify-content:space-between;align-items:center;gap:12px}
+      .estimateLines>div{padding:6px 0;font-size:12px}
+      .estimateLines>div+div{border-top:1px solid #e4edf5}
+      .estimateLine{padding:5px 2px;font-size:13px}
+      .estimateTotal{margin-top:8px;padding:12px;border-radius:11px;background:#0d5fb5;color:#fff;font-size:15px;font-weight:850}
+      .estimateTotal strong{font-size:25px}
+      .estimateClear{margin-top:10px;padding:0;border:0;background:none;color:#146cb4;font-family:inherit;font-size:12px;font-weight:850;text-decoration:underline;cursor:pointer}
       .publicPriceCalendar>footer{padding:0 18px 15px;color:#6d8294;font-size:11px}
       .webCalendar{margin-top:18px}
       @media(max-width:760px){.publicPriceCalendar>header{align-items:flex-start}.publicPriceCalendar h2{font-size:19px}.publicPriceCalendar>header>span{font-size:9px}.publicPriceGrid{min-width:460px}}
