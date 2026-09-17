@@ -15,8 +15,6 @@ const Base = () => (
 const links = [
   ["✎", "პირადი ინფორმაცია", "სახელი, გვარი, ელფოსტა და Login", "/account/profile?source=app", "violet"],
   ["⌾", "უსაფრთხოება", "პაროლი, კოდური სიტყვა და დაცვა", "/account/security?source=app", "green"],
-  ["♢", "შეტყობინებები", "Push, QR სკანები, ჩათი და სიახლეები", "/account/notifications?source=app", "blue"],
-  ["?", "დახმარება და კონტაქტი", "KOMPASI მხარდაჭერა 24/7", "/support?source=app", "gold"],
 ];
 export default function Account() {
   const router = useRouter();
@@ -50,14 +48,14 @@ export default function Account() {
         <header>
           <small>KOMPASI ACCOUNT</small>
           <h1>ანგარიში</h1>
-          <p>მართეთ პირადი მონაცემები, უსაფრთხოება და აპის შეტყობინებები.</p>
+          <p>აქ მხოლოდ თქვენი პირადი მონაცემები და ანგარიშის უსაფრთხოება იმართება.</p>
         </header>
         <section className="accountIdentity">
           <span className="accountAvatar">{name.charAt(0).toUpperCase()}</span>
           <span className="accountCopy"><small>ACCOUNT OWNER</small><b>{name}</b><em>{email || "ელფოსტა არ არის დამატებული"}</em></span>
           <i>✓</i>
         </section>
-        <div className="accountSectionTitle"><span>ანგარიშის მართვა</span><small>აირჩიეთ სასურველი განყოფილება</small></div>
+        <div className="accountSectionTitle"><span>ანგარიშის მართვა</span><small>მხოლოდ ანგარიშის ფუნქციები</small></div>
         <section className="accountMenu">
           {links.map(([icon, a, b, h, color]) => (
             <Link href={h} key={a} className={color}>
