@@ -84,12 +84,12 @@ export default function Products() {
         .pc section a {
           width: 100%;
           min-width: 0;
-          aspect-ratio: 1 / 1;
-          min-height: 0;
-          padding: 16px;
+          height: 132px;
+          min-height: 132px;
+          padding: 13px;
           display: grid;
           grid-template-columns: 1fr 25px;
-          grid-template-rows: 54px 1fr 24px;
+          grid-template-rows: 42px 1fr 22px;
           align-items: start;
           gap: 8px;
           border: 1px solid rgba(255,255,255,.72);
@@ -100,8 +100,8 @@ export default function Products() {
         }
         .pc section a:nth-child(5){grid-column:1/3;width:calc(50% - 5px);justify-self:center}
         .pc section i {
-          width: 50px;
-          height: 50px;
+          width: 40px;
+          height: 40px;
           display: grid;
           place-items: center;
           grid-column:1/3;
@@ -109,7 +109,7 @@ export default function Products() {
           background: rgba(255,255,255,.17);
           color:#fff;
           box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
-          font-size: 21px;
+          font-size: 18px;
           font-style: normal;
         }
         .pc section span {
@@ -122,13 +122,13 @@ export default function Products() {
           display: block;
         }
         .pc section b {
-          font-size: 15px;
+          font-size: 13px;
           line-height:1.25;
         }
         .pc section small {
           margin-top: 5px;
           color: rgba(255,255,255,.8);
-          font-size: 9px;
+          font-size: 9.5px;
           line-height: 1.45;
           line-height: 1.3;
         }
@@ -137,8 +137,8 @@ export default function Products() {
           grid-row:3;
           align-self:end;
           justify-self:end;
-          width:24px;
-          height:24px;
+          width:22px;
+          height:22px;
           display:grid;
           place-items:center;
           border-radius:8px;
@@ -154,7 +154,7 @@ export default function Products() {
         .pc section a.gold{background:radial-gradient(circle at 100% 0,rgba(255,238,151,.4),transparent 44%),linear-gradient(145deg,#d49325,#8b5812)}
         .pc section a:hover{border-color:#fff;transform:translateY(-2px);box-shadow:0 18px 36px rgba(1,21,49,.3),inset 0 1px 0 rgba(255,255,255,.25)}
         @media (max-width: 380px) {
-          .pw{width:min(480px,calc(100% - 20px))}.pc section{gap:7px}.pc section a{padding:12px;border-radius:17px}.pc section i{width:44px;height:44px}.pc section b{font-size:13px}.pc section small{font-size:8px;line-height:1.35}
+          .pw{width:min(480px,calc(100% - 20px))}.pc section{gap:7px}.pc section a{height:122px;min-height:122px;padding:10px;border-radius:17px}.pc section i{width:36px;height:36px}.pc section b{font-size:12px}.pc section small{font-size:8.5px;line-height:1.3}
         }
       `}</style>
     </main>
