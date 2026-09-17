@@ -7,3 +7,25 @@ header{background:#ffffffdd;backdrop-filter:blur(16px);position:sticky;top:0;z-i
 .dashboard>div{min-height:140px;justify-content:center;box-shadow:0 10px 26px #233b6d0b}.dashboard>div:nth-child(1){border-top:4px solid #29c7ad}.dashboard>div:nth-child(2){border-top:4px solid #5372e8}.dashboard>div:nth-child(3){border-top:4px solid #ffb45f}
 .answers button{cursor:pointer;transition:.18s}.answers button:hover{border-color:#5975df;transform:translateY(-2px)}.ai-box{background:linear-gradient(135deg,#152640,#213b61);box-shadow:0 18px 45px #172b4d25}
 @media(max-width:760px){header{padding:0 16px}.hero{border-radius:24px}.section{border-radius:22px!important;margin:12px 10px;padding-left:18px;padding-right:18px}.grades article{min-height:165px}.dashboard>div{min-height:120px}.actions{flex-direction:column}.actions button{width:100%}}
+
+/* Full first-week programme */
+.program-section{overflow:hidden;background:linear-gradient(150deg,#fff 0%,#f7f9ff 72%,#eef9ff 100%)!important}
+.program-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:30px}
+.program-heading h2{margin-bottom:10px}.program-heading p{max-width:680px;margin:0;color:#66758f;font-size:17px;line-height:1.65}
+.week-badge{display:flex;align-items:center;gap:12px;flex:0 0 auto;padding:15px 20px;border:1px solid #dce6fb;border-radius:20px;background:#fff;box-shadow:0 12px 30px #294d8d12}
+.week-badge b{font-size:36px;line-height:1;color:#3558d8}.week-badge span{font-size:13px;font-weight:800;line-height:1.35;color:#64718a}
+.program-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.grade-card{--accent:#3558d8;--soft:#edf2ff;position:relative;overflow:hidden;padding:26px;border:1px solid #e1e7f2;border-radius:26px;background:#fff;box-shadow:0 14px 38px #21385f0d;transition:transform .22s,box-shadow .22s,border-color .22s}
+.grade-card:before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--accent)}
+.grade-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 30%,#dfe5f2);box-shadow:0 20px 46px #21385f18}
+.grade-one{--accent:#2879e8;--soft:#eaf4ff}.grade-two{--accent:#7655d8;--soft:#f2edff}.grade-three{--accent:#e47b22;--soft:#fff2e5}.grade-four{--accent:#16947e;--soft:#e7f8f3}
+.grade-summary{display:flex;align-items:center;gap:15px}.grade-summary small{display:block;margin-bottom:3px;color:#8490a4;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.grade-summary h3{margin:0;font-size:26px}
+.grade-number{display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;border-radius:17px;background:var(--soft);color:var(--accent);font-size:25px;font-weight:900}
+.grade-lead{min-height:52px;margin:19px 0 16px;color:#56657d;line-height:1.6}
+.topic-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}.topic-chips span{padding:7px 10px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:800}
+.expand-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 15px;border:0;border-radius:14px;background:var(--soft);color:var(--accent);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:filter .18s,transform .18s}.expand-btn:hover{filter:saturate(1.15);transform:translateY(-1px)}.expand-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 32%,transparent);outline-offset:2px}.expand-btn i{font-style:normal;font-size:22px;line-height:1;transition:transform .25s}.grade-card.expanded .expand-btn i{transform:rotate(180deg)}
+.grade-details{padding-top:23px;animation:reveal .28s ease both}.grade-details[hidden]{display:none}.detail-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:13px;border-bottom:1px solid #e9edf4}.detail-head b{font-size:15px}.detail-head span{color:#8792a6;font-size:12px;font-weight:700}
+.day-list{list-style:none;margin:8px 0 0;padding:0}.day-list li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid #eef1f6}.day-list li>span{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--soft);color:var(--accent);font-size:13px;font-weight:900}.day-list b{font-size:14px}.day-list p{margin:4px 0 0;color:#768297;font-size:13px;line-height:1.45}.adaptive-note{margin-top:15px;padding:12px 14px;border-radius:13px;background:#f7f9fc;color:#5e6a80;font-size:12px;font-weight:800;line-height:1.5}
+@keyframes reveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.program-heading{align-items:flex-start}.week-badge{display:none}.program-grid{grid-template-columns:1fr}.grade-card{padding:22px;border-radius:22px}.grade-lead{min-height:0}.program-section{padding-top:42px!important;padding-bottom:42px!important}.program-heading h2{font-size:30px}.program-heading p{font-size:16px}.detail-head{align-items:flex-start;gap:10px}}
+@media(prefers-reduced-motion:reduce){.grade-card,.expand-btn,.expand-btn i,.grade-details{transition:none;animation:none}}
