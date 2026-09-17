@@ -2,6 +2,16 @@ const signup=document.getElementById('signup');
 const db=window.supabase.createClient('https://edvwyvprlmvfbiwnsmsy.supabase.co','sb_publishable_INttCaXkOGNLNegRdrLIIQ_B4K-lF2n');
 
 function openSignup(){signup.showModal()}
+function showCabinetView(view,trigger){
+  document.querySelectorAll('.cabinet-view').forEach(section=>section.classList.remove('active'));
+  const target=document.getElementById(`${view}View`);if(target)target.classList.add('active');
+  document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
+  const titles={dashboard:'მთავარი',syllabus:'სარჩევი',analytics:'შედეგები'};
+  document.getElementById('pageTitle').textContent=titles[view]||'მთავარი';
+  document.querySelector('.sidebar')?.classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleSidebar(){document.querySelector('.sidebar')?.classList.toggle('open')}
 
 function answer(el,ok){
   el.closest('.answers').querySelectorAll('button').forEach(b=>b.className='');
