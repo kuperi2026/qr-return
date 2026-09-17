@@ -462,7 +462,7 @@ export default function SecurityPage() {
 
                 <p>
                   {ka
-                    ? "პაროლი იცვლება მხოლოდ თქვენს Login ელფოსტაზე გაგზავნილი დაცული ბმულით."
+                    ? "პაროლი იცვლება მხოლოდ თქვენს ელფოსტაზე გაგზავნილი დაცული ბმულით."
                     : "Email verification/reset will be enabled later. Automatic password reset using only the code word is intentionally disabled for now."}
                 </p>
               </div>
