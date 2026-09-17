@@ -22,6 +22,34 @@ function celebrateCorrect(){
   playRewardSound();const celebration=document.getElementById('celebration');celebration.classList.remove('show');void celebration.offsetWidth;celebration.classList.add('show');setTimeout(()=>celebration.classList.remove('show'),1100);
 }
 
+let numberGameState={};
+function startNumberGame(){
+  const savedEnd=Number(localStorage.getItem('qrEduGameEnd')),now=Date.now();
+  numberGameState={level:1,streak:0,misses:0,score:0,endTime:savedEnd>now?savedEnd:now+30*60*1000,timer:null};
+  localStorage.setItem('qrEduGameEnd',String(numberGameState.endTime));
+  document.getElementById('numberGame').showModal();updateGameTimer();
+  numberGameState.timer=setInterval(updateGameTimer,1000);showNumberQuestion();
+}
+function closeNumberGame(){clearInterval(numberGameState.timer);document.getElementById('numberGame').close()}
+function updateGameTimer(){
+  const left=Math.max(0,numberGameState.endTime-Date.now()),m=Math.floor(left/60000),s=Math.floor(left%60000/1000);
+  document.getElementById('gameTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(!left){clearInterval(numberGameState.timer);document.getElementById('numberOptions').innerHTML='';document.getElementById('gameFeedback').textContent='დღევანდელი დრო დასრულდა — ყოჩაღ!';localStorage.removeItem('qrEduGameEnd')}
+}
+function showNumberQuestion(){
+  const s=numberGameState;if(Date.now()>=s.endTime)return updateGameTimer();
+  const min=s.level===1?1:s.level===2?6:11,max=s.level===1?10:s.level===2?15:20,answer=Math.floor(Math.random()*(max-min+1))+min,pool=[answer];
+  while(pool.length<4){const n=Math.floor(Math.random()*20)+1;if(!pool.includes(n))pool.push(n)}
+  s.answer=answer;document.getElementById('shownNumber').textContent=answer;document.getElementById('gameLevel').textContent=`დონე ${s.level} · რიცხვები ${min}–${max}`;document.getElementById('gameProgress').style.width=`${s.streak/3*100}%`;document.getElementById('gameFeedback').textContent='აირჩიე სწორი პასუხი';
+  const box=document.getElementById('numberOptions');box.innerHTML='';pool.sort(()=>Math.random()-.5).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>answerNumber(b,n===answer);box.appendChild(b)});
+}
+function answerNumber(button,correct){
+  const s=numberGameState;button.parentElement.querySelectorAll('button').forEach(b=>b.disabled=true);button.classList.add(correct?'correct':'wrong');
+  if(correct){s.score++;s.streak++;s.misses=0;celebrateCorrect();document.getElementById('gameFeedback').textContent='სწორია! კიდევ ერთი ვარსკვლავი ★';if(s.streak>=3&&s.level<3){s.level++;s.streak=0}}
+  else{s.streak=0;s.misses++;document.getElementById('gameFeedback').textContent=`სწორი პასუხია ${s.answer} — შემდეგი გამარტივდება`;if(s.misses>=2&&s.level>1){s.level--;s.misses=0}}
+  document.getElementById('gameScore').textContent=`★ ${s.score}`;setTimeout(showNumberQuestion,900);
+}
+
 function toggleGrade(button){
   const card=button.closest('.grade-card');
   const details=card.querySelector('.grade-details');
@@ -92,7 +120,7 @@ function showPlacementResult(){
   result.innerHTML=`<span class="eyebrow">ტესტი დასრულდა</span><div class="result-grade">${recommended}</div><h2>რეკომენდაცია: ${levelNames[recommended]} დონე</h2><p>${s.correct} სწორი პასუხი 12-დან. ხვალინდელი და შემდგომი დავალებები ბავშვის ყოველდღიური შედეგების მიხედვით ავტომატურად მოერგება.</p><div class="result-actions"><button class="primary" onclick="closeTest('placement');chooseGrade()">I კლასის პროგრამა</button><button class="secondary" onclick="closeTest('placement');openSignup()">შედეგის შენახვა</button></div>`;
 }
 function chooseGrade(){
-  document.getElementById('curriculum').scrollIntoView({behavior:'smooth'});
+  document.getElementById('today').scrollIntoView({behavior:'smooth'});
 }
 
 function localQuestion(grade,day,i){
@@ -103,20 +131,20 @@ function localQuestion(grade,day,i){
 }
 let topicState={};
 function openTopic(grade,day,title){
-  topicState={grade,day,title,index:0,score:0,questions:Array.from({length:20},(_,i)=>localQuestion(grade,day,i+1))};
+  topicState={grade,day,title,index:0,score:0,questions:Array.from({length:15},(_,i)=>localQuestion(grade,day,i+1))};
   document.getElementById('topicTest').showModal();showTopicQuestion();
 }
 function showTopicQuestion(){
-  const s=topicState;if(s.index>=20){showTopicResult();return}const q=s.questions[s.index];
-  document.getElementById('topicMeta').textContent=`${roman[s.grade]} კლასი · კითხვა ${s.index+1}/20`;
+  const s=topicState;if(s.index>=15){showTopicResult();return}const q=s.questions[s.index];
+  document.getElementById('topicMeta').textContent=`${roman[s.grade]} კლასი · კითხვა ${s.index+1}/15`;
   document.getElementById('topicTitle').textContent=s.title;
-  document.getElementById('topicBar').style.width=`${s.index/20*100}%`;
+  document.getElementById('topicBar').style.width=`${s.index/15*100}%`;
   document.getElementById('topicPrompt').textContent=q.prompt;
   const box=document.getElementById('topicOptions');box.innerHTML='';q.options.forEach(o=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>gradeTopicAnswer(b,o===q.answer);box.appendChild(b)});
   document.getElementById('topicHint').textContent='პასუხის მიხედვით შემდეგი დავალების დონე მოერგება';
 }
 function gradeTopicAnswer(button,ok){button.parentElement.querySelectorAll('button').forEach(b=>b.disabled=true);button.classList.add(ok?'correct':'wrong');if(ok){topicState.score++;celebrateCorrect()}topicState.index++;document.getElementById('topicHint').textContent=ok?'სწორია ✓':'სწორი პასუხი გამოჩნდება შედეგების მიმოხილვაში';setTimeout(showTopicQuestion,700)}
-function showTopicResult(){document.getElementById('topicBar').style.width='100%';document.getElementById('topicPrompt').textContent=`შედეგი: ${topicState.score} / 20`;document.getElementById('topicOptions').innerHTML=`<button onclick="closeTest('topicTest');openSignup()">შედეგის შენახვა</button><button onclick="topicState.index=0;topicState.score=0;showTopicQuestion()">თავიდან გავლა</button>`;document.getElementById('topicHint').textContent=topicState.score>=16?'შესანიშნავია — შემდეგი თემა მზადაა!':'კარგი დასაწყისია — კიდევ ერთხელ ცდა დაგეხმარება.'}
+function showTopicResult(){document.getElementById('topicBar').style.width='100%';document.getElementById('topicPrompt').textContent=`შედეგი: ${topicState.score} / 15`;document.getElementById('topicOptions').innerHTML=`<button onclick="closeTest('topicTest');openSignup()">შედეგის შენახვა</button><button onclick="topicState.index=0;topicState.score=0;showTopicQuestion()">თავიდან გავლა</button>`;document.getElementById('topicHint').textContent=topicState.score>=12?'შესანიშნავია — შემდეგ ჯერზე უფრო რთული დონე დაგხვდება!':'კარგი დასაწყისია — შემდეგი კითხვები უფრო მარტივად მოერგება.'}
 
 document.querySelectorAll('.grade-card').forEach((card,gradeIndex)=>card.querySelectorAll('.day-list li').forEach((li,dayIndex)=>{
   li.tabIndex=0;li.setAttribute('role','button');li.setAttribute('aria-label',`${li.querySelector('b').textContent} — ტესტის დაწყება`);
