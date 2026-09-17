@@ -178,12 +178,21 @@ export default function SubscriptionsPage() {
         <section className="panel">
           <div className="checkoutStage profileStage">
             <div className="webGuides">
-              <details className="purchaseGuide webInstruction" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}><summary><span>როგორ მუშაობს?</span><b>ინსტრუქცია ⌄</b></summary><div><article><i>1</i><p><b>პროფილები ავტომატურად ჩანს</b><span>კალენდარში მხოლოდ თქვენს ანგარიშზე უკვე შექმნილი QR პროფილებია.</span></p></article><article><i>2</i><p><b>ფასზე დაჭერა ნიშნავს არჩევას</b><span>თითოეულ პროფილს პირდაპირ მიანიჭეთ 1, 3, 6 ან 12 თვე; აქტიურ ფასზე მეორედ დაჭერა არჩევანს მოხსნის.</span></p></article><article><i>3</i><p><b>მიიღეთ ერთიანი შეჯამება</b><span>სხვადასხვა ვადა ერთ შეკვეთაში გაერთიანდება და თითოეული ცალკე გამოჩნდება.</span></p></article><article><i>4</i><p><b>რაოდენობრივი ფასდაკლება</b><span>3–4 პროფილი −5% · 5–6 −10% · 7 −12% · 8 ან მეტი −15%.</span></p></article><footer>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>. ფასიანი ვადა იწყება უფასო პერიოდის დასრულების შემდეგ.</footer></div></details>
+              <details className="purchaseGuide webInstruction" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}>
+                <summary><span>როგორ მუშაობს?</span><b>ინსტრუქცია ⌄</b></summary>
+                <div>
+                  <article><i>1</i><p><b>ნახეთ თქვენი პროფილები</b><span>ქვემოთ, ფასების კალენდარში ავტომატურად გამოჩნდება ამ ანგარიშზე დარეგისტრირებული ყველა QR პროფილი.</span></p></article>
+                  <article><i>2</i><p><b>აირჩიეთ ვადა თითოეული პროფილისთვის</b><span>სასურველი პროფილის გასწვრივ დააჭირეთ 1, 3, 6 ან 12 თვის ფასს. იმავე ფასზე ხელახლა დაჭერით არჩევანს მოხსნით.</span></p></article>
+                  <article><i>3</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>არჩეული პროფილები მარჯვნივ ერთიან შეჯამებაში გამოჩნდება. 3–4 პროფილზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
+                  <article><i>4</i><p><b>გააგზავნეთ გააქტიურების მოთხოვნა</b><span>შეამოწმეთ პროფილები, ვადები და საბოლოო თანხა, შემდეგ დააჭირეთ „გააქტიურების მოთხოვნას“. მომსახურება ჩაირთვება QR RETURN-ის დადასტურების შემდეგ.</span></p></article>
+                  <footer>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>. ფასიანი ვადა იწყება უფასო პერიოდის დასრულების შემდეგ.</footer>
+                </div>
+              </details>
               <details className="purchaseGuide tariffGuide" open={openPricingPanel === "prices"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("prices"); else if (openPricingPanel === "prices") setOpenPricingPanel(null); }}><summary><span>ყველა პროდუქტის ფასი</span><b>ფასების ნახვა ⌄</b></summary><div><section className="referencePriceTable" aria-label="ყველა პროდუქტის ფასი"><div className="referencePriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <span key={item.value}>{item.label}</span>)}</div>{PRODUCTS.map((product) => <div className="referencePriceRow" key={product.type}><b>{product.icon} {product.name}</b>{PERIODS.map((item) => <span key={item.value}>{product.prices[item.value]}₾</span>)}</div>)}</section></div></details>
             </div>
-          <section className="liveCalculator" aria-label="ფასის კალკულატორი">
+          <section className={isAppPricing ? "liveCalculator" : "liveCalculator webCalendar"} aria-label="ფასის კალკულატორი">
             <header><div><small>უკვე დარეგისტრირებული პროფილები</small><h3>აირჩიეთ პროფილი და ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
-            {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className="chosenProductGroup"><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
+            {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className={`chosenProductGroup category-${product.type}`}><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
 
           </section>
           {loading ? <div className="state">პროფილები იტვირთება...</div> : profiles.length ? <div className="profilePicker">
@@ -331,6 +340,36 @@ export default function SubscriptionsPage() {
       .chosenProductGroup .chosenProduct>span small{font-size:11px}
       .priceCalendarHead{font-size:12px!important}
       @media(max-width:760px){.back{font-size:13px}.webGuides .purchaseGuide>summary{font-size:14px}.chosenProductGroup .chosenProduct>span strong{font-size:13px}}
+      .webGuides .webInstruction{border-color:#b9d8f3;background:linear-gradient(145deg,#fff,#f0f7ff);box-shadow:0 10px 26px rgba(12,75,142,.09)}
+      .webGuides .webInstruction>summary{color:#104b80}
+      .webGuides .webInstruction article{border:1px solid #dceaf8;background:#fff;border-radius:12px}
+      .webGuides .webInstruction article:nth-child(2){background:#f1f8ff;border-color:#cbe3fa}
+      .webGuides .webInstruction article:nth-child(3){background:#effaf6;border-color:#ccebdd}
+      .webGuides .webInstruction article:nth-child(4){background:#fff8ed;border-color:#f5dfb9}
+      .webGuides .webInstruction article>i{background:linear-gradient(140deg,#096ce0,#6f59df);box-shadow:0 4px 12px rgba(30,92,191,.2)}
+      .webGuides .webInstruction article:nth-child(3)>i{background:#0c9d75}
+      .webGuides .webInstruction article:nth-child(4)>i{background:#dc8a17}
+      .webGuides .webInstruction article b{font-size:16px;color:#173f66}
+      .webGuides .webInstruction article span{font-size:14px;color:#45657f;line-height:1.6}
+      .webGuides .webInstruction footer{font-size:14px;line-height:1.5}
+      .webCalendar{padding:18px;border:1px solid #a7cdf2;border-radius:20px;background:linear-gradient(145deg,#fff 15%,#eaf5ff 100%);box-shadow:0 14px 36px rgba(18,91,164,.14)}
+      .webCalendar>header{padding:2px 2px 13px;border-bottom:1px solid #d5e7f8}
+      .webCalendar>header small{font-size:12px;color:#557b9c}
+      .webCalendar>header h3{font-size:21px;color:#113e69}
+      .webCalendar>header>div:last-child span{font-size:12px}
+      .webCalendar .priceCalendarHead{padding:12px;color:#315a7b;font-size:13px!important}
+      .webCalendar .chosenProductGroup{--accent:#1675e9;margin-top:13px;padding:10px;border:1px solid color-mix(in srgb,var(--accent) 38%,white);border-radius:16px;background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 12%,white),#fff 72%);box-shadow:0 7px 18px rgba(13,67,125,.08)}
+      .webCalendar .category-dog{--accent:#8057d9}.webCalendar .category-cat{--accent:#dc5f91}.webCalendar .category-keys{--accent:#198dba}.webCalendar .category-wallet{--accent:#be862c}.webCalendar .category-bag{--accent:#e07758}.webCalendar .category-suitcase{--accent:#346fd7}.webCalendar .category-emergency{--accent:#d85062}.webCalendar .category-parking{--accent:#168f78}
+      .webCalendar .chosenProductGroup>header{padding:4px 5px 9px;color:var(--accent);font-size:15px}
+      .webCalendar .chosenProductGroup>header b{padding:5px 9px;background:#fff;color:var(--accent);font-size:11px}
+      .webCalendar .priceCalendar article{min-height:58px;border-radius:12px;box-shadow:0 2px 7px rgba(13,67,125,.06)}
+      .webCalendar .chosenProductGroup .chosenProduct>span strong{font-size:15px;color:#173b5b}
+      .webCalendar .chosenProductGroup .chosenProduct>span small{font-size:11px}
+      .webCalendar .priceCalendar article>button{height:42px;border-color:color-mix(in srgb,var(--accent) 32%,white);background:#fff;color:var(--accent);font-size:14px!important;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+      .webCalendar .priceCalendar article>button:hover{transform:translateY(-2px);box-shadow:0 5px 12px color-mix(in srgb,var(--accent) 18%,transparent)}
+      .webCalendar .priceCalendar article>button.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 5px 13px color-mix(in srgb,var(--accent) 28%,transparent)}
+      .webCalendar .selectedCalendarProfile{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 9%,white)!important;box-shadow:0 0 0 1px var(--accent)!important}
+      @media(max-width:760px){.webCalendar{padding:12px}.webCalendar .priceCalendar{overflow-x:auto}.webCalendar .priceCalendarHead,.webCalendar .chosenProductGroup{min-width:490px}.webGuides .webInstruction article b{font-size:15px}.webGuides .webInstruction article span{font-size:13px}}
       :global(body.kompasiAppMode) .webGuides{display:none!important}
     `}</style>
   </main>;
