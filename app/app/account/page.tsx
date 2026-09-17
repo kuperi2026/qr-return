@@ -46,13 +46,13 @@ export default function Account() {
     <main className="sub">
       <div className="subw">
         <header>
-          <small>KOMPASI ACCOUNT</small>
+          <small>KOMPASI ანგარიში</small>
           <h1>ანგარიში</h1>
           <p>აქ მხოლოდ თქვენი პირადი მონაცემები და ანგარიშის უსაფრთხოება იმართება.</p>
         </header>
         <section className="accountIdentity">
           <span className="accountAvatar">{name.charAt(0).toUpperCase()}</span>
-          <span className="accountCopy"><small>ACCOUNT OWNER</small><b>{name}</b><em>{email || "ელფოსტა არ არის დამატებული"}</em></span>
+          <span className="accountCopy"><small>ანგარიშის მფლობელი</small><b>{name}</b><em>{email || "ელფოსტა არ არის დამატებული"}</em></span>
           <i>✓</i>
         </section>
         <div className="accountSectionTitle"><span>ანგარიშის მართვა</span><small>მხოლოდ ანგარიშის ფუნქციები</small></div>
@@ -69,7 +69,7 @@ export default function Account() {
           ))}
         </section>
         <button className="appLogout" type="button" onClick={signOut} disabled={signingOut}>
-          <i>↪</i><span><b>{signingOut ? "მიმდინარეობს გასვლა…" : "აპლიკაციიდან გასვლა"}</b><small>ანგარიშის უსაფრთხოდ დასრულება</small></span>
+          <i>↪</i><span><b>{signingOut ? "მიმდინარეობს გასვლა…" : "აპლიკაციიდან გასვლა"}</b><small>მიმდინარე სესიიდან უსაფრთხოდ გასვლა</small></span>
         </button>
       </div>
       <Base />
