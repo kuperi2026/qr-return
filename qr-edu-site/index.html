@@ -1,7 +1,37 @@
 <!doctype html><html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QR Edu — მათემატიკა მარტივად</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="polish.css"></head>
 <body><header><a class="brand" href="#"><span class="brand-mark">QR</span><span class="brand-copy"><strong>QR EDU</strong><small>პირველი კლასის მათემატიკა</small></span></a><nav><a href="#week">კალენდარი</a><a href="#curriculum">სარჩევი</a><a href="#progress">პროგრესი</a><button class="ghost" onclick="openSignup()">შესვლა</button><button class="header-primary" onclick="openSignup()">რეგისტრაცია</button></nav></header>
 <main><section class="hero"><div class="hero-copy"><span class="hero-kicker">I კლასის მათემატიკა</span><h1>სწავლა, რომელიც ბავშვის <em>დონეს ერგება</em></h1><p>საცდელი ტესტი განსაზღვრავს საწყის დონეს, შემდეგ კი ყოველდღიური დავალებები ბავშვის შედეგების მიხედვით ავტომატურად იცვლება.</p><div class="actions"><button class="hero-primary" onclick="startPlacement()">დაიწყე საცდელი ტესტი</button><button class="hero-secondary" onclick="chooseGrade()">ნახე ყველა თემა</button></div></div><div class="hero-support"><button onclick="startPlacement()"><span class="support-icon">◎</span><span><b>დონის განსაზღვრა</b><small>12 ადაპტური კითხვა</small></span><i>›</i></button><button onclick="document.querySelector('#week').scrollIntoView({behavior:'smooth'})"><span class="support-icon">✓</span><span><b>დღევანდელი დავალება</b><small>20 პერსონალური კითხვა</small></span><i>›</i></button><button onclick="chooseGrade()"><span class="support-icon">＋</span><span><b>თემით მეცადინეობა</b><small>აირჩიე სასურველი თავი</small></span><i>›</i></button></div></section>
-<section id="week" class="section calendar-section"><div class="calendar-head"><div><div class="eyebrow">პირადი კალენდარი</div><h2>ნინოს სასწავლო კვირა</h2><p>დავალებები ავტომატურად იცვლება ბავშვის წინა შედეგის მიხედვით.</p></div><div class="child-chip"><span>ნ</span><div><b>ნინო</b><small>I კლასი · საშუალო დონე</small></div></div></div><div class="week-calendar"><article class="day done"><small>ორშ</small><b>14</b><span>რიცხვები</span><em>✓ 18/20</em></article><article class="day today"><small>სამ</small><b>15</b><span>შეკრება</span><button onclick="openTopic(1,2,'შეკრება')">დაწყება</button></article><article class="day"><small>ოთხ</small><b>16</b><span>გამოკლება</span><em>20 კითხვა</em></article><article class="day"><small>ხუთ</small><b>17</b><span>შედარება</span><em>20 კითხვა</em></article><article class="day"><small>პარ</small><b>18</b><span>ამოცანები</span><em>20 კითხვა</em></article><article class="day review"><small>შაბ</small><b>19</b><span>შეჯამება</span><em>კვირის ტესტი</em></article><article class="day rest"><small>კვი</small><b>20</b><span>დასვენება</span><em>⭐ 1 ჯილდო</em></article></div></section>
+<section id="week" class="section calendar-section premium-calendar">
+  <div class="calendar-head">
+    <div><div class="eyebrow">პირადი სასწავლო გეგმა</div><h2>ნინოს კვირა</h2><p>ყოველი ახალი დავალება წინა შედეგზე მორგებული სირთულით იხსნება.</p></div>
+    <div class="child-chip"><span>ნ</span><div><b>ნინო</b><small>I კლასი · საშუალო დონე</small></div></div>
+  </div>
+  <div class="calendar-toolbar"><b>14–20 სექტემბერი</b><span>✦ ავტომატურად მორგებული გეგმა</span></div>
+  <div class="learning-dashboard">
+    <article class="today-task">
+      <div class="task-top"><span class="today-label">დღეს · ხუთშაბათი</span><span class="level-chip">საშუალო დონე</span></div>
+      <div class="task-title"><span class="task-number">04</span><div><small>თავი 3 · შეკრება</small><h3>შეკრება 20-მდე</h3><p>სურათებით, რიცხვითი ღერძით და მარტივი მაგალითებით.</p></div></div>
+      <div class="task-metrics"><span><b>20</b><small>კითხვა</small></span><span><b>12</b><small>წუთი</small></span><span><b>+3</b><small>ვარსკვლავი</small></span></div>
+      <div class="task-progress"><div><span>დღის პროგრესი</span><b>0%</b></div><i><em></em></i></div>
+      <button class="task-start" onclick="openTopic(1,2,'შეკრება 20-მდე')">დავალების დაწყება <span>→</span></button>
+    </article>
+    <aside class="weekly-snapshot">
+      <div class="progress-ring"><div><b>3/6</b><small>დასრულდა</small></div></div>
+      <h3>კვირის მიზანი</h3><p>კიდევ 3 დავალება და ნინო მიიღებს კვირის ოქროს ვარსკვლავს.</p>
+      <div class="accuracy"><span>სიზუსტე</span><b>90%</b></div><div class="accuracy-line"><i></i></div>
+      <div class="reward-preview"><span>★</span><div><b>შემდეგი ჯილდო</b><small>ოქროს ვარსკვლავი</small></div></div>
+    </aside>
+  </div>
+  <div class="week-strip" aria-label="კვირის დავალებები">
+    <article class="week-item completed"><div><small>ორშ</small><b>14</b></div><span><b>რიცხვები</b><small>18/20 სწორი</small></span><em>✓</em></article>
+    <article class="week-item completed"><div><small>სამ</small><b>15</b></div><span><b>დათვლა</b><small>19/20 სწორი</small></span><em>✓</em></article>
+    <article class="week-item completed"><div><small>ოთხ</small><b>16</b></div><span><b>შედარება</b><small>17/20 სწორი</small></span><em>✓</em></article>
+    <article class="week-item current"><div><small>ხუთ</small><b>17</b></div><span><b>შეკრება</b><small>დღის დავალება</small></span><em>→</em></article>
+    <article class="week-item upcoming"><div><small>პარ</small><b>18</b></div><span><b>გამოკლება</b><small>ხვალ გაიხსნება</small></span><em>•</em></article>
+    <article class="week-item review"><div><small>შაბ</small><b>19</b></div><span><b>შეჯამება</b><small>კვირის ტესტი</small></span><em>★</em></article>
+    <article class="week-item rest"><div><small>კვი</small><b>20</b></div><span><b>დასვენება</b><small>ჯილდოს დღე</small></span><em>☀</em></article>
+  </div>
+</section>
 <section id="curriculum" class="section curriculum-section"><div class="section-heading"><div><div class="eyebrow">I კლასის სარჩევი</div><h2>სრული სასწავლო გეგმა</h2><p>32 კვირა · 8 თავი · ყოველი მეოთხე კვირა მთავრდება შეჯამებით</p></div><span class="curriculum-count">32 კვირა</span></div><div class="curriculum-grid">
 <details class="curriculum-card" open><summary><span>01</span><div><small>1–4 კვირა</small><b>რიცხვები და დათვლა</b></div><i>+</i></summary><div><p>რიცხვები 0–10 · რაოდენობა და ციფრი · წინ და უკან დათვლა · გამოტოვებული რიცხვი</p><button onclick="openTopic(1,1,'რიცხვები და დათვლა')">მეცადინეობის დაწყება</button><em>კვირა 4 — შემაჯამებელი ტესტი</em></div></details>
 <details class="curriculum-card"><summary><span>02</span><div><small>5–8 კვირა</small><b>რიცხვები 20-მდე</b></div><i>+</i></summary><div><p>რიცხვთა რიგი · წინა და მომდევნო · ზრდადობა და კლებადობა · მეტი, ნაკლები, ტოლი</p><button onclick="openTopic(1,4,'რიცხვები 20-მდე')">მეცადინეობის დაწყება</button><em>კვირა 8 — შემაჯამებელი ტესტი</em></div></details>
