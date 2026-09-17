@@ -19,8 +19,8 @@ export default function Products() {
           <p>პროფილები, წვდომები და მომსახურება ერთ სივრცეში.</p>
         </header>
         <section>
-          {hub.map(([icon, name, note, href, color], index) => (
-            <Link href={href} key={name} className={`${color} ${index < 2 ? "featured" : "compact"}`}>
+          {hub.map(([icon, name, note, href, color]) => (
+            <Link href={href} key={name} className={color}>
               <i>{icon}</i>
               <span>
                 <b>{name}</b>
@@ -84,61 +84,77 @@ export default function Products() {
         .pc section a {
           width: 100%;
           min-width: 0;
-          min-height: 82px;
-          padding: 13px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          aspect-ratio: 1 / 1;
+          min-height: 0;
+          padding: 16px;
+          display: grid;
+          grid-template-columns: 1fr 25px;
+          grid-template-rows: 54px 1fr 24px;
+          align-items: start;
+          gap: 8px;
           border: 1px solid rgba(255,255,255,.72);
           border-radius: 19px;
-          background: linear-gradient(145deg,#fff,#f7fbff);
-          color: #173652;
+          color: #fff;
           text-decoration: none;
           box-shadow: 0 14px 30px rgba(1,25,57,.2),inset 0 1px 0 rgba(255,255,255,.8);
         }
-        .pc section a.featured{min-height:148px;padding:15px;display:grid;grid-template-columns:1fr 24px;grid-template-rows:50px 1fr;background:linear-gradient(145deg,#ffffff,#eaf5ff);align-content:start}.pc section a.featured.green{background:linear-gradient(145deg,#effff8,#d9f5e8)}.pc section a.featured i{grid-column:1/3;width:50px;height:50px}.pc section a.featured span{grid-column:1;align-self:end}.pc section a.featured em{grid-column:2;align-self:end;justify-self:end}
-        .pc section a.compact{grid-column:1/3;background:linear-gradient(145deg,#fff,#f4f8fc)}
+        .pc section a:nth-child(5){grid-column:1/3;width:calc(50% - 5px);justify-self:center}
         .pc section i {
           width: 50px;
           height: 50px;
           display: grid;
           place-items: center;
-          flex: 0 0 50px;
+          grid-column:1/3;
           border-radius: 13px;
-          background: #edf5ff;
+          background: rgba(255,255,255,.17);
+          color:#fff;
+          box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
           font-size: 21px;
           font-style: normal;
         }
         .pc section span {
+          grid-column:1/3;
           min-width: 0;
-          flex: 1;
+          align-self:end;
         }
         .pc section b,
         .pc section small {
           display: block;
         }
         .pc section b {
-          font-size: 14px;
+          font-size: 15px;
+          line-height:1.25;
         }
         .pc section small {
           margin-top: 5px;
-          color: #778b9e;
-          font-size: 10px;
+          color: rgba(255,255,255,.8);
+          font-size: 9px;
           line-height: 1.45;
           line-height: 1.3;
         }
         .pc section em {
-          color: #1763c2;
-          font-size: 20px;
+          grid-column:2;
+          grid-row:3;
+          align-self:end;
+          justify-self:end;
+          width:24px;
+          height:24px;
+          display:grid;
+          place-items:center;
+          border-radius:8px;
+          background:rgba(255,255,255,.16);
+          color: #fff;
+          font-size: 18px;
           font-style: normal;
         }
-        .pc section a.blue i{background:#e6f1ff;color:#075dcc}.pc section a.green i{background:#e6f8ef;color:#08784a}
-        .pc section a.violet i{background:#f0eaff;color:#6847c6}
-        .pc section a.rose i{background:#ffeaf2;color:#bd356b}
-        .pc section a.gold i{background:#fff2db;color:#9a6100}
-        .pc section a:hover{border-color:#b9d8f8;transform:translateY(-1px);box-shadow:0 14px 30px rgba(4,42,91,.16)}
+        .pc section a.blue{background:radial-gradient(circle at 100% 0,rgba(112,217,255,.42),transparent 45%),linear-gradient(145deg,#176bd0,#06468d)}
+        .pc section a.green{background:radial-gradient(circle at 100% 0,rgba(118,255,211,.4),transparent 44%),linear-gradient(145deg,#129b79,#05604f)}
+        .pc section a.violet{background:radial-gradient(circle at 100% 0,rgba(216,167,255,.38),transparent 44%),linear-gradient(145deg,#7957d8,#44308f)}
+        .pc section a.rose{background:radial-gradient(circle at 100% 0,rgba(255,184,203,.42),transparent 44%),linear-gradient(145deg,#d34c78,#8f2851)}
+        .pc section a.gold{background:radial-gradient(circle at 100% 0,rgba(255,238,151,.4),transparent 44%),linear-gradient(145deg,#d49325,#8b5812)}
+        .pc section a:hover{border-color:#fff;transform:translateY(-2px);box-shadow:0 18px 36px rgba(1,21,49,.3),inset 0 1px 0 rgba(255,255,255,.25)}
         @media (max-width: 380px) {
-          .pw{width:min(480px,calc(100% - 20px))}.pc section{gap:7px}.pc section a.featured{min-height:138px;padding:12px}.pc section a.featured b{font-size:12px}.pc section a.featured small{font-size:8px}.pc section a.compact{min-height:72px;padding:11px}.pc section i{width:44px;height:44px;flex-basis:44px}
+          .pw{width:min(480px,calc(100% - 20px))}.pc section{gap:7px}.pc section a{padding:12px;border-radius:17px}.pc section i{width:44px;height:44px}.pc section b{font-size:13px}.pc section small{font-size:8px;line-height:1.35}
         }
       `}</style>
     </main>
