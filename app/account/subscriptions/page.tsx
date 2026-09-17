@@ -221,17 +221,14 @@ export default function SubscriptionsPage() {
         ))}
       </nav>
 
-      <div className={hasAccount ? "layout" : "layout publicLayout"}>
-        <section className="panel">
-          <div className="checkoutStage profileStage">
+      <section className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
+        <header className="pricingSectionHeader"><span>01</span><div><small>თავისუფლად სანახავი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტები და ვადები — ეს მხოლოდ ფასის შეფასებაა.</p></div></header>
             <div className="webGuides">
               <details className="purchaseGuide webInstruction" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}>
-                <summary><span>როგორ მუშაობს?</span><b>ინსტრუქცია ⌄</b></summary>
+                <summary><span>როგორ მუშაობს?</span><b>კალკულატორის ინსტრუქცია ⌄</b></summary>
                 <div>
                   <article><i>1</i><p><b>გამოთვალეთ ფასი პროფილის გარეშეც</b><span>ფასების კალენდარში დააჭირეთ სასურველი პროდუქტისა და ვადის ფასს. თუ რამდენიმე ერთნაირი პროდუქტი გჭირდებათ, გაზარდეთ რაოდენობა + ღილაკით. ეს მხოლოდ წინასწარი გამოთვლაა.</span></p></article>
-                  <article><i>2</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>კალკულატორი დაუყოვნებლივ აჩვენებს არჩეულ პროდუქტებს, ფასდაკლებასა და სავარაუდო ჯამს. 3–4 პროდუქტზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
-                  <article><i>3</i><p><b>შემდეგ აირჩიეთ თქვენი პროფილები</b><span>„ჩემი პროფილების“ ნაწილში, ანგარიშში შესვლის შემდეგ, ავტომატურად გამოჩნდება თქვენი დარეგისტრირებული QR პროფილები. თითოეულის ვადა იქ ცალკე აირჩიეთ.</span></p></article>
-                  <article><i>4</i><p><b>გააგზავნეთ გააქტიურების მოთხოვნა</b><span>შეამოწმეთ პროფილები, ვადები და საბოლოო თანხა, შემდეგ დააჭირეთ „გააქტიურების მოთხოვნას“. მომსახურება ჩაირთვება QR RETURN-ის დადასტურების შემდეგ.</span></p></article>
+                  <article><i>2</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>კალკულატორი პროფილის შექმნისა და ანგარიშში შესვლის გარეშე აჩვენებს არჩეულ პროდუქტებს, ფასდაკლებასა და სავარაუდო ჯამს. 3–4 პროდუქტზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
                   <footer>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>. ფასიანი ვადა იწყება უფასო პერიოდის დასრულების შემდეგ.</footer>
                 </div>
               </details>
@@ -267,6 +264,13 @@ export default function SubscriptionsPage() {
                 <footer>ეს გამოთვლა მხოლოდ ფასის გასაგებადაა; პროფილს არ ქმნის და გააქტიურების მოთხოვნას არ აგზავნის.</footer>
               </section>
             </div>
+      </section>
+
+      <header className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>პაკეტის ვადის გააქტიურება</h2><p>შედით ანგარიშში, აირჩიეთ დარეგისტრირებული პროფილების ვადა და გადაამოწმეთ საბოლოო შეჯამება.</p></div></header>
+
+      <div className={hasAccount ? "layout" : "layout publicLayout"}>
+        <section className="panel">
+          <div className="checkoutStage profileStage">
           <section className={isAppPricing ? "liveCalculator" : "liveCalculator webCalendar"} aria-label="დარეგისტრირებული პროფილების არჩევა">
             <header><div><small>მხოლოდ თქვენი ანგარიში</small><h3>ჩემი პროფილები · აირჩიეთ ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
             {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : !hasAccount ? <div className="calendarEmpty"><b>თქვენი პროფილები აქ გამოჩნდება</b><span>შედით ანგარიშში და აირჩიეთ უკვე დარეგისტრირებული პროფილის მომსახურების ვადა.</span><Link href="/login">შესვლა</Link><Link href="/register">პროფილის შექმნა</Link></div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className={`chosenProductGroup category-${product.type}`}><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
@@ -486,6 +490,18 @@ export default function SubscriptionsPage() {
       .publicPriceCalendar>footer{padding:0 18px 15px;color:#6d8294;font-size:11px}
       .webCalendar{margin-top:18px}
       @media(max-width:760px){.publicPriceCalendar>header{align-items:flex-start}.publicPriceCalendar h2{font-size:19px}.publicPriceCalendar>header>span{font-size:9px}.publicPriceGrid{min-width:460px}}
+      .publicPricingSection{padding:23px;border:1px solid #c8dff4;border-radius:22px;background:linear-gradient(145deg,#f0f7ff,#fff 45%);box-shadow:0 17px 40px rgba(16,81,145,.1)}
+      .pricingSectionHeader,.ownerSectionHeader{display:flex;align-items:center;gap:16px}
+      .pricingSectionHeader{margin-bottom:18px}
+      .pricingSectionHeader>span,.ownerSectionHeader>span{width:52px;height:52px;display:grid;place-items:center;flex:0 0 52px;border-radius:16px;background:linear-gradient(145deg,#126ae5,#6550d4);color:#fff;font-size:21px;font-weight:950;box-shadow:0 8px 20px rgba(44,91,195,.2)}
+      .pricingSectionHeader small,.ownerSectionHeader small{color:#3979b0;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.7px}
+      .pricingSectionHeader h1,.ownerSectionHeader h2{margin:4px 0;color:#153d62;font-size:25px;line-height:1.2}
+      .pricingSectionHeader p,.ownerSectionHeader p{margin:0;color:#5a7690;font-size:13px;line-height:1.5}
+      .ownerSectionHeader{margin:33px 0 14px;padding-top:23px;border-top:2px solid #bed9f1}
+      .ownerSectionHeader>span{background:linear-gradient(145deg,#139c83,#0b6cbd)}
+      .ownerSectionHeader small{color:#16876f}
+      @media(max-width:760px){.publicPricingSection{padding:13px;border-radius:18px}.pricingSectionHeader,.ownerSectionHeader{gap:10px}.pricingSectionHeader>span,.ownerSectionHeader>span{width:43px;height:43px;flex-basis:43px;font-size:16px}.pricingSectionHeader h1,.ownerSectionHeader h2{font-size:20px}.pricingSectionHeader p,.ownerSectionHeader p{font-size:12px}}
+      :global(body.kompasiAppMode) .publicPricingSection,:global(body.kompasiAppMode) .ownerSectionHeader{display:none!important}
       :global(body.kompasiAppMode) .webGuides{display:none!important}
     `}</style>
   </main>;
