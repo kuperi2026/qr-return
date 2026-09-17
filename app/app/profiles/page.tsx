@@ -22,6 +22,7 @@ export default function AppProfiles() {
   const [items, setItems] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -53,6 +54,17 @@ export default function AppProfiles() {
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
+  async function deleteProfile(profile: Profile) {
+    if (!window.confirm(`წავშალოთ „${profile.item_name || "უსახელო პროფილი"}“? პროფილი და მისი ისტორია ვეღარ აღდგება.`)) return;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_KEY;
+    if (!url || !key) return;
+    setDeletingId(profile.id);
+    const { error } = await createClient(url, key).rpc("delete_owned_item", { p_item_id: profile.id });
+    setDeletingId(null);
+    if (error) { window.alert(error.message); return; }
+    setItems((current) => current.filter((item) => item.id !== profile.id));
+  }
   return (
     <main className="ap">
       <div className="aw">
@@ -102,9 +114,10 @@ export default function AppProfiles() {
                 <Link className={`lostQuick ${p.lost ? "enabled" : ""}`} href={`/app/product/${p.tag_code}?panel=lost`}>
                   ! Lost Mode
                 </Link>
-                <Link className="open" href={"/app/product/" + p.tag_code}>
-                  ›
-                </Link>
+                <div className="profileActions">
+                  <Link className="editProfile" href={"/app/product/" + p.tag_code} aria-label="პროფილის რედაქტირება" title="რედაქტირება"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="m13.5 6.5 4 4" fill="none" stroke="currentColor" strokeWidth="2"/></svg></Link>
+                  <button type="button" className="deleteProfile" disabled={deletingId === p.id} onClick={() => void deleteProfile(p)} aria-label="პროფილის წაშლა" title="წაშლა"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                </div>
               </article>
             ))}
           </section>
@@ -192,7 +205,7 @@ function Style() {
         min-width: 0;
         color: #173652;
         min-height: 79px;
-        padding: 10px 38px 10px 10px;
+        padding: 10px 66px 10px 10px;
         display: flex;
         align-items: center;
         gap: 11px;
@@ -260,15 +273,8 @@ function Style() {
         background: #fff0f0;
         color: #bd3434;
       }
-      .open {
-        position: absolute;
-        right: 12px;
-        bottom: 16px;
-        color: #1761bd;
-        text-decoration: none;
-        font-size: 24px;
-      }
-      .lostQuick{position:absolute;right:37px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
+      .profileActions{position:absolute;right:9px;bottom:9px;display:flex;gap:5px}.editProfile,.deleteProfile{width:27px;height:27px;padding:0;display:grid;place-items:center;border:1px solid #cbddeb;border-radius:9px;background:#edf6ff;color:#1761bd;cursor:pointer}.deleteProfile{border-color:#f0cccc;background:#fff2f2;color:#c23838}.editProfile svg,.deleteProfile svg{width:14px;height:14px}.deleteProfile:disabled{opacity:.45;cursor:wait}
+      .lostQuick{position:absolute;right:75px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
       .empty {
         margin-top: 25px;
         display: grid;
