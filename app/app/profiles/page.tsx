@@ -70,7 +70,7 @@ export default function AppProfiles() {
       <div className="aw">
         <header>
           <div>
-            <small>მფლობელის სივრცე</small>
+            <small>KOMPASI პროფილები</small>
             <h1>QR პროფილები</h1>
           </div>
           <Link href="/app/add" aria-label="ახალი პროფილის რეგისტრაცია">＋</Link>
@@ -88,7 +88,7 @@ export default function AppProfiles() {
         ) : visible.length === 0 ? (
           <div className="empty">
             <b>პროფილი ვერ მოიძებნა</b>
-            <span>დაამატეთ ახალი QR პროფილი ქვედა ღილაკით.</span>
+            <span>დაამატეთ ახალი QR პროფილი ზედა „＋“ ღილაკით.</span>
           </div>
         ) : (
           <section>
@@ -135,7 +135,7 @@ function Style() {
         overflow-x: hidden;
         background: radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%), linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
         color: #fff;
-        font-family: Inter, Arial, sans-serif;
+        font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif;
       }
       .ap, .ap * {
         box-sizing: border-box;

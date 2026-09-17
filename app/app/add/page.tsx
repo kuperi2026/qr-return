@@ -29,7 +29,7 @@ export default function Add() {
           <small>ახალი პროფილი</small>
           <h1>რას იცავთ?</h1>
           <p>
-            აირჩიეთ პროდუქტი. რეგისტრაციის ფორმა მხოლოდ არჩევის შემდეგ
+            აირჩიეთ პროფილის ტიპი. რეგისტრაციის ფორმა მხოლოდ არჩევის შემდეგ
             გაიხსნება.
           </p>
         </header>
@@ -55,7 +55,7 @@ function Base() {
         overflow-x: hidden;
         background: radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%), linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
         color: #fff;
-        font-family: Inter, Arial, sans-serif;
+        font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif;
       }
       .sub, .sub * {
         box-sizing: border-box;

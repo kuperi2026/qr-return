@@ -113,7 +113,7 @@ export default function Dashboard() {
             <span>◌</span><b>{ka ? "ჩათი" : "Chat"}</b><small>{ka ? "მპოვნელთან" : "With finder"}</small>
           </Link>
           <button type="button" className="lostShortcut" onClick={() => setShowProducts((current) => !current)}>
-            <span>!</span><b>Lost Mode</b><small>{ka ? "პროდუქტი" : "Product"}</small>
+            <span>!</span><b>Lost Mode</b><small>{ka ? "პროფილი" : "Profile"}</small>
           </button>
         </section>
 
@@ -139,7 +139,7 @@ export default function Dashboard() {
 
         {showProducts && (
           <section className="productList">
-            <header><div><small>MY PRODUCTS</small><h2>{ka ? "აირჩიეთ პროდუქტი" : "Choose a product"}</h2></div><button type="button" onClick={() => setShowProducts(false)}>×</button></header>
+            <header><div><small>{ka ? "ჩემი პროფილები" : "MY PROFILES"}</small><h2>{ka ? "აირჩიეთ პროფილი" : "Choose a profile"}</h2></div><button type="button" onClick={() => setShowProducts(false)}>×</button></header>
             {items.length ? items.map((item) => (
               <Link key={item.id} href={`/app/product/${item.tag_code}?panel=lost`}>
                 <span className="productIcon">{productIcon(item)}</span>
@@ -147,7 +147,7 @@ export default function Dashboard() {
                 <em className={item.lost ? "on" : "off"}>{item.lost ? "ON" : "OFF"}</em>
               </Link>
             )) : (
-              <div className="emptyProducts"><span>⌁</span><b>{ka ? "პროდუქტი ჯერ არ არის" : "No products yet"}</b><Link href="/app/add">{ka ? "პროფილის რეგისტრაცია" : "Register a profile"}</Link></div>
+              <div className="emptyProducts"><span>⌁</span><b>{ka ? "პროფილი ჯერ არ არის" : "No profiles yet"}</b><Link href="/app/add">{ka ? "პროფილის რეგისტრაცია" : "Register a profile"}</Link></div>
             )}
           </section>
         )}

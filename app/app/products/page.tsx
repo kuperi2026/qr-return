@@ -14,7 +14,7 @@ export default function Products() {
     <main className="pc">
       <div className="pw">
         <header>
-          <small><i /> KOMPASI CONTROL</small>
+          <small><i /> KOMPASI ჰაბი</small>
           <h1>ჰაბი</h1>
           <p>პროფილები, წვდომები და მომსახურება ერთ სივრცეში.</p>
         </header>
@@ -39,7 +39,7 @@ export default function Products() {
             radial-gradient(circle at 20% 5%,rgba(83,174,242,.38),transparent 31%),
             linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
           color: #fff;
-          font-family: Inter, Arial, sans-serif;
+          font-family:"Noto Sans Georgian","Sylfaen",Inter,Arial,sans-serif;
         }
         .pc, .pc * {
           box-sizing: border-box;

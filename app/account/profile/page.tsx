@@ -218,7 +218,7 @@ export default function OwnerProfileEditPage() {
 
           <div>
             <strong>QR RETURN</strong>
-            <small>OWNER PROFILE</small>
+            <small>პირადი ინფორმაცია</small>
           </div>
         </a>
 
@@ -243,7 +243,7 @@ export default function OwnerProfileEditPage() {
 
       <section className="container">
         <a href="/app/account?source=app" className="back">
-          ← {ka ? "მფლობელის ანგარიში" : "Owner account"}
+          ← {ka ? "ანგარიშზე დაბრუნება" : "Back to account"}
         </a>
 
         <div className="heading">
@@ -251,7 +251,7 @@ export default function OwnerProfileEditPage() {
 
           <div>
             <div className="eyebrow">
-              {ka ? "მფლობელის პროფილი" : "OWNER PROFILE"}
+              {ka ? "პირადი ინფორმაცია" : "PERSONAL INFORMATION"}
             </div>
 
             <h1>
@@ -274,7 +274,7 @@ export default function OwnerProfileEditPage() {
           <div>
             <strong>
               {ka
-                ? "ერთი Owner Profile ყველა QR პროფილისთვის"
+                ? "ერთი მფლობელის მონაცემები ყველა QR პროფილისთვის"
                 : "One Owner Profile for all QR profiles"}
             </strong>
 
