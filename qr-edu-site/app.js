@@ -8,6 +8,18 @@ function answer(el,ok){
   el.className=ok?'ok':'no';
   const feedback=el.closest('.math-card').querySelector('.feedback');
   feedback.textContent=ok?'სწორია! შესანიშნავი პასუხია 🎉':'კიდევ ვცადოთ — შემდეგი კითხვა უფრო მარტივი იქნება 💡';
+  if(ok)celebrateCorrect();
+}
+
+function playRewardSound(){
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;
+  const ctx=new AudioCtx(),now=ctx.currentTime;
+  [523.25,659.25,783.99].forEach((frequency,index)=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=frequency;gain.gain.setValueAtTime(.0001,now+index*.08);gain.gain.exponentialRampToValueAtTime(.16,now+index*.08+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+index*.08+.3);osc.connect(gain).connect(ctx.destination);osc.start(now+index*.08);osc.stop(now+index*.08+.32)});
+  const length=Math.floor(ctx.sampleRate*.45),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/length,2);
+  const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();noise.buffer=buffer;filter.type='bandpass';filter.frequency.value=1400;gain.gain.value=.055;noise.connect(filter).connect(gain).connect(ctx.destination);noise.start(now+.1);setTimeout(()=>ctx.close(),900);
+}
+function celebrateCorrect(){
+  playRewardSound();const celebration=document.getElementById('celebration');celebration.classList.remove('show');void celebration.offsetWidth;celebration.classList.add('show');setTimeout(()=>celebration.classList.remove('show'),1100);
 }
 
 function toggleGrade(button){
@@ -86,7 +98,7 @@ function chooseGrade(){
 
 function localQuestion(grade,day,i){
   let prompt,answer;
-  if(grade===1){const a=i%9+1,b=i*2%8+1;if(day===1){prompt=`რომელი რიცხვი მოდის ${i*3%19}-ის შემდეგ?`;answer=String(i*3%19+1)}else if(day===2||day===6||day===7){prompt=`რამდენია ${a} + ${b}?`;answer=String(a+b)}else if(day===3){prompt=`რამდენია ${10+i%10} − ${i%8+1}?`;answer=String(9+i%10-i%8)}else if(day===4){const x=i*3%20,y=i*5%20;prompt=`რომელი ნიშანია სწორი: ${x} □ ${y}?`;answer=x>y?'>':x<y?'<':'='}else{prompt='რამდენი გვერდი აქვს სამკუთხედს?';answer='3'}}
+  if(grade===1){const a=i%9+1,b=i*2%8+1;if(day===1){prompt=`რომელი რიცხვი მოდის ${i*3%19}-ის შემდეგ?`;answer=String(i*3%19+1)}else if(day===2||day===7){prompt=`რამდენია ${a} + ${b}?`;answer=String(a+b)}else if(day===3){prompt=`რამდენია ${10+i%10} − ${i%8+1}?`;answer=String(9+i%10-i%8)}else if(day===4){const x=i*3%20,y=i*5%20;prompt=`რომელი ნიშანია სწორი: ${x} □ ${y}?`;answer=x>y?'>':x<y?'<':'='}else if(day===6){prompt=`ნინოს ჰქონდა ${a} ფანქარი და კიდევ ${b} მისცეს. რამდენი ფანქარი აქვს ახლა?`;answer=String(a+b)}else{prompt='რამდენი გვერდი აქვს სამკუთხედს?';answer='3'}}
   let options;if(/^-?\d+$/.test(answer)){const n=Number(answer);options=[answer,String(n+1),String(Math.max(0,n-1)),String(n+2)]}else if(['>','<','='].includes(answer)){options=['>','<','=','არცერთი']}else{options=[answer,'1/2','1/3','1/4']}
   return{prompt,answer,options:[...new Set(options)].slice(0,4)};
 }
@@ -104,7 +116,7 @@ function showTopicQuestion(){
   const box=document.getElementById('topicOptions');box.innerHTML='';q.options.forEach(o=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>gradeTopicAnswer(b,o===q.answer);box.appendChild(b)});
   document.getElementById('topicHint').textContent='პასუხის მიხედვით შემდეგი დავალების დონე მოერგება';
 }
-function gradeTopicAnswer(button,ok){button.parentElement.querySelectorAll('button').forEach(b=>b.disabled=true);button.classList.add(ok?'correct':'wrong');if(ok)topicState.score++;topicState.index++;document.getElementById('topicHint').textContent=ok?'სწორია ✓':'სწორი პასუხი გამოჩნდება შედეგების მიმოხილვაში';setTimeout(showTopicQuestion,550)}
+function gradeTopicAnswer(button,ok){button.parentElement.querySelectorAll('button').forEach(b=>b.disabled=true);button.classList.add(ok?'correct':'wrong');if(ok){topicState.score++;celebrateCorrect()}topicState.index++;document.getElementById('topicHint').textContent=ok?'სწორია ✓':'სწორი პასუხი გამოჩნდება შედეგების მიმოხილვაში';setTimeout(showTopicQuestion,700)}
 function showTopicResult(){document.getElementById('topicBar').style.width='100%';document.getElementById('topicPrompt').textContent=`შედეგი: ${topicState.score} / 20`;document.getElementById('topicOptions').innerHTML=`<button onclick="closeTest('topicTest');openSignup()">შედეგის შენახვა</button><button onclick="topicState.index=0;topicState.score=0;showTopicQuestion()">თავიდან გავლა</button>`;document.getElementById('topicHint').textContent=topicState.score>=16?'შესანიშნავია — შემდეგი თემა მზადაა!':'კარგი დასაწყისია — კიდევ ერთხელ ცდა დაგეხმარება.'}
 
 document.querySelectorAll('.grade-card').forEach((card,gradeIndex)=>card.querySelectorAll('.day-list li').forEach((li,dayIndex)=>{
@@ -112,6 +124,14 @@ document.querySelectorAll('.grade-card').forEach((card,gradeIndex)=>card.querySe
   const launch=()=>openTopic(gradeIndex+1,dayIndex+1,li.querySelector('b').textContent);
   li.addEventListener('click',launch);li.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();launch()}});
 }));
+
+function escapeXml(value){return value.replace(/[<>&'\"]/g,char=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','\"':'&quot;'}[char]))}
+function downloadCertificate(){
+  const input=document.getElementById('certificateName'),name=(input.value.trim()||'პირველკლასელი').slice(0,60),safeName=escapeXml(name);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="990" viewBox="0 0 1400 990"><rect width="1400" height="990" fill="#fffdf5"/><rect x="28" y="28" width="1344" height="934" rx="16" fill="none" stroke="#d9a83c" stroke-width="10"/><rect x="48" y="48" width="1304" height="894" rx="12" fill="none" stroke="#173b5c" stroke-width="3"/><text x="700" y="145" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="800" fill="#159be7">QR EDU</text><text x="700" y="260" text-anchor="middle" font-family="Arial,sans-serif" font-size="72" font-weight="800" fill="#b27a0d">სიგელი</text><text x="700" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#617087">გადაეცემა</text><text x="700" y="455" text-anchor="middle" font-family="Arial,sans-serif" font-size="66" font-weight="800" fill="#173b5c">${safeName}</text><line x1="300" y1="485" x2="1100" y2="485" stroke="#d4bc82" stroke-width="2"/><text x="700" y="575" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" fill="#617087">I კლასის მათემატიკის პროგრამის</text><text x="700" y="620" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" fill="#617087">წარმატებით დასრულებისთვის</text><text x="700" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="800" fill="#b27a0d">★ შესანიშნავი მუშაობისთვის ★</text><text x="220" y="860" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" fill="#173b5c">თარიღი</text><line x1="110" y1="880" x2="330" y2="880" stroke="#173b5c"/><text x="1180" y="860" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" fill="#173b5c">QR Edu</text><line x1="1070" y1="880" x2="1290" y2="880" stroke="#173b5c"/></svg>`;
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`QR-Edu-სიგელი-${name}.svg`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+}
+const certificateName=document.getElementById('certificateName');if(certificateName)certificateName.addEventListener('input',event=>{document.getElementById('certificatePreviewName').textContent=event.target.value||'პირველკლასელი'});
 
 async function completeSignup(){
   const msg=document.getElementById('signupmsg');
