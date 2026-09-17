@@ -13,7 +13,7 @@ const Base = () => (
   `}</style>
 );
 const links = [
-  ["✎", "პირადი ინფორმაცია", "სახელი, გვარი, ელფოსტა და Login", "/account/profile?source=app", "violet"],
+  ["✎", "პირადი ინფორმაცია", "სახელი, გვარი, ელფოსტა და ტელეფონი", "/account/profile?source=app", "violet"],
   ["⌾", "უსაფრთხოება", "პაროლი, კოდური სიტყვა და დაცვა", "/account/security?source=app", "green"],
 ];
 export default function Account() {
