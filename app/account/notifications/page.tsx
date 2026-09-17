@@ -448,7 +448,7 @@ export default function AccountNotificationsPage() {
     { id: "location", icon: "⌖", title: ka ? "ლოკაცია" : "Location", subtitle: ka ? "გაზიარებული მდებარეობები" : "Shared locations", items: notifications.filter((item) => item.type === "location") },
     { id: "order", icon: "▣", title: ka ? "შეკვეთები" : "Orders", subtitle: ka ? "სტატუსი და მიწოდება" : "Status and delivery", items: notifications.filter((item) => item.type === "order") },
     { id: "other", icon: "✦", title: ka ? "სხვა სიახლეები" : "Other updates", subtitle: ka ? "სისტემური და მნიშვნელოვანი ინფორმაცია" : "System and important information", items: notifications.filter((item) => !["chat", "scan", "location", "order"].includes(item.type)) },
-  ].filter((group) => group.items.length > 0);
+  ];
 
   if (loading) {
     return (
@@ -598,6 +598,12 @@ export default function AccountNotificationsPage() {
           <div className="chat"><span>◌</span><b>{chatCount}</b><small>{ka ? "ჩათი" : "Chats"}</small></div>
           <div className="location"><span>⌖</span><b>{locationCount}</b><small>{ka ? "ლოკაცია" : "Locations"}</small></div>
           <div className="order"><span>▣</span><b>{orderCount}</b><small>{ka ? "შეკვეთა" : "Orders"}</small></div>
+        </section>
+
+        <section className="notificationQuickActions" aria-label={ka ? "სწრაფი მოქმედებები" : "Quick actions"}>
+          <Link href="/app/chat"><span>◌</span><b>{ka ? "ჩათის გახსნა" : "Open chat"}</b><small>{ka ? "მპოვნელის პასუხები" : "Finder replies"}</small></Link>
+          <Link href="/app/profiles"><span>⌁</span><b>{ka ? "ჩემი პროფილები" : "My profiles"}</b><small>{ka ? "სკანები და სტატუსი" : "Scans and status"}</small></Link>
+          <button type="button" onClick={() => void loadNotifications()}><span>↻</span><b>{ka ? "განახლება" : "Refresh"}</b><small>{ka ? "ახალი აქტივობის ნახვა" : "Check new activity"}</small></button>
         </section>
 
         {showFilters && <section className="filters">
@@ -760,7 +766,7 @@ export default function AccountNotificationsPage() {
       </div>
 
       <style jsx>{`
-        .appNotificationGroups{display:none}
+        .appNotificationGroups,.notificationQuickActions{display:none}
         .page {
           min-height: 100vh;
 
@@ -1212,6 +1218,7 @@ export default function AccountNotificationsPage() {
         body.kompasiAppMode .accountNotificationsPage .group-other{border-left:4px solid #315b7c!important}
         body.kompasiAppMode .accountNotificationsPage .notificationGroup.open{border-color:#8ebbdc!important;box-shadow:0 16px 34px rgba(5,53,97,.16)!important}
         body.kompasiAppMode .accountNotificationsPage .notificationGroupBody{background:linear-gradient(180deg,#edf4f9,#f7fbfd)!important}
+        body.kompasiAppMode .accountNotificationsPage .notificationQuickActions{margin-top:10px;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.notificationQuickActions>a,.notificationQuickActions>button{min-width:0;min-height:68px;padding:8px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:linear-gradient(145deg,#116bbd,#0a436f);color:#fff;text-align:center;text-decoration:none;font-family:inherit;box-shadow:0 8px 20px rgba(2,31,62,.2);cursor:pointer}.notificationQuickActions>a:nth-child(2){background:linear-gradient(145deg,#087e73,#0a5b63)}.notificationQuickActions>button{background:linear-gradient(145deg,#6a4ac2,#44328f)}.notificationQuickActions span{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.16);font-size:14px;font-weight:950}.notificationQuickActions b{max-width:100%;overflow:hidden;font-size:9px;text-overflow:ellipsis;white-space:nowrap}.notificationQuickActions small{max-width:100%;overflow:hidden;color:rgba(255,255,255,.78);font-size:7px;text-overflow:ellipsis;white-space:nowrap}
         @media(max-width:600px){body.kompasiAppMode .accountNotificationsPage .topbar{width:calc(100% - 24px)!important}.accountNotificationsPage .heading{gap:10px!important}.accountNotificationsPage .markAll{border-color:rgba(255,255,255,.35)!important;background:rgba(255,255,255,.14)!important;color:#fff!important}}
       `}</style>
     </main>
