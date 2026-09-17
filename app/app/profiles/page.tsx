@@ -274,7 +274,7 @@ function Style() {
         color: #bd3434;
       }
       .profileActions{position:absolute;right:9px;bottom:9px;display:flex;gap:5px}.editProfile,.deleteProfile{width:27px;height:27px;padding:0;display:grid;place-items:center;border:1px solid #cbddeb;border-radius:9px;background:#edf6ff;color:#1761bd;cursor:pointer}.deleteProfile{border-color:#f0cccc;background:#fff2f2;color:#c23838}.editProfile svg,.deleteProfile svg{width:14px;height:14px}.deleteProfile:disabled{opacity:.45;cursor:wait}
-      .lostQuick{position:absolute;right:37px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
+      .lostQuick{position:absolute;right:75px;bottom:9px;padding:5px 7px;border:1px solid #f0c6a0;border-radius:8px;background:#fff7ed;color:#a85a0a;text-decoration:none;font-size:8px;font-weight:900}.lostQuick.enabled{border-color:#e7aeb3;background:#fff0f1;color:#b52b37}
       .empty {
         margin-top: 25px;
         display: grid;
