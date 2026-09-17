@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import PlansMenu from "@/app/components/home/PlansMenu";
 
 type Lang = "ka" | "en";
 
@@ -33,9 +32,6 @@ export default function OwnerProfileEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [resettingPassword, setResettingPassword] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState("");
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -195,19 +191,6 @@ export default function OwnerProfileEditPage() {
     }
   }
 
-  async function sendPasswordReset() {
-    if (!owner?.email || resettingPassword) return;
-    setResettingPassword(true);
-    setPasswordMessage("");
-    setError("");
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(owner.email, {
-      redirectTo: `${window.location.origin}/app/reset-password`,
-    });
-    if (resetError) setError(resetError.message);
-    else setPasswordMessage(ka ? "პაროლის შეცვლის ბმული გამოგზავნილია ელფოსტაზე." : "A password reset link was sent to your email.");
-    setResettingPassword(false);
-  }
-
   if (loading) {
     return (
       <main className="statePage">
@@ -336,7 +319,7 @@ export default function OwnerProfileEditPage() {
 
           <section className="card">
             <div className="sectionTitle">
-              <span>01</span>
+              <span>✦</span>
 
               <h2>
                 {ka
@@ -384,8 +367,8 @@ export default function OwnerProfileEditPage() {
 
               <small>
                 {ka
-                  ? "ელფოსტა გამოიყენება Login-ისთვის და ამ გვერდიდან არ იცვლება."
-                  : "Email is used for sign-in and cannot be changed from this page."}
+                  ? "ეს არის თქვენს ანგარიშთან დაკავშირებული ელფოსტა."
+                  : "This email is connected to your account."}
               </small>
             </label>
 
@@ -425,46 +408,6 @@ export default function OwnerProfileEditPage() {
             </label>
           </section>
 
-          <section className="card securityLinkCard">
-            <div>
-              <span className="eyebrow">
-                {ka ? "უსაფრთხოება" : "SECURITY"}
-              </span>
-
-              <h2>
-                {ka
-                  ? "პირადი ნომერი და კოდური სიტყვა"
-                  : "Personal ID and code word"}
-              </h2>
-
-              <p>
-                {ka
-                  ? "ეს მონაცემები აქ არ ჩანს და მპოვნელისთვის არასდროს გამოჩნდება."
-                  : "These details are hidden here and are never shown to finders."}
-              </p>
-            </div>
-
-            <a href="/account/security?source=app">
-              🔐 {ka ? "უსაფრთხოების მართვა" : "Manage security"} →
-            </a>
-          </section>
-
-          <section className="card loginCard">
-            <div className="sectionTitle">
-              <span>02</span>
-              <h2>{ka ? "Login და პაროლი" : "Login and password"}</h2>
-            </div>
-            <div className="loginRows">
-              <div><small>{ka ? "Login ელფოსტა" : "Login email"}</small><strong>{owner.email}</strong></div>
-              <div><small>{ka ? "პაროლი" : "Password"}</small><strong>••••••••••</strong></div>
-            </div>
-            <p>{ka ? "უსაფრთხოების გამო არსებული პაროლი არ ინახება წაკითხვადი სახით. მისი შეცვლა შეგიძლიათ დაცული ბმულით." : "For security, your current password cannot be displayed. Change it using a secure email link."}</p>
-            <button type="button" onClick={sendPasswordReset} disabled={resettingPassword}>
-              {resettingPassword ? (ka ? "იგზავნება..." : "Sending...") : (ka ? "პაროლის შეცვლის ბმულის გაგზავნა" : "Send password reset link")}
-            </button>
-            {passwordMessage && <div className="passwordMessage">✓ {passwordMessage}</div>}
-          </section>
-
           {error && (
             <div className="errorBox">
               {error}
@@ -498,10 +441,6 @@ export default function OwnerProfileEditPage() {
         </form>
       </section>
 
-      <section id="service-plans" className="servicePlansSection">
-        <PlansMenu ka={ka} />
-      </section>
-
       <style jsx global>{`
         * {
           box-sizing: border-box;
@@ -529,15 +468,16 @@ export default function OwnerProfileEditPage() {
           background:
             radial-gradient(
               circle at 8% 10%,
-              rgba(20, 101, 232, 0.07),
+              rgba(41, 143, 230, 0.18),
               transparent 28%
             ),
             radial-gradient(
               circle at 94% 8%,
-              rgba(118, 85, 247, 0.07),
+              rgba(131, 91, 214, 0.16),
               transparent 28%
             ),
-            #f7f9fc;
+            radial-gradient(circle at 82% 86%,rgba(19,176,132,.13),transparent 27%),
+            linear-gradient(180deg,#f4f8ff,#f8f5ff 52%,#f2fbf8);
         }
 
         .servicePlansSection {
@@ -688,9 +628,10 @@ export default function OwnerProfileEditPage() {
           padding: 16px;
           display: flex;
           gap: 11px;
-          border: 1px solid #dbe7ff;
-          border-radius: 14px;
-          background: #f5f9ff;
+          border: 1px solid #cadff5;
+          border-radius: 16px;
+          background: linear-gradient(135deg,#eaf5ff,#f3edff 55%,#ebfaf4);
+          box-shadow:0 8px 22px rgba(47,84,132,.08);
         }
 
         .infoNotice strong {
@@ -712,10 +653,10 @@ export default function OwnerProfileEditPage() {
 
         .card {
           padding: 27px;
-          border: 1px solid #e4e7ec;
+          border: 1px solid #d7e4f0;
           border-radius: 20px;
-          background: white;
-          box-shadow: 0 10px 28px rgba(16, 24, 40, 0.04);
+          background: linear-gradient(155deg,#ffffff,#f6f9ff 56%,#f3fbf8);
+          box-shadow: 0 14px 32px rgba(37, 70, 111, 0.09);
         }
 
         .ownerIdentityCard{position:relative;overflow:hidden;border:0;background:linear-gradient(135deg,#073f91 0%,#0b6fd1 64%,#079a75 100%);color:#fff;box-shadow:0 18px 42px rgba(5,61,125,.22)}
@@ -827,20 +768,20 @@ export default function OwnerProfileEditPage() {
           width: 100%;
           height: 50px;
           padding: 0 13px;
-          border: 1px solid #d0d5dd;
-          border-radius: 10px;
+          border: 1px solid #ccdaea;
+          border-radius: 13px;
           outline: none;
-          background: white;
+          background: rgba(255,255,255,.92);
         }
 
         input:disabled {
-          background: #f2f4f7;
-          color: #667085;
+          background: linear-gradient(135deg,#edf3f9,#f4f0fa);
+          color: #5e7287;
         }
 
         input:focus {
-          border-color: #84adff;
-          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
+          border-color: #638ee8;
+          box-shadow: 0 0 0 4px rgba(84, 112, 224, 0.11);
         }
 
         .securityLinkCard {
@@ -919,13 +860,10 @@ export default function OwnerProfileEditPage() {
 
         .actions button {
           border: 0;
-          background: linear-gradient(
-            135deg,
-            #1465e8,
-            #7655f7
-          );
+          background: linear-gradient(135deg,#176fd1,#7657d7 56%,#0b9a78);
           color: white;
           cursor: pointer;
+          box-shadow:0 10px 24px rgba(74,73,184,.24);
         }
 
         .actions button:disabled {
