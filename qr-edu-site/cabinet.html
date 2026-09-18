@@ -9,7 +9,7 @@
    <button data-view="analytics" onclick="showCabinetView('analytics',this)"><span>↗</span> შედეგები</button>
   </nav>
   <div class="side-goal"><span>კვირის მიზანი</span><b>3 / 5 დღე</b><i><em></em></i><small>კიდევ 2 დღე ოქროს ვარსკვლავამდე</small></div>
-  <button class="parent-switch" onclick="openSignup()"><span>👤</span><div><b>მშობლის სივრცე</b><small>ანგარიშის მართვა</small></div><i>›</i></button>
+  <button class="parent-switch" onclick="showCabinetView('analytics',document.querySelector('[data-view=analytics]'))"><span>👤</span><div><b>მშობლის სივრცე</b><small>შედეგების ნახვა</small></div><i>›</i></button>
  </aside>
  <main class="cabinet-main">
   <header class="cabinet-topbar"><button class="mobile-brand" onclick="toggleSidebar()">QR</button><div><span>პირადი კაბინეტი</span><b id="pageTitle">მთავარი</b></div><div class="top-actions"><button class="sound-toggle" aria-label="ხმის ჩართვა">♪</button><button class="student-menu"><span>ნ</span><div><b>ნინო</b><small>I კლასი</small></div><i>⌄</i></button></div></header>
