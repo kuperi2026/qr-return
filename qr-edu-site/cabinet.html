@@ -1,0 +1,69 @@
+<!doctype html><html lang="ka"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="QR Edu — მოსწავლის პირადი მათემატიკის კაბინეტი."><title>QR Edu — მოსწავლის კაბინეტი</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232267dc'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='29' font-family='Arial' font-weight='900' fill='white'%3E12%3C/text%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="polish.css"></head>
+<body class="cabinet-body">
+<div class="app-shell">
+ <aside class="sidebar">
+  <a class="side-brand" href="#"><span>QR</span><div><b>QR EDU</b><small>მოსწავლის კაბინეტი</small></div></a>
+  <nav class="side-nav" aria-label="კაბინეტის მენიუ">
+   <button class="active" data-view="dashboard" onclick="showCabinetView('dashboard',this)"><span>⌂</span> მთავარი</button>
+   <button data-view="syllabus" onclick="showCabinetView('syllabus',this)"><span>▤</span> სარჩევი</button>
+   <button data-view="analytics" onclick="showCabinetView('analytics',this)"><span>↗</span> შედეგები</button>
+  </nav>
+  <div class="side-goal"><span>კვირის მიზანი</span><b>3 / 5 დღე</b><i><em></em></i><small>კიდევ 2 დღე ოქროს ვარსკვლავამდე</small></div>
+  <button class="parent-switch" onclick="openSignup()"><span>👤</span><div><b>მშობლის სივრცე</b><small>ანგარიშის მართვა</small></div><i>›</i></button>
+ </aside>
+ <main class="cabinet-main">
+  <header class="cabinet-topbar"><button class="mobile-brand" onclick="toggleSidebar()">QR</button><div><span>პირადი კაბინეტი</span><b id="pageTitle">მთავარი</b></div><div class="top-actions"><button class="sound-toggle" aria-label="ხმის ჩართვა">♪</button><button class="student-menu"><span>ნ</span><div><b>ნინო</b><small>I კლასი</small></div><i>⌄</i></button></div></header>
+
+  <section id="dashboardView" class="cabinet-view active">
+   <div class="greeting"><div><small>ხუთშაბათი · 17 სექტემბერი</small><h1>გამარჯობა, ნინო! 👋</h1><p>დღევანდელი დავალება მზადაა — დაიწყე შენი დონიდან.</p></div><div class="streak"><span>🔥</span><div><b>4 დღე</b><small>უწყვეტი სერია</small></div></div></div>
+   <div class="dashboard-grid">
+    <article class="today-lesson">
+     <div class="lesson-header"><span>დღევანდელი აქტივობა</span><b><i></i> 30 წუთი</b></div>
+     <div class="lesson-content"><div class="lesson-symbol">4+3</div><div><small>შეკრება · დონე 2</small><h2>შეკრება 20-მდე</h2><p>15 ადაპტური კითხვა. სწორი პასუხების შემდეგ სირთულე ავტომატურად გაიზრდება.</p></div></div>
+     <div class="lesson-stats"><span><b>15</b><small>კითხვა</small></span><span><b>~18</b><small>წუთი</small></span><span><b>+5 ★</b><small>ჯილდო</small></span></div>
+     <button onclick="openTopic(1,2,'შეკრება 20-მდე')">დავალების დაწყება <span>→</span></button>
+    </article>
+    <aside class="daily-time"><div class="time-circle"><div><b>30</b><small>წუთი დარჩა</small></div></div><h3>დღიური დრო</h3><p>საერთოა დავალებებისა და თამაშებისთვის.</p><div><span>ამ კვირაში</span><b>1 სთ 12 წთ</b></div></aside>
+   </div>
+   <div class="metric-grid">
+    <article><span class="metric-icon blue">✓</span><div><small>საშუალო შედეგი</small><b>86%</b><em>↑ 8% წინა კვირიდან</em></div></article>
+    <article><span class="metric-icon green">★</span><div><small>ვარსკვლავები</small><b>18</b><em>კიდევ 7 ახალ ჯილდომდე</em></div></article>
+    <article><span class="metric-icon orange">◎</span><div><small>შესრულებული</small><b>7 აქტივობა</b><em>3 ამ კვირაში</em></div></article>
+   </div>
+   <div class="dashboard-lower">
+    <article class="progress-card"><div class="card-heading"><div><h2>შედეგის გაუმჯობესება</h2><p>ბოლო 6 აქტივობა</p></div><span>+18%</span></div><div class="chart-wrap"><div class="chart-y"><span>100</span><span>75</span><span>50</span><span>25</span></div><svg viewBox="0 0 600 190" role="img" aria-label="შედეგები გაიზარდა 68-დან 86 პროცენტამდე"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2267dc" stop-opacity=".25"/><stop offset="1" stop-color="#2267dc" stop-opacity="0"/></linearGradient></defs><path class="gridline" d="M0 25H600M0 75H600M0 125H600M0 175H600"/><path class="area" d="M0 145 L120 128 L240 115 L360 95 L480 72 L600 54 L600 190 L0 190Z"/><path class="trend" d="M0 145 L120 128 L240 115 L360 95 L480 72 L600 54"/><g class="points"><circle cx="0" cy="145" r="5"/><circle cx="120" cy="128" r="5"/><circle cx="240" cy="115" r="5"/><circle cx="360" cy="95" r="5"/><circle cx="480" cy="72" r="5"/><circle cx="600" cy="54" r="5"/></g></svg></div><div class="chart-labels"><span>1 სექ</span><span>4 სექ</span><span>8 სექ</span><span>11 სექ</span><span>15 სექ</span><span>დღეს</span></div></article>
+    <article class="skills-card"><div class="card-heading"><div><h2>თემების ცოდნა</h2><p>სწორი პასუხების მიხედვით</p></div><button onclick="showCabinetView('analytics',document.querySelector('[data-view=analytics]'))">დეტალურად</button></div><div class="skill"><div><span>რიცხვების ცნობა</span><b>94%</b></div><i><em style="width:94%"></em></i></div><div class="skill"><div><span>შედარება</span><b>88%</b></div><i><em style="width:88%"></em></i></div><div class="skill"><div><span>შეკრება</span><b>76%</b></div><i><em style="width:76%"></em></i></div><div class="skill weak"><div><span>გამოკლება</span><b>61%</b></div><i><em style="width:61%"></em></i></div></article>
+   </div>
+   <article class="extra-game"><div class="game-mark">12</div><div><small>დამატებითი თამაში</small><h3>იცანი რიცხვი</h3><p>რიცხვები 1-დან 20-მდე · თამაშის დრო შედის დღიურ 30 წუთში</p></div><button onclick="startNumberGame()">თამაში →</button></article>
+  </section>
+
+  <section id="syllabusView" class="cabinet-view">
+   <div class="view-intro"><div><small>I კლასის მათემატიკა</small><h1>ტესტების სარჩევი</h1><p>ეს არის უნარები, რომლებზეც ყოველდღიური დავალებები და კვირის ორი ტესტი დაფუძნდება.</p></div><span>6 მიმართულება · 140 კითხვა</span></div>
+   <div class="syllabus-grid">
+    <article><span class="topic-no">01</span><div><small>საწყისი საფუძველი</small><h2>რიცხვები და დათვლა</h2><p>რიცხვების ცნობა 1–20; რაოდენობისა და ციფრის დაკავშირება; წინ და უკან დათვლა; გამოტოვებული რიცხვი.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+    <article><span class="topic-no">02</span><div><small>რიცხვითი აზროვნება</small><h2>შედარება და რიგი</h2><p>მეტი, ნაკლები და ტოლი; წინა და მომდევნო რიცხვი; ზრდადობით და კლებადობით დალაგება.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+    <article><span class="topic-no">03</span><div><small>ძირითადი მოქმედება</small><h2>შეკრება 20-მდე</h2><p>შეკრება საგნებით და რიცხვითი ღერძით; 10-მდე და 20-მდე; უცნობი შესაკრების პოვნა.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+    <article><span class="topic-no">04</span><div><small>ძირითადი მოქმედება</small><h2>გამოკლება 20-მდე</h2><p>გამოკლება საგნებით; 10-მდე და 20-მდე; პასუხის შემოწმება საპირისპირო მოქმედებით.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+    <article><span class="topic-no">05</span><div><small>გამოყენება</small><h2>მარტივი ამოცანები</h2><p>პირობის გაგება; შეკრებისა და გამოკლების მოქმედების შერჩევა; პასუხის სრული ფორმით ჩამოყალიბება.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+    <article><span class="topic-no">06</span><div><small>ლოგიკა და სივრცე</small><h2>ფიგურები და კანონზომიერება</h2><p>ძირითადი ფიგურები; სივრცითი მიმართულებები; მიმდევრობის გაგრძელება და განსხვავებული საგნის პოვნა.</p><div class="topic-meta"><span>● 20 კითხვა</span><b>დონე 1–3</b></div></div></article>
+   </div>
+   <div class="test-logic"><span>↗</span><div><h2>როგორ იქმნება ბავშვის ტესტი?</h2><p>პირველი კითხვა ბავშვის მიმდინარე დონიდან იწყება. 3 ზედიზედ სწორი პასუხი სირთულეს ზრდის, ხოლო 2 შეცდომა ამცირებს. კვირის ორი ტესტი განსაზღვრავს მომდევნო კვირის საწყის დონეს.</p></div></div>
+  </section>
+
+  <section id="analyticsView" class="cabinet-view">
+   <div class="view-intro"><div><small>პასუხების ანალიზი</small><h1>ნინოს შედეგები</h1><p>აქ ჩანს არა მხოლოდ ქულა, არამედ რომელი უნარი უმჯობესდება და სად სჭირდება დახმარება.</p></div><select aria-label="პერიოდი"><option>ბოლო 30 დღე</option><option>ეს კვირა</option></select></div>
+   <div class="analysis-summary"><article><small>საშუალო სიზუსტე</small><b>86%</b><span class="positive">↑ 8%</span></article><article><small>სწორი პასუხები</small><b>112 / 130</b><span>ბოლო 30 დღე</span></article><article><small>საშუალო დრო</small><b>42 წმ</b><span class="positive">↓ 9 წმ</span></article><article><small>მიმდინარე დონე</small><b>დონე 2</b><span>სტაბილური</span></article></div>
+   <div class="analysis-grid">
+    <article class="topic-analysis"><div class="card-heading"><div><h2>თემების ანალიზი</h2><p>სიზუსტე და ცვლილება</p></div></div><div class="analysis-row"><span class="status excellent">ძლიერი</span><div><b>რიცხვების ცნობა</b><small>47 სწორი · 3 შეცდომა</small></div><strong>94%</strong><em>↑ 4%</em></div><div class="analysis-row"><span class="status good">კარგი</span><div><b>შედარება</b><small>22 სწორი · 3 შეცდომა</small></div><strong>88%</strong><em>↑ 6%</em></div><div class="analysis-row"><span class="status practice">სავარჯიშო</span><div><b>შეკრება</b><small>29 სწორი · 9 შეცდომა</small></div><strong>76%</strong><em>↑ 12%</em></div><div class="analysis-row"><span class="status attention">ყურადღება</span><div><b>გამოკლება</b><small>14 სწორი · 9 შეცდომა</small></div><strong>61%</strong><em>↓ 3%</em></div></article>
+    <article class="mistake-card"><div class="card-heading"><div><h2>შეცდომების მიზეზები</h2><p>ბოლო 18 არასწორი პასუხი</p></div></div><div class="donut" aria-label="შეცდომების განაწილება"><div><b>18</b><small>შეცდომა</small></div></div><ul><li><i class="c1"></i><span>ყურადღების გაფანტვა</span><b>44%</b></li><li><i class="c2"></i><span>მოქმედების არევა</span><b>33%</b></li><li><i class="c3"></i><span>დათვლის შეცდომა</span><b>23%</b></li></ul></article>
+   </div>
+   <article class="recommendation"><span>✦</span><div><small>სისტემის რეკომენდაცია</small><h2>შემდეგი ფოკუსი: გამოკლება 10-მდე</h2><p>ნინო ხშირად ურევს გამოკლების მოქმედებას შეკრებაში. შემდეგ სამ მეცადინეობაში ჯერ ვიზუალური მაგალითები მიეცემა, შემდეგ — რიცხვითი მაგალითები.</p></div><button onclick="openTopic(1,3,'გამოკლება 10-მდე')">სავარჯიშოს ნახვა</button></article>
+  </section>
+ </main>
+</div>
+<nav class="mobile-nav"><button class="active" data-view="dashboard" onclick="showCabinetView('dashboard',this)">⌂<span>მთავარი</span></button><button data-view="syllabus" onclick="showCabinetView('syllabus',this)">▤<span>სარჩევი</span></button><button data-view="analytics" onclick="showCabinetView('analytics',this)">↗<span>შედეგები</span></button></nav>
+<div id="celebration" class="celebration" aria-live="polite"><b>სწორია! 🎉</b><span>★</span><span>★</span><span>★</span></div>
+<dialog id="numberGame" class="game-dialog"><button class="close" onclick="closeNumberGame()">×</button><div class="game-top"><div><small>დამატებითი თამაში</small><b id="gameLevel">დონე 1 · რიცხვები 1–10</b></div><div class="game-timer">⏱ <b id="gameTimer">30:00</b></div></div><div class="game-progress"><i id="gameProgress"></i></div><p class="game-instruction">რომელი რიცხვია?</p><div class="number-stage"><span id="shownNumber">7</span></div><div id="numberOptions" class="number-options"></div><div class="game-footer"><span id="gameFeedback">აირჩიე სწორი პასუხი</span><b id="gameScore">★ 0</b></div></dialog>
+<dialog id="topicTest" class="test-dialog"><button class="close" onclick="closeTest('topicTest')">×</button><div class="quiz-top"><span id="topicMeta">I კლასი</span><b>15 კითხვა</b></div><h2 id="topicTitle">დავალება</h2><div class="quiz-progress"><i id="topicBar"></i></div><h3 id="topicPrompt">იტვირთება…</h3><div id="topicOptions" class="quiz-options"></div><p id="topicHint" class="quiz-hint"></p></dialog>
+<dialog id="signup"><button class="close" onclick="signup.close()">×</button><span class="pill">მშობლის რეგისტრაცია</span><h2>შექმენი ოჯახის ანგარიში</h2><label>მშობლის სახელი<input id="parentName" placeholder="სახელი და გვარი"></label><label>ელფოსტა<input id="parentEmail" type="email" placeholder="name@example.com"></label><label>პაროლი<input id="parentPassword" type="password" minlength="6" placeholder="მინიმუმ 6 სიმბოლო"></label><label>ბავშვის სახელი<input id="childName" placeholder="ბავშვის სახელი"></label><div class="row"><label>კლასი<input value="I კლასი" disabled></label><label>სკოლა<input id="childSchool" placeholder="სკოლის სახელი"></label></div><input id="childGrade" type="hidden" value="1"><button class="primary full" onclick="completeSignup()">ანგარიშის შექმნა</button><p id="signupmsg"></p></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script></body></html>
