@@ -9,7 +9,6 @@ import { supabase } from "@/lib/supabase";
 
 import {
   Chevron,
-  QRIcon,
 } from "./HomeIcons";
 
 type Lang = "ka" | "en";
@@ -104,11 +103,11 @@ export default function HomeHeader({
 
           <a href="/" className="homeBrand">
             <div className="homeBrandLogo">
-              <QRIcon size={23} />
+              <img src="/home/kompasi-logo.svg" alt="" width="40" height="40" />
             </div>
 
             <div>
-              <strong>QR RETURN</strong>
+              <strong>KOMPASI</strong>
               <span>SMART LOST &amp; FOUND</span>
             </div>
           </a>
@@ -253,9 +252,11 @@ export default function HomeHeader({
 
           border-radius: 10px;
 
-          background: #ffffff;
-          color: #063B72;
+          background: transparent;
+          color: #ffffff;
         }
+
+        .homeBrandLogo img{width:100%;height:100%;display:block;object-fit:contain}
 
         .homeBrand strong,
         .homeBrand span {
