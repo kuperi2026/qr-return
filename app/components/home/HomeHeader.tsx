@@ -15,7 +15,6 @@ import {
 type Lang = "ka" | "en";
 
 type Menu =
-  | "about"
   | "shop"
   | "productInfo"
   | "plans"
@@ -114,13 +113,6 @@ export default function HomeHeader({
           </a>
 
           <nav className="homeNav">
-
-            <button
-              onClick={() => toggleMenu("about")}
-            >
-              {ka ? "ჩვენ შესახებ" : "About"}
-              <Chevron open={openMenu === "about"} />
-            </button>
 
             <button
               onClick={() => toggleMenu("shop")}
