@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import HomeHeader from "./components/home/HomeHeader";
+import AboutMenu from "./components/home/AboutMenu";
 import ShopMenu from "./components/home/ShopMenu";
 import ProductInfoMenu from "./components/home/ProductInfoMenu";
 import ContactMenu from "./components/home/ContactMenu";
@@ -13,6 +14,7 @@ import PlansMenu from "./components/home/PlansMenu";
 type Lang = "ka" | "en";
 
 type Menu =
+  | "about"
   | "shop"
   | "productInfo"
   | "plans"
@@ -45,6 +47,8 @@ export default function HomePage() {
         setLanguage={setLanguage}
         toggleMenu={toggleMenu}
       />
+
+      {openMenu === "about" && <AboutMenu ka={ka} />}
 
       {openMenu === "shop" && (
         <ShopMenu ka={ka} />
