@@ -267,12 +267,13 @@ export default function SubscriptionsPage() {
       </section>}
 
       {view === "profiles" && <>
-      <header id="my-profiles" className="ownerSectionHeader"><span>02</span><div><small>მომსახურების არჩევა</small><h2>ჩემი პროფილები</h2><p>აირჩიეთ სასურველი ვადა თითოეული პროფილისთვის. რამდენიმე პროფილს განსხვავებული ვადითაც დაამატებთ.</p></div></header>
+      <section id="my-profiles" className="publicPricingSection profilePricingSection">
+      <header className="pricingSectionHeader"><span>02</span><div><small>მომსახურების არჩევა</small><h1>ჩემი პროფილები</h1><p>თითოეული პროფილისთვის აირჩიეთ სასურველი ვადა.</p></div></header>
 
-      <div className={hasAccount ? "layout" : "layout publicLayout"}>
+      <div className={hasAccount ? "layout profileEstimateLayout" : "layout publicLayout profileEstimateLayout"}>
         <section className="panel">
           <div className="checkoutStage profileStage">
-          <section className="liveCalculator webCalendar" aria-label="დარეგისტრირებული პროფილების არჩევა">
+          <section className="liveCalculator webCalendar publicPriceCalendar" aria-label="დარეგისტრირებული პროფილების არჩევა">
             <header><div><small>შექმნილი პროფილები</small><h3>პროფილი და მომსახურების ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
             {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : !hasAccount ? <div className="calendarEmpty"><b>თქვენი პროფილები აქ გამოჩნდება</b><span>შედით ანგარიშში და აირჩიეთ უკვე დარეგისტრირებული პროფილის მომსახურების ვადა.</span><Link href="/login" style={{ color: "#fff", textDecoration: "none", background: "#1266b7", padding: "10px 14px", borderRadius: 9 }}>შესვლა</Link><Link href="/register" style={{ color: "#1266b7", textDecoration: "none", background: "#e8f3ff", padding: "10px 14px", borderRadius: 9 }}>პროფილის შექმნა</Link></div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className={`chosenProductGroup category-${product.type}`}><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
 
@@ -313,7 +314,7 @@ export default function SubscriptionsPage() {
           <div className="appStageActions"><button type="button" className="appPrevious" onClick={() => setAppStep(1)}>← პროფილები</button><button type="button" className="appNext" disabled={!selectedProfiles.length} onClick={() => setAppStep(3)}>შეჯამება <span>→</span></button></div></div>
         </section>
 
-        {hasAccount && <aside className="summary checkoutStage summaryStage">
+        {hasAccount && <aside className="summary estimateSummary checkoutStage summaryStage">
           <div className="summaryTitle"><div><small>თქვენი არჩევანი</small><h2>{selectedItems.length ? `${selectedItems.length} არჩეული პროფილი` : "აირჩიეთ პროფილი"}</h2></div></div>
           {selectedItems.length > 0 && <div className="chosen">{selectedItems.map((profile) => { const meta = PRODUCTS.find((item) => item.type === normalizeType(profile)); const ownPeriod = selectedPeriod(profile.id); return <div key={profile.id}><span>{meta?.icon} {profile.item_name || meta?.name}<small>{PERIODS.find((item) => item.value === ownPeriod)?.label || "ვადა არჩეული არ არის"}</small></span><b>{ownPeriod ? meta?.prices[ownPeriod] || 0 : 0} ₾</b></div>; })}</div>}
           <div className="line desktopSharedPeriod"><span>არჩეული ვადა</span><b>{PERIODS.find((item) => item.value === period)?.label}</b></div>
@@ -327,6 +328,7 @@ export default function SubscriptionsPage() {
           <p>მომსახურება ჩაირთვება QR RETURN-ის დადასტურების შემდეგ.</p>
         </aside>}
       </div>
+      </section>
 
       {hasAccount && <section className="purchaseHistory" id="history">
         <div className="historyHeading">
@@ -528,6 +530,37 @@ export default function SubscriptionsPage() {
       .layout .summary{padding:18px;border:1px solid #cbdced;border-radius:15px;background:#fff;color:#244260;box-shadow:0 8px 22px rgba(25,66,112,.08)}.layout .summaryTitle small{color:#5481a6}.layout .summaryTitle h2{margin:5px 0 13px;color:#173b5b;font-size:18px}.layout .chosen{background:#f5f9fd}.layout .chosen>div{color:#31516c;font-size:12px}.layout .line{padding:10px 0;color:#516d83;font-size:12px}.layout .line b{color:#173b5b}.layout .total{margin-top:12px;padding:12px;background:#e9f4ff}.layout .total span{color:#315c7e;font-size:12px}.layout .total strong{color:#1266b7;font-size:29px}.layout .summary>button{min-height:45px;border-radius:10px;background:#1266b7;color:#fff;font-size:13px;box-shadow:0 6px 14px rgba(18,102,183,.18)}.layout .summary p{color:#617c91}
       @media(max-width:760px){.ownerSectionHeader h2{font-size:19px}.ownerSectionHeader p{font-size:11px}.webCalendar{padding:10px}.webCalendar .priceCalendarHead,.webCalendar .chosenProductGroup{min-width:460px}.webCalendar .priceCalendar article>button{font-size:12px!important}.layout .summary{padding:15px}}
       .ownerSectionHeader small{color:#b8dcff!important}.ownerSectionHeader h2{color:#fff!important}.ownerSectionHeader p{color:#e0eeff!important}.ownerSectionHeader>span{background:#fff;color:#1464b3}
+      .profileEstimateLayout{grid-template-columns:minmax(0,1fr) 270px;align-items:start;gap:14px;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+      .profileEstimateLayout.publicLayout{grid-template-columns:minmax(0,1fr)}
+      .profileEstimateLayout .panel{min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+      .profileEstimateLayout .webCalendar{margin:0;padding:0;border:1px solid #b8d8f5;border-radius:14px;background:linear-gradient(145deg,#f7fbff,#fff 55%);box-shadow:0 12px 28px rgba(16,82,150,.1)}
+      .profileEstimateLayout .webCalendar>header{padding:13px 14px 8px;border-bottom:0}
+      .profileEstimateLayout .webCalendar>header small{color:#427aab;font-size:11px;font-weight:900}
+      .profileEstimateLayout .webCalendar>header h3{margin:3px 0 0;color:#123e68;font-size:17px}
+      .profileEstimateLayout .webCalendar>header>div:last-child span{color:#52718c;font-size:11px}
+      .profileEstimateLayout .webCalendar>header>div:last-child strong{color:#1469b1;font-size:16px}
+      .profileEstimateLayout .priceInstructions{margin:0;padding:0 10px 11px;border:0;background:transparent;box-shadow:none}
+      .profileEstimateLayout .webCalendar .priceCalendarHead{padding:6px 8px;color:#47718e;font-size:11px!important}
+      .profileEstimateLayout .webCalendar .chosenProductGroup{--accent:#1675e9;margin-top:4px;padding:4px 7px;border:1px solid color-mix(in srgb,var(--accent) 26%,white);border-radius:9px;background:color-mix(in srgb,var(--accent) 6%,white);box-shadow:none}
+      .profileEstimateLayout .webCalendar .category-dog{--accent:#8057d9}.profileEstimateLayout .webCalendar .category-cat{--accent:#dc5f91}.profileEstimateLayout .webCalendar .category-keys{--accent:#198dba}.profileEstimateLayout .webCalendar .category-wallet{--accent:#be862c}.profileEstimateLayout .webCalendar .category-bag{--accent:#e07758}.profileEstimateLayout .webCalendar .category-suitcase{--accent:#346fd7}.profileEstimateLayout .webCalendar .category-emergency{--accent:#d85062}.profileEstimateLayout .webCalendar .category-parking{--accent:#168f78}
+      .profileEstimateLayout .webCalendar .chosenProductGroup>header{padding:3px 4px 6px;color:var(--accent);font-size:12px}
+      .profileEstimateLayout .webCalendar .chosenProductGroup>header b{background:#fff;color:var(--accent)}
+      .profileEstimateLayout .webCalendar .priceCalendar article{min-height:47px;margin-top:4px;padding:4px 6px;border-radius:9px;background:#fff;box-shadow:0 2px 7px rgba(20,77,127,.05)}
+      .profileEstimateLayout .webCalendar .chosenProductGroup .chosenProduct>span strong{color:#254662;font-size:12px}
+      .profileEstimateLayout .webCalendar .priceCalendar article>button{height:35px;border-color:color-mix(in srgb,var(--accent) 24%,white);background:#fff;color:var(--accent);font-size:12px!important;box-shadow:0 2px 7px rgba(20,77,127,.05)}
+      .profileEstimateLayout .webCalendar .priceCalendar article>button.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 5px 13px color-mix(in srgb,var(--accent) 25%,transparent)}
+      .profileEstimateLayout .webCalendar .selectedCalendarProfile{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 9%,white)!important;box-shadow:0 0 0 1px var(--accent)!important}
+      .profileEstimateLayout .summary.estimateSummary{position:sticky;top:18px;margin:0;padding:17px;border:1px solid #c9d8e8;border-radius:14px;background:#fff;box-shadow:0 10px 25px rgba(25,66,112,.09)}
+      .profileEstimateLayout .summaryTitle small{color:#427caa;font-size:11px}
+      .profileEstimateLayout .summaryTitle h2{margin:4px 0 10px;color:#254967;font-size:16px}
+      .profileEstimateLayout .chosen{margin:10px 0 6px;padding:5px 8px;border-radius:10px;background:#fff}
+      .profileEstimateLayout .chosen>div{padding:6px 0;color:#31516c;font-size:11px}
+      .profileEstimateLayout .line{padding:6px 2px;color:#516d83;font-size:12px}
+      .profileEstimateLayout .total{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:11px;border-radius:11px;background:#0d5fb5;color:#fff}
+      .profileEstimateLayout .total span,.profileEstimateLayout .total strong{color:#fff}
+      .profileEstimateLayout .total span{font-size:12px}.profileEstimateLayout .total strong{font-size:21px}
+      @media(max-width:850px){.profileEstimateLayout{grid-template-columns:1fr}.profileEstimateLayout .summary.estimateSummary{position:static;order:-1}}
+      @media(max-width:760px){.profileEstimateLayout .webCalendar>header h3{font-size:16px}.profileEstimateLayout .summary.estimateSummary{padding:12px}}
     `}</style>
   </main>;
 }
