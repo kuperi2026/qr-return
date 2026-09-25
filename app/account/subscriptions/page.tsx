@@ -518,6 +518,11 @@ export default function SubscriptionsPage() {
       .ownerSectionHeader>span{background:linear-gradient(145deg,#139c83,#0b6cbd)}
       .ownerSectionHeader small{color:#16876f}
       @media(max-width:760px){.publicPricingSection{padding:13px;border-radius:18px}.pricingSectionHeader,.ownerSectionHeader{gap:10px}.pricingSectionHeader>span,.ownerSectionHeader>span{width:43px;height:43px;flex-basis:43px;font-size:16px}.pricingSectionHeader h1,.ownerSectionHeader h2{font-size:20px}.pricingSectionHeader p,.ownerSectionHeader p{font-size:12px}}
+      :global(.subscriptionsPage .topbar a){color:#fff!important;text-decoration:none!important}
+      :global(.subscriptionsPage .topbar .brand>span){display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#fff!important;color:#1266e9!important;font-weight:950}
+      :global(.subscriptionsPage .topbar .brand strong){color:#fff!important}
+      :global(.subscriptionsPage .topbar .brand small){color:#d6e9ff!important}
+      :global(.subscriptionsPage .topbar .back){padding:10px 14px;border:1px solid rgba(255,255,255,.38);border-radius:10px;background:rgba(255,255,255,.12)}
     `}</style>
   </main>;
 }
