@@ -210,14 +210,16 @@ export default function SubscriptionsPage() {
 
     <section className={view === "choice" ? "shell choiceShell" : "shell"}>
       <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
-      {view === "choice" && <nav className="pricingViewNav" aria-label="მომსახურების არჩევანი">
+      {view === "choice" && <div className="choiceContent">
+      <header className="choiceIntro"><span>QR RETURN · მომსახურება და პაკეტები</span><h1>აირჩიეთ თქვენთვის სასურველი გზა</h1><p>ერთ გვერდზე წინასწარ გამოთვლით ფასს. მეორე გვერდზე აირჩევთ უკვე შექმნილ პროფილებს და თითოეულს სასურველ ვადას მიანიჭებთ. შეგიძლიათ რამდენიმე პროფილი ერთად აირჩიოთ, განსხვავებული ვადებით.</p></header>
+      <nav className="pricingViewNav" aria-label="მომსახურების არჩევანი">
         <a href="#estimate" onClick={() => setView("estimate")}>
           <span className="choiceIcon" aria-hidden="true">₾</span><span className="choiceCopy"><small>01</small><strong>ფასის წინასწარ გამოთვლა</strong></span><span className="choiceArrow" aria-hidden="true">→</span>
         </a>
         <a href="#my-profiles" onClick={() => setView("profiles")}>
           <span className="choiceIcon" aria-hidden="true">▣</span><span className="choiceCopy"><small>02</small><strong>ჩემი შექმნილი პროფილები</strong></span><span className="choiceArrow" aria-hidden="true">→</span>
         </a>
-      </nav>}
+      </nav></div>}
 
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
         {([1, 3] as const).map((step) => (
@@ -229,7 +231,7 @@ export default function SubscriptionsPage() {
       </nav>
 
       {view === "estimate" && <section id="estimate" className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
-        <header className="pricingSectionHeader"><span>01</span><div><small>თავისუფლად სანახავი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტები და ვადები — ეს მხოლოდ ფასის შეფასებაა.</p></div></header>
+        <header className="pricingSectionHeader"><span>01</span><div><small>ფასის კალკულატორი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტი, რაოდენობა და ვადა. კალკულატორი სავარაუდო ჯამს ანგარიშში შესვლის გარეშე გაჩვენებთ.</p></div></header>
             <div className="webGuides">
               <section className="publicPriceCalendar" aria-label="ყველა პროდუქტის ფასების კალენდარი">
                 <header><div><small>ფასების ცხრილი</small><h2>ყველა პროდუქტის ფასი</h2></div><span>8 პროდუქტი · 4 ვადა</span></header>
@@ -266,7 +268,7 @@ export default function SubscriptionsPage() {
       </section>}
 
       {view === "profiles" && <>
-      <header id="my-profiles" className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>პაკეტის ვადის გააქტიურება</h2><p>აქ მხოლოდ თქვენი უკვე შექმნილი პროფილებია. თითოეულს ცალკე ვადა აურჩიეთ; ფასები და საერთო ჯამი ავტომატურად გამოჩნდება.</p></div></header>
+      <header id="my-profiles" className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>აირჩიეთ პროფილები და ვადები</h2><p>აქ თქვენი უკვე შექმნილი პროფილებია. მონიშნეთ რამდენიმე ერთად და თითოეულს მისთვის სასურველი ვადა აურჩიეთ — მაგალითად, კატას 3 თვე, გასაღებს 6 თვე. თითოეულის ფასი და საერთო ჯამი ავტომატურად გამოჩნდება.</p></div></header>
 
       <div className={hasAccount ? "layout" : "layout publicLayout"}>
         <section className="panel">
@@ -365,7 +367,7 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
-      .choiceShell{min-height:100vh;display:flex;align-items:center;justify-content:center}
+      .choiceShell{min-height:100vh;display:flex;align-items:center;justify-content:center}.choiceContent{width:100%;max-width:950px;margin:auto}.choiceIntro{max-width:760px;margin:0 0 30px;color:#fff}.choiceIntro span{display:inline-block;padding:7px 12px;border:1px solid rgba(255,255,255,.34);border-radius:99px;background:rgba(255,255,255,.12);font-size:11px;font-weight:850;letter-spacing:.04em}.choiceIntro h1{margin:15px 0 11px;font-size:clamp(26px,3.4vw,39px);line-height:1.2;letter-spacing:-.025em}.choiceIntro p{max-width:740px;margin:0;color:#e2efff;font-size:15px;line-height:1.65}
       .subscriptionsPage .topbar .brand,.subscriptionsPage .topbar .back{color:#fff!important;text-decoration:none!important}.subscriptionsPage .topbar .brand{gap:11px}.subscriptionsPage .topbar .brand>span{background:#fff!important;color:#1266e9!important}.subscriptionsPage .topbar .brand strong{color:#fff!important;font-size:17px}.subscriptionsPage .topbar .brand small{color:#d6e9ff!important;font-size:11px}.subscriptionsPage .topbar .back{padding:10px 14px;border:1px solid rgba(255,255,255,.38);border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:800}
       .pricingViewNav{width:100%;max-width:950px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
       .pricingViewNav a{min-height:285px;padding:30px;display:flex;flex-direction:column;align-items:flex-start;position:relative;overflow:hidden;border:1px solid #d8e8f7;border-radius:26px;background:linear-gradient(145deg,#fff,#eaf4ff);color:#17324d;text-decoration:none;box-shadow:0 24px 55px rgba(0,25,65,.22);transition:transform .18s ease,box-shadow .18s ease}
@@ -373,7 +375,7 @@ export default function SubscriptionsPage() {
       .pricingViewNav a:hover{transform:translateY(-5px);box-shadow:0 29px 65px rgba(0,25,65,.3)}
       .choiceIcon{width:68px;height:68px;display:grid;place-items:center;flex:0 0 68px;border-radius:19px;background:#dcecff;color:#0867c9;font-size:33px;font-weight:900}.pricingViewNav a:nth-child(2) .choiceIcon{background:#d8f3e6;color:#087a59}.choiceCopy{margin-top:25px;min-width:0}.choiceCopy small,.choiceCopy strong{display:block}.choiceCopy small{color:#4d7398;font-size:12px;font-weight:900;letter-spacing:.08em}.choiceCopy strong{max-width:310px;margin:7px 0 0;color:#13375a;font-size:clamp(21px,2.5vw,28px);line-height:1.2}.choiceArrow{position:absolute;right:27px;bottom:22px;color:#0871cf;font-size:31px;font-weight:700}.pricingViewNav a:nth-child(2) .choiceArrow{color:#087a59}
       .pricingViewNav a:focus-visible{outline:3px solid #ffe578;outline-offset:3px}
-      @media(max-width:760px){.choiceShell{min-height:100svh;padding:25px 16px}.pricingViewNav{max-width:460px;grid-template-columns:1fr;gap:14px}.pricingViewNav a{min-height:185px;padding:20px;border-radius:20px}.choiceIcon{width:48px;height:48px;flex-basis:48px;border-radius:13px;font-size:24px}.choiceCopy{margin-top:17px}.choiceCopy strong{max-width:280px;font-size:21px}.choiceArrow{right:19px;bottom:14px;font-size:24px}}
+      @media(max-width:760px){.choiceShell{min-height:100svh;padding:30px 16px}.choiceIntro{max-width:460px;margin:0 auto 22px}.choiceIntro h1{font-size:27px}.choiceIntro p{font-size:13px;line-height:1.6}.pricingViewNav{max-width:460px;grid-template-columns:1fr;gap:14px}.pricingViewNav a{min-height:185px;padding:20px;border-radius:20px}.choiceIcon{width:48px;height:48px;flex-basis:48px;border-radius:13px;font-size:24px}.choiceCopy{margin-top:17px}.choiceCopy strong{max-width:280px;font-size:21px}.choiceArrow{right:19px;bottom:14px;font-size:24px}}
       .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay,.profilePicker,.periodStage{display:none}
       .liveCalculator{display:block}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e3eaf2}.historyDates>div{padding:10px;border:1px solid #dce8f2;border-radius:10px;background:#fff}.historyDates small,.historyDates strong{display:block}.historyDates small{color:#71879a!important;font-size:9px!important;font-weight:850}.historyDates strong{margin-top:4px;color:#19476b!important;font-size:12px!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{grid-template-columns:1fr 1fr;gap:7px}}
