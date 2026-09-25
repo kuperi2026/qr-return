@@ -74,7 +74,6 @@ export default function SubscriptionsPage() {
   const [error, setError] = useState("");
   const [appStep, setAppStep] = useState<1 | 2 | 3>(1);
   const [openCategory, setOpenCategory] = useState("");
-  const [openPricingPanel, setOpenPricingPanel] = useState<"prices" | "guide" | null>("guide");
 
   useEffect(() => { void (async () => {
     const params = new URLSearchParams(window.location.search);
@@ -158,7 +157,6 @@ export default function SubscriptionsPage() {
   function toggleProfile(id: number) {
     setSelectedProfiles((current) => {
       if (current.includes(id)) return current.filter((value) => value !== id);
-      setOpenPricingPanel("prices");
       return [...current, id];
     });
   }
@@ -206,10 +204,9 @@ export default function SubscriptionsPage() {
       <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
       <section className="appTariffHeader">
         <small>მომსახურება და პაკეტები</small>
-        <h1>ყველა პროდუქტის ტარიფი</h1>
+        <h1>ფასები და ჩემი პროფილები</h1>
         <p>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>.</p>
         {isAppPricing && <div className="calendarAdvantage"><span>✦</span><p><b>უპირატესობა</b> შეგიძლიათ რამდენიმე გააქტიურებული პროფილი ერთ შეკვეთაში გააერთიანოთ და თითოეულისთვის განსხვავებული მომსახურების ვადა აირჩიოთ. მაგალითად, ძაღლის პროფილისთვის — 1 თვე, ხოლო Parking QR-ისთვის — 1 წელი.</p></div>}
-        <details className="purchaseGuide" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}><summary><span>როგორ ავირჩიოთ პროფილი და ვადა?</span><b>ინსტრუქცია ⌄</b></summary><div><article><i>1</i><p><b>კალენდარში ჩანს რეგისტრირებული პროფილები</b><span>პროფილის ცალკე არჩევა საჭირო არ არის — ყველა შექმნილი QR პროფილი ავტომატურად გამოჩნდება.</span></p></article><article><i>2</i><p><b>ფასზე დაჭერით ირჩევთ ვადას</b><span>სასურველი პროფილის რიგში დააჭირეთ 1, 3, 6 ან 12 თვის ფასს. არჩეულ ფასზე მეორედ დაჭერა არჩევანს მოხსნის.</span></p></article><article><i>3</i><p><b>თითოეულ პროფილს შეიძლება სხვადასხვა ვადა ჰქონდეს</b><span>მაგალითად, ერთ პროფილს 1 თვე, მეორეს 3 თვე და მესამეს 6 თვე. ყველა არჩევანი ერთ შეკვეთაში გაერთიანდება.</span></p></article><article><i>4</i><p><b>შეჯამება და ავტომატური ფასდაკლება</b><span>შეჯამებაში გამოჩნდება თითოეული პროფილი, მისი ვადა და ფასი. 3–4 პროფილი −5% · 5–6 −10% · 7 −12% · 8 ან მეტი −15%.</span></p></article><section className="referencePriceTable" aria-label="ყველა პროდუქტის ტარიფები"><header><span>ყველა პროდუქტის ტარიფი</span><small>საინფორმაციო ცხრილი</small></header><div className="referencePriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <span key={item.value}>{item.label}</span>)}</div>{PRODUCTS.map((product) => <div className="referencePriceRow" key={product.type}><b>{product.icon} {product.name}</b>{PERIODS.map((item) => <span key={item.value}>{product.prices[item.value]}₾</span>)}</div>)}</section><footer>თითოეული QR კოდის გააქტიურებიდან მომსახურებით სარგებლობა პირველი <b>60 დღის განმავლობაში უფასოა</b>. ფასიანი ვადა ამის შემდეგ იწყება.</footer></div></details>
       </section>
 
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
@@ -221,19 +218,11 @@ export default function SubscriptionsPage() {
         ))}
       </nav>
 
-      <section className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
+      <section id="estimate" className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
         <header className="pricingSectionHeader"><span>01</span><div><small>თავისუფლად სანახავი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტები და ვადები — ეს მხოლოდ ფასის შეფასებაა.</p></div></header>
             <div className="webGuides">
-              <details className="purchaseGuide webInstruction" open={openPricingPanel === "guide"} onToggle={(event) => { if (event.currentTarget.open) setOpenPricingPanel("guide"); else if (openPricingPanel === "guide") setOpenPricingPanel(null); }}>
-                <summary><span>როგორ მუშაობს?</span><b>კალკულატორის ინსტრუქცია ⌄</b></summary>
-                <div>
-                  <article><i>1</i><p><b>გამოთვალეთ ფასი პროფილის გარეშეც</b><span>ფასების კალენდარში დააჭირეთ სასურველი პროდუქტისა და ვადის ფასს. თუ რამდენიმე ერთნაირი პროდუქტი გჭირდებათ, გაზარდეთ რაოდენობა + ღილაკით. ეს მხოლოდ წინასწარი გამოთვლაა.</span></p></article>
-                  <article><i>2</i><p><b>ნახეთ ჯამი და ფასდაკლება</b><span>კალკულატორი პროფილის შექმნისა და ანგარიშში შესვლის გარეშე აჩვენებს არჩეულ პროდუქტებს, ფასდაკლებასა და სავარაუდო ჯამს. 3–4 პროდუქტზე ფასდაკლებაა 5%, 5–6-ზე — 10%, 7-ზე — 12%, ხოლო 8 ან მეტზე — 15%.</span></p></article>
-                  <footer>თითოეული QR კოდის გააქტიურებიდან პირველი <b>60 დღე უფასოა</b>. ფასიანი ვადა იწყება უფასო პერიოდის დასრულების შემდეგ.</footer>
-                </div>
-              </details>
               <section className="publicPriceCalendar" aria-label="ყველა პროდუქტის ფასების კალენდარი">
-                <header><div><small>ფასების კალენდარი</small><h2>ყველა პროდუქტის ფასი</h2></div><span>8 პროდუქტი · 4 ვადა</span></header>
+                <header><div><small>ფასების ცხრილი</small><h2>ყველა პროდუქტის ფასი</h2></div><span>8 პროდუქტი · 4 ვადა</span></header>
                 <p>აირჩიეთ პროდუქტი, ვადა და რაოდენობა — სავარაუდო ჯამი მაშინვე დაითვლება. ანგარიშში შესვლა საჭირო არ არის.</p>
                 <div className="publicPriceScroll">
                   <div className="publicPriceGrid publicPriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>
@@ -266,13 +255,13 @@ export default function SubscriptionsPage() {
             </div>
       </section>
 
-      <header className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>პაკეტის ვადის გააქტიურება</h2><p>შედით ანგარიშში, აირჩიეთ დარეგისტრირებული პროფილების ვადა და გადაამოწმეთ საბოლოო შეჯამება.</p></div></header>
+      <header id="my-profiles" className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>პაკეტის ვადის გააქტიურება</h2><p>აქ მხოლოდ თქვენი უკვე შექმნილი პროფილებია. თითოეულს ცალკე ვადა აურჩიეთ; ფასები და საერთო ჯამი ავტომატურად გამოჩნდება.</p></div></header>
 
       <div className={hasAccount ? "layout" : "layout publicLayout"}>
         <section className="panel">
           <div className="checkoutStage profileStage">
           <section className={isAppPricing ? "liveCalculator" : "liveCalculator webCalendar"} aria-label="დარეგისტრირებული პროფილების არჩევა">
-            <header><div><small>მხოლოდ თქვენი ანგარიში</small><h3>ჩემი პროფილები · აირჩიეთ ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
+            <header><div><small>მხოლოდ თქვენი ანგარიში</small><h3>ჩემი შექმნილი პროფილები · აირჩიეთ ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
             {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : !hasAccount ? <div className="calendarEmpty"><b>თქვენი პროფილები აქ გამოჩნდება</b><span>შედით ანგარიშში და აირჩიეთ უკვე დარეგისტრირებული პროფილის მომსახურების ვადა.</span><Link href="/login">შესვლა</Link><Link href="/register">პროფილის შექმნა</Link></div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className={`chosenProductGroup category-${product.type}`}><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
 
           </section>
@@ -319,7 +308,7 @@ export default function SubscriptionsPage() {
           <div className="line"><span>საწყისი ჯამი</span><b>{subtotal ? `${subtotal} ₾` : "—"}</b></div>
           <div className="line discount"><span>მრავალპროდუქტიანი ფასდაკლება</span><b>{discountPercent ? `−${discountPercent}%` : "0%"}</b></div>
           {discountAmount > 0 && <div className="saving">თქვენ დაზოგავთ <b>{discountAmount} ₾-ს</b></div>}
-          <div className="total"><span>სულ გადასახდელი</span><strong>{total ? `${total} ₾` : "0 ₾"}</strong></div>
+          <div className="total"><span>ჯამი გააქტიურების მოთხოვნისთვის</span><strong>{total ? `${total} ₾` : "0 ₾"}</strong></div>
           {message && <div className="requestSuccess">✓ {message}</div>}
           {error && <div className="requestError">{error}</div>}
           <button disabled={!selectedItems.length || hasIncompletePeriods || submitting} onClick={requestActivation}>{submitting ? "მოთხოვნა იგზავნება..." : "გააქტიურების მოთხოვნა"}</button>
