@@ -528,7 +528,6 @@ export default function SubscriptionsPage() {
       .layout .summary{padding:18px;border:1px solid #cbdced;border-radius:15px;background:#fff;color:#244260;box-shadow:0 8px 22px rgba(25,66,112,.08)}.layout .summaryTitle small{color:#5481a6}.layout .summaryTitle h2{margin:5px 0 13px;color:#173b5b;font-size:18px}.layout .chosen{background:#f5f9fd}.layout .chosen>div{color:#31516c;font-size:12px}.layout .line{padding:10px 0;color:#516d83;font-size:12px}.layout .line b{color:#173b5b}.layout .total{margin-top:12px;padding:12px;background:#e9f4ff}.layout .total span{color:#315c7e;font-size:12px}.layout .total strong{color:#1266b7;font-size:29px}.layout .summary>button{min-height:45px;border-radius:10px;background:#1266b7;color:#fff;font-size:13px;box-shadow:0 6px 14px rgba(18,102,183,.18)}.layout .summary p{color:#617c91}
       @media(max-width:760px){.ownerSectionHeader h2{font-size:19px}.ownerSectionHeader p{font-size:11px}.webCalendar{padding:10px}.webCalendar .priceCalendarHead,.webCalendar .chosenProductGroup{min-width:460px}.webCalendar .priceCalendar article>button{font-size:12px!important}.layout .summary{padding:15px}}
       .ownerSectionHeader small{color:#b8dcff!important}.ownerSectionHeader h2{color:#fff!important}.ownerSectionHeader p{color:#e0eeff!important}.ownerSectionHeader>span{background:#fff;color:#1464b3}
-      :global(.subscriptionsPage .calendarEmpty a){color:#fff!important;text-decoration:none!important}
     `}</style>
   </main>;
 }
