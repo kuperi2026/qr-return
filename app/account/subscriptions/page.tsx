@@ -274,7 +274,7 @@ export default function SubscriptionsPage() {
         <section className="panel">
           <div className="checkoutStage profileStage">
           <section className="liveCalculator webCalendar publicPriceCalendar" aria-label="დარეგისტრირებული პროფილების არჩევა">
-            <header><div><small>შექმნილი პროფილები</small><h3>პროფილი და მომსახურების ვადა</h3></div><div><span>{selectedItems.length} არჩეული</span><strong>{selectedItems.length ? `${total} ₾` : "—"}</strong></div></header>
+            <header><div><small>შექმნილი პროფილები</small><h3>აირჩიეთ პროფილი და ვადა</h3></div></header>
             {loading ? <div className="calendarEmpty">პროფილები იტვირთება...</div> : !hasAccount ? <div className="calendarEmpty"><b>თქვენი პროფილები აქ გამოჩნდება</b><span>შედით ანგარიშში და აირჩიეთ უკვე დარეგისტრირებული პროფილის მომსახურების ვადა.</span><Link href="/login" style={{ color: "#fff", textDecoration: "none", background: "#1266b7", padding: "10px 14px", borderRadius: 9 }}>შესვლა</Link><Link href="/register" style={{ color: "#1266b7", textDecoration: "none", background: "#e8f3ff", padding: "10px 14px", borderRadius: 9 }}>პროფილის შექმნა</Link></div> : profiles.length ? <section className="priceInstructions appProfileCalendar"><div className="priceCalendar"><div className="priceCalendarHead"><span>პროფილი</span>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>{PRODUCTS.map((product) => { const owned = profiles.filter((profile) => normalizeType(profile) === product.type); if (!owned.length) return null; return <section key={product.type} className={`chosenProductGroup category-${product.type}`}><header><span>{product.icon} {product.name}</span><b>{owned.length} პროფილი</b></header>{owned.map((profile) => { const ownPeriod = profilePeriods[profile.id] || null; const selected = selectedProfiles.includes(profile.id); return <article key={profile.id} className={selected ? "chosenProduct selectedCalendarProfile" : "chosenProduct"}><span><strong>{profile.item_name || profile.tag_code}</strong><small>{profile.tag_code}</small></span>{PERIODS.map((item) => { const active = selected && ownPeriod === item.value; return <button key={item.value} type="button" className={active ? "active" : ""} aria-label={`${profile.item_name || profile.tag_code}: ${item.label}, ${product.prices[item.value]} ლარი`} aria-pressed={active} onClick={() => chooseProfilePeriod(profile.id, item.value)}><span>{product.prices[item.value]}₾</span>{active && <i>✓</i>}</button>; })}</article>; })}</section>; })}</div></section> : <div className="calendarEmpty"><b>დარეგისტრირებული პროფილი არ გაქვთ</b><span>ჯერ შექმენით QR პროფილი და ის ავტომატურად გამოჩნდება ამ კალენდარში.</span><Link href={isAppPricing ? "/app/add" : "/register"}>+ პროფილის დამატება</Link></div>}
 
           </section>
@@ -317,11 +317,10 @@ export default function SubscriptionsPage() {
         {hasAccount && <aside className="summary estimateSummary checkoutStage summaryStage">
           <div className="summaryTitle"><div><small>თქვენი არჩევანი</small><h2>{selectedItems.length ? `${selectedItems.length} არჩეული პროფილი` : "აირჩიეთ პროფილი"}</h2></div></div>
           {selectedItems.length > 0 && <div className="chosen">{selectedItems.map((profile) => { const meta = PRODUCTS.find((item) => item.type === normalizeType(profile)); const ownPeriod = selectedPeriod(profile.id); return <div key={profile.id}><span>{meta?.icon} {profile.item_name || meta?.name}<small>{PERIODS.find((item) => item.value === ownPeriod)?.label || "ვადა არჩეული არ არის"}</small></span><b>{ownPeriod ? meta?.prices[ownPeriod] || 0 : 0} ₾</b></div>; })}</div>}
-          <div className="line desktopSharedPeriod"><span>არჩეული ვადა</span><b>{PERIODS.find((item) => item.value === period)?.label}</b></div>
           <div className="line"><span>საწყისი ჯამი</span><b>{subtotal ? `${subtotal} ₾` : "—"}</b></div>
-          <div className="line discount"><span>მრავალპროდუქტიანი ფასდაკლება</span><b>{discountPercent ? `−${discountPercent}%` : "0%"}</b></div>
+          {discountPercent > 0 && <div className="line discount"><span>ფასდაკლება</span><b>−{discountPercent}%</b></div>}
           {discountAmount > 0 && <div className="saving">თქვენ დაზოგავთ <b>{discountAmount} ₾-ს</b></div>}
-          <div className="total"><span>ჯამი გააქტიურების მოთხოვნისთვის</span><strong>{total ? `${total} ₾` : "0 ₾"}</strong></div>
+          <div className="total"><span>საერთო ჯამი</span><strong>{total ? `${total} ₾` : "0 ₾"}</strong></div>
           {message && <div className="requestSuccess">✓ {message}</div>}
           {error && <div className="requestError">{error}</div>}
           <button disabled={!selectedItems.length || hasIncompletePeriods || submitting} onClick={requestActivation}>{submitting ? "მოთხოვნა იგზავნება..." : "გააქტიურების მოთხოვნა"}</button>
@@ -561,6 +560,87 @@ export default function SubscriptionsPage() {
       .profileEstimateLayout .total span{font-size:12px}.profileEstimateLayout .total strong{font-size:21px}
       @media(max-width:850px){.profileEstimateLayout{grid-template-columns:1fr}.profileEstimateLayout .summary.estimateSummary{position:static;order:-1}}
       @media(max-width:760px){.profileEstimateLayout .webCalendar>header h3{font-size:16px}.profileEstimateLayout .summary.estimateSummary{padding:12px}}
+      .subscriptionsPage{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.45}
+      .publicPricingSection{padding:24px;border-color:#d7e5ed;border-radius:22px;background:#fff;box-shadow:0 20px 48px rgba(0,30,63,.17)}
+      .pricingSectionHeader{margin-bottom:20px;gap:15px}.pricingSectionHeader>span{width:46px;height:46px;flex-basis:46px;border-radius:14px;background:#087e8b;font-size:17px;box-shadow:0 6px 16px rgba(8,126,139,.2)}
+      .pricingSectionHeader small{color:#087e8b;font-size:13px;letter-spacing:.045em}.pricingSectionHeader h1{margin:3px 0;color:#17324d;font-size:27px;font-weight:800}.pricingSectionHeader p{margin-top:5px;color:#52697d;font-size:15px}
+      .webGuides,.profileEstimateLayout{grid-template-columns:minmax(0,1fr) 315px;gap:22px}
+      .profileEstimateLayout.publicLayout{grid-template-columns:minmax(0,1fr)}
+      .publicPriceCalendar,.profileEstimateLayout .webCalendar{border:1px solid #dae5ec;border-radius:16px;background:#fbfdfe;box-shadow:0 7px 20px rgba(13,51,81,.055)}
+      .publicPriceCalendar>header,.profileEstimateLayout .webCalendar>header{padding:18px 19px 13px;border-bottom:1px solid #e4ecf1}
+      .publicPriceCalendar h2,.profileEstimateLayout .webCalendar>header h3{margin:0;color:#17324d;font-size:21px;font-weight:800;line-height:1.3}
+      .profileEstimateLayout .webCalendar>header small{display:block;margin-bottom:3px;color:#087e8b;font-size:13px;font-weight:800}
+      .publicPriceScroll{padding:5px 14px 17px}.profileEstimateLayout .priceInstructions{padding:5px 14px 17px}
+      .publicPriceGrid{grid-template-columns:minmax(160px,1.45fr) repeat(4,minmax(68px,.7fr));gap:7px;min-width:550px}
+      .publicPriceHead,.profileEstimateLayout .webCalendar .priceCalendarHead{padding:12px 10px 9px;color:#405b70;font-size:14px!important;font-weight:750}
+      .publicPriceRow,.profileEstimateLayout .webCalendar .chosenProductGroup{--accent:#087e8b!important;margin-top:8px;border:1px solid #e0e9ee;border-radius:12px;background:#f4f8fa;box-shadow:none}
+      .publicPriceRow{min-height:62px;padding:7px 10px}
+      .publicPriceRow strong{gap:9px;color:#17324d;font-size:16px}.publicPriceRow strong span{width:35px;height:35px;border-radius:10px;font-size:20px}
+      .publicPriceCell{min-height:45px;border-color:#bedbdc;border-radius:9px;background:#fff;color:#086c79;font-size:16px;box-shadow:0 1px 3px rgba(15,62,77,.06)}
+      .publicPriceCell:hover,.profileEstimateLayout .webCalendar .priceCalendar article>button:hover{border-color:#087e8b;box-shadow:0 3px 11px rgba(8,126,139,.14)}
+      .publicPriceCell.selected,.profileEstimateLayout .webCalendar .priceCalendar article>button.active{border-color:#087e8b;background:#087e8b;color:#fff;box-shadow:0 4px 10px rgba(8,126,139,.22)}
+      .quantityControls button{width:28px;height:28px;border-color:#a7cfd1;color:#086c79;font-size:19px}.quantityControls b{color:#405b70;font-size:13px}
+      .profileEstimateLayout .webCalendar .chosenProductGroup{padding:8px 10px}
+      .profileEstimateLayout .webCalendar .chosenProductGroup>header{padding:3px 5px 9px;color:#173c55;font-size:15px}
+      .profileEstimateLayout .webCalendar .chosenProductGroup>header b{padding:5px 9px;border:1px solid #d7e5e9;background:#fff;color:#49677a;font-size:12px}
+      .profileEstimateLayout .webCalendar .priceCalendar article{min-height:59px;margin-top:5px;padding:6px 9px;border-color:#e1e9ed;border-radius:10px;background:#fff}
+      .profileEstimateLayout .webCalendar .chosenProductGroup .chosenProduct>span strong{color:#17324d;font-size:16px}
+      .profileEstimateLayout .webCalendar .chosenProductGroup .chosenProduct>span small{margin-top:3px;color:#587084;font-size:13px}
+      .profileEstimateLayout .webCalendar .priceCalendar article>button{height:44px;border-color:#bedbdc;border-radius:9px;background:#fff;color:#086c79;font-size:16px!important;box-shadow:0 1px 3px rgba(15,62,77,.06)}
+      .profileEstimateLayout .webCalendar .selectedCalendarProfile{border-color:#087e8b!important;background:#edf8f7!important;box-shadow:0 0 0 1px #087e8b!important}
+      .estimateSummary,.profileEstimateLayout .summary.estimateSummary{padding:23px;border:1px solid #d8e4ea;border-radius:16px;background:#fff;box-shadow:0 8px 23px rgba(13,51,81,.065)}
+      .estimateSummary>div:first-child small,.profileEstimateLayout .summaryTitle small{color:#087e8b;font-size:13px;font-weight:800}
+      .estimateSummary>div:first-child strong,.profileEstimateLayout .summaryTitle h2{margin:5px 0 14px;color:#17324d;font-size:19px;line-height:1.35}
+      .estimateLines,.profileEstimateLayout .chosen{margin:15px 0 12px;padding:8px 12px;border:1px solid #e5edf1;border-radius:11px;background:#f6f9fa}
+      .estimateLines>div,.profileEstimateLayout .chosen>div{padding:9px 0;color:#294960;font-size:14px;line-height:1.4}
+      .estimateLine,.profileEstimateLayout .line{padding:10px 2px;color:#456075;font-size:14px}
+      .estimateLine b,.profileEstimateLayout .line b{color:#17324d;font-size:15px}
+      .estimateTotal,.profileEstimateLayout .total{margin-top:13px;padding:15px;border-radius:12px;background:#123d56;color:#fff;font-size:15px}
+      .estimateTotal strong,.profileEstimateLayout .total strong{color:#fff;font-size:25px}
+      .profileEstimateLayout .total span{color:#fff;font-size:15px}
+      .profileEstimateLayout .summary>button{min-height:49px;margin-top:15px;background:#087e8b;color:#fff;font-size:15px;box-shadow:0 5px 13px rgba(8,126,139,.18)}
+      .profileEstimateLayout .summary>button:disabled{background:#dbe7e9;color:#536875;box-shadow:none;opacity:1}
+      .estimateSummary p,.profileEstimateLayout .summary p{color:#60788a;font-size:13px;line-height:1.5}
+      .estimateClear{color:#087e8b;font-size:13px}
+      .calendarEmpty{padding:28px 18px;border:0;border-radius:0;background:transparent;color:#4b6578;font-size:15px}
+      .calendarEmpty b{color:#17324d;font-size:18px}.calendarEmpty a{min-height:45px;font-size:14px}
+      @media(max-width:850px){.webGuides,.profileEstimateLayout{grid-template-columns:1fr;gap:16px}.estimateSummary,.profileEstimateLayout .summary.estimateSummary{position:static;order:-1}}
+      @media(max-width:760px){.publicPricingSection{padding:15px;border-radius:17px}.pricingSectionHeader{margin-bottom:16px;gap:11px}.pricingSectionHeader>span{width:42px;height:42px;flex-basis:42px;font-size:15px}.pricingSectionHeader h1{font-size:22px}.pricingSectionHeader p{font-size:14px}.publicPriceCalendar h2,.profileEstimateLayout .webCalendar>header h3{font-size:18px}.publicPriceScroll,.profileEstimateLayout .priceInstructions{padding:5px 10px 13px}.publicPriceGrid{min-width:550px}.profileEstimateLayout .webCalendar .priceCalendarHead,.profileEstimateLayout .webCalendar .chosenProductGroup{min-width:550px}.estimateSummary,.profileEstimateLayout .summary.estimateSummary{padding:17px}.publicPriceCell,.profileEstimateLayout .webCalendar .priceCalendar article>button{font-size:15px!important}}
+      .publicPricingSection{padding:0;overflow:hidden;border:1px solid #c8d6e7;background:#fff}
+      .pricingSectionHeader{position:relative;isolation:isolate;margin:0;padding:22px 26px;overflow:hidden;background:linear-gradient(110deg,#112e50,#1d4b82 74%,#245788)}
+      .pricingSectionHeader::after{content:"";position:absolute;z-index:-1;top:-105px;right:-30px;width:270px;height:270px;border:1px solid rgba(130,232,230,.28);border-radius:50%;box-shadow:0 0 0 34px rgba(130,232,230,.06),0 0 0 70px rgba(130,232,230,.04)}
+      .pricingSectionHeader>span{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.16);color:#fff;box-shadow:none}
+      .pricingSectionHeader small{color:#91f0e6}.pricingSectionHeader h1{color:#fff}.pricingSectionHeader p{color:#d7e8f5}
+      .webGuides,.profileEstimateLayout{padding:22px;gap:20px}
+      .profileEstimateLayout{margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+      .publicPriceCalendar,.profileEstimateLayout .webCalendar{background:#fff}
+      .publicPriceCalendar>header,.profileEstimateLayout .webCalendar>header{background:#f5f8fd}
+      .profileEstimateLayout .webCalendar>header small{color:#2e5dca}
+      .publicPriceHead,.profileEstimateLayout .webCalendar .priceCalendarHead{color:#354c64}
+      .publicPriceRow,.profileEstimateLayout .webCalendar .chosenProductGroup{--accent:#315bd4!important;border-color:#dce5f3;border-left:3px solid #6786df;background:#f4f7fc}
+      .publicPriceCell,.profileEstimateLayout .webCalendar .priceCalendar article>button{border-color:#cbd9ef;color:#2854c8}
+      .publicPriceCell:hover,.profileEstimateLayout .webCalendar .priceCalendar article>button:hover{border-color:#315bd4;box-shadow:0 3px 11px rgba(49,91,212,.16)}
+      .publicPriceCell.selected,.profileEstimateLayout .webCalendar .priceCalendar article>button.active{border-color:#315bd4;background:#315bd4;color:#fff;box-shadow:0 4px 11px rgba(49,91,212,.24)}
+      .profileEstimateLayout .webCalendar .selectedCalendarProfile{border-color:#315bd4!important;background:#eaf0ff!important;box-shadow:0 0 0 1px #315bd4!important}
+      .profileEstimateLayout .webCalendar .chosenProductGroup>header{color:#29487a}
+      .quantityControls button{border-color:#b6c9ea;color:#315bd4}
+      .webGuides .estimateSummary,.profileEstimateLayout .summary.estimateSummary{border:1px solid #183c62;background:linear-gradient(150deg,#173a61,#102b4b);color:#e5f1fb;box-shadow:0 14px 28px rgba(16,43,75,.16)}
+      .webGuides .estimateSummary>div:first-child small,.profileEstimateLayout .summaryTitle small{color:#8df0df}
+      .webGuides .estimateSummary>div:first-child strong,.profileEstimateLayout .summaryTitle h2{color:#fff}
+      .webGuides .estimateLines,.profileEstimateLayout .chosen{border:1px solid rgba(202,230,249,.13);background:rgba(255,255,255,.08)}
+      .webGuides .estimateLines>div,.profileEstimateLayout .chosen>div{border-color:rgba(222,239,250,.15);color:#edf7ff}
+      .profileEstimateLayout .chosen>div b{color:#fff}
+      .webGuides .estimateLine,.profileEstimateLayout .line{border-color:rgba(222,239,250,.18);color:#d3e5f1}
+      .webGuides .estimateLine b,.profileEstimateLayout .line b{color:#fff}
+      .webGuides .estimateTotal,.profileEstimateLayout .total{background:#89ebdc;color:#11314a;box-shadow:none}
+      .webGuides .estimateTotal strong,.profileEstimateLayout .total strong,.profileEstimateLayout .total span{color:#11314a}
+      .profileEstimateLayout .summary>button{background:#89ebdc;color:#10344d;box-shadow:0 5px 14px rgba(4,24,46,.14)}
+      .profileEstimateLayout .summary>button:disabled{background:#39546d;color:#d1dfeb;opacity:1;box-shadow:none}
+      .webGuides .estimateSummary p,.profileEstimateLayout .summary p{color:#b7d0e2}
+      .webGuides .estimateClear{color:#93eddf}
+      .purchaseHistory{border-color:#dbe6ee;border-radius:18px;box-shadow:0 12px 28px rgba(0,31,63,.1)}
+      .historyHeading small{color:#315bd4;font-size:13px}.historyHeading h2{font-size:23px}.historyHeading>span{background:#eaf0ff;color:#315bd4;font-size:13px}.historyEmpty{font-size:14px}
+      @media(max-width:760px){.pricingSectionHeader{padding:19px 16px}.webGuides,.profileEstimateLayout{padding:14px;gap:15px}.profileEstimateLayout.publicLayout{grid-template-columns:1fr}}
     `}</style>
   </main>;
 }
