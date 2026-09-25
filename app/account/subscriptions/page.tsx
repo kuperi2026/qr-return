@@ -641,6 +641,10 @@ export default function SubscriptionsPage() {
       .purchaseHistory{border-color:#dbe6ee;border-radius:18px;box-shadow:0 12px 28px rgba(0,31,63,.1)}
       .historyHeading small{color:#315bd4;font-size:13px}.historyHeading h2{font-size:23px}.historyHeading>span{background:#eaf0ff;color:#315bd4;font-size:13px}.historyEmpty{font-size:14px}
       @media(max-width:760px){.pricingSectionHeader{padding:19px 16px}.webGuides,.profileEstimateLayout{padding:14px;gap:15px}.profileEstimateLayout.publicLayout{grid-template-columns:1fr}}
+      :global(.subscriptionsPage .topbar .brand){display:flex;align-items:center;gap:11px;color:#fff;text-decoration:none}
+      :global(.subscriptionsPage .topbar .brand>div){display:flex;flex-direction:column;justify-content:center;gap:2px}
+      :global(.subscriptionsPage .topbar .brand strong){display:block;color:#fff;font-size:17px;line-height:1.1}
+      :global(.subscriptionsPage .topbar .brand small){display:block;margin:0;color:#c9e0f4;font-size:12px;line-height:1.2}
     `}</style>
   </main>;
 }
