@@ -64,7 +64,7 @@ export default function SubscriptionsPage() {
   const [period, setPeriod] = useState<Period>("6");
   const [profilePeriods, setProfilePeriods] = useState<Record<number, Period>>({});
   const [estimateSelections, setEstimateSelections] = useState<Record<string, EstimateSelection>>({});
-  const [view, setView] = useState<"estimate" | "profiles">("estimate");
+  const [view, setView] = useState<"choice" | "estimate" | "profiles">("choice");
   const [isAppPricing, setIsAppPricing] = useState(false);
   const [hasAccount, setHasAccount] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ export default function SubscriptionsPage() {
   const [openCategory, setOpenCategory] = useState("");
 
   useEffect(() => {
-    const syncView = () => setView(window.location.hash === "#my-profiles" ? "profiles" : "estimate");
+    const syncView = () => setView(window.location.hash === "#my-profiles" ? "profiles" : window.location.hash === "#estimate" ? "estimate" : "choice");
     syncView();
     window.addEventListener("hashchange", syncView);
     return () => window.removeEventListener("hashchange", syncView);
@@ -94,7 +94,6 @@ export default function SubscriptionsPage() {
       return;
     }
     setHasAccount(true);
-    if (!window.location.hash) setView("profiles");
     const { data } = await supabase.from("item").select("id,tag_code,item_name,item_type,pet_type,created_at").eq("owner_id", user.id).order("created_at", { ascending: false });
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
@@ -218,9 +217,14 @@ export default function SubscriptionsPage() {
         {isAppPricing && <div className="calendarAdvantage"><span>✦</span><p><b>უპირატესობა</b> შეგიძლიათ რამდენიმე გააქტიურებული პროფილი ერთ შეკვეთაში გააერთიანოთ და თითოეულისთვის განსხვავებული მომსახურების ვადა აირჩიოთ. მაგალითად, ძაღლის პროფილისთვის — 1 თვე, ხოლო Parking QR-ისთვის — 1 წელი.</p></div>}
       </section>
 
+      <header className="choiceIntro"><span>მომსახურება და პაკეტები</span><h1>რით გსურთ დაწყება?</h1><p>აირჩიეთ თქვენთვის სასურველი გზა. თითოეული QR კოდის გააქტიურებიდან პირველი 60 დღე უფასოა.</p></header>
       <nav className="pricingViewNav" aria-label="მომსახურების არჩევანი">
-        <a href="#estimate" className={view === "estimate" ? "active" : ""} aria-current={view === "estimate" ? "page" : undefined} onClick={() => setView("estimate")}>ფასის წინასწარ გამოთვლა</a>
-        <a href="#my-profiles" className={view === "profiles" ? "active" : ""} aria-current={view === "profiles" ? "page" : undefined} onClick={() => setView("profiles")}>ჩემი შექმნილი პროფილები</a>
+        <a href="#estimate" className={view === "estimate" ? "active" : ""} aria-current={view === "estimate" ? "page" : undefined} onClick={() => setView("estimate")}>
+          <span className="choiceIcon" aria-hidden="true">₾</span><span className="choiceCopy"><small>01 · წინასწარი შეფასება</small><strong>ფასის წინასწარ გამოთვლა</strong><span>პროდუქტი, რაოდენობა და ვადა აირჩიეთ. ფასი ანგარიშში შესვლის გარეშეც დაითვლება.</span></span><span className="choiceArrow" aria-hidden="true">→</span>
+        </a>
+        <a href="#my-profiles" className={view === "profiles" ? "active" : ""} aria-current={view === "profiles" ? "page" : undefined} onClick={() => setView("profiles")}>
+          <span className="choiceIcon" aria-hidden="true">▣</span><span className="choiceCopy"><small>02 · ჩემი ანგარიში</small><strong>ჩემი შექმნილი პროფილები</strong><span>აირჩიეთ უკვე შექმნილი QR პროფილები, თითოეულის ვადა და გაგზავნეთ გააქტიურების მოთხოვნა.</span></span><span className="choiceArrow" aria-hidden="true">→</span>
+        </a>
       </nav>
 
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
@@ -369,11 +373,13 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
-      .pricingViewNav{margin:0 0 18px;padding:6px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border:1px solid rgba(255,255,255,.3);border-radius:17px;background:rgba(255,255,255,.12)}
-      .pricingViewNav a{min-height:50px;padding:8px 12px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:#eaf5ff;font-size:14px;font-weight:850;text-align:center;text-decoration:none}
-      .pricingViewNav a.active{background:#fff;color:#0757a4;box-shadow:0 5px 14px rgba(0,25,65,.18)}
-      .pricingViewNav a:focus-visible{outline:3px solid #ffe578;outline-offset:2px}
-      @media(max-width:760px){.pricingViewNav a{min-height:56px;padding:8px 5px;font-size:11px}}
+      .choiceIntro{max-width:760px;margin:8px 0 22px;color:#fff}.choiceIntro>span{display:inline-block;padding:7px 11px;border:1px solid rgba(255,255,255,.3);border-radius:99px;background:rgba(255,255,255,.13);font-size:12px;font-weight:850}.choiceIntro h1{margin:14px 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.15;letter-spacing:-.03em}.choiceIntro p{margin:0;color:#dcecff;font-size:15px;line-height:1.65}
+      .pricingViewNav{margin:0 0 24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+      .pricingViewNav a{min-height:174px;padding:23px;display:flex;align-items:flex-start;gap:16px;border:2px solid transparent;border-radius:22px;background:#fff;color:#17324d;text-decoration:none;box-shadow:0 16px 34px rgba(0,25,65,.18);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+      .pricingViewNav a:hover{transform:translateY(-3px);box-shadow:0 21px 40px rgba(0,25,65,.26)}.pricingViewNav a.active{border-color:#64dbb4;background:#f3fffa;box-shadow:0 16px 34px rgba(0,25,65,.18),inset 0 0 0 2px #fff}
+      .choiceIcon{width:54px;height:54px;display:grid;place-items:center;flex:0 0 54px;border-radius:16px;background:#e9f2ff;color:#0867c9;font-size:27px;font-weight:900}.pricingViewNav a:nth-child(2) .choiceIcon{background:#e5f7ef;color:#087a59}.choiceCopy{min-width:0;flex:1}.choiceCopy small,.choiceCopy strong,.choiceCopy>span{display:block}.choiceCopy small{color:#55758f;font-size:11px;font-weight:850;letter-spacing:.02em}.choiceCopy strong{margin:7px 0 9px;color:#13375a;font-size:21px;line-height:1.25}.choiceCopy>span{color:#526d82;font-size:13px;line-height:1.55}.choiceArrow{align-self:flex-end;color:#0871cf;font-size:27px;font-weight:700}.pricingViewNav a:nth-child(2) .choiceArrow{color:#087a59}
+      .pricingViewNav a:focus-visible{outline:3px solid #ffe578;outline-offset:3px}
+      @media(max-width:760px){.choiceIntro{margin:5px 0 18px}.choiceIntro h1{font-size:30px}.choiceIntro p{font-size:13px}.pricingViewNav{grid-template-columns:1fr;gap:11px;margin-bottom:20px}.pricingViewNav a{min-height:132px;padding:16px;gap:12px;border-radius:17px}.choiceIcon{width:44px;height:44px;flex-basis:44px;border-radius:12px;font-size:23px}.choiceCopy strong{font-size:17px}.choiceCopy>span{font-size:11px}.choiceArrow{font-size:22px}}
       .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay,.profilePicker,.periodStage{display:none}
       .liveCalculator{display:block}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e3eaf2}.historyDates>div{padding:10px;border:1px solid #dce8f2;border-radius:10px;background:#fff}.historyDates small,.historyDates strong{display:block}.historyDates small{color:#71879a!important;font-size:9px!important;font-weight:850}.historyDates strong{margin-top:4px;color:#19476b!important;font-size:12px!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{grid-template-columns:1fr 1fr;gap:7px}}
