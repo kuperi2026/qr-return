@@ -231,11 +231,10 @@ export default function SubscriptionsPage() {
       </nav>
 
       {view === "estimate" && <section id="estimate" className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
-        <header className="pricingSectionHeader"><span>01</span><div><small>ფასის კალკულატორი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტი, რაოდენობა და ვადა. კალკულატორი სავარაუდო ჯამს ანგარიშში შესვლის გარეშე გაჩვენებთ.</p></div></header>
+        <header className="pricingSectionHeader"><span>01</span><div><small>ფასის კალკულატორი</small><h1>ფასის წინასწარ გამოთვლა</h1></div></header>
             <div className="webGuides">
               <section className="publicPriceCalendar" aria-label="ყველა პროდუქტის ფასების კალენდარი">
-                <header><div><small>ფასების ცხრილი</small><h2>ყველა პროდუქტის ფასი</h2></div><span>8 პროდუქტი · 4 ვადა</span></header>
-                <p>აირჩიეთ პროდუქტი, ვადა და რაოდენობა — სავარაუდო ჯამი მაშინვე დაითვლება. ანგარიშში შესვლა საჭირო არ არის.</p>
+                <header><div><h2>პროდუქტი და ვადა</h2></div></header>
                 <div className="publicPriceScroll">
                   <div className="publicPriceGrid publicPriceHead"><b>პროდუქტი</b>{PERIODS.map((item) => <b key={item.value}>{item.label}</b>)}</div>
                   {PRODUCTS.map((product) => {
@@ -252,8 +251,9 @@ export default function SubscriptionsPage() {
                     </div>;
                   })}
                 </div>
-                <div className="estimateSummary" aria-live="polite">
-                  <div><small>ფასის კალკულატორი · წინასწარი გამოთვლა</small><strong>{estimateCount ? `${estimateCount} პროდუქტი` : "აირჩიეთ პროდუქტი და ვადა"}</strong></div>
+              </section>
+              <aside className="estimateSummary" aria-live="polite" aria-label="ფასის შეჯამება">
+                  <div><small>წინასწარი კალკულატორი</small><strong>{estimateCount ? `${estimateCount} პროდუქტი` : "აირჩიეთ პროდუქტი და ვადა"}</strong></div>
                   {estimateCount > 0 && <>
                     <div className="estimateLines">{PRODUCTS.map((product) => { const selection = estimateSelections[product.type]; return selection ? <div key={product.type}><span>{product.icon} {product.name} · {selection.quantity} ცალი · {PERIODS.find((item) => item.value === selection.period)?.label}</span><b>{product.prices[selection.period] * selection.quantity} ₾</b></div> : null; })}</div>
                     <div className="estimateLine"><span>საწყისი ჯამი</span><b>{estimateSubtotal} ₾</b></div>
@@ -261,9 +261,8 @@ export default function SubscriptionsPage() {
                     <div className="estimateTotal"><span>სავარაუდო ჯამი</span><strong>{estimateTotal.toFixed(2)} ₾</strong></div>
                     <button type="button" className="estimateClear" onClick={() => setEstimateSelections({})}>არჩევანის გასუფთავება</button>
                   </>}
-                </div>
-                <footer>ეს გამოთვლა მხოლოდ ფასის გასაგებადაა; პროფილს არ ქმნის და გააქტიურების მოთხოვნას არ აგზავნის.</footer>
-              </section>
+                  <p>სავარაუდო ფასი · მოთხოვნა არ იგზავნება</p>
+              </aside>
             </div>
       </section>}
 
@@ -518,6 +517,11 @@ export default function SubscriptionsPage() {
       :global(.subscriptionsPage .topbar .brand strong){color:#fff!important}
       :global(.subscriptionsPage .topbar .brand small){color:#d6e9ff!important}
       :global(.subscriptionsPage .topbar .back){padding:10px 14px;border:1px solid rgba(255,255,255,.38);border-radius:10px;background:rgba(255,255,255,.12)}
+      .publicPricingSection{padding:16px;border-radius:17px}.pricingSectionHeader{margin-bottom:12px;gap:11px}.pricingSectionHeader>span{width:38px;height:38px;flex-basis:38px;border-radius:11px;font-size:14px}.pricingSectionHeader h1{font-size:21px}
+      .webGuides{grid-template-columns:minmax(0,1fr) 270px;align-items:start;gap:14px;margin-bottom:0}.publicPriceCalendar{border-radius:14px}.publicPriceCalendar>header{padding:13px 14px 6px}.publicPriceCalendar h2{font-size:17px}.publicPriceScroll{padding:0 10px 11px}.publicPriceHead{padding:6px 8px;font-size:11px}.publicPriceGrid{grid-template-columns:minmax(120px,1.45fr) repeat(4,minmax(53px,.7fr));gap:5px;min-width:410px}.publicPriceRow{min-height:47px;margin-top:4px;padding:4px 7px;border-radius:9px}.publicPriceRow strong{gap:5px;font-size:12px}.publicPriceRow strong span{width:26px;height:26px;font-size:16px}.publicPriceCell{min-height:35px;padding:6px 1px;font-size:12px}.quantityControls{gap:4px}.quantityControls button{width:23px;height:23px}.quantityControls b{font-size:10px}
+      .estimateSummary{position:sticky;top:18px;margin:0;padding:17px;border-color:#c9d8e8;border-radius:14px;background:#fff;box-shadow:0 10px 25px rgba(25,66,112,.09)}.estimateSummary>div:first-child small{font-size:11px}.estimateSummary>div:first-child strong{font-size:16px}.estimateSummary p{margin:12px 0 0;color:#678096;font-size:11px;line-height:1.4}.estimateLines{margin:10px 0 6px;padding:5px 8px}.estimateLines>div{font-size:11px}.estimateLine{font-size:12px}.estimateTotal{padding:11px;font-size:13px}.estimateTotal strong{font-size:21px}
+      @media(max-width:850px){.webGuides{grid-template-columns:1fr}.estimateSummary{position:static;order:-1}.publicPriceGrid{min-width:410px}}
+      @media(max-width:760px){.publicPricingSection{padding:11px}.pricingSectionHeader h1{font-size:19px}.webGuides{gap:10px}.publicPriceCalendar h2{font-size:16px}.estimateSummary{padding:12px}.estimateSummary>div:first-child strong{font-size:15px}}
     `}</style>
   </main>;
 }
