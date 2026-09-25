@@ -64,6 +64,7 @@ export default function SubscriptionsPage() {
   const [period, setPeriod] = useState<Period>("6");
   const [profilePeriods, setProfilePeriods] = useState<Record<number, Period>>({});
   const [estimateSelections, setEstimateSelections] = useState<Record<string, EstimateSelection>>({});
+  const [view, setView] = useState<"estimate" | "profiles">("estimate");
   const [isAppPricing, setIsAppPricing] = useState(false);
   const [hasAccount, setHasAccount] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,6 +75,13 @@ export default function SubscriptionsPage() {
   const [error, setError] = useState("");
   const [appStep, setAppStep] = useState<1 | 2 | 3>(1);
   const [openCategory, setOpenCategory] = useState("");
+
+  useEffect(() => {
+    const syncView = () => setView(window.location.hash === "#my-profiles" ? "profiles" : "estimate");
+    syncView();
+    window.addEventListener("hashchange", syncView);
+    return () => window.removeEventListener("hashchange", syncView);
+  }, []);
 
   useEffect(() => { void (async () => {
     const params = new URLSearchParams(window.location.search);
@@ -86,6 +94,7 @@ export default function SubscriptionsPage() {
       return;
     }
     setHasAccount(true);
+    if (!window.location.hash) setView("profiles");
     const { data } = await supabase.from("item").select("id,tag_code,item_name,item_type,pet_type,created_at").eq("owner_id", user.id).order("created_at", { ascending: false });
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
@@ -209,6 +218,11 @@ export default function SubscriptionsPage() {
         {isAppPricing && <div className="calendarAdvantage"><span>✦</span><p><b>უპირატესობა</b> შეგიძლიათ რამდენიმე გააქტიურებული პროფილი ერთ შეკვეთაში გააერთიანოთ და თითოეულისთვის განსხვავებული მომსახურების ვადა აირჩიოთ. მაგალითად, ძაღლის პროფილისთვის — 1 თვე, ხოლო Parking QR-ისთვის — 1 წელი.</p></div>}
       </section>
 
+      <nav className="pricingViewNav" aria-label="მომსახურების არჩევანი">
+        <a href="#estimate" className={view === "estimate" ? "active" : ""} aria-current={view === "estimate" ? "page" : undefined} onClick={() => setView("estimate")}>ფასის წინასწარ გამოთვლა</a>
+        <a href="#my-profiles" className={view === "profiles" ? "active" : ""} aria-current={view === "profiles" ? "page" : undefined} onClick={() => setView("profiles")}>ჩემი შექმნილი პროფილები</a>
+      </nav>
+
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
         {([1, 3] as const).map((step) => (
           <button key={step} type="button" className={appStep === step ? "active" : appStep > step ? "done" : ""} onClick={() => setAppStep(step)}>
@@ -218,7 +232,7 @@ export default function SubscriptionsPage() {
         ))}
       </nav>
 
-      <section id="estimate" className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
+      {view === "estimate" && <section id="estimate" className="publicPricingSection" aria-label="წინასწარი ფასის გამოთვლა">
         <header className="pricingSectionHeader"><span>01</span><div><small>თავისუფლად სანახავი</small><h1>წინასწარ გამოთვალეთ ფასი</h1><p>აირჩიეთ პროდუქტები და ვადები — ეს მხოლოდ ფასის შეფასებაა.</p></div></header>
             <div className="webGuides">
               <section className="publicPriceCalendar" aria-label="ყველა პროდუქტის ფასების კალენდარი">
@@ -253,8 +267,9 @@ export default function SubscriptionsPage() {
                 <footer>ეს გამოთვლა მხოლოდ ფასის გასაგებადაა; პროფილს არ ქმნის და გააქტიურების მოთხოვნას არ აგზავნის.</footer>
               </section>
             </div>
-      </section>
+      </section>}
 
+      {view === "profiles" && <>
       <header id="my-profiles" className="ownerSectionHeader"><span>02</span><div><small>თქვენი QR პროფილები</small><h2>პაკეტის ვადის გააქტიურება</h2><p>აქ მხოლოდ თქვენი უკვე შექმნილი პროფილებია. თითოეულს ცალკე ვადა აურჩიეთ; ფასები და საერთო ჯამი ავტომატურად გამოჩნდება.</p></div></header>
 
       <div className={hasAccount ? "layout" : "layout publicLayout"}>
@@ -349,10 +364,16 @@ export default function SubscriptionsPage() {
           </div>
         )}
       </section>}
+      </>}
 
     </section>
 
     <style jsx>{`
+      .pricingViewNav{margin:0 0 18px;padding:6px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border:1px solid rgba(255,255,255,.3);border-radius:17px;background:rgba(255,255,255,.12)}
+      .pricingViewNav a{min-height:50px;padding:8px 12px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:#eaf5ff;font-size:14px;font-weight:850;text-align:center;text-decoration:none}
+      .pricingViewNav a.active{background:#fff;color:#0757a4;box-shadow:0 5px 14px rgba(0,25,65,.18)}
+      .pricingViewNav a:focus-visible{outline:3px solid #ffe578;outline-offset:2px}
+      @media(max-width:760px){.pricingViewNav a{min-height:56px;padding:8px 5px;font-size:11px}}
       .appCheckoutSteps,.appNext,.appStageActions,.summaryPrevious,.appPriceCatalog,.inlineCalculator,.calculatorLauncher,.calculatorOverlay,.profilePicker,.periodStage{display:none}
       .liveCalculator{display:block}
       .purchaseHistory{margin-top:16px;padding:24px;border:1px solid #d9dddf;border-radius:15px;background:#fff;box-shadow:0 12px 30px rgba(38,48,56,.07)}.historyHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}.historyHeading small{color:#1266e9;font-size:12px;font-weight:900}.historyHeading h2{margin:5px 0 0;color:#17324d;font-size:25px}.historyHeading>span{padding:8px 11px;border-radius:9px;background:#eef5ff;color:#075dcc;font-size:12px;font-weight:900}.historyEmpty{margin-top:18px;padding:22px;border:1px dashed #cbd9e8;border-radius:12px;color:#60758a;text-align:center}.historyList{margin-top:18px;display:grid;gap:10px}.historyList article{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;border:1px solid #dde6ef;border-radius:12px;background:#f8fbff}.historyList article strong,.historyList article span{display:block}.historyList article strong{color:#17324d;font-size:15px}.historyList article span{margin-top:4px;color:#60758a;font-size:12px}.historyAmount{color:#17324d;font-size:17px;font-weight:950}.historyStatus{padding:7px 9px;border-radius:999px;background:#fff4d8;color:#8a5b00;font-size:12px;font-weight:900}.historyStatus.confirmed{background:#e8f8f0;color:#087443}.historyStatus.rejected,.historyStatus.cancelled{background:#fff0f0;color:#a51d26}.historyDates{grid-column:1/-1;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid #e3eaf2}.historyDates>div{padding:10px;border:1px solid #dce8f2;border-radius:10px;background:#fff}.historyDates small,.historyDates strong{display:block}.historyDates small{color:#71879a!important;font-size:9px!important;font-weight:850}.historyDates strong{margin-top:4px;color:#19476b!important;font-size:12px!important}@media(max-width:760px){.purchaseHistory{padding:18px 14px}.historyHeading{align-items:flex-start}.historyHeading h2{font-size:21px}.historyList article{grid-template-columns:1fr auto}.historyStatus{grid-column:2}.historyDates{grid-template-columns:1fr 1fr;gap:7px}}
@@ -486,12 +507,10 @@ export default function SubscriptionsPage() {
       .pricingSectionHeader small,.ownerSectionHeader small{color:#3979b0;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.7px}
       .pricingSectionHeader h1,.ownerSectionHeader h2{margin:4px 0;color:#153d62;font-size:25px;line-height:1.2}
       .pricingSectionHeader p,.ownerSectionHeader p{margin:0;color:#5a7690;font-size:13px;line-height:1.5}
-      .ownerSectionHeader{margin:33px 0 14px;padding-top:23px;border-top:2px solid #bed9f1}
+      .ownerSectionHeader{margin:0 0 14px;padding-top:0;border-top:0}
       .ownerSectionHeader>span{background:linear-gradient(145deg,#139c83,#0b6cbd)}
       .ownerSectionHeader small{color:#16876f}
       @media(max-width:760px){.publicPricingSection{padding:13px;border-radius:18px}.pricingSectionHeader,.ownerSectionHeader{gap:10px}.pricingSectionHeader>span,.ownerSectionHeader>span{width:43px;height:43px;flex-basis:43px;font-size:16px}.pricingSectionHeader h1,.ownerSectionHeader h2{font-size:20px}.pricingSectionHeader p,.ownerSectionHeader p{font-size:12px}}
-      :global(body.kompasiAppMode) .publicPricingSection,:global(body.kompasiAppMode) .ownerSectionHeader{display:none!important}
-      :global(body.kompasiAppMode) .webGuides{display:none!important}
     `}</style>
   </main>;
 }
