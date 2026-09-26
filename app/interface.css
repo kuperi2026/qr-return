@@ -1,0 +1,22 @@
+@font-face{font-family:'QR Georgian';src:url('/fonts/noto-georgian-regular.ttf') format('truetype');font-style:normal;font-weight:100 500;font-display:swap}
+@font-face{font-family:'QR Georgian';src:url('/fonts/noto-georgian-semibold.ttf') format('truetype');font-style:normal;font-weight:600 900;font-display:swap}
+:root{--font-georgian:'QR Georgian','Noto Sans Georgian',Arial,sans-serif}
+.homeHero .heroSupport{gap:12px;font-family:var(--font-georgian)}
+.homeHero .heroSupport .supportCard{box-sizing:border-box;border:1px solid #d7e3ee;border-radius:16px;background:#fff;color:#193b59;box-shadow:0 8px 24px #00264b12;backdrop-filter:none}
+.homeHero .heroSupport .supportCard summary,.homeHero .heroSupport .supportLink{box-sizing:border-box;min-height:86px;padding:17px 20px;grid-template-columns:44px minmax(0,1fr) 20px;gap:14px}
+.homeHero .heroSupport .supportSymbol{height:44px;width:44px;display:grid;place-items:center;background:#edf3f9;color:#355c80;border-radius:12px}
+.homeHero .heroSupport strong{font-size:16px;line-height:1.5;font-weight:650;letter-spacing:0}
+.homeHero .heroSupport .supportLink small{margin-top:4px;color:#6b7f93;font-size:13px;line-height:1.5;font-weight:400}
+.homeHero .heroSupport b{color:#7a91a8;display:flex;align-items:center;justify-content:center;transition:transform .18s}
+.homeHero .heroSupport .supportCard p{padding:0 24px 22px 78px;color:#5c7287;font-size:14px;line-height:1.8}
+.homeHero .heroSupport .supportLink:hover{transform:translateY(-2px);background:#f6f9fc;border-color:#97b4d0}
+.homeHero .heroSupport .supportLink:focus-visible,.homeHero .heroSupport summary:focus-visible{outline:3px solid #80b5ea;outline-offset:3px;border-radius:16px}
+@media(max-width:520px){.homeHero .heroSupport .supportCard summary,.homeHero .heroSupport .supportLink{padding:15px 17px}.homeHero .heroSupport strong{font-size:15px}}
+
+.subscriptionsPage .choiceContent{font-family:var(--font-georgian),Arial,sans-serif}
+
+.homePalette .heroSupport{border-radius:16px!important}
+.homePalette .heroSupport .supportCard summary,.homePalette .heroSupport .supportLink{min-height:82px!important;padding:14px 18px!important;display:grid;grid-template-columns:40px minmax(0,1fr) 16px;gap:12px}
+.homePalette .heroSupport .supportSymbol{width:40px;height:40px}
+.homePalette .heroSupport strong{font-size:15px}
+.homePalette .heroSupport .supportCard:last-child{border-right:0!important;border-bottom:0!important}

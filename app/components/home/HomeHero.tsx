@@ -1,5 +1,7 @@
 "use client";
 
+import InterfaceIcon from "../ui/InterfaceIcon";
+
 export default function HomeHero({ ka }: { ka: boolean }) {
   type ProductKind = "emergency" | "parking" | "suitcase" | "dog" | "cat" | "bag" | "wallet" | "keys";
   const detailCopyKa: Record<ProductKind, Array<[string, string, string]>> = {
@@ -108,11 +110,11 @@ export default function HomeHero({ ka }: { ka: boolean }) {
           </article>
           <div className="heroSupport">
             <details className="supportCard">
-              <summary><span aria-hidden="true">✦</span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true">+</b></summary>
+              <summary><span className="supportSymbol"><InterfaceIcon name="info" size={22}/></span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true"><InterfaceIcon name="plus" size={18}/></b></summary>
               <p>{ka ? "სწრაფი რეგისტრაცია, აპლიკაციის გარეშე სკანირება, კონფიდენციალურობის კონტროლი, Lost Mode და პროფილის მართვა." : "Quick registration, app-free scanning, privacy controls, Lost Mode and profile management."}</p>
             </details>
-            <a className="supportCard supportLink" href="/book-call"><span aria-hidden="true">📞</span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true">→</b></a>
-            <a className="supportCard supportLink" href="/support"><span aria-hidden="true">💬</span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true">→</b></a>
+            <a className="supportCard supportLink" href="/book-call"><span className="supportSymbol"><InterfaceIcon name="phone" size={22}/></span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true"><InterfaceIcon name="arrow" size={18}/></b></a>
+            <a className="supportCard supportLink" href="/support"><span className="supportSymbol"><InterfaceIcon name="chat" size={22}/></span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true"><InterfaceIcon name="arrow" size={18}/></b></a>
           </div>
         </div>
 

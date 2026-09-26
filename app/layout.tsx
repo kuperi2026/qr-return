@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./product-grid.css";
+import "./interface.css";
+import StyledJsxRegistry from "./registry";
+import SiteBackNavigation from "./components/SiteBackNavigation";
 import AppInstallManager from "@/app/components/app/AppInstallManager";
 import PremiumAppShell from "@/app/components/app/PremiumAppShell";
 
@@ -45,9 +48,12 @@ export default function RootLayout({
             "Arial, Helvetica, sans-serif",
         }}
       >
+        <StyledJsxRegistry>
+        <SiteBackNavigation />
         {children}
         <PremiumAppShell />
         <AppInstallManager />
+        </StyledJsxRegistry>
       </body>
     </html>
   );

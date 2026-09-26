@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import InterfaceIcon from "./components/ui/InterfaceIcon";
 
 import HomeHeader from "./components/home/HomeHeader";
 import AboutMenu from "./components/home/AboutMenu";
@@ -48,6 +49,7 @@ export default function HomePage() {
         toggleMenu={toggleMenu}
       />
 
+      {openMenu && <div style={{background:"#f5f8fb",padding:"10px 24px"}}><button type="button" onClick={() => setOpenMenu(null)} style={{display:"flex",alignItems:"center",gap:8,border:0,borderRadius:8,padding:"10px 12px",background:"#fff",color:"#193c59",fontFamily:"var(--font-georgian)",fontSize:14,cursor:"pointer"}}><InterfaceIcon name="back" size={18}/>{ka ? "უკან დაბრუნება" : "Back"}</button></div>}
       {openMenu === "about" && <AboutMenu ka={ka} />}
 
       {openMenu === "shop" && (

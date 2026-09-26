@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ServiceChoiceCards from "@/app/components/service/ServiceChoiceCards";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -80,7 +81,8 @@ export default function SubscriptionsPage() {
     const syncView = () => setView(window.location.hash === "#my-profiles" ? "profiles" : window.location.hash === "#estimate" ? "estimate" : "choice");
     syncView();
     window.addEventListener("hashchange", syncView);
-    return () => window.removeEventListener("hashchange", syncView);
+    window.addEventListener("popstate", syncView);
+    return () => { window.removeEventListener("hashchange", syncView); window.removeEventListener("popstate", syncView); };
   }, []);
 
   useEffect(() => { void (async () => {
@@ -212,14 +214,7 @@ export default function SubscriptionsPage() {
       <Link href="/app/products" className="appBack" style={{ display: "none" }}>← ჰაბში დაბრუნება</Link>
       {view === "choice" && <div className="choiceContent">
       <header className="choiceIntro"><span>QR RETURN · მომსახურება და პაკეტები</span><h1>აირჩიეთ თქვენთვის სასურველი გზა</h1><p>ერთ გვერდზე წინასწარ გამოთვლით ფასს. მეორე გვერდზე აირჩევთ უკვე შექმნილ პროფილებს და თითოეულს სასურველ ვადას მიანიჭებთ. შეგიძლიათ რამდენიმე პროფილი ერთად აირჩიოთ, განსხვავებული ვადებით.</p></header>
-      <nav className="pricingViewNav" aria-label="მომსახურების არჩევანი">
-        <a href="#estimate" onClick={() => setView("estimate")}>
-          <span className="choiceIcon" aria-hidden="true">₾</span><span className="choiceCopy"><small>01</small><strong>ფასის წინასწარ გამოთვლა</strong></span><span className="choiceArrow" aria-hidden="true">→</span>
-        </a>
-        <a href="#my-profiles" onClick={() => setView("profiles")}>
-          <span className="choiceIcon" aria-hidden="true">▣</span><span className="choiceCopy"><small>02</small><strong>ჩემი შექმნილი პროფილები</strong></span><span className="choiceArrow" aria-hidden="true">→</span>
-        </a>
-      </nav></div>}
+      <ServiceChoiceCards local onChoose={setView} /></div>}
 
       <nav className="appCheckoutSteps" aria-label="პაკეტის გააქტიურების ეტაპები">
         {([1, 3] as const).map((step) => (
@@ -367,6 +362,8 @@ export default function SubscriptionsPage() {
     </section>
 
     <style jsx>{`
+      .subscriptionsPage .choiceShell{min-height:calc(100svh - 56px);padding-top:50px;padding-bottom:70px}.choiceIntro h1{font-weight:650!important;line-height:1.45!important}.choiceIntro p{max-width:690px!important;font-size:15px!important;line-height:1.85!important}
+
       .choiceShell{min-height:100vh;display:flex;align-items:center;justify-content:center}.choiceContent{width:100%;max-width:950px;margin:auto}.choiceIntro{max-width:760px;margin:0 0 30px;color:#fff}.choiceIntro span{display:inline-block;padding:7px 12px;border:1px solid rgba(255,255,255,.34);border-radius:99px;background:rgba(255,255,255,.12);font-size:11px;font-weight:850;letter-spacing:.04em}.choiceIntro h1{margin:15px 0 11px;font-size:clamp(26px,3.4vw,39px);line-height:1.2;letter-spacing:-.025em}.choiceIntro p{max-width:740px;margin:0;color:#e2efff;font-size:15px;line-height:1.65}
       .subscriptionsPage .topbar .brand,.subscriptionsPage .topbar .back{color:#fff!important;text-decoration:none!important}.subscriptionsPage .topbar .brand{gap:11px}.subscriptionsPage .topbar .brand>span{background:#fff!important;color:#1266e9!important}.subscriptionsPage .topbar .brand strong{color:#fff!important;font-size:17px}.subscriptionsPage .topbar .brand small{color:#d6e9ff!important;font-size:11px}.subscriptionsPage .topbar .back{padding:10px 14px;border:1px solid rgba(255,255,255,.38);border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:800}
       .pricingViewNav{width:100%;max-width:950px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}

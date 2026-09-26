@@ -1,5 +1,7 @@
 "use client";
 
+import { SupportAttachment, SupportMessageText } from "@/app/components/support/SupportMessageContent";
+
 import {
   FormEvent,
   useEffect,
@@ -1041,15 +1043,11 @@ export default function AdminSupportPage() {
                           </div>
 
                           {message.message && (
-                            <div className="messageText">
-                              {
-                                message.message
-                              }
-                            </div>
+                            <SupportMessageText text={message.message} />
                           )}
 
                           {message.attachment_path && (
-                            <AdminAttachment
+                            <SupportAttachment
                               path={
                                 message.attachment_path
                               }

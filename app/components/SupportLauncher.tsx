@@ -1,5 +1,7 @@
 "use client";
 
+import { SupportAttachment, SupportMessageText } from "@/app/components/support/SupportMessageContent";
+
 import {
   ChangeEvent,
   FormEvent,
@@ -825,15 +827,11 @@ export default function SupportLauncher({
                       </div>
 
                       {message.message && (
-                        <div className="messageText">
-                          {
-                            message.message
-                          }
-                        </div>
+                        <SupportMessageText text={message.message} />
                       )}
 
                       {message.attachment_path && (
-                        <AttachmentPreview
+                        <SupportAttachment
                           path={
                             message.attachment_path
                           }
