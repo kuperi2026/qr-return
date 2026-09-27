@@ -20,3 +20,15 @@
 .homePalette .heroSupport .supportSymbol{width:40px;height:40px}
 .homePalette .heroSupport strong{font-size:15px}
 .homePalette .heroSupport .supportCard:last-child{border-right:0!important;border-bottom:0!important}
+
+/* Soft color cues for the three support options. */
+.homeHero .heroSupport .supportCard{--card-tint:#f5f0ff;--card-icon:#e9dfff;--card-accent:#7151a8;--card-hover:#eee5ff}
+.homeHero .heroSupport .supportCard:nth-child(2){--card-tint:#eef5ff;--card-icon:#dceaff;--card-accent:#285f9f;--card-hover:#e3efff}
+.homeHero .heroSupport .supportCard:nth-child(3){--card-tint:#edf9f4;--card-icon:#d4eee3;--card-accent:#22765f;--card-hover:#e0f3eb}
+.homePalette .heroSupport .supportCard,
+.homePalette .heroSupport .supportCard summary,
+.homePalette .heroSupport .supportCard p{background:var(--card-tint)!important}
+.homeHero .heroSupport .supportSymbol{background:var(--card-icon);color:var(--card-accent)}
+.homeHero .heroSupport b{color:var(--card-accent)}
+.homePalette .heroSupport .supportLink:hover,
+.homePalette .heroSupport .supportCard summary:hover{background:var(--card-hover)!important}
