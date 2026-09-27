@@ -2,3 +2,4 @@
 @font-face{font-family:'QR Georgian';src:url('/fonts/noto-georgian-semibold.ttf') format('truetype');font-style:normal;font-weight:600 900;font-display:swap}
 :root{--font-georgian:'QR Georgian','Noto Sans Georgian',Arial,sans-serif}
 .subscriptionsPage .choiceContent{font-family:var(--font-georgian),Arial,sans-serif}
+.homePalette .bottomAccountNote{box-sizing:border-box}
