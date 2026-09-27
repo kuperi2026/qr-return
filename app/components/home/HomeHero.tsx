@@ -1,6 +1,6 @@
 "use client";
 
-import InterfaceIcon from "../ui/InterfaceIcon";
+import HomeSupportCards from "./HomeSupportCards";
 
 export default function HomeHero({ ka }: { ka: boolean }) {
   type ProductKind = "emergency" | "parking" | "suitcase" | "dog" | "cat" | "bag" | "wallet" | "keys";
@@ -108,14 +108,7 @@ export default function HomeHero({ ka }: { ka: boolean }) {
           <article className="ecosystemCircle">
             <h1>{ka ? <>შექმენი შენი ციფრული QR პროფილი <strong>20 წამში.</strong></> : <>Create your digital QR profile in <strong>20 seconds.</strong></>}</h1>
           </article>
-          <div className="heroSupport">
-            <details className="supportCard">
-              <summary><span className="supportSymbol"><InterfaceIcon name="info" size={22}/></span><strong>{ka ? "პროდუქტის შესახებ" : "Product information"}</strong><b aria-hidden="true"><InterfaceIcon name="plus" size={18}/></b></summary>
-              <p>{ka ? "სწრაფი რეგისტრაცია, აპლიკაციის გარეშე სკანირება, კონფიდენციალურობის კონტროლი, Lost Mode და პროფილის მართვა." : "Quick registration, app-free scanning, privacy controls, Lost Mode and profile management."}</p>
-            </details>
-            <a className="supportCard supportLink" href="/book-call"><span className="supportSymbol"><InterfaceIcon name="phone" size={22}/></span><span><strong>{ka ? "24/7 მხარდაჭერა" : "24/7 support"}</strong><small>{ka ? "ზარის დაჯავშნა" : "Book a call"}</small></span><b aria-hidden="true"><InterfaceIcon name="arrow" size={18}/></b></a>
-            <a className="supportCard supportLink" href="/support"><span className="supportSymbol"><InterfaceIcon name="chat" size={22}/></span><span><strong>{ka ? "ონლაინ ჩათი" : "Online chat"}</strong><small>{ka ? "მოგვწერეთ ახლავე" : "Message us now"}</small></span><b aria-hidden="true"><InterfaceIcon name="arrow" size={18}/></b></a>
-          </div>
+          <HomeSupportCards ka={ka}/>
         </div>
 
         <section className="productShowcase" aria-label={ka ? "QR RETURN პროდუქტები" : "QR RETURN products"}>
