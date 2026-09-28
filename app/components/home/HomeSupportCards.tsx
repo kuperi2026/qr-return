@@ -49,10 +49,10 @@ export default function HomeSupportCards({ ka }: { ka: boolean }) {
 
     <style jsx>{`
       .homeContactCards{position:relative;z-index:2;width:min(1140px,calc(100vw - 48px));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;font-family:var(--font-georgian),Arial,sans-serif}
-      .contactTile{box-sizing:border-box;min-width:0;display:grid;grid-template-columns:42px minmax(0,1fr) 26px;align-items:center;gap:13px;min-height:112px;padding:21px 20px;border:1px solid #d0e6f3;border-radius:18px;background:#fff;color:#173e60;text-align:left;text-decoration:none;font:inherit;cursor:pointer;box-shadow:0 8px 20px #073c6315;transition:transform .18s,box-shadow .18s}
+      .contactTile{box-sizing:border-box;min-width:0;display:grid;grid-template-columns:42px minmax(0,1fr) 26px;align-items:center;gap:13px;min-height:112px;padding:21px 20px;border:1px solid #d0e6f3;border-radius:18px;background:#fff;color:#17212f;text-align:left;text-decoration:none;font:inherit;cursor:pointer;box-shadow:0 8px 20px #073c6315;transition:transform .18s,box-shadow .18s}
       .contactTile:hover{transform:translateY(-3px);box-shadow:0 12px 26px #062e652b}.contactTile:focus-visible{outline:3px solid #9ce7d4;outline-offset:4px}
       .contactIcon{height:42px;width:42px;display:grid;place-items:center;border-radius:12px;background:#e1f0fc;color:#126ea6}
-      .contactCopy{min-width:0}.contactCopy strong{display:block;font-size:18px;line-height:1.6;font-weight:600;letter-spacing:0}.contactCopy small{display:block;margin-top:6px;font-size:14px;line-height:1.6;color:#496b84;letter-spacing:0}
+      .contactCopy{min-width:0}.contactCopy strong{display:block;font-size:18px;line-height:1.6;font-weight:600;letter-spacing:0;color:#17212f}.contactCopy small{display:block;margin-top:6px;font-size:14px;line-height:1.6;color:#374151;letter-spacing:0}
       .contactArrow{height:26px;width:26px;display:grid;place-items:center;border:1px solid #cce1f0;border-radius:50%;color:#266b9a;background:#eff7fd}
       .callTile{background:#fff}.callTile .contactIcon{background:#dff1ed;color:#187967}
       .chatTile{background:#fff}.chatTile .contactIcon{background:#e6edfc;color:#3c64aa}
