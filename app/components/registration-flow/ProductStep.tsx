@@ -62,7 +62,7 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
-  const [formPage, setFormPage] = useState<1 | 2 | 3>(1);
+  const [formPage, setFormPage] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   const pet =
     isPetType(type);
@@ -83,7 +83,7 @@ export default function ProductStep({
     <>
       <div className="stepTitle">
         <span>
-          STEP 2 OF 3
+          STEP 2 OF 3 · {formPage}/5
         </span>
 
         <h1>
@@ -343,8 +343,7 @@ export default function ProductStep({
 
       {/* PHOTO */}
 
-      {formPage === 2 && <>
-      <section className="formSection">
+      {formPage === 2 && <section className="formSection">
         <p className="sectionIntro">
           ფოტო მპოვნელისთვის ამოცნობას მნიშვნელოვნად ამარტივებს.
         </p>
@@ -371,11 +370,11 @@ export default function ProductStep({
             )
           }
         />
-      </section>
+      </section>}
 
       {/* ADDITIONAL INFO */}
 
-      <section className="formSection">
+      {formPage === 3 && <section className="formSection">
         <div className="sectionHeader">
           <span>
             03
@@ -471,6 +470,14 @@ export default function ProductStep({
             </Field>
           )}
 
+
+        </div>
+      </section>}
+
+      {/* LOST LOCATION AND FINDER MESSAGE */}
+
+      {formPage === 4 && <section className="formSection">
+        <div className="formGrid">
           <Field label="დაკარგვის ადგილი">
             <input
               type="text"
@@ -510,12 +517,11 @@ export default function ProductStep({
             />
           </Field>
         </div>
-      </section>
-      </>}
+      </section>}
 
       {/* FINDER VIEW */}
 
-      {formPage === 3 && <section className="formSection">
+      {formPage === 5 && <section className="formSection">
         <p className="finderVisibilityIntro">
           სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
           დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
@@ -680,7 +686,10 @@ export default function ProductStep({
           className="backButton"
           onClick={() => {
             if (formPage === 1) onBack();
-            else setFormPage((formPage - 1) as 1 | 2);
+            else {
+              setFormPage((formPage - 1) as 1 | 2 | 3 | 4);
+              window.scrollTo({ top: 0, behavior: "instant" });
+            }
           }}
         >
           ← უკან
@@ -690,11 +699,14 @@ export default function ProductStep({
           type="button"
           className="primaryButton"
           onClick={() => {
-            if (formPage === 3) onNext();
-            else setFormPage((formPage + 1) as 2 | 3);
+            if (formPage === 5) onNext();
+            else {
+              setFormPage((formPage + 1) as 2 | 3 | 4 | 5);
+              window.scrollTo({ top: 0, behavior: "instant" });
+            }
           }}
         >
-          {formPage === 3 ? "შემოწმება" : "გაგრძელება"}
+          {formPage === 5 ? "შემოწმება" : "გაგრძელება"}
 
           <span>
             →
