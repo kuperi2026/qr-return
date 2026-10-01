@@ -62,7 +62,7 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
-  const [formPage, setFormPage] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [formPage, setFormPage] = useState<1 | 2 | 3 | 4>(1);
 
   const pet =
     isPetType(type);
@@ -83,7 +83,7 @@ export default function ProductStep({
     <>
       <div className="stepTitle">
         <span>
-          STEP 2 OF 3 · {formPage}/5
+          STEP 2 OF 3 · {formPage}/4
         </span>
 
         <h1>
@@ -91,10 +91,10 @@ export default function ProductStep({
             {meta.emoji}
           </span>
 
-          {meta.label}
+          {formPage === 1 ? meta.label : formPage === 2 ? "ფოტო" : formPage === 3 ? "დამატებითი ინფორმაცია" : "ინფორმაციის ხილვადობა"}
         </h1>
 
-        {!["suitcase", "keys"].includes(type) && (
+        {formPage === 1 && !["suitcase", "keys"].includes(type) && (
           <p>
             {getProductFormText(type)}
           </p>
@@ -104,7 +104,7 @@ export default function ProductStep({
       {/* BASIC INFO */}
 
       {formPage === 1 && <section className="formSection">
-        {!pet && (
+        {["suitcase", "keys"].includes(type) && (
           <p className="sectionIntro">
             შეავსეთ ნივთის ამოსაცნობად საჭირო ინფორმაცია.
           </p>
@@ -374,21 +374,7 @@ export default function ProductStep({
 
       {/* ADDITIONAL INFO */}
 
-      {formPage === 3 && <section className="formSection">
-        <div className="sectionHeader">
-          <span>
-            03
-          </span>
-
-          <div>
-            <strong>
-              დამატებითი ინფორმაცია
-            </strong>
-
-
-          </div>
-        </div>
-
+      {formPage === 3 && <section className="formSection additionalInformation">
         <div className="formGrid">
           <Field label="აღწერა">
             <textarea
@@ -471,13 +457,6 @@ export default function ProductStep({
           )}
 
 
-        </div>
-      </section>}
-
-      {/* LOST LOCATION AND FINDER MESSAGE */}
-
-      {formPage === 4 && <section className="formSection">
-        <div className="formGrid">
           <Field label="დაკარგვის ადგილი">
             <input
               type="text"
@@ -521,10 +500,9 @@ export default function ProductStep({
 
       {/* FINDER VIEW */}
 
-      {formPage === 5 && <section className="formSection">
+      {formPage === 4 && <section className="formSection">
         <p className="finderVisibilityIntro">
-          სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
-          დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
+          აირჩიეთ, რომელი ინფორმაცია გამოჩნდეს მპოვნელისთვის.
         </p>
 
         <div className="visibilityGrid">
@@ -687,7 +665,7 @@ export default function ProductStep({
           onClick={() => {
             if (formPage === 1) onBack();
             else {
-              setFormPage((formPage - 1) as 1 | 2 | 3 | 4);
+              setFormPage((formPage - 1) as 1 | 2 | 3);
               window.scrollTo({ top: 0, behavior: "instant" });
             }
           }}
@@ -699,14 +677,14 @@ export default function ProductStep({
           type="button"
           className="primaryButton"
           onClick={() => {
-            if (formPage === 5) onNext();
+            if (formPage === 4) onNext();
             else {
-              setFormPage((formPage + 1) as 2 | 3 | 4 | 5);
+              setFormPage((formPage + 1) as 2 | 3 | 4);
               window.scrollTo({ top: 0, behavior: "instant" });
             }
           }}
         >
-          {formPage === 5 ? "შემოწმება" : "გაგრძელება"}
+          {formPage === 4 ? "შემოწმება" : "გაგრძელება"}
 
           <span>
             →
@@ -1041,6 +1019,18 @@ export default function ProductStep({
 
         .primaryButton span {
           font-size: 17px;
+        }
+
+        @media (min-width: 900px) and (max-height: 950px) {
+          .registrationPage:not(.appRegistration) .formSection {
+            margin-top: 10px;
+            padding-top: 8px;
+          }
+
+          .registrationPage:not(.appRegistration) .additionalInformation {
+            margin-top: 7px;
+            padding-top: 7px;
+          }
         }
 
         @media (

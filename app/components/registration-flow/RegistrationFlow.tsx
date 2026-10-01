@@ -1098,7 +1098,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main className={`registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`registrationPage${step > 1 ? " registrationDetails" : ""}${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"
@@ -1263,6 +1263,23 @@ export default function RegistrationFlow({
 
           background:
             #0647c8;
+        }
+
+        .registrationPage:not(.appRegistration) {
+          min-height: calc(100svh - 57px);
+          box-sizing: border-box;
+          padding-bottom: 12px;
+        }
+
+        @media (min-width: 900px) and (max-height: 950px) {
+          .registrationPage.registrationDetails:not(.appRegistration) .marketingLine p {
+            display: none;
+          }
+
+          .registrationPage.registrationDetails:not(.appRegistration) .registrationCard {
+            padding-top: 18px;
+            padding-bottom: 18px;
+          }
         }
 
         .emojiBackground {
