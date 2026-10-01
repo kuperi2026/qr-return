@@ -312,20 +312,12 @@ export default function EmergencyBraceletPage() {
         await supabase.auth.getUser();
 
       if (error || !data.user) {
-        window.location.href =
-          "/login?next=/register/emergency-bracelet";
+        // Guests can view and fill every step. Saving still requires an owner.
         return;
       }
 
       const user =
         data.user;
-
-      if (!user) {
-        window.location.href =
-          "/login";
-
-        return;
-      }
 
       const {
         data: owner,
@@ -461,7 +453,7 @@ export default function EmergencyBraceletPage() {
 
       if (!ownerId) {
         throw new Error(
-          "Owner Account ვერ მოიძებნა."
+          "პროფილის შესანახად შედით თქვენს ანგარიშში."
         );
       }
 

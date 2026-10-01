@@ -204,15 +204,8 @@ export default function RegistrationFlow({
           error ||
           !user
         ) {
-          const appRegistration =
-            new URLSearchParams(window.location.search).get("source") === "app";
-
-          window.location.assign(
-            appRegistration
-              ? `/login?source=app&next=${encodeURIComponent(`/register/${type}?source=app`)}`
-              : "/login"
-          );
-
+          // Account data is optional while viewing and filling the form.
+          // createProfile still verifies the owner before any upload or write.
           return;
         }
 
@@ -704,7 +697,7 @@ export default function RegistrationFlow({
         !user
       ) {
         throw new Error(
-          "ანგარიშთან კავშირი ვერ მოიძებნა. გთხოვთ ხელახლა შეხვიდეთ."
+          "პროფილის შესანახად შედით თქვენს ანგარიშში."
         );
       }
 
