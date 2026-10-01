@@ -69,4 +69,59 @@ body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) {
   body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) :is(.heading, .qrSection, .infoBox, .optionalNotice, .finalNotice, .nameWarning, .holderSummary, .creatorContact, .visibilityLayout, .subSection) {
     margin-top: 10px;
   }
+
+  /* Review has ten visibility switches: use the desktop width instead of a
+     single long column, keeping switch heights and all text readable. */
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .card {
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .progressRow {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .heading {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .lockedSummary {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .visibilityLayout {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    grid-template-columns: 1.6fr 1fr;
+    margin-top: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .visibilityGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .finalNotice {
+    grid-column: 1;
+    grid-row: 4;
+    margin-top: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .nameWarning {
+    grid-column: 2;
+    grid-row: 4;
+    margin-top: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.emergencyReviewStep:not(.appRegistration) .finalActions {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    margin-top: 0;
+  }
 }
