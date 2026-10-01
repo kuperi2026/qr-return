@@ -22,7 +22,7 @@ export default function RegisterPage() {
   }, []);
 
   return (
-    <main className="page">
+    <main className="page qrRegistrationColors">
       <header className="topbar">
         <a href="/" className="brand">
           <span className="brandMark">QR</span>

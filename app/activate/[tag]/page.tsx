@@ -317,7 +317,7 @@ export default function ScanPage() {
   if (loading) {
     return (
       <>
-        <main className="statePage">
+        <main className="statePage qrRegistrationColors">
           <div className="logo">
             QR
           </div>
@@ -341,7 +341,7 @@ export default function ScanPage() {
   if (error || !qr) {
     return (
       <>
-        <main className="statePage">
+        <main className="statePage qrRegistrationColors">
           <div className="logo">
             QR
           </div>
@@ -381,7 +381,7 @@ export default function ScanPage() {
 
   return (
     <>
-      <main className="page">
+      <main className="page qrRegistrationColors">
         <header className="header">
           <a
             href="/"

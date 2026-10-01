@@ -1,0 +1,182 @@
+/* Support-chat palette, scoped to website registration. Color properties only. */
+.qrRegistrationColors:not(.appRegistration) {
+  background: #f3f6f9 !important;
+  color: #17354c !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.header, .topbar, .registrationHeader) {
+  border-color: #dce5ec !important;
+  background: transparent !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.brand, .brandText, .brand strong, .brand b, .brandText strong, .marketingLine, h1, h2, h3, label, .label, .sectionHeader strong, .sectionTitle h3, .visibilityRow strong, .categoryContent strong) {
+  color: #17354c !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.brand small, .brandText small, .brandText span, .eyebrow, .stepTitle > span, .previewTitle > span, .photoHeader .eyebrow, .formHeader > span, .intro > span, .sectionTitle > span, .qrLabel, .categoryNumber) {
+  color: #537286 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.brandMark, .logo, .mobileMark, .loadingLogo, .previewMark, .headingIcon, .sectionHeader > span, .sectionNumber, .finderIcon, .infoIcon, .noticeIcon, .accountCheck, .uploadIcon, .confirmIcon, .plus, .successIcon, .bottomInfo > span) {
+  background: #c8ecde !important;
+  border-color: #c8ecde !important;
+  color: #22625d !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.card, .mainCard, .registrationCard, .activationCard, .form, .formArea, .formContent, .sectionCard, .progressCard, .loadingCard, .visibilityPanel, .previewPanel, .finderPreview, .previewCard, .continueCard) {
+  background: #fff !important;
+  border-color: #d7e2eb !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.intro p, .heading p, .stepTitle p, .previewTitle p, .photoHeader p, .formHeader p, .marketingLine p, .sectionHeader p, .help, .sectionIntro, .finderVisibilityIntro, .visibilityText p, .previewBlock p, .previewContent p, .finderText p, .confirmationNotice p, .accountNotice p, .infoBox p, .optionalNotice p, .finalNotice p, .nameWarning p, .qrHelp p, .optionalBox p, .promise, .privacy, .accountNote, .security, .loadingBox) {
+  color: #506e83 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]), select, textarea) {
+  background: #fbfdff !important;
+  border-color: #dce5ed !important;
+  color: #193951 !important;
+  caret-color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(input, select, textarea)::placeholder {
+  color: #607d91 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(input, select, textarea):focus {
+  border-color: #8ab7a8 !important;
+  outline-color: #43856d !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.field label b, .required, .requiredBadge, .alwaysVisible, .ready, .homeLink, .login a, .back, .found) {
+  color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.primaryButton, .submit, .submitButton, .saveButton, .continueButton, .confirmButton, .createButton, .activateButton, .homeButton, .changeButton, .contactButton, .arrow, button[type="submit"], button:not([class])) {
+  background: #216d59 !important;
+  border-color: #216d59 !important;
+  color: #fff !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.primaryButton, .submit, .submitButton, .saveButton, .continueButton, .confirmButton, .createButton, .activateButton, .homeButton, .changeButton, .contactButton, button[type="submit"]):hover {
+  background: #195a49 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.primaryButton, .submit, .submitButton, .saveButton, .continueButton, .confirmButton, .createButton, .activateButton):disabled {
+  background: #e8eeed !important;
+  border-color: #e1e9e5 !important;
+  color: #80948b !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.secondaryButton, .backButton, .removeButton, .changeProduct, .profilesButton, .topButton, .contactButton.secondary, .languages, .language) {
+  background: #ebf0f4 !important;
+  border-color: #dce5ec !important;
+  color: #23475f !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.languages, .language) button {
+  background: transparent !important;
+  color: #698091 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.languages, .language) button.active {
+  background: #fff !important;
+  color: #23475f !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.productCard, .categoryCard, .mobileCategory, .uploadBox, .visibilityRow, .contactRow, .toggleRow, .relationshipButton, .previewBlock, .optionalBox, .qrBox) {
+  background: #fbfdff !important;
+  border-color: #d7e2eb !important;
+  color: #17354c !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.productCard, .categoryCard, .uploadBox):hover {
+  background: #f1f7fb !important;
+  border-color: #8ab7a8 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.finderNotice, .accountNotice, .confirmationNotice, .bottomInfo, .importantNote, .infoBox, .infoCard, .optionalNotice, .finalNotice, .qrHelp, .nameWarning, .contactPreview, .previewBlock.highlighted, .ownerItem, .previewRow, .previewHero, .finderPreview .previewItems) {
+  background: #f1f7fb !important;
+  border-color: #d7e2eb !important;
+  color: #506e83 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.finderText strong, .accountNotice strong, .confirmationNotice strong, .infoBox strong, .qrHelp strong, .optionalBox strong, .ownerItem strong, .previewRow strong, .previewBlock strong, .previewContent h3, .heroContent h2, .bottomInfo strong) {
+  color: #17354c !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.visibilityText .labelLine strong, .uploadBox strong, .uploadBox p, .uploadBox small) {
+  color: #506e83 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.toggleButton, .visibilityToggle, .miniToggle, .visibilityButton) {
+  background: #ebf0f4 !important;
+  border-color: #dce5ec !important;
+  color: #698091 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.toggleButton.on, .lockedToggle, .visibilityButton.on, .relationshipButton.selected, .emergencySignals span) {
+  background: #ddf1e6 !important;
+  border-color: #c2e1d0 !important;
+  color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.toggleButton.on strong, .lockedToggle strong) {
+  color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.visibilityToggle.on, .miniToggle.on, .toggleButton.on .toggleTrack, .lockedTrack, .visibilityButton.on strong, .progressFill, .progressStep.active .stepCircle, .progressStep.completed .stepCircle, .step.active .stepNumber, .line.filled) {
+  background: #216d59 !important;
+  border-color: #216d59 !important;
+  color: #fff !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.progressStep, .progressRow) {
+  color: #698091 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.progressStep.active, .progressStep.completed, .step.active) {
+  color: #216d59 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.stepCircle, .stepNumber) {
+  border-color: #d7e2eb !important;
+  background: #ebf0f4 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.progressTrack, .progress .line, .progressBar, .stepLine) {
+  background: #dce5ec !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.sidePanel, .choice, .topSummary, .creatorSummary, .lockedSummary, .holderSummary, .creatorContact, .previewTop, .savingBox, .photoArea) {
+  background: linear-gradient(110deg, #194c70, #176775) !important;
+  border-color: #21566a !important;
+  color: #fff !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) :is(.choice, .topSummary, .creatorSummary, .lockedSummary, .holderSummary, .creatorContact, .previewTop, .savingBox) :is(h1, h2, h3, strong, p, span, small) {
+  color: #fff !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) .choice.active {
+  background: linear-gradient(110deg, #194c70, #216d59) !important;
+  border-color: #8ab7a8 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) .sidePanel :is(.brand, .brand strong, h1, h2, h3, .rule strong) {
+  color: #fff !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) .sidePanel :is(.brand span, .stepLabel, .categoryBox p, .rule p, .backLink) {
+  color: #e0ecf2 !important;
+}
+
+.qrRegistrationColors:not(.appRegistration) .sidePanel .brandMark,
+.qrRegistrationColors:not(.appRegistration) .previewTop .previewMark {
+  background: #c8ecde !important;
+  color: #22625d !important;
+}

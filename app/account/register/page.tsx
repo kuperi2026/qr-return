@@ -150,7 +150,7 @@ export default function AccountRegisterPage() {
   }
 
   return (
-    <main className="page">
+    <main className="page qrRegistrationColors">
       <header className="header">
         <a href="/" className="brand">
           <div className="logo">

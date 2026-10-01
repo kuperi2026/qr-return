@@ -19,7 +19,7 @@ export default function RegistrationShell({
 }: RegistrationShellProps) {
   return (
     <>
-      <main className="registrationPage">
+      <main className="registrationPage qrRegistrationColors">
         <aside className="sidePanel">
           <div className="sideInner">
             <a href="/" className="brand">

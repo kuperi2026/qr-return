@@ -891,7 +891,7 @@ export default function EmergencyBraceletPage() {
 
   if (loadingAccount) {
     return (
-      <main className="loadingPage">
+      <main className="loadingPage qrRegistrationColors">
         <div className="loadingBox">
           <div className="loadingLogo">
             QR
@@ -961,7 +961,7 @@ export default function EmergencyBraceletPage() {
 
   return (
     <>
-      <main className={`${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`qrRegistrationColors ${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
         <header className="topbar">
           <a
             href="/"

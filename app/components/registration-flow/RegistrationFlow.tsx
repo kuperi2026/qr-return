@@ -1047,7 +1047,7 @@ export default function RegistrationFlow({
   if (loading) {
     return (
       <>
-        <main className="loadingPage">
+        <main className="loadingPage qrRegistrationColors">
           <div className="loadingEmoji">
             {meta.emoji}
           </div>
@@ -1098,7 +1098,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main className={`registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`qrRegistrationColors registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"

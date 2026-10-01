@@ -91,14 +91,14 @@ export default function AddProfilePage() {
 
   if (loading) {
     return (
-      <main className="statePage">
+      <main className="statePage qrRegistrationColors">
         {ka ? "იტვირთება..." : "Loading..."}
       </main>
     );
   }
 
   return (
-    <main className="page">
+    <main className="page qrRegistrationColors">
       <header className="header">
         <a href="/account" className="brand">
           <div className="logo">QR</div>
