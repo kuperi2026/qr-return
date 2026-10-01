@@ -1,0 +1,72 @@
+/* The back navigation is 57px tall. Include page padding in the remaining
+   viewport instead of adding a full viewport underneath the navigation. */
+body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) {
+  box-sizing: border-box;
+  min-height: calc(100vh - 57px);
+  min-height: calc(100svh - 57px);
+  padding-bottom: 12px;
+}
+
+/* Fit desktop registration steps by reclaiming blank space. Input dimensions,
+   column widths, typography and colors remain defined by the original forms. */
+@media (min-width: 900px) {
+  body:not(.kompasiAppMode) main.qrRegistrationFit.registrationPage:not(.appRegistration) .registrationHeader {
+    position: absolute;
+    top: 8px;
+    left: max(20px, calc((100% - 1040px) / 2));
+    width: auto;
+    max-width: none;
+    min-height: 40px;
+    margin: 0;
+    border-bottom: 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.registrationPage:not(.appRegistration) .progress {
+    max-width: min(650px, calc(100% - 180px));
+    margin: 8px auto 0;
+    transform: translateX(55px);
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.registrationPage:not(.appRegistration) .marketingLine {
+    max-width: 1020px;
+    margin: 6px auto;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.registrationPage:not(.appRegistration) .registrationCard {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.registrationPage:not(.appRegistration) .formSection {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) .formGrid {
+    row-gap: 10px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) :is(.actions, .previewActions, .finalActions) {
+    margin-top: 10px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) .topbar {
+    height: 48px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) .card {
+    margin-top: 12px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) .emergencyChoiceCard {
+    margin: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) :is(.heading, .qrSection, .infoBox, .optionalNotice, .finalNotice, .nameWarning, .holderSummary, .creatorContact, .visibilityLayout, .subSection) {
+    margin-top: 10px;
+  }
+}

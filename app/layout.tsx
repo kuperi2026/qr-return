@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./product-grid.css";
 import "./interface.css";
 import "./registration-colors.css";
+import "./registration-fit.css";
 import StyledJsxRegistry from "./registry";
 import SiteBackNavigation from "./components/SiteBackNavigation";
 import AppInstallManager from "@/app/components/app/AppInstallManager";
@@ -59,4 +60,3 @@ export default function RootLayout({
     </html>
   );
 }
-
