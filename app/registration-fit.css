@@ -4,7 +4,7 @@ body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) {
   box-sizing: border-box;
   min-height: calc(100vh - 57px);
   min-height: calc(100svh - 57px);
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 /* Fit desktop registration steps by reclaiming blank space. Input dimensions,
@@ -68,6 +68,14 @@ body:not(.kompasiAppMode) main.qrRegistrationFit:not(.appRegistration) {
 
   body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) :is(.heading, .qrSection, .infoBox, .optionalNotice, .finalNotice, .nameWarning, .holderSummary, .creatorContact, .visibilityLayout, .subSection) {
     margin-top: 10px;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) :is(.holderSummary, .creatorContact) p {
+    margin: 4px 0 0;
+  }
+
+  body:not(.kompasiAppMode) main.qrRegistrationFit.page:not(.appRegistration) .subSection {
+    padding-top: 8px;
   }
 
   /* Review has ten visibility switches: use the desktop width instead of a
