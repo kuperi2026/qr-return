@@ -237,7 +237,7 @@ export default function SignupPage() {
 
   return (
     <>
-      <main className={`page qrSignupLayout ${appMode ? "appAuth" : ""}`}>
+      <main className={`page ${appMode ? "appAuth" : ""}`}>
         <div className="decor decor1">
           QR
         </div>
