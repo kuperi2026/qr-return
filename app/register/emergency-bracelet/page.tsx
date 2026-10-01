@@ -953,7 +953,7 @@ export default function EmergencyBraceletPage() {
 
   return (
     <>
-      <main className={`qrRegistrationColors qrRegistrationFit ${step === 1 ? "page emergencyChoicePage" : "page"}${step === 6 ? " emergencyReviewStep" : ""}${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`qrRegistrationColors ${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
         <header className="topbar">
           <a
             href="/"

@@ -1091,7 +1091,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main className={`qrRegistrationColors qrRegistrationFit registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`qrRegistrationColors registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"

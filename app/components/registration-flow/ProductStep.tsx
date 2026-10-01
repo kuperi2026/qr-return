@@ -62,12 +62,7 @@ export default function ProductStep({
   onBack,
   onNext,
 }: ProductStepProps) {
-  const [formPage, setFormPage] = useState<1 | 2 | 3 | 4>(1);
-
-  function changeFormPage(page: 1 | 2 | 3 | 4) {
-    setFormPage(page);
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
+  const [formPage, setFormPage] = useState<1 | 2 | 3>(1);
 
   const pet =
     isPetType(type);
@@ -88,7 +83,7 @@ export default function ProductStep({
     <>
       <div className="stepTitle">
         <span>
-          STEP 2 OF 3 · {formPage} / 4
+          STEP 2 OF 3
         </span>
 
         <h1>
@@ -348,7 +343,8 @@ export default function ProductStep({
 
       {/* PHOTO */}
 
-      {formPage === 2 && <section className="formSection">
+      {formPage === 2 && <>
+      <section className="formSection">
         <p className="sectionIntro">
           ფოტო მპოვნელისთვის ამოცნობას მნიშვნელოვნად ამარტივებს.
         </p>
@@ -375,11 +371,11 @@ export default function ProductStep({
             )
           }
         />
-      </section>}
+      </section>
 
       {/* ADDITIONAL INFO */}
 
-      {formPage === 3 && <section className="formSection additionalInfo">
+      <section className="formSection">
         <div className="sectionHeader">
           <span>
             03
@@ -514,11 +510,12 @@ export default function ProductStep({
             />
           </Field>
         </div>
-      </section>}
+      </section>
+      </>}
 
       {/* FINDER VIEW */}
 
-      {formPage === 4 && <section className="formSection">
+      {formPage === 3 && <section className="formSection">
         <p className="finderVisibilityIntro">
           სახელი, გვარი და მობილურის ნომერი მპოვნელისთვის ყოველთვის ხილულია.
           დანარჩენი ინფორმაციის ჩვენებას თავად აკონტროლებთ.
@@ -683,7 +680,7 @@ export default function ProductStep({
           className="backButton"
           onClick={() => {
             if (formPage === 1) onBack();
-            else changeFormPage((formPage - 1) as 1 | 2 | 3);
+            else setFormPage((formPage - 1) as 1 | 2);
           }}
         >
           ← უკან
@@ -693,11 +690,11 @@ export default function ProductStep({
           type="button"
           className="primaryButton"
           onClick={() => {
-            if (formPage === 4) onNext();
-            else changeFormPage((formPage + 1) as 2 | 3 | 4);
+            if (formPage === 3) onNext();
+            else setFormPage((formPage + 1) as 2 | 3);
           }}
         >
-          {formPage === 4 ? "შემოწმება" : "გაგრძელება"}
+          {formPage === 3 ? "შემოწმება" : "გაგრძელება"}
 
           <span>
             →
