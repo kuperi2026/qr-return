@@ -31,7 +31,8 @@ export default function AppInstallManager() {
   }, []);
 
   const ownerArea = pathname === "/app" || pathname === "/my-profiles" || pathname.startsWith("/account") || pathname.startsWith("/profile/");
-  if (!ownerArea || !visible || !promptEvent) return null;
+  // Keep the fixed install prompt clear of the account registration controls.
+  if (pathname === "/account/register" || !ownerArea || !visible || !promptEvent) return null;
 
   async function install() {
     if (!promptEvent) return;
@@ -57,3 +58,4 @@ export default function AppInstallManager() {
     </aside>
   );
 }
+
