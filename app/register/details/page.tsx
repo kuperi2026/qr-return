@@ -12,7 +12,6 @@ function DetailsContent() {
 
   return (
     <main
-      className="qrRegistrationColors"
       style={{
         minHeight: "100vh",
         background: "#f8fafc",

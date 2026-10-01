@@ -204,8 +204,15 @@ export default function RegistrationFlow({
           error ||
           !user
         ) {
-          // Account data is optional while viewing and filling the form.
-          // createProfile still verifies the owner before any upload or write.
+          const appRegistration =
+            new URLSearchParams(window.location.search).get("source") === "app";
+
+          window.location.assign(
+            appRegistration
+              ? `/login?source=app&next=${encodeURIComponent(`/register/${type}?source=app`)}`
+              : "/login"
+          );
+
           return;
         }
 
@@ -697,7 +704,7 @@ export default function RegistrationFlow({
         !user
       ) {
         throw new Error(
-          "პროფილის შესანახად შედით თქვენს ანგარიშში."
+          "ანგარიშთან კავშირი ვერ მოიძებნა. გთხოვთ ხელახლა შეხვიდეთ."
         );
       }
 
@@ -1040,7 +1047,7 @@ export default function RegistrationFlow({
   if (loading) {
     return (
       <>
-        <main className="loadingPage qrRegistrationColors">
+        <main className="loadingPage">
           <div className="loadingEmoji">
             {meta.emoji}
           </div>
@@ -1091,7 +1098,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main className={`qrRegistrationColors registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`registrationPage${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"

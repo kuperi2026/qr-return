@@ -39,7 +39,6 @@ export default function ItemRegistrationPage() {
 
   return (
     <main
-      className="qrRegistrationColors"
       style={{
         minHeight: "100vh",
         background: "#f8fafc",

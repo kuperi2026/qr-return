@@ -70,7 +70,7 @@ function RegistrationSuccessContent() {
 
   return (
     <>
-      <main className="page qrRegistrationColors">
+      <main className="page">
         <section className="card">
           <div className="successIcon">
             ✓
@@ -403,7 +403,7 @@ function RegistrationSuccessContent() {
 function LoadingScreen() {
   return (
     <>
-      <main className="loadingPage qrRegistrationColors">
+      <main className="loadingPage">
         <div className="loadingCard">
           <div className="loadingIcon">
             QR

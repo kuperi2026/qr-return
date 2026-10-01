@@ -312,12 +312,20 @@ export default function EmergencyBraceletPage() {
         await supabase.auth.getUser();
 
       if (error || !data.user) {
-        // Guests can view and fill every step. Saving still requires an owner.
+        window.location.href =
+          "/login?next=/register/emergency-bracelet";
         return;
       }
 
       const user =
         data.user;
+
+      if (!user) {
+        window.location.href =
+          "/login";
+
+        return;
+      }
 
       const {
         data: owner,
@@ -453,7 +461,7 @@ export default function EmergencyBraceletPage() {
 
       if (!ownerId) {
         throw new Error(
-          "პროფილის შესანახად შედით თქვენს ანგარიშში."
+          "Owner Account ვერ მოიძებნა."
         );
       }
 
@@ -883,7 +891,7 @@ export default function EmergencyBraceletPage() {
 
   if (loadingAccount) {
     return (
-      <main className="loadingPage qrRegistrationColors">
+      <main className="loadingPage">
         <div className="loadingBox">
           <div className="loadingLogo">
             QR
@@ -953,7 +961,7 @@ export default function EmergencyBraceletPage() {
 
   return (
     <>
-      <main className={`qrRegistrationColors ${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`${step === 1 ? "page emergencyChoicePage" : "page"}${isAppRegistration ? " appRegistration" : ""}`}>
         <header className="topbar">
           <a
             href="/"
