@@ -1098,6 +1098,95 @@ export default function SignupPage() {
         .appAuth .submit { height: 45px; margin-top: 11px; border-radius: 11px; background: linear-gradient(120deg,#0b74e5,#13a66b); box-shadow: 0 9px 20px rgba(4,70,117,.24); }
         .appAuth .bottom { margin-top:9px;padding-top:9px;font-size: 11px; }
 
+        /* Match the website chat palette without changing layout or typography. */
+        .page:not(.appAuth) {
+          background:
+            radial-gradient(circle at 12% 4%, rgba(31, 119, 202, .38), transparent 28%),
+            radial-gradient(circle at 88% 18%, rgba(214, 172, 83, .18), transparent 27%),
+            linear-gradient(145deg, #031d36 0%, #073e72 48%, #06182b 100%);
+        }
+
+        .page:not(.appAuth) .header {
+          border-color: rgba(217, 181, 100, .28);
+        }
+
+        .page:not(.appAuth) .brandIcon,
+        .page:not(.appAuth) .introIcon {
+          background: linear-gradient(135deg, #f9e7b8, #d5a94e);
+          color: #082847;
+          border-color: rgba(238, 207, 137, .42);
+        }
+
+        .page:not(.appAuth) .brand small { color: #b9d0e3; }
+
+        .page:not(.appAuth) .loginButton {
+          border-color: rgba(219, 183, 101, .42);
+          background: rgba(255, 255, 255, .1);
+          color: #fff7e4;
+        }
+
+        .page:not(.appAuth) .introCard {
+          border-color: rgba(238, 207, 137, .42);
+          background: linear-gradient(135deg, #0a5596 0%, #073762 55%, #9c772d 145%);
+          box-shadow: 0 18px 42px rgba(0, 13, 28, .36);
+        }
+
+        .page:not(.appAuth) .introCard p { color: #b9d0e3; }
+        .page:not(.appAuth) .line { background: #e7c977; }
+
+        .page:not(.appAuth) .card {
+          border-color: rgba(224, 190, 111, .48);
+          background: #f8fbfe;
+          box-shadow: 0 20px 48px rgba(0, 10, 24, .4);
+        }
+
+        .page:not(.appAuth) .signupLanguages {
+          border-color: #d8e2eb;
+          background: #eef4f8;
+        }
+
+        .page:not(.appAuth) .signupLanguages button { color: #4f6478; }
+        .page:not(.appAuth) .signupLanguages button.active {
+          background: linear-gradient(135deg, #f6e2ad, #d6aa50);
+          color: #092540;
+          box-shadow: 0 5px 12px rgba(0, 0, 0, .18);
+        }
+
+        .page:not(.appAuth) .cardHeader > span { color: #073e72; }
+        .page:not(.appAuth) .cardHeader h2 { color: #1a3349; }
+        .page:not(.appAuth) .field label { color: #18344d; }
+        .page:not(.appAuth) .field label b { color: #8b641e; }
+
+        .page:not(.appAuth) .field input,
+        .page:not(.appAuth) .passwordField input {
+          border-color: #cbd8e3 !important;
+          background: #fff !important;
+          color: #18344d !important;
+        }
+
+        .page:not(.appAuth) .field input:focus,
+        .page:not(.appAuth) .passwordField input:focus {
+          border-color: #d0a54d !important;
+          box-shadow: 0 0 0 4px rgba(213, 169, 78, .14) !important;
+        }
+
+        .page:not(.appAuth) .passwordField button {
+          background: #fff9ea;
+          color: #8b641e;
+        }
+
+        .page:not(.appAuth) .submit {
+          background: linear-gradient(135deg, #f6e2ad, #d6aa50);
+          color: #092540;
+        }
+
+        .page:not(.appAuth) .bottom {
+          border-color: #d7e1ea;
+          color: #4f6478;
+        }
+
+        .page:not(.appAuth) .bottom a { color: #073e72; }
+
         /* MOBILE */
 
         @media (max-width: 850px) {
