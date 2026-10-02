@@ -1156,22 +1156,6 @@ export default function RegistrationFlow({
           }
         />
 
-        <section className="marketingLine">
-          <span>
-            {meta.emoji}
-          </span>
-
-          <div>
-            <strong>
-              {meta.slogan}
-            </strong>
-
-            {meta.subline && (
-              <p>{meta.subline}</p>
-            )}
-          </div>
-        </section>
-
         <section className="registrationCard">
           {errorMessage && (
             <div
@@ -1272,10 +1256,6 @@ export default function RegistrationFlow({
         }
 
         @media (min-width: 900px) and (max-height: 950px) {
-          .registrationPage.registrationDetails:not(.appRegistration) .marketingLine p {
-            display: none;
-          }
-
           .registrationPage.registrationDetails:not(.appRegistration) .registrationCard {
             padding-top: 18px;
             padding-bottom: 18px;
@@ -1311,7 +1291,7 @@ export default function RegistrationFlow({
 
           width: 100%;
 
-          max-width: 930px;
+          max-width: 820px;
 
           min-height: 68px;
 
@@ -1415,51 +1395,6 @@ export default function RegistrationFlow({
           text-decoration: none;
         }
 
-        .marketingLine {
-          position: relative;
-
-          z-index: 2;
-
-          width: 100%;
-
-          max-width: 800px;
-
-          margin:
-            16px auto 12px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            center;
-
-          gap: 10px;
-
-          color: #ffffff;
-
-          text-align: center;
-        }
-
-        .marketingLine > span {
-          font-size: 36px;
-        }
-
-        .marketingLine strong {
-          display: block;
-
-          font-size: 19px;
-          line-height: 1.45;
-        }
-
-        .marketingLine p {
-          margin: 9px 0 0;
-          color: rgba(255, 255, 255, 0.94);
-          font-size: 15px;
-          font-weight: 700;
-          line-height: 1.5;
-        }
-
         .registrationCard {
           position: relative;
 
@@ -1469,7 +1404,7 @@ export default function RegistrationFlow({
 
           max-width: 820px;
 
-          margin: 0 auto;
+          margin: 16px auto 0;
 
           padding: 22px;
 
@@ -1539,25 +1474,9 @@ export default function RegistrationFlow({
             border-radius: 15px;
           }
 
-          .marketingLine {
-            align-items:
-              flex-start;
 
-            text-align: left;
-          }
 
-          .marketingLine > span {
-            font-size: 32px;
-          }
 
-          .marketingLine strong {
-            font-size: 17px;
-          }
-
-          .marketingLine p {
-            margin-top: 8px;
-            font-size: 14px;
-          }
         }
       `}</style>
       <style jsx global>{`
@@ -1568,10 +1487,6 @@ export default function RegistrationFlow({
           .registrationPage.appRegistration .registrationHeader { min-height: 52px; border-bottom:1px solid rgba(18,91,151,.13); }
           .registrationPage.appRegistration .changeProduct { padding: 7px 9px; border-color:#b9d9ef; background:rgba(255,255,255,.72); color:#0b5ca8; font-size: 10px; box-shadow:0 5px 14px rgba(7,63,111,.08); }
           .registrationPage.appRegistration .progress { padding-top: 12px; }
-          .registrationPage.appRegistration .marketingLine { margin: 8px auto; gap: 7px; color:#123d5c; }
-          .registrationPage.appRegistration .marketingLine > span { font-size: 25px; }
-          .registrationPage.appRegistration .marketingLine strong { font-size: 14px; line-height: 1.3; }
-          .registrationPage.appRegistration .marketingLine p { margin-top: 3px; color:#57758b; font-size: 10px; line-height: 1.35; }
           .registrationPage.appRegistration .registrationCard { padding: 13px 12px; border:1px solid rgba(142,190,219,.42); border-radius: 16px; background:rgba(255,255,255,.96); box-shadow:0 18px 44px rgba(7,54,95,.14); }
           .registrationPage.appRegistration .stepTitle h1,
           .registrationPage.appRegistration .previewTitle h1 { font-size: 19px; }

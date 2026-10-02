@@ -101,7 +101,7 @@ export default function RegistrationProgress({
           width: 100%;
           max-width: 650px;
 
-          margin: 25px auto 0;
+          margin: 18px auto 0;
 
           display: flex;
           align-items: center;
