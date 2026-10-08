@@ -26,7 +26,12 @@ export default function AiRecoveryCommandCenter({ profiles }: { profiles: Recove
   const totalScans = profiles.reduce((sum, profile) => sum + (profile.scanCount || 0), 0);
 
   return (
-    <section className={styles.overview} aria-label="პროფილების მიმოხილვა">
+    <section className={styles.recoveryPanel} aria-label="დაბრუნების მართვის ცენტრი">
+      <header className={styles.recoveryHeader}>
+        <div><span className={styles.intelligenceLabel}>AI · KOMPASI INTELLIGENCE</span><h2>დაბრუნების მართვის ცენტრი</h2></div>
+        <span className={styles.systemReady}><InterfaceIcon name="check" size={15}/>სისტემა მზადაა</span>
+      </header>
+      <div className={styles.overview}>
       <div className={styles.metric}>
         <span className={styles.metricLabel}>სულ პროფილი</span>
         <strong className={styles.metricValue}>{profiles.length}</strong>
@@ -48,6 +53,11 @@ export default function AiRecoveryCommandCenter({ profiles }: { profiles: Recove
             <a className={styles.mapLink} href={`https://www.google.com/maps?q=${latest.latitude},${latest.longitude}`} target="_blank" rel="noreferrer"><InterfaceIcon name="pin" size={15}/>რუკაზე ნახვა</a>
           )}
         </>}
+      </div>
+      </div>
+      <div className={styles.activityStrip}>
+        <span>უახლესი აქტივობა</span>
+        <strong>{latest ? `${latest.name || latest.tagCode || "QR პროფილი"} — ${latest.lost ? "დაკარგვის რეჟიმი ჩართულია; პროფილი დასკანირდა." : "QR პროფილი დასკანირდა."}` : "სკანირება ჯერ არ დაფიქსირებულა."}</strong>
       </div>
     </section>
   );

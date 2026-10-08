@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatProfileDate } from "@/lib/profile-date";
 import styles from "./owner-space.module.css";
@@ -62,9 +62,8 @@ export default function ProfileCard({
   const [downloadError, setDownloadError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyReload, setHistoryReload] = useState(0);
   const [historyError, setHistoryError] = useState("");
   const [scanHistory, setScanHistory] = useState<ScanHistoryEvent[]>([]);
   const type = getType(item);
@@ -83,29 +82,30 @@ export default function ProfileCard({
       ? `https://www.google.com/maps?q=${item.lastScanLatitude},${item.lastScanLongitude}`
       : "";
 
-  async function toggleScanHistory() {
-    const nextOpen = !historyOpen;
-    setHistoryOpen(nextOpen);
-    if (!nextOpen || historyLoaded || historyLoading) return;
-
-    setHistoryLoading(true);
-    setHistoryError("");
-
-    const { data, error } = await supabase
-      .from("scan_events")
-      .select("id,created_at,latitude,longitude,accuracy,location_shared")
-      .eq("item_id", item.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (error) {
-      setHistoryError("სკანირების ისტორიის ჩატვირთვა ვერ მოხერხდა.");
-    } else {
-      setScanHistory((data || []) as ScanHistoryEvent[]);
-      setHistoryLoaded(true);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadHistory() {
+      setHistoryLoading(true);
+      setHistoryError("");
+      setScanHistory([]);
+      try {
+        const { data, error } = await supabase
+          .from("scan_events")
+          .select("id,created_at,latitude,longitude,accuracy,location_shared")
+          .eq("item_id", item.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+        if (error) throw error;
+        if (!cancelled) setScanHistory((data || []) as ScanHistoryEvent[]);
+      } catch {
+        if (!cancelled) setHistoryError("სკანირების ისტორიის ჩატვირთვა ვერ მოხერხდა.");
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
+      }
     }
-    setHistoryLoading(false);
-  }
+    void loadHistory();
+    return () => { cancelled = true; };
+  }, [item.id, item.scanCount, item.lastScannedAt, historyReload]);
 
   async function downloadProfileQR() {
     if (!item.tagCode || downloading) return;
@@ -176,7 +176,8 @@ export default function ProfileCard({
       <div className={`${styles.service} ${item.serviceStatus === "expired" ? styles.serviceExpired : ""}`}>
         <div>
           <strong>{serviceLabel(item)}</strong>
-          <small>{item.serviceStatus === "expired" ? "დასრულდა:" : "ვადა:"} {formatProfileDate(item.serviceExpiresAt || item.trialEndsAt, false)}</small>
+          {item.serviceStatus === "active" && item.serviceStartsAt && <small>ჩაირთო: {formatProfileDate(item.serviceStartsAt)}</small>}
+          <small>{item.serviceStatus === "expired" ? "დასრულდა:" : item.serviceStatus === "active" ? "მოქმედებს:" : "უფასო პერიოდი სრულდება:"} {formatProfileDate(item.serviceExpiresAt || item.trialEndsAt)}</small>
         </div>
         <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა</Link>
       </div>
@@ -184,40 +185,39 @@ export default function ProfileCard({
         <div><span>სკანირებები</span><strong>{item.scanCount || 0}</strong></div>
         <div><span>ბოლო სკანირება</span><strong>{formatProfileDate(item.lastScannedAt)}</strong></div>
       </div>
-      <div className={styles.cardActions}>
-        {item.tagCode && <>
-          <Link className={styles.button} href={`/profile/${encodeURIComponent(item.tagCode)}/edit`}>რედაქტირება</Link>
-          <button type="button" className={styles.primaryButton} onClick={downloadProfileQR} disabled={downloading}>{downloading ? "მზადდება..." : "QR-ის ჩამოტვირთვა"}</button>
-        </>}
+      <div className={styles.locationLine}>
+        <InterfaceIcon name="pin" size={16}/>
+        {hasLocation ? <a href={mapsUrl} target="_blank" rel="noreferrer">ბოლო სკანირების მდებარეობა — რუკაზე ნახვა</a> : <span>მდებარეობა ჯერ არ გაზიარებულა</span>}
       </div>
-      {downloadError && <p className={styles.cardError} role="alert">{downloadError}</p>}
 
-      <details className={styles.details}>
-        <summary>ისტორია და სხვა მოქმედებები<span className={styles.chevron} aria-hidden="true"/></summary>
-        <div className={styles.extraActions}>
-          {item.tagCode && <Link href={`/scan/${encodeURIComponent(item.tagCode)}`} target="_blank" rel="noreferrer">პროფილი მპოვნელისთვის</Link>}
-          <Link href={`/account/admin?profile=${encodeURIComponent(item.id)}`}>ადმინის დამატება</Link>
-          {hasLocation && <a href={mapsUrl} target="_blank" rel="noreferrer">ბოლო მდებარეობა</a>}
+      <section className={styles.historySection} aria-labelledby={`history-title-${item.id}`}>
+        <div className={styles.historyHeading}>
+          <h4 id={`history-title-${item.id}`}>სკანირების ისტორია</h4>
+          <span>თბილისის დროით</span>
         </div>
-        {item.serviceStatus === "active" && item.serviceStartsAt && <p className={styles.timezone}>პაკეტი ჩაირთო: {formatProfileDate(item.serviceStartsAt)}</p>}
-        <p className={styles.timezone}>პაკეტის ვადა: {formatProfileDate(item.serviceExpiresAt || item.trialEndsAt)} · თბილისის დროით</p>
-        <button type="button" className={styles.historyToggle} onClick={toggleScanHistory} aria-expanded={historyOpen} aria-controls={`history-${item.id}`}>
-          სკანირების ისტორია <span aria-hidden="true">{historyOpen ? "−" : "+"}</span>
-        </button>
-        {historyOpen && <div className={styles.history} id={`history-${item.id}`}>
+        <div className={styles.history} role="region" aria-label={`${item.name || label}: სკანირების ისტორია`} tabIndex={0} aria-busy={historyLoading}>
           {historyLoading && <p role="status">ისტორია იტვირთება...</p>}
-          {historyError && <p role="alert">{historyError}</p>}
+          {historyError && <div className={styles.historyFailure}><p role="alert">{historyError}</p><button type="button" className={styles.button} onClick={() => setHistoryReload((value) => value + 1)}>ხელახლა ცდა</button></div>}
           {!historyLoading && !historyError && scanHistory.length === 0 && <p>სკანირების ისტორია ცარიელია.</p>}
           {!historyLoading && !historyError && scanHistory.map((event) => <div className={styles.historyRow} key={event.id}>
             <div><strong>{formatProfileDate(event.created_at)}</strong><span>{event.location_shared ? "მდებარეობა გაზიარებულია" : "მდებარეობა არ გაზიარებულა"}</span></div>
             {event.latitude !== null && event.longitude !== null && <a href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`} target="_blank" rel="noreferrer">რუკა</a>}
           </div>)}
-        </div>}
-        {onDelete && <div className={styles.extraActions}>
-          <button type="button" className={styles.delete} disabled={deleting} onClick={deleteProfile}>{deleting ? "იშლება..." : "პროფილის წაშლა"}</button>
-        </div>}
-        {deleteError && <p className={styles.cardError} role="alert">{deleteError}</p>}
-      </details>
+        </div>
+        {!historyLoading && !historyError && scanHistory.length === 50 && <p className={styles.timezone}>ნაჩვენებია ბოლო 50 სკანირება.</p>}
+      </section>
+
+      <div className={styles.cardActions}>
+        {item.tagCode && <>
+          <Link className={styles.button} href={`/profile/${encodeURIComponent(item.tagCode)}/edit`}>რედაქტირება</Link>
+          <button type="button" className={styles.primaryButton} onClick={downloadProfileQR} disabled={downloading}>{downloading ? "მზადდება..." : "QR-ის ჩამოტვირთვა"}</button>
+          <Link className={styles.button} href={`/scan/${encodeURIComponent(item.tagCode)}`} target="_blank" rel="noreferrer">პროფილი მპოვნელისთვის</Link>
+        </>}
+        <Link className={styles.button} href={`/account/admin?profile=${encodeURIComponent(item.id)}`}><InterfaceIcon name="plus" size={16}/>ადმინის დამატება</Link>
+        {onDelete && <button type="button" className={`${styles.button} ${styles.delete}`} disabled={deleting} onClick={deleteProfile}>{deleting ? "იშლება..." : "პროფილის წაშლა"}</button>}
+      </div>
+      {downloadError && <p className={styles.cardError} role="alert">{downloadError}</p>}
+      {deleteError && <p className={styles.cardError} role="alert">{deleteError}</p>}
     </article>
   );
 }
