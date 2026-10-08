@@ -62,6 +62,7 @@ export default function ProfileCard({
   const [downloadError, setDownloadError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [historyRequested, setHistoryRequested] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyReload, setHistoryReload] = useState(0);
   const [historyError, setHistoryError] = useState("");
@@ -83,6 +84,7 @@ export default function ProfileCard({
       : "";
 
   useEffect(() => {
+    if (!historyRequested) return;
     let cancelled = false;
     async function loadHistory() {
       setHistoryLoading(true);
@@ -105,7 +107,7 @@ export default function ProfileCard({
     }
     void loadHistory();
     return () => { cancelled = true; };
-  }, [item.id, item.scanCount, item.lastScannedAt, historyReload]);
+  }, [item.id, item.scanCount, item.lastScannedAt, historyRequested, historyReload]);
 
   async function downloadProfileQR() {
     if (!item.tagCode || downloading) return;
@@ -153,7 +155,7 @@ export default function ProfileCard({
     <article className={`${styles.card} ${item.lost ? styles.cardLost : ""}`} aria-labelledby={`profile-${item.id}`}>
       <div className={styles.cardHeader}>
         <div className={styles.avatar}>
-          {item.photo ? <img src={item.photo} alt={item.name || label}/> : <InterfaceIcon name="profiles" size={28}/>}
+          {item.photo ? <img src={item.photo} alt={item.name || label}/> : <InterfaceIcon name={profileIcon(type)} size={28}/>}
         </div>
         <div className={styles.identity}>
           <span className={styles.type}>{label}</span>
@@ -168,7 +170,8 @@ export default function ProfileCard({
       <div className={`${styles.lostMode} ${item.lost ? styles.lostModeActive : ""}`}>
         <div><strong>დაკარგვის რეჟიმი</strong><small>{item.lost ? "მპოვნელი ხედავს დაკარგვის სტატუსს" : "ჩართეთ, თუ ნივთი დაიკარგა"}</small></div>
         <button type="button" onClick={changeLostMode} disabled={changingLost || !onLostChange} aria-pressed={!!item.lost} aria-label={`${item.name || label}: დაკარგვის რეჟიმი`}>
-          {changingLost ? "ინახება..." : item.lost ? "გამორთვა" : "ჩართვა"}
+          <span className={styles.toggleTrack} aria-hidden="true"><span/></span>
+          <span>{changingLost ? "ინახება..." : item.lost ? "გამორთვა" : "ჩართვა"}</span>
         </button>
       </div>
       {lostError && <p className={styles.cardError} role="alert">{lostError}</p>}
@@ -190,11 +193,14 @@ export default function ProfileCard({
         {hasLocation ? <a href={mapsUrl} target="_blank" rel="noreferrer">ბოლო სკანირების მდებარეობა — რუკაზე ნახვა</a> : <span>მდებარეობა ჯერ არ გაზიარებულა</span>}
       </div>
 
-      <section className={styles.historySection} aria-labelledby={`history-title-${item.id}`}>
-        <div className={styles.historyHeading}>
-          <h4 id={`history-title-${item.id}`}>სკანირების ისტორია</h4>
-          <span>თბილისის დროით</span>
-        </div>
+      <details className={styles.historySection} onToggle={(event) => { if (event.currentTarget.open) setHistoryRequested(true); }}>
+        <summary className={styles.historyHeading}>
+          <span className={styles.historyTitle}><InterfaceIcon name="history" size={18}/>სკანირების ისტორია</span>
+          <span className={styles.historyCount}>{item.scanCount || 0}</span>
+          <InterfaceIcon name="chevronDown" size={17}/>
+        </summary>
+        <div className={styles.historyContent}>
+        <p className={styles.timezone}>თბილისის დროით · უახლესი ჩანაწერები</p>
         <div className={styles.history} role="region" aria-label={`${item.name || label}: სკანირების ისტორია`} tabIndex={0} aria-busy={historyLoading}>
           {historyLoading && <p role="status">ისტორია იტვირთება...</p>}
           {historyError && <div className={styles.historyFailure}><p role="alert">{historyError}</p><button type="button" className={styles.button} onClick={() => setHistoryReload((value) => value + 1)}>ხელახლა ცდა</button></div>}
@@ -205,21 +211,30 @@ export default function ProfileCard({
           </div>)}
         </div>
         {!historyLoading && !historyError && scanHistory.length === 50 && <p className={styles.timezone}>ნაჩვენებია ბოლო 50 სკანირება.</p>}
-      </section>
+        </div>
+      </details>
 
       <div className={styles.cardActions}>
         {item.tagCode && <>
-          <Link className={styles.button} href={`/profile/${encodeURIComponent(item.tagCode)}/edit`}>რედაქტირება</Link>
-          <button type="button" className={styles.primaryButton} onClick={downloadProfileQR} disabled={downloading}>{downloading ? "მზადდება..." : "QR-ის ჩამოტვირთვა"}</button>
-          <Link className={styles.button} href={`/scan/${encodeURIComponent(item.tagCode)}`} target="_blank" rel="noreferrer">პროფილი მპოვნელისთვის</Link>
+          <Link className={styles.button} href={`/profile/${encodeURIComponent(item.tagCode)}/edit`}><InterfaceIcon name="edit" size={17}/>რედაქტირება</Link>
+          <button type="button" className={styles.primaryButton} onClick={downloadProfileQR} disabled={downloading}><InterfaceIcon name="download" size={17}/>{downloading ? "მზადდება..." : "QR-ის ჩამოტვირთვა"}</button>
+          <Link className={`${styles.button} ${styles.secondaryAction}`} href={`/scan/${encodeURIComponent(item.tagCode)}`} target="_blank" rel="noreferrer"><InterfaceIcon name="external" size={17}/>პროფილი მპოვნელისთვის</Link>
         </>}
-        <Link className={styles.button} href={`/account/admin?profile=${encodeURIComponent(item.id)}`}><InterfaceIcon name="plus" size={16}/>ადმინის დამატება</Link>
-        {onDelete && <button type="button" className={`${styles.button} ${styles.delete}`} disabled={deleting} onClick={deleteProfile}>{deleting ? "იშლება..." : "პროფილის წაშლა"}</button>}
+        <Link className={`${styles.button} ${styles.secondaryAction}`} href={`/account/admin?profile=${encodeURIComponent(item.id)}`}><InterfaceIcon name="plus" size={17}/>ადმინის დამატება</Link>
+        {onDelete && <button type="button" className={`${styles.button} ${styles.delete}`} disabled={deleting} onClick={deleteProfile}><InterfaceIcon name="trash" size={16}/>{deleting ? "იშლება..." : "პროფილის წაშლა"}</button>}
       </div>
       {downloadError && <p className={styles.cardError} role="alert">{downloadError}</p>}
       {deleteError && <p className={styles.cardError} role="alert">{deleteError}</p>}
     </article>
   );
+}
+
+function profileIcon(type: string) {
+  const icons = {
+    dog: "dog", cat: "cat", pet: "dog", keys: "key", wallet: "wallet",
+    bag: "bag", suitcase: "suitcase", luggage: "suitcase", parking: "car", emergency: "medical",
+  } as const;
+  return icons[type as keyof typeof icons] || "profiles";
 }
 
 function getType(
