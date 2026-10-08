@@ -78,7 +78,10 @@ export default function SubscriptionsPage() {
   const [openCategory, setOpenCategory] = useState("");
 
   useEffect(() => {
-    const syncView = () => setView(window.location.hash === "#my-profiles" ? "profiles" : window.location.hash === "#estimate" ? "estimate" : "choice");
+    const syncView = () => {
+      const requestedProfile = new URLSearchParams(window.location.search).get("profile");
+      setView(window.location.hash === "#estimate" ? "estimate" : window.location.hash === "#my-profiles" || (requestedProfile && !window.location.hash) ? "profiles" : "choice");
+    };
     syncView();
     window.addEventListener("hashchange", syncView);
     window.addEventListener("popstate", syncView);
@@ -99,8 +102,9 @@ export default function SubscriptionsPage() {
     const { data } = await supabase.from("item").select("id,tag_code,item_name,item_type,pet_type,created_at").eq("owner_id", user.id).order("created_at", { ascending: false });
     const rows = (data || []) as Profile[];
     const requestedProfile = Number(new URLSearchParams(window.location.search).get("profile"));
-    const initialProfile = rows.find((profile) => profile.id === requestedProfile) || rows[0];
-    setProfiles(rows); setSelectedProfiles([]);
+    const requestedItem = rows.find((profile) => profile.id === requestedProfile);
+    const initialProfile = requestedItem || rows[0];
+    setProfiles(rows); setSelectedProfiles(requestedItem ? [requestedItem.id] : []);
     setOpenCategory(initialProfile ? normalizeType(initialProfile) : ""); setLoading(false);
     const { data: requests } = await supabase
       .from("service_activation_requests")

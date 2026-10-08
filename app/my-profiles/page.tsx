@@ -121,6 +121,8 @@ export default function MyProfilesPage() {
     useState("all");
 
   const [createdMessage, setCreatedMessage] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -252,19 +254,20 @@ export default function MyProfilesPage() {
   }, [router]);
 
   async function handleLogout() {
-    const supabase =
-      createSupabaseClient();
-
-    if (!supabase) {
-      return;
+    if (loggingOut) return;
+    setLoggingOut(true);
+    setLogoutError("");
+    try {
+      const supabase = createSupabaseClient();
+      if (!supabase) throw new Error("კავშირი მიუწვდომელია.");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.replace("/login");
+    } catch {
+      setLogoutError("ანგარიშიდან გამოსვლა ვერ მოხერხდა. სცადეთ ხელახლა.");
+    } finally {
+      setLoggingOut(false);
     }
-
-    await supabase.auth
-      .signOut();
-
-    router.replace(
-      "/login"
-    );
   }
 
   const filteredProfiles =
@@ -278,7 +281,7 @@ export default function MyProfilesPage() {
         (
           profile
         ) => {
-          const type =
+          const rawType =
             (
               profile
                 .item_type ||
@@ -286,6 +289,7 @@ export default function MyProfilesPage() {
                 .pet_type ||
               ""
             ).toLowerCase();
+          const type = rawType === "key" ? "keys" : rawType === "luggage" ? "suitcase" : rawType;
 
           const petType =
             (
@@ -479,9 +483,10 @@ export default function MyProfilesPage() {
           <div className={styles.headerActions}>
             <Link href="/account/subscriptions">მომსახურება და პაკეტები</Link>
             {email && <span className={styles.email} title={email}>{email}</span>}
-            <button type="button" className={styles.logout} onClick={handleLogout}>გამოსვლა</button>
+            <button type="button" className={styles.logout} onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
           </div>
         </header>
+        {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
 
         <section className={styles.heading}>
           <div>

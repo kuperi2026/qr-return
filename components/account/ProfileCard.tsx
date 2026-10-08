@@ -182,7 +182,7 @@ export default function ProfileCard({
           {item.serviceStatus === "active" && item.serviceStartsAt && <small>ჩაირთო: {formatProfileDate(item.serviceStartsAt)}</small>}
           <small>{item.serviceStatus === "expired" ? "დასრულდა:" : item.serviceStatus === "active" ? "მოქმედებს:" : "უფასო პერიოდი სრულდება:"} {formatProfileDate(item.serviceExpiresAt || item.trialEndsAt)}</small>
         </div>
-        <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}`}>პაკეტის არჩევა</Link>
+        <Link href={`/account/subscriptions?profile=${encodeURIComponent(item.id)}#my-profiles`}>პაკეტის არჩევა</Link>
       </div>
       <div className={styles.scanSummary}>
         <div><span>სკანირებები</span><strong>{item.scanCount || 0}</strong></div>
@@ -249,11 +249,8 @@ function getType(
     );
   }
 
-  return (
-    item.type ||
-    item.petType ||
-    "other"
-  );
+  const type = (item.type || item.petType || "other").toLowerCase();
+  return type === "key" ? "keys" : type === "luggage" ? "suitcase" : type;
 }
 
 function getLabel(
