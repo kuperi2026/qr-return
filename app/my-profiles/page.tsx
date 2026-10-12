@@ -474,101 +474,98 @@ export default function MyProfilesPage() {
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.wrap}>
-        <div className={styles.summaryCard}>
-          <header className={styles.header}>
-            <Link href="/" className={styles.brand}>
-              <span className={styles.brandMark}>QR</span>დაცული QR კავშირი
+    <main className={`${styles.page} ${styles.ownerPage}`}>
+      <div className={`${styles.wrap} ${styles.ownerLayout}`}>
+        <aside className={styles.ownerSidebar} aria-label="მფლობელის სივრცე">
+          <div className={styles.sidebarIntro}>
+            <Link href="/" className={styles.sidebarBrand}>
+              <span className={styles.sidebarBrandMark}>QR</span>QR RETURN
             </Link>
-            <div className={styles.headerActions}>
-              <Link href="/account/subscriptions">მომსახურება და პაკეტები</Link>
-              {email && <span className={styles.email} title={email}>{email}</span>}
-              <button type="button" className={styles.logout} onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
+            <p>მფლობელის სივრცე</p>
+          </div>
+          <nav className={styles.sidebarNav} aria-label="მფლობელის მენიუ">
+            <a href="#profiles-heading" aria-current="page"><InterfaceIcon name="profiles" size={18}/>ჩემი პროფილები</a>
+            <Link href="/account/chat"><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
+            <Link href="/account/subscriptions" aria-label="მომსახურება და პაკეტები"><InterfaceIcon name="wallet" size={18}/>პაკეტები</Link>
+          </nav>
+          {!errorMessage && (
+            <AiRecoveryCommandCenter profiles={profiles.map((profile) => ({
+              id: profile.id, tagCode: profile.tag_code, name: profile.item_name,
+              type: profile.item_type || profile.pet_type, scanCount: profile.scan_count,
+              lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
+              longitude: profile.last_scan_longitude, lost: profile.lost,
+            }))}/>
+          )}
+          <footer className={styles.sidebarFooter}>
+            {email && <span className={styles.sidebarEmail} title={email}>{email}</span>}
+            <button type="button" onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
+          </footer>
+        </aside>
+        <div className={styles.ownerContent}>
+          <header className={styles.ownerHeading}>
+            <div>
+              <h1 id="profiles-heading">ჩემი პროფილები {!errorMessage && <span className={styles.count}>{profiles.length}</span>}</h1>
+              <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
             </div>
+            <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>
           </header>
           {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
 
-          <section className={styles.heading}>
-            <div>
-              <h1>მფლობელის სივრცე</h1>
-              <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
-            </div>
-            <div className={styles.headingActions}>
-              <Link href="/account/chat" className={styles.button}><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
-              <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>
-            </div>
-          </section>
-
-          {!errorMessage && profiles.length > 0 && (
-            <AiRecoveryCommandCenter profiles={profiles.map((profile) => ({
-                id: profile.id, tagCode: profile.tag_code, name: profile.item_name,
-                type: profile.item_type || profile.pet_type, scanCount: profile.scan_count,
-                lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
-                longitude: profile.last_scan_longitude, lost: profile.lost,
-              }))}/>
-          )}
-          {!errorMessage && profiles.length > 0 && (
-            <div className={styles.summaryProfiles}>
-              <div className={styles.sectionHeading}>
-                <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
-                <span className={styles.results} role="status">
-                  {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
-                </span>
-              </div>
-              <div className={styles.toolbar}>
-                <label className={styles.search}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
-                  <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="სახელი ან QR კოდი" aria-label="პროფილის ძიება სახელით ან QR კოდით"/>
-                </label>
-                <select value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="პროფილის ტიპი">
-                  <option value="all">ყველა ტიპი</option>
-                  <option value="dog">ძაღლი</option><option value="cat">კატა</option>
-                  <option value="keys">გასაღები</option><option value="wallet">საფულე</option>
-                  <option value="bag">ჩანთა</option><option value="suitcase">ჩემოდანი</option>
-                  <option value="parking">ავტომობილი</option><option value="emergency">ემერჯენსი სამაჯური</option>
-                </select>
-              </div>
-            </div>
+          {createdMessage && <div className={styles.notice} role="status">{createdMessage}</div>}
+          {errorMessage ? (
+            <section className={styles.error} role="alert">
+              <strong>პროფილების ჩატვირთვა ვერ მოხერხდა</strong><span>{errorMessage}</span>
+            </section>
+          ) : profiles.length === 0 ? (
+            <section className={styles.empty}>
+              <h2>ჯერ არცერთი QR პროფილი არ გაქვთ</h2>
+              <p>დაამატეთ ცხოველი ან ნივთი თქვენს ანგარიშზე.</p>
+              <Link href="/register" className={styles.primaryButton}>პირველი პროფილის დამატება</Link>
+            </section>
+          ) : (
+            <>
+              <section aria-labelledby="profiles-heading">
+                <div className={styles.ownerFilters}>
+                  <div className={styles.toolbar}>
+                    <label className={styles.search}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+                      <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="სახელი ან QR კოდი" aria-label="პროფილის ძიება სახელით ან QR კოდით"/>
+                    </label>
+                    <select value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="პროფილის ტიპი">
+                      <option value="all">ყველა ტიპი</option>
+                      <option value="dog">ძაღლი</option><option value="cat">კატა</option>
+                      <option value="keys">გასაღები</option><option value="wallet">საფულე</option>
+                      <option value="bag">ჩანთა</option><option value="suitcase">ჩემოდანი</option>
+                      <option value="parking">ავტომობილი</option><option value="emergency">ემერჯენსი სამაჯური</option>
+                    </select>
+                  </div>
+                  <span className={styles.results} role="status">
+                    {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
+                  </span>
+                </div>
+                {cards.length === 0 ? (
+                  <div className={styles.empty}>
+                    <h2>პროფილი ვერ მოიძებნა</h2><p>შეცვალეთ საძიებო სიტყვა ან პროფილის ტიპი.</p>
+                    <button type="button" className={styles.button} onClick={() => { setSearch(""); setFilter("all"); }}>ფილტრების გასუფთავება</button>
+                  </div>
+                ) : (
+                  <div className={styles.grid}>
+                    {visibleCards.map((profile) => <ProfileCard key={profile.id} item={profile} onLostChange={handleLostChange} onDelete={handleDelete}/>) }
+                  </div>
+                )}
+                {totalPages > 1 && (
+                  <nav className={styles.pagination} aria-label="პროფილების გვერდები">
+                    <button type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1} aria-label="წინა გვერდი">‹</button>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                      <button key={page} type="button" onClick={() => setCurrentPage(page)} aria-current={page === currentPage ? "page" : undefined} aria-label={`${page} გვერდი`}>{page}</button>
+                    ))}
+                    <button type="button" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages} aria-label="შემდეგი გვერდი">›</button>
+                  </nav>
+                )}
+              </section>
+            </>
           )}
         </div>
-
-        {createdMessage && <div className={styles.notice} role="status">{createdMessage}</div>}
-        {errorMessage ? (
-          <section className={styles.error} role="alert">
-            <strong>პროფილების ჩატვირთვა ვერ მოხერხდა</strong><span>{errorMessage}</span>
-          </section>
-        ) : profiles.length === 0 ? (
-          <section className={styles.empty}>
-            <h2>ჯერ არცერთი QR პროფილი არ გაქვთ</h2>
-            <p>დაამატეთ ცხოველი ან ნივთი თქვენს ანგარიშზე.</p>
-            <Link href="/register" className={styles.primaryButton}>პირველი პროფილის დამატება</Link>
-          </section>
-        ) : (
-          <>
-            <section aria-labelledby="profiles-heading">
-              {cards.length === 0 ? (
-                <div className={styles.empty}>
-                  <h2>პროფილი ვერ მოიძებნა</h2><p>შეცვალეთ საძიებო სიტყვა ან პროფილის ტიპი.</p>
-                  <button type="button" className={styles.button} onClick={() => { setSearch(""); setFilter("all"); }}>ფილტრების გასუფთავება</button>
-                </div>
-              ) : (
-                <div className={styles.grid}>
-                  {visibleCards.map((profile) => <ProfileCard key={profile.id} item={profile} onLostChange={handleLostChange} onDelete={handleDelete}/>) }
-                </div>
-              )}
-              {totalPages > 1 && (
-                <nav className={styles.pagination} aria-label="პროფილების გვერდები">
-                  <button type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1} aria-label="წინა გვერდი">‹</button>
-                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                    <button key={page} type="button" onClick={() => setCurrentPage(page)} aria-current={page === currentPage ? "page" : undefined} aria-label={`${page} გვერდი`}>{page}</button>
-                  ))}
-                  <button type="button" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages} aria-label="შემდეგი გვერდი">›</button>
-                </nav>
-              )}
-            </section>
-          </>
-        )}
       </div>
     </main>
   );
