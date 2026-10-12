@@ -509,11 +509,26 @@ export default function MyProfilesPage() {
               }))}/>
           )}
           {!errorMessage && profiles.length > 0 && (
-            <div className={`${styles.sectionHeading} ${styles.summaryProfiles}`}>
-              <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
-              <span className={styles.results} role="status">
-                {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
-              </span>
+            <div className={styles.summaryProfiles}>
+              <div className={styles.sectionHeading}>
+                <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
+                <span className={styles.results} role="status">
+                  {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
+                </span>
+              </div>
+              <div className={styles.toolbar}>
+                <label className={styles.search}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+                  <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="სახელი ან QR კოდი" aria-label="პროფილის ძიება სახელით ან QR კოდით"/>
+                </label>
+                <select value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="პროფილის ტიპი">
+                  <option value="all">ყველა ტიპი</option>
+                  <option value="dog">ძაღლი</option><option value="cat">კატა</option>
+                  <option value="keys">გასაღები</option><option value="wallet">საფულე</option>
+                  <option value="bag">ჩანთა</option><option value="suitcase">ჩემოდანი</option>
+                  <option value="parking">ავტომობილი</option><option value="emergency">ემერჯენსი სამაჯური</option>
+                </select>
+              </div>
             </div>
           )}
         </div>
@@ -532,19 +547,6 @@ export default function MyProfilesPage() {
         ) : (
           <>
             <section aria-labelledby="profiles-heading">
-              <div className={styles.toolbar}>
-                <label className={styles.search}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
-                  <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="სახელი ან QR კოდი" aria-label="პროფილის ძიება სახელით ან QR კოდით"/>
-                </label>
-                <select value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="პროფილის ტიპი">
-                  <option value="all">ყველა ტიპი</option>
-                  <option value="dog">ძაღლი</option><option value="cat">კატა</option>
-                  <option value="keys">გასაღები</option><option value="wallet">საფულე</option>
-                  <option value="bag">ჩანთა</option><option value="suitcase">ჩემოდანი</option>
-                  <option value="parking">ავტომობილი</option><option value="emergency">ემერჯენსი სამაჯური</option>
-                </select>
-              </div>
               {cards.length === 0 ? (
                 <div className={styles.empty}>
                   <h2>პროფილი ვერ მოიძებნა</h2><p>შეცვალეთ საძიებო სიტყვა ან პროფილის ტიპი.</p>
