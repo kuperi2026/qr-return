@@ -1,0 +1,19 @@
+.header { max-width:1120px; margin:0 auto; color:var(--qr-primary); font-family:var(--font-georgian),Arial,sans-serif; }
+.header * { box-sizing:border-box; }
+.top { min-height:76px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--qr-primary); }
+.mark { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px; border-radius:11px; background:var(--qr-secondary); font-size:15px; font-weight:800; }
+.brand strong { display:block; font-size:16px; line-height:1.5; letter-spacing:.04em; }
+.brand small { display:block; color:var(--qr-text-secondary); font-size:11px; line-height:1.5; }
+.account { display:flex; align-items:center; gap:16px; min-width:0; font-size:12px; color:var(--qr-text-secondary); }
+.email { overflow:hidden; text-overflow:ellipsis; max-width:240px; }
+.account button { min-height:40px; padding:8px 12px; border:1px solid var(--qr-border); border-radius:9px; color:var(--qr-text-secondary); background:var(--qr-surface); font:inherit; cursor:pointer; }
+.account button:disabled { opacity:.6; cursor:wait; }
+.nav { display:flex; gap:24px; border-bottom:1px solid var(--qr-border); overflow-x:auto; scrollbar-width:thin; }
+.nav a { display:flex; align-items:center; justify-content:center; flex:0 0 auto; gap:8px; min-height:48px; padding:8px 2px 12px; border-bottom:2px solid transparent; color:var(--qr-text-secondary); font-size:13px; font-weight:600; text-decoration:none; }
+.nav a[aria-current=page] { color:var(--qr-secondary-ink); border-color:var(--qr-secondary-ink); }
+.nav a:hover { color:var(--qr-secondary-ink); }
+.header :is(a,button):focus-visible { outline:3px solid var(--qr-focus); outline-offset:2px; }
+:global(body.kompasiAppMode) .header { display:none; }
+@media(max-width:600px) { .top { min-height:68px; }.email { display:none; }.nav { gap:18px; }.nav a { font-size:12px; gap:6px; }.account { gap:8px; } }
+@media(max-width:360px) { .nav { gap:12px; }.nav a { font-size:11px; }.nav a svg { display:none; } }

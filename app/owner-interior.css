@@ -1,0 +1,202 @@
+/* Owner pages only. The approved homepage and the installed app retain their own styles.
+   Important declarations supersede legacy styled-jsx palettes during their migration. */
+body:not(.kompasiAppMode) main[data-owner-ui] {
+  min-height:calc(100svh - 56px); padding:0 24px 40px;
+  background:var(--qr-background)!important; color:var(--qr-text)!important;
+  font-family:var(--font-georgian),Arial,sans-serif!important;
+}
+body:not(.kompasiAppMode) main[data-owner-ui] :is(button,input,textarea,select) { font-family:inherit; }
+body:not(.kompasiAppMode) main[data-owner-ui] :is(a,button,input,textarea,select,summary):focus-visible { outline:3px solid var(--qr-focus)!important; outline-offset:3px; }
+body:not(.kompasiAppMode) main[data-owner-ui] button:disabled { cursor:not-allowed; }
+
+/* Packages: a quiet workspace, with teal selection and one orange activation action. */
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .shell { width:100%; max-width:1120px; margin:0 auto; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceShell { display:block; min-height:0!important; padding:32px 0 20px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceContent { max-width:none; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceIntro { max-width:760px; margin:0 0 26px; color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceIntro>span { padding:0; border:0; background:none!important; color:var(--qr-secondary-ink)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceIntro h1 { margin:9px 0; font-size:28px!important; color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceIntro p { color:var(--qr-text-secondary)!important; font-size:14px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoices { gap:18px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice { min-height:190px; padding:24px; border:1px solid var(--qr-border)!important; border-radius:14px; background:var(--qr-surface)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice:hover { border-color:var(--qr-secondary-ink)!important; box-shadow:var(--qr-shadow)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceSymbol { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; border-radius:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice strong { color:var(--qr-primary)!important; font-size:19px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice :is(p,small) { color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceChevron { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:var(--qr-primary)!important; background:var(--qr-accent)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .interiorBack { display:flex; align-items:center; min-height:52px; max-width:1120px; margin:auto; color:var(--qr-text-secondary); text-decoration:none; font-size:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .publicPricingSection { border:1px solid var(--qr-border)!important; border-radius:16px; background:var(--qr-surface)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader { background:var(--qr-primary)!important; padding:20px 24px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader::after { display:none; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader>span { background:var(--qr-secondary)!important; color:var(--qr-primary)!important; border:0!important; width:40px; height:40px; flex-basis:40px; border-radius:10px; font-size:14px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader small { color:var(--qr-secondary)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader h1 { color:var(--qr-text-inverse)!important; font-size:23px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader p { color:var(--qr-text-inverse-muted)!important; font-size:13px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.webGuides,.profileEstimateLayout) { padding:20px; gap:20px; grid-template-columns:minmax(0,1fr) 290px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .profileEstimateLayout.publicLayout { grid-template-columns:1fr; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCalendar,.webCalendar) { border:1px solid var(--qr-border)!important; background:var(--qr-surface)!important; box-shadow:none!important; border-radius:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCalendar,.webCalendar)>header { padding:14px 16px; background:var(--qr-surface)!important; border-bottom:1px solid var(--qr-border); }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCalendar h2,.webCalendar h3) { color:var(--qr-primary)!important; font-size:16px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .webCalendar>header small { color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceHead,.priceCalendarHead) { color:var(--qr-text-secondary)!important; font-size:11px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .publicPriceGrid { min-width:470px; grid-template-columns:minmax(135px,1.4fr) repeat(4,minmax(58px,.7fr)); }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceRow,.chosenProductGroup) { --accent:var(--qr-secondary-ink)!important; background:var(--qr-background)!important; border-color:var(--qr-border)!important; border-left:1px solid var(--qr-border)!important; border-radius:10px; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.priceProduct strong,.chosenProductGroup>header,.chosenProduct strong) { color:var(--qr-primary)!important; font-size:13px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .chosenProductGroup>header b { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; border:0!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .chosenProduct small { color:var(--qr-text-secondary)!important; opacity:1; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCell,.priceCalendar article>button) { min-height:42px; height:42px; border:1px solid var(--qr-border-control)!important; background:var(--qr-surface)!important; color:var(--qr-primary)!important; box-shadow:none!important; font-size:14px!important; border-radius:8px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCell:hover,.priceCalendar article>button:hover) { background:var(--qr-secondary-soft)!important; border-color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.publicPriceCell.selected,.priceCalendar article>button.active) { border-color:var(--qr-secondary-ink)!important; background:var(--qr-secondary-ink)!important; color:var(--qr-surface)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .profileEstimateLayout .webCalendar .selectedCalendarProfile { border-color:var(--qr-secondary-ink)!important; background:var(--qr-secondary-soft)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .quantityControls button { background:var(--qr-surface)!important; color:var(--qr-primary)!important; border-color:var(--qr-border-control)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .quantityControls b { color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateSummary,.summary.estimateSummary) { padding:18px; background:var(--qr-background)!important; color:var(--qr-text)!important; border:1px solid var(--qr-border)!important; box-shadow:none!important; border-radius:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateSummary>div:first-child small,.summaryTitle small) { color:var(--qr-secondary-ink)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateSummary>div:first-child strong,.summaryTitle h2) { color:var(--qr-primary)!important; font-size:17px!important; line-height:1.6; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateLines,.chosen) { background:var(--qr-surface)!important; border-color:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateLines>div,.chosen>div,.chosen>div b,.estimateLine,.line,.line b,.estimateLine b) { color:var(--qr-text)!important; border-color:var(--qr-border)!important; font-size:12px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateTotal,.total) { background:var(--qr-primary)!important; color:var(--qr-text-inverse)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateTotal strong,.total strong) { color:var(--qr-secondary)!important; font-size:27px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .total span { color:var(--qr-text-inverse)!important; font-size:12px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .summary>button { min-height:46px; background:var(--qr-accent)!important; color:var(--qr-primary)!important; box-shadow:none!important; font-size:13px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .summary>button:hover:not(:disabled) { background:var(--qr-accent-hover)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .summary>button:disabled { background:var(--qr-border)!important; color:var(--qr-text-secondary)!important; opacity:1; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateSummary p,.summary p,.historyEmpty) { color:var(--qr-text-secondary)!important; font-size:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .estimateClear { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .calendarEmpty { color:var(--qr-text-secondary)!important; font-size:14px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .calendarEmpty b { color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .calendarEmpty a { padding:10px 14px; border-radius:9px; background:var(--qr-accent)!important; color:var(--qr-primary)!important; text-decoration:none; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .calendarEmpty .registerAction { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .purchaseHistory { border-color:var(--qr-border)!important; box-shadow:none!important; padding:20px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .historyHeading h2 { color:var(--qr-primary)!important; font-size:19px; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .historyHeading small { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .historyHeading>span { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .historyList article { background:var(--qr-background)!important; border-color:var(--qr-border)!important; }
+
+/* Registration: restrained category tiles and consistent forms. */
+body:not(.kompasiAppMode) [data-owner-ui="register"] .mainCard { max-width:1120px; margin:0 auto; padding:30px 0; background:transparent!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .intro { text-align:left; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .intro>span { color:var(--qr-secondary-ink)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .intro h1 { color:var(--qr-primary)!important; font-size:28px; line-height:1.6; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .intro p { color:var(--qr-text-secondary)!important; font-size:14px; font-weight:400; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productsGrid { gap:14px; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard { min-height:130px; grid-template-columns:48px minmax(0,1fr); position:relative; padding:20px 18px; border:1px solid var(--qr-border)!important; border-radius:14px; background:var(--qr-surface)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard:hover { border-color:var(--qr-secondary-ink)!important; box-shadow:var(--qr-shadow)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productIcon { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard strong { font-size:13px; line-height:1.6; padding-right:10px; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .arrow { position:absolute; right:12px; bottom:10px; background:transparent!important; color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard:hover .arrow { background:var(--qr-accent)!important; color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .bottomInfo { background:var(--qr-surface-muted)!important; color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .bottomInfo>span { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="register"] .bottomInfo strong { color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .emojiBackground { display:none; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .registrationCard { background:var(--qr-surface)!important; border:1px solid var(--qr-border)!important; box-shadow:var(--qr-shadow)!important; border-radius:16px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .changeProduct { border-color:var(--qr-border)!important; background:var(--qr-surface)!important; color:var(--qr-primary)!important; }
+
+/* Edit profile: light canvas and a single strong save action. */
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .header { border-color:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] :is(.brand strong,.back,.intro h1) { color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] :is(.brand small,.intro p,.locked span) { color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .logo { background:var(--qr-secondary)!important; color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .eyebrow { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .intro h1 { font-size:28px; line-height:1.5; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .content { padding:28px 0 48px; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .locked { border:1px solid var(--qr-border)!important; color:var(--qr-primary)!important; background:var(--qr-surface-muted)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .card { border-color:var(--qr-border)!important; border-radius:16px; box-shadow:var(--qr-shadow)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .saveButton { background:var(--qr-accent)!important; color:var(--qr-primary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .saveButton:hover { background:var(--qr-accent-hover)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] .cancelButton { background:var(--qr-surface)!important; color:var(--qr-primary)!important; border-color:var(--qr-border-control)!important; }
+
+@media(max-width:900px) {
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.webGuides,.profileEstimateLayout) { grid-template-columns:1fr; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.estimateSummary,.summary.estimateSummary) { position:static; order:1; }
+}
+@media(max-width:600px) {
+ body:not(.kompasiAppMode) main[data-owner-ui] { padding:0 14px 28px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] :is(.webGuides,.profileEstimateLayout) { padding:12px; gap:12px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader { padding:16px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .pricingSectionHeader h1 { font-size:19px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice { min-height:165px; padding:20px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .serviceChoice strong { font-size:17px; }
+ body:not(.kompasiAppMode) [data-owner-ui="subscriptions"] .choiceIntro h1 { font-size:24px!important; }
+ body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard { min-height:128px; padding:16px 13px; gap:10px; grid-template-columns:1fr; }
+ body:not(.kompasiAppMode) [data-owner-ui="register"] .productIcon { width:40px; height:40px; }
+ body:not(.kompasiAppMode) [data-owner-ui="register"] .productCard strong { padding-right:12px; font-size:12px; }
+ body:not(.kompasiAppMode) [data-owner-ui="register"] .intro h1 { font-size:24px; }
+}
+
+/* Messages: white inbox, navy message bubbles, mint active conversation. */
+body:not(.kompasiAppMode) [data-owner-ui="chat"]>.header { max-width:1120px; width:100%; min-height:0; padding:12px 0 0; border:0!important; background:transparent!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .headerRight { flex-direction:row; align-items:center; width:100%; justify-content:flex-end; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .accountButton { display:none; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .languages { background:var(--qr-surface)!important; border:1px solid var(--qr-border)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .languages button { color:var(--qr-text-secondary)!important; min-height:32px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .languages button.active { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .container { max-width:1120px; width:100%; padding:16px 0 0!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorCard { max-width:none; min-height:68px!important; margin-bottom:20px!important; padding:14px 18px!important; background:var(--qr-primary)!important; border:0!important; border-radius:12px; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorCard::after { display:none; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorAvatar { background:var(--qr-secondary)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorCopy strong { font-size:14px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorCopy span { color:var(--qr-text-inverse-muted)!important; font-size:12px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .onlineDot { background:var(--qr-primary-hover)!important; color:var(--qr-secondary)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .pageTitle { display:flex!important; margin-bottom:18px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .pageTitle>div>span { color:var(--qr-secondary-ink)!important; font-size:10px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .pageTitle h1 { color:var(--qr-primary)!important; font-size:26px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .pageTitle p { color:var(--qr-text-secondary)!important; font-size:13px!important; line-height:1.7; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .refresh { background:var(--qr-surface)!important; color:var(--qr-text)!important; border-color:var(--qr-border-control)!important; font-size:12px; min-height:40px; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .inbox { background:var(--qr-surface)!important; border:1px solid var(--qr-border)!important; border-radius:14px; box-shadow:var(--qr-shadow)!important; grid-template-columns:310px minmax(0,1fr); }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .sidebar { background:var(--qr-surface)!important; border-color:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] :is(.sidebarTitle,.chatHeader) { background:var(--qr-surface)!important; color:var(--qr-primary)!important; border-color:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .sidebarTitle { min-height:62px; padding:14px 16px; font-size:14px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] :is(.sidebarTitle span,.chatItemIcon) { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .chatHeader h2 { color:var(--qr-primary)!important; font-size:16px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .chatHeader :is(p,small) { color:var(--qr-text-secondary)!important; font-size:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .liveStatus { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .thread { border-color:var(--qr-border)!important; padding:16px 44px 16px 14px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .thread.active { border-left:3px solid var(--qr-secondary-ink)!important; background:var(--qr-secondary-soft)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .thread:not(.active):hover { background:var(--qr-background)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] :is(.threadIcon,.threadReply) { background:var(--qr-surface-muted)!important; color:var(--qr-secondary-ink)!important; border-color:var(--qr-border)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] :is(.threadTag,.threadTop small,.threadText,.threadTime,.sidebarEmpty,.chatState) { color:var(--qr-text-secondary)!important; font-size:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .threadTop strong { color:var(--qr-primary)!important; font-size:14px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .aiReception { border-color:var(--qr-border)!important; background:var(--qr-background)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .aiReceptionHead strong { color:var(--qr-primary)!important; font-size:13px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .aiReceptionHead small { color:var(--qr-text-secondary)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .aiSpark { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .saveAutomation { background:var(--qr-accent)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .messages { background:var(--qr-background)!important; padding:18px!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .privacyNotice { background:var(--qr-surface-muted)!important; color:var(--qr-text-secondary)!important; border-color:var(--qr-border)!important; font-size:12px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .bubble { background:var(--qr-surface)!important; border-color:var(--qr-border)!important; color:var(--qr-text)!important; font-size:14px!important; line-height:1.7; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .messageRow.mine .bubble { background:var(--qr-primary)!important; color:var(--qr-text-inverse)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .bubble time { font-size:11px; opacity:1; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .seen { color:var(--qr-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .sender { color:var(--qr-text-secondary)!important; font-size:11px; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer { background:var(--qr-surface)!important; border-color:var(--qr-border)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer textarea { background:var(--qr-surface)!important; color:var(--qr-text)!important; border:1px solid var(--qr-border-control)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer :is(.emojiButton,.mediaButton,.locationButton) { background:var(--qr-surface-muted)!important; border-color:var(--qr-border)!important; color:var(--qr-secondary-ink)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer .mediaButton.recording { background:var(--qr-emergency-soft)!important; color:var(--qr-emergency)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer .sendButton { background:var(--qr-accent)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="chat"] .composer .sendButton:hover:not(:disabled) { background:var(--qr-accent-hover)!important; }
+@media(max-width:800px) {
+ body:not(.kompasiAppMode) [data-owner-ui="chat"] .inbox { grid-template-columns:1fr; min-height:500px; }
+ body:not(.kompasiAppMode) [data-owner-ui="chat"] .pageTitle { gap:12px; }
+ body:not(.kompasiAppMode) [data-owner-ui="chat"] .messages { height:380px!important; flex:auto!important; }
+ body:not(.kompasiAppMode) [data-owner-ui="chat"] .operatorCopy span { font-size:11px!important; }
+ body:not(.kompasiAppMode) [data-owner-ui="chat"] .compactThemePicker { display:none; }
+}
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .registrationHeader { border-color:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .progressStep { color:var(--qr-text-secondary)!important; font-size:13px; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .stepCircle { color:var(--qr-text-secondary)!important; background:var(--qr-surface)!important; border:1px solid var(--qr-border-control)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .progressStep:is(.active,.completed) { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .progressStep:is(.active,.completed) .stepCircle { color:var(--qr-primary)!important; background:var(--qr-secondary)!important; border-color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .progress .line { background:var(--qr-border)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .progress .line.filled { background:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.stepTitle>span,.previewTitle>span) { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.stepTitle h1,.previewTitle h1) { color:var(--qr-primary)!important; font-size:26px; line-height:1.5; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.accountNotice,.finderNotice,.readonlyBox) { background:var(--qr-surface-muted)!important; border-color:var(--qr-border)!important; color:var(--qr-text-secondary)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.accountCheck,.finderIcon) { background:var(--qr-secondary-soft)!important; color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.primaryButton,.confirmButton) { background:var(--qr-accent)!important; color:var(--qr-primary)!important; box-shadow:none!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(.primaryButton,.confirmButton):hover:not(:disabled) { background:var(--qr-accent-hover)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] .backButton { color:var(--qr-primary)!important; border-color:var(--qr-border-control)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="registration-form"] :is(input,textarea,select) { color:var(--qr-text)!important; border-color:var(--qr-border-control)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] :is(.sectionTitle>b,.visibilityHeader>span) { color:var(--qr-secondary-ink)!important; }
+body:not(.kompasiAppMode) [data-owner-ui="edit"] :is(.optionalGroup,.contactMethods,.locationBox) { border-color:var(--qr-border)!important; background:var(--qr-background)!important; }

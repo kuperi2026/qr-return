@@ -16,6 +16,7 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
+import OwnerNavigation from "@/components/account/OwnerNavigation";
 import ProfileCard, {
   type ProfileCardItem,
 } from "@/components/account/ProfileCard";
@@ -476,20 +477,12 @@ export default function MyProfilesPage() {
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <header className={styles.header}>
-          <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark}>QR</span>დაცული QR კავშირი
-          </Link>
-          <div className={styles.headerActions}>
-            <Link href="/account/subscriptions">მომსახურება და პაკეტები</Link>
-            {email && <span className={styles.email} title={email}>{email}</span>}
-            <button type="button" className={styles.logout} onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
-          </div>
-        </header>
+        <OwnerNavigation email={email} onLogout={handleLogout} loggingOut={loggingOut}/>
         {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
 
         <section className={styles.heading}>
           <div>
+            <span className={styles.eyebrow}>თქვენი ანგარიში</span>
             <h1>მფლობელის სივრცე</h1>
             <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
           </div>
@@ -518,7 +511,7 @@ export default function MyProfilesPage() {
               lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
               longitude: profile.last_scan_longitude, lost: profile.lost,
             }))}/>
-            <section aria-labelledby="profiles-heading">
+            <section className={styles.profilesSection} aria-labelledby="profiles-heading">
               <div className={styles.sectionHeading}>
                 <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
                 <span className={styles.results} role="status">
