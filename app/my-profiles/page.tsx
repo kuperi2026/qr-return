@@ -508,6 +508,14 @@ export default function MyProfilesPage() {
                 longitude: profile.last_scan_longitude, lost: profile.lost,
               }))}/>
           )}
+          {!errorMessage && profiles.length > 0 && (
+            <div className={`${styles.sectionHeading} ${styles.summaryProfiles}`}>
+              <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
+              <span className={styles.results} role="status">
+                {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
+              </span>
+            </div>
+          )}
         </div>
 
         {createdMessage && <div className={styles.notice} role="status">{createdMessage}</div>}
@@ -524,12 +532,6 @@ export default function MyProfilesPage() {
         ) : (
           <>
             <section aria-labelledby="profiles-heading">
-              <div className={styles.sectionHeading}>
-                <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
-                <span className={styles.results} role="status">
-                  {cards.length > 0 ? `${(currentPage - 1) * PROFILES_PER_PAGE + 1}–${Math.min(currentPage * PROFILES_PER_PAGE, cards.length)} / ${cards.length}` : "0 შედეგი"}
-                </span>
-              </div>
               <div className={styles.toolbar}>
                 <label className={styles.search}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>

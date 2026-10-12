@@ -206,44 +206,49 @@
 .card :is(a,button,summary,[tabindex]):focus-visible { outline-color:#ffffff; }
 .card .lostMode button:focus-visible, .card .historyHeading:focus-visible, .card .historyRow a:focus-visible { outline-color:#0a4c8a; }
 
-/* Open, compact summary; blue is reserved for values and actions. */
-.summaryCard { margin:0 0 22px; padding:0; border:0; border-radius:0; background:transparent; color:#263f59; box-shadow:none; }
-.summaryCard .header { padding:10px 0; border-color:#edf1f5; }
-.summaryCard .brand { color:#263f59; font-size:.9375rem; }
-.summaryCard .brandMark { background:#edf5fc; color:#0a4c8a; border-color:transparent; box-shadow:none; }
+/* The owner overview shares the profile cards' blue gradient. */
+.summaryCard { margin:12px 0 14px; padding:0 20px; border:1px solid #0a4c8a; border-radius:18px; background:radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%); color:#ffffff; box-shadow:none; }
+.summaryCard .header { padding:10px 0; border-color:rgba(255,255,255,.18); }
+.summaryCard .brand { color:#ffffff; font-size:.9375rem; }
+.summaryCard .brandMark { background:rgba(255,255,255,.12); color:#ffffff; border-color:rgba(255,255,255,.25); box-shadow:none; }
 .summaryCard .headerActions { gap:16px; font-size:.875rem; }
-.summaryCard .headerActions a, .summaryCard .logout { color:#4f6478; font-weight:500; }
+.summaryCard .headerActions a, .summaryCard .logout { color:#ffffff; font-weight:500; }
+.summaryCard .headerActions a:hover, .summaryCard .logout:hover { text-decoration:underline; text-underline-offset:4px; }
 .summaryCard .logout { font-size:.875rem!important; }
-.summaryCard .email { color:#60758a; }
-.summaryCard .heading { padding:20px 0 18px; }
-.summaryCard .heading h1 { color:#263f59; font-size:1.625rem; font-weight:600; }
-.summaryCard .heading p { margin-top:5px; color:#60758a; font-size:.9375rem; }
+.summaryCard .email { color:#e2edf8; }
+.summaryCard .heading { padding:16px 0; }
+.summaryCard .heading h1 { color:#ffffff; font-size:1.625rem; font-weight:600; }
+.summaryCard .heading p { margin-top:5px; color:#e2edf8; font-size:.9375rem; }
 .summaryCard .headingActions { gap:8px; }
 .summaryCard .headingActions .button, .summaryCard .headingActions .primaryButton { min-height:42px; padding:9px 14px; border-radius:9px; font-size:.9375rem; box-shadow:none; }
-.summaryCard .headingActions .button { background:#ffffff; color:#0a4c8a; border-color:#d8e5f2; }
-.summaryCard .headingActions .primaryButton { background:#0a4c8a; color:#ffffff; border-color:#0a4c8a; }
-.summaryCard .headingActions .button:hover { background:#edf5fc; color:#063b72; border-color:#9ebcd7; }
-.summaryCard .headingActions .primaryButton:hover { background:#063b72; border-color:#063b72; }
-.summaryCard .recoveryPanel { margin:0; overflow:visible; border:0; border-radius:0; background:transparent; color:#263f59; box-shadow:none; }
+.summaryCard .headingActions .button { background:rgba(255,255,255,.08); color:#ffffff; border-color:rgba(255,255,255,.5); }
+.summaryCard .headingActions .primaryButton { background:#eaf3ff; color:#0a4c8a; border-color:#eaf3ff; }
+.summaryCard .headingActions .button:hover { background:rgba(255,255,255,.1); border-color:#ffffff; }
+.summaryCard .headingActions .primaryButton:hover { background:#ffffff; border-color:#ffffff; }
+.summaryCard .recoveryPanel { margin:0; overflow:visible; border:0; border-radius:0; background:transparent; color:#ffffff; box-shadow:none; }
 .summaryCard .recoveryHeader { padding:0 0 10px; border:0; background:transparent; }
-.summaryCard .recoveryHeader>div { gap:3px; flex-direction:column; align-items:flex-start; }
-.summaryCard .recoveryHeader h2 { color:#263f59; font-size:1rem; font-weight:500; }
-.summaryCard .intelligenceLabel { color:#60758a; font-size:.75rem; font-weight:500; letter-spacing:.04em; }
-.summaryCard .systemReady { padding:0; border:0; background:transparent; color:#08784b; font-size:.8125rem; }
-.summaryCard .overview { padding:14px 0; border-radius:12px; background:#f5f9fd; }
-.summaryCard .metric { padding:0 18px; background:transparent; border-color:#dce7f1; }
-.summaryCard .metricLabel { color:#4f6478; font-size:.875rem; }
-.summaryCard .metricValue { margin-top:5px; color:#0a4c8a; font-size:1.75rem; font-weight:500; }
-.summaryCard .alertValue { color:#bd232b; }
+.summaryCard .recoveryHeader>div { gap:4px 12px; }
+.summaryCard .recoveryHeader h2 { color:#ffffff; font-size:1rem; font-weight:500; }
+.summaryCard .intelligenceLabel { color:#e2edf8; font-size:.75rem; font-weight:500; letter-spacing:.04em; }
+.summaryCard .systemReady { padding:0; border:0; background:transparent; color:#b9f6d3; font-size:.8125rem; }
+.summaryCard .overview { padding:12px 0; border:1px solid rgba(255,255,255,.16); border-radius:12px; background:rgba(0,20,48,.1); }
+.summaryCard .metric { padding:0 16px; background:transparent; border-color:rgba(255,255,255,.18); }
+.summaryCard .metricLabel { color:#e2edf8; font-size:.875rem; }
+.summaryCard .metricValue { margin-top:4px; color:#ffffff; font-size:1.75rem; font-weight:600; }
+.summaryCard .alertValue { color:#ffd5d5; }
 .summaryCard .latestValue { font-size:1rem; }
-.summaryCard .metricDate { color:#4f6478; font-size:.8125rem; }
-.summaryCard .mapLink { color:#0a4c8a; font-size:.875rem; }
+.summaryCard .metricDate { color:#e2edf8; font-size:.8125rem; }
+.summaryCard .mapLink { color:#ffffff; font-size:.875rem; text-decoration:underline; text-underline-offset:3px; }
 .summaryCard .activityStrip { padding:9px 0 0; border:0; background:transparent; font-size:.8125rem; gap:3px 8px; }
-.summaryCard .activityStrip span { color:#60758a; }
-.summaryCard .activityStrip strong { color:#4f6478; font-weight:400; }
-.summaryCard :is(a,button):focus-visible { outline-color:#0a4c8a; }
+.summaryCard .activityStrip span { color:#e2edf8; }
+.summaryCard .activityStrip strong { color:#ffffff; font-weight:400; }
+.summaryCard .summaryProfiles { margin:12px 0 0; padding:12px 0; border-top:1px solid rgba(255,255,255,.18); }
+.summaryCard .sectionHeading h2 { color:#ffffff; font-size:1.125rem; }
+.summaryCard .count { padding:2px 8px; border-color:rgba(255,255,255,.2); background:rgba(255,255,255,.1); color:#ffffff; }
+.summaryCard .results { color:#e2edf8; }
+.summaryCard :is(a,button):focus-visible { outline-color:#ffffff; }
 @media(max-width:680px) {
-  .summaryCard { margin-bottom:18px; }
+  .summaryCard { margin:10px 0 12px; padding:0 14px; border-radius:16px; }
   .summaryCard .header { gap:8px; }
   .summaryCard .headerActions { gap:12px; }
   .summaryCard .heading { padding:16px 0; gap:12px; }
