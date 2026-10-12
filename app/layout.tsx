@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import "./brand-colors.css";
 import "./product-grid.css";
 import "./interface.css";
-import "./owner-interior.css";
 import StyledJsxRegistry from "./registry";
 import SiteBackNavigation from "./components/SiteBackNavigation";
 import AppInstallManager from "@/app/components/app/AppInstallManager";

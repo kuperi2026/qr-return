@@ -1098,7 +1098,7 @@ export default function RegistrationFlow({
 
   return (
     <>
-      <main data-owner-ui="registration-form" className={`registrationPage${step > 1 ? " registrationDetails" : ""}${isAppRegistration ? " appRegistration" : ""}`}>
+      <main className={`registrationPage${step > 1 ? " registrationDetails" : ""}${isAppRegistration ? " appRegistration" : ""}`}>
         <div
           className="emojiBackground"
           aria-hidden="true"

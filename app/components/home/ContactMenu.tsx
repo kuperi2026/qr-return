@@ -8,9 +8,9 @@ export default function ContactMenu({
   return (
     <section
       style={{
-        background: "var(--qr-background)",
-        borderBottom: "1px solid var(--qr-border)",
-        boxShadow: "0 8px 22px rgba(10, 76, 138, 0.06)",
+        background: "#f7faff",
+        borderBottom: "1px solid #dfe7f1",
+        boxShadow: "0 20px 45px rgba(10, 48, 100, 0.1)",
       }}
     >
       <div
@@ -31,7 +31,7 @@ export default function ContactMenu({
         >
           <span
             style={{
-              color: "var(--qr-secondary-ink)",
+              color: "#1266e9",
               fontSize: "9px",
               fontWeight: 900,
               letterSpacing: "1px",
@@ -43,7 +43,7 @@ export default function ContactMenu({
           <h2
             style={{
               margin: "8px 0 0",
-              color: "var(--qr-primary)",
+              color: "#1c324d",
               fontSize: "25px",
               lineHeight: 1.15,
             }}
@@ -54,7 +54,7 @@ export default function ContactMenu({
           <p
             style={{
               margin: "8px 0 0",
-              color: "var(--qr-text-secondary)",
+              color: "#6e7e91",
               fontSize: "12px",
               lineHeight: 1.6,
             }}
@@ -115,28 +115,28 @@ export default function ContactMenu({
 const cardStyle = {
   minHeight: "205px",
   padding: "24px",
-  border: "1px solid var(--qr-border)",
+  border: "1px solid #d7e2ef",
   borderRadius: "15px",
-  background: "var(--qr-surface)",
+  background: "#ffffff",
   color: "inherit",
   textDecoration: "none",
 };
 
 const numberStyle = {
-  color: "var(--qr-secondary-ink)",
+  color: "#1266e9",
   fontSize: "10px",
   fontWeight: 900,
 };
 
 const headingStyle = {
   margin: "17px 0 0",
-  color: "var(--qr-primary)",
+  color: "#263c55",
   fontSize: "17px",
 };
 
 const paragraphStyle = {
   margin: "9px 0 0",
-  color: "var(--qr-text-secondary)",
+  color: "#6d7c90",
   fontSize: "12px",
   lineHeight: 1.68,
 };
@@ -144,6 +144,6 @@ const paragraphStyle = {
 const linkStyle = {
   display: "block",
   marginTop: "19px",
-  color: "var(--qr-secondary-ink)",
+  color: "#1266e9",
   fontSize: "11px",
 };

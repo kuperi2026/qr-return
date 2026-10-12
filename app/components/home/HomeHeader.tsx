@@ -115,32 +115,32 @@ export default function HomeHeader({
 
           <nav className="homeNav">
 
-            <button aria-expanded={openMenu === "about"} onClick={() => toggleMenu("about")}>
+            <button onClick={() => toggleMenu("about")}>
               {ka ? "ჩვენ შესახებ" : "About"}
               <Chevron open={openMenu === "about"} />
             </button>
 
             <button
-              aria-expanded={openMenu === "shop"} onClick={() => toggleMenu("shop")}
+              onClick={() => toggleMenu("shop")}
             >
               {ka ? "ონლაინ შეძენა" : "Shop"}
               <Chevron open={openMenu === "shop"} />
             </button>
 
             <button
-              aria-expanded={openMenu === "productInfo"} onClick={() => toggleMenu("productInfo")}
+              onClick={() => toggleMenu("productInfo")}
             >
               {ka ? "პროდუქტის შესახებ" : "Product info"}
               <Chevron open={openMenu === "productInfo"} />
             </button>
 
-            <button aria-expanded={openMenu === "plans"} onClick={() => toggleMenu("plans")}>
+            <button onClick={() => toggleMenu("plans")}>
               {ka ? "მომსახურება და პაკეტები" : "Service & plans"}
               <Chevron open={openMenu === "plans"} />
             </button>
 
             <button
-              aria-expanded={openMenu === "contact"} onClick={() => toggleMenu("contact")}
+              onClick={() => toggleMenu("contact")}
             >
               {ka ? "კონტაქტი" : "Contact"}
             </button>

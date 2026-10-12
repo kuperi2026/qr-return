@@ -33,19 +33,19 @@ export default function AiRecoveryCommandCenter({ profiles }: { profiles: Recove
       </header>
       <div className={styles.overview}>
       <div className={styles.metric}>
-        <span className={styles.metricLabel}><InterfaceIcon name="profiles" size={17}/>სულ პროფილი</span>
+        <span className={styles.metricLabel}>სულ პროფილი</span>
         <strong className={styles.metricValue}>{profiles.length}</strong>
       </div>
       <div className={styles.metric}>
-        <span className={styles.metricLabel}><InterfaceIcon name="pin" size={17}/>დაკარგულია</span>
+        <span className={styles.metricLabel}>დაკარგულია</span>
         <strong className={`${styles.metricValue} ${activeCases ? styles.alertValue : ""}`}>{activeCases}</strong>
       </div>
       <div className={styles.metric}>
-        <span className={styles.metricLabel}><InterfaceIcon name="history" size={17}/>სულ სკანირება</span>
+        <span className={styles.metricLabel}>სულ სკანირება</span>
         <strong className={styles.metricValue}>{totalScans}</strong>
       </div>
       <div className={styles.metric}>
-        <span className={styles.metricLabel}><InterfaceIcon name="check" size={17}/>ბოლო სკანირება</span>
+        <span className={styles.metricLabel}>ბოლო სკანირება</span>
         <strong className={`${styles.metricValue} ${styles.latestValue}`}>{latest ? latest.name || latest.tagCode || "QR პროფილი" : "ჯერ არ ყოფილა"}</strong>
         {latest && <>
           <time className={styles.metricDate} dateTime={latest.lastScannedAt!}>{formatProfileDate(latest.lastScannedAt)}</time>

@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import OwnerNavigation from "@/components/account/OwnerNavigation";
-import InterfaceIcon, { type IconName } from "@/app/components/ui/InterfaceIcon";
 
 const PRODUCTS = [
-  { type: "dog", label: "ძაღლი", icon: "dog" },
-  { type: "cat", label: "კატა", icon: "cat" },
-  { type: "keys", label: "გასაღები", icon: "key" },
-  { type: "wallet", label: "საფულე", icon: "wallet" },
-  { type: "bag", label: "ჩანთა", icon: "bag" },
-  { type: "suitcase", label: "ჩემოდანი", icon: "suitcase" },
-  { type: "parking", label: "მანქანა / Parking", icon: "car" },
-  { type: "emergency", label: "Emergency", icon: "medical" },
+  { type: "dog", label: "ძაღლი", emoji: "🐶" },
+  { type: "cat", label: "კატა", emoji: "🐱" },
+  { type: "keys", label: "გასაღები", emoji: "🔑" },
+  { type: "wallet", label: "საფულე", emoji: "👛" },
+  { type: "bag", label: "ჩანთა", emoji: "👜" },
+  { type: "suitcase", label: "ჩემოდანი", emoji: "🧳" },
+  { type: "parking", label: "მანქანა / Parking", emoji: "🚘" },
+  { type: "emergency", label: "Emergency", emoji: "🩺" },
 ] as const;
 
 export default function RegisterPage() {
@@ -24,12 +22,18 @@ export default function RegisterPage() {
   }, []);
 
   return (
-    <main className="page" data-owner-ui="register">
-      <OwnerNavigation/>
+    <main className="page">
+      <header className="topbar">
+        <a href="/" className="brand">
+          <span className="brandMark">QR</span>
+          <span className="brandText"><strong>QR RETURN</strong><small>SMART LOST &amp; FOUND</small></span>
+        </a>
+        <a href="/my-profiles" className="profilesButton">ჩემი პროფილები</a>
+      </header>
 
       <section className="mainCard">
         <div className="intro">
-          <span>ახალი QR პროფილი</span>
+          <span>PRODUCT REGISTRATION</span>
           <h1>აირჩიეთ პროდუქტი</h1>
           <p>აირჩიეთ კატეგორია და დაიწყეთ QR პროფილის შექმნა.</p>
         </div>
@@ -39,9 +43,9 @@ export default function RegisterPage() {
             const href = product.type === "emergency" ? "/register/emergency-bracelet" : `/register-item/${product.type}${tagQuery}`;
             return (
               <a key={product.type} href={href} className={`productCard ${product.type === "emergency" ? "emergency" : ""}`}>
-                <span className="productIcon"><InterfaceIcon name={product.icon as IconName} size={28}/></span>
+                <span className="productIcon">{product.emoji}</span>
                 <strong>{product.label}</strong>
-                <span className="arrow"><InterfaceIcon name="arrow" size={17}/></span>
+                <span className="arrow">→</span>
               </a>
             );
           })}

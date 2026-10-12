@@ -1153,7 +1153,7 @@ export default function EditProfilePage() {
 
   return (
     <>
-      <main className="page" data-owner-ui="edit">
+      <main className="page">
         <header className="header">
           <a
             href="/"
