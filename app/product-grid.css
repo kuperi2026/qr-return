@@ -57,6 +57,49 @@
   border-color: #9caeba !important;
 }
 
+/* Expanded navigation keeps the homepage's white and sky-blue palette. */
+.homePalette .homeNav button:hover,
+.homePalette .homeNav button[aria-expanded="true"] {
+  color: #0876bb !important;
+  box-shadow: inset 0 -3px #159be7;
+}
+
+.homePalette .homeNav button:focus-visible {
+  outline: 3px solid #0876bb;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.homePalette .plansMenu .serviceChoices .serviceChoice {
+  color: #173b5c;
+  background: #ffffff;
+  border-color: #d4e3ee;
+  box-shadow: 0 5px 16px rgba(10, 76, 138, .05);
+}
+
+.homePalette .plansMenu .serviceChoices .serviceChoice:hover {
+  background: #f0f8fe;
+  border-color: #83bfe3;
+  box-shadow: 0 7px 20px rgba(10, 76, 138, .09);
+}
+
+.homePalette .plansMenu .serviceChoices .choiceSymbol {
+  color: #0876bb;
+  background: #e4f3fc;
+}
+
+.homePalette .plansMenu .serviceChoices :is(small, .choiceChevron) {
+  color: #0876bb;
+}
+
+.homePalette .plansMenu .serviceChoices p {
+  color: #526b80;
+}
+
+.homePalette .plansMenu .serviceChoice:focus-visible {
+  outline-color: #07549c;
+}
+
 /* Blue rectangular hero, centered headline and white horizontal action bar. */
 .homePalette .homeHero {
   min-height: auto !important;
