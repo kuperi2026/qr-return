@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "./brand-colors.css";
 import "./product-grid.css";
 import "./interface.css";
 import StyledJsxRegistry from "./registry";
