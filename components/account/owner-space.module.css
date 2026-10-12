@@ -205,3 +205,27 @@
 .cardActions a[href^="/account/admin"]:hover { background:#e7f8ef; color:#087443; border-color:#b9d8c8; }
 .card :is(a,button,summary,[tabindex]):focus-visible { outline-color:#ffffff; }
 .card .lostMode button:focus-visible, .card .historyHeading:focus-visible, .card .historyRow a:focus-visible { outline-color:#0a4c8a; }
+
+/* The owner's summary uses the exact blue background of the existing profile cards. */
+.summaryCard { margin:12px 0 18px; padding:0 16px; overflow:hidden; border:1px solid #0a4c8a; border-radius:18px; background:radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%); color:#ffffff; box-shadow:0 8px 20px rgba(24,55,90,.07); }
+.summaryCard .header { border-color:rgba(255,255,255,.25); }
+.summaryCard .brand, .summaryCard .headerActions a, .summaryCard .logout, .summaryCard .heading h1 { color:#ffffff; }
+.summaryCard .brandMark { background:#eaf3ff; color:#0647c8; border-color:#b8d2f4; box-shadow:none; }
+.summaryCard .email, .summaryCard .heading p { color:#e2edf8; }
+.summaryCard .headingActions .button { background:#eaf3ff; color:#075dcc; border-color:#7aacef; box-shadow:none; }
+.summaryCard .headingActions .primaryButton { background:#ffffff; color:#0647c8; border-color:#ffffff; box-shadow:none; }
+.summaryCard .headingActions a:hover { background:#dceaff; color:#063b72; border-color:#ffffff; }
+.summaryCard .recoveryPanel { margin:0 -16px; border:0; border-top:1px solid rgba(255,255,255,.25); border-radius:0; background:transparent; color:#ffffff; box-shadow:none; }
+.summaryCard .recoveryHeader { border-color:rgba(255,255,255,.25); background:transparent; }
+.summaryCard .recoveryHeader h2, .summaryCard .metricValue, .summaryCard .mapLink { color:#ffffff; }
+.summaryCard .intelligenceLabel, .summaryCard .metricLabel, .summaryCard .metricDate { color:#e2edf8; }
+.summaryCard .metric { background:transparent; border-color:rgba(255,255,255,.25); }
+.summaryCard .alertValue { color:#ffebeb; }
+.summaryCard .activityStrip { background:rgba(0,20,55,.18); border-color:rgba(255,255,255,.25); }
+.summaryCard .activityStrip span { color:#e2edf8; }
+.summaryCard .activityStrip strong { color:#ffffff; }
+.summaryCard :is(a,button):focus-visible { outline-color:#ffffff; }
+@media(max-width:680px) {
+  .summaryCard { margin-top:10px; padding:0 12px; border-radius:16px; }
+  .summaryCard .recoveryPanel { margin:0 -12px; }
+}

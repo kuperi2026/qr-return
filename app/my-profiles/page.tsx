@@ -476,28 +476,39 @@ export default function MyProfilesPage() {
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <header className={styles.header}>
-          <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark}>QR</span>დაცული QR კავშირი
-          </Link>
-          <div className={styles.headerActions}>
-            <Link href="/account/subscriptions">მომსახურება და პაკეტები</Link>
-            {email && <span className={styles.email} title={email}>{email}</span>}
-            <button type="button" className={styles.logout} onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
-          </div>
-        </header>
-        {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
+        <div className={styles.summaryCard}>
+          <header className={styles.header}>
+            <Link href="/" className={styles.brand}>
+              <span className={styles.brandMark}>QR</span>დაცული QR კავშირი
+            </Link>
+            <div className={styles.headerActions}>
+              <Link href="/account/subscriptions">მომსახურება და პაკეტები</Link>
+              {email && <span className={styles.email} title={email}>{email}</span>}
+              <button type="button" className={styles.logout} onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
+            </div>
+          </header>
+          {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
 
-        <section className={styles.heading}>
-          <div>
-            <h1>მფლობელის სივრცე</h1>
-            <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
-          </div>
-          <div className={styles.headingActions}>
-            <Link href="/account/chat" className={styles.button}><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
-            <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>
-          </div>
-        </section>
+          <section className={styles.heading}>
+            <div>
+              <h1>მფლობელის სივრცე</h1>
+              <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
+            </div>
+            <div className={styles.headingActions}>
+              <Link href="/account/chat" className={styles.button}><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
+              <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>
+            </div>
+          </section>
+
+          {!errorMessage && profiles.length > 0 && (
+            <AiRecoveryCommandCenter profiles={profiles.map((profile) => ({
+                id: profile.id, tagCode: profile.tag_code, name: profile.item_name,
+                type: profile.item_type || profile.pet_type, scanCount: profile.scan_count,
+                lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
+                longitude: profile.last_scan_longitude, lost: profile.lost,
+              }))}/>
+          )}
+        </div>
 
         {createdMessage && <div className={styles.notice} role="status">{createdMessage}</div>}
         {errorMessage ? (
@@ -512,12 +523,6 @@ export default function MyProfilesPage() {
           </section>
         ) : (
           <>
-            <AiRecoveryCommandCenter profiles={profiles.map((profile) => ({
-              id: profile.id, tagCode: profile.tag_code, name: profile.item_name,
-              type: profile.item_type || profile.pet_type, scanCount: profile.scan_count,
-              lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
-              longitude: profile.last_scan_longitude, lost: profile.lost,
-            }))}/>
             <section aria-labelledby="profiles-heading">
               <div className={styles.sectionHeading}>
                 <h2 id="profiles-heading">ჩემი პროფილები <span className={styles.count}>{profiles.length}</span></h2>
