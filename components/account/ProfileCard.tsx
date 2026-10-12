@@ -153,7 +153,8 @@ export default function ProfileCard({
 
   return (
     <article className={`${styles.card} ${item.lost ? styles.cardLost : ""}`} aria-labelledby={`profile-${item.id}`}>
-      <div className={styles.cardHeader}>
+      <details className={styles.cardDisclosure}>
+      <summary className={`${styles.cardHeader} ${styles.cardSummary}`}>
         <div className={styles.avatar}>
           {item.photo ? <img src={item.photo} alt={item.name || label}/> : <InterfaceIcon name={profileIcon(type)} size={28}/>}
         </div>
@@ -164,8 +165,10 @@ export default function ProfileCard({
         <span className={`${styles.status} ${item.lost ? styles.statusLost : item.active === false ? styles.statusInactive : ""}`}>
           {item.lost ? "დაკარგულია" : item.active === false ? "არააქტიური" : "აქტიური"}
         </span>
-      </div>
+        <span className={styles.cardToggle} aria-hidden="true"><InterfaceIcon name="chevronDown" size={18}/></span>
+      </summary>
 
+      <div className={styles.cardBody}>
       <div className={styles.qrCode}><span>QR კოდი</span><strong>{item.tagCode || "—"}</strong></div>
       <div className={`${styles.lostMode} ${item.lost ? styles.lostModeActive : ""}`}>
         <div><strong>დაკარგვის რეჟიმი</strong><small>{item.lost ? "მპოვნელი ხედავს დაკარგვის სტატუსს" : "ჩართეთ, თუ ნივთი დაიკარგა"}</small></div>
@@ -225,6 +228,8 @@ export default function ProfileCard({
       </div>
       {downloadError && <p className={styles.cardError} role="alert">{downloadError}</p>}
       {deleteError && <p className={styles.cardError} role="alert">{deleteError}</p>}
+      </div>
+      </details>
     </article>
   );
 }
