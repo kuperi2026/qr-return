@@ -206,25 +206,27 @@
 .card :is(a,button,summary,[tabindex]):focus-visible { outline-color:#ffffff; }
 .card .lostMode button:focus-visible, .card .historyHeading:focus-visible, .card .historyRow a:focus-visible { outline-color:#0a4c8a; }
 
-/* The owner's summary uses the exact blue background of the existing profile cards. */
-.summaryCard { margin:12px 0 18px; padding:0 16px; overflow:hidden; border:1px solid #0a4c8a; border-radius:18px; background:radial-gradient(circle at 21% 17%,rgba(78,166,238,.3),transparent 30%),linear-gradient(180deg,#0a4c8a 0%,#063b72 100%); color:#ffffff; box-shadow:0 8px 20px rgba(24,55,90,.07); }
-.summaryCard .header { border-color:rgba(255,255,255,.25); }
-.summaryCard .brand, .summaryCard .headerActions a, .summaryCard .logout, .summaryCard .heading h1 { color:#ffffff; }
-.summaryCard .brandMark { background:#eaf3ff; color:#0647c8; border-color:#b8d2f4; box-shadow:none; }
-.summaryCard .email, .summaryCard .heading p { color:#e2edf8; }
-.summaryCard .headingActions .button { background:#eaf3ff; color:#075dcc; border-color:#7aacef; box-shadow:none; }
-.summaryCard .headingActions .primaryButton { background:#ffffff; color:#0647c8; border-color:#ffffff; box-shadow:none; }
-.summaryCard .headingActions a:hover { background:#dceaff; color:#063b72; border-color:#ffffff; }
-.summaryCard .recoveryPanel { margin:0 -16px; border:0; border-top:1px solid rgba(255,255,255,.25); border-radius:0; background:transparent; color:#ffffff; box-shadow:none; }
-.summaryCard .recoveryHeader { border-color:rgba(255,255,255,.25); background:transparent; }
-.summaryCard .recoveryHeader h2, .summaryCard .metricValue, .summaryCard .mapLink { color:#ffffff; }
-.summaryCard .intelligenceLabel, .summaryCard .metricLabel, .summaryCard .metricDate { color:#e2edf8; }
-.summaryCard .metric { background:transparent; border-color:rgba(255,255,255,.25); }
-.summaryCard .alertValue { color:#ffebeb; }
-.summaryCard .activityStrip { background:rgba(0,20,55,.18); border-color:rgba(255,255,255,.25); }
-.summaryCard .activityStrip span { color:#e2edf8; }
-.summaryCard .activityStrip strong { color:#ffffff; }
-.summaryCard :is(a,button):focus-visible { outline-color:#ffffff; }
+/* A light owner summary with the same blue accents as the profile cards. */
+.summaryCard { margin:12px 0 18px; padding:0 16px; overflow:hidden; border:1px solid #d8e5f2; border-radius:18px; background:#ffffff; color:#263f59; box-shadow:none; }
+.summaryCard .header { border-color:#e5ebf2; }
+.summaryCard .brand, .summaryCard .headerActions a, .summaryCard .logout, .summaryCard .heading h1 { color:#0a4c8a; }
+.summaryCard .brandMark { background:#0a4c8a; color:#ffffff; border-color:#0a4c8a; box-shadow:none; }
+.summaryCard .email, .summaryCard .heading p { color:#4f6478; }
+.summaryCard .headingActions .button { background:#ffffff; color:#0a4c8a; border-color:#b8d2f4; box-shadow:none; }
+.summaryCard .headingActions .primaryButton { background:#0a4c8a; color:#ffffff; border-color:#0a4c8a; box-shadow:none; }
+.summaryCard .headingActions .button:hover { background:#eaf3ff; color:#063b72; border-color:#7aacef; }
+.summaryCard .headingActions .primaryButton:hover { background:#063b72; border-color:#063b72; }
+.summaryCard .recoveryPanel { margin:0 -16px; border:0; border-top:1px solid #d8e5f2; border-radius:0; background:#f7faff; color:#263f59; box-shadow:none; }
+.summaryCard .recoveryHeader { border-color:#d8e5f2; background:#ffffff; }
+.summaryCard .recoveryHeader h2, .summaryCard .metricValue, .summaryCard .mapLink { color:#0a4c8a; }
+.summaryCard .intelligenceLabel { color:#0a4c8a; }
+.summaryCard .metricLabel, .summaryCard .metricDate { color:#4f6478; }
+.summaryCard .metric { background:#f0f6fd; border-color:#d8e5f2; }
+.summaryCard .alertValue { color:#bd232b; }
+.summaryCard .activityStrip { background:#ffffff; border-color:#d8e5f2; }
+.summaryCard .activityStrip span { color:#4f6478; }
+.summaryCard .activityStrip strong { color:#263f59; }
+.summaryCard :is(a,button):focus-visible { outline-color:#0a4c8a; }
 @media(max-width:680px) {
   .summaryCard { margin-top:10px; padding:0 12px; border-radius:16px; }
   .summaryCard .recoveryPanel { margin:0 -12px; }
