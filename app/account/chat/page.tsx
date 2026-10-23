@@ -241,9 +241,7 @@ export default function OwnerChatInboxPage() {
       }
     }
 
-    if (!silent) {
-      setChatLoading(false);
-    }
+    setChatLoading(false);
   }
 
   async function sendMessage(
