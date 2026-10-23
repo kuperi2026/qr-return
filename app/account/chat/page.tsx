@@ -73,6 +73,10 @@ export default function OwnerChatInboxPage() {
   const [error, setError] = useState("");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const followBottomRef = useRef(true);
+  const selectedKeyRef = useRef("");
+  const messageRequestRef = useRef(0);
+  selectedKeyRef.current = selected ? `${selected.profile_id}:${selected.finder_session}` : "";
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   const ka = lang === "ka";
@@ -133,7 +137,7 @@ export default function OwnerChatInboxPage() {
 
   useLayoutEffect(() => {
     const container = messagesRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
+    if (container && followBottomRef.current) container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   async function checkUser() {
@@ -193,8 +197,8 @@ export default function OwnerChatInboxPage() {
       if (requested) {
         setSelected(requested);
         setMobileConversationOpen(true);
-      } else if (!selected && result.length > 0) {
-        setSelected(result[0]);
+      } else {
+        setSelected(current => current || result[0] || null);
       }
 
       setError("");
@@ -207,7 +211,10 @@ export default function OwnerChatInboxPage() {
     thread: ChatThread,
     silent = false
   ) {
+    const request = ++messageRequestRef.current;
+    const threadKey = `${thread.profile_id}:${thread.finder_session}`;
     if (!silent) {
+      followBottomRef.current = true;
       setChatLoading(true);
     }
 
@@ -219,12 +226,15 @@ export default function OwnerChatInboxPage() {
       }
     );
 
+    if (request !== messageRequestRef.current || threadKey !== selectedKeyRef.current) return;
+
     if (rpcError) {
       if (!silent) {
         setError(rpcError.message);
       }
     } else {
-      setMessages((data ?? []) as ChatMessage[]);
+      const nextMessages = (data ?? []) as ChatMessage[];
+      setMessages(current => JSON.stringify(current) === JSON.stringify(nextMessages) ? current : nextMessages);
 
       if (!silent) {
         setError("");
@@ -297,6 +307,7 @@ export default function OwnerChatInboxPage() {
       setText("");
       setShowEmojis(false);
 
+      followBottomRef.current = true;
       await loadMessages(selected, true);
       await loadThreads("", true);
     }
@@ -462,7 +473,7 @@ export default function OwnerChatInboxPage() {
           <button
             type="button"
             className="refresh"
-            onClick={() => void loadThreads()}
+            onClick={() => void loadThreads("", true)}
           >
             ↻ {ka ? "განახლება" : "Refresh"}
           </button>
@@ -625,7 +636,10 @@ export default function OwnerChatInboxPage() {
                     : "The finder does not need an account. This conversation is linked to the QR code and their anonymous session."}
                 </div>
 
-                <div className="messages" ref={messagesRef}>
+                <div className="messages" ref={messagesRef} onScroll={(event) => {
+                  const element = event.currentTarget;
+                  followBottomRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+                }}>
                   {chatLoading ? (
                     <div className="chatState">
                       {ka
