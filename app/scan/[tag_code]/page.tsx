@@ -239,7 +239,7 @@ export default function FinderPage() {
 
   if (loading) {
     return (
-      <main className="centerPage">
+      <main className="finderPage centerPage">
         <div className="logo centerLogo">
           QR
         </div>
@@ -254,7 +254,7 @@ export default function FinderPage() {
 
   if (error || !profile) {
     return (
-      <main className="centerPage">
+      <main className="finderPage centerPage">
         <div className="logo centerLogo">
           QR
         </div>
@@ -301,7 +301,7 @@ export default function FinderPage() {
   return (
     <>
       <QRScanTracker itemId={profile.id} tagCode={profile.tag_code} />
-      <main className="page">
+      <main className="finderPage">
         <header className="header">
           <a href="/" className="brand">
             <div className="logo">QR</div>
@@ -828,37 +828,22 @@ function phoneHref(phone: string) {
 function Styles() {
   return (
     <style jsx global>{`
-      * {
+      .finderPage * {
         box-sizing: border-box;
       }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        background: #f4f7fb;
-        color: #172b43;
-        font-family:
-          Arial,
-          Helvetica,
-          sans-serif;
-      }
-
-      a {
+      .finderPage a {
         text-decoration: none;
       }
 
-      .page {
+      .finderPage {
         min-height: 100vh;
         background:
           radial-gradient(circle at 21% 17%, rgba(78,166,238,.3), transparent 30%),
           linear-gradient(180deg,#0a4c8a 0%,#063b72 100%);
       }
 
-      .header {
+      .finderPage .header {
         height: 70px;
 
         display: flex;
@@ -870,13 +855,13 @@ function Styles() {
         border-bottom: 1px solid rgba(255,255,255,.22);
       }
 
-      .brand {
+      .finderPage .brand {
         display: flex;
         align-items: center;
         gap: 10px;
       }
 
-      .logo {
+      .finderPage .logo {
         width: 39px;
         height: 39px;
 
@@ -888,30 +873,30 @@ function Styles() {
         color: #ffffff;
         background: #1266e9;
 
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 900;
       }
 
-      .brand strong,
-      .brand small {
+      .finderPage .brand strong,
+      .finderPage .brand small {
         display: block;
       }
 
-      .brand strong {
+      .finderPage .brand strong {
         color: #ffffff;
         font-size: 17px;
       }
 
-      .brand small {
+      .finderPage .brand small {
         margin-top: 3px;
 
         color: rgba(255,255,255,.7);
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 800;
         letter-spacing: 1.1px;
       }
 
-      .content {
+      .finderPage .content {
         width: calc(100% - 30px);
         max-width: 720px;
 
@@ -919,7 +904,7 @@ function Styles() {
         padding: 38px 0 60px;
       }
 
-      .finderCard {
+      .finderPage .finderCard {
         overflow: hidden;
 
         border: 1px solid #e0e7ef;
@@ -930,7 +915,7 @@ function Styles() {
         box-shadow: 0 24px 65px rgba(0,24,58,.28);
       }
 
-      .hero {
+      .finderPage .hero {
         padding: 32px;
 
         display: flex;
@@ -940,8 +925,8 @@ function Styles() {
         border-bottom: 1px solid #e8edf3;
       }
 
-      .mainPhoto,
-      .photoPlaceholder {
+      .finderPage .mainPhoto,
+      .finderPage .photoPlaceholder {
         width: 118px;
         height: 118px;
 
@@ -950,11 +935,11 @@ function Styles() {
         border-radius: 20px;
       }
 
-      .mainPhoto {
+      .finderPage .mainPhoto {
         object-fit: cover;
       }
 
-      .photoPlaceholder {
+      .finderPage .photoPlaceholder {
         display: grid;
         place-items: center;
 
@@ -963,15 +948,15 @@ function Styles() {
         font-size: 48px;
       }
 
-      .eyebrow {
+      .finderPage .eyebrow {
         color: #1266e9;
 
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 900;
         letter-spacing: 1.5px;
       }
 
-      .heroText h1 {
+      .finderPage .heroText h1 {
         margin: 7px 0 8px;
 
         color: #172b43;
@@ -980,7 +965,7 @@ function Styles() {
         line-height: 1.1;
       }
 
-      .categoryBadge {
+      .finderPage .categoryBadge {
         display: inline-flex;
 
         padding: 6px 10px;
@@ -990,29 +975,29 @@ function Styles() {
         color: #1266e9;
         background: #edf5ff;
 
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 800;
       }
 
-      .heroText p {
+      .finderPage .heroText p {
         margin: 11px 0 0;
 
         color: #7c8998;
-        font-size: 11px;
+        font-size: 12px;
       }
 
-      .heroText p strong {
+      .finderPage .heroText p strong {
         color: #42556b;
       }
 
-      .heroText .driverStatus {
+      .finderPage .heroText .driverStatus {
         margin-top: 10px;
         color: #16845b;
         font-size: 13px;
         font-weight: 850;
       }
 
-      .messageBox {
+      .finderPage .messageBox {
         margin: 24px 30px 0;
         padding: 20px;
 
@@ -1022,18 +1007,18 @@ function Styles() {
         background: #f5f9ff;
       }
 
-      .messageBox span,
-      .rewardBox span {
+      .finderPage .messageBox span,
+      .finderPage .rewardBox span {
         display: block;
 
         color: #1266e9;
 
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 900;
         letter-spacing: 1px;
       }
 
-      .messageBox p {
+      .finderPage .messageBox p {
         margin: 8px 0 0;
 
         color: #34485f;
@@ -1042,7 +1027,7 @@ function Styles() {
         line-height: 1.65;
       }
 
-      .rewardBox {
+      .finderPage .rewardBox {
         margin: 13px 30px 0;
         padding: 17px 20px;
 
@@ -1051,7 +1036,7 @@ function Styles() {
         background: #f6f8fb;
       }
 
-      .rewardBox strong {
+      .finderPage .rewardBox strong {
         display: block;
 
         margin-top: 5px;
@@ -1060,14 +1045,14 @@ function Styles() {
         font-size: 17px;
       }
 
-      .section,
-      .locationSection {
+      .finderPage .section,
+      .finderPage .locationSection {
         padding: 30px;
 
         border-bottom: 1px solid #e8edf3;
       }
 
-      .sectionHeading {
+      .finderPage .sectionHeading {
         display: flex;
         align-items: flex-start;
         gap: 13px;
@@ -1075,7 +1060,7 @@ function Styles() {
         margin-bottom: 20px;
       }
 
-      .sectionHeading > span {
+      .finderPage .sectionHeading > span {
         width: 28px;
         height: 28px;
 
@@ -1087,21 +1072,21 @@ function Styles() {
         color: #1266e9;
         background: #edf5ff;
 
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 900;
       }
 
-      .sectionHeading small {
+      .finderPage .sectionHeading small {
         display: block;
 
         color: #9aa6b4;
 
-        font-size: 7px;
+        font-size: 12px;
         font-weight: 900;
         letter-spacing: 1px;
       }
 
-      .sectionHeading h2 {
+      .finderPage .sectionHeading h2 {
         margin: 3px 0 0;
 
         color: #20354e;
@@ -1109,7 +1094,7 @@ function Styles() {
         font-size: 17px;
       }
 
-      .grid {
+      .finderPage .grid {
         display: grid;
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
@@ -1117,7 +1102,7 @@ function Styles() {
         gap: 10px;
       }
 
-      .info {
+      .finderPage .info {
         padding: 15px;
 
         border: 1px solid #e4eaf1;
@@ -1126,19 +1111,19 @@ function Styles() {
         background: #fbfcfe;
       }
 
-      .info span,
-      .longInfo span,
-      .ownerName span,
-      .additionalContact > span {
+      .finderPage .info span,
+      .finderPage .longInfo span,
+      .finderPage .ownerName span,
+      .finderPage .additionalContact > span {
         display: block;
 
         color: #8996a5;
 
-        font-size: 9px;
+        font-size: 12px;
         font-weight: 800;
       }
 
-      .info strong {
+      .finderPage .info strong {
         display: block;
 
         margin-top: 5px;
@@ -1148,7 +1133,7 @@ function Styles() {
         font-size: 12px;
       }
 
-      .longInfo {
+      .finderPage .longInfo {
         margin-top: 10px;
         padding: 16px;
 
@@ -1156,7 +1141,7 @@ function Styles() {
         border-radius: 12px;
       }
 
-      .longInfo p {
+      .finderPage .longInfo p {
         margin: 7px 0 0;
 
         color: #53657a;
@@ -1165,11 +1150,11 @@ function Styles() {
         line-height: 1.6;
       }
 
-      .ownerPhotoWrap {
+      .finderPage .ownerPhotoWrap {
         margin-bottom: 15px;
       }
 
-      .ownerPhotoWrap img {
+      .finderPage .ownerPhotoWrap img {
         width: 60px;
         height: 60px;
 
@@ -1178,11 +1163,11 @@ function Styles() {
         border-radius: 50%;
       }
 
-      .ownerName {
+      .finderPage .ownerName {
         margin-bottom: 14px;
       }
 
-      .ownerName strong {
+      .finderPage .ownerName strong {
         display: block;
 
         margin-top: 4px;
@@ -1191,7 +1176,7 @@ function Styles() {
         font-size: 13px;
       }
 
-      .contactButtons {
+      .finderPage .contactButtons {
         display: grid;
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
@@ -1199,8 +1184,8 @@ function Styles() {
         gap: 9px;
       }
 
-      .primaryButton,
-      .secondaryButton {
+      .finderPage .primaryButton,
+      .finderPage .secondaryButton {
         min-height: 45px;
 
         display: flex;
@@ -1211,23 +1196,23 @@ function Styles() {
 
         border-radius: 11px;
 
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 850;
       }
 
-      .primaryButton {
+      .finderPage .primaryButton {
         color: #ffffff;
         background: #1266e9;
       }
 
-      .secondaryButton {
+      .finderPage .secondaryButton {
         color: #1266e9;
         background: #f1f6fd;
 
         border: 1px solid #dbe7f7;
       }
 
-      .additionalContact {
+      .finderPage .additionalContact {
         margin-top: 16px;
         padding: 16px;
 
@@ -1236,22 +1221,22 @@ function Styles() {
         background: #f7f9fc;
       }
 
-      .additionalContact strong,
-      .additionalContact a {
+      .finderPage .additionalContact strong,
+      .finderPage .additionalContact a {
         display: block;
 
         margin-top: 6px;
 
         color: #263a52;
 
-        font-size: 11px;
+        font-size: 12px;
       }
 
-      .locationSection {
+      .finderPage .locationSection {
         border-bottom: 0;
       }
 
-      .locationSection > p {
+      .finderPage .locationSection > p {
         margin: -5px 0 17px;
 
         color: #6f7e8e;
@@ -1260,7 +1245,7 @@ function Styles() {
         line-height: 1.6;
       }
 
-      .locationButton {
+      .finderPage .locationButton {
         min-height: 45px;
 
         padding: 0 17px;
@@ -1271,47 +1256,47 @@ function Styles() {
         color: #ffffff;
         background: #1266e9;
 
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 850;
 
         cursor: pointer;
       }
 
-      .locationStatus {
+      .finderPage .locationStatus {
         margin-top: 12px;
 
         color: #53657a;
 
-        font-size: 10px;
+        font-size: 12px;
       }
 
-      .privacy {
+      .finderPage .privacy {
         padding: 19px 20px;
 
         text-align: center;
       }
 
-      .privacy strong {
+      .finderPage .privacy strong {
         color: #1266e9;
 
-        font-size: 9px;
+        font-size: 12px;
         letter-spacing: 1px;
       }
 
-      .privacy p {
+      .finderPage .privacy p {
         max-width: 420px;
 
         margin: 6px auto 0;
 
         color: #98a4b1;
 
-        font-size: 9px;
+        font-size: 12px;
         line-height: 1.5;
       }
 
-      .eyebrow,.messageBox span,.rewardBox span{font-size:12px}.heroText p{font-size:15px}.categoryBadge{font-size:13px}.messageBox p{font-size:16px}.sectionHeading small{font-size:11px}.sectionHeading h2{font-size:22px}.info span,.longInfo span,.ownerName span,.additionalContact>span{font-size:13px}.info strong,.longInfo p{font-size:16px}.ownerName strong{font-size:17px}.primaryButton,.secondaryButton,.locationButton{min-height:54px;font-size:16px}.additionalContact strong,.additionalContact a,.locationSection>p{font-size:16px}.locationStatus{font-size:14px}.privacy strong{font-size:12px}.privacy p{font-size:13px}
+      .finderPage .eyebrow,.finderPage .messageBox span,.finderPage .rewardBox span{font-size:12px}.finderPage .heroText p{font-size:15px}.finderPage .categoryBadge{font-size:13px}.finderPage .messageBox p{font-size:16px}.finderPage .sectionHeading small{font-size:12px}.finderPage .sectionHeading h2{font-size:22px}.finderPage .info span,.finderPage .longInfo span,.finderPage .ownerName span,.finderPage .additionalContact>span{font-size:13px}.finderPage .info strong,.finderPage .longInfo p{font-size:16px}.finderPage .ownerName strong{font-size:17px}.finderPage .primaryButton,.finderPage .secondaryButton,.finderPage .locationButton{min-height:54px;font-size:16px}.finderPage .additionalContact strong,.finderPage .additionalContact a,.finderPage .locationSection>p{font-size:16px}.finderPage .locationStatus{font-size:14px}.finderPage .privacy strong{font-size:12px}.finderPage .privacy p{font-size:13px}
 
-      .centerPage {
+      .finderPage.centerPage {
         min-height: 100vh;
 
         display: flex;
@@ -1326,11 +1311,11 @@ function Styles() {
         background: #f4f7fb;
       }
 
-      .centerLogo {
+      .finderPage .centerLogo {
         margin-bottom: 12px;
       }
 
-      .centerPage h1 {
+      .finderPage .centerPage h1 {
         margin: 0;
 
         color: #172b43;
@@ -1338,12 +1323,12 @@ function Styles() {
         font-size: 25px;
       }
 
-      .centerPage p {
+      .finderPage .centerPage p {
         color: #7c8998;
         font-size: 12px;
       }
 
-      .errorBox {
+      .finderPage .errorBox {
         margin-top: 15px;
         padding: 14px 18px;
 
@@ -1358,29 +1343,29 @@ function Styles() {
       }
 
       @media (max-width: 600px) {
-        .header {
+        .finderPage .header {
           height: 62px;
           padding: 0 16px;
         }
 
-        .content {
+        .finderPage .content {
           width: calc(100% - 20px);
           padding-top: 18px;
         }
 
-        .finderCard {
+        .finderPage .finderCard {
           border-radius: 17px;
         }
 
-        .hero {
+        .finderPage .hero {
           padding: 22px;
 
           align-items: flex-start;
           gap: 16px;
         }
 
-        .mainPhoto,
-        .photoPlaceholder {
+        .finderPage .mainPhoto,
+        .finderPage .photoPlaceholder {
           width: 88px;
           height: 88px;
 
@@ -1389,30 +1374,52 @@ function Styles() {
           border-radius: 16px;
         }
 
-        .photoPlaceholder {
+        .finderPage .photoPlaceholder {
           font-size: 37px;
         }
 
-        .heroText h1 {
+        .finderPage .heroText h1 {
           font-size: 25px;
         }
 
-        .messageBox,
-        .rewardBox {
+        .finderPage .messageBox,
+        .finderPage .rewardBox {
           margin-left: 20px;
           margin-right: 20px;
         }
 
-        .section,
-        .locationSection {
+        .finderPage .section,
+        .finderPage .locationSection {
           padding: 24px 20px;
         }
 
-        .grid,
-        .contactButtons {
+        .finderPage .grid,
+        .finderPage .contactButtons {
           grid-template-columns: 1fr;
         }
       }
+
+.finderPage { min-height:100dvh; background:linear-gradient(180deg,#eaf3ff 0,#f5f8fc 360px); color:#193650; }
+.finderPage .header { background:white; border-bottom:1px solid #dce7f3; }
+.finderPage .brand strong { color:#154c89; }
+.finderPage .brand small { color:#617389; letter-spacing:0; }
+.finderPage .content { padding-top:26px; }
+.finderPage .finderCard { border-color:#dce7f3; box-shadow:0 12px 36px #24496c0c; }
+.finderPage .hero { background:linear-gradient(120deg,#fff,#edf5ff); }
+.finderPage .heroText h1 { color:#153c68; overflow-wrap:anywhere; }
+.finderPage .mainPhoto,.finderPage .photoPlaceholder { border:3px solid white; box-shadow:0 4px 16px #24496c12; }
+.finderPage .sectionHeading small,.finderPage .info span { color:#5d7289; }
+.finderPage .messageBox { background:#edf5ff; border-color:#d5e6fb; }
+.finderPage .rewardBox { background:#edf9f3; border:1px solid #cce8da; }
+.finderPage .rewardBox strong { color:#21684e; }
+.finderPage .primaryButton,.finderPage .locationButton { background:#1465d9; color:#fff; }
+.finderPage .secondaryButton { border:1px solid #c7dcf7; background:#edf5ff; color:#1256b0; }
+.finderPage .privacy { color:#617389; }
+.finderPage :is(button,a):focus-visible { outline:3px solid #87b9f7; outline-offset:3px; }
+.finderPage .aiGuide { margin:18px 24px; box-shadow:none; border-color:#d5e6fb; background:#f5f9ff; }
+.finderPage .aiOrb { background:#1465d9; box-shadow:none; }
+.finderPage .aiGuideHead small { color:#1465d9; }
+@media(max-width:520px) { .finderPage .hero { padding:24px 18px; }.finderPage .aiGuide { margin:16px; }.finderPage .header { padding:0 18px; } }
     `}</style>
   );
 }
