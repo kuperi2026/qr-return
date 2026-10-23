@@ -398,7 +398,7 @@ export default function OwnerChatInboxPage() {
 
   if (loading) {
     return (
-      <main className="statePage">
+      <main className="ownerInboxPage statePage">
         <div className="logo">QR</div>
 
         <h1>QR RETURN</h1>
@@ -415,11 +415,11 @@ export default function OwnerChatInboxPage() {
   }
 
   return (
-    <main className={`page ownerChatPage theme-${chatTheme}`}>
+    <main className={`page ownerInboxPage theme-${chatTheme}`}>
       <header className="header">
         <div className="headerRight">
-          <a href="/account" className="accountButton">
-            ← {ka ? "ჩემი ანგარიში" : "My Account"}
+          <a href="/my-profiles" className="accountButton">
+            ← {ka ? "ჩემი პროფილები" : "My profiles"}
           </a>
 
           <div className="languages">
@@ -443,15 +443,8 @@ export default function OwnerChatInboxPage() {
       </header>
 
       <section className="container">
-        <div className="operatorCard">
-          <span className="operatorAvatar">⌁</span>
-          <span className="operatorCopy"><strong>პირდაპირი კავშირი</strong><span>უპასუხეთ მპოვნელს უსაფრთხო ჩატში</span></span>
-          <span className="onlineDot">● LIVE</span>
-        </div>
-
         <div className="pageTitle">
           <div>
-            <span>QR RETURN LIVE CHAT</span>
 
             <h1>
               {ka
@@ -461,8 +454,8 @@ export default function OwnerChatInboxPage() {
 
             <p>
               {ka
-                ? "აქ გამოჩნდება მპოვნელებისგან მიღებული Live Chat შეტყობინებები."
-                : "Live Chat messages from finders will appear here."}
+                ? "მიმოწერა თქვენი QR პროფილების მპოვნელებთან."
+                : "Conversations with people who found your QR profiles."}
             </p>
           </div>
 
@@ -476,7 +469,7 @@ export default function OwnerChatInboxPage() {
         </div>
 
         {error && (
-          <div className="errorBox">
+          <div className="errorBox" role="alert">
             ⚠ {error}
           </div>
         )}
@@ -494,8 +487,8 @@ export default function OwnerChatInboxPage() {
             </div>
 
             <section className={`aiReception ${automationOpen ? "open" : ""}`}>
-              <button type="button" className="aiReceptionHead" onClick={() => setAutomationOpen((value) => !value)}>
-                <span className="aiSpark">✦</span><span><strong>AI მისალმება</strong><small>{automationEnabled ? "აქტიურია · პირველ შეტყობინებაზე პასუხობს" : "გამორთულია"}</small></span><em>{automationOpen ? "⌃" : "⌄"}</em>
+              <button type="button" className="aiReceptionHead" aria-expanded={automationOpen} onClick={() => setAutomationOpen((value) => !value)}>
+                <span className="aiSpark">✦</span><span><strong>ავტომატური პასუხი</strong><small>{automationEnabled ? "აქტიურია · პირველ შეტყობინებაზე პასუხობს" : "გამორთულია"}</small></span><em>{automationOpen ? "⌃" : "⌄"}</em>
               </button>
               {automationOpen && <div className="aiReceptionBody">
                 <label className="automationSwitch"><span><b>ავტომატური პირველი პასუხი</b><small>მპოვნელი პასუხს მიიღებს მაშინაც, როცა აპში არ ხართ.</small></span><input type="checkbox" checked={automationEnabled} onChange={(event) => setAutomationEnabled(event.target.checked)} /></label>
@@ -534,10 +527,14 @@ export default function OwnerChatInboxPage() {
                       key={`${thread.profile_id}-${thread.finder_session}`}
                       type="button"
                       className={`thread ${active ? "active" : ""}`}
+                      aria-current={active ? "true" : undefined}
                       onClick={() => {
                         setSelected(thread);
-                        setChatLoading(true);
-                        setMessages([]);
+                        if (!active) setChatLoading(true);
+                        if (!active) setMessages([]);
+                        setText("");
+                        setEditingId(null);
+                        setShowEmojis(false);
                         setMobileConversationOpen(true);
                       }}
                     >
@@ -601,7 +598,7 @@ export default function OwnerChatInboxPage() {
                     {getIcon(selected)}
                   </div>
 
-                  <div>
+                  <div className="chatIdentity">
                     <small>
                       {ka
                         ? "მპოვნელთან საუბარი"
@@ -616,7 +613,7 @@ export default function OwnerChatInboxPage() {
                   </div>
 
                   <div className="liveStatus">
-                    {selected.finder_last_active ? `${ka ? "აქტიური:" : "Active:"} ${formatDate(selected.finder_last_active)}` : "● LIVE"}
+                    {selected.finder_last_active ? `${ka ? "აქტიური:" : "Active:"} ${formatDate(selected.finder_last_active)}` : (ka ? "მპოვნელი" : "Finder")}
                   </div>
                   <button type="button" className="deleteChat" onClick={() => void deleteConversation()} aria-label={ka ? "ჩათის წაშლა" : "Delete chat"}>⌫</button>
                 </div>
@@ -736,11 +733,12 @@ export default function OwnerChatInboxPage() {
 
                   <div className="composerInputRow">
                     <textarea
+                      aria-label={ka ? "შეტყობინება" : "Message"}
                       value={text}
                       onChange={(event) => setText(event.target.value)}
                       rows={1}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
+                        if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                           event.preventDefault();
                           event.currentTarget.form?.requestSubmit();
                         }
@@ -762,874 +760,131 @@ export default function OwnerChatInboxPage() {
       </section>
 
       <Styles />
-      <style jsx global>{`
-        .compactThemePicker{position:relative;order:3}.compactThemePicker button{width:40px;height:40px;padding:0;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #c7d5e2;cursor:pointer}.compactThemePicker .blue{background:linear-gradient(135deg,#126bd1,#dceeff)}.compactThemePicker .ocean{background:linear-gradient(135deg,#087a58,#c9f0df)}.compactThemePicker .violet{background:linear-gradient(135deg,#7254c7,#e6dcff)}.compactThemePicker .red{background:linear-gradient(135deg,#bd252c,#ffd5d7)}.themeOptions{position:absolute;left:0;bottom:48px;z-index:30;padding:7px;display:grid;gap:7px;border-radius:22px;background:#fff;box-shadow:0 10px 28px rgba(14,54,92,.2)}
-        html body.kompasiAppMode .ownerChatPage.theme-blue{background:linear-gradient(155deg,#0757a6 0%,#78b9eb 24%,#e3f1fb 52%,#fff 82%)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean{background:linear-gradient(155deg,#087a58 0%,#70cba6 26%,#e3f6ee 57%,#fff 84%)!important}html body.kompasiAppMode .ownerChatPage.theme-violet{background:linear-gradient(155deg,#5642a4 0%,#a696dd 25%,#eeeafd 58%,#fff 84%)!important}html body.kompasiAppMode .ownerChatPage.theme-red{background:linear-gradient(155deg,#9f1e24 0%,#d96569 25%,#f7dddd 58%,#fff 84%)!important}
-        html body.kompasiAppMode .ownerChatPage.theme-blue .messageRow.mine .bubble{background:linear-gradient(135deg,#075fbd,#1584cf)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean .messageRow.mine .bubble{background:linear-gradient(135deg,#087a58,#159b79)!important}html body.kompasiAppMode .ownerChatPage.theme-violet .messageRow.mine .bubble{background:linear-gradient(135deg,#6247b2,#8565d2)!important}html body.kompasiAppMode .ownerChatPage.theme-red .messageRow.mine .bubble{background:linear-gradient(135deg,#a61f26,#cf3c42)!important}
-        html body.kompasiAppMode .ownerChatPage.theme-blue .chatPanel{background:#e8f3fc!important}html body.kompasiAppMode .ownerChatPage.theme-blue .chatHeader{background:linear-gradient(90deg,#c8e4f8,#eef6fc)!important}html body.kompasiAppMode .ownerChatPage.theme-blue .messages{background:linear-gradient(155deg,#d7ebf8 0%,#eaf5fb 48%,#f8fcff 100%)!important}html body.kompasiAppMode .ownerChatPage.theme-blue .composer{background:#e1eff9!important}
-        html body.kompasiAppMode .ownerChatPage.theme-ocean .chatPanel{background:#e5f6f3!important}html body.kompasiAppMode .ownerChatPage.theme-ocean .chatHeader{background:linear-gradient(90deg,#bfe8e1,#eef9f7)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean .messages{background:linear-gradient(155deg,#ccece6 0%,#e8f7f4 50%,#fbfefd 100%)!important}html body.kompasiAppMode .ownerChatPage.theme-ocean .composer{background:#d9f0eb!important}
-        html body.kompasiAppMode .ownerChatPage.theme-violet .chatPanel{background:#f0ecfb!important}html body.kompasiAppMode .ownerChatPage.theme-violet .chatHeader{background:linear-gradient(90deg,#ddd4f7,#f5f2fc)!important}html body.kompasiAppMode .ownerChatPage.theme-violet .messages{background:linear-gradient(155deg,#e2daf8 0%,#f1edfb 50%,#fdfcff 100%)!important}html body.kompasiAppMode .ownerChatPage.theme-violet .composer{background:#eae4f8!important}
-        html body.kompasiAppMode .ownerChatPage.theme-red .chatPanel{background:#fae9ea!important}html body.kompasiAppMode .ownerChatPage.theme-red .chatHeader{background:linear-gradient(90deg,#efbfc1,#fff0f0)!important}html body.kompasiAppMode .ownerChatPage.theme-red .messages{background:linear-gradient(155deg,#efc7c9 0%,#f8e3e4 50%,#fff9f9 100%)!important}html body.kompasiAppMode .ownerChatPage.theme-red .composer{background:#f2d4d6!important}
-        html body.kompasiAppMode .ownerChatPage .sender{font-size:15px!important;font-weight:900!important;line-height:1.35!important}html body.kompasiAppMode .ownerChatPage .messageText{font-size:16px!important;line-height:1.5!important}
-        body.kompasiAppMode{background:#f7fbfc!important}
-        body.kompasiAppMode .ownerChatPage{font-family:"Noto Sans Georgian",Inter,"Segoe UI",Arial,"Sylfaen",sans-serif!important;background:radial-gradient(circle at 88% 8%,rgba(117,88,214,.14),transparent 25%),radial-gradient(circle at 10% 70%,rgba(31,190,147,.14),transparent 30%),linear-gradient(155deg,#087f91 0%,#6fc6cb 22%,#d9f0ef 48%,#ffffff 78%)!important}
-        body.kompasiAppMode .ownerChatPage .operatorCard{margin-bottom:8px!important;padding:10px 13px!important;border:0!important;border-radius:15px!important;background:#084c8d!important;box-shadow:none!important}
-        html body.kompasiAppMode .ownerChatPage .inbox{border:1px solid rgba(255,255,255,.78)!important;border-radius:18px!important;background:rgba(255,255,255,.84)!important;box-shadow:0 12px 32px rgba(4,75,88,.16)!important;backdrop-filter:blur(14px)!important}html body.kompasiAppMode .ownerChatPage .sidebar,html body.kompasiAppMode .ownerChatPage .chatPanel{background:rgba(248,253,253,.9)!important}html body.kompasiAppMode .ownerChatPage .sidebarTitle,html body.kompasiAppMode .ownerChatPage .chatHeader{background:linear-gradient(90deg,#dff4f1,#eef1fb)!important}html body.kompasiAppMode .ownerChatPage .thread{background:rgba(255,255,255,.76)!important}html body.kompasiAppMode .ownerChatPage .thread:nth-child(3n+2){background:rgba(237,249,245,.9)!important}html body.kompasiAppMode .ownerChatPage .thread.active{background:linear-gradient(90deg,#ccefeb,#e7e2f7)!important}
-        body.kompasiAppMode .ownerChatPage .thread{min-height:76px!important;padding:10px 46px 10px 11px!important;border-color:#e7edf3!important}.ownerChatPage .thread.active{background:#eaf4ff!important}.ownerChatPage .threadIcon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}.ownerChatPage .threadTop strong{font-size:14px!important}.ownerChatPage .thread p{font-size:12px!important;line-height:1.35!important}
-        html body.kompasiAppMode .ownerChatPage .messages{background:linear-gradient(160deg,#edf9f7 0%,#f7f5fc 52%,#ffffff 100%)!important}.ownerChatPage .bubble{border-radius:17px 17px 17px 5px!important;background:#fff!important;color:#20364a!important;font-size:15px!important;line-height:1.45!important;box-shadow:0 2px 8px rgba(22,78,85,.1)!important}.ownerChatPage .messageRow.mine .bubble{border-radius:17px 17px 5px 17px!important;background:linear-gradient(135deg,#087f91,#159b79)!important;color:#fff!important;box-shadow:none!important}.ownerChatPage .messageMeta time{font-size:12px!important}.ownerChatPage .messageMeta span{font-size:11px!important}
-        body.kompasiAppMode .ownerChatPage .composer textarea{border:1px solid #dbe4ec!important;border-radius:16px!important;background:#f7f9fb!important;font-size:15px!important}.ownerChatPage .composer .sendButton{border-radius:14px!important;background:#0a67c7!important}.ownerChatPage .aiReception{display:block!important}.aiLanguage{margin-top:9px}.aiLanguage>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.aiLanguage>div{display:grid;grid-template-columns:1fr 1fr;gap:6px}.aiLanguage button{min-height:36px;border:1px solid #c9dced;border-radius:9px;background:#fff;color:#075dcc;font-size:10px;font-weight:900;cursor:pointer}
-        .deleteChat{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border:1px solid #ffd1d1;border-radius:11px;background:#fff2f2;color:#c53636;font-size:18px;cursor:pointer}.messageFooter{max-width:78%;margin-top:4px;display:flex;align-items:center;justify-content:flex-end;gap:6px}.messageFooter .messageMeta{margin:0}.editMessage,.deleteMessage{width:25px;height:25px;margin:0;padding:0;display:grid;place-items:center;border:1px solid #cbd9e6;border-radius:50%;background:rgba(255,255,255,.82);color:#3271ad;line-height:1;cursor:pointer}.deleteMessage{border-color:#f1c8c8;color:#c53636}.editMessage svg,.deleteMessage svg{width:14px;height:14px;display:block}.cancelEdit{width:42px;min-height:48px;border:1px solid #d6e0e8;border-radius:14px;background:#fff;color:#64788a;font-size:22px}.threadTop small{display:block;margin-top:3px;color:#668096;font-size:11px;font-weight:750}.liveStatus{max-width:150px;line-height:1.25;text-align:center}
-        .conversationTabs{display:none!important}
-        body.kompasiAppMode .ownerChatPage>.container>.errorBox{display:none!important}
-        .ownerChatPage .locationButton{padding:0!important;display:grid!important;place-items:center!important;line-height:0!important}.ownerChatPage .locationButton svg{width:20px;height:20px;display:block;margin:0!important;transform:none!important}
-        .ownerChatPage .composerTools>.emojiWrap{order:1}.ownerChatPage .composerTools>.mediaButton:nth-of-type(1){order:2}.ownerChatPage .composerTools>.mediaButton:nth-of-type(2){order:4}.ownerChatPage .composerTools>.locationButton{order:5}
-        html body.kompasiAppMode .ownerChatPage .inbox.mobileChatOpen .chatPanel .composer{bottom:18px!important;background:transparent!important}
-        .ownerChatPage .composerTools>.mediaButton:nth-of-type(2){margin-left:auto!important}
-        .aiReception{margin:0 10px 10px;overflow:hidden;border:1px solid #cfe0f3;border-radius:14px;background:#f4f9ff}.aiReceptionHead{width:100%;min-height:58px;padding:9px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#173652;text-align:left}.aiSpark{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:11px;background:#0b70d7;color:#fff;font-size:17px}.aiReceptionHead>span:nth-child(2){min-width:0;flex:1}.aiReceptionHead strong,.aiReceptionHead small{display:block}.aiReceptionHead strong{font-size:12px}.aiReceptionHead small{margin-top:3px;color:#668096;font-size:8px}.aiReceptionHead em{font-style:normal}.aiReceptionBody{padding:0 10px 11px}.automationSwitch{padding:10px;display:flex;align-items:center;gap:8px;border-radius:10px;background:#fff}.automationSwitch>span{min-width:0;flex:1}.automationSwitch b,.automationSwitch small{display:block}.automationSwitch b{font-size:10px}.automationSwitch small{margin-top:3px;color:#71869a;font-size:8px;line-height:1.35}.automationSwitch input{width:40px;height:22px;accent-color:#0b74e5}.automationText{display:block;margin-top:9px}.automationText>span{display:block;margin-bottom:5px;color:#566e84;font-size:9px;font-weight:900}.automationText textarea{width:100%;min-height:82px;padding:9px;border:1px solid #ccdeef;border-radius:10px;background:#fff;color:#173652;font-size:10px;line-height:1.5;resize:none}.saveAutomation{width:100%;min-height:40px;margin-top:8px;border:0;border-radius:10px;background:#0b70d7;color:#fff;font-size:10px;font-weight:900}.aiReceptionBody>p{margin:7px 2px 0;color:#71869a;font-size:8px;line-height:1.4}
-        body.kompasiAppMode .ownerChatPage .operatorCard{max-width:100%!important;margin-bottom:12px!important;padding:12px 14px!important;border-radius:17px!important;background:#116fd3!important}
-        body.kompasiAppMode .ownerChatPage .pageTitle{margin-bottom:14px!important}.ownerChatPage .pageTitle h1{font-size:28px!important}.ownerChatPage .pageTitle p{font-size:11px!important}
-        body.kompasiAppMode .ownerChatPage .inbox{min-height:590px!important;border:0!important;border-radius:22px!important;background:#fff!important;box-shadow:0 18px 44px rgba(1,24,58,.28)!important}
-        body.kompasiAppMode .ownerChatPage .sidebar{background:#fff!important}.ownerChatPage .sidebarTitle{height:58px!important;padding:0 14px!important}.ownerChatPage .sidebarTitle strong{font-size:16px!important}.ownerChatPage .sidebarTitle span{background:#e7f2ff!important;color:#0a66cc!important}
-        body.kompasiAppMode .ownerChatPage .thread{position:relative;min-height:84px!important;padding:12px 48px 12px 12px!important;border-bottom:1px solid #edf1f5!important;background:#fff!important}.ownerChatPage .thread.active{background:#edf5ff!important}.ownerChatPage .threadIcon{width:50px!important;height:50px!important;flex-basis:50px!important;border-radius:50%!important;background:#e8f3ff!important;font-size:23px!important}.ownerChatPage .threadTop strong{font-size:15px!important}.ownerChatPage .thread p{font-size:13px!important}.ownerChatPage .threadReply{top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;border:0!important;border-radius:50%!important;background:#e8f3ff!important;color:#0b6ed8!important;box-shadow:none!important}
-        body.kompasiAppMode .ownerChatPage .chatHeader{position:sticky!important;top:0!important;z-index:5!important;min-height:68px!important;background:#fff!important;box-shadow:0 4px 15px rgba(13,61,112,.07)!important}.ownerChatPage .chatItemIcon{border-radius:50%!important}.ownerChatPage .liveStatus{background:#e5f8ef!important}
-        body.kompasiAppMode .ownerChatPage .privacyNotice{display:none!important}.ownerChatPage .messages{height:430px!important;background:#f7f9fc!important}.ownerChatPage .bubble{width:fit-content!important;min-width:0!important;padding:8px 11px!important;border:0!important;border-radius:15px 15px 15px 5px!important;background:#e9eef4!important;color:#253b50!important;font-size:16px!important}.ownerChatPage .messageRow.mine .bubble{border-radius:15px 15px 5px 15px!important;background:#0b74e5!important;color:#fff!important}
-        body.kompasiAppMode .ownerChatPage .composer{position:sticky!important;bottom:0!important;z-index:5!important;padding:9px 10px!important;border-top:1px solid #e7edf4!important;background:#fff!important}.ownerChatPage .composerTools{gap:6px!important}.ownerChatPage .composer .emojiButton,.ownerChatPage .composer .mediaButton,.ownerChatPage .composer .locationButton{width:40px!important;min-height:40px!important;border:0!important;border-radius:50%!important;background:#eaf3ff!important;font-size:19px!important}.ownerChatPage .composer textarea{min-height:48px!important;max-height:110px!important;border:0!important;border-radius:22px!important;background:#f0f3f7!important;padding:13px 15px!important}.ownerChatPage .composer .sendButton{width:48px!important;min-height:48px!important;border-radius:50%!important;background:#0b74e5!important}
-        @media(max-width:800px){body.kompasiAppMode.kompasiChatOpen{height:100dvh!important;overflow:hidden!important}body.kompasiAppMode .ownerChatPage{height:calc(100dvh - 82px)!important;min-height:0!important;overflow:hidden!important;overscroll-behavior:none!important}body.kompasiAppMode .ownerChatPage .container{width:calc(100% - 16px)!important;height:100%!important;min-height:0!important;padding:10px 0 8px!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}.ownerChatPage .operatorCard{min-height:64px!important;flex:0 0 64px!important;margin-bottom:8px!important}.ownerChatPage .operatorCopy strong{font-size:13px!important}.ownerChatPage .operatorCopy span{font-size:9px!important}.ownerChatPage .pageTitle{display:none!important}.ownerChatPage .inbox{height:auto!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important}.ownerChatPage .sidebar,.ownerChatPage .chatPanel{height:100%!important;min-height:0!important;overflow:hidden!important}.ownerChatPage .sidebar{display:flex!important;flex-direction:column!important}.ownerChatPage .inbox.mobileChatOpen .sidebar{display:none!important}.ownerChatPage .sidebarTitle,.ownerChatPage .conversationTabs,.ownerChatPage .aiReception{flex:0 0 auto!important}.ownerChatPage .threadList{max-height:none!important;height:auto!important;min-height:0!important;flex:1 1 0!important;overflow-y:auto!important;overscroll-behavior:contain!important}.ownerChatPage .inbox.mobileChatOpen .chatPanel{position:relative!important;height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important}.ownerChatPage .chatHeader{position:relative!important;top:auto!important;flex:0 0 68px!important}.ownerChatPage .messages{height:auto!important;min-height:0!important;flex:1 1 0!important;padding-bottom:120px!important;overflow-y:auto!important;overscroll-behavior:contain!important}.ownerChatPage .inbox.mobileChatOpen .composer{position:absolute!important;right:0!important;bottom:8px!important;left:0!important;z-index:8!important;width:100%!important;height:104px!important;margin:0!important;padding:6px 8px 8px!important;display:flex!important;flex-direction:column!important;gap:6px!important;transform:none!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}.ownerChatPage .composerTools{width:100%!important;height:40px!important;display:flex!important;align-items:center!important;gap:6px!important}.ownerChatPage .composerTools>.mediaButton:nth-of-type(2){margin-left:auto!important}.ownerChatPage .composerInputRow{width:100%!important;height:50px!important;display:flex!important;align-items:center!important;gap:7px!important}.ownerChatPage .composer .emojiButton,.ownerChatPage .composer .mediaButton,.ownerChatPage .composer .locationButton{width:40px!important;min-height:40px!important}.ownerChatPage .composer textarea{width:auto!important;height:50px!important;min-height:50px!important;max-height:50px!important;flex:1 1 auto!important;padding:13px 15px!important;overflow-y:auto!important;resize:none!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(163,190,214,.55)!important}.ownerChatPage .composer .sendButton{width:48px!important;min-height:48px!important;flex:0 0 48px!important}.ownerChatPage .composerInputRow>.cancelEdit{width:38px!important;min-height:38px!important;flex:0 0 38px!important}.ownerChatPage .composer:has(.voiceRecordingControls) .composerInputRow{visibility:hidden!important}.ownerChatPage .composer .voiceRecordingControls{position:absolute!important;right:8px!important;bottom:8px!important;left:8px!important;z-index:3!important;height:50px!important;min-height:50px!important;padding:5px 6px 5px 14px!important;display:flex!important;border:1px solid rgba(163,190,214,.55)!important;border-radius:18px!important;background:rgba(255,255,255,.9)!important;box-shadow:none!important}.ownerChatPage .composer .voiceRecordingTime{margin-right:auto!important;font-size:14px!important}.ownerChatPage .composer .voiceRecordingControls button{width:38px!important;min-height:38px!important}}
-        @media(max-width:800px){body.kompasiAppMode.kompasiChatOpen{height:var(--kompasi-visible-height,100dvh)!important}body.kompasiAppMode .ownerChatPage{height:calc(var(--kompasi-visible-height,100dvh) - 82px)!important}.ownerChatPage .messages{padding-bottom:8px!important}.ownerChatPage .inbox.mobileChatOpen .composer{position:relative!important;right:auto!important;bottom:auto!important;left:auto!important;flex:0 0 104px!important;margin:0!important}.ownerChatPage .chatHeader{min-height:62px!important;flex-basis:62px!important}.ownerChatPage .operatorCard{min-height:58px!important;flex-basis:58px!important;margin-bottom:6px!important}}
-      `}</style>
+
     </main>
   );
 }
 
 function Styles() {
-  return (
-    <style jsx global>{`
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        font-family: Inter, Arial, sans-serif;
-        background:
-          radial-gradient(circle at 12% 10%, rgba(104,190,255,.58) 0, rgba(104,190,255,0) 30%),
-          radial-gradient(circle at 88% 22%, rgba(48,112,238,.62) 0, rgba(48,112,238,0) 34%),
-          linear-gradient(145deg,#07388e 0%,#0b64d8 48%,#052a70 100%);
-        background-attachment: fixed;
-        color: #101828;
-      }
-
-      button,
-      textarea {
-        font: inherit;
-      }
-
-      .page {
-        min-height: 100vh;
-      }
-
-      .statePage {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
-
-      .statePage h1 {
-        margin: 10px 0 5px;
-        color: #1465e8;
-      }
-
-      .statePage p {
-        color: #667085;
-      }
-
-      .header {
-        width: calc(100% - 32px);
-        max-width: 1180px;
-        min-height: 82px;
-        margin: auto;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        border-bottom: 1px solid rgba(255,255,255,.3);
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-      }
-
-      .logo {
-        width: 47px;
-        height: 47px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: linear-gradient(
-          135deg,
-          #1465e8,
-          #7655f7
-        );
-        color: white;
-        font-weight: 900;
-      }
-
-      .brand strong,
-      .brand small {
-        display: block;
-      }
-
-      .brand strong {
-        color: #1465e8;
-        font-size: 19px;
-        font-weight: 900;
-      }
-
-      .brand small {
-        margin-top: 2px;
-        color: #7655f7;
-        font-size: 8px;
-        font-weight: 900;
-        letter-spacing: 1.5px;
-      }
-
-      .headerRight {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .accountButton {
-        padding: 9px 12px;
-        border-radius: 10px;
-        background: white;
-        color: #0754bd;
-        font-size: 10px;
-        font-weight: 800;
-        text-decoration: none;
-      }
-
-      .languages {
-        display: flex;
-        padding: 4px;
-        border-radius: 9px;
-        background: #eaecf0;
-      }
-
-      .languages button {
-        padding: 7px 9px;
-        border: 0;
-        border-radius: 7px;
-        background: transparent;
-        color: #667085;
-        font-size: 9px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .languages button.active {
-        background: white;
-        color: #1465e8;
-      }
-
-      .operatorCard{position:relative;margin:0 0 16px;padding:14px 15px;display:flex;align-items:center;gap:12px;max-width:480px;overflow:hidden;border:1px solid rgba(255,255,255,.34);border-radius:19px;background:linear-gradient(135deg,#126fe5,#6950d8 58%,#0aa875);color:#fff;box-shadow:0 15px 36px rgba(0,24,74,.3)}.operatorCard:after{content:"";position:absolute;right:-28px;top:-45px;width:120px;height:120px;border:18px solid rgba(255,255,255,.09);border-radius:50%}
-      .operatorAvatar{width:50px;height:50px;display:grid;place-items:center;flex:0 0 50px;border:1px solid rgba(255,255,255,.45);border-radius:15px;background:rgba(255,255,255,.17);color:#fff;font-size:28px;font-weight:950;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
-      .operatorCopy{position:relative;z-index:1;min-width:0;flex:1;color:#fff}.operatorCopy strong{display:block;color:#fff;font-size:15px;line-height:1.2}.operatorCopy span{display:block;margin-top:5px;color:#e1eeff;font-size:10px;font-weight:750}.onlineDot{position:relative;z-index:1;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:8px;font-weight:900}
-
-      .container {
-        width: calc(100% - 30px);
-        max-width: 1180px;
-        margin: auto;
-        padding: 36px 0 70px;
-      }
-
-      .pageTitle {
-        margin-bottom: 22px;
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 20px;
-      }
-
-      .pageTitle span {
-        color: #c8dcff;
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1.4px;
-      }
-
-      .pageTitle h1 {
-        margin: 5px 0;
-        color: white;
-        font-size: 32px;
-      }
-
-      .pageTitle p {
-        margin: 0;
-        color: rgba(255,255,255,.78);
-        font-size: 11px;
-      }
-
-      .refresh {
-        padding: 10px 13px;
-        border: 1px solid #d0d5dd;
-        border-radius: 9px;
-        background: white;
-        color: #344054;
-        font-size: 10px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .errorBox {
-        margin-bottom: 14px;
-        padding: 11px 13px;
-        border: 1px solid #fecdca;
-        border-radius: 10px;
-        background: #fff1f0;
-        color: #b42318;
-        font-size: 10px;
-      }
-
-      .inbox {
-        min-height: 560px;
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        overflow: hidden;
-        border: 1px solid #e4e7ec;
-        border-radius: 22px;
-        background: white;
-        box-shadow: 0 20px 55px rgba(16, 24, 40, 0.07);
-      }
-
-      .sidebar {
-        border-right: 1px solid #e4e7ec;
-        background: #fafbfc;
-      }
-
-      .sidebarTitle {
-        height: 66px;
-        padding: 0 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #e4e7ec;
-      }
-
-      .sidebarTitle strong {
-        font-size: 13px;
-      }
-
-      .sidebarTitle span {
-        min-width: 25px;
-        height: 25px;
-        padding: 0 7px;
-        display: grid;
-        place-items: center;
-        border-radius: 999px;
-        background: #eef4ff;
-        color: #1465e8;
-        font-size: 9px;
-        font-weight: 900;
-      }
-
-      .threadList {
-        max-height: 584px;
-        overflow-y: auto;
-      }
-
-      .thread {
-        width: 100%;
-        padding: 15px;
-        display: flex;
-        gap: 11px;
-        border: 0;
-        border-bottom: 1px solid #eaecf0;
-        background: transparent;
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .thread:hover {
-        background: #f5f8ff;
-      }
-
-      .thread.active {
-        background: #eef4ff;
-      }
-
-      .threadIcon {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: white;
-        font-size: 21px;
-      }
-
-      .threadBody {
-        min-width: 0;
-        flex: 1;
-      }
-
-      .threadTop {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-
-      .threadTop strong {
-        overflow: hidden;
-        font-size: 11px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .threadTop time {
-        flex: 0 0 auto;
-        color: #98a2b3;
-        font-size: 7px;
-      }
-
-      .threadTag {
-        margin-top: 3px;
-        color: #1465e8;
-        font-size: 8px;
-        font-weight: 800;
-      }
-
-      .thread p {
-        margin: 5px 0 0;
-        overflow: hidden;
-        color: #667085;
-        font-size: 9px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .threadReply{position:absolute;right:12px;bottom:12px;width:29px;height:29px;display:grid;place-items:center;border:1px solid #cfe0f2;border-radius:10px;background:#fff;color:#1761bd;font-size:21px;font-weight:900;box-shadow:0 4px 10px rgba(23,63,109,.08)}
-
-      .noThreads {
-        padding: 70px 25px;
-        text-align: center;
-        color: #667085;
-      }
-
-      .noThreads > div {
-        margin-bottom: 12px;
-        font-size: 35px;
-      }
-
-      .noThreads strong {
-        color: #344054;
-        font-size: 12px;
-      }
-
-      .noThreads p {
-        font-size: 9px;
-        line-height: 1.6;
-      }
-
-      .chatPanel {
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .selectChat {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px;
-        text-align: center;
-      }
-
-      .selectIcon {
-        font-size: 45px;
-      }
-
-      .selectChat h2 {
-        margin: 13px 0 5px;
-      }
-
-      .selectChat p {
-        color: #667085;
-        font-size: 10px;
-      }
-
-      .chatHeader {
-        min-height: 78px;
-        padding: 12px 18px;
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        border-bottom: 1px solid #e4e7ec;
-      }
-
-      .mobileChatBack{display:none;width:38px;height:38px;place-items:center;flex:0 0 38px;border:1px solid #d7e4f3;border-radius:11px;background:#f2f7fd;color:#1761bd;font-size:26px;font-weight:900}
-
-      .chatItemIcon {
-        width: 48px;
-        height: 48px;
-        flex: 0 0 48px;
-        display: grid;
-        place-items: center;
-        border-radius: 13px;
-        background: #eef4ff;
-        font-size: 23px;
-      }
-
-      .chatHeader > div:nth-child(2) {
-        min-width: 0;
-        flex: 1;
-      }
-
-      .chatHeader small {
-        color: #7655f7;
-        font-size: 8px;
-        font-weight: 900;
-      }
-
-      .chatHeader h2 {
-        margin: 3px 0;
-        overflow: hidden;
-        font-size: 16px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .chatHeader p {
-        margin: 0;
-        color: #98a2b3;
-        font-size: 8px;
-      }
-
-      .liveStatus {
-        padding: 7px 9px;
-        border-radius: 999px;
-        background: #ecfdf3;
-        color: #027a48;
-        font-size: 8px;
-        font-weight: 900;
-      }
-
-      .privacyNotice {
-        margin: 13px 17px 0;
-        padding: 10px 11px;
-        border: 1px solid #dbe7ff;
-        border-radius: 10px;
-        background: #f5f9ff;
-        color: #667085;
-        font-size: 9px;
-        line-height: 1.5;
-      }
-
-      .messages {
-        height: 390px;
-        padding: 18px;
-        overflow-y: auto;
-        background: #fafbfc;
-      }
-
-      .chatState {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: #667085;
-        text-align: center;
-        font-size: 10px;
-      }
-
-      .chatState > div {
-        font-size: 32px;
-      }
-
-      .messageRow {
-        margin-bottom: 11px;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .messageRow.mine {
-        align-items: flex-end;
-      }
-
-      .sender {
-        margin: 0 0 4px 5px;
-        color: #98a2b3;
-        font-size: 8px;
-        font-weight: 800;
-      }
-
-      .bubble {
-        max-width: 78%;
-        padding: 10px 11px 7px;
-        border: 1px solid #e4e7ec;
-        border-radius: 14px;
-        background: white;
-        color: #344054;
-        font-size: 11px;
-        line-height: 1.5;
-        white-space: pre-wrap;
-      }
-
-      .messageRow.mine .bubble {
-        border: 0;
-        background: #1465e8;
-        color: white;
-      }
-
-      .messageMeta {
-        margin-top: 5px;
-        display: flex;
-        gap: 7px;
-        align-items: center;
-        justify-content: flex-end;
-        font-size: 11px;
-        opacity: .84;
-      }
-
-      .messageMeta time { font-size: 11px; }
-      .seen { color: #c4e2ff; font-weight: 800; }
-      .delivered { color: rgba(255,255,255,.8); font-weight: 750; }
-
-      .locationLink {
-        display: inline-flex;
-        margin-top: 8px;
-        padding: 7px 9px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.2);
-        color: inherit;
-        font-size: 9px;
-        font-weight: 900;
-        text-decoration: none;
-      }
-
-      .bubble time {
-        display: block;
-        margin-top: 5px;
-        font-size: 7px;
-        text-align: right;
-        opacity: 0.7;
-      }
-
-      .composer {
-        position: relative;
-        padding: 13px 17px;
-        display: grid;
-        gap: 9px;
-        border-top: 1px solid #e4e7ec;
-        background:linear-gradient(145deg,#fff,#f5f9ff);
-      }
-
-      .composerTools{display:flex;align-items:center;gap:8px}.composerInputRow{display:flex;align-items:flex-end;gap:9px}
-
-      .emojiWrap{position:relative;flex:0 0 auto}.composer .emojiButton,.composer .mediaButton{width:46px;min-height:46px;padding:0;border:1px solid #cbdcf7;background:#eef4ff;color:#1266e9;font-size:24px}.emojiPicker{position:absolute;left:0;bottom:54px;z-index:20;width:336px;max-width:calc(100vw - 40px);max-height:260px;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:7px;border:1px solid #d8e2ef;border-radius:16px;background:#fff;box-shadow:0 16px 42px rgba(0,24,58,.2)}.composer .emojiPicker button{min-height:38px;padding:0;border:0;background:transparent;color:inherit;font-size:25px}.chatMediaInput{display:none}.composer .mediaButton.recording{background:#fee4e2;color:#d92d20;animation:pulse 1s infinite}.chatMediaImage{display:block;max-width:min(300px,65vw);max-height:320px;border-radius:12px;object-fit:cover}.chatMediaAudio{width:min(290px,65vw);height:40px}.chatMediaLink{display:block}@keyframes pulse{50%{opacity:.55}}
-
-      .composer textarea {
-        min-height: 66px;
-        max-height: 150px;
-        flex: 1;
-        padding: 11px;
-        border: 1px solid #d0d5dd;
-        border-radius: 10px;
-        outline: none;
-        resize: none;
-        overflow-y: auto;
-        font-size: 16px;
-      }
-
-      .composer textarea:focus {
-        border-color: #1465e8;
-      }
-
-      .composer button {
-        min-height: 43px;
-        padding: 0 16px;
-        border: 0;
-        border-radius: 9px;
-        background: #1465e8;
-        color: white;
-        font-size: 14px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .composer .locationButton {
-        width:46px;
-        min-height:46px;
-        padding:0;
-        border: 1px solid #cbdcf7;
-        background: #eef4ff;
-        color: #1266e9;
-      }
-      .composer .sendButton{width:50px;min-height:50px;padding:0;flex:0 0 50px;border-radius:14px;background:linear-gradient(135deg,#0b74e5,#13a66b);font-size:20px;box-shadow:0 8px 18px rgba(4,70,117,.22)}
-
-      .composer button:disabled {
-        opacity: 0.5;
-        cursor: default;
-      }
-
-      @media (max-width: 800px) {
-        .header {
-          padding: 12px 0;
-          align-items: flex-start;
-        }
-
-        .headerRight {
-          align-items: flex-end;
-          flex-direction: column-reverse;
-        }
-
-        .accountButton {
-          display: none;
-        }
-
-        .pageTitle {
-          align-items: flex-start;
-          flex-direction: column;
-        }
-
-        .inbox {
-          grid-template-columns: 1fr;
-        }
-
-        .inbox .chatPanel{display:none}.inbox.mobileChatOpen .sidebar{display:none}.inbox.mobileChatOpen .chatPanel{display:flex}.inbox.mobileChatOpen .mobileChatBack{display:grid}
-
-        .sidebar {
-          border-right: 0;
-          border-bottom: 1px solid #e4e7ec;
-        }
-
-        .threadList {
-          max-height:none;
-        }
-        .thread{position:relative;min-height:92px;padding:14px 50px 14px 14px}.threadReply{right:12px;bottom:12px}
-
-        .messages {
-          height: 420px;
-        }
-      }
-
-      @media (max-width: 520px) {
-        .container {
-          width: calc(100% - 16px);
-          padding-top: 25px;
-        }
-
-        .brand strong {
-          font-size: 16px;
-        }
-
-        .pageTitle h1 {
-          font-size: 27px;
-        }
-
-        .inbox {
-          border-radius: 16px;
-        }
-
-        .chatHeader {
-          padding: 11px;
-        }
-
-        .privacyNotice {
-          margin: 10px 10px 0;
-        }
-
-        .messages {
-          height: 390px;
-          padding: 12px;
-        }
-
-        .composer {
-          padding: 10px;
-          gap:8px;
-        }
-
-        .composerTools{width:100%;overflow:visible}.composerInputRow{width:100%}.composerInputRow textarea{min-width:0;min-height:52px}.composer .sendButton{width:50px}
-
-        .bubble {
-          max-width: 88%;
-        }
-      }
-
-      /* Premium website palette — app mode keeps its dedicated compact theme. */
-      body:not(.kompasiAppMode) .ownerChatPage {
-        background:
-          radial-gradient(circle at 12% 4%, rgba(31, 119, 202, .38), transparent 28%),
-          radial-gradient(circle at 88% 18%, rgba(214, 172, 83, .18), transparent 27%),
-          linear-gradient(145deg, #031d36 0%, #073e72 48%, #06182b 100%);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .header {
-        border-color: rgba(217, 181, 100, .28);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .accountButton {
-        border: 1px solid rgba(219, 183, 101, .42);
-        background: rgba(255, 255, 255, .1);
-        color: #fff7e4;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
-        backdrop-filter: blur(12px);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .languages {
-        border: 1px solid rgba(255, 255, 255, .15);
-        background: rgba(255, 255, 255, .08);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .languages button { color: #b9cee1; }
-      body:not(.kompasiAppMode) .ownerChatPage .languages button.active {
-        background: linear-gradient(135deg, #f6e2ad, #d6aa50);
-        color: #092540;
-        box-shadow: 0 5px 14px rgba(0, 0, 0, .18);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .operatorCard {
-        border-color: rgba(238, 207, 137, .42);
-        background: linear-gradient(135deg, #0a5596 0%, #073762 55%, #9c772d 145%);
-        box-shadow: 0 18px 38px rgba(0, 13, 28, .36);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .onlineDot {
-        border: 1px solid rgba(247, 224, 169, .34);
-        background: rgba(238, 198, 107, .16);
-        color: #ffe8ae;
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .pageTitle span { color: #e7c977; }
-
-      body:not(.kompasiAppMode) .ownerChatPage .refresh {
-        border-color: rgba(224, 190, 111, .55);
-        background: linear-gradient(135deg, #fffdf7, #f5e4b9);
-        color: #173550;
-        box-shadow: 0 8px 20px rgba(0, 12, 27, .22);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .inbox {
-        border-color: rgba(224, 190, 111, .48);
-        background: #f8fbfe;
-        box-shadow: 0 28px 70px rgba(0, 10, 24, .4), inset 0 1px 0 #fff;
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .sidebar {
-        border-color: #d8e2eb;
-        background: linear-gradient(180deg, #f9fcff 0%, #eef4f8 100%);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .sidebarTitle,
-      body:not(.kompasiAppMode) .ownerChatPage .chatHeader {
-        border-color: #d8e2eb;
-        background: linear-gradient(110deg, #082d50 0%, #0a477e 76%, #72551f 145%);
-        color: #fff;
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .sidebarTitle span,
-      body:not(.kompasiAppMode) .ownerChatPage .chatItemIcon {
-        background: linear-gradient(135deg, #f9e7b8, #d5a94e);
-        color: #082847;
-        box-shadow: 0 6px 16px rgba(0, 13, 29, .22);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .chatHeader small { color: #f0d589; }
-      body:not(.kompasiAppMode) .ownerChatPage .chatHeader p { color: #b9d0e3; }
-      body:not(.kompasiAppMode) .ownerChatPage .liveStatus {
-        border: 1px solid rgba(145, 229, 188, .28);
-        background: rgba(25, 164, 100, .18);
-        color: #aaf0ca;
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .thread:hover { background: #eef6fd; }
-      body:not(.kompasiAppMode) .ownerChatPage .thread.active {
-        border-left: 3px solid #d7ab50;
-        background: linear-gradient(90deg, #e6f1fb, #fffaf0);
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .threadIcon { background: #e6f0f8; }
-      body:not(.kompasiAppMode) .ownerChatPage .threadTag { color: #a17627; }
-      body:not(.kompasiAppMode) .ownerChatPage .threadReply {
-        border-color: #e1c681;
-        background: #fff8e7;
-        color: #8d651b;
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .aiReception {
-        border-color: #d8c185;
-        background: linear-gradient(135deg, #f5faff, #fff9e9);
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .aiSpark,
-      body:not(.kompasiAppMode) .ownerChatPage .saveAutomation {
-        background: linear-gradient(135deg, #0a5ea8, #07345d);
-        box-shadow: 0 7px 16px rgba(4, 44, 82, .2);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .messages {
-        background:
-          radial-gradient(circle at 100% 0, rgba(216, 173, 79, .1), transparent 30%),
-          linear-gradient(145deg, #edf4f9 0%, #f8fbfd 55%, #f4efe3 130%);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .bubble {
-        border-color: #d8e2ea;
-        background: rgba(255, 255, 255, .96);
-        color: #1a3349;
-        box-shadow: 0 5px 16px rgba(7, 42, 73, .1);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .messageRow.mine .bubble {
-        background: linear-gradient(135deg, #0a5c9f, #07345e);
-        color: #fff;
-        box-shadow: 0 8px 20px rgba(4, 42, 76, .24);
-      }
-
-      body:not(.kompasiAppMode) .ownerChatPage .seen { color: #f0d58e; }
-
-      body:not(.kompasiAppMode) .ownerChatPage .composer {
-        border-color: #d7e1ea;
-        background: linear-gradient(135deg, #fff 0%, #f2f7fb 70%, #fff8e9 130%);
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .composer textarea {
-        border-color: #cbd8e3;
-        background: #fff;
-        color: #18344d;
-        box-shadow: inset 0 1px 3px rgba(5, 37, 66, .06);
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .composer textarea:focus {
-        border-color: #d0a54d;
-        box-shadow: 0 0 0 3px rgba(213, 169, 78, .14);
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .composer .emojiButton,
-      body:not(.kompasiAppMode) .ownerChatPage .composer .mediaButton,
-      body:not(.kompasiAppMode) .ownerChatPage .composer .locationButton {
-        border-color: #d9c17e;
-        background: #fff9ea;
-        color: #8b641e;
-      }
-      body:not(.kompasiAppMode) .ownerChatPage .composer .sendButton {
-        background: linear-gradient(135deg, #d8ae55, #a97825);
-        color: #fff;
-        box-shadow: 0 9px 20px rgba(142, 99, 25, .28);
-      }
-
-      @media (orientation:landscape) and (max-height:560px){.ownerChatPage .operatorCard{display:none}.ownerChatPage .container{padding-top:12px!important}.ownerChatPage .pageTitle{margin-bottom:10px}.ownerChatPage .messages{height:230px}.composer{grid-template-columns:auto minmax(0,1fr);align-items:end}.composerTools{align-self:end}.composerInputRow{min-width:0}}
-    `}</style>
-  );
+  return <style jsx global>{`
+    .ownerInboxPage { --accent:#1465d9; --tint:#edf4ff; background:#f3f6fa; color:#18334d; min-height:100dvh; padding:20px 24px 32px; }
+    .ownerInboxPage.theme-ocean { --accent:#087a58; --tint:#e5f6ef; }
+    .ownerInboxPage.theme-violet { --accent:#7254c7; --tint:#f0ebfc; }
+    .ownerInboxPage.theme-red { --accent:#bd252c; --tint:#fceeee; }
+    .ownerInboxPage *, .ownerInboxPage *::before, .ownerInboxPage *::after { box-sizing:border-box; }
+    .ownerInboxPage :is(button,textarea) { font:inherit; }
+    .ownerInboxPage button { cursor:pointer; }
+    .ownerInboxPage button:disabled { opacity:.5; cursor:default; }
+    .ownerInboxPage :is(button,a,textarea):focus-visible { outline:3px solid #79aef2; outline-offset:3px; }
+    .ownerInboxPage .header,.ownerInboxPage .container { max-width:1240px; margin:auto; width:100%; }
+    .ownerInboxPage .headerRight { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .ownerInboxPage .accountButton { color:var(--accent); font-size:14px; text-decoration:none; font-weight:600; }
+    .ownerInboxPage .languages { display:flex; padding:3px; border:1px solid #dce5ef; border-radius:10px; background:white; }
+    .ownerInboxPage .languages button { padding:7px 10px; border:0; border-radius:7px; background:transparent; color:#617389; font-size:12px; }
+    .ownerInboxPage .languages .active { background:var(--tint); color:var(--accent); }
+    .ownerInboxPage .pageTitle { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:22px 0 18px; }
+    .ownerInboxPage .pageTitle h1 { margin:0 0 6px; font-size:28px; line-height:1.35; }
+    .ownerInboxPage .pageTitle p { margin:0; font-size:14px; color:#617389; }
+    .ownerInboxPage .refresh { padding:10px 14px; border:1px solid #dce5ef; border-radius:10px; background:#fff; color:#34516f; font-size:13px; white-space:nowrap; }
+    .ownerInboxPage .errorBox { padding:12px; margin-bottom:12px; border:1px solid #fecaca; border-radius:10px; background:#fff1f2; color:#a52235; overflow-wrap:anywhere; }
+    .ownerInboxPage .inbox { display:grid; grid-template-columns:320px minmax(0,1fr); height:clamp(520px,calc(100dvh - 215px),820px); overflow:hidden; background:#fff; border:1px solid #dce5ef; border-radius:18px; box-shadow:0 8px 30px #17365308; }
+    .ownerInboxPage .sidebar { min-width:0; min-height:0; display:flex; flex-direction:column; border-right:1px solid #e3eaf2; background:#fff; }
+    .ownerInboxPage .sidebarTitle { display:flex; justify-content:space-between; align-items:center; min-height:68px; padding:16px 18px; border-bottom:1px solid #e3eaf2; }
+    .ownerInboxPage .sidebarTitle strong { font-size:16px; }
+    .ownerInboxPage .sidebarTitle>span { padding:4px 9px; border-radius:20px; background:var(--tint); color:var(--accent); font-size:12px; }
+    .ownerInboxPage .threadList { flex:1; min-height:0; overflow:auto; }
+    .ownerInboxPage .thread { position:relative; display:flex; gap:12px; padding:18px 30px 18px 16px; width:100%; border:0; border-bottom:1px solid #edf1f6; border-left:3px solid transparent; background:white; text-align:left; color:inherit; }
+    .ownerInboxPage .thread:hover { background:#f8faff; }
+    .ownerInboxPage .thread.active { background:var(--tint); border-left-color:var(--accent); }
+    .ownerInboxPage .threadIcon,.ownerInboxPage .chatItemIcon { display:grid; place-items:center; width:42px; height:42px; flex:0 0 42px; border-radius:12px; background:var(--tint); font-size:23px; }
+    .ownerInboxPage .threadBody { min-width:0; flex:1; }
+    .ownerInboxPage .threadTop { display:flex; flex-direction:column; gap:4px; }
+    .ownerInboxPage .threadTop strong { font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ownerInboxPage .threadTop small { display:none; }
+    .ownerInboxPage .threadTop time { font-size:11px; color:#748399; }
+    .ownerInboxPage .threadTag { margin-top:5px; color:var(--accent); font-size:11px; }
+    .ownerInboxPage .thread p { margin:6px 0 0; font-size:13px; color:#617389; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ownerInboxPage .threadReply { position:absolute; right:12px; top:50%; color:#7a8da3; }
+    .ownerInboxPage .aiReception { order:3; flex-shrink:0; border-top:1px solid #e3eaf2; background:#f9fbfe; max-height:65%; overflow:auto; }
+    .ownerInboxPage .aiReceptionHead { display:flex; align-items:center; gap:10px; width:100%; border:0; background:transparent; padding:14px 16px; text-align:left; color:inherit; }
+    .ownerInboxPage .aiReceptionHead>span:nth-child(2) { flex:1; }
+    .ownerInboxPage .aiReceptionHead strong,.ownerInboxPage .aiReceptionHead small { display:block; }
+    .ownerInboxPage .aiReceptionHead strong { font-size:13px; }
+    .ownerInboxPage .aiReceptionHead small { margin-top:4px; font-size:11px; color:#617389; }
+    .ownerInboxPage .aiSpark { color:var(--accent); }
+    .ownerInboxPage .aiReceptionBody { padding:0 16px 16px; font-size:12px; }
+    .ownerInboxPage .automationSwitch { display:flex; align-items:center; gap:10px; }
+    .ownerInboxPage .automationSwitch small { display:block; margin-top:5px; color:#617389; line-height:1.5; }
+    .ownerInboxPage .automationSwitch input { width:20px; height:20px; accent-color:var(--accent); }
+    .ownerInboxPage .aiLanguage { margin:12px 0; }
+    .ownerInboxPage .aiLanguage button { padding:6px 9px; margin:6px 6px 0 0; border:1px solid #dce5ef; border-radius:6px; background:white; color:var(--accent); }
+    .ownerInboxPage .automationText textarea { display:block; width:100%; min-height:100px; margin-top:6px; padding:10px; border:1px solid #dce5ef; border-radius:8px; resize:vertical; font-size:14px; }
+    .ownerInboxPage .saveAutomation { width:100%; margin-top:10px; padding:10px; border:0; border-radius:8px; background:var(--accent); color:white; }
+    .ownerInboxPage .aiReceptionBody>p { color:#617389; line-height:1.5; }
+    .ownerInboxPage .chatPanel { display:flex; flex-direction:column; min-height:0; min-width:0; }
+    .ownerInboxPage .chatHeader { display:flex; align-items:center; gap:12px; flex-shrink:0; padding:14px 18px; border-bottom:1px solid #e3eaf2; }
+    .ownerInboxPage .chatIdentity { min-width:0; flex:1; }
+    .ownerInboxPage .chatIdentity small { font-size:11px; color:#617389; }
+    .ownerInboxPage .chatIdentity h2 { margin:3px 0; font-size:17px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .ownerInboxPage .chatIdentity p { margin:0; font-size:11px; color:#617389; }
+    .ownerInboxPage .liveStatus { max-width:125px; color:#617389; font-size:11px; line-height:1.5; }
+    .ownerInboxPage .deleteChat,.ownerInboxPage .mobileChatBack { width:36px; height:36px; flex-shrink:0; border:1px solid #dce5ef; border-radius:9px; background:white; color:#617389; font-size:22px; }
+    .ownerInboxPage .mobileChatBack { display:none; }
+    .ownerInboxPage .privacyNotice { padding:9px 18px; font-size:11px; line-height:1.5; color:#6c7e93; background:#f9fbfe; }
+    .ownerInboxPage .messages { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:22px; background:#f6f8fc; }
+    .ownerInboxPage .messageRow { display:flex; flex-direction:column; align-items:flex-start; margin-bottom:18px; }
+    .ownerInboxPage .messageRow.mine { align-items:flex-end; }
+    .ownerInboxPage .sender { margin:0 0 5px 4px; font-size:11px; color:#617389; }
+    .ownerInboxPage .bubble { max-width:85%; padding:11px 14px; border:1px solid #e3eaf2; border-radius:15px 15px 15px 4px; background:white; font-size:15px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .ownerInboxPage .mine .bubble { background:var(--accent); border-color:var(--accent); color:white; border-radius:15px 15px 4px 15px; }
+    .ownerInboxPage .messageFooter,.ownerInboxPage .messageMeta { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    .ownerInboxPage .messageFooter { max-width:95%; margin-top:5px; }
+    .ownerInboxPage .messageMeta { color:#6c7e93; font-size:10px; }
+    .ownerInboxPage .seen { color:var(--accent); }
+    .ownerInboxPage .editMessage,.ownerInboxPage .deleteMessage { padding:6px; border:0; background:transparent; color:#6c7e93; }
+    .ownerInboxPage .editMessage svg,.ownerInboxPage .deleteMessage svg { width:14px; height:14px; display:block; }
+    .ownerInboxPage .locationLink { display:block; color:inherit; font-size:13px; margin-top:8px; }
+    .ownerInboxPage .composer { position:relative; flex-shrink:0; display:grid; gap:8px; padding:12px 16px; border-top:1px solid #e3eaf2; background:#fff; }
+    .ownerInboxPage .composerTools,.ownerInboxPage .composerInputRow { display:flex; align-items:center; gap:8px; min-width:0; }
+    .ownerInboxPage .composerTools { flex-wrap:wrap; }
+    .ownerInboxPage .composer textarea { flex:1; width:0; min-width:0; min-height:48px; max-height:110px; padding:12px 14px; border:1px solid #dce5ef; border-radius:12px; background:#f8faff; color:#18334d; font-size:16px; resize:vertical; }
+    .ownerInboxPage .emojiButton,.ownerInboxPage .mediaButton,.ownerInboxPage .locationButton,.ownerInboxPage .cancelEdit { width:36px; height:36px; padding:0; border:0; border-radius:9px; background:var(--tint); color:var(--accent); font-size:20px; }
+    .ownerInboxPage .locationButton svg { width:20px; height:20px; }
+    .ownerInboxPage .sendButton { width:48px; height:48px; flex:0 0 48px; border:0; border-radius:12px; background:var(--accent); color:white; font-size:21px; }
+    .ownerInboxPage .emojiWrap,.ownerInboxPage .compactThemePicker { position:relative; }
+    .ownerInboxPage .emojiPicker { position:absolute; bottom:44px; left:0; z-index:10; display:grid; grid-template-columns:repeat(6,1fr); width:270px; max-width:calc(100vw - 60px); max-height:230px; overflow:auto; padding:8px; border:1px solid #dce5ef; border-radius:12px; background:white; box-shadow:0 8px 30px #17365322; }
+    .ownerInboxPage .emojiPicker button { border:0; background:white; padding:6px; font-size:23px; }
+    .ownerInboxPage .compactThemePicker button { display:block; width:28px; height:28px; border:3px solid white; border-radius:50%; box-shadow:0 0 0 1px #dce5ef; }
+    .ownerInboxPage .compactThemePicker .blue { background:#1465d9; }.ownerInboxPage .compactThemePicker .ocean { background:#087a58; }.ownerInboxPage .compactThemePicker .violet { background:#7254c7; }.ownerInboxPage .compactThemePicker .red { background:#bd252c; }
+    .ownerInboxPage .themeOptions { position:absolute; bottom:40px; display:grid; gap:8px; padding:8px; border:1px solid #dce5ef; background:white; border-radius:12px; z-index:10; }
+    .ownerInboxPage .chatMediaInput { display:none; }
+    .ownerInboxPage .chatMediaImage { display:block; max-width:min(300px,55vw); max-height:300px; object-fit:contain; border-radius:8px; }
+    .ownerInboxPage .chatMediaAudio { max-width:100%; width:260px; }
+    .ownerInboxPage .selectChat,.ownerInboxPage .chatState,.ownerInboxPage .noThreads { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center; color:#617389; font-size:14px; line-height:1.7; }
+    .ownerInboxPage .selectChat h2 { font-size:20px; color:#18334d; margin:12px 0 0; }
+    .ownerInboxPage .selectIcon,.ownerInboxPage .noThreads>div { font-size:32px; }
+    .ownerInboxPage.statePage { display:flex; align-items:center; justify-content:center; flex-direction:column; }
+    .ownerInboxPage.statePage .logo { color:var(--accent); font-size:30px; font-weight:700; }
+    @media(max-width:800px) {
+      .ownerInboxPage { padding:12px; }
+      .ownerInboxPage .pageTitle { margin:16px 0 12px; }
+      .ownerInboxPage .pageTitle h1 { font-size:23px; }
+      .ownerInboxPage .pageTitle p { display:none; }
+      .ownerInboxPage .inbox { grid-template-columns:minmax(0,1fr); height:calc(var(--kompasi-visible-height,100dvh) - 170px); min-height:340px; border-radius:12px; }
+      body.kompasiAppMode .ownerInboxPage .inbox { height:calc(var(--kompasi-visible-height,100dvh) - 250px); }
+      .ownerInboxPage .sidebar { border-right:0; }
+      .ownerInboxPage .chatPanel { display:none; }
+      .ownerInboxPage .mobileChatOpen .sidebar { display:none; }
+      .ownerInboxPage .mobileChatOpen .chatPanel { display:flex; }
+      .ownerInboxPage .mobileChatBack { display:block; }
+      .ownerInboxPage .chatHeader { padding:10px; gap:8px; }
+      .ownerInboxPage .chatItemIcon { display:none; }
+      .ownerInboxPage .liveStatus { max-width:90px; font-size:10px; }
+      .ownerInboxPage .privacyNotice { display:none; }
+      .ownerInboxPage .messages { padding:14px; }
+      .ownerInboxPage .composer { padding:10px; }
+      .ownerInboxPage .bubble { max-width:92%; }
+      .ownerInboxPage .noThreads { padding:18px; }
+    }
+  `}</style>;
 }

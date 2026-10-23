@@ -19,7 +19,6 @@ import {
 import ProfileCard, {
   type ProfileCardItem,
 } from "@/components/account/ProfileCard";
-import AiRecoveryCommandCenter from "@/app/components/account/AiRecoveryCommandCenter";
 import InterfaceIcon from "@/app/components/ui/InterfaceIcon";
 import styles from "@/components/account/owner-space.module.css";
 
@@ -488,14 +487,6 @@ export default function MyProfilesPage() {
             <Link href="/account/chat"><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
             <Link href="/account/subscriptions" aria-label="მომსახურება და პაკეტები"><InterfaceIcon name="wallet" size={18}/>პაკეტები</Link>
           </nav>
-          {!errorMessage && (
-            <AiRecoveryCommandCenter profiles={profiles.map((profile) => ({
-              id: profile.id, tagCode: profile.tag_code, name: profile.item_name,
-              type: profile.item_type || profile.pet_type, scanCount: profile.scan_count,
-              lastScannedAt: profile.last_scanned_at, latitude: profile.last_scan_latitude,
-              longitude: profile.last_scan_longitude, lost: profile.lost,
-            }))}/>
-          )}
           <footer className={styles.sidebarFooter}>
             {email && <span className={styles.sidebarEmail} title={email}>{email}</span>}
             <button type="button" onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "გადიხართ..." : "გამოსვლა"}</button>
