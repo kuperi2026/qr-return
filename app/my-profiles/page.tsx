@@ -485,7 +485,6 @@ export default function MyProfilesPage() {
           <nav className={styles.sidebarNav} aria-label="მფლობელის მენიუ">
             <a href="#profiles-heading" aria-current="page"><InterfaceIcon name="profiles" size={18}/>ჩემი პროფილები</a>
             <Link href="/account/chat"><InterfaceIcon name="chat" size={18}/>ჩათი</Link>
-            <Link href="/account/subscriptions" aria-label="მომსახურება და პაკეტები"><InterfaceIcon name="wallet" size={18}/>პაკეტები</Link>
           </nav>
           <footer className={styles.sidebarFooter}>
             {email && <span className={styles.sidebarEmail} title={email}>{email}</span>}
@@ -498,7 +497,7 @@ export default function MyProfilesPage() {
               <h1 id="profiles-heading">ჩემი პროფილები {!errorMessage && <span className={styles.count}>{profiles.length}</span>}</h1>
               <p>თქვენი პროფილები, სკანირებები და დაკარგვის რეჟიმი.</p>
             </div>
-            <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>
+            {(profiles.length > 0 || errorMessage) && <Link href="/register" className={styles.primaryButton}><InterfaceIcon name="plus" size={18}/>ახალი პროფილი</Link>}
           </header>
           {logoutError && <div className={styles.error} role="alert">{logoutError}</div>}
 
