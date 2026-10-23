@@ -5,24 +5,6 @@ import { supabase } from "@/lib/supabase";
 
 type Lang = "ka" | "en";
 
-type AdminRecord = {
-  id: number;
-  owner_id: string;
-  admin_user_id: string | null;
-  admin_email: string;
-
-  can_view_profiles: boolean;
-  can_edit_profiles: boolean;
-  can_manage_lost_mode: boolean;
-  can_manage_visibility: boolean;
-  can_manage_contacts: boolean;
-  can_manage_location: boolean;
-  can_manage_additional_contact: boolean;
-  can_use_live_chat: boolean;
-
-  active: boolean;
-};
-
 type OwnerProfile = {
   id: number;
   item_name: string | null;
@@ -49,7 +31,6 @@ type ProfileAccess = {
   can_use_live_chat: boolean;
 };
 
-type ProfilePermission = Exclude<keyof ProfileAccess, "selected">;
 
 const emptyProfileAccess = (): ProfileAccess => ({
   selected: false,
@@ -71,20 +52,7 @@ const emptyProfileAccess = (): ProfileAccess => ({
 export default function AdminPage() {
   const [lang, setLang] = useState<Lang>("ka");
 
-  const [admin, setAdmin] = useState<AdminRecord | null>(null);
-  const [email, setEmail] = useState("");
-
-  const [canViewProfiles, setCanViewProfiles] = useState(true);
-  const [canEditProfiles, setCanEditProfiles] = useState(false);
-  const [canManageLostMode, setCanManageLostMode] = useState(false);
-  const [canManageVisibility, setCanManageVisibility] = useState(false);
-  const [canManageContacts, setCanManageContacts] = useState(false);
-  const [canManageLocation, setCanManageLocation] = useState(false);
-  const [canManageAdditionalContact, setCanManageAdditionalContact] =
-    useState(false);
-  const [canUseLiveChat, setCanUseLiveChat] = useState(false);
-
-  const [active, setActive] = useState(true);
+  const [savedProfileIds, setSavedProfileIds] = useState<number[]>([]);
   const [profiles, setProfiles] = useState<OwnerProfile[]>([]);
   const [profileAccess, setProfileAccess] = useState<Record<number, ProfileAccess>>({});
   const [openProfileId, setOpenProfileId] = useState<number | null>(null);
@@ -112,6 +80,7 @@ export default function AdminPage() {
       const ownerProfiles=(profileRows??[]) as OwnerProfile[]; setProfiles(ownerProfiles);
       const {data:rows,error:rowsError}=await supabase.from("profile_co_admins").select("*").eq("owner_id",user.id);
       if(rowsError) throw rowsError;
+      setSavedProfileIds((rows ?? []).map(row => Number(row.item_id)));
       const next:Record<number,ProfileAccess>={}; ownerProfiles.forEach(p=>next[p.id]=emptyProfileAccess());
       (rows??[]).forEach(row=>next[row.item_id]={selected:true,adminEmail:row.admin_email,adminFirstName:row.admin_first_name??"",adminLastName:row.admin_last_name??"",adminPhone:row.admin_phone??"",active:row.active,can_view_profiles:true,can_edit_profiles:row.can_edit_profiles,can_manage_lost_mode:row.can_manage_lost_mode,can_manage_visibility:row.can_manage_visibility,can_manage_contacts:row.can_manage_contacts,can_manage_location:row.can_manage_location,can_manage_additional_contact:row.can_manage_additional_contact,can_use_live_chat:row.can_use_live_chat});
       const requested=Number(new URLSearchParams(window.location.search).get("profile"));
@@ -119,6 +88,7 @@ export default function AdminPage() {
         next[requested]={...(next[requested]??emptyProfileAccess()),selected:true};
         setOpenProfileId(requested);
       }
+      setOpenProfileId(current => current ?? (ownerProfiles.some(p => p.id === requested) ? requested : ownerProfiles[0]?.id ?? null));
       setProfileAccess(next);
     } catch(err){setError(err instanceof Error?err.message:"მონაცემების ჩატვირთვა ვერ მოხერხდა.");}
     finally{setLoading(false);}
@@ -129,7 +99,7 @@ export default function AdminPage() {
     try{
       const {data:{user},error:userError}=await supabase.auth.getUser();
       if(userError||!user){window.location.href="/login";return;}
-      const chosen=profiles.filter(p=>profileAccess[p.id]?.selected);
+      const chosen=profiles.filter(p=>p.id === openProfileId);
       if(!chosen.length) throw new Error("აირჩიეთ მინიმუმ ერთი QR პროფილი.");
       const payload=chosen.map(p=>{const a=profileAccess[p.id],mail=a.adminEmail.trim().toLowerCase();
         if(!a.adminFirstName.trim()||!a.adminLastName.trim()||!a.adminPhone.trim()) throw new Error(`${p.item_name||"QR პროფილი"} — შეავსეთ თანაადმინისტრატორის სახელი, გვარი და ტელეფონი.`);
@@ -138,84 +108,10 @@ export default function AdminPage() {
         return {owner_id:user.id,item_id:p.id,admin_email:mail,admin_first_name:a.adminFirstName.trim(),admin_last_name:a.adminLastName.trim(),admin_phone:a.adminPhone.trim(),active:a.active,can_view_profiles:true,can_edit_profiles:a.can_edit_profiles,can_manage_lost_mode:a.can_manage_lost_mode,can_manage_visibility:a.can_manage_visibility,can_manage_contacts:a.can_manage_contacts,can_manage_location:a.can_manage_location,can_manage_additional_contact:a.can_manage_additional_contact,can_use_live_chat:a.can_use_live_chat,updated_at:new Date().toISOString()};});
       const {error:saveError}=await supabase.from("profile_co_admins").upsert(payload,{onConflict:"item_id"});
       if(saveError) throw saveError;
-      setSuccess("თანაადმინისტრატორის მონაცემები და უფლებები წარმატებით შეინახა.");await loadAdmin();
+      setSavedProfileIds(ids => Array.from(new Set([...ids, ...chosen.map(p => p.id)])));
+      setSuccess(ka ? "ამ პროფილის თანაადმინისტრატორი და უფლებები შენახულია." : "Co-administrator and permissions saved for this profile.");
     }catch(err){setError(err instanceof Error?err.message:"შენახვა ვერ მოხერხდა.");}
     finally{setSaving(false);}
-  }
-
-  async function removeAdmin() {
-    if (!admin) return;
-
-    const confirmed = window.confirm(
-      ka
-        ? "ნამდვილად გსურთ ადმინისტრატორის წაშლა?"
-        : "Are you sure you want to remove this administrator?"
-    );
-
-    if (!confirmed) return;
-
-    setRemoving(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      const { error: deleteError } = await supabase
-        .from("owner_admins")
-        .delete()
-        .eq("id", admin.id)
-        .eq("owner_id", user.id);
-
-      if (deleteError) {
-        throw deleteError;
-      }
-
-      setAdmin(null);
-      setEmail("");
-
-      setCanViewProfiles(true);
-      setCanEditProfiles(false);
-      setCanManageLostMode(false);
-      setCanManageVisibility(false);
-      setCanManageContacts(false);
-      setCanManageLocation(false);
-      setCanManageAdditionalContact(false);
-      setCanUseLiveChat(false);
-
-      setActive(true);
-      setProfileAccess((current) => {
-        const cleared: Record<number, ProfileAccess> = {};
-        Object.keys(current).forEach((id) => {
-          cleared[Number(id)] = emptyProfileAccess();
-        });
-        return cleared;
-      });
-
-      setSuccess(
-        ka
-          ? "ადმინისტრატორი წაიშალა."
-          : "Administrator removed."
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : ka
-          ? "ადმინისტრატორის წაშლა ვერ მოხერხდა."
-          : "Could not remove administrator."
-      );
-    } finally {
-      setRemoving(false);
-    }
   }
 
   async function removeProfileAdmin(itemId: number, profileName: string) {
@@ -248,6 +144,7 @@ export default function AdminPage() {
         ...current,
         [itemId]: emptyProfileAccess(),
       }));
+      setSavedProfileIds(ids => ids.filter(id => id !== itemId));
       setSuccess(ka ? "თანაადმინისტრატორი წარმატებით წაიშალა." : "Co-administrator removed.");
     } catch (err) {
       setError(err instanceof Error ? err.message : ka ? "წაშლა ვერ მოხერხდა." : "Could not remove co-administrator.");
@@ -265,14 +162,15 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="statePage">
+      <main className="coAdminPage statePage">
         {ka ? "იტვირთება..." : "Loading..."}
+        <AdminStyles />
       </main>
     );
   }
 
   return (
-    <main className="page accountAdminPage">
+    <main className="coAdminPage">
       <header className="header">
         <div aria-hidden="true" />
 
@@ -296,15 +194,15 @@ export default function AdminPage() {
       </header>
 
       <section className="container">
-        <a href="/account" className="back">
-          ← {ka ? "მფლობელის პროფილი" : "Owner profile"}
+        <a href="/my-profiles" className="back">
+          ← {ka ? "ჩემი პროფილები" : "My profiles"}
         </a>
 
         <div className="heading">
           <h1>
             {ka
-              ? "სანდო პირი და უფლებები"
-              : "Co-administrator registration and permissions"}
+              ? "პროფილის ადმინისტრატორი"
+              : "Profile administrator"}
           </h1>
 
           <p>
@@ -314,10 +212,11 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {error && <div className="errorBox">{error}</div>}
-        {success && <div className="successBox">{success}</div>}
+        {error && <div className="errorBox" role="alert">{error}</div>}
+        {success && <div className="successBox" role="status">{success}</div>}
 
         <form onSubmit={saveAdmin}>
+          <fieldset disabled={saving || removing}>
           <section className="card">
             <div className="permissionsHeader">
               <div>
@@ -330,34 +229,27 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {profiles.length > 0 && <label className="profileChoice"><span>{ka ? "QR პროფილი" : "QR profile"}</span><select value={openProfileId ?? ""} disabled={saving || removing} onChange={event => { setOpenProfileId(Number(event.target.value)); setError(""); setSuccess(""); }}>{profiles.map(profile => <option key={profile.id} value={profile.id}>{profile.item_name || profile.tag_code || "QR"} · {profile.tag_code}</option>)}</select></label>}
             {profiles.length === 0 ? (
               <div className="emptyProductList">
                 {ka ? "ჯერ არცერთი QR პროფილი არ გაქვთ." : "You do not have any QR profiles yet."}
               </div>
             ) : (
               <div className="productAccessList">
-                {profiles.map((profile) => {
+                {profiles.filter(profile => profile.id === openProfileId).map((profile) => {
                   const current = profileAccess[profile.id] ?? emptyProfileAccess();
                   const title = profile.item_name || (ka ? "უსახელო პროფილი" : "Unnamed profile");
                   const icon = profile.pet_type === "dog" ? "🐶" : profile.pet_type === "cat" ? "🐱" : "🏷️";
 
                   return (
                     <article className={`productAccessCard ${openProfileId === profile.id ? "selected" : ""}`} key={profile.id}>
-                      <button
-                        type="button"
-                        className="productSelector"
-                        onClick={() => {
-                          setOpenProfileId((opened) => opened === profile.id ? null : profile.id);
-                          if (!current.selected) updateProfileAccess(profile.id, { selected: true });
-                        }}
-                      >
+                      <div className="productSelector">
                         <span className="productIcon">{profile.photo ? <img src={profile.photo} alt="" /> : icon}</span>
                         <span className="productIdentity">
                           <strong>{title}</strong>
                           <small>{profile.tag_code ? `QR · ${profile.tag_code}` : (ka ? "QR პროფილი" : "QR profile")}</small>
                         </span>
-                        <span className="productCheck">{openProfileId === profile.id ? "−" : current.selected ? "✓" : "+"}</span>
-                      </button>
+                      </div>
 
                       {openProfileId === profile.id && (
                         <div className="profileAdminPanel">
@@ -381,6 +273,17 @@ export default function AdminPage() {
                             </label>
                           </div>
                           <p className="adminLinkNote">{ka ? "ელ-ფოსტა სანდო პირის ანგარიშს უსაფრთხოდ დაუკავშირდება." : "The email will securely link to the trusted person's account."}</p>
+                          <h3 className="permissionTitle">{ka ? "რისი უფლება ექნება?" : "What can they do?"}</h3>
+                          <div className="profilePermissionGrid">
+                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
+                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
+                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
+                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
+                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
+                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
+                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
+                          </div>
+                          {savedProfileIds.includes(profile.id) && <>
                           <button
                             type="button"
                             className="profileRemoveButton"
@@ -391,15 +294,7 @@ export default function AdminPage() {
                               ? ka ? "იშლება..." : "Removing..."
                               : ka ? "თანაადმინისტრატორის წაშლა" : "Remove co-administrator"}
                           </button>
-                          <div className="profilePermissionGrid">
-                          <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
-                          <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
-                          <MiniPermission label={ka ? "ხილვადობა" : "Visibility"} value={current.can_manage_visibility} onChange={(value) => updateProfileAccess(profile.id, { can_manage_visibility: value })} />
-                          <MiniPermission label={ka ? "კონტაქტები" : "Contacts"} value={current.can_manage_contacts} onChange={(value) => updateProfileAccess(profile.id, { can_manage_contacts: value })} />
-                          <MiniPermission label={ka ? "ლოკაცია" : "Location"} value={current.can_manage_location} onChange={(value) => updateProfileAccess(profile.id, { can_manage_location: value })} />
-                          <MiniPermission label={ka ? "დამატებითი კონტაქტი" : "Extra contact"} value={current.can_manage_additional_contact} onChange={(value) => updateProfileAccess(profile.id, { can_manage_additional_contact: value })} />
-                          <MiniPermission label={ka ? "Live Chat" : "Live Chat"} value={current.can_use_live_chat} onChange={(value) => updateProfileAccess(profile.id, { can_use_live_chat: value })} />
-                          </div>
+                          </>}
                         </div>
                       )}
                     </article>
@@ -409,731 +304,31 @@ export default function AdminPage() {
             )}
           </section>
 
+          </fieldset>
           <div className="actions">
 
             <div className="rightActions">
-              <a href="/account" className="cancelButton">
+              <a href="/my-profiles" className="cancelButton">
                 {ka ? "გაუქმება" : "Cancel"}
               </a>
 
               <button
                 type="submit"
                 className="saveButton"
-                disabled={saving}
+                disabled={saving || removing || openProfileId === null}
               >
                 {saving
                   ? ka
                     ? "ინახება..."
                     : "Saving..."
-                  : ka ? "ცვლილებების შენახვა" : "Save changes"}
+                  : ka ? "ამ პროფილის შენახვა" : "Save this profile"}
               </button>
             </div>
           </div>
         </form>
       </section>
 
-      <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
-
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-        }
-
-        body {
-          background: #063b72;
-        }
-
-        input,
-        button {
-          font: inherit;
-        }
-
-        .page {
-          min-height: 100vh;
-          color: #101828;
-          font-family: Inter, Arial, sans-serif;
-          background:
-            radial-gradient(circle at 21% 17%, rgba(78, 166, 238, 0.3), transparent 30%),
-            linear-gradient(180deg, #0a4c8a 0%, #063b72 100%);
-        }
-
-        .header {
-          width: calc(100% - 36px);
-          max-width: 1000px;
-          min-height: 86px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-        }
-
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-        }
-
-        .logo {
-          width: 50px;
-          height: 50px;
-          display: grid;
-          place-items: center;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-          font-size: 14px;
-          font-weight: 900;
-        }
-
-        .brand strong,
-        .brand small {
-          display: block;
-        }
-
-        .brand strong {
-          color: #1465e8;
-          font-size: 21px;
-          font-weight: 900;
-        }
-
-        .brand small {
-          margin-top: 3px;
-          color: #7655f7;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1.7px;
-        }
-
-        .languages {
-          padding: 4px;
-          display: flex;
-          border-radius: 10px;
-          background: #eaecf0;
-        }
-
-        .languages button {
-          padding: 8px 11px;
-          border: 0;
-          border-radius: 8px;
-          background: transparent;
-          color: #667085;
-          font-size: 11px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .languages .active {
-          background: white;
-          color: #1465e8;
-        }
-
-        .container {
-          width: calc(100% - 36px);
-          max-width: 850px;
-          margin: auto;
-          padding: 50px 0 90px;
-        }
-
-        .back {
-          color: #d9edff;
-          font-size: 13px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        .heading {
-          margin: 36px 0 26px;
-        }
-
-        .eyebrow {
-          color: #7655f7;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-        }
-
-        .heading h1 {
-          margin: 8px 0 11px;
-          color: #ffffff;
-          font-size: clamp(38px, 5vw, 48px);
-          letter-spacing: -2px;
-        }
-
-        .heading p {
-          margin: 0;
-          color: #e2f1ff;
-          font-size: 16px;
-          line-height: 1.65;
-        }
-
-        .permissionsHeader p,
-        .accountAccess p {
-          margin: 0;
-          color: #667085;
-          font-size: 14px;
-          line-height: 1.65;
-        }
-
-        .importantNotice {
-          margin-bottom: 22px;
-          padding: 17px;
-          display: flex;
-          align-items: flex-start;
-          gap: 13px;
-          border: 1px solid #dbe7ff;
-          border-radius: 15px;
-          background: #ffffff;
-        }
-
-        .noticeIcon {
-          width: 38px;
-          height: 38px;
-          flex: 0 0 38px;
-          display: grid;
-          place-items: center;
-          border-radius: 11px;
-          background: white;
-        }
-
-        .importantNotice strong {
-          color: #173a67;
-          font-size: 17px;
-          line-height: 1.4;
-        }
-
-        .importantNotice p {
-          margin: 7px 0 0;
-          color: #405b78;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        form {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .card {
-          padding: 28px;
-          border: 1px solid #e4e7ec;
-          border-radius: 21px;
-          background: white;
-          box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
-        }
-
-        .cardTitle {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-        }
-
-        .adminAvatar {
-          width: 55px;
-          height: 55px;
-          display: grid;
-          place-items: center;
-          border-radius: 15px;
-          background: linear-gradient(135deg, #eef4ff, #f0edff);
-          color: #1465e8;
-          font-size: 24px;
-          font-weight: 900;
-        }
-
-        .cardTitle span {
-          color: #7655f7;
-          font-size: 9px;
-          font-weight: 900;
-          letter-spacing: 1.4px;
-        }
-
-        .cardTitle h2 {
-          margin: 4px 0 0;
-          font-size: 21px;
-        }
-
-        .emailField {
-          display: block;
-          margin-top: 24px;
-        }
-
-        label > span {
-          display: block;
-          margin-bottom: 7px;
-          color: #475467;
-          font-size: 13px;
-          font-weight: 800;
-        }
-
-        label small {
-          display: block;
-          margin-top: 8px;
-          color: #52677f;
-          font-size: 15px;
-          font-weight: 650;
-          line-height: 1.55;
-        }
-
-        input {
-          width: 100%;
-          height: 50px;
-          padding: 0 13px;
-          border: 1px solid #d0d5dd;
-          border-radius: 10px;
-          outline: none;
-        }
-
-        input:focus {
-          border-color: #84adff;
-          box-shadow: 0 0 0 3px rgba(20, 101, 232, 0.08);
-        }
-
-        .permissionsHeader h2,
-        .accountAccess h2 {
-          margin: 7px 0 9px;
-          color: #173a67;
-          font-size: 26px;
-          line-height: 1.3;
-        }
-
-        .permissionsHeader p {
-          color: #52677f;
-          font-size: 16px;
-          line-height: 1.6;
-        }
-
-        .profileAccessIntro {
-          color: #0a58ca !important;
-          font-size: 16px !important;
-          font-weight: 750;
-        }
-
-        .permissionList {
-          margin-top: 24px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .permissionRow {
-          padding: 21px 0;
-          display: flex;
-          align-items: center;
-          gap: 13px;
-          border-top: 1px solid #eaecf0;
-        }
-
-        .permissionRow:first-child {
-          border-top: 0;
-          padding-top: 0;
-        }
-
-        .permissionIcon {
-          width: 42px;
-          height: 42px;
-          flex: 0 0 42px;
-          display: grid;
-          place-items: center;
-          border-radius: 12px;
-          background: #eaf3ff;
-          color: #0a58ca;
-          font-size: 21px;
-        }
-
-        .permissionText {
-          flex: 1;
-        }
-
-        .permissionText strong {
-          display: block;
-          color: #173a67;
-          font-size: 17px;
-          line-height: 1.4;
-        }
-
-        .permissionText p {
-          margin: 6px 0 0;
-          color: #52677f;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .toggle {
-          width: 48px;
-          height: 27px;
-          flex: 0 0 48px;
-          padding: 3px;
-          border: 0;
-          border-radius: 999px;
-          background: #d0d5dd;
-          cursor: pointer;
-        }
-
-        .toggle span {
-          width: 21px;
-          height: 21px;
-          display: block;
-          border-radius: 50%;
-          background: white;
-          transition: transform 0.2s ease;
-        }
-
-        .toggle.on {
-          background: #1465e8;
-        }
-
-        .toggle.on span {
-          transform: translateX(21px);
-        }
-
-        .toggle.locked {
-          opacity: 0.75;
-          cursor: default;
-        }
-
-        .accountAccess {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 25px;
-        }
-
-        .bigToggle {
-          width: 56px;
-          height: 31px;
-          flex: 0 0 56px;
-          padding: 3px;
-          border: 0;
-          border-radius: 999px;
-          background: #d0d5dd;
-          cursor: pointer;
-        }
-
-        .bigToggle span {
-          width: 25px;
-          height: 25px;
-          display: block;
-          border-radius: 50%;
-          background: white;
-          transition: transform 0.2s ease;
-        }
-
-        .bigToggle.on {
-          background: #12b76a;
-        }
-
-        .bigToggle.on span {
-          transform: translateX(25px);
-        }
-
-        .accessStatus {
-          margin-top: 16px;
-          padding: 11px 13px;
-          border-radius: 10px;
-          font-size: 11px;
-          font-weight: 900;
-        }
-
-        .activeStatus {
-          background: #ecfdf3;
-          color: #027a48;
-        }
-
-        .inactiveStatus {
-          background: #f2f4f7;
-          color: #667085;
-        }
-
-        .actions {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-        }
-
-        .rightActions {
-          margin-left: auto;
-          display: flex;
-          gap: 10px;
-        }
-
-        .cancelButton,
-        .saveButton,
-        .removeButton {
-          min-height: 47px;
-          padding: 0 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 900;
-          text-decoration: none;
-          cursor: pointer;
-        }
-
-        .cancelButton {
-          border: 1px solid #d0d5dd;
-          background: white;
-          color: #475467;
-        }
-
-        .saveButton {
-          border: 0;
-          background: linear-gradient(135deg, #1465e8, #7655f7);
-          color: white;
-        }
-
-        .removeButton {
-          border: 1px solid #fecdca;
-          background: #fff6f5;
-          color: #b42318;
-        }
-
-        .saveButton:disabled,
-        .removeButton:disabled {
-          opacity: 0.65;
-        }
-
-        .errorBox,
-        .successBox {
-          margin-bottom: 15px;
-          padding: 13px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 800;
-        }
-
-        .errorBox {
-          border: 1px solid #fecdca;
-          background: #fff1f0;
-          color: #b42318;
-        }
-
-        .successBox {
-          border: 1px solid #abefc6;
-          background: #ecfdf3;
-          color: #027a48;
-        }
-
-        .selectAllButton {
-          padding: 10px 14px;
-          border: 1px solid #c7d7fe;
-          border-radius: 10px;
-          background: #eef4ff;
-          color: #175cd3;
-          font-size: 12px;
-          font-weight: 900;
-          cursor: pointer;
-        }
-
-        .productAccessList {
-          display: grid;
-          gap: 12px;
-          margin-top: 22px;
-        }
-
-        .productAccessCard {
-          overflow: hidden;
-          border: 1px solid #e4e7ec;
-          border-radius: 16px;
-          background: #fff;
-          transition: 0.2s ease;
-        }
-
-        .productAccessCard.selected {
-          border-color: #84adff;
-          box-shadow: 0 8px 24px rgba(20, 101, 232, 0.1);
-        }
-
-        .productSelector {
-          width: 100%;
-          padding: 14px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          border: 0;
-          background: transparent;
-          text-align: left;
-          cursor: pointer;
-        }
-
-        .productIcon {
-          width: 48px;
-          height: 48px;
-          flex: 0 0 48px;
-          display: grid;
-          place-items: center;
-          overflow: hidden;
-          border-radius: 13px;
-          background: #f2f4f7;
-          font-size: 23px;
-        }
-
-        .productIcon img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .productIdentity {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .productIdentity strong,
-        .productIdentity small {
-          display: block;
-        }
-
-        .productIdentity small {
-          margin-top: 4px;
-          color: #667085;
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .productCheck {
-          width: 30px;
-          height: 30px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #eef4ff;
-          color: #1465e8;
-          font-weight: 900;
-        }
-
-        .selected .productCheck {
-          background: #1465e8;
-          color: white;
-        }
-
-        .profileAdminPanel{padding:18px;border-top:1px solid #dbe7f5;background:#f8fbff}
-        .profileAdminHeading{display:flex;align-items:center;justify-content:space-between;gap:14px}
-        .profileAdminTitle{margin:0;color:#173a67;font-size:20px;line-height:1.35}
-        .editProfileAdminButton{flex:0 0 auto;min-height:42px;padding:0 15px;border:1px solid #8bb8ee;border-radius:10px;background:#0a58ca;color:#fff;font-size:14px;font-weight:900;cursor:pointer}
-        .editProfileAdminButton:hover{background:#0849a8}
-        .profileContactGrid input:disabled{background:#eef2f6;color:#667085;cursor:not-allowed}
-        .profileEditNote{margin:6px 0 16px;color:#52677f;font-size:14px;line-height:1.55}
-        .profileContactGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-        .profileContactGrid label span{font-size:14px;color:#24486f;font-weight:800}
-        .profileContactGrid input{background:#fff;font-size:16px}
-        .adminLinkNote{margin:10px 0 0;color:#0a58ca;font-size:14px;font-weight:700}
-        .copyProfileField{display:block;margin-top:16px;padding:14px;border:1px solid #b9d4f5;border-radius:11px;background:#eef6ff}
-        .copyProfileField span{display:block;margin-bottom:8px;color:#173a67;font-size:14px;font-weight:850}
-        .copyProfileField select{width:100%;min-height:46px;padding:0 12px;border:1px solid #a9c9f4;border-radius:9px;background:#fff;color:#173a67;font-size:15px}
-        .profileRemoveButton{margin-top:16px;min-height:44px;padding:0 14px;border:1px solid #f0a7a2;border-radius:10px;background:#fff1f0;color:#b42318;font-size:14px;font-weight:850;cursor:pointer}
-        .profileRemoveButton:disabled{opacity:.6;cursor:not-allowed}
-        .profilePermissionGrid {
-          padding: 14px;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-          border-top: 1px solid #eaecf0;
-          background: #f8faff;
-        }
-
-        .miniPermission {
-          padding: 10px 11px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-          border: 1px solid #e4e7ec;
-          border-radius: 10px;
-          background: white;
-          color: #344054;
-          font-size: 11px;
-          font-weight: 800;
-          cursor: pointer;
-        }
-
-        .miniPermission.on {
-          border-color: #84adff;
-          background: #eef4ff;
-          color: #175cd3;
-        }
-
-        .miniPermission:disabled {
-          opacity: 0.48;
-          cursor: not-allowed;
-        }
-
-        .miniPermissionDot {
-          width: 18px;
-          height: 18px;
-          display: grid;
-          place-items: center;
-          border-radius: 50%;
-          background: #eaecf0;
-          font-size: 10px;
-        }
-
-        .miniPermission.on .miniPermissionDot {
-          background: #1465e8;
-          color: white;
-        }
-
-        .emptyProductList {
-          margin-top: 20px;
-          padding: 22px;
-          border-radius: 12px;
-          background: #f2f4f7;
-          color: #667085;
-          text-align: center;
-          font-size: 12px;
-          font-weight: 800;
-        }
-
-        .statePage {
-          min-height: 100vh;
-          display: grid;
-          place-items: center;
-          padding: 30px;
-          background: #f7f9fc;
-          color: #667085;
-          font-family: Inter, Arial, sans-serif;
-        }
-
-        @media (max-width: 650px) {
-          .card {
-            padding: 21px;
-          }
-
-          .accountAccess {
-            align-items: flex-start;
-          }
-
-          .actions {
-            align-items: stretch;
-            flex-direction: column;
-          }
-
-          .rightActions {
-            width: 100%;
-            margin-left: 0;
-          }
-
-          .rightActions > * {
-            flex: 1;
-          }
-
-          .removeButton {
-            width: 100%;
-          }
-
-          .profilePermissionGrid,
-          .profileContactGrid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
+      <AdminStyles />
     </main>
   );
 }
@@ -1157,6 +352,7 @@ function MiniPermission({
       className={`miniPermission ${value ? "on" : ""}`}
       onClick={() => !locked && onChange(!value)}
       disabled={disabled || locked}
+      aria-pressed={value}
     >
       <span>{label}</span>
       <span className="miniPermissionDot">{value ? "✓" : "−"}</span>
@@ -1164,45 +360,56 @@ function MiniPermission({
   );
 }
 
-function PermissionToggle({
-  icon,
-  title,
-  description,
-  value,
-  onChange,
-  locked = false,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-  value: boolean;
-  onChange: (value: boolean) => void;
-  locked?: boolean;
-}) {
-  return (
-    <div className="permissionRow">
-      {icon && <div className="permissionIcon">{icon}</div>}
-
-      <div className="permissionText">
-        <strong>{title}</strong>
-        <p>{description}</p>
-      </div>
-
-      <button
-        type="button"
-        className={`toggle ${value ? "on" : ""} ${
-          locked ? "locked" : ""
-        }`}
-        onClick={() => {
-          if (!locked) {
-            onChange(!value);
-          }
-        }}
-        disabled={locked}
-        aria-pressed={value}
-      >
-        <span />
-      </button>
-    </div>
-  );
+function AdminStyles() {
+  return <style jsx global>{`
+    .coAdminPage { min-height:100dvh; background:#f3f6fa; color:#193650; padding:0 20px 40px; }
+    .coAdminPage * { box-sizing:border-box; }
+    .coAdminPage fieldset { border:0; padding:0; margin:0; min-width:0; }
+    .coAdminPage :is(button,input,select) { font:inherit; }
+    .coAdminPage :is(button,a,input,select):focus-visible { outline:3px solid #87b9f7; outline-offset:3px; }
+    .coAdminPage .header { max-width:820px; margin:auto; min-height:64px; display:flex; justify-content:space-between; align-items:center; }
+    .coAdminPage .languages { display:flex; padding:3px; border:1px solid #dce5ef; background:white; border-radius:10px; }
+    .coAdminPage .languages button { padding:7px 10px; border:0; border-radius:7px; color:#617389; background:transparent; cursor:pointer; font-size:12px; }
+    .coAdminPage .languages .active { color:#1465d9; background:#edf4ff; }
+    .coAdminPage .container { max-width:820px; margin:auto; }
+    .coAdminPage .back { color:#1465d9; text-decoration:none; font-size:14px; }
+    .coAdminPage .heading { margin:22px 0; }
+    .coAdminPage .heading h1 { margin:0 0 10px; font-size:28px; line-height:1.4; }
+    .coAdminPage .heading p { margin:0; font-size:14px; color:#617389; line-height:1.7; max-width:640px; }
+    .coAdminPage .card { padding:24px; border:1px solid #dce5ef; border-radius:18px; background:white; box-shadow:0 8px 28px #18365006; }
+    .coAdminPage .permissionsHeader h2 { margin:0 0 6px; font-size:18px; }
+    .coAdminPage .profileAccessIntro { margin:0 0 20px; color:#617389; font-size:13px; line-height:1.6; }
+    .coAdminPage label>span { display:block; margin-bottom:7px; color:#3f5872; font-size:13px; }
+    .coAdminPage input,.coAdminPage select { width:100%; min-width:0; min-height:46px; padding:10px 12px; border:1px solid #d4dfec; border-radius:10px; background:#fff; color:#193650; font-size:16px; }
+    .coAdminPage .profileChoice select { background:#f7faff; }
+    .coAdminPage .productAccessList { margin-top:20px; }
+    .coAdminPage .productSelector { display:flex; align-items:center; gap:12px; padding-bottom:18px; border-bottom:1px solid #e6edf4; }
+    .coAdminPage .productIcon { width:46px; height:46px; display:grid; place-items:center; border-radius:12px; background:#edf4ff; font-size:24px; overflow:hidden; }
+    .coAdminPage .productIcon img { width:100%; height:100%; object-fit:cover; }
+    .coAdminPage .productIdentity { min-width:0; overflow-wrap:anywhere; }
+    .coAdminPage .productIdentity strong,.coAdminPage .productIdentity small { display:block; }
+    .coAdminPage .productIdentity strong { font-size:16px; }
+    .coAdminPage .productIdentity small { margin-top:4px; color:#617389; font-size:12px; }
+    .coAdminPage .profileAdminTitle,.coAdminPage .permissionTitle { margin:22px 0 16px; font-size:16px; }
+    .coAdminPage .profileContactGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .coAdminPage .adminLinkNote { margin:12px 0; color:#617389; font-size:12px; line-height:1.6; }
+    .coAdminPage .profilePermissionGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .coAdminPage .miniPermission { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px; min-height:48px; border:1px solid #dce5ef; border-radius:10px; background:#fff; color:#3f5872; text-align:left; font-size:14px; cursor:pointer; }
+    .coAdminPage .miniPermission.on { border-color:#86b4ee; background:#edf4ff; color:#1256b0; }
+    .coAdminPage .miniPermissionDot { width:22px; height:22px; flex-shrink:0; display:grid; place-items:center; border-radius:6px; background:#edf1f6; }
+    .coAdminPage .miniPermission.on .miniPermissionDot { background:#1465d9; color:#fff; }
+    .coAdminPage .profileRemoveButton { margin-top:26px; padding:10px 0; border:0; border-top:1px solid #edf1f6; background:white; color:#af3045; font-size:13px; cursor:pointer; }
+    .coAdminPage .actions { margin-top:18px; }
+    .coAdminPage .rightActions { display:flex; justify-content:flex-end; gap:12px; }
+    .coAdminPage .cancelButton,.coAdminPage .saveButton { display:inline-flex; justify-content:center; align-items:center; padding:13px 18px; min-height:46px; border:1px solid #dce5ef; border-radius:10px; background:white; color:#3f5872; text-decoration:none; font-size:14px; cursor:pointer; }
+    .coAdminPage .saveButton { background:#1465d9; border-color:#1465d9; color:white; }
+    .coAdminPage button:disabled { opacity:.55; cursor:default; }
+    .coAdminPage .errorBox,.coAdminPage .successBox { padding:14px; margin-bottom:16px; border-radius:10px; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+    .coAdminPage .errorBox { background:#fff1f2; color:#a52235; border:1px solid #fecaca; }
+    .coAdminPage .successBox { background:#ecfdf5; color:#17644d; border:1px solid #b7e8d4; }
+    .coAdminPage .emptyProductList { padding:24px; color:#617389; text-align:center; }
+    .coAdminPage.statePage { display:grid; place-items:center; }
+    body.kompasiAppMode .coAdminPage { padding-bottom:100px; }
+    @media(max-width:600px) { .coAdminPage { padding:0 14px 30px; }.coAdminPage .heading h1 { font-size:24px; }.coAdminPage .card { padding:18px; }.coAdminPage .profileContactGrid,.coAdminPage .profilePermissionGrid { grid-template-columns:1fr; }.coAdminPage .rightActions>* { flex:1; }.coAdminPage .header { min-height:58px; } }
+  `}</style>;
 }
