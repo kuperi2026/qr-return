@@ -1103,7 +1103,7 @@ export default function EditProfilePage() {
   if (loading) {
     return (
       <>
-        <main className="center">
+        <main className="profileEditPage center">
           <h1>
             QR RETURN
           </h1>
@@ -1124,7 +1124,7 @@ export default function EditProfilePage() {
   ) {
     return (
       <>
-        <main className="center">
+        <main className="profileEditPage center">
           <h1>
             QR RETURN
           </h1>
@@ -1153,7 +1153,7 @@ export default function EditProfilePage() {
 
   return (
     <>
-      <main className="page">
+      <main className="profileEditPage page">
         <header className="header">
           <a
             href="/"
@@ -2356,22 +2356,15 @@ function VisibilityToggle({
 function Styles() {
   return (
     <style jsx global>{`
-      * {
+      .profileEditPage * {
         box-sizing: border-box;
       }
 
-      body {
-        margin: 0;
-      }
-
-      button,
-      input,
-      select,
-      textarea {
+      .profileEditPage button, .profileEditPage input, .profileEditPage select, .profileEditPage textarea {
         font: inherit;
       }
 
-      .page {
+      .profileEditPage.page {
         min-height: 100vh;
         background:
           radial-gradient(circle at 21% 17%, rgba(78,166,238,.3), transparent 30%),
@@ -2383,7 +2376,7 @@ function Styles() {
           sans-serif;
       }
 
-      .header {
+      .profileEditPage .header {
         width: calc(100% - 32px);
         max-width: 1050px;
         min-height: 78px;
@@ -2396,14 +2389,14 @@ function Styles() {
           1px solid rgba(255,255,255,.22);
       }
 
-      .brand {
+      .profileEditPage .brand {
         display: flex;
         align-items: center;
         gap: 10px;
         text-decoration: none;
       }
 
-      .logo {
+      .profileEditPage .logo {
         width: 43px;
         height: 43px;
         display: grid;
@@ -2415,54 +2408,54 @@ function Styles() {
         font-weight: 900;
       }
 
-      .brand strong {
+      .profileEditPage .brand strong {
         display: block;
         color: #ffffff;
         font-size: 20px;
       }
 
-      .brand small {
+      .profileEditPage .brand small {
         display: block;
         color: rgba(255,255,255,.7);
         font-size: 9px;
         letter-spacing: 2px;
       }
 
-      .back {
+      .profileEditPage .back {
         color: #ffffff;
         text-decoration: none;
         font-size: 14px;
         font-weight: 800;
       }
 
-      .content {
+      .profileEditPage .content {
         width: calc(100% - 24px);
         max-width: 760px;
         margin: auto;
         padding: 45px 0 80px;
       }
 
-      .eyebrow {
+      .profileEditPage .eyebrow {
         color: #b9ddfc;
         font-size: 12px;
         font-weight: 900;
         letter-spacing: 2px;
       }
 
-      .intro h1 {
+      .profileEditPage .intro h1 {
         margin: 8px 0;
         color: #ffffff;
         font-size: 40px;
       }
 
-      .intro p {
+      .profileEditPage .intro p {
         margin: 0;
         color: rgba(255,255,255,.82);
         font-size: 15px;
         line-height: 1.6;
       }
 
-      .locked {
+      .profileEditPage .locked {
         margin: 24px 0;
         padding: 14px 16px;
         border-radius: 13px;
@@ -2472,14 +2465,14 @@ function Styles() {
         font-size: 14px;
       }
 
-      .locked span {
+      .profileEditPage .locked span {
         display: block;
         margin-top: 4px;
         color: rgba(255,255,255,.76);
         font-size: 12px;
       }
 
-      .card {
+      .profileEditPage .card {
         padding: 28px;
         border:
           1px solid #e2e7ed;
@@ -2488,57 +2481,52 @@ function Styles() {
         box-shadow: 0 24px 65px rgba(0,24,58,.28);
       }
 
-      .sectionTitle {
+      .profileEditPage .sectionTitle {
         display: flex;
         gap: 12px;
         margin-bottom: 23px;
       }
 
-      .sectionTitle > b {
+      .profileEditPage .sectionTitle > b {
         color: #1465e8;
         font-size: 11px;
       }
 
-      .sectionTitle h2 {
+      .profileEditPage .sectionTitle h2 {
         margin: 0;
         font-size: 24px;
       }
 
-      .sectionTitle p {
+      .profileEditPage .sectionTitle p {
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 13px;
         line-height: 1.5;
       }
 
-      .divider {
+      .profileEditPage .divider {
         height: 1px;
         margin: 32px 0;
         background: #edf0f3;
       }
 
-      .field,
-      .visibilityField {
+      .profileEditPage .field, .profileEditPage .visibilityField {
         display: block;
         margin-bottom: 17px;
       }
 
-      .field > span,
-      .visibilityHeader > span {
+      .profileEditPage .field > span, .profileEditPage .visibilityHeader > span {
         display: block;
         color: #344054;
         font-size: 17px;
         font-weight: 800;
       }
 
-      .field > span {
+      .profileEditPage .field > span {
         margin-bottom: 8px;
       }
 
-      .field input,
-      .visibilityField input,
-      .visibilityField select,
-      .visibilityField textarea {
+      .profileEditPage .field input, .profileEditPage .visibilityField input, .profileEditPage .visibilityField select, .profileEditPage .visibilityField textarea {
         width: 100%;
         border:
           1px solid #d5dae1;
@@ -2548,25 +2536,20 @@ function Styles() {
         outline: none;
       }
 
-      .field input,
-      .visibilityField input,
-      .visibilityField select {
+      .profileEditPage .field input, .profileEditPage .visibilityField input, .profileEditPage .visibilityField select {
         height: 58px;
         padding: 0 16px;
         font-size: 16px;
       }
 
-      .visibilityField textarea {
+      .profileEditPage .visibilityField textarea {
         min-height: 120px;
         padding: 16px;
         font-size: 16px;
         resize: vertical;
       }
 
-      .field input:focus,
-      .visibilityField input:focus,
-      .visibilityField select:focus,
-      .visibilityField textarea:focus {
+      .profileEditPage .field input:focus, .profileEditPage .visibilityField input:focus, .profileEditPage .visibilityField select:focus, .profileEditPage .visibilityField textarea:focus {
         border-color: #1465e8;
         box-shadow:
           0 0 0 3px
@@ -2578,7 +2561,7 @@ function Styles() {
           );
       }
 
-      .visibilityHeader {
+      .profileEditPage .visibilityHeader {
         margin-bottom: 8px;
         display: flex;
         align-items: center;
@@ -2587,18 +2570,18 @@ function Styles() {
         gap: 15px;
       }
 
-      .visibilityField small {
+      .profileEditPage .visibilityField small {
         display: block;
         margin-top: 6px;
         color: #98a2b3;
         font-size: 13px;
       }
 
-      .visibilityField small b {
+      .profileEditPage .visibilityField small b {
         color: #1465e8;
       }
 
-      .contactMethods {
+      .profileEditPage .contactMethods {
         margin: 20px 0;
         padding: 18px;
         border-radius: 15px;
@@ -2607,23 +2590,23 @@ function Styles() {
           1px solid #e0e5eb;
       }
 
-      .contactMethodsHeader {
+      .profileEditPage .contactMethodsHeader {
         margin-bottom: 13px;
       }
 
-      .contactMethodsHeader strong {
+      .profileEditPage .contactMethodsHeader strong {
         display: block;
         color: #344054;
         font-size: 17px;
       }
 
-      .contactMethodsHeader p {
+      .profileEditPage .contactMethodsHeader p {
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 13px;
       }
 
-      .contactMethod {
+      .profileEditPage .contactMethod {
         width: 100%;
         min-height: 64px;
         margin-top: 9px;
@@ -2639,12 +2622,12 @@ function Styles() {
         cursor: pointer;
       }
 
-      .contactMethod.active {
+      .profileEditPage .contactMethod.active {
         border-color: #1465e8;
         background: #f3f7fd;
       }
 
-      .contactMethodIcon {
+      .profileEditPage .contactMethodIcon {
         width: 40px;
         height: 40px;
         flex: 0 0 40px;
@@ -2655,17 +2638,17 @@ function Styles() {
         font-size: 18px;
       }
 
-      .contactMethodText {
+      .profileEditPage .contactMethodText {
         flex: 1;
       }
 
-      .contactMethodText strong {
+      .profileEditPage .contactMethodText strong {
         display: block;
         color: #344054;
         font-size: 16px;
       }
 
-      .contactMethodText span {
+      .profileEditPage .contactMethodText span {
         display: block;
         margin-top: 4px;
         color: #7b8492;
@@ -2673,7 +2656,7 @@ function Styles() {
         line-height: 1.4;
       }
 
-      .contactCheck {
+      .profileEditPage .contactCheck {
         width: 23px;
         height: 23px;
         flex: 0 0 23px;
@@ -2688,19 +2671,19 @@ function Styles() {
         font-weight: 900;
       }
 
-      .contactCheck.active {
+      .profileEditPage .contactCheck.active {
         border-color: #1465e8;
         background: #1465e8;
       }
 
-      .optionalGroup {
+      .profileEditPage .optionalGroup {
         margin-top: 20px;
         padding: 18px;
         border-radius: 15px;
         background: #f8fafc;
       }
 
-      .optionalHeader {
+      .profileEditPage .optionalHeader {
         margin-bottom: 17px;
         display: flex;
         justify-content:
@@ -2708,17 +2691,17 @@ function Styles() {
         gap: 15px;
       }
 
-      .optionalHeader strong {
+      .profileEditPage .optionalHeader strong {
         font-size: 17px;
       }
 
-      .optionalHeader p {
+      .profileEditPage .optionalHeader p {
         margin: 4px 0 0;
         color: #98a2b3;
         font-size: 13px;
       }
 
-      .photoEditor {
+      .profileEditPage .photoEditor {
         margin-bottom: 18px;
         padding: 16px;
         border:
@@ -2727,7 +2710,7 @@ function Styles() {
         background: #fafbfc;
       }
 
-      .photoEditor img {
+      .profileEditPage .photoEditor img {
         width: 100px;
         height: 100px;
         margin: 12px 0;
@@ -2735,7 +2718,7 @@ function Styles() {
         object-fit: cover;
       }
 
-      .upload {
+      .profileEditPage .upload {
         min-height: 44px;
         padding: 0 14px;
         display: inline-flex;
@@ -2748,22 +2731,22 @@ function Styles() {
         cursor: pointer;
       }
 
-      .upload input {
+      .profileEditPage .upload input {
         display: none;
       }
 
-      .photoEditor small {
+      .profileEditPage .photoEditor small {
         display: block;
         margin-top: 8px;
         color: #98a2b3;
         font-size: 13px;
       }
 
-      .photoEditor small b {
+      .profileEditPage .photoEditor small b {
         color: #1465e8;
       }
 
-      .switch {
+      .profileEditPage .switch {
         width: 50px;
         height: 29px;
         flex: 0 0 50px;
@@ -2774,7 +2757,7 @@ function Styles() {
         cursor: pointer;
       }
 
-      .switch span {
+      .profileEditPage .switch span {
         display: block;
         width: 23px;
         height: 23px;
@@ -2783,16 +2766,16 @@ function Styles() {
         transition: 0.2s;
       }
 
-      .switch.active {
+      .profileEditPage .switch.active {
         background: #1465e8;
       }
 
-      .switch.active span {
+      .profileEditPage .switch.active span {
         transform:
           translateX(21px);
       }
 
-      .locationBox {
+      .profileEditPage .locationBox {
         padding: 17px;
         display: flex;
         align-items: center;
@@ -2803,19 +2786,18 @@ function Styles() {
         background: #f8fafc;
       }
 
-      .locationBox strong {
+      .profileEditPage .locationBox strong {
         font-size: 17px;
       }
 
-      .locationBox p {
+      .profileEditPage .locationBox p {
         margin: 5px 0 0;
         color: #7b8492;
         font-size: 13px;
         line-height: 1.5;
       }
 
-      .error,
-      .success {
+      .profileEditPage .error, .profileEditPage .success {
         margin-top: 20px;
         padding: 14px;
         border-radius: 12px;
@@ -2824,17 +2806,17 @@ function Styles() {
         line-height: 1.5;
       }
 
-      .error {
+      .profileEditPage .error {
         background: #fff1f1;
         color: #b42318;
       }
 
-      .success {
+      .profileEditPage .success {
         background: #ecfdf3;
         color: #027a48;
       }
 
-      .actions {
+      .profileEditPage .actions {
         margin-top: 28px;
         display: grid;
         grid-template-columns:
@@ -2842,8 +2824,7 @@ function Styles() {
         gap: 10px;
       }
 
-      .cancelButton,
-      .saveButton {
+      .profileEditPage .cancelButton, .profileEditPage .saveButton {
         min-height: 58px;
         display: flex;
         align-items: center;
@@ -2854,26 +2835,26 @@ function Styles() {
         text-decoration: none;
       }
 
-      .cancelButton {
+      .profileEditPage .cancelButton {
         border:
           1px solid #d5dae1;
         background: white;
         color: #475467;
       }
 
-      .saveButton {
+      .profileEditPage .saveButton {
         border: 0;
         background: #1465e8;
         color: white;
         cursor: pointer;
       }
 
-      .saveButton:disabled {
+      .profileEditPage .saveButton:disabled {
         opacity: 0.6;
         cursor: wait;
       }
 
-      .center {
+      .profileEditPage.center {
         width: calc(100% - 24px);
         max-width: 600px;
         margin: auto;
@@ -2884,35 +2865,84 @@ function Styles() {
           sans-serif;
       }
 
-      .center h1 {
+      .profileEditPage.center h1 {
         color: #1465e8;
       }
 
-      .center p {
+      .profileEditPage.center p {
         color: #667085;
       }
 
-      .field label,.visibilityField label{font-size:15px}.field input,.field select,.field textarea,.visibilityField input,.visibilityField select,.visibilityField textarea{font-size:15px}.optionalHeader strong,.contactMethodsHeader strong,.locationBox strong{font-size:16px}.optionalHeader p,.contactMethodsHeader p,.locationBox p{font-size:12px}.saveButton,.cancelButton{font-size:14px}
+      .profileEditPage .field label, .profileEditPage .visibilityField label{font-size:15px}.profileEditPage .field input, .profileEditPage .field select, .profileEditPage .field textarea, .profileEditPage .visibilityField input, .profileEditPage .visibilityField select, .profileEditPage .visibilityField textarea{font-size:15px}.profileEditPage .optionalHeader strong, .profileEditPage .contactMethodsHeader strong, .profileEditPage .locationBox strong{font-size:16px}.profileEditPage .optionalHeader p, .profileEditPage .contactMethodsHeader p, .profileEditPage .locationBox p{font-size:12px}.profileEditPage .saveButton, .profileEditPage .cancelButton{font-size:14px}
 
       @media (
         max-width: 600px
       ) {
-        .page{min-height:100dvh}.header{min-height:64px}.content{width:100%;padding:22px 0 0}.intro,.locked{margin-left:14px;margin-right:14px}.intro{padding:0}.locked{margin-top:18px;margin-bottom:14px}.card{padding:22px 15px calc(92px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;border-left:0;border-right:0;border-bottom:0}.sectionTitle h2{font-size:22px}.field>span,.visibilityHeader>span{font-size:16px}.optionalGroup,.contactMethods,.locationBox{padding:15px}.actions{position:sticky;z-index:20;bottom:0;margin:28px -15px calc(-92px - env(safe-area-inset-bottom));padding:12px 15px max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);box-shadow:0 -8px 24px rgba(0,28,65,.12);grid-template-columns:1fr 1.45fr}.cancelButton,.saveButton{min-height:54px}
-        .back {
+        .profileEditPage.page{min-height:100dvh}.profileEditPage .header{min-height:64px}.profileEditPage .content{width:100%;padding:22px 0 0}.profileEditPage .intro, .profileEditPage .locked{margin-left:14px;margin-right:14px}.profileEditPage .intro{padding:0}.profileEditPage .locked{margin-top:18px;margin-bottom:14px}.profileEditPage .card{padding:22px 15px calc(92px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;border-left:0;border-right:0;border-bottom:0}.profileEditPage .sectionTitle h2{font-size:22px}.profileEditPage .field>span, .profileEditPage .visibilityHeader>span{font-size:16px}.profileEditPage .optionalGroup, .profileEditPage .contactMethods, .profileEditPage .locationBox{padding:15px}.profileEditPage .actions{position:sticky;z-index:20;bottom:0;margin:28px -15px calc(-92px - env(safe-area-inset-bottom));padding:12px 15px max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);box-shadow:0 -8px 24px rgba(0,28,65,.12);grid-template-columns:1fr 1.45fr}.profileEditPage .cancelButton, .profileEditPage .saveButton{min-height:54px}
+        .profileEditPage .back {
           display: none;
         }
 
-        .intro h1 {
+        .profileEditPage .intro h1 {
           font-size: 31px;
         }
 
-        .field input,
-        .visibilityField input,
-        .visibilityField select,
-        .visibilityField textarea {
+        .profileEditPage .field input, .profileEditPage .visibilityField input, .profileEditPage .visibilityField select, .profileEditPage .visibilityField textarea {
           font-size: 16px;
         }
       }
-    `}</style>
+
+.profileEditPage.page { background:linear-gradient(150deg,#e9f2ff 0%,#f5f8ff 45%,#eef7fb 100%); color:#193650; }
+.profileEditPage .header { max-width:820px; border-bottom:1px solid #d3e1f5; min-height:70px; }
+.profileEditPage .brand strong { color:#123c88; font-size:18px; }
+.profileEditPage .brand small { color:#526f94; font-size:11px; letter-spacing:0; }
+.profileEditPage .back { color:#1465d9; font-weight:600; }
+.profileEditPage .logo { background:#1465d9; }
+.profileEditPage .content { max-width:820px; padding:24px 0 40px; }
+.profileEditPage .intro { padding:24px 28px; border-radius:20px; background:linear-gradient(115deg,#123c88,#1465d9); box-shadow:0 10px 28px #154c9b24; }
+.profileEditPage .eyebrow { display:inline-block; padding:6px 10px; border:1px solid #ffffff42; border-radius:7px; background:#ffffff14; color:#e1edff; font-size:11px; letter-spacing:.4px; }
+.profileEditPage .intro h1 { font-size:27px; margin:12px 0 10px; line-height:1.4; }
+.profileEditPage .intro p { color:#e0ebff; font-size:14px; line-height:1.7; }
+.profileEditPage .locked { margin:18px 0; padding:14px 16px; border:1px solid #c6dcfa; border-left:4px solid #1465d9; background:#edf4ff; color:#123c88; }
+.profileEditPage .locked span { color:#47698b; font-size:13px; line-height:1.6; }
+.profileEditPage .card { padding:24px; border:1px solid #cfdef3; border-radius:18px; box-shadow:0 12px 36px #234f8b0b; }
+.profileEditPage .sectionTitle { gap:10px; align-items:flex-start; margin-bottom:20px; }
+.profileEditPage .sectionTitle>b { display:grid; place-items:center; width:30px; height:30px; flex-shrink:0; border-radius:9px; background:#e4efff; color:#1465d9; font-size:12px; }
+.profileEditPage .sectionTitle h2 { font-size:19px; line-height:1.5; color:#123c88; }
+.profileEditPage .sectionTitle p { color:#617389; }
+.profileEditPage .field>span,.profileEditPage .visibilityHeader>span { color:#28496b; font-size:15px; font-weight:600; }
+.profileEditPage .field input,.profileEditPage .visibilityField input,.profileEditPage .visibilityField select,.profileEditPage .visibilityField textarea { background:#f8faff; color:#193650; border-color:#cbdaf0; border-radius:10px; }
+.profileEditPage .field input,.profileEditPage .visibilityField input,.profileEditPage .visibilityField select { height:48px; }
+.profileEditPage .visibilityField textarea { min-height:100px; }
+.profileEditPage .visibilityField small,.profileEditPage .photoEditor small,.profileEditPage .optionalHeader p { color:#617389; }
+.profileEditPage .divider { margin:26px 0; background:#dce8f8; }
+.profileEditPage .contactMethods,.profileEditPage .optionalGroup,.profileEditPage .locationBox { background:#f0f6ff; border:1px solid #d3e1f5; border-radius:12px; }
+.profileEditPage .contactMethodsHeader strong,.profileEditPage .optionalHeader strong,.profileEditPage .locationBox strong { color:#123c88; }
+.profileEditPage .contactMethod.active { background:#e3efff; border-color:#508ce0; }
+.profileEditPage .contactMethodText strong { color:#28496b; }
+.profileEditPage .photoEditor { background:#f5f9ff; border-color:#a7c5f0; }
+.profileEditPage .upload { background:#e4efff; color:#1256b0; }
+.profileEditPage .switch { width:40px; height:24px; flex-basis:40px; background:#aabbd2; }
+.profileEditPage .switch span { width:18px; height:18px; }
+.profileEditPage .switch.active { background:#1465d9; }
+.profileEditPage .switch.active span { transform:translateX(16px); }
+.profileEditPage .actions { display:flex; justify-content:flex-end; padding:16px; border:1px solid #c8dcf6; background:#e7f0ff; border-radius:14px; }
+.profileEditPage .cancelButton,.profileEditPage .saveButton { min-height:48px; padding:12px 20px; font-size:14px; font-weight:700; border-radius:10px; }
+.profileEditPage .saveButton { background:#1465d9; box-shadow:0 4px 10px #1465d925; }
+.profileEditPage .saveButton:hover:not(:disabled) { background:#104fae; }
+.profileEditPage :is(button,a,input,select,textarea):focus-visible { outline:3px solid #87b9f7; outline-offset:3px; }
+.profileEditPage .error,.profileEditPage .success { font-size:14px; }
+@media(max-width:600px) {
+.profileEditPage .content { width:100%; padding:18px 14px 30px; }
+.profileEditPage .intro { margin:0; padding:20px; }
+.profileEditPage .intro h1 { font-size:23px; }
+.profileEditPage .locked { margin:16px 0; }
+.profileEditPage .card { padding:18px; border:1px solid #cfdef3; border-radius:18px; }
+.profileEditPage .sectionTitle h2 { font-size:18px; }
+.profileEditPage .actions { position:static; margin:24px 0 0; padding:12px; box-shadow:none; flex-wrap:wrap; }
+.profileEditPage .actions>* { flex:1; padding:12px 10px; }
+.profileEditPage .header { min-height:64px; }
+}
+`}</style>
   );
 }
