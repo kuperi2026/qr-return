@@ -199,6 +199,7 @@ export default function AdminPage() {
         </a>
 
         <div className="heading">
+          <span className="heroBadge">QR RETURN · {ka ? "გაზიარებული მართვა" : "Shared management"}</span>
           <h1>
             {ka
               ? "პროფილის ადმინისტრატორი"
@@ -220,11 +221,11 @@ export default function AdminPage() {
           <section className="card">
             <div className="permissionsHeader">
               <div>
-                <h2>{ka ? "აირჩიეთ QR პროფილი" : "Choose a QR profile"}</h2>
+                <h2><span className="stepNumber">01</span>{ka ? "აირჩიეთ QR პროფილი" : "Choose a QR profile"}</h2>
                 <p className="profileAccessIntro">
                   {ka
                     ? "გახსენით სასურველი პროფილი და შეავსეთ მხოლოდ აუცილებელი ველები."
-                    : "Select the QR profile or profiles that the co-administrator will be allowed to manage."}
+                    : "Select the QR profile that the co-administrator will be allowed to manage."}
                 </p>
               </div>
             </div>
@@ -253,7 +254,7 @@ export default function AdminPage() {
 
                       {openProfileId === profile.id && (
                         <div className="profileAdminPanel">
-                          <div className="profileAdminHeading"><h3 className="profileAdminTitle">{ka ? "სანდო პირის მონაცემები" : "Trusted person details"}</h3></div>
+                          <div className="profileAdminHeading"><h3 className="profileAdminTitle"><span className="stepNumber">02</span>{ka ? "სანდო პირის მონაცემები" : "Trusted person details"}</h3></div>
                           <div className="profileContactGrid">
                             <label>
                               <span>{ka ? "სახელი" : "First name"} *</span>
@@ -273,7 +274,7 @@ export default function AdminPage() {
                             </label>
                           </div>
                           <p className="adminLinkNote">{ka ? "ელ-ფოსტა სანდო პირის ანგარიშს უსაფრთხოდ დაუკავშირდება." : "The email will securely link to the trusted person's account."}</p>
-                          <h3 className="permissionTitle">{ka ? "რისი უფლება ექნება?" : "What can they do?"}</h3>
+                          <h3 className="permissionTitle"><span className="stepNumber">03</span>{ka ? "რისი უფლება ექნება?" : "What can they do?"}</h3>
                           <div className="profilePermissionGrid">
                           <MiniPermission label={ka ? "რედაქტირება" : "Edit"} value={current.can_edit_profiles} onChange={(value) => updateProfileAccess(profile.id, { can_edit_profiles: value })} />
                           <MiniPermission label={ka ? "დაკარგვის რეჟიმი" : "Lost Mode"} value={current.can_manage_lost_mode} onChange={(value) => updateProfileAccess(profile.id, { can_manage_lost_mode: value })} />
@@ -355,7 +356,7 @@ function MiniPermission({
       aria-pressed={value}
     >
       <span>{label}</span>
-      <span className="miniPermissionDot">{value ? "✓" : "−"}</span>
+      <span className="miniPermissionDot" aria-hidden="true"><span>{value ? "✓" : ""}</span></span>
     </button>
   );
 }
@@ -410,6 +411,39 @@ function AdminStyles() {
     .coAdminPage .emptyProductList { padding:24px; color:#617389; text-align:center; }
     .coAdminPage.statePage { display:grid; place-items:center; }
     body.kompasiAppMode .coAdminPage { padding-bottom:100px; }
-    @media(max-width:600px) { .coAdminPage { padding:0 14px 30px; }.coAdminPage .heading h1 { font-size:24px; }.coAdminPage .card { padding:18px; }.coAdminPage .profileContactGrid,.coAdminPage .profilePermissionGrid { grid-template-columns:1fr; }.coAdminPage .rightActions>* { flex:1; }.coAdminPage .header { min-height:58px; } }
+    .coAdminPage { background:linear-gradient(150deg,#e9f2ff 0%,#f5f8ff 45%,#eef7fb 100%); }
+    .coAdminPage .heading { padding:24px 28px; border-radius:20px; background:linear-gradient(115deg,#123c88,#1465d9); color:#fff; box-shadow:0 10px 28px #154c9b24; }
+    .coAdminPage .heroBadge { display:inline-block; margin-bottom:12px; padding:6px 10px; border:1px solid #ffffff42; border-radius:7px; background:#ffffff14; color:#e1edff; font-size:11px; font-weight:700; letter-spacing:.4px; }
+    .coAdminPage .heading h1 { color:#fff; font-size:27px; }
+    .coAdminPage .heading p { color:#e0ebff; font-size:14px; }
+    .coAdminPage .languages { display:flex; padding:4px; gap:4px; background:#fff; border:1px solid #cbdcf4; border-radius:10px; }
+    .coAdminPage .languages button { border:0; border-radius:7px; padding:7px 11px; background:transparent; color:#526783; cursor:pointer; }
+    .coAdminPage .languages button.active { color:#fff; background:#1465d9; }
+    .coAdminPage .card { border-color:#cfdef3; box-shadow:0 12px 36px #234f8b0b; padding:24px; }
+    .coAdminPage .permissionsHeader h2,.coAdminPage .profileAdminTitle,.coAdminPage .permissionTitle { display:flex; align-items:center; gap:10px; color:#123c88; font-size:17px; }
+    .coAdminPage .stepNumber { display:inline-grid; place-items:center; flex-shrink:0; width:30px; height:30px; background:#e4efff; color:#1465d9; border-radius:9px; font-size:12px; font-weight:700; }
+    .coAdminPage .profileAccessIntro { margin-bottom:14px; }
+    .coAdminPage .profileChoice select { background:#edf4ff; border-color:#a7c5f0; font-weight:600; }
+    .coAdminPage .productAccessList { margin-top:14px; }
+    .coAdminPage .productSelector { padding:12px 14px; border:1px solid #c6dcfa; border-left:4px solid #1465d9; border-radius:12px; background:#f0f6ff; }
+    .coAdminPage .productIcon { background:#fff; }
+    .coAdminPage .productIdentity strong { color:#123c88; }
+    .coAdminPage label>span { color:#28496b; font-weight:600; }
+    .coAdminPage input { background:#f8faff; border-color:#cbdaf0; }
+    .coAdminPage input:focus { background:#fff; border-color:#1465d9; }
+    .coAdminPage .adminLinkNote { color:#47698b; }
+    .coAdminPage .permissionTitle { border-top:1px solid #dce8f8; padding-top:20px; }
+    .coAdminPage .miniPermission { background:#f5f8ff; border-color:#d3e1f5; color:#28496b; font-weight:600; padding:12px 14px; transition:background .15s,border-color .15s; }
+    .coAdminPage .miniPermission:hover { border-color:#79a7e7; background:#eaf2ff; }
+    .coAdminPage .miniPermission.on { background:#e3efff; border-color:#508ce0; color:#104b9e; }
+    .coAdminPage .miniPermissionDot { width:40px; height:24px; padding:3px; border-radius:20px; background:#aabbd2; display:flex; align-items:center; }
+    .coAdminPage .miniPermissionDot>span { width:18px; height:18px; border-radius:50%; background:white; box-shadow:0 1px 3px #19365030; display:grid; place-items:center; font-size:12px; color:#1465d9; }
+    .coAdminPage .miniPermission.on .miniPermissionDot { background:#1465d9; }
+    .coAdminPage .miniPermission.on .miniPermissionDot>span { transform:translateX(16px); }
+    .coAdminPage .profileRemoveButton { background:#fff4f5; border:1px solid #f0cbd2; padding:10px 14px; border-radius:9px; margin-top:20px; }
+    .coAdminPage .actions { padding:16px 18px; border:1px solid #c8dcf6; background:#e7f0ff; border-radius:14px; }
+    .coAdminPage .saveButton { background:#1465d9; border-color:#1465d9; color:#fff; font-weight:700; box-shadow:0 4px 10px #1465d925; }
+    .coAdminPage .saveButton:hover:not(:disabled) { background:#104fae; }
+    @media(max-width:600px) { .coAdminPage { padding:0 14px 30px; }.coAdminPage .heading { padding:20px; }.coAdminPage .heading h1 { font-size:23px; }.coAdminPage .card { padding:18px; }.coAdminPage .profileContactGrid,.coAdminPage .profilePermissionGrid { grid-template-columns:1fr; }.coAdminPage .rightActions>* { flex:1; padding:12px 10px; }.coAdminPage .header { min-height:58px; }.coAdminPage .actions { padding:12px; } }
   `}</style>;
 }
